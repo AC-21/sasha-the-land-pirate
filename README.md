@@ -46,3 +46,9 @@ The accepted technical packet may create `Game/`, `SimulationCore/`, `SaveContra
 ## Next gate
 
 Sealed historical receipts accept WP-0001 contract `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`, its temporary identity, repository location, creator-operated installation of the exact D-0047 candidate, and the now-superseded Gateway route. Owner-authenticated D-0051 and packet route-successor receipts now protect `UNITY-MCP-EXTERNAL` against that unchanged contract. The packet is `accepted`, not `active`: the assigned Unity seat and same-organization packet project, exact clean Bridge/relay/client/target/connection profile, installed toolchain, and standalone quarantine/manual-import boundary still require evidence and a separate activation receipt. The A1 boundary schema permits only exact reserved outputs plus seven exact repository-ignored Unity scratch roots, and separately requires an isolated ephemeral runtime HOME/private temp for Unity, relay, license, log, and connection state. All scratch is destroyed on close and never enters the reservation or creator import. No further agent Unity interaction is authorized, and autonomy remains A0.
+
+Schema v4 remains the formal machine gate. Later A0 evidence proposes an exact
+allowlist, four independent provider decisions, and a schema-v5
+code-identity-context successor. Those proposals are unratified and do not
+silently amend current authority, but the creator runbook remains fail-closed
+until they are ratified or rejected in favor of an exact protected alternative.

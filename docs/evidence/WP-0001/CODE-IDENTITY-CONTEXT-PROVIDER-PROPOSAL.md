@@ -563,14 +563,20 @@ A protected schema-v5 successor must:
 No pass-producing collector should be implemented before the protected
 provider choice and schema successor are ratified.
 
+`SCHEMA-V5-ADOPTION-SEQUENCE-PROPOSAL.md` defines the proposed two protected
+transactions around the non-activation implementation lane: design authority
+first, exact merged hash/provider authority second, and a separate activation
+receipt last. It is also A0-only and unratified.
+
 ## Current disposition
 
 Keep A0. Keep WP-0001 blocked. Keep the protected repo MCP entry disabled. Keep
 Unity tool calls at zero.
 
 Recommended next protected decision: select the verification route and
-independent provider, then ratify the schema/collector successor as one
-content-addressed transaction.
+independent provider, then use the two protected transactions in
+`SCHEMA-V5-ADOPTION-SEQUENCE-PROPOSAL.md` around the bounded non-activation
+implementation lane.
 
 This successor closes only the on-disk verifier-context evidence gap. It does
 not prove kernel-loaded-image identity or in-memory/cloud-managed Codex

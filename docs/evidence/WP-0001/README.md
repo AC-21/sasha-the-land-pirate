@@ -16,6 +16,10 @@ authorizes a Unity tool call.
   — exact A0-only proposal for binding signing commands, verifier identity,
   policy attachment, filesystem view, and raw outputs through a fourth provider
   domain.
+- [`SCHEMA-V5-ADOPTION-SEQUENCE-PROPOSAL.md`](SCHEMA-V5-ADOPTION-SEQUENCE-PROPOSAL.md)
+  — A0-only two-transaction sequence for authorizing implementation before
+  final hashes exist, then ratifying exact merged identities without
+  self-activation.
 - [`A1-MCP-ALLOWLIST-PROPOSAL.md`](A1-MCP-ALLOWLIST-PROPOSAL.md) — A0-only,
   source-grounded proposal for the exact observation-only client allowlist and
   its phase-gated expansion rule.

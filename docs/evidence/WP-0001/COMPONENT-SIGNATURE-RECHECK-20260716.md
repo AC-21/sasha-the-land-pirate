@@ -26,14 +26,23 @@ Protected authority must select and machine-bind exactly one route:
 - run verification inside the exact A1 principal, filesystem view,
   sandbox/policy boundary, and process ancestry that will own the client,
   relay, and Editor; or
-- revise and ratify a specific external read-only verifier context and its
-  binding to the exact A1 component paths, vnodes, hashes, and policies.
+- ratify a distinct closed-schema external boundary that explicitly redefines
+  verification authority and independently authenticates mappings to every
+  exact A1 component path, vnode, hash, process birth, bundle resource, and
+  policy record.
 
 The current schema and live validator do not machine-bind that verifier
 execution context. Their signing evidence binds the component tuple, but not
 the verifier's own executable, PID, UID, parent, sandbox/policy attachment, or
-filesystem view. A protected contract revision or creator-ratified external
-verifier context is therefore still required before activation.
+filesystem view. A protected contract revision or distinct protected external
+verifier boundary with the closed-schema mappings above is therefore
+recommended before activation.
+
+This A0 record does not amend schema v4 or current activation authority. Schema
+v4 cannot machine-prove the observed context gap, so a v4 pass must not be
+described as closing it. The creator must ratify a successor or explicitly
+reject it in favor of an exact protected alternative before relying on this
+dimension; until then the runbook remains fail-closed at A0.
 
 ## Preserved sandbox failure
 
@@ -156,12 +165,13 @@ command path, component path and SHA-256, signing tuple, timestamp, process
 identity, and applicable policy hashes. Any failure or context mismatch fails
 closed.
 
-That rule is not yet fully machine-enforced. Before activation, a protected
-schema/collector revision or creator-ratified external-verifier context must
-bind the verifier's executable, PID, UID, parent/process ancestry,
-sandbox/policy attachment, filesystem view, and policy hashes. Until then, a
-host-context pass cannot satisfy this blocker. No route is selected merely by
-this A0 observation.
+That rule is not yet fully machine-enforced. A protected schema/collector
+successor or distinct closed-schema external boundary would need to bind the
+verifier's executable, PID, UID, parent/process ancestry, sandbox/policy
+attachment, filesystem view, and policy hashes. This A0 note recommends that
+disposition but does not enact it. Until the creator protects a decision, a
+host-context pass cannot be described as closing this blocker. No route is
+selected merely by this A0 observation.
 
 `CODE-IDENTITY-CONTEXT-PROVIDER-PROPOSAL.md` defines the proposed fourth raw
 provider domain and exact machine-enforcement successor. It is also A0-only and

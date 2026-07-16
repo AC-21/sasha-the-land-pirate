@@ -26,4 +26,17 @@ The durable repository, foundation-only CI, and protected `main` are creator-gre
 
 WP-0001 is accepted at immutable contract `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`. It adds .NET SDK 10.0.301 for locked headless tests while keeping Unity-consumed code at `netstandard2.1`/C# 9, makes `SimulationCore` and `SaveContracts` dual-use local Unity packages with no copied source, requires Editor-generated package locks, pins official `com.unity.ai.assistant` 2.14.0-pre.1 plus an eligible assigned Unity AI seat and linked project, denies direct agent Unity executable/CLI/batchmode use, requires native IL2CPP ARM64 and Metal evidence, and replaces the unsafe shared-worktree boundary with a standalone disposable clone/sandbox. The original sealed acceptance receipt records its historical Gateway selection. Owner-authenticated receipts `RR-D0051-20260716` and `RR-WP0001-ROUTE-20260716` now protect the packet's already-authored mutually exclusive `UNITY-MCP-EXTERNAL` profile while leaving the accepted packet bytes and non-route acceptance claims unchanged.
 
-WP-0001 remains inactive at A0 until the assigned seat, linked project, Bridge/relay/client/project-target/approved-connection profile, exact D-0047 Editor/IL2CPP/Xcode tuple, and physical A1 quarantine/manual-import boundary are verified and bound by a separate creator activation receipt. The read-only console smoke that occurred before D-0051 is a preserved setup deviation and is forbidden as activation evidence; the packet still requires a new clean zero-tool-call connection handshake. WP-0002 additionally waits on value-matching identity/core receipts, explicit city-comparison authorization, and its own acceptance in `governance/ratification-state.json`. Separate status histories prevent accepted setup authority from silently authorizing implementation.
+WP-0001 remains inactive at A0 until the assigned seat, linked project,
+Bridge/relay/client/project-target/approved-connection profile, exact D-0047
+Editor/IL2CPP/Xcode tuple, and physical A1 quarantine/manual-import boundary
+are verified and bound by a separate creator activation receipt. Later A0
+evidence also exposes unratified allowlist, provider-independence, and
+verifier-context decisions; schema v4 remains the formal machine gate, but the
+creator runbook keeps activation fail-closed until those findings receive a
+protected disposition. The read-only console smoke that occurred before D-0051
+is a preserved setup deviation and is forbidden as activation evidence; the
+packet still requires a new clean zero-tool-call connection handshake. WP-0002
+additionally waits on value-matching identity/core receipts, explicit
+city-comparison authorization, and its own acceptance in
+`governance/ratification-state.json`. Separate status histories prevent
+accepted setup authority from silently authorizing implementation.

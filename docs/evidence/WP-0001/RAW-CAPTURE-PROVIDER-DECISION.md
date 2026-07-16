@@ -186,5 +186,9 @@ implementation, select and ratify the four underlying evidence providers,
 revise the machine-enforced evidence contract, and then design each collector
 as the smallest content-addressed adapter to retained provider output.
 
+`SCHEMA-V5-ADOPTION-SEQUENCE-PROPOSAL.md` proposes how to authorize that
+implementation without pretending final source hashes exist in advance and
+without allowing the implementation lane to activate itself.
+
 Until those decisions exist, keep A0, keep WP-0001 blocked, keep the protected
 repo MCP entry disabled, and keep Unity tool invocations at zero.

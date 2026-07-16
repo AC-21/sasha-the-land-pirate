@@ -30,6 +30,9 @@ Stop without opening a Unity MCP session if any of these is true:
 - the clean setup cycle would run a model prompt or Unity tool;
 - any exact binary, policy, configuration, or evidence hash drifts;
 - a secret value would enter Git;
+- the later allowlist/provider/verifier-context findings lack a sealed
+  protected disposition receipt selecting either a ratified successor or an
+  exact protected alternative;
 - the activation receipt or reservation is incomplete.
 
 ## 1. Freeze the final protected base
@@ -52,8 +55,9 @@ The immutable packet contract is:
 `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`
 
 Raw file hashes are not contract hashes and must be recalculated after every
-protected change. Recreate the candidate after this runbook PR merges; do not
-reuse the earlier prepared clone.
+protected change. Recreate the candidate only after the final protected-head
+freeze for all activation prerequisites; do not reuse any earlier prepared
+clone.
 
 ## 2. Establish the physical quarantine
 
@@ -503,6 +507,15 @@ Exact permitted scratch:
 
 ## 9. Protected activation transaction
 
+This section is unusable while the later A0 findings lack the protected
+disposition required by the stop conditions. If schema v5 is selected, the
+activation transaction must also bind its Transaction-B receipt ID,
+raw-evidence authority-object hash, challenge root, complete attempt census,
+and selected successful child challenge. If an exact alternative is selected,
+the activation receipt must bind that disposition receipt and every replacement
+claim/evidence field. A schema-v4 pass alone cannot waive the unresolved
+disposition.
+
 The creator issues one distinct sealed packet-activation receipt, for example:
 
 `RR-WP0001-ACTIVATE-YYYYMMDD`
@@ -578,7 +591,13 @@ remaining work, not to waive it:
   code-identity-context gap, with
   `CODE-IDENTITY-CONTEXT-PROVIDER-PROPOSAL.md` defining the proposed exact
   verifier-context attempt set, protected authority object, and schema-v5
-  machine-enforcement successor;
+  machine-enforcement successor.
+  `SCHEMA-V5-ADOPTION-SEQUENCE-PROPOSAL.md` separately defines the proposed
+  design-authority, implementation, final-hash-ratification, and activation
+  sequence needed to avoid circular self-authorization. These schema-v5
+  records are A0 proposals, not current schema-v4 authority. The creator must
+  ratify them or explicitly select an exact protected alternative before
+  treating the observed verifier-context gap as closed;
 - persistent-relay mitigation is not proven;
 - no fresh live capture yet proves the exact Editor-owner/relay-peer Unix FD
   and reciprocal Codex/relay stdin/stdout pipe graph;
