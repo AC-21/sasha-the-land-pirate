@@ -1,0 +1,48 @@
+name: WP-0003 Core
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    name: wp0003-core
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Report preinstalled SDK
+        working-directory: Tests
+        run: dotnet --version
+
+      - name: Run offline deterministic-core tests
+        run: python3 Tools/run_wp0003_core_tests.py --dotnet dotnet
+
+      - name: Validate foundation
+        run: python3 -B docs/foundation-v0.1/tools/validate_foundation.py
+
+      - name: Reject candidate whitespace errors
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git diff --check \
+              "${{ github.event.pull_request.base.sha }}...HEAD"
+          else
+            git show --check --format= --no-ext-diff HEAD
+          fi
