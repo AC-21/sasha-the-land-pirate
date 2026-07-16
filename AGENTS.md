@@ -28,6 +28,7 @@ This repository is currently **documentation/control-plane work only**.
 - Repository creation does not advance autonomy.
 - Historical sealed receipts `RR-D0049-20260715` and `RR-WP0001-ACCEPT-20260715` remain immutable. Owner-authenticated receipts `RR-D0051-20260716` and `RR-WP0001-ROUTE-20260716` now protect the direct-MCP successor and bind `UNITY-MCP-EXTERNAL` to unchanged WP-0001 contract `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`. WP-0001 may enter A1 only after schema-v4 evidence binds the creator-created protected empty seed and registry-only package graph, exact D-0047 tuple, assigned seat/linkage, actual detached quarantine, exact client/relay/Editor/socket/config/FD identity, creator-claimed allowlist and code identities, three exact raw collectors, revoked zero-tool preflight, and distinct live activation session. Its fresh external-protected creator receipt must carry every packet-specific activation claim.
 - At most one A1 packet may be active. A1 output is manually inspected and imported or rejected by the creator; agents do not merge it.
+- `WP-0003` and the lean local-development boundary are proposed, inactive successors. Until protected creator receipts ratify D-0052, accept WP-0003, and separately activate it, every current A0 prohibition above still wins.
 
 If requested work exceeds A0, stop and name the missing authorization. Do not “prepare ahead” by creating implementation scaffolding.
 
@@ -102,10 +103,10 @@ Before editing:
 1. Reproduce the packet baseline; stop if it differs.
 2. Confirm packet status and approval receipt, not merely its filename.
 3. Acquire the required reservation: exact base commit, paths, state domains/content IDs, lease, expiry, heartbeat, and fencing token.
-4. Work only in the packet's standalone disposable clone/sandbox with an independent `.git` directory, or its isolated asset package.
+4. Work only in the packet's standalone disposable clone/sandbox with an independent `.git` directory, or its isolated asset package. Only a fully ratified, accepted, and activated WP-0003 may instead use its exact creator-attested durable-repository `agent/*` branch.
 5. Touch only declared paths and interfaces. Ask to amend scope before crossing them.
 
-At A1, the foundation and trusted state must be read-only/hash-checked inputs; only exact reserved packet outputs, manifest-bound repository scratch, and a hash-bound disposable runtime HOME/private temp may be writable; ambient creator-home/shared-temp writes and symlink escape are denied except for an exact packet-required socket path; all non-output state is non-importable and destroy-on-close; and merge/release credentials are absent. A folder named `sandbox` is not proof of quarantine.
+Generic A1 uses read-only/hash-checked foundation inputs, exact reserved outputs, manifest-bound scratch, and a disposable runtime HOME/private temp with no merge/release credentials. Activated WP-0003 instead uses protected `main`, required checks, creator-controlled merge, its exact local boundary, and conditional first Unity MCP use; it grants no governance, credential, install, publishing, release, or self-merge authority. A folder named `sandbox` is never proof of a boundary.
 
 ## Engineering laws
 

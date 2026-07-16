@@ -24,6 +24,7 @@ Pass when:
 - dependency/license inventory is current;
 - D-0051's selected `UNITY-MCP-EXTERNAL` path is protected by both its active creator decision and a creator-controlled external `packet-acceptance` route-amendment receipt bound to WP-0001's exact contract; its exact seat, linked project, Bridge, relay path/digest/version/arguments, Codex client/version, explicit project target, creator-approved connection, scope/rate-limit, initiation-identity, and revocation evidence is verified; global MCP configuration is absent and the trusted A0 checkout's repo-scoped entry remains disabled;
 - no agent or CI directly invoked a Unity process; before A1, only D-0050's receipt-bound creator-operated setup may install/open the exact candidate. The pre-D-0051 read-only console smoke is retained as a deviation and cannot satisfy activation evidence; a new clean setup handshake must record zero Unity tool calls or implementation work;
+- if WP-0003 is the active packet, D-0052 ratification, packet acceptance, and local activation receipts are distinct; its real checkpoint is protected-`main` ancestry, its branch is valid `agent/*`, and no Unity MCP call occurs before the exact conditional first-use gate passes;
 - native Apple Silicon build succeeds.
 
 ## Gate 2 — Simulation correctness

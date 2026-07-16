@@ -66,6 +66,7 @@ SCENARIO_ARTIFACTS = ROOT / "scenarios" / "artifacts"
 SCENARIO_FIXTURE_SCHEMA = ROOT / "schemas" / "scenario-fixture-manifest.schema.json"
 SCENARIO_ARTIFACT_SCHEMA = ROOT / "schemas" / "scenario-artifact.schema.json"
 A1_BOUNDARY_SCHEMA = ROOT / "schemas" / "a1-boundary-manifest.schema.json"
+LOCAL_A1_BOUNDARY_SCHEMA = ROOT / "schemas" / "local-a1-boundary.schema.json"
 WP0001_A1_EVIDENCE_SCHEMA = (
     ROOT / "schemas" / "wp0001-a1-activation-evidence.schema.json"
 )
@@ -507,6 +508,29 @@ def git_commit_exists(commit: str) -> bool:
         ["cat-file", "-e", f"{commit}^{{commit}}"]
     )
     return result.returncode == 0
+
+
+def git_branch_name_is_valid(branch: str) -> bool:
+    result = run_foundation_git(["check-ref-format", "--branch", branch])
+    return result.returncode == 0
+
+
+def git_commit_is_ancestor(ancestor: str, descendant: str) -> bool:
+    result = run_foundation_git(
+        ["merge-base", "--is-ancestor", ancestor, descendant]
+    )
+    return result.returncode == 0
+
+
+def git_commit_is_ancestor_of_protected_main(commit: str) -> bool:
+    reference = "refs/remotes/origin/main"
+    reference_result = run_foundation_git(
+        ["rev-parse", "--verify", "--quiet", reference]
+    )
+    return (
+        reference_result.returncode == 0
+        and git_commit_is_ancestor(commit, reference)
+    )
 
 
 def git_repo_blob(commit: str, repo_relative: str) -> bytes | None:
@@ -5948,6 +5972,173 @@ def load_json_bytes(raw: bytes, label: str) -> tuple[object | None, list[str]]:
         return None, [f"{label} is not valid UTF-8 JSON: {exc}"]
 
 
+def validate_local_a1_boundary_manifest(
+    packet: dict,
+    state: dict,
+    activation_receipt: dict | None,
+    receipts_by_id: dict[str, dict],
+) -> tuple[dict | None, list[str]]:
+    """Validate the compact creator-attested WP-0003 local-development boundary."""
+    errors: list[str] = []
+    packet_id = packet.get("id", "unknown-packet")
+    if packet_id != "WP-0003":
+        return None, [f"{packet_id} is not eligible for the local A1 boundary"]
+
+    reference = packet.get("a1_boundary_manifest")
+    if not isinstance(reference, dict):
+        return None, [f"{packet_id} lacks a canonical local A1 boundary reference"]
+    expected_path = "governance/a1-boundaries/WP-0003.json"
+    if reference.get("path") != expected_path:
+        errors.append(f"{packet_id} local boundary must use {expected_path}")
+    manifest_path, path_error = safe_foundation_path(
+        reference.get("path"), f"{packet_id} local boundary path"
+    )
+    if path_error:
+        return None, [path_error]
+    if manifest_path is None or not manifest_path.is_file():
+        return None, errors + [f"{packet_id} local boundary manifest is missing"]
+
+    actual_hash = sha256_file(manifest_path)
+    if reference.get("sha256") != actual_hash:
+        errors.append(f"{packet_id} local boundary raw hash mismatch")
+    errors.extend(validate_instance_shape(manifest_path, LOCAL_A1_BOUNDARY_SCHEMA))
+    manifest = load_json(manifest_path)
+
+    if manifest.get("manifest_id") != reference.get("manifest_id"):
+        errors.append(f"{packet_id} local boundary ID differs from packet reference")
+    if manifest.get("packet_id") != packet_id:
+        errors.append(f"{packet_id} local boundary binds another packet")
+    if manifest.get("packet_contract_sha256") != packet.get("contract_sha256"):
+        errors.append(f"{packet_id} local boundary binds the wrong packet contract")
+
+    reservation = packet.get("reservation", {})
+    repository = manifest.get("repository", {})
+    branch = repository.get("branch")
+    if (
+        not isinstance(branch, str)
+        or not branch.startswith("agent/")
+        or not git_branch_name_is_valid(branch)
+    ):
+        errors.append(
+            f"{packet_id} local boundary branch must be a valid agent/* Git branch"
+        )
+    base_commit = repository.get("base_commit")
+    if not isinstance(base_commit, str) or not git_commit_exists(base_commit):
+        errors.append(f"{packet_id} local boundary base commit does not exist")
+    elif not git_commit_is_ancestor_of_protected_main(base_commit):
+        errors.append(
+            f"{packet_id} local boundary base commit is not protected-main ancestry"
+        )
+    if repository.get("base_commit") != reservation.get("base_commit"):
+        errors.append(f"{packet_id} local boundary base commit differs from reservation")
+    expected_reservation = {
+        "lease_id": reservation.get("lease_id"),
+        "fencing_token": reservation.get("fencing_token"),
+        "expires_at": reservation.get("expires_at"),
+        "paths": reservation.get("paths"),
+        "domains": reservation.get("domains"),
+    }
+    if manifest.get("reservation") != expected_reservation:
+        errors.append(f"{packet_id} local boundary does not exactly bind its reservation")
+    if manifest.get("git_safety", {}).get("checkpoint_commit") != reservation.get(
+        "base_commit"
+    ):
+        errors.append(f"{packet_id} local boundary checkpoint differs from reserved base")
+
+    expected_foundation = {
+        "constitution_sha256": state.get("constitution_sha256"),
+        "decision_ledger_sha256": state.get("decision_ledger_sha256"),
+        "last_creator_receipt_id": state.get("last_creator_receipt_id"),
+    }
+    if manifest.get("foundation_binding") != expected_foundation:
+        errors.append(f"{packet_id} local boundary does not bind current foundation authority")
+
+    required_claims = {
+        "A1-LOCAL-BOUNDARY-VERIFIED",
+        "ACTIVATE-A1-WP-0003",
+    }
+    if not isinstance(activation_receipt, dict):
+        errors.append(f"{packet_id} local boundary has no activation receipt")
+    else:
+        resolver = activation_receipt.get("artifact_resolver")
+        claims = subject_claims(activation_receipt).get(packet_id, set())
+        if (
+            activation_receipt.get("receipt_kind") != "packet-activation"
+            or activation_receipt.get("issuer_role") != "creator"
+            or activation_receipt.get("sealed") is not True
+            or not isinstance(resolver, dict)
+            or resolver.get("type") != "external-protected"
+            or not resolver.get("resolver_reference")
+            or not isinstance(activation_receipt.get("signature_reference"), str)
+            or not activation_receipt.get("signature_reference")
+            or set(activation_receipt.get("subject_ids", [])) != {packet_id}
+            or not required_claims.issubset(claims)
+        ):
+            errors.append(
+                f"{packet_id} local activation receipt lacks exact protected authority"
+            )
+        if manifest.get("attestation_receipt_id") != activation_receipt.get(
+            "receipt_id"
+        ):
+            errors.append(f"{packet_id} local boundary names another receipt")
+        if manifest.get("attested_by") != activation_receipt.get("issued_by"):
+            errors.append(f"{packet_id} local boundary attestor differs from receipt issuer")
+        if (
+            activation_receipt.get("artifact_sha256", {}).get(expected_path)
+            != actual_hash
+        ):
+            errors.append(
+                f"{packet_id} activation receipt does not bind local boundary bytes"
+            )
+        if activation_receipt.get("foundation_binding") != expected_foundation:
+            errors.append(
+                f"{packet_id} local activation receipt lacks foundation binding"
+            )
+        if (
+            activation_receipt.get("subject_contract_sha256", {}).get(packet_id)
+            != packet.get("contract_sha256")
+        ):
+            errors.append(
+                f"{packet_id} local activation receipt binds the wrong contract"
+            )
+        accepted_commit = activation_receipt.get("accepted_commit")
+        if repository.get("branch_head_commit") != accepted_commit:
+            errors.append(
+                f"{packet_id} local boundary branch head differs from activation commit"
+            )
+        if (
+            not isinstance(accepted_commit, str)
+            or not git_commit_exists(accepted_commit)
+        ):
+            errors.append(
+                f"{packet_id} local activation receipt commit does not exist"
+            )
+        elif isinstance(base_commit, str) and not git_commit_is_ancestor(
+            base_commit,
+            accepted_commit,
+        ):
+            errors.append(
+                f"{packet_id} local activation receipt commit does not descend from its base"
+            )
+        if state.get("last_creator_receipt_id") == activation_receipt.get(
+            "receipt_id"
+        ):
+            errors.append(
+                f"{packet_id} local activation receipt cannot self-bind as prior creator receipt"
+            )
+
+    last_creator_receipt = receipts_by_id.get(state.get("last_creator_receipt_id"))
+    if (
+        not last_creator_receipt
+        or not last_creator_receipt.get("sealed")
+        or last_creator_receipt.get("issuer_role") != "creator"
+    ):
+        errors.append(
+            f"{packet_id} state does not name a sealed prior creator receipt"
+        )
+    return manifest, errors
+
+
 def validate_a1_boundary_manifest(
     packet: dict,
     state: dict,
@@ -5956,6 +6147,13 @@ def validate_a1_boundary_manifest(
 ) -> tuple[dict | None, list[str]]:
     errors: list[str] = []
     packet_id = packet.get("id", "unknown-packet")
+    if packet_id == "WP-0003":
+        return validate_local_a1_boundary_manifest(
+            packet,
+            state,
+            activation_receipt,
+            receipts_by_id,
+        )
     reference = packet.get("a1_boundary_manifest")
     if not isinstance(reference, dict):
         return None, [f"{packet_id} lacks a canonical A1 boundary-manifest reference"]
@@ -7209,6 +7407,29 @@ def main() -> int:
                 gate_resolved = False
             if not receipt.get("sealed"):
                 gate_resolved = False
+            required_kind = requirement.get("required_receipt_kind")
+            if required_kind is not None and receipt.get("receipt_kind") != required_kind:
+                errors.append(
+                    f"ratification state {gate_name} decision receipt {receipt_id} has kind "
+                    f"{receipt.get('receipt_kind')!r}, expected {required_kind!r}"
+                )
+                gate_resolved = False
+            required_role = requirement.get("required_issuer_role")
+            if required_role is not None and receipt.get("issuer_role") != required_role:
+                errors.append(
+                    f"ratification state {gate_name} decision receipt {receipt_id} has issuer role "
+                    f"{receipt.get('issuer_role')!r}, expected {required_role!r}"
+                )
+                gate_resolved = False
+            required_resolver = requirement.get("required_resolver_type")
+            resolver = receipt.get("artifact_resolver")
+            actual_resolver = resolver.get("type") if isinstance(resolver, dict) else None
+            if required_resolver is not None and actual_resolver != required_resolver:
+                errors.append(
+                    f"ratification state {gate_name} decision receipt {receipt_id} has resolver "
+                    f"{actual_resolver!r}, expected {required_resolver!r}"
+                )
+                gate_resolved = False
         if len(decision_ids) != len(set(decision_ids)):
             errors.append(f"ratification state {gate_name} repeats a decision requirement")
         receipt_purposes: list[str] = []
@@ -7290,6 +7511,37 @@ def main() -> int:
                 gate_resolved = False
         if len(receipt_purposes) != len(set(receipt_purposes)):
             errors.append(f"ratification state {gate_name} repeats a receipt purpose")
+        if gate_name == "local_development":
+            decision_receipt_ids = {
+                requirement.get("receipt_id")
+                for requirement in gate.get("decision_requirements", [])
+                if requirement.get("receipt_id") is not None
+            }
+            packet_receipt_ids = {
+                requirement.get("receipt_id")
+                for requirement in gate.get("receipt_requirements", [])
+                if requirement.get("receipt_id") is not None
+            }
+            duplicate_authority_receipts = decision_receipt_ids & packet_receipt_ids
+            if duplicate_authority_receipts:
+                errors.append(
+                    "ratification state local_development must keep decision, "
+                    f"packet-acceptance, and activation receipts distinct: "
+                    f"{sorted(duplicate_authority_receipts)}"
+                )
+                gate_resolved = False
+            if len(packet_receipt_ids) != len(
+                [
+                    requirement
+                    for requirement in gate.get("receipt_requirements", [])
+                    if requirement.get("receipt_id") is not None
+                ]
+            ):
+                errors.append(
+                    "ratification state local_development must keep packet-acceptance "
+                    "and activation receipts distinct"
+                )
+                gate_resolved = False
         if gate.get("status") in {"ready", "passed"} and not gate_resolved:
             errors.append(f"ratification state {gate_name} is {gate.get('status')} with unresolved requirements")
         gate_resolutions[gate_name] = gate_resolved
@@ -7354,10 +7606,12 @@ def main() -> int:
             accept_requirement = accept_requirements[0]
 
         activation_claim = f"ACTIVATE-A1-{packet_id}"
-        quarantine_claims = {
-            "A1-QUARANTINE-BOUNDARY-VERIFIED",
-            activation_claim,
-        }
+        boundary_claim = (
+            "A1-LOCAL-BOUNDARY-VERIFIED"
+            if packet_id == "WP-0003"
+            else "A1-QUARANTINE-BOUNDARY-VERIFIED"
+        )
+        quarantine_claims = {boundary_claim, activation_claim}
         if packet_id == "WP-0001":
             quarantine_claims.add("AUTHORIZE-WP0001-MCP-ALLOWLIST")
             quarantine_claims.add("AUTHORIZE-WP0001-RAW-COLLECTORS")
