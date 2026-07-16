@@ -10,7 +10,7 @@ The approved durable checkout is `/Users/sasha/Documents/Codex/sasha-the-land-pi
 
 The creator expressed a Unity-first preference and reports a local license. Inspection found Hub 3.19.5, Rosetta 2, and Editor 6000.5.4f1 ARM64; full Xcode and a standalone .NET SDK were absent. The creator-approved WP-0001 installation candidate is Unity 6000.3.19f1 ARM64 with Mac Build Support (IL2CPP), Xcode 26.3, URP 17.3, and Unity Test Framework 1.6. Mono is the iteration backend; IL2CPP ARM64 is the acceptance-build authority. D-0051 supersedes D-0049 and selects `UNITY-MCP-EXTERNAL`—Codex through Unity's MCP Bridge and exact Unity-installed relay—while D-0050 permits only creator-operated pre-A1 setup; direct agent/CI Unity process invocation remains prohibited. The secret-free [`pre-A1 readiness snapshot`](docs/evidence/WP-0001/pre-a1-readiness-20260716.json) records the current stack, route, three preserved deviations, and thirteen blockers as point-in-time A0 evidence.
 
-A creator-requested [`lean A1 local-development successor`](docs/foundation-v0.1/15-LEAN-A1-LOCAL-DEVELOPMENT.md) and proposed `WP-0003` now define the practical path out of that blocked certification regime. They remain inactive until protected creator receipts ratify D-0052, accept WP-0003, and separately activate it.
+The creator-ratified [`lean A1 local-development successor`](docs/foundation-v0.1/15-LEAN-A1-LOCAL-DEVELOPMENT.md) and accepted `WP-0003` now define the practical path out of that blocked certification regime. They remain inactive until a distinct protected creator receipt activates the exact local boundary.
 
 Current creator-ratified facts:
 
@@ -31,7 +31,7 @@ Everything marked provisional or open in the foundation remains so.
 1. Read [`AGENTS.md`](AGENTS.md) before changing anything.
 2. Read the [`foundation v0.1 map`](docs/foundation-v0.1/README.md).
 3. Read the [`game constitution`](docs/foundation-v0.1/00-GAME-CONSTITUTION.md) and [`decision ledger`](docs/foundation-v0.1/01-DECISION-LEDGER.md).
-4. Check [`ratification-state.json`](docs/foundation-v0.1/governance/ratification-state.json) and the exact proposed work packet before acting.
+4. Check [`ratification-state.json`](docs/foundation-v0.1/governance/ratification-state.json) and the exact work packet before acting.
 
 Validate the bootstrap foundation from the repository root:
 
@@ -39,7 +39,7 @@ Validate the bootstrap foundation from the repository root:
 python3 docs/foundation-v0.1/tools/validate_foundation.py
 ```
 
-Expected current result: the foundation lint passes with ten receipts: five intentionally unsealed bootstrap creator-source captures and five sealed receipts for D-0049, D-0050, D-0051, WP-0001 acceptance, and the WP-0001 direct-MCP route successor.
+Expected current result: the foundation lint passes with twelve receipts: five intentionally unsealed bootstrap creator-source captures and seven sealed receipts, including the distinct D-0052 ratification and WP-0003 acceptance records.
 
 ## Planned seams
 

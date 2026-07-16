@@ -1,0 +1,33 @@
+{
+  "receipt_id": "RR-D0052-20260716",
+  "issued_at": "2026-07-16T19:28:15Z",
+  "issued_by": "AC-21",
+  "issuer_role": "creator",
+  "receipt_kind": "decision-ratification",
+  "artifact_resolver": {
+    "type": "external-protected",
+    "resolver_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/19#issuecomment-4995791603"
+  },
+  "source_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/19#issuecomment-4995791603",
+  "subject_ids": ["D-0052"],
+  "subject_claims": [
+    {
+      "subject_id": "D-0052",
+      "claims": ["RATIFY-LEAN-A1-LOCAL"]
+    }
+  ],
+  "approval_text_sha256": "375873379cdca4488a3aa9d2a378ab3f865579e75dfd2e14c37f7a07b9977c90",
+  "accepted_commit": "bf335654e57c9c300060d5e8bdcf5795f0462c62",
+  "artifact_sha256": {
+    "github.com/AC-21/sasha-the-land-pirate/pull/19#issuecomment-4995791603": "375873379cdca4488a3aa9d2a378ab3f865579e75dfd2e14c37f7a07b9977c90",
+    "15-LEAN-A1-LOCAL-DEVELOPMENT.md": "8657599b9fb2fc4e2cba8c7927e81d04368a03d16b172a8cd70bac74ca8b42d2",
+    "ledger/decisions.jsonl": "770551141ccd39e2ea09e8cf1624807045a5357586ea4ce2e9f2baddb8d920be"
+  },
+  "subject_contract_sha256": {},
+  "subject_event_sha256": {
+    "D-0052": "6f58eae08ac6335fa2f448905213895d97694422ffb06c2eec5ecbe41093ff3a"
+  },
+  "foundation_binding": null,
+  "signature_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/19#issuecomment-4995791603",
+  "sealed": true
+}
