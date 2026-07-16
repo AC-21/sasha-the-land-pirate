@@ -52,6 +52,22 @@ If either required app does not report, reports failure, or becomes unavailable,
 the PR remains blocked. Auto-merge capability does not waive repository,
 governance, creator, packet, or autonomy requirements.
 
+## Pending-check queue test
+
+The pull request containing this section is the bounded A0 live-test vehicle for
+pending-check auto-merge. Its operator must request squash auto-merge while at
+least one required check is still pending, then verify from GitHub's external
+timeline that:
+
+- an auto-merge enablement event exists before the merge event;
+- both exact required checks conclude successfully before the merge event;
+- the resulting `main` push passes the Foundation workflow; and
+- GitHub deletes the source branch.
+
+This text specifies the test; it does not self-attest the result. The GitHub
+timeline, check runs, merge commit, and post-merge workflow remain the
+drift-prone external evidence.
+
 ## Reproduction
 
 Read-only live checks:
