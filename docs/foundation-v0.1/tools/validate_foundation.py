@@ -12,6 +12,8 @@ from collections import Counter
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+from validate_wp0001_pre_a1_readiness import validate_wp0001_pre_a1_readiness
+
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = ROOT.parents[1]
@@ -25,6 +27,15 @@ SCENARIO_ARTIFACTS = ROOT / "scenarios" / "artifacts"
 SCENARIO_FIXTURE_SCHEMA = ROOT / "schemas" / "scenario-fixture-manifest.schema.json"
 SCENARIO_ARTIFACT_SCHEMA = ROOT / "schemas" / "scenario-artifact.schema.json"
 A1_BOUNDARY_SCHEMA = ROOT / "schemas" / "a1-boundary-manifest.schema.json"
+WP0001_UNITY_EPHEMERAL_SCRATCH_PATHS = (
+    "Game/Library/",
+    "Game/Temp/",
+    "Game/Logs/",
+    "Game/Obj/",
+    "Game/UserSettings/",
+    "Game/MemoryCaptures/",
+    "Game/Recordings/",
+)
 
 PACKET_CONTRACT_FIELDS = (
     "schema_version", "id", "class", "declared_risk", "save_risk", "created_on",
@@ -2283,6 +2294,326 @@ def subject_claims(receipt: dict) -> dict[str, set[str]]:
     }
 
 
+def normalize_repo_relative_path(value: object) -> str | None:
+    """Return one unambiguous repository-relative POSIX path without a trailing slash."""
+    if not isinstance(value, str) or not value or "\\" in value:
+        return None
+    candidate = Path(value)
+    if candidate.is_absolute() or any(part in {"", ".", ".."} for part in candidate.parts):
+        return None
+    normalized = candidate.as_posix().rstrip("/")
+    return normalized or None
+
+
+def repo_paths_overlap(left: object, right: object) -> bool:
+    """Treat equality and ancestor/descendant relationships as path overlap."""
+    left_path = normalize_repo_relative_path(left)
+    right_path = normalize_repo_relative_path(right)
+    if left_path is None or right_path is None:
+        return False
+    return (
+        left_path == right_path
+        or left_path.startswith(f"{right_path}/")
+        or right_path.startswith(f"{left_path}/")
+    )
+
+
+def repo_path_is_git_ignored(path: str) -> bool:
+    """Probe ignore policy without creating the scratch directory."""
+    normalized = normalize_repo_relative_path(path)
+    if normalized is None:
+        return False
+    result = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(REPO_ROOT),
+            "check-ignore",
+            "-q",
+            "--no-index",
+            "--",
+            f"{normalized}/.a1-boundary-ignore-probe",
+        ],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    return result.returncode == 0
+
+
+def a1_scratch_boundary_codes(
+    packet_id: object,
+    reservation_paths: object,
+    protection: object,
+) -> list[str]:
+    """Return stable policy codes for an invalid non-output scratch boundary."""
+    if not isinstance(protection, dict):
+        return ["scratch-boundary-invalid"]
+    scratch_paths = protection.get("ephemeral_scratch_paths")
+    if not isinstance(scratch_paths, list):
+        return ["scratch-path-list-invalid"]
+
+    codes: set[str] = set()
+    scratch_values_are_strings = all(
+        isinstance(scratch_path, str) for scratch_path in scratch_paths
+    )
+    if packet_id == "WP-0001" and (
+        not scratch_values_are_strings
+        or scratch_paths != list(WP0001_UNITY_EPHEMERAL_SCRATCH_PATHS)
+    ):
+        codes.add("wp0001-scratch-set-mismatch")
+    if protection.get("scratch_destroy_on_close") is not True:
+        codes.add("scratch-not-destroyed-on-close")
+
+    normalized_scratch: list[str] = []
+    for scratch_path in scratch_paths:
+        normalized = normalize_repo_relative_path(scratch_path)
+        if normalized is None:
+            codes.add("scratch-path-unsafe")
+            continue
+        normalized_scratch.append(normalized)
+        if not repo_path_is_git_ignored(scratch_path):
+            codes.add("scratch-not-gitignored")
+
+    reserved = reservation_paths if isinstance(reservation_paths, list) else []
+    protected = protection.get("protected_paths", [])
+    protected_paths = protected if isinstance(protected, list) else []
+    if any(
+        repo_paths_overlap(scratch_path, reserved_path)
+        for scratch_path in normalized_scratch
+        for reserved_path in reserved
+    ):
+        codes.add("scratch-reservation-overlap")
+    if any(
+        repo_paths_overlap(scratch_path, protected_path)
+        for scratch_path in normalized_scratch
+        for protected_path in protected_paths
+    ):
+        codes.add("scratch-protected-overlap")
+    if any(
+        repo_paths_overlap(left_path, right_path)
+        for left_index, left_path in enumerate(normalized_scratch)
+        for right_path in normalized_scratch[left_index + 1 :]
+    ):
+        codes.add("scratch-internal-overlap")
+    return sorted(codes)
+
+
+def validate_a1_scratch_fixtures() -> list[str]:
+    errors: list[str] = []
+    fixture_path = ROOT / "governance" / "fixtures" / "a1-scratch-boundary.fixtures.json"
+    if not fixture_path.is_file():
+        return ["A1 scratch-boundary fixtures are missing"]
+    fixture = load_json(fixture_path)
+    cases = fixture.get("cases")
+    if not isinstance(cases, list) or not cases:
+        return [f"{fixture_path.relative_to(ROOT)} must contain cases"]
+
+    seen_case_ids: set[str] = set()
+    for case in cases:
+        if not isinstance(case, dict):
+            errors.append(f"{fixture_path.relative_to(ROOT)} has a non-object case")
+            continue
+        case_id = case.get("id")
+        if not isinstance(case_id, str) or not case_id:
+            errors.append(f"{fixture_path.relative_to(ROOT)} has a case without an ID")
+            continue
+        if case_id in seen_case_ids:
+            errors.append(f"duplicate A1 scratch fixture case ID: {case_id}")
+        seen_case_ids.add(case_id)
+        expected_codes = case.get("expected_codes")
+        if (
+            not isinstance(expected_codes, list)
+            or any(not isinstance(code, str) for code in expected_codes)
+            or len(expected_codes) != len(set(expected_codes))
+        ):
+            errors.append(f"{case_id} expected_codes must be a unique string array")
+            continue
+        actual_codes = a1_scratch_boundary_codes(
+            case.get("packet_id"),
+            case.get("reservation_paths"),
+            case.get("protection_boundary"),
+        )
+        if actual_codes != sorted(expected_codes):
+            errors.append(
+                f"{case_id} expected {sorted(expected_codes)} but produced {actual_codes}"
+            )
+    return errors
+
+
+def normalize_absolute_runtime_root(value: object) -> str | None:
+    """Accept one exact canonical-looking absolute root without aliases or traversal."""
+    if (
+        not isinstance(value, str)
+        or not value.startswith("/")
+        or value == "/"
+        or value.endswith("/")
+        or "\\" in value
+        or "//" in value
+    ):
+        return None
+    if any(part in {"", ".", ".."} for part in value.split("/")[1:]):
+        return None
+    return value
+
+
+def absolute_runtime_paths_overlap(left: object, right: object) -> bool:
+    left_path = normalize_absolute_runtime_root(left)
+    right_path = normalize_absolute_runtime_root(right)
+    if left_path is None or right_path is None:
+        return False
+    return (
+        left_path == right_path
+        or left_path.startswith(f"{right_path}/")
+        or right_path.startswith(f"{left_path}/")
+    )
+
+
+def a1_runtime_boundary_codes(
+    environment: object,
+    runtime: object,
+) -> list[str]:
+    """Return stable policy codes for an invalid disposable process boundary."""
+    codes: set[str] = set()
+    if not isinstance(environment, dict):
+        codes.add("runtime-environment-invalid")
+        environment = {}
+    for field in ("sandbox_profile_sha256", "network_policy_sha256"):
+        value = environment.get(field)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            codes.add("runtime-policy-hash-invalid")
+
+    if not isinstance(runtime, dict):
+        return sorted(codes | {"runtime-boundary-invalid"})
+    if runtime.get("isolation_mode") not in {
+        "dedicated-ephemeral-os-user",
+        "equivalent-os-sandbox",
+    }:
+        codes.add("runtime-isolation-mode-invalid")
+    if not isinstance(runtime.get("principal_uid"), int) or isinstance(
+        runtime.get("principal_uid"), bool
+    ) or runtime.get("principal_uid", 0) < 1:
+        codes.add("runtime-principal-invalid")
+
+    home_root = normalize_absolute_runtime_root(runtime.get("ephemeral_home_root"))
+    temp_root = normalize_absolute_runtime_root(runtime.get("private_temp_root"))
+    if home_root is None or temp_root is None:
+        codes.add("runtime-root-unsafe")
+    elif absolute_runtime_paths_overlap(home_root, temp_root):
+        codes.add("runtime-roots-overlap")
+
+    bindings = runtime.get("environment_bindings")
+    expected_bindings = {
+        "HOME": home_root,
+        "TMPDIR": temp_root,
+        "TMP": temp_root,
+        "TEMP": temp_root,
+    }
+    if not isinstance(bindings, dict) or bindings != expected_bindings:
+        codes.add("runtime-environment-binding-mismatch")
+
+    host_home = normalize_absolute_runtime_root(runtime.get("ambient_host_home_root"))
+    shared_values = runtime.get("ambient_shared_temp_roots")
+    shared_roots = (
+        [normalize_absolute_runtime_root(value) for value in shared_values]
+        if isinstance(shared_values, list)
+        else []
+    )
+    if (
+        host_home is None
+        or not isinstance(shared_values, list)
+        or not shared_values
+        or any(value is None for value in shared_roots)
+    ):
+        codes.add("ambient-root-invalid")
+    denied_roots = runtime.get("denied_ambient_write_roots")
+    expected_denials = (
+        [host_home, *shared_roots]
+        if host_home is not None and all(value is not None for value in shared_roots)
+        else []
+    )
+    if not isinstance(denied_roots, list) or denied_roots != expected_denials:
+        codes.add("ambient-write-denial-mismatch")
+    if (
+        runtime.get("ambient_host_home_write_denied") is not True
+        or runtime.get("ambient_shared_temp_write_denied") is not True
+    ):
+        codes.add("ambient-write-denial-disabled")
+
+    ambient_roots = [
+        value for value in [host_home, *shared_roots] if isinstance(value, str)
+    ]
+    if home_root is not None and any(
+        absolute_runtime_paths_overlap(home_root, ambient_root)
+        for ambient_root in ambient_roots
+    ):
+        codes.add("runtime-home-overlaps-ambient")
+    if temp_root is not None and any(
+        absolute_runtime_paths_overlap(temp_root, ambient_root)
+        for ambient_root in ambient_roots
+    ):
+        codes.add("runtime-temp-overlaps-ambient")
+
+    roots_to_check = [
+        value
+        for value in [home_root, temp_root, host_home, *shared_roots]
+        if isinstance(value, str)
+    ]
+    if any(Path(value).resolve(strict=False).as_posix() != value for value in roots_to_check):
+        codes.add("runtime-root-symlink-escape")
+    if (
+        runtime.get("symlink_escape_forbidden") is not True
+        or runtime.get("runtime_roots_symlink_free") is not True
+    ):
+        codes.add("runtime-symlink-guard-disabled")
+    if runtime.get("runtime_roots_importable") is not False:
+        codes.add("runtime-roots-importable")
+    if runtime.get("destroy_on_close") is not True:
+        codes.add("runtime-not-destroyed-on-close")
+    return sorted(codes)
+
+
+def validate_a1_runtime_fixtures() -> list[str]:
+    errors: list[str] = []
+    fixture_path = ROOT / "governance" / "fixtures" / "a1-runtime-boundary.fixtures.json"
+    if not fixture_path.is_file():
+        return ["A1 runtime-boundary fixtures are missing"]
+    fixture = load_json(fixture_path)
+    cases = fixture.get("cases")
+    if not isinstance(cases, list) or not cases:
+        return [f"{fixture_path.relative_to(ROOT)} must contain cases"]
+
+    seen_case_ids: set[str] = set()
+    for case in cases:
+        if not isinstance(case, dict):
+            errors.append(f"{fixture_path.relative_to(ROOT)} has a non-object case")
+            continue
+        case_id = case.get("id")
+        if not isinstance(case_id, str) or not case_id:
+            errors.append(f"{fixture_path.relative_to(ROOT)} has a case without an ID")
+            continue
+        if case_id in seen_case_ids:
+            errors.append(f"duplicate A1 runtime fixture case ID: {case_id}")
+        seen_case_ids.add(case_id)
+        expected_codes = case.get("expected_codes")
+        if (
+            not isinstance(expected_codes, list)
+            or any(not isinstance(code, str) for code in expected_codes)
+            or len(expected_codes) != len(set(expected_codes))
+        ):
+            errors.append(f"{case_id} expected_codes must be a unique string array")
+            continue
+        actual_codes = a1_runtime_boundary_codes(
+            case.get("approved_environment"),
+            case.get("runtime_boundary"),
+        )
+        if actual_codes != sorted(expected_codes):
+            errors.append(
+                f"{case_id} expected {sorted(expected_codes)} but produced {actual_codes}"
+            )
+    return errors
+
+
 def validate_a1_boundary_manifest(
     packet: dict,
     state: dict,
@@ -2342,6 +2673,51 @@ def validate_a1_boundary_manifest(
     protection = manifest.get("protection_boundary", {})
     if set(protection.get("writable_paths", [])) != set(reservation.get("paths", [])):
         errors.append(f"{packet_id} boundary writable paths differ from its exact reservation")
+    scratch_code_messages = {
+        "scratch-boundary-invalid": "scratch protection record is invalid",
+        "scratch-path-list-invalid": "scratch paths must be an array",
+        "wp0001-scratch-set-mismatch": (
+            "Unity scratch paths differ from the exact WP-0001 non-output set"
+        ),
+        "scratch-not-destroyed-on-close": "scratch is not marked for destruction on close",
+        "scratch-path-unsafe": "scratch contains an unsafe repository-relative path",
+        "scratch-not-gitignored": "scratch contains a path that is not repository-ignored",
+        "scratch-reservation-overlap": "scratch overlaps reserved packet output",
+        "scratch-protected-overlap": "scratch overlaps a protected path",
+        "scratch-internal-overlap": "scratch roots overlap each other",
+    }
+    for code in a1_scratch_boundary_codes(
+        packet_id, reservation.get("paths", []), protection
+    ):
+        errors.append(
+            f"{packet_id} boundary {scratch_code_messages.get(code, code)}"
+        )
+    runtime_code_messages = {
+        "runtime-environment-invalid": "approved runtime environment is invalid",
+        "runtime-policy-hash-invalid": "lacks exact sandbox/network policy hashes",
+        "runtime-boundary-invalid": "runtime protection record is invalid",
+        "runtime-isolation-mode-invalid": "lacks a disposable OS-user or sandbox mode",
+        "runtime-principal-invalid": "lacks an exact runtime principal UID",
+        "runtime-root-unsafe": "runtime HOME or private temp root is unsafe",
+        "runtime-roots-overlap": "runtime HOME and private temp roots overlap",
+        "runtime-environment-binding-mismatch": "HOME/TMP variables differ from runtime roots",
+        "ambient-root-invalid": "ambient host HOME or shared temp roots are invalid",
+        "ambient-write-denial-mismatch": "ambient write-denial roots are not exact",
+        "ambient-write-denial-disabled": "ambient host HOME/shared-temp writes are not denied",
+        "runtime-home-overlaps-ambient": "ephemeral HOME overlaps ambient host state",
+        "runtime-temp-overlaps-ambient": "private temp overlaps ambient shared temp",
+        "runtime-root-symlink-escape": "runtime or ambient roots resolve through a symlink",
+        "runtime-symlink-guard-disabled": "symlink escape is not forbidden and attested absent",
+        "runtime-roots-importable": "runtime roots are importable packet output",
+        "runtime-not-destroyed-on-close": "runtime roots are not destroy-on-close",
+    }
+    for code in a1_runtime_boundary_codes(
+        manifest.get("approved_environment"),
+        manifest.get("runtime_boundary"),
+    ):
+        errors.append(
+            f"{packet_id} boundary {runtime_code_messages.get(code, code)}"
+        )
     protected_required = {
         "docs/foundation-v0.1/00-GAME-CONSTITUTION.md",
         "docs/foundation-v0.1/ledger/decisions.jsonl",
@@ -2521,6 +2897,16 @@ def main() -> int:
     errors.extend(validate_supersession_graph(records))
     errors.extend(validate_supersession_authority(records, receipts))
     errors.extend(validate_supersession_fixtures())
+    errors.extend(validate_a1_scratch_fixtures())
+    errors.extend(validate_a1_runtime_fixtures())
+    errors.extend(
+        validate_wp0001_pre_a1_readiness(
+            ROOT,
+            load_json=load_json,
+            validate_schema_subset=validate_schema_subset,
+            git_commit_exists=git_commit_exists,
+        )
+    )
     errors.extend(validate_local_links())
     errors.extend(validate_references(records))
     scenarios, scenario_errors = validate_scenario_registry_v2()

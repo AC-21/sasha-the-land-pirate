@@ -1,0 +1,441 @@
+{
+  "schema_version": 1,
+  "evidence_id": "EVID-WP0001-PRE-A1-20260716",
+  "packet_id": "WP-0001",
+  "observed_at": "2026-07-16T08:29:46Z",
+  "observation_mode": "read-only-filesystem-log-and-process-inspection",
+  "overall_status": "blocked",
+  "activation_authority": false,
+  "contains_secret_values": false,
+  "authority_binding": {
+    "base_commit": "3e336ce7f5bf9823fde57b3a3f016945696399d9",
+    "packet_contract_sha256": "eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3",
+    "active_route": "UNITY-MCP-EXTERNAL",
+    "route_decision_id": "D-0051",
+    "route_receipt_ids": [
+      "RR-D0051-20260716",
+      "RR-WP0001-ROUTE-20260716"
+    ],
+    "current_autonomy": "A0",
+    "a1_activation_receipt_id": null
+  },
+  "host_environment": {
+    "os": "macOS",
+    "os_version": "15.7.7",
+    "architecture": "arm64",
+    "hardware": "Apple M3 Max",
+    "memory_gb": 48,
+    "rosetta_present": true
+  },
+  "toolchain": [
+    {
+      "id": "UNITY-HUB",
+      "required": "3.19.5",
+      "observed": "3.19.5",
+      "status": "matched",
+      "evidence": [
+        "Unity Hub application-bundle version"
+      ]
+    },
+    {
+      "id": "UNITY-EDITOR",
+      "required": "6000.3.19f1 changeset 7689f4515d75 ARM64",
+      "observed": "6000.5.4f1 changeset d550df8bd089 ARM64",
+      "status": "mismatch",
+      "evidence": [
+        "/Users/sasha/Sashas/ProjectSettings/ProjectVersion.txt",
+        "installed Editor application-bundle inspection"
+      ]
+    },
+    {
+      "id": "MAC-BUILD-SUPPORT-IL2CPP",
+      "required": "Mac Build Support (IL2CPP) for Unity 6000.3.19f1",
+      "observed": "absent; installed Mac player variations are Mono-only",
+      "status": "missing",
+      "evidence": [
+        "installed Editor PlaybackEngines directory inspection"
+      ]
+    },
+    {
+      "id": "XCODE",
+      "required": "full Xcode 26.3",
+      "observed": "full Xcode absent; active developer directory is /Library/Developer/CommandLineTools",
+      "status": "missing",
+      "evidence": [
+        "/Applications/Xcode.app absence",
+        "xcode-select and xcodebuild read-only preflight"
+      ]
+    },
+    {
+      "id": "DOTNET-SDK",
+      "required": "10.0.301",
+      "observed": null,
+      "status": "missing",
+      "evidence": [
+        "dotnet executable not found on PATH"
+      ]
+    },
+    {
+      "id": "ROSETTA-2",
+      "required": "installed where required by Unity Apple-Silicon tooling",
+      "observed": "com.apple.pkg.RosettaUpdateAuto 1.0.0.0.1.1777570176",
+      "status": "matched",
+      "evidence": [
+        "macOS package receipt"
+      ]
+    }
+  ],
+  "observation_project": {
+    "path": "/Users/sasha/Sashas",
+    "purpose": "observation-only-onboarding-project",
+    "editor_version": "6000.5.4f1",
+    "editor_changeset": "d550df8bd089",
+    "company_name": "DefaultCompany",
+    "product_name": "Sashas",
+    "bundle_identifier": null,
+    "organization_id_sha256": "9b502c7e60d87721337fb9836a5bcfbaa6624d472e480de7ecbb328bf97d622a",
+    "cloud_project_id_sha256": "0bc8f812dc0be6e99edcea952518fe09437762f5353d450c76e0e62992ab56e1",
+    "unity_connect_enabled": false,
+    "matches_wp0001_temporary_identity": false,
+    "same_organization_project_linkage_verified": false
+  },
+  "package_graph": {
+    "manifest_path": "/Users/sasha/Sashas/Packages/manifest.json",
+    "manifest_sha256": "bc0a9207b56a53b5dc00045eb057dcf10bec4558bec7ae97039b3c56ae1d2e59",
+    "lock_path": "/Users/sasha/Sashas/Packages/packages-lock.json",
+    "lock_sha256": "6a97aea36ac4663cdfa912cf7067a9d98d3c9d9291cffce285a9ca391011bd00",
+    "packages": [
+      {
+        "id": "UNITY-AI-ASSISTANT",
+        "required": "com.unity.ai.assistant 2.14.0-pre.1 from Unity Registry",
+        "observed": "com.unity.ai.assistant 2.14.0-pre.1",
+        "status": "matched",
+        "evidence": [
+          "manifest and Editor-generated package lock"
+        ]
+      },
+      {
+        "id": "URP",
+        "required": "com.unity.render-pipelines.universal 17.3",
+        "observed": "com.unity.render-pipelines.universal 17.5.0",
+        "status": "mismatch",
+        "evidence": [
+          "manifest and Editor-generated package lock"
+        ]
+      },
+      {
+        "id": "UNITY-TEST-FRAMEWORK",
+        "required": "com.unity.test-framework 1.6",
+        "observed": "com.unity.test-framework 1.7.0",
+        "status": "mismatch",
+        "evidence": [
+          "manifest and Editor-generated package lock"
+        ]
+      }
+    ]
+  },
+  "direct_mcp_route": {
+    "selected_route": "UNITY-MCP-EXTERNAL",
+    "bridge": {
+      "state": "running",
+      "connection_file": "/Users/sasha/.unity/mcp/connections/bridge-9f46638e-24947.json",
+      "connection_file_sha256": "8b3a94bac0f49559d0758f16b07cdf1f153e016c71daf7939e73f0f5e50f1cb6",
+      "protocol_version": "2.0",
+      "connection_type": "named_pipe",
+      "endpoint": "/tmp/unity-mcp-9f46638e-24947",
+      "project_path": "/Users/sasha/Sashas",
+      "expected_project_target": "receipt-bound standalone WP-0001 A1 clone/Game",
+      "target_matches_wp0001": false
+    },
+    "relay": {
+      "path": "/Users/sasha/.unity/relay/relay_mac_arm64.app/Contents/MacOS/relay_mac_arm64",
+      "sha256": "e52d9dc5380297456dc9ae168bdc981e7344651e653b73424dd4bc88df26eaf1",
+      "package_copy_sha256": "e52d9dc5380297456dc9ae168bdc981e7344651e653b73424dd4bc88df26eaf1",
+      "matches_package_copy": true,
+      "version": "1.0.12-build.96",
+      "architecture": "arm64",
+      "bundle_identifier": "com.unity.ai.assistant.relay",
+      "team_identifier": "9QW8UQUTAA",
+      "observed_arguments": [
+        "--relay",
+        "--port",
+        "9001",
+        "--mcp-client-port",
+        "9002",
+        "--editor-pid",
+        "24947",
+        "--shutdown-delay",
+        "180",
+        "--log-dir",
+        "/Users/sasha/Sashas/Logs"
+      ],
+      "direct_mcp_mode_active": false
+    },
+    "external_client": {
+      "path": "/Applications/ChatGPT.app/Contents/Resources/codex",
+      "sha256": "bdcb530615d44fcc7b35d12fe00f30c3025c25fc22a21193591dcdb064304385",
+      "version": "codex-cli 0.144.5",
+      "publisher": "OpenAI OpCo, LLC",
+      "exact_version_first_approval_verified": false
+    },
+    "repository_config": {
+      "path": ".codex/config.toml",
+      "sha256": "c8b3e2bb9d914d2deba6fbd2119a4cd02a6771fd4d5a5f3110cccffe94b931c0",
+      "enabled": false,
+      "configured_target": "/REPLACE-WITH-RECEIPT-BOUND-A1-CLONE/Game",
+      "global_unity_mcp_present": false
+    },
+    "network_listeners": [
+      {
+        "role": "relay",
+        "transport": "tcp",
+        "address": "127.0.0.1",
+        "port": 9001,
+        "exposure": "loopback",
+        "state": "listening"
+      },
+      {
+        "role": "mcp-client",
+        "transport": "tcp",
+        "address": "*",
+        "port": 9002,
+        "exposure": "all-interfaces",
+        "state": "listening"
+      }
+    ],
+    "session_history": {
+      "connected_direct_clients": 0,
+      "historical_handshakes_observed": 33,
+      "handshakes_with_zero_tools_observed": 2,
+      "handshakes_with_full_toolset_observed": 31,
+      "handshake_tool_count": 54,
+      "minimal_scope_verified": false,
+      "approval_history_state": "inherited-auto-approval-observed",
+      "zero_tool_clean_handshake_verified": false,
+      "unity_tool_invocations_before_activation": 1
+    },
+    "entitlement_and_linkage": {
+      "unity_editor_license_observed": true,
+      "eligible_unity_ai_seat": "unverified",
+      "same_organization_project_linkage": "unverified",
+      "license_secret_material_copied": false
+    }
+  },
+  "deviations": [
+    {
+      "id": "DEV-MCP-READCONSOLE-001",
+      "observed_on": "2026-07-16",
+      "occurred_at": "2026-07-16T07:10:18.186Z",
+      "category": "pre-activation-unity-tool-call",
+      "action": "Unity_ReadConsole",
+      "result": "completed successfully at 2026-07-16T07:10:19.102Z",
+      "project_mutation_state": "unknown-no-mutation-observed",
+      "mcp_tool_invocation": true,
+      "activation_evidence_eligible": false,
+      "preservation_status": "preserved",
+      "clean_cycle_required": true,
+      "notes": "This A0 read-only smoke was not authorized as activation evidence and cannot satisfy the required zero-tool setup handshake."
+    },
+    {
+      "id": "DEV-DIRECT-UNITY-VERSION-001",
+      "observed_on": "2026-07-16",
+      "occurred_at": null,
+      "category": "prohibited-direct-unity-process-invocation",
+      "action": "/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app/Contents/MacOS/Unity -version",
+      "result": "returned 6000.5.4f1; no MCP call, project mutation, or implementation is known",
+      "project_mutation_state": "unknown-no-mutation-observed",
+      "mcp_tool_invocation": false,
+      "activation_evidence_eligible": false,
+      "preservation_status": "preserved",
+      "clean_cycle_required": true,
+      "notes": "Direct agent invocation of Unity is prohibited. The exact execution timestamp was not retained, so this observation preserves only the date and command result."
+    },
+    {
+      "id": "DEV-DIRECT-UNITY-HUB-001",
+      "observed_on": "2026-07-16",
+      "occurred_at": null,
+      "category": "prohibited-direct-unity-process-invocation",
+      "action": "/Applications/Unity Hub.app/Contents/MacOS/Unity Hub -- --headless editors -i",
+      "result": "returned no output; no installation, project mutation, MCP call, or implementation is known",
+      "project_mutation_state": "unknown-no-mutation-observed",
+      "mcp_tool_invocation": false,
+      "activation_evidence_eligible": false,
+      "preservation_status": "preserved",
+      "clean_cycle_required": true,
+      "notes": "A read-only preflight incorrectly launched Unity Hub despite the direct-invocation prohibition. The result is preserved and cannot support activation."
+    }
+  ],
+  "blockers": [
+    {
+      "id": "BLK-D0047-EDITOR",
+      "domain": "toolchain",
+      "status": "blocking",
+      "summary": "The only installed Editor is 6000.5.4f1, not the approved 6000.3.19f1 changeset 7689f4515d75.",
+      "evidence": [
+        "UNITY-EDITOR requirement observation"
+      ]
+    },
+    {
+      "id": "BLK-MAC-IL2CPP",
+      "domain": "toolchain",
+      "status": "blocking",
+      "summary": "Mac Build Support (IL2CPP) for the approved Editor candidate is absent.",
+      "evidence": [
+        "MAC-BUILD-SUPPORT-IL2CPP requirement observation"
+      ]
+    },
+    {
+      "id": "BLK-XCODE",
+      "domain": "toolchain",
+      "status": "blocking",
+      "summary": "Full Xcode 26.3 is absent.",
+      "evidence": [
+        "XCODE requirement observation"
+      ]
+    },
+    {
+      "id": "BLK-DOTNET-SDK",
+      "domain": "toolchain",
+      "status": "blocking",
+      "summary": ".NET SDK 10.0.301 is absent.",
+      "evidence": [
+        "DOTNET-SDK requirement observation"
+      ]
+    },
+    {
+      "id": "BLK-PACKAGE-GRAPH",
+      "domain": "toolchain",
+      "status": "blocking",
+      "summary": "URP 17.5.0 and Test Framework 1.7.0 do not match the approved 17.3 and 1.6 package targets.",
+      "evidence": [
+        "package manifest SHA-256 bc0a9207b56a53b5dc00045eb057dcf10bec4558bec7ae97039b3c56ae1d2e59",
+        "package lock SHA-256 6a97aea36ac4663cdfa912cf7067a9d98d3c9d9291cffce285a9ca391011bd00"
+      ]
+    },
+    {
+      "id": "BLK-WP0001-PROJECT-IDENTITY",
+      "domain": "project-identity",
+      "status": "blocking",
+      "summary": "The open observation project is not the temporary LocalFoundationLab/SashaAtomicLandPirate_WP0001 project.",
+      "evidence": [
+        "observation_project.matches_wp0001_temporary_identity=false"
+      ]
+    },
+    {
+      "id": "BLK-UNITY-AI-SEAT-LINKAGE",
+      "domain": "entitlement",
+      "status": "blocking",
+      "summary": "An eligible assigned Unity AI seat and same-organization WP-0001 project linkage remain unverified.",
+      "evidence": [
+        "entitlement_and_linkage.eligible_unity_ai_seat=unverified",
+        "entitlement_and_linkage.same_organization_project_linkage=unverified"
+      ]
+    },
+    {
+      "id": "BLK-MCP-TARGET",
+      "domain": "mcp-route",
+      "status": "blocking",
+      "summary": "The live Bridge targets /Users/sasha/Sashas while the repository MCP entry is disabled and retains a fail-closed placeholder target.",
+      "evidence": [
+        "bridge connection-file SHA-256 8b3a94bac0f49559d0758f16b07cdf1f153e016c71daf7939e73f0f5e50f1cb6",
+        "repository config SHA-256 c8b3e2bb9d914d2deba6fbd2119a4cd02a6771fd4d5a5f3110cccffe94b931c0"
+      ]
+    },
+    {
+      "id": "BLK-MCP-NETWORK-BOUNDARY",
+      "domain": "mcp-route",
+      "status": "blocking",
+      "summary": "The MCP client listener is exposed on all interfaces instead of a proven quarantine-only boundary.",
+      "evidence": [
+        "mcp-client TCP listener *=9002 exposure=all-interfaces"
+      ]
+    },
+    {
+      "id": "BLK-MCP-APPROVAL-SCOPE",
+      "domain": "mcp-route",
+      "status": "blocking",
+      "summary": "The current client inherited prior auto-approval, handshakes advertised 54 tools, and neither exact-client first approval nor minimal scope is verified.",
+      "evidence": [
+        "session_history.approval_history_state=inherited-auto-approval-observed",
+        "session_history.handshake_tool_count=54",
+        "session_history.minimal_scope_verified=false"
+      ]
+    },
+    {
+      "id": "BLK-CLEAN-ZERO-TOOL-CYCLE",
+      "domain": "mcp-route",
+      "status": "blocking",
+      "summary": "The preserved Unity_ReadConsole, direct Unity -version, and direct Unity Hub CLI deviations require a fresh, exact, zero-tool clean cycle.",
+      "evidence": [
+        "DEV-MCP-READCONSOLE-001",
+        "DEV-DIRECT-UNITY-VERSION-001",
+        "DEV-DIRECT-UNITY-HUB-001"
+      ]
+    },
+    {
+      "id": "BLK-A1-QUARANTINE",
+      "domain": "quarantine",
+      "status": "blocking",
+      "summary": "No standalone physical quarantine with read-only trusted state, restricted credentials, exact packet outputs, and an isolated destroy-on-close runtime HOME/private temp boundary is attested.",
+      "evidence": [
+        "WP-0001 a1_boundary_manifest=null",
+        "ratification-state active_autonomy=A0",
+        "ambient Unity/MCP state currently exists outside packet paths under the creator home and shared temp namespace"
+      ]
+    },
+    {
+      "id": "BLK-A1-ACTIVATION-RECEIPT",
+      "domain": "authority",
+      "status": "blocking",
+      "summary": "No sealed creator-issued WP-0001 packet-activation receipt exists.",
+      "evidence": [
+        "authority_binding.a1_activation_receipt_id=null"
+      ]
+    }
+  ],
+  "next_actions": [
+    {
+      "id": "NEXT-VERIFY-SEAT-LINKAGE",
+      "actor": "creator",
+      "action": "Verify the eligible assigned Unity AI seat and link the temporary WP-0001 project to the same approved Unity organization without copying license secrets.",
+      "completion_evidence": "Secret-free entitlement, assigned-seat, organization, and linked-project identifiers bound by the activation evidence bundle."
+    },
+    {
+      "id": "NEXT-INSTALL-D0047",
+      "actor": "creator-operated setup",
+      "action": "Install the exact D-0047 Editor, Mac IL2CPP module, Xcode, .NET SDK, URP, and Test Framework tuple.",
+      "completion_evidence": "Exact versions, changeset, module inventory, package locks, installer provenance, and digests."
+    },
+    {
+      "id": "NEXT-CREATE-TEMP-PROJECT",
+      "actor": "creator-operated setup",
+      "action": "Create the approved temporary LocalFoundationLab/SashaAtomicLandPirate_WP0001 identity only inside the standalone A1 candidate quarantine.",
+      "completion_evidence": "Project settings and isolated save-profile evidence matching the accepted packet contract."
+    },
+    {
+      "id": "NEXT-HARDEN-MCP-BOUNDARY",
+      "actor": "creator-operated setup",
+      "action": "Restrict the relay/client boundary, revoke inherited approval, pin the exact relay/client/target, and prove the minimum permitted tool scope.",
+      "completion_evidence": "Loopback or stronger isolation, exact binary hashes, exact target, explicit first approval, scope inventory, and revocation state."
+    },
+    {
+      "id": "NEXT-RUN-CLEAN-HANDSHAKE",
+      "actor": "creator-operated setup",
+      "action": "Run one fresh setup handshake with no model prompt and zero Unity tool invocations, then disconnect.",
+      "completion_evidence": "Complete handshake/connection log with zero tool calls and all three preserved deviations excluded from activation authority."
+    },
+    {
+      "id": "NEXT-ATTEST-A1",
+      "actor": "creator and independent verifier",
+      "action": "Attest the standalone physical quarantine, exact reservation, read-only foundation, credential denial, isolated ephemeral runtime HOME/private temp, ambient-home/shared-temp denial, destroy-on-close policy, and manual import-or-reject boundary before activation.",
+      "completion_evidence": "Protected A1 boundary manifest binding exact sandbox/network policy hashes and runtime roots, plus a distinct sealed creator-issued WP-0001 packet-activation receipt."
+    }
+  ],
+  "evidence_limitations": [
+    "This artifact records a point-in-time A0 observation and does not activate WP-0001 or authorize any Unity call.",
+    "No implementation or installation was authorized, and no project mutation was observed. The Unity_ReadConsole, direct Editor -version, and direct Hub CLI deviations are all preserved; absence of mutation from either direct process probe is not treated as proven.",
+    "Unity license secret material was not copied; organization and cloud-project identifiers are represented only by SHA-256 digests.",
+    "The exact timestamps of DEV-DIRECT-UNITY-VERSION-001 and DEV-DIRECT-UNITY-HUB-001 were not retained.",
+    "Live process, port, connection, and package fields were collected during the preceding preflight window, can drift before or after observed_at, and must be recaptured for activation."
+  ]
+}

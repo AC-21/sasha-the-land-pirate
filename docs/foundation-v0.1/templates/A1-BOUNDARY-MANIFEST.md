@@ -4,6 +4,7 @@ This worksheet is not authority. Before an A1 packet runs, a creator-controlled 
 
 ## Immutable identity
 
+- Schema version: `3`
 - Manifest ID:
 - Packet ID:
 - Packet contract SHA-256:
@@ -23,9 +24,25 @@ This worksheet is not authority. Before an A1 packet runs, a creator-controlled 
 
 - Tool name, exact version, source, installer/archive SHA-256 when available:
 - OS and exact version:
-- Architecture and hardware ID:
-- Sandbox profile:
-- Network policy:
+- Architecture and non-secret hardware ID/digest:
+- Sandbox profile ID/path and raw SHA-256:
+- Network policy ID/path and raw SHA-256:
+
+## Disposable runtime boundary
+
+- Isolation mode: `dedicated-ephemeral-os-user` or `equivalent-os-sandbox`
+- Runtime instance ID, principal ID, and exact UID:
+- Exact absolute ephemeral `HOME` root:
+- Exact absolute private temp root:
+- `HOME`, `TMPDIR`, `TMP`, and `TEMP` bindings (must equal those roots):
+- Exact ambient creator-home root:
+- Exact ambient shared-temp roots:
+- Exact denied ambient write roots (creator home followed by every shared-temp root):
+- Ambient creator-home writes denied: `true`
+- Ambient shared-temp writes denied: `true`
+- Symlink escape forbidden and all bound roots verified symlink-free: `true`
+- Runtime roots importable as packet output: `false`
+- Destroy the runtime HOME/private temp when quarantine closes: `true`
 
 ## Foundation binding
 
@@ -37,8 +54,14 @@ This worksheet is not authority. Before an A1 packet runs, a creator-controlled 
 
 - Protected paths mounted read-only or absent:
 - Writable paths (must exactly equal the reservation):
+- Ephemeral scratch paths (non-output; must be exact, disjoint from protected/reserved paths, and repository-ignored):
+- Destroy all ephemeral scratch when the quarantine closes: `true`
 - Approved credential IDs:
 - Denied merge, release, protected-main, governance, and receipt-write capabilities:
+
+For WP-0001, the exact permitted scratch roots are `Game/Library/`, `Game/Temp/`, `Game/Logs/`, `Game/Obj/`, `Game/UserSettings/`, `Game/MemoryCaptures/`, and `Game/Recordings/`. `Game/Builds/` is not scratch authority: build evidence must be written directly to the packet-declared `BuildArtifacts/WP-0001/` paths. Nothing under a scratch root may be imported; any retained evidence must first be copied into a declared output path and recorded in the packet evidence manifest.
+
+Unity, relay, licensing, package-cache, log, and MCP connection state outside the repository must resolve only inside the disposable runtime HOME/private temp. The creator's ambient HOME and shared temp namespaces are denied, and the exact sandbox/network policies are hash-bound. These runtime roots are boundary infrastructure, never reservation paths or creator-import candidates.
 
 ## Creator import boundary
 

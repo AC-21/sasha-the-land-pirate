@@ -1,0 +1,508 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/wp0001-pre-a1-readiness.schema.json",
+  "title": "WP-0001 pre-A1 readiness observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evidence_id",
+    "packet_id",
+    "observed_at",
+    "observation_mode",
+    "overall_status",
+    "activation_authority",
+    "contains_secret_values",
+    "authority_binding",
+    "host_environment",
+    "toolchain",
+    "observation_project",
+    "package_graph",
+    "direct_mcp_route",
+    "deviations",
+    "blockers",
+    "next_actions",
+    "evidence_limitations"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "evidence_id": {
+      "const": "EVID-WP0001-PRE-A1-20260716"
+    },
+    "packet_id": { "const": "WP-0001" },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "observation_mode": {
+      "const": "read-only-filesystem-log-and-process-inspection"
+    },
+    "overall_status": { "const": "blocked" },
+    "activation_authority": { "const": false },
+    "contains_secret_values": { "const": false },
+    "authority_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_commit",
+        "packet_contract_sha256",
+        "active_route",
+        "route_decision_id",
+        "route_receipt_ids",
+        "current_autonomy",
+        "a1_activation_receipt_id"
+      ],
+      "properties": {
+        "base_commit": { "$ref": "#/$defs/gitObject" },
+        "packet_contract_sha256": { "$ref": "#/$defs/sha256" },
+        "active_route": { "const": "UNITY-MCP-EXTERNAL" },
+        "route_decision_id": { "const": "D-0051" },
+        "route_receipt_ids": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "RR-D0051-20260716",
+              "RR-WP0001-ROUTE-20260716"
+            ]
+          }
+        },
+        "current_autonomy": { "const": "A0" },
+        "a1_activation_receipt_id": { "type": "null" }
+      }
+    },
+    "host_environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "os",
+        "os_version",
+        "architecture",
+        "hardware",
+        "memory_gb",
+        "rosetta_present"
+      ],
+      "properties": {
+        "os": { "const": "macOS" },
+        "os_version": { "type": "string", "minLength": 1 },
+        "architecture": { "const": "arm64" },
+        "hardware": { "type": "string", "minLength": 1 },
+        "memory_gb": { "type": "integer", "minimum": 1 },
+        "rosetta_present": { "type": "boolean" }
+      }
+    },
+    "toolchain": {
+      "type": "array",
+      "minItems": 6,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/requirementObservation" }
+    },
+    "observation_project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "purpose",
+        "editor_version",
+        "editor_changeset",
+        "company_name",
+        "product_name",
+        "bundle_identifier",
+        "organization_id_sha256",
+        "cloud_project_id_sha256",
+        "unity_connect_enabled",
+        "matches_wp0001_temporary_identity",
+        "same_organization_project_linkage_verified"
+      ],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "purpose": { "const": "observation-only-onboarding-project" },
+        "editor_version": { "type": "string", "minLength": 1 },
+        "editor_changeset": { "type": "string", "minLength": 1 },
+        "company_name": { "type": "string", "minLength": 1 },
+        "product_name": { "type": "string", "minLength": 1 },
+        "bundle_identifier": { "type": ["string", "null"] },
+        "organization_id_sha256": { "$ref": "#/$defs/sha256" },
+        "cloud_project_id_sha256": { "$ref": "#/$defs/sha256" },
+        "unity_connect_enabled": { "type": "boolean" },
+        "matches_wp0001_temporary_identity": { "const": false },
+        "same_organization_project_linkage_verified": { "const": false }
+      }
+    },
+    "package_graph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifest_path",
+        "manifest_sha256",
+        "lock_path",
+        "lock_sha256",
+        "packages"
+      ],
+      "properties": {
+        "manifest_path": { "type": "string", "minLength": 1 },
+        "manifest_sha256": { "$ref": "#/$defs/sha256" },
+        "lock_path": { "type": "string", "minLength": 1 },
+        "lock_sha256": { "$ref": "#/$defs/sha256" },
+        "packages": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/requirementObservation" }
+        }
+      }
+    },
+    "direct_mcp_route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selected_route",
+        "bridge",
+        "relay",
+        "external_client",
+        "repository_config",
+        "network_listeners",
+        "session_history",
+        "entitlement_and_linkage"
+      ],
+      "properties": {
+        "selected_route": { "const": "UNITY-MCP-EXTERNAL" },
+        "bridge": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "connection_file",
+            "connection_file_sha256",
+            "protocol_version",
+            "connection_type",
+            "endpoint",
+            "project_path",
+            "expected_project_target",
+            "target_matches_wp0001"
+          ],
+          "properties": {
+            "state": { "const": "running" },
+            "connection_file": { "type": "string", "minLength": 1 },
+            "connection_file_sha256": { "$ref": "#/$defs/sha256" },
+            "protocol_version": { "const": "2.0" },
+            "connection_type": { "const": "named_pipe" },
+            "endpoint": { "type": "string", "minLength": 1 },
+            "project_path": { "type": "string", "minLength": 1 },
+            "expected_project_target": { "type": "string", "minLength": 1 },
+            "target_matches_wp0001": { "const": false }
+          }
+        },
+        "relay": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "package_copy_sha256",
+            "matches_package_copy",
+            "version",
+            "architecture",
+            "bundle_identifier",
+            "team_identifier",
+            "observed_arguments",
+            "direct_mcp_mode_active"
+          ],
+          "properties": {
+            "path": { "type": "string", "minLength": 1 },
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "package_copy_sha256": { "$ref": "#/$defs/sha256" },
+            "matches_package_copy": { "const": true },
+            "version": { "type": "string", "minLength": 1 },
+            "architecture": { "const": "arm64" },
+            "bundle_identifier": { "type": "string", "minLength": 1 },
+            "team_identifier": { "type": "string", "minLength": 1 },
+            "observed_arguments": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string" }
+            },
+            "direct_mcp_mode_active": { "const": false }
+          }
+        },
+        "external_client": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "version",
+            "publisher",
+            "exact_version_first_approval_verified"
+          ],
+          "properties": {
+            "path": { "type": "string", "minLength": 1 },
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "version": { "type": "string", "minLength": 1 },
+            "publisher": { "type": "string", "minLength": 1 },
+            "exact_version_first_approval_verified": { "const": false }
+          }
+        },
+        "repository_config": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "enabled",
+            "configured_target",
+            "global_unity_mcp_present"
+          ],
+          "properties": {
+            "path": { "const": ".codex/config.toml" },
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "enabled": { "const": false },
+            "configured_target": { "type": "string", "minLength": 1 },
+            "global_unity_mcp_present": { "const": false }
+          }
+        },
+        "network_listeners": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/networkListener" }
+        },
+        "session_history": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "connected_direct_clients",
+            "historical_handshakes_observed",
+            "handshakes_with_zero_tools_observed",
+            "handshakes_with_full_toolset_observed",
+            "handshake_tool_count",
+            "minimal_scope_verified",
+            "approval_history_state",
+            "zero_tool_clean_handshake_verified",
+            "unity_tool_invocations_before_activation"
+          ],
+          "properties": {
+            "connected_direct_clients": { "const": 0 },
+            "historical_handshakes_observed": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "handshakes_with_zero_tools_observed": { "const": 2 },
+            "handshakes_with_full_toolset_observed": { "const": 31 },
+            "handshake_tool_count": { "type": "integer", "minimum": 1 },
+            "minimal_scope_verified": { "const": false },
+            "approval_history_state": {
+              "const": "inherited-auto-approval-observed"
+            },
+            "zero_tool_clean_handshake_verified": { "const": false },
+            "unity_tool_invocations_before_activation": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "entitlement_and_linkage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "unity_editor_license_observed",
+            "eligible_unity_ai_seat",
+            "same_organization_project_linkage",
+            "license_secret_material_copied"
+          ],
+          "properties": {
+            "unity_editor_license_observed": { "const": true },
+            "eligible_unity_ai_seat": { "const": "unverified" },
+            "same_organization_project_linkage": {
+              "const": "unverified"
+            },
+            "license_secret_material_copied": { "const": false }
+          }
+        }
+      }
+    },
+    "deviations": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/deviation" }
+    },
+    "blockers": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/blocker" }
+    },
+    "next_actions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nextAction" }
+    },
+    "evidence_limitations": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "gitObject": {
+      "type": "string",
+      "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"
+    },
+    "requirementObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "required",
+        "observed",
+        "status",
+        "evidence"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Z0-9-]+$"
+        },
+        "required": { "type": "string", "minLength": 1 },
+        "observed": { "type": ["string", "null"] },
+        "status": {
+          "enum": [
+            "matched",
+            "mismatch",
+            "missing",
+            "unverified",
+            "unsafe"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "networkListener": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "transport",
+        "address",
+        "port",
+        "exposure",
+        "state"
+      ],
+      "properties": {
+        "role": {
+          "enum": ["relay", "mcp-client"]
+        },
+        "transport": { "const": "tcp" },
+        "address": { "type": "string", "minLength": 1 },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "exposure": {
+          "enum": ["loopback", "all-interfaces"]
+        },
+        "state": { "const": "listening" }
+      }
+    },
+    "deviation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "observed_on",
+        "occurred_at",
+        "category",
+        "action",
+        "result",
+        "project_mutation_state",
+        "mcp_tool_invocation",
+        "activation_evidence_eligible",
+        "preservation_status",
+        "clean_cycle_required",
+        "notes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^DEV-[A-Z0-9-]+$"
+        },
+        "observed_on": { "type": "string", "format": "date" },
+        "occurred_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "category": {
+          "enum": [
+            "pre-activation-unity-tool-call",
+            "prohibited-direct-unity-process-invocation"
+          ]
+        },
+        "action": { "type": "string", "minLength": 1 },
+        "result": { "type": "string", "minLength": 1 },
+        "project_mutation_state": {
+          "enum": [
+            "none-observed",
+            "unknown-no-mutation-observed",
+            "observed"
+          ]
+        },
+        "mcp_tool_invocation": { "type": "boolean" },
+        "activation_evidence_eligible": { "const": false },
+        "preservation_status": { "const": "preserved" },
+        "clean_cycle_required": { "const": true },
+        "notes": { "type": "string", "minLength": 1 }
+      }
+    },
+    "blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "domain", "status", "summary", "evidence"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^BLK-[A-Z0-9-]+$"
+        },
+        "domain": {
+          "enum": [
+            "toolchain",
+            "project-identity",
+            "entitlement",
+            "mcp-route",
+            "quarantine",
+            "authority"
+          ]
+        },
+        "status": { "const": "blocking" },
+        "summary": { "type": "string", "minLength": 1 },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "nextAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "actor", "action", "completion_evidence"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^NEXT-[A-Z0-9-]+$"
+        },
+        "actor": { "type": "string", "minLength": 1 },
+        "action": { "type": "string", "minLength": 1 },
+        "completion_evidence": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

@@ -105,7 +105,7 @@ Before editing:
 4. Work only in the packet's standalone disposable clone/sandbox with an independent `.git` directory, or its isolated asset package.
 5. Touch only declared paths and interfaces. Ask to amend scope before crossing them.
 
-At A1, the foundation and trusted state must be read-only/hash-checked inputs, only packet outputs may be writable, and merge/release credentials must be absent. A folder named `sandbox` is not proof of quarantine.
+At A1, the foundation and trusted state must be read-only/hash-checked inputs; only exact reserved packet outputs, manifest-bound repository scratch, and a hash-bound disposable runtime HOME/private temp may be writable; ambient creator-home/shared-temp writes and symlink escape are denied; all non-output state is non-importable and destroy-on-close; and merge/release credentials are absent. A folder named `sandbox` is not proof of quarantine.
 
 ## Engineering laws
 

@@ -36,6 +36,9 @@ jobs:
       - name: Validate foundation
         run: python3 -B docs/foundation-v0.1/tools/validate_foundation.py
 
+      - name: Run control-plane regression tests
+        run: python3 -B -m unittest discover -s docs/foundation-v0.1/tools -p 'test_*.py'
+
       - name: Reject whitespace errors
         run: git show --check --format= --no-ext-diff HEAD
 
