@@ -36,6 +36,16 @@ before pass-producing collector implementation. That recommendation is not yet
 a protected gate; schema v4 still cannot prove provider independence. A1
 remains blocked.
 
+The separate `inspect_wp0001_toolchain_static.py` collector can diagnose the
+contracted Hub, Editor, Mac IL2CPP, Xcode, .NET, Rosetta, and protected-project
+package tuple using bounded file reads only. Its
+`wp0001-static-host-toolchain-observation` output is always A0,
+`activation_authority: false`, and `activation_evidence_eligible: false`.
+It never starts Unity-family or external processes and cannot replace creator
+screenshots, successful IL2CPP build evidence, the physical quarantine, or the
+activation receipt. Do not store its output beneath `a1-activation/`; the
+collector rejects that destination.
+
 ## Evidence law
 
 - Preserve failed, aborted, and deviating attempts.

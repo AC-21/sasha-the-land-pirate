@@ -183,6 +183,21 @@ Required tuple:
 - URP `17.3`
 - Unity Test Framework `1.6`
 
+Before opening Hub or Editor, the creator may run the A0-only static diagnostic:
+
+```bash
+python3 -B docs/foundation-v0.1/tools/inspect_wp0001_toolchain_static.py \
+  --project-root "/absolute/path/to/detached-candidate/Game" \
+  --output "/absolute/path/outside-a1-activation/static-toolchain.json"
+```
+
+The collector reads bounded plist, JSON, Mach-O, receipt, and package bytes. It
+starts no Unity-family or external process and performs no network access.
+Exit `0` means the static tuple matched, `1` means blocked or indeterminate,
+and `2` means collection failed. Even exit `0` remains non-authoritative A0
+diagnostic evidence. Mac IL2CPP remains `unverified` until a protected physical
+marker profile is supplied; the repository intentionally ships no such profile.
+
 Unity’s release page identifies the exact Editor, changeset, ARM64 installer,
 Mac IL2CPP component, and a known Metal timeout/freeze issue that WP-0001 must
 exercise:
