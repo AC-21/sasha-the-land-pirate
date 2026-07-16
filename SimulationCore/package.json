@@ -1,0 +1,11 @@
+{
+  "name": "com.ac21.sasha.simulation-core",
+  "version": "0.1.0",
+  "displayName": "Sasha Simulation Core",
+  "description": "Engine-independent deterministic technical state for WP-0003.",
+  "unity": "6000.0",
+  "dependencies": {},
+  "author": {
+    "name": "AC-21"
+  }
+}

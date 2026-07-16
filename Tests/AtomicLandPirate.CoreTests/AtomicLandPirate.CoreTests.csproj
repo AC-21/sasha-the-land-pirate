@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>AtomicLandPirate.CoreTests</AssemblyName>
+    <RootNamespace>AtomicLandPirate.CoreTests</RootNamespace>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <DebugType>embedded</DebugType>
+    <GenerateMSBuildEditorConfigFile>false</GenerateMSBuildEditorConfigFile>
+    <PathMap>$(MSBuildProjectDirectory)=/_/CoreTests,$([System.IO.Path]::GetFullPath('$(ArtifactsRoot)'))=/_/Artifacts/CoreTests</PathMap>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../SimulationCore/AtomicLandPirate.SimulationCore.csproj" />
+    <ProjectReference Include="../../SaveContracts/AtomicLandPirate.SaveContracts.csproj" />
+  </ItemGroup>
+</Project>
