@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "manifest_id": "A1B-WP-0003-LOCAL-DEV",
+  "boundary_mode": "local-development",
+  "packet_id": "WP-0003",
+  "packet_contract_sha256": "fb8b7362f3c6915447964e134486123ede6d8b22430fe744f5c0a03c0537bd47",
+  "created_at": "2026-07-16T19:38:29Z",
+  "attested_by": "AC-21",
+  "attestation_receipt_id": "RR-WP0003-ACTIVATE-20260716",
+  "repository": {
+    "root": "/Users/sasha/Documents/Codex/sasha-the-land-pirate",
+    "remote_url": "https://github.com/AC-21/sasha-the-land-pirate",
+    "base_commit": "0080c1e9d65b77adf3726d9eaa657b3738330da2",
+    "branch": "agent/wp0003-a1-activation",
+    "branch_head_commit": "0080c1e9d65b77adf3726d9eaa657b3738330da2",
+    "branch_is_main": false,
+    "independent_git_directory": true,
+    "shared_worktree": false,
+    "clean_at_activation": true,
+    "game_project_path": "/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game"
+  },
+  "reservation": {
+    "lease_id": "lease-WP0003-20260716-a1-local",
+    "fencing_token": "fence-WP0003-0080c1e9-20260716T193829Z",
+    "expires_at": "2026-08-15T19:38:29Z",
+    "paths": [
+      "Game/",
+      "SimulationCore/",
+      "SaveContracts/",
+      "Tools/",
+      "Tests/",
+      ".github/workflows/wp0003-ci.yml",
+      "BuildArtifacts/WP-0003/",
+      "docs/evidence/WP-0003/",
+      "docs/adr/",
+      "docs/known-issues/",
+      "docs/licenses/",
+      "docs/manifests/"
+    ],
+    "domains": [
+      "audit",
+      "presentation",
+      "tooling",
+      "save"
+    ]
+  },
+  "foundation_binding": {
+    "constitution_sha256": "ff6d7938c14a074acf796619868b97551cefd1681147559983a293792c20afb8",
+    "decision_ledger_sha256": "df5a4840f468676d6e3b428be1eda957310ef12c812241c5be3cdde6bd4601ef",
+    "last_creator_receipt_id": "RR-WP0003-ACCEPT-20260716"
+  },
+  "unity": {
+    "editor_version": "6000.5.4f1",
+    "project_path": "/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game",
+    "project_state": "bootstrap-pending",
+    "mcp_authorization_mode": "conditional-first-use",
+    "first_use_preconditions": [
+      "creator-opened-exact-game-project",
+      "creator-confirmed-licensed-editor",
+      "bridge-running",
+      "codex-selected-and-approved",
+      "target-matches-game",
+      "requested-call-within-allowed-actions"
+    ]
+  },
+  "git_safety": {
+    "checkpoint_commit": "0080c1e9d65b77adf3726d9eaa657b3738330da2",
+    "main_protected": true,
+    "pull_requests_required": true,
+    "required_checks": [
+      "Cursor Approval Agent: Pull Request Approver",
+      "validate"
+    ],
+    "force_push_disabled": true
+  },
+  "permission_boundary": {
+    "allowed_actions": [
+      "edit-declared-repository-paths",
+      "unity-mcp-project-and-object-edits",
+      "unity-mcp-play-mode",
+      "unity-mcp-project-tests",
+      "unity-mcp-console-read",
+      "unity-mcp-screen-capture",
+      "local-nondestructive-validation",
+      "git-commit-push-protected-pr"
+    ],
+    "denied_actions": [
+      "direct-unity-process-invocation",
+      "dependency-or-tool-install-without-creator",
+      "account-seat-license-billing-purchase-change",
+      "credential-or-secret-access",
+      "publish-release-deploy-monetize",
+      "external-third-party-contact",
+      "git-history-rewrite-or-protection-bypass",
+      "direct-agent-write-outside-repository",
+      "constitutional-governance-credential-dependency-save-release-auto-merge"
+    ]
+  },
+  "credential_boundary": {
+    "secrets_committed": false,
+    "opaque_git_transport_authorized": true,
+    "credential_material_access_authorized": false,
+    "release_credentials_available": false
+  },
+  "local_observation_exceptions": [
+    "BASE-WP0003-MAC",
+    "BASE-WP0003-REPOSITORY",
+    "BASE-WP0003-UNITY"
+  ]
+}

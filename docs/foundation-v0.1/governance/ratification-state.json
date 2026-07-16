@@ -6,9 +6,9 @@
   "active_a1_packet_id": null,
   "a1_max_active_packets": 1,
   "trusted_gatekeeper_status": "not-implemented",
-  "constitution_sha256": null,
-  "decision_ledger_sha256": null,
-  "last_creator_receipt_id": null,
+  "constitution_sha256": "ff6d7938c14a074acf796619868b97551cefd1681147559983a293792c20afb8",
+  "decision_ledger_sha256": "df5a4840f468676d6e3b428be1eda957310ef12c812241c5be3cdde6bd4601ef",
+  "last_creator_receipt_id": "RR-WP0003-ACCEPT-20260716",
   "packet_entry_gates": {
     "WP-0001": "technical_spike",
     "WP-0002": "ugly_gameplay_toy",

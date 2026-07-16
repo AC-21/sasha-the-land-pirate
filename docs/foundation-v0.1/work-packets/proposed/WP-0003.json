@@ -16,7 +16,11 @@
   "approved_by": "AC-21",
   "approval_receipt_id": "RR-WP0003-ACCEPT-20260716",
   "contract_sha256": "fb8b7362f3c6915447964e134486123ede6d8b22430fe744f5c0a03c0537bd47",
-  "a1_boundary_manifest": null,
+  "a1_boundary_manifest": {
+    "manifest_id": "A1B-WP-0003-LOCAL-DEV",
+    "path": "governance/a1-boundaries/WP-0003.json",
+    "sha256": "f495286de7c1ef4b762de8fb8e4603e59c5eaee7b0cf0c27bb6c73268760722b"
+  },
   "implementer": null,
   "verifier": null,
   "integrator": null,
@@ -88,13 +92,31 @@
   ],
   "dependencies": [],
   "reservation": {
-    "status": "unreserved",
-    "lease_id": null,
-    "base_commit": null,
-    "paths": [],
-    "domains": [],
-    "expires_at": null,
-    "fencing_token": null
+    "status": "held",
+    "lease_id": "lease-WP0003-20260716-a1-local",
+    "base_commit": "0080c1e9d65b77adf3726d9eaa657b3738330da2",
+    "paths": [
+      "Game/",
+      "SimulationCore/",
+      "SaveContracts/",
+      "Tools/",
+      "Tests/",
+      ".github/workflows/wp0003-ci.yml",
+      "BuildArtifacts/WP-0003/",
+      "docs/evidence/WP-0003/",
+      "docs/adr/",
+      "docs/known-issues/",
+      "docs/licenses/",
+      "docs/manifests/"
+    ],
+    "domains": [
+      "audit",
+      "presentation",
+      "tooling",
+      "save"
+    ],
+    "expires_at": "2026-08-15T19:38:29Z",
+    "fencing_token": "fence-WP0003-0080c1e9-20260716T193829Z"
   },
   "declared_paths": [
     "Game/",
