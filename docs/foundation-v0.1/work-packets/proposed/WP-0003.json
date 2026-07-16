@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "id": "WP-0003",
-  "status": "accepted",
+  "status": "active",
   "class": "architecture",
   "declared_risk": "high",
   "derived_risk": "high",
@@ -304,6 +304,14 @@
       "actor": "creator",
       "at": "2026-07-16T18:59:28Z",
       "receipt_id": "RR-WP0003-ACCEPT-20260716"
+    },
+    {
+      "event_id": "WPE-WP0003-ACTIVE",
+      "from": "accepted",
+      "to": "active",
+      "actor": "creator",
+      "at": "2026-07-16T19:41:34Z",
+      "receipt_id": "RR-WP0003-ACTIVATE-20260716"
     }
   ]
 }
