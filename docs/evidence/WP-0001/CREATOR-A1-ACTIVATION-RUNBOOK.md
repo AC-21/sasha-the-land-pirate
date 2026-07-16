@@ -268,8 +268,12 @@ The runtime’s only active Codex MCP configuration is
 - no global Unity MCP fallback;
 - no undeclared server.
 
-Use client-visible sanitized names, such as `Unity_ReadConsole`, not Unity’s
-dotted internal names. A1 categorically excludes `Unity_RunCommand`,
+Use client-visible sanitized names, not Unity’s dotted internal names.
+`Unity_ReadConsole` is a naming example in fixtures, not a recommended
+read-only capability: the same tool accepts `Action=Clear`.
+[`A1-MCP-ALLOWLIST-PROPOSAL.md`](A1-MCP-ALLOWLIST-PROPOSAL.md) records the
+current unratified source-level recommendation. A1 categorically excludes
+`Unity_RunCommand`,
 `Unity_PackageManager_ExecuteAction`, and `Unity_ImportExternalModel`. Adding
 one requires a separately protected boundary revision; it cannot be smuggled
 into activation.
