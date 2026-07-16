@@ -1,0 +1,40 @@
+# WP-0001 evidence index
+
+Status: **A0 / blocked**. Nothing in this directory activates WP-0001 or
+authorizes a Unity tool call.
+
+## Current records
+
+- [`pre-a1-readiness-20260716.json`](pre-a1-readiness-20260716.json) — secret-free
+  host/toolchain/route snapshot and the preserved deviation ledger.
+- [`UNITY-MCP-STATIC-SECURITY-AUDIT-20260716.md`](UNITY-MCP-STATIC-SECURITY-AUDIT-20260716.md)
+  — source-level audit of the installed Unity Assistant direct-MCP path.
+- [`CREATOR-A1-ACTIVATION-RUNBOOK.md`](CREATOR-A1-ACTIVATION-RUNBOOK.md) —
+  creator-operated, fail-closed activation procedure.
+- [`POST-A1-IMPLEMENTATION-SEQUENCE.md`](POST-A1-IMPLEMENTATION-SEQUENCE.md) —
+  bounded implementation order to use only after protected A1 activation.
+
+The activation contract is machine-checked by
+`a1-boundary-manifest.schema.json`,
+`wp0001-a1-activation-evidence.schema.json`, and
+`wp0001-a1-evidence-record.schema.json`. The creator-side
+`validate_wp0001_a1_live.py` verifies the actual detached candidate and
+principal boundary without starting Unity. After the creator has independently
+started the exact route, `validate_wp0001_mcp_live.py` reads its OS/process,
+config, discovery, and socket state without starting Unity or MCP. Fixed raw
+protocol/listener/probe captures are parsed by `validate_foundation.py`; copied
+summary facts or blank command files are insufficient. Those raw captures must
+come from the exact source-hashed protocol, network, and policy-attachment
+collectors authorized by
+`AUTHORIZE-WP0001-RAW-COLLECTORS`. The collectors are deliberately not yet
+implemented, so A1 remains blocked.
+
+## Evidence law
+
+- Preserve failed, aborted, and deviating attempts.
+- Commit no secret values, license material, auth tokens, or uncropped account
+  identifiers.
+- Recalculate every hash after a protected-main change.
+- Do not reuse a prepared candidate clone after its approved base changes.
+- A creator-issued packet-activation receipt must bind the exact physical
+  boundary and evidence bytes before implementation begins.

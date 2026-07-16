@@ -6,17 +6,56 @@ from __future__ import annotations
 import json
 import hashlib
 import re
+import stat
 import subprocess
 import sys
+import tomllib
 from collections import Counter
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from validate_wp0001_pre_a1_readiness import validate_wp0001_pre_a1_readiness
+from validate_wp0001_mcp_live import (
+    EXPECTED_CHECK_NAMES as WP0001_MCP_LIVE_CHECKS,
+    VALIDATOR_VERSION as WP0001_MCP_LIVE_VALIDATOR_VERSION,
+    client_arguments_policy_safe,
+    code_identity_matches,
+    editor_arguments_policy_safe,
+    route_contract as wp0001_mcp_route_contract,
+    session_identity_sha256 as wp0001_session_identity_sha256,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = ROOT.parents[1]
+SYSTEM_GIT = "/usr/bin/git"
+FOUNDATION_GIT_ENV = {
+    "HOME": "/var/empty",
+    "XDG_CONFIG_HOME": "/var/empty",
+    "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "GIT_CONFIG_NOSYSTEM": "1",
+    "GIT_CONFIG_GLOBAL": "/dev/null",
+    "GIT_OPTIONAL_LOCKS": "0",
+    "GIT_NO_REPLACE_OBJECTS": "1",
+    "GIT_NO_LAZY_FETCH": "1",
+    "GIT_TERMINAL_PROMPT": "0",
+    "GIT_PAGER": "",
+    "PAGER": "",
+}
+FOUNDATION_GIT_ARGS = (
+    "--no-replace-objects",
+    "-c",
+    "core.fsmonitor=false",
+    "-c",
+    "core.hooksPath=/dev/null",
+    "-c",
+    "maintenance.auto=false",
+    "-c",
+    "gc.auto=0",
+    "--no-optional-locks",
+)
 DECISIONS = ROOT / "ledger" / "decisions.jsonl"
 DECISION_SCHEMA = ROOT / "schemas" / "decision.schema.json"
 SCENARIO_SCHEMA = ROOT / "schemas" / "scenario-definition.schema.json"
@@ -27,6 +66,12 @@ SCENARIO_ARTIFACTS = ROOT / "scenarios" / "artifacts"
 SCENARIO_FIXTURE_SCHEMA = ROOT / "schemas" / "scenario-fixture-manifest.schema.json"
 SCENARIO_ARTIFACT_SCHEMA = ROOT / "schemas" / "scenario-artifact.schema.json"
 A1_BOUNDARY_SCHEMA = ROOT / "schemas" / "a1-boundary-manifest.schema.json"
+WP0001_A1_EVIDENCE_SCHEMA = (
+    ROOT / "schemas" / "wp0001-a1-activation-evidence.schema.json"
+)
+WP0001_A1_EVIDENCE_RECORD_SCHEMA = (
+    ROOT / "schemas" / "wp0001-a1-evidence-record.schema.json"
+)
 WP0001_UNITY_EPHEMERAL_SCRATCH_PATHS = (
     "Game/Library/",
     "Game/Temp/",
@@ -36,6 +81,131 @@ WP0001_UNITY_EPHEMERAL_SCRATCH_PATHS = (
     "Game/MemoryCaptures/",
     "Game/Recordings/",
 )
+WP0001_PROJECT_SEED_EVIDENCE_PATH = (
+    "docs/evidence/WP-0001/a1-activation/project-seed.json"
+)
+WP0001_RUNTIME_CONFIG_EVIDENCE_PATH = (
+    "docs/evidence/WP-0001/a1-activation/codex-runtime-config.toml"
+)
+WP0001_MCP_LIVE_VERIFIER_PATH = (
+    "docs/foundation-v0.1/tools/validate_wp0001_mcp_live.py"
+)
+WP0001_QUARANTINE_LIVE_VERIFIER_PATH = (
+    "docs/foundation-v0.1/tools/validate_wp0001_a1_live.py"
+)
+WP0001_ACTIVATION_EVIDENCE_PATHS = (
+    "docs/evidence/WP-0001/a1-activation/evidence-manifest.json",
+    WP0001_PROJECT_SEED_EVIDENCE_PATH,
+    "docs/evidence/WP-0001/a1-activation/toolchain.json",
+    "docs/evidence/WP-0001/a1-activation/entitlement-linkage.json",
+    "docs/evidence/WP-0001/a1-activation/project-identity.json",
+    "docs/evidence/WP-0001/a1-activation/quarantine.json",
+    "docs/evidence/WP-0001/a1-activation/mcp-route.json",
+    "docs/evidence/WP-0001/a1-activation/bridge-discovery.json",
+    WP0001_RUNTIME_CONFIG_EVIDENCE_PATH,
+    "docs/evidence/WP-0001/a1-activation/clean-handshake.json",
+    "docs/evidence/WP-0001/a1-activation/activation-session.json",
+    "docs/evidence/WP-0001/a1-activation/network-observation.json",
+    "docs/evidence/WP-0001/a1-activation/deviations.json",
+    "docs/evidence/WP-0001/a1-activation/sandbox.policy",
+    "docs/evidence/WP-0001/a1-activation/network.policy",
+)
+WP0001_PRESERVED_DEVIATION_IDS = (
+    "DEV-WP0001-PRE-D0051-UNITY-READ-CONSOLE",
+    "DEV-WP0001-PRE-A1-EDITOR-VERSION-PROBE",
+    "DEV-WP0001-PRE-A1-HUB-LIST-PROBE",
+)
+WP0001_ALWAYS_FORBIDDEN_MCP_TOOLS = {
+    "Unity_RunCommand",
+    "Unity_PackageManager_ExecuteAction",
+    "Unity_ImportExternalModel",
+}
+WP0001_CLIENT_ABSENT_ENVIRONMENT_VARIABLES = (
+    "AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY",
+    "AWS_SESSION_TOKEN",
+    "GH_TOKEN",
+    "GITHUB_TOKEN",
+    "GIT_ASKPASS",
+    "SSH_AUTH_SOCK",
+    "VERCEL_TOKEN",
+)
+WP0001_REQUIRED_RAW_SOURCE_BY_KIND = {
+    "mcp-route": (
+        "docs/evidence/WP-0001/a1-activation/commands/mcp-route-live.json"
+    ),
+    "bridge-discovery": (
+        "docs/evidence/WP-0001/a1-activation/commands/mcp-route-live.json"
+    ),
+    "clean-handshake": (
+        "docs/evidence/WP-0001/a1-activation/commands/clean-handshake.raw.json"
+    ),
+    "activation-session": (
+        "docs/evidence/WP-0001/a1-activation/commands/"
+        "activation-session-live.json"
+    ),
+    "network-observation": (
+        "docs/evidence/WP-0001/a1-activation/commands/network-probes.json"
+    ),
+}
+WP0001_POLICY_ATTACHMENT_RAW_PATH = (
+    "docs/evidence/WP-0001/a1-activation/commands/"
+    "policy-attachment.json"
+)
+WP0001_REQUIRED_TOOLCHAIN_VERSIONS = {
+    "Unity Hub": "3.19.5",
+    "Unity Editor ARM64": "6000.3.19f1",
+    "Mac Build Support (IL2CPP)": "6000.3.19f1",
+    "Xcode": "26.3",
+    ".NET SDK": "10.0.301",
+    "com.unity.ai.assistant": "2.14.0-pre.1",
+}
+WP0001_LIVE_QUARANTINE_CHECKS = {
+    "packet_is_wp0001",
+    "candidate_root_is_canonical",
+    "candidate_exists",
+    "trusted_root_exists",
+    "candidate_separate_from_trusted_root",
+    "candidate_owner_uid_matches",
+    "candidate_root_default_write_denied",
+    "declared_writable_paths_exact_and_writable",
+    "scratch_paths_exact_and_writable",
+    "candidate_write_scope_exact",
+    "independent_git_directory",
+    "git_directory_owner_uid_matches",
+    "no_shared_git_object_inodes",
+    "git_directory_symlink_free",
+    "candidate_worktree_symlink_free",
+    "no_shared_worktree_inodes",
+    "no_git_file_indirection",
+    "no_alternates",
+    "head_matches",
+    "detached_head",
+    "git_directory_is_candidate_dot_git",
+    "git_common_directory_is_candidate_dot_git",
+    "clean_worktree",
+    "git_metadata_passive",
+    "zero_remotes",
+    "principal_uid_matches",
+    "environment_bindings_match",
+    "client_environment_guard_matches",
+    "forbidden_credential_env_absent",
+    "boot_session_matches",
+    "trusted_root_not_writable",
+    "creator_home_exists",
+    "creator_home_not_writable",
+    "runtime_home_exists_owned_private",
+    "runtime_temp_exists_owned_private",
+    "runtime_home_writable",
+    "runtime_temp_writable",
+    "shared_temp_roots_exist",
+    "shared_temp_default_write_denied",
+    "socket_exception_exact",
+    "socket_exists_owned_0600",
+    "socket_is_unix_domain_not_symlink",
+    "sandbox_policy_hash_matches",
+    "network_policy_hash_matches",
+}
 
 PACKET_CONTRACT_FIELDS = (
     "schema_version", "id", "class", "declared_risk", "save_risk", "created_on",
@@ -287,23 +457,83 @@ def safe_foundation_path(relative: object, label: str) -> tuple[Path | None, str
     return resolved, None
 
 
-def git_commit_exists(commit: str) -> bool:
-    result = subprocess.run(
-        ["git", "-C", str(REPO_ROOT), "cat-file", "-e", f"{commit}^{{commit}}"],
-        stdout=subprocess.DEVNULL,
+def safe_repo_path(relative: object, label: str) -> tuple[Path | None, str | None]:
+    """Resolve a repository-relative path without accepting escape or ambiguity."""
+    if not isinstance(relative, str) or not relative or "\\" in relative:
+        return None, f"{label} must be a non-empty POSIX repository-relative path"
+    candidate = Path(relative)
+    if candidate.is_absolute() or any(part in {"", ".", ".."} for part in candidate.parts):
+        return None, f"{label} is not a safe repository-relative path: {relative!r}"
+    resolved = (REPO_ROOT / candidate).resolve()
+    try:
+        resolved.relative_to(REPO_ROOT.resolve())
+    except ValueError:
+        return None, f"{label} escapes the repository: {relative!r}"
+    return resolved, None
+
+
+def run_foundation_git(args: list[str]) -> subprocess.CompletedProcess[bytes]:
+    git_path = Path(SYSTEM_GIT)
+    try:
+        metadata = git_path.lstat()
+    except OSError as exc:
+        raise RuntimeError("system Git is unavailable") from exc
+    if (
+        not stat.S_ISREG(metadata.st_mode)
+        or stat.S_ISLNK(metadata.st_mode)
+        or metadata.st_uid != 0
+        or metadata.st_mode & 0o022
+    ):
+        raise RuntimeError("system Git identity is unsafe")
+    return subprocess.run(
+        [
+            SYSTEM_GIT,
+            *FOUNDATION_GIT_ARGS,
+            "-C",
+            str(REPO_ROOT),
+            *args,
+        ],
+        stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
+        stdin=subprocess.DEVNULL,
         check=False,
+        env=FOUNDATION_GIT_ENV,
+        timeout=20,
+    )
+
+
+def git_commit_exists(commit: str) -> bool:
+    result = run_foundation_git(
+        ["cat-file", "-e", f"{commit}^{{commit}}"]
     )
     return result.returncode == 0
 
 
+def git_repo_blob(commit: str, repo_relative: str) -> bytes | None:
+    result = run_foundation_git(
+        ["show", f"{commit}:{repo_relative}"]
+    )
+    return result.stdout if result.returncode == 0 else None
+
+
+def git_repo_tree_listing(commit: str, repo_relative: str) -> bytes | None:
+    result = run_foundation_git(
+        [
+            "ls-tree",
+            "-r",
+            "-z",
+            commit,
+            "--",
+            repo_relative,
+        ]
+    )
+    return result.stdout if result.returncode == 0 else None
+
+
 def git_foundation_blob(commit: str, relative: str) -> bytes | None:
     repo_relative = (Path("docs") / ROOT.name / Path(relative)).as_posix()
-    result = subprocess.run(
-        ["git", "-C", str(REPO_ROOT), "show", f"{commit}:{repo_relative}"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-        check=False,
+    result = run_foundation_git(
+        ["show", f"{commit}:{repo_relative}"]
     )
     return result.stdout if result.returncode == 0 else None
 
@@ -733,7 +963,25 @@ def validate_instance_shape(path: Path, schema_path: Path) -> list[str]:
     """Validate one JSON instance with the repository's recursive subset."""
     instance = load_json(path)
     schema = load_json(schema_path)
-    return validate_schema_subset(instance, schema, schema, str(path.relative_to(ROOT)))
+    label: str | None = None
+    for base in (ROOT, REPO_ROOT):
+        for candidate, candidate_base in (
+            (path, base),
+            (path.resolve(strict=False), base.resolve(strict=False)),
+        ):
+            try:
+                label = str(candidate.relative_to(candidate_base))
+            except ValueError:
+                continue
+            break
+        if label is not None:
+            break
+    return validate_schema_subset(
+        instance,
+        schema,
+        schema,
+        label if label is not None else str(path),
+    )
 
 
 def is_nonnegative_int(value: object) -> bool:
@@ -2494,6 +2742,11 @@ def a1_runtime_boundary_codes(
         runtime.get("principal_uid"), bool
     ) or runtime.get("principal_uid", 0) < 1:
         codes.add("runtime-principal-invalid")
+    if re.fullmatch(
+        r"[0-9a-f]{64}",
+        str(runtime.get("boot_session_sha256")),
+    ) is None:
+        codes.add("runtime-boot-session-invalid")
 
     home_root = normalize_absolute_runtime_root(runtime.get("ephemeral_home_root"))
     temp_root = normalize_absolute_runtime_root(runtime.get("private_temp_root"))
@@ -2539,6 +2792,28 @@ def a1_runtime_boundary_codes(
         or runtime.get("ambient_shared_temp_write_denied") is not True
     ):
         codes.add("ambient-write-denial-disabled")
+    exception_values = runtime.get("ambient_shared_temp_write_exceptions")
+    exceptions = (
+        [normalize_absolute_runtime_root(value) for value in exception_values]
+        if isinstance(exception_values, list)
+        else []
+    )
+    if (
+        not isinstance(exception_values, list)
+        or len(exception_values) != len(set(exception_values))
+        or any(value is None for value in exceptions)
+    ):
+        codes.add("ambient-write-exception-invalid")
+    elif any(
+        not any(
+            isinstance(shared_root, str)
+            and isinstance(exception, str)
+            and exception.startswith(f"{shared_root}/")
+            for shared_root in shared_roots
+        )
+        for exception in exceptions
+    ):
+        codes.add("ambient-write-exception-outside-shared-temp")
 
     ambient_roots = [
         value for value in [host_home, *shared_roots] if isinstance(value, str)
@@ -2556,7 +2831,7 @@ def a1_runtime_boundary_codes(
 
     roots_to_check = [
         value
-        for value in [home_root, temp_root, host_home, *shared_roots]
+        for value in [home_root, temp_root, host_home, *shared_roots, *exceptions]
         if isinstance(value, str)
     ]
     if any(Path(value).resolve(strict=False).as_posix() != value for value in roots_to_check):
@@ -2614,6 +2889,3038 @@ def validate_a1_runtime_fixtures() -> list[str]:
     return errors
 
 
+def code_identity_shape_valid(value: object) -> bool:
+    return (
+        isinstance(value, dict)
+        and set(value)
+        == {
+            "verification_scope",
+            "identifier",
+            "team_identifier",
+            "cdhash",
+            "designated_requirement_sha256",
+            "authorities_sha256",
+        }
+        and value.get("verification_scope") == "codesign-strict-component"
+        and isinstance(value.get("identifier"), str)
+        and bool(value.get("identifier"))
+        and re.fullmatch(r"[A-Z0-9]{10}", str(value.get("team_identifier")))
+        is not None
+        and re.fullmatch(r"[0-9a-f]{40}", str(value.get("cdhash"))) is not None
+        and re.fullmatch(
+            r"[0-9a-f]{64}",
+            str(value.get("designated_requirement_sha256")),
+        )
+        is not None
+        and re.fullmatch(
+            r"[0-9a-f]{64}",
+            str(value.get("authorities_sha256")),
+        )
+        is not None
+    )
+
+
+def a1_wp0001_boundary_codes(
+    repository: object,
+    runtime: object,
+    project_seed: object,
+    route: object,
+    approved_toolchain: object = None,
+    approved_environment: object = None,
+    toolchain_profile: object = None,
+    activation_evidence: object = None,
+    raw_capture_collectors: object = None,
+    observed_seed_tree_sha256: str | None = None,
+) -> list[str]:
+    """Return stable policy codes for the WP-0001 protected seed and MCP route."""
+    codes: set[str] = set()
+    if not isinstance(repository, dict):
+        repository = {}
+        codes.add("wp0001-repository-invalid")
+    if not isinstance(runtime, dict):
+        runtime = {}
+        codes.add("wp0001-runtime-invalid")
+    if not isinstance(project_seed, dict):
+        project_seed = {}
+        codes.add("wp0001-project-seed-invalid")
+    if not isinstance(route, dict):
+        route = {}
+        codes.add("wp0001-unity-mcp-route-invalid")
+    if not isinstance(toolchain_profile, dict):
+        toolchain_profile = {}
+        codes.add("wp0001-toolchain-profile-invalid")
+    if not isinstance(activation_evidence, dict):
+        activation_evidence = {}
+        codes.add("wp0001-activation-evidence-invalid")
+    if not isinstance(raw_capture_collectors, dict):
+        raw_capture_collectors = {}
+        codes.add("wp0001-raw-collector-authority-invalid")
+
+    repository_root = normalize_absolute_runtime_root(repository.get("absolute_root"))
+    if repository_root is None:
+        codes.add("wp0001-repository-root-invalid")
+    if (
+        repository.get("git_directory") != ".git"
+        or repository.get("git_common_directory") != ".git"
+        or repository.get("detached_head") is not True
+        or repository.get("remote_count") != 0
+        or repository.get("alternates_present") is not False
+    ):
+        codes.add("wp0001-repository-isolation-invalid")
+
+    if project_seed.get("mode") != "creator-created-protected-base":
+        codes.add("wp0001-project-seed-mode-invalid")
+    if project_seed.get("project_root") != "Game":
+        codes.add("wp0001-project-seed-root-invalid")
+    if project_seed.get("base_commit") != repository.get("base_commit"):
+        codes.add("wp0001-project-seed-base-mismatch")
+    if project_seed.get("creator_attested_no_implementation") is not True:
+        codes.add("wp0001-project-seed-attestation-missing")
+    seed_evidence = project_seed.get("evidence")
+    if (
+        not isinstance(seed_evidence, dict)
+        or seed_evidence.get("path") != WP0001_PROJECT_SEED_EVIDENCE_PATH
+    ):
+        codes.add("wp0001-project-seed-evidence-invalid")
+    if (
+        observed_seed_tree_sha256 is not None
+        and project_seed.get("git_tree_sha256") != observed_seed_tree_sha256
+    ):
+        codes.add("wp0001-project-seed-tree-mismatch")
+
+    exact_profile = {
+        "hub_version": "3.19.5",
+        "editor_version": "6000.3.19f1",
+        "editor_changeset": "7689f4515d75",
+        "editor_architecture": "arm64",
+        "mac_il2cpp_installed": True,
+        "mac_il2cpp_editor_version": "6000.3.19f1",
+        "xcode_version": "26.3",
+        "rosetta_installed": True,
+        "dotnet_sdk_version": "10.0.301",
+        "assistant_package_version": "2.14.0-pre.1",
+        "mono_iteration_authorized": True,
+        "il2cpp_arm64_acceptance": True,
+    }
+    if any(toolchain_profile.get(key) != value for key, value in exact_profile.items()):
+        codes.add("wp0001-toolchain-profile-mismatch")
+    resolved_urp = toolchain_profile.get("resolved_urp_version")
+    resolved_tests = toolchain_profile.get("resolved_test_framework_version")
+    if (
+        not isinstance(resolved_urp, str)
+        or re.fullmatch(r"17\.3(?:\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?)?", resolved_urp)
+        is None
+        or not isinstance(resolved_tests, str)
+        or re.fullmatch(r"1\.6(?:\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?)?", resolved_tests)
+        is None
+    ):
+        codes.add("wp0001-toolchain-package-line-mismatch")
+    expected_toolchain_records = {
+        **WP0001_REQUIRED_TOOLCHAIN_VERSIONS,
+        "URP": resolved_urp,
+        "Unity Test Framework": resolved_tests,
+    }
+    toolchain_items = approved_toolchain if isinstance(approved_toolchain, list) else []
+    toolchain_names = [
+        item.get("name") for item in toolchain_items if isinstance(item, dict)
+    ]
+    toolchain_records = {
+        item.get("name"): item.get("version")
+        for item in toolchain_items
+        if isinstance(item, dict)
+        and isinstance(item.get("name"), str)
+        and isinstance(item.get("version"), str)
+    }
+    if (
+        len(toolchain_items) != len(expected_toolchain_records)
+        or len(toolchain_names) != len(set(toolchain_names))
+        or set(toolchain_names) != set(expected_toolchain_records)
+        or any(
+            toolchain_records.get(name) != version
+            for name, version in expected_toolchain_records.items()
+        )
+        or any(
+            not isinstance(item, dict)
+            or not isinstance(item.get("source"), str)
+            or not item.get("source")
+            or re.fullmatch(r"[0-9a-f]{64}", str(item.get("sha256"))) is None
+            for item in toolchain_items
+        )
+    ):
+        codes.add("wp0001-approved-toolchain-mismatch")
+
+    expected_activation_paths = {
+        "manifest": "docs/evidence/WP-0001/a1-activation/evidence-manifest.json",
+        "toolchain": "docs/evidence/WP-0001/a1-activation/toolchain.json",
+        "quarantine": "docs/evidence/WP-0001/a1-activation/quarantine.json",
+        "route": "docs/evidence/WP-0001/a1-activation/mcp-route.json",
+        "activation_session": "docs/evidence/WP-0001/a1-activation/activation-session.json",
+        "deviations": "docs/evidence/WP-0001/a1-activation/deviations.json",
+        "sandbox_policy": "docs/evidence/WP-0001/a1-activation/sandbox.policy",
+        "network_policy": "docs/evidence/WP-0001/a1-activation/network.policy",
+    }
+    for key, expected_path in expected_activation_paths.items():
+        reference = activation_evidence.get(key)
+        if (
+            not isinstance(reference, dict)
+            or reference.get("path") != expected_path
+            or re.fullmatch(r"[0-9a-f]{64}", str(reference.get("sha256"))) is None
+        ):
+            codes.add("wp0001-activation-evidence-invalid")
+    sandbox_policy_ref = (
+        activation_evidence.get("sandbox_policy")
+        if isinstance(activation_evidence.get("sandbox_policy"), dict)
+        else {}
+    )
+    network_policy_ref = (
+        activation_evidence.get("network_policy")
+        if isinstance(activation_evidence.get("network_policy"), dict)
+        else {}
+    )
+    if isinstance(approved_environment, dict):
+        if (
+            sandbox_policy_ref.get("sha256")
+            != approved_environment.get("sandbox_profile_sha256")
+            or network_policy_ref.get("sha256")
+            != approved_environment.get("network_policy_sha256")
+        ):
+            codes.add("wp0001-policy-evidence-mismatch")
+    else:
+        codes.add("wp0001-approved-environment-invalid")
+
+    expected_collectors = {
+        "protocol": (
+            "docs/foundation-v0.1/tools/capture_wp0001_protocol.py"
+        ),
+        "network": (
+            "docs/foundation-v0.1/tools/capture_wp0001_network.py"
+        ),
+        "policy_attachment": (
+            "docs/foundation-v0.1/tools/"
+            "capture_wp0001_policy_attachment.py"
+        ),
+    }
+    if (
+        set(raw_capture_collectors)
+        != {
+            "protocol",
+            "network",
+            "policy_attachment",
+            "authority_claim",
+        }
+        or raw_capture_collectors.get("authority_claim")
+        != "AUTHORIZE-WP0001-RAW-COLLECTORS"
+        or any(
+            not isinstance(raw_capture_collectors.get(kind), dict)
+            or set(raw_capture_collectors[kind]) != {"path", "sha256"}
+            or raw_capture_collectors[kind].get("path") != expected_path
+            or re.fullmatch(
+                r"[0-9a-f]{64}",
+                str(raw_capture_collectors[kind].get("sha256")),
+            )
+            is None
+            or raw_capture_collectors[kind].get("sha256") == "0" * 64
+            for kind, expected_path in expected_collectors.items()
+        )
+    ):
+        codes.add("wp0001-raw-collector-authority-invalid")
+
+    client = route.get("client") if isinstance(route.get("client"), dict) else {}
+    relay = route.get("relay") if isinstance(route.get("relay"), dict) else {}
+    bridge = route.get("bridge") if isinstance(route.get("bridge"), dict) else {}
+    entitlement = (
+        route.get("entitlement") if isinstance(route.get("entitlement"), dict) else {}
+    )
+    identity = (
+        route.get("project_identity")
+        if isinstance(route.get("project_identity"), dict)
+        else {}
+    )
+    policy = (
+        route.get("codex_policy") if isinstance(route.get("codex_policy"), dict) else {}
+    )
+    process_observation = (
+        route.get("process_observation")
+        if isinstance(route.get("process_observation"), dict)
+        else {}
+    )
+    connection = (
+        route.get("connection") if isinstance(route.get("connection"), dict) else {}
+    )
+    handshake = (
+        route.get("handshake") if isinstance(route.get("handshake"), dict) else {}
+    )
+    activation_session = (
+        route.get("activation_session")
+        if isinstance(route.get("activation_session"), dict)
+        else {}
+    )
+    controls = (
+        route.get("controls") if isinstance(route.get("controls"), dict) else {}
+    )
+
+    if route.get("route") != "UNITY-MCP-EXTERNAL":
+        codes.add("wp0001-route-selection-mismatch")
+    if (
+        route.get("code_identity_authority_claim")
+        != "AUTHORIZE-WP0001-CODE-IDENTITIES"
+    ):
+        codes.add("wp0001-code-identity-authority-invalid")
+    expected_target = f"{repository_root}/Game" if repository_root else None
+    if bridge.get("project_path") != expected_target:
+        codes.add("wp0001-mcp-project-target-mismatch")
+    editor_pid = bridge.get("editor_pid")
+    expected_arguments = (
+        [
+            "--mcp",
+            "--project-path",
+            expected_target,
+            "--instance-id",
+            str(editor_pid),
+        ]
+        if expected_target is not None and isinstance(editor_pid, int)
+        else None
+    )
+    if relay.get("arguments") != expected_arguments:
+        codes.add("wp0001-mcp-relay-arguments-mismatch")
+    if relay.get("parent_pid") != client.get("pid"):
+        codes.add("wp0001-mcp-process-parent-mismatch")
+    if client.get("cwd") != repository_root:
+        codes.add("wp0001-mcp-client-cwd-mismatch")
+    editor_tool_hash = next(
+        (
+            item.get("sha256")
+            for item in toolchain_items
+            if isinstance(item, dict)
+            and item.get("name") == "Unity Editor ARM64"
+        ),
+        None,
+    )
+    package_copy_path = relay.get("package_copy_path")
+    if (
+        any(
+            re.fullmatch(r"[0-9a-f]{64}", str(value)) is None
+            or value == "0" * 64
+            for value in (
+                client.get("sha256"),
+                relay.get("sha256"),
+                relay.get("package_copy_sha256"),
+                bridge.get("editor_sha256"),
+                bridge.get("connection_file_sha256"),
+                client.get("environment_names_sha256"),
+                relay.get("environment_names_sha256"),
+                bridge.get("environment_names_sha256"),
+            )
+        )
+        or not code_identity_shape_valid(client.get("signing_identity"))
+        or not code_identity_shape_valid(relay.get("signing_identity"))
+        or not code_identity_shape_valid(bridge.get("signing_identity"))
+        or not isinstance(client.get("arguments"), list)
+        or not client.get("arguments")
+        or not client_arguments_policy_safe(client.get("arguments"))
+        or not isinstance(bridge.get("arguments"), list)
+        or not bridge.get("arguments")
+        or not editor_arguments_policy_safe(
+            bridge.get("arguments"),
+            expected_target,
+        )
+        or bridge.get("cwd") != expected_target
+        or bridge.get("editor_version") != "6000.3.19f1"
+        or bridge.get("editor_changeset") != "7689f4515d75"
+        or bridge.get("editor_sha256") != editor_tool_hash
+        or not isinstance(package_copy_path, str)
+        or not package_copy_path.startswith(
+            f"{expected_target}/Library/PackageCache/com.unity.ai.assistant@"
+        )
+    ):
+        codes.add("wp0001-mcp-process-identity-invalid")
+
+    principal_uid = runtime.get("principal_uid")
+    if {
+        client.get("principal_uid"),
+        relay.get("principal_uid"),
+        bridge.get("principal_uid"),
+    } != {principal_uid}:
+        codes.add("wp0001-mcp-principal-mismatch")
+
+    expected_bindings = runtime.get("environment_bindings")
+    if policy.get("environment_bindings") != expected_bindings:
+        codes.add("wp0001-mcp-environment-mismatch")
+    home_root = runtime.get("ephemeral_home_root")
+    expected_client_environment = (
+        {
+            "CODEX_HOME": f"{home_root}/.codex",
+            "XDG_CONFIG_HOME": f"{home_root}/.config",
+            "XDG_CACHE_HOME": f"{home_root}/.cache",
+            "XDG_DATA_HOME": f"{home_root}/.local/share",
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_CONFIG_GLOBAL": f"{home_root}/.gitconfig",
+            "GIT_TERMINAL_PROMPT": "0",
+            "absent_variables": list(
+                WP0001_CLIENT_ABSENT_ENVIRONMENT_VARIABLES
+            ),
+        }
+        if isinstance(home_root, str)
+        else None
+    )
+    canonical_environment_bytes = (
+        json.dumps(
+            expected_client_environment,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode("utf-8")
+        if isinstance(expected_client_environment, dict)
+        else b""
+    )
+    expected_environment_sha256 = hashlib.sha256(
+        canonical_environment_bytes
+    ).hexdigest()
+    if (
+        runtime.get("client_environment_guard") != expected_client_environment
+        or policy.get("client_environment_guard") != expected_client_environment
+        or policy.get("environment_sha256") != expected_environment_sha256
+        or client.get("environment_sha256") != expected_environment_sha256
+    ):
+        codes.add("wp0001-mcp-environment-mismatch")
+    expected_inventory_sha256 = policy.get(
+        "effective_server_inventory_sha256"
+    )
+    if (
+        re.fullmatch(r"[0-9a-f]{64}", str(expected_inventory_sha256)) is None
+        or expected_inventory_sha256 == "0" * 64
+        or client.get("server_inventory_sha256")
+        != expected_inventory_sha256
+        or handshake.get("server_inventory_sha256")
+        != expected_inventory_sha256
+        or activation_session.get("server_inventory_sha256")
+        != expected_inventory_sha256
+    ):
+        codes.add("wp0001-mcp-config-inventory-invalid")
+    enabled_tools = policy.get("enabled_tools")
+    visible_tools = policy.get("client_visible_tools")
+    if (
+        not isinstance(enabled_tools, list)
+        or not enabled_tools
+        or enabled_tools != visible_tools
+        or any(
+            not isinstance(tool, str)
+            or re.fullmatch(r"Unity_[A-Za-z0-9_]+", tool) is None
+            for tool in enabled_tools
+        )
+    ):
+        codes.add("wp0001-mcp-tool-scope-mismatch")
+    elif any(tool in WP0001_ALWAYS_FORBIDDEN_MCP_TOOLS for tool in enabled_tools):
+        codes.add("wp0001-mcp-forbidden-tool")
+    canonical_tool_bytes = (
+        json.dumps(
+            enabled_tools,
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        if isinstance(enabled_tools, list)
+        else b""
+    )
+    if (
+        policy.get("enabled_tools_sha256")
+        != hashlib.sha256(canonical_tool_bytes).hexdigest()
+        or policy.get("tool_scope_authority_claim")
+        != "AUTHORIZE-WP0001-MCP-ALLOWLIST"
+    ):
+        codes.add("wp0001-mcp-tool-scope-authority-invalid")
+    if relay.get("sha256") != relay.get("package_copy_sha256"):
+        codes.add("wp0001-mcp-relay-package-mismatch")
+    if (
+        policy.get("server_name") != "unity_mcp_a1_wp0001"
+        or policy.get("approval_policy") != "on-request"
+        or policy.get("default_tools_approval_mode") != "prompt"
+        or policy.get("required") is not True
+        or policy.get("exact_command_identity_enforced") is not True
+        or policy.get("project_config_disabled") is not True
+        or policy.get("global_unity_mcp_absent") is not True
+    ):
+        codes.add("wp0001-codex-policy-invalid")
+
+    relay_path = relay.get("path")
+    connection_file = bridge.get("connection_file")
+    runtime_config_path = policy.get("runtime_config_path")
+    expected_runtime_config_path = (
+        f"{expected_client_environment['CODEX_HOME']}/config.toml"
+        if isinstance(expected_client_environment, dict)
+        else None
+    )
+    if not (
+        isinstance(home_root, str)
+        and isinstance(relay_path, str)
+        and relay_path.startswith(f"{home_root}/.unity/relay/")
+        and isinstance(connection_file, str)
+        and connection_file.startswith(f"{home_root}/.unity/mcp/connections/")
+        and runtime_config_path == expected_runtime_config_path
+    ):
+        codes.add("wp0001-mcp-runtime-state-escape")
+
+    if (
+        process_observation.get("path")
+        != "docs/evidence/WP-0001/a1-activation/mcp-route.json"
+        or process_observation != activation_evidence.get("route")
+    ):
+        codes.add("wp0001-mcp-process-evidence-mismatch")
+
+    endpoint = bridge.get("endpoint")
+    project_hash = (
+        hashlib.sha1(f"{repository_root}/Game/Assets".encode("utf-8"))
+        .hexdigest()[:8]
+        if repository_root is not None
+        else None
+    )
+    expected_endpoint = (
+        f"/tmp/unity-mcp-{project_hash}-{editor_pid}"
+        if project_hash is not None and isinstance(editor_pid, int)
+        else None
+    )
+    expected_connection_file = (
+        f"{home_root}/.unity/mcp/connections/bridge-{project_hash}-{editor_pid}.json"
+        if isinstance(home_root, str)
+        and project_hash is not None
+        and isinstance(editor_pid, int)
+        else None
+    )
+    if (
+        endpoint != expected_endpoint
+        or connection_file != expected_connection_file
+        or bridge.get("discovery_connection_type") != "named_pipe"
+        or bridge.get("physical_transport") != "unix_socket"
+        or bridge.get("endpoint_owner_uid") != principal_uid
+        or bridge.get("endpoint_mode") != "0600"
+        or bridge.get("shared_temp_exception") is not True
+    ):
+        codes.add("wp0001-mcp-endpoint-invalid")
+    expected_socket_exception = (
+        f"/private{expected_endpoint}" if isinstance(expected_endpoint, str) else None
+    )
+    if runtime.get("ambient_shared_temp_write_exceptions") != [
+        expected_socket_exception
+    ]:
+        codes.add("wp0001-mcp-socket-exception-invalid")
+    discovery_record = bridge.get("discovery_record")
+    if (
+        not isinstance(discovery_record, dict)
+        or discovery_record.get("path")
+        != "docs/evidence/WP-0001/a1-activation/bridge-discovery.json"
+    ):
+        codes.add("wp0001-mcp-discovery-evidence-invalid")
+
+    if (
+        connection.get("prior_approval_history_absent") is not True
+        or connection.get("preflight_approval_revoked") is not True
+        or connection.get("publisher_fallback_used") is not False
+        or connection.get("batch_auto_approve") is not False
+        or connection.get("direct_requires_approval") is not True
+        or connection.get("gateway_allowed") is not False
+        or connection.get("first_connection_creator_approved") is not True
+        or connection.get("final_state") != "connected"
+    ):
+        codes.add("wp0001-mcp-connection-state-invalid")
+    policy_evidence = policy.get("evidence")
+    policy_evidence_sha256 = (
+        policy_evidence.get("sha256")
+        if isinstance(policy_evidence, dict)
+        else None
+    )
+    handshake_capture = parse_datetime(handshake.get("captured_at"))
+    handshake_starts = [
+        parse_datetime(handshake.get(field))
+        for field in (
+            "client_started_at",
+            "relay_started_at",
+            "editor_started_at",
+        )
+    ]
+    handshake_birth_ids_valid = all(
+        re.fullmatch(r"[0-9a-f]{64}", str(handshake.get(field))) is not None
+        for field in (
+            "client_process_birth_id_sha256",
+            "relay_process_birth_id_sha256",
+            "editor_process_birth_id_sha256",
+        )
+    )
+    if (
+        handshake_capture is None
+        or any(start is None for start in handshake_starts)
+        or any(
+            isinstance(start, datetime) and start > handshake_capture
+            for start in handshake_starts
+        )
+        or not handshake_birth_ids_valid
+    ):
+        codes.add("wp0001-mcp-handshake-time-invalid")
+    if (
+        handshake.get("capture_complete") is not True
+        or not {"initialize", "tools/list"}.issubset(
+            set(handshake.get("observed_methods", []))
+            if isinstance(handshake.get("observed_methods"), list)
+            else set()
+        )
+        or any(
+            method
+            not in {
+                "initialize",
+                "notifications/initialized",
+                "tools/list",
+                "ping",
+            }
+            for method in (
+                handshake.get("observed_methods", [])
+                if isinstance(handshake.get("observed_methods"), list)
+                else []
+            )
+        )
+        or not all(
+            isinstance(handshake.get(field), int)
+            and not isinstance(handshake.get(field), bool)
+            and handshake.get(field) > 0
+            for field in ("client_pid", "relay_pid", "editor_pid")
+        )
+        or handshake.get("editor_pid") != bridge.get("editor_pid")
+        or handshake.get("runtime_config_sha256")
+        != policy_evidence_sha256
+        or handshake.get("enabled_tools_sha256")
+        != policy.get("enabled_tools_sha256")
+        or handshake.get("environment_sha256")
+        != expected_environment_sha256
+        or handshake.get("model_prompt_count") != 0
+        or handshake.get("unity_tool_call_count") != 0
+        or handshake.get("disconnected") is not True
+        or handshake.get("approval_revoked_after_disconnect") is not True
+    ):
+        codes.add("wp0001-mcp-handshake-not-clean")
+
+    runtime_config_sha256 = policy_evidence_sha256
+    activation_session_evidence = activation_session.get("evidence")
+    if (
+        not isinstance(activation_session_evidence, dict)
+        or activation_session_evidence
+        != activation_evidence.get("activation_session")
+        or activation_session_evidence.get("path")
+        != "docs/evidence/WP-0001/a1-activation/activation-session.json"
+        or activation_session.get("client_pid") != client.get("pid")
+        or activation_session.get("relay_pid") != relay.get("pid")
+        or activation_session.get("editor_pid") != bridge.get("editor_pid")
+        or activation_session.get("client_started_at") != client.get("started_at")
+        or activation_session.get("relay_started_at") != relay.get("started_at")
+        or activation_session.get("editor_started_at") != bridge.get("started_at")
+        or activation_session.get("client_process_birth_id_sha256")
+        != client.get("process_birth_id_sha256")
+        or activation_session.get("relay_process_birth_id_sha256")
+        != relay.get("process_birth_id_sha256")
+        or activation_session.get("editor_process_birth_id_sha256")
+        != bridge.get("process_birth_id_sha256")
+        or activation_session.get("runtime_config_sha256")
+        != runtime_config_sha256
+        or activation_session.get("enabled_tools_sha256")
+        != policy.get("enabled_tools_sha256")
+        or activation_session.get("environment_sha256")
+        != expected_environment_sha256
+        or any(
+            not isinstance(activation_session.get(field), str)
+            or not activation_session.get(field)
+            for field in (
+                "client_started_at",
+                "relay_started_at",
+                "editor_started_at",
+                "captured_at",
+            )
+        )
+        or any(
+            re.fullmatch(
+                r"[0-9a-f]{64}",
+                str(activation_session.get(field)),
+            )
+            is None
+            for field in (
+                "session_id_sha256",
+                "connection_record_sha256",
+                "fd_graph_sha256",
+            )
+        )
+        or activation_session.get("connection_record_sha256")
+        != bridge.get("connection_file_sha256")
+        or activation_session.get("session_id_sha256")
+        != wp0001_session_identity_sha256(
+            route,
+            runtime,
+            activation_session.get("fd_graph_sha256"),
+        )
+        or activation_session.get("approval_history_absent_before_connection")
+        is not True
+        or activation_session.get("creator_approved") is not True
+        or activation_session.get("publisher_fallback_used") is not False
+        or activation_session.get("connected") is not True
+        or activation_session.get("capture_complete") is not True
+        or activation_session.get("model_prompt_count") != 0
+        or activation_session.get("unity_tool_call_count") != 0
+        or activation_session.get("receipt_must_be_reissued_on_drift") is not True
+    ):
+        codes.add("wp0001-mcp-activation-session-invalid")
+    activation_capture = parse_datetime(activation_session.get("captured_at"))
+    activation_starts = [
+        parse_datetime(activation_session.get(field))
+        for field in (
+            "client_started_at",
+            "relay_started_at",
+            "editor_started_at",
+        )
+    ]
+    if (
+        activation_capture is None
+        or any(start is None for start in activation_starts)
+        or any(
+            isinstance(start, datetime) and start > activation_capture
+            for start in activation_starts
+        )
+        or (
+            isinstance(activation_starts[0], datetime)
+            and activation_capture - activation_starts[0] > timedelta(minutes=15)
+        )
+        or (
+            isinstance(activation_starts[1], datetime)
+            and activation_capture - activation_starts[1] > timedelta(minutes=15)
+        )
+        or (
+            handshake_capture is not None
+            and activation_capture <= handshake_capture
+        )
+    ):
+        codes.add("wp0001-mcp-activation-session-stale")
+
+    if (
+        controls.get("pending_execution_gap_acknowledged") is not True
+        or controls.get("hidden_tool_gap_acknowledged") is not True
+        or controls.get("os_quarantine_authoritative") is not True
+    ):
+        codes.add("wp0001-mcp-stock-gap-unacknowledged")
+    mitigation = controls.get("mitigation_mode")
+    tcp_listener_count = controls.get("tcp_listener_count")
+    wildcard_listener_count = controls.get("wildcard_listener_count")
+    non_loopback_probes = controls.get("non_loopback_probe_count")
+    non_loopback_successes = controls.get(
+        "non_loopback_probe_success_count"
+    )
+    loopback_probes = controls.get("loopback_probe_count")
+    loopback_successes = controls.get("loopback_probe_success_count")
+    approved_egress_probes = controls.get("approved_egress_probe_count")
+    approved_egress_successes = controls.get(
+        "approved_egress_probe_success_count"
+    )
+    unapproved_egress_probes = controls.get(
+        "unapproved_egress_probe_count"
+    )
+    unapproved_egress_successes = controls.get(
+        "unapproved_egress_probe_success_count"
+    )
+    probe_targets = controls.get("probe_targets")
+    expected_loopback_target = (
+        f"unix://{runtime.get('ambient_shared_temp_write_exceptions', [None])[0]}"
+        if isinstance(
+            runtime.get("ambient_shared_temp_write_exceptions"), list
+        )
+        and len(runtime.get("ambient_shared_temp_write_exceptions")) == 1
+        else None
+    )
+    if (
+        not isinstance(probe_targets, dict)
+        or set(probe_targets)
+        != {
+            "non_loopback_listener",
+            "loopback_control",
+            "approved_egress",
+            "unapproved_egress",
+        }
+        or re.fullmatch(
+            r"external-observer://[0-9a-f]{64}",
+            str(probe_targets.get("non_loopback_listener")),
+        )
+        is None
+        or probe_targets.get("non_loopback_listener")
+        == f"external-observer://{'0' * 64}"
+        or probe_targets.get("loopback_control")
+        != expected_loopback_target
+        or probe_targets.get("approved_egress")
+        != "https://packages.unity.com/"
+        or probe_targets.get("unapproved_egress")
+        != "https://example.com/"
+        or controls.get("probe_targets_sha256")
+        != canonical_json_sha256(probe_targets)
+    ):
+        codes.add("wp0001-mcp-network-policy-unproven")
+    if (
+        controls.get("network_policy_enforced") is not True
+        or controls.get("network_policy_sha256")
+        != (
+            approved_environment.get("network_policy_sha256")
+            if isinstance(approved_environment, dict)
+            else None
+        )
+        or controls.get("boot_session_sha256")
+        != runtime.get("boot_session_sha256")
+        or controls.get("non_loopback_reachable_listener_count") != 0
+        or non_loopback_successes != 0
+        or not isinstance(tcp_listener_count, int)
+        or isinstance(tcp_listener_count, bool)
+        or not isinstance(wildcard_listener_count, int)
+        or isinstance(wildcard_listener_count, bool)
+        or wildcard_listener_count > tcp_listener_count
+    ):
+        codes.add("wp0001-mcp-nonloopback-reachable")
+    if mitigation == "persistent-relay-suppressed":
+        if (
+            controls.get("persistent_relay_process_count") != 0
+            or tcp_listener_count != 0
+            or wildcard_listener_count != 0
+        ):
+            codes.add("wp0001-mcp-persistent-relay-not-suppressed")
+    elif mitigation == "os-network-denied":
+        pass
+    else:
+        codes.add("wp0001-mcp-mitigation-mode-invalid")
+    probe_counts = (
+        non_loopback_probes,
+        loopback_probes,
+        approved_egress_probes,
+        unapproved_egress_probes,
+    )
+    if (
+        any(
+            not isinstance(count, int)
+            or isinstance(count, bool)
+            or count < 1
+            for count in probe_counts
+        )
+        or loopback_successes != loopback_probes
+        or approved_egress_successes != approved_egress_probes
+        or unapproved_egress_successes != 0
+    ):
+        codes.add("wp0001-mcp-network-policy-unproven")
+    network_capture = parse_datetime(controls.get("captured_at"))
+    if (
+        network_capture is None
+        or activation_capture is None
+        or network_capture > activation_capture
+        or activation_capture - network_capture > timedelta(minutes=15)
+        or any(
+            isinstance(start, datetime) and start > network_capture
+            for start in activation_starts
+        )
+    ):
+        codes.add("wp0001-mcp-network-policy-unproven")
+
+    if (
+        entitlement.get("eligible_assigned_seat_verified") is not True
+        or entitlement.get("same_organization_project_linkage_verified") is not True
+        or entitlement.get("license_secret_material_copied") is not False
+    ):
+        codes.add("wp0001-unity-entitlement-linkage-invalid")
+    if (
+        identity.get("company") != "LocalFoundationLab"
+        or identity.get("product") != "SashaAtomicLandPirate_WP0001"
+        or identity.get("bundle_id")
+        != "local.foundation.sashaatomiclandpirate.wp0001"
+        or identity.get("dev_profile") != "wp0001-dev-v1"
+        or identity.get("test_profile") != "wp0001-test-v1"
+        or identity.get("temporary_non_shipping") is not True
+        or identity.get("prior_root_discovery_forbidden") is not True
+    ):
+        codes.add("wp0001-project-identity-invalid")
+    return sorted(codes)
+
+
+def wp0001_seed_tree_policy_codes(tree_listing: bytes | None) -> list[str]:
+    """Reject an empty, scratch-bearing, symlinked, or submodule project seed."""
+    if not tree_listing:
+        return ["wp0001-project-seed-tree-empty"]
+    codes: set[str] = set()
+    scratch_roots = tuple(
+        item.rstrip("/") for item in WP0001_UNITY_EPHEMERAL_SCRATCH_PATHS
+    )
+    for raw_entry in tree_listing.split(b"\0"):
+        if not raw_entry:
+            continue
+        try:
+            metadata, raw_path = raw_entry.split(b"\t", 1)
+            mode, object_type, _object_id = metadata.decode("ascii").split(" ", 2)
+            path = raw_path.decode("utf-8")
+        except (ValueError, UnicodeDecodeError):
+            codes.add("wp0001-project-seed-tree-unparseable")
+            continue
+        if mode == "120000":
+            codes.add("wp0001-project-seed-symlink")
+        if object_type == "commit" or mode == "160000":
+            codes.add("wp0001-project-seed-submodule")
+        if any(path == root or path.startswith(f"{root}/") for root in scratch_roots):
+            codes.add("wp0001-project-seed-tracks-scratch")
+        if path.startswith("Game/Assets/") and path not in {
+            "Game/Assets/.gitkeep",
+            "Game/Assets/.keep",
+        }:
+            codes.add("wp0001-project-seed-assets-not-empty")
+        if path.startswith("Game/Packages/") and path not in {
+            "Game/Packages/manifest.json",
+            "Game/Packages/packages-lock.json",
+        }:
+            codes.add("wp0001-project-seed-embedded-package")
+        if not (
+            path.startswith("Game/Packages/")
+            or path.startswith("Game/ProjectSettings/")
+            or path in {"Game/Assets/.gitkeep", "Game/Assets/.keep"}
+        ):
+            codes.add("wp0001-project-seed-unexpected-path")
+    return sorted(codes)
+
+
+def wp0001_project_seed_content(
+    base_commit: str,
+    toolchain_profile: object,
+) -> tuple[dict, list[str]]:
+    """Read the protected Game seed and derive the exact facts evidence must bind."""
+    codes: set[str] = set()
+    profile = toolchain_profile if isinstance(toolchain_profile, dict) else {}
+    required_paths = (
+        "Game/Packages/manifest.json",
+        "Game/Packages/packages-lock.json",
+        "Game/ProjectSettings/ProjectSettings.asset",
+        "Game/ProjectSettings/ProjectVersion.txt",
+    )
+    blobs = {
+        path: git_repo_blob(base_commit, path)
+        for path in required_paths
+    }
+    if any(blob is None for blob in blobs.values()):
+        codes.add("wp0001-project-seed-required-file-missing")
+
+    project_version_text = ""
+    project_version_blob = blobs["Game/ProjectSettings/ProjectVersion.txt"]
+    if project_version_blob is not None:
+        try:
+            project_version_text = project_version_blob.decode("utf-8")
+        except UnicodeDecodeError:
+            codes.add("wp0001-project-seed-project-version-invalid")
+    editor_version = profile.get("editor_version")
+    editor_changeset = profile.get("editor_changeset")
+    if (
+        f"m_EditorVersion: {editor_version}" not in project_version_text
+        or f"m_EditorVersionWithRevision: {editor_version} ({editor_changeset})"
+        not in project_version_text
+    ):
+        codes.add("wp0001-project-seed-project-version-invalid")
+
+    def parse_seed_json(path: str) -> dict:
+        raw = blobs[path]
+        if raw is None:
+            return {}
+        parsed, parse_errors = load_json_bytes(raw, path)
+        if parse_errors or not isinstance(parsed, dict):
+            codes.add("wp0001-project-seed-package-json-invalid")
+            return {}
+        return parsed
+
+    package_manifest = parse_seed_json("Game/Packages/manifest.json")
+    package_lock = parse_seed_json("Game/Packages/packages-lock.json")
+    dependencies = (
+        package_manifest.get("dependencies")
+        if isinstance(package_manifest.get("dependencies"), dict)
+        else {}
+    )
+    lock_dependencies = (
+        package_lock.get("dependencies")
+        if isinstance(package_lock.get("dependencies"), dict)
+        else {}
+    )
+    expected_packages = {
+        "com.unity.ai.assistant": profile.get("assistant_package_version"),
+        "com.unity.render-pipelines.universal": profile.get("resolved_urp_version"),
+        "com.unity.test-framework": profile.get("resolved_test_framework_version"),
+    }
+    if (
+        package_manifest.get("enableLockFile") is not True
+        or package_manifest.get("resolutionStrategy") != "lowest"
+    ):
+        codes.add("wp0001-project-seed-lock-policy-invalid")
+    allowed_manifest_keys = {
+        "dependencies",
+        "enableLockFile",
+        "resolutionStrategy",
+        "testables",
+        "useSatSolver",
+    }
+    if set(package_manifest) - allowed_manifest_keys:
+        codes.add("wp0001-project-seed-package-source-invalid")
+    registry_version_pattern = re.compile(
+        r"[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?"
+    )
+    for package_name, version in dependencies.items():
+        if (
+            not isinstance(package_name, str)
+            or not package_name.startswith("com.unity.")
+            or not isinstance(version, str)
+            or registry_version_pattern.fullmatch(version) is None
+        ):
+            codes.add("wp0001-project-seed-package-source-invalid")
+    testables = package_manifest.get("testables", [])
+    if not isinstance(testables, list):
+        codes.add("wp0001-project-seed-package-source-invalid")
+        testables = []
+    if set(testables) - set(dependencies):
+        codes.add("wp0001-project-seed-package-source-invalid")
+    if set(dependencies) - set(lock_dependencies):
+        codes.add("wp0001-project-seed-package-lock-incomplete")
+    for package_name, lock_record in lock_dependencies.items():
+        if (
+            not isinstance(package_name, str)
+            or not package_name.startswith("com.unity.")
+            or not isinstance(lock_record, dict)
+            or lock_record.get("source") not in {"registry", "builtin"}
+            or not isinstance(lock_record.get("depth"), int)
+            or isinstance(lock_record.get("depth"), bool)
+            or lock_record.get("depth", -1) < 0
+            or not isinstance(lock_record.get("version"), str)
+            or registry_version_pattern.fullmatch(lock_record["version"]) is None
+        ):
+            codes.add("wp0001-project-seed-package-source-invalid")
+            continue
+        lock_url = lock_record.get("url")
+        if lock_url not in {None, "https://packages.unity.com"}:
+            codes.add("wp0001-project-seed-package-source-invalid")
+        transitive = lock_record.get("dependencies", {})
+        if not isinstance(transitive, dict):
+            codes.add("wp0001-project-seed-package-source-invalid")
+            continue
+        for transitive_name, transitive_version in transitive.items():
+            if (
+                not isinstance(transitive_name, str)
+                or not transitive_name.startswith("com.unity.")
+                or not isinstance(transitive_version, str)
+                or registry_version_pattern.fullmatch(transitive_version) is None
+            ):
+                codes.add("wp0001-project-seed-package-source-invalid")
+    for package_name, expected_version in expected_packages.items():
+        lock_record = lock_dependencies.get(package_name)
+        if (
+            dependencies.get(package_name) != expected_version
+            or not isinstance(lock_record, dict)
+            or lock_record.get("version") != expected_version
+        ):
+            codes.add("wp0001-project-seed-package-version-mismatch")
+
+    project_settings_text = ""
+    project_settings_blob = blobs["Game/ProjectSettings/ProjectSettings.asset"]
+    if project_settings_blob is not None:
+        try:
+            project_settings_text = project_settings_blob.decode("utf-8")
+        except UnicodeDecodeError:
+            codes.add("wp0001-project-seed-identity-invalid")
+    for required_text in (
+        "companyName: LocalFoundationLab",
+        "productName: SashaAtomicLandPirate_WP0001",
+        "local.foundation.sashaatomiclandpirate.wp0001",
+    ):
+        if required_text not in project_settings_text:
+            codes.add("wp0001-project-seed-identity-invalid")
+
+    facts = {
+        "project_root": "Game",
+        "game_tree_sha256": None,
+        "required_seed_files": list(required_paths),
+        "editor_version": editor_version,
+        "editor_changeset": editor_changeset,
+        "assistant_package_version": profile.get("assistant_package_version"),
+        "resolved_urp_version": profile.get("resolved_urp_version"),
+        "resolved_test_framework_version": profile.get(
+            "resolved_test_framework_version"
+        ),
+        "manifest_dependencies": dependencies,
+        "resolved_package_lock": lock_dependencies,
+        "package_lock_enabled": package_manifest.get("enableLockFile"),
+        "resolution_strategy": package_manifest.get("resolutionStrategy"),
+        "company": "LocalFoundationLab",
+        "product": "SashaAtomicLandPirate_WP0001",
+        "bundle_id": "local.foundation.sashaatomiclandpirate.wp0001",
+        "creator_attested_no_implementation": True,
+    }
+    return facts, sorted(codes)
+
+
+def apply_fixture_mutations(value: dict, mutations: object) -> dict:
+    """Apply simple dotted-path replacement mutations to an isolated JSON fixture."""
+    candidate = json.loads(json.dumps(value))
+    if not isinstance(mutations, list):
+        return candidate
+    for mutation in mutations:
+        if not isinstance(mutation, dict):
+            continue
+        path = mutation.get("path")
+        if not isinstance(path, str) or not path:
+            continue
+        parts = path.split(".")
+        current: object = candidate
+        for part in parts[:-1]:
+            if not isinstance(current, dict) or part not in current:
+                current = None
+                break
+            current = current[part]
+        if isinstance(current, dict):
+            current[parts[-1]] = mutation.get("value")
+    return candidate
+
+
+def validate_a1_wp0001_boundary_fixtures() -> list[str]:
+    errors: list[str] = []
+    fixture_path = (
+        ROOT / "governance" / "fixtures" / "a1-wp0001-boundary.fixtures.json"
+    )
+    if not fixture_path.is_file():
+        return ["WP-0001 A1 boundary fixtures are missing"]
+    fixture = load_json(fixture_path)
+    base_case = fixture.get("base_case")
+    cases = fixture.get("cases")
+    if not isinstance(base_case, dict) or not isinstance(cases, list) or not cases:
+        return [f"{fixture_path.relative_to(ROOT)} lacks base_case or cases"]
+    seen_ids: set[str] = set()
+    for case in cases:
+        if not isinstance(case, dict):
+            errors.append(f"{fixture_path.relative_to(ROOT)} has a non-object case")
+            continue
+        case_id = case.get("id")
+        if not isinstance(case_id, str) or not case_id:
+            errors.append(f"{fixture_path.relative_to(ROOT)} has a case without an ID")
+            continue
+        if case_id in seen_ids:
+            errors.append(f"duplicate WP-0001 A1 boundary fixture ID: {case_id}")
+        seen_ids.add(case_id)
+        candidate = apply_fixture_mutations(base_case, case.get("mutations"))
+        expected_codes = case.get("expected_codes")
+        if (
+            not isinstance(expected_codes, list)
+            or any(not isinstance(code, str) for code in expected_codes)
+            or len(expected_codes) != len(set(expected_codes))
+        ):
+            errors.append(f"{case_id} expected_codes must be a unique string array")
+            continue
+        actual_codes = a1_wp0001_boundary_codes(
+            candidate.get("repository"),
+            candidate.get("runtime_boundary"),
+            candidate.get("project_seed"),
+            candidate.get("unity_mcp_route"),
+            candidate.get("approved_toolchain"),
+            candidate.get("approved_environment"),
+            candidate.get("wp0001_toolchain_profile"),
+            candidate.get("activation_evidence"),
+            candidate.get("raw_capture_collectors"),
+            observed_seed_tree_sha256=case.get(
+                "observed_seed_tree_sha256",
+                candidate.get("project_seed", {}).get("git_tree_sha256"),
+            ),
+        )
+        if actual_codes != sorted(expected_codes):
+            errors.append(
+                f"{case_id} expected {sorted(expected_codes)} but produced {actual_codes}"
+            )
+    return errors
+
+
+def validate_repo_evidence_reference(
+    reference: object,
+    label: str,
+    *,
+    expected_path: str | None = None,
+    committed_blob: bytes | None = None,
+) -> tuple[Path | None, list[str]]:
+    errors: list[str] = []
+    if not isinstance(reference, dict):
+        return None, [f"{label} reference is missing or invalid"]
+    relative = reference.get("path")
+    if expected_path is not None and relative != expected_path:
+        errors.append(f"{label} must use {expected_path}")
+    path, path_error = safe_repo_path(relative, f"{label} path")
+    if path_error:
+        return None, errors + [path_error]
+    expected_hash = reference.get("sha256")
+    if (
+        not isinstance(expected_hash, str)
+        or re.fullmatch(r"[0-9a-f]{64}", expected_hash) is None
+    ):
+        errors.append(f"{label} lacks a raw SHA-256")
+        return path, errors
+    if committed_blob is not None:
+        actual_hash = hashlib.sha256(committed_blob).hexdigest()
+        if actual_hash != expected_hash:
+            errors.append(f"{label} committed bytes do not match its SHA-256")
+    elif path is None or not path.is_file():
+        errors.append(f"{label} evidence file is missing")
+    elif sha256_file(path) != expected_hash:
+        errors.append(f"{label} evidence file does not match its SHA-256")
+    return path, errors
+
+
+def validate_python_collector_source(
+    reference: object,
+    label: str,
+) -> list[str]:
+    path, errors = validate_repo_evidence_reference(reference, label)
+    if errors or path is None or not path.is_file():
+        return errors
+    try:
+        source = path.read_text(encoding="utf-8")
+        compile(source, str(path), "exec")
+    except (OSError, UnicodeDecodeError, SyntaxError):
+        return errors + [f"{label} is not valid Python source"]
+    if (
+        "def main(" not in source
+        or 'if __name__ == "__main__":' not in source
+        or len(
+            [
+                line
+                for line in source.splitlines()
+                if line.strip() and not line.lstrip().startswith("#")
+            ]
+        )
+        < 3
+    ):
+        errors.append(f"{label} is an inert or incomplete collector")
+    return errors
+
+
+def canonical_json_sha256(value: object) -> str:
+    return hashlib.sha256(
+        json.dumps(
+            value,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode("utf-8")
+    ).hexdigest()
+
+
+def _timestamps_within_one_second(left: object, right: object) -> bool:
+    left_time = parse_datetime(left)
+    right_time = parse_datetime(right)
+    return (
+        left_time is not None
+        and right_time is not None
+        and abs((left_time - right_time).total_seconds()) <= 1
+    )
+
+
+def _live_process_capture_matches(
+    observed: object,
+    expected: dict,
+    *,
+    executable_path_key: str,
+    executable_hash_key: str,
+    environment: dict,
+) -> bool:
+    if not isinstance(observed, dict):
+        return False
+    expected_keys = {
+        "pid",
+        "parent_pid",
+        "uid",
+        "started_at",
+        "executable_path",
+        "executable_sha256",
+        "executable_regular",
+        "executable_symlink",
+        "cwd",
+        "arguments_sha256",
+        "process_birth_id_sha256",
+        "signing_identity",
+        "inspection_error",
+    }
+    expected_keys.add("environment")
+    if set(observed) != expected_keys:
+        return False
+    signing = observed.get("signing_identity")
+    expected_identity = expected.get("signing_identity")
+    executable_vnode = (
+        signing.get("executable_vnode")
+        if isinstance(signing, dict)
+        else None
+    )
+    vnode_matches = (
+        isinstance(executable_vnode, dict)
+        and set(executable_vnode)
+        == {
+            "device",
+            "inode",
+            "size",
+            "mtime_ns",
+            "stable_across_inspection",
+        }
+        and all(
+            isinstance(executable_vnode.get(key), int)
+            and not isinstance(executable_vnode.get(key), bool)
+            and executable_vnode.get(key) >= 0
+            for key in ("device", "inode", "size", "mtime_ns")
+        )
+        and executable_vnode.get("stable_across_inspection") is True
+    )
+    identity_matches = (
+        isinstance(signing, dict)
+        and code_identity_matches(signing, expected_identity)
+        and vnode_matches
+    )
+    try:
+        path_matches = (
+            Path(str(observed.get("executable_path"))).resolve(strict=False)
+            == Path(str(expected.get(executable_path_key))).resolve(strict=False)
+        )
+        cwd_matches = (
+            Path(str(observed.get("cwd"))).resolve(strict=False)
+            == Path(str(expected.get("cwd"))).resolve(strict=False)
+        )
+    except (OSError, RuntimeError):
+        path_matches = False
+        cwd_matches = False
+    observed_environment = observed.get("environment")
+    environment_names = (
+        observed_environment.get("names")
+        if isinstance(observed_environment, dict)
+        else None
+    )
+    environment_matches = (
+        isinstance(observed_environment, dict)
+        and set(observed_environment)
+        == {
+            "values",
+            "names",
+            "duplicate_names",
+            "names_sha256",
+            "absent_variable_names_present",
+        }
+        and observed_environment.get("values") == environment
+        and isinstance(environment_names, list)
+        and environment_names == sorted(set(environment_names))
+        and observed_environment.get("duplicate_names") == []
+        and observed_environment.get("names_sha256")
+        == canonical_json_sha256(environment_names)
+        == expected.get("environment_names_sha256")
+        and observed_environment.get("absent_variable_names_present") == []
+    )
+    return (
+        observed.get("inspection_error") is None
+        and observed.get("pid")
+        == expected.get(
+            "editor_pid" if executable_path_key == "editor_path" else "pid"
+        )
+        and observed.get("uid") == expected.get("principal_uid")
+        and _timestamps_within_one_second(
+            observed.get("started_at"),
+            expected.get("started_at"),
+        )
+        and observed.get("executable_regular") is True
+        and observed.get("executable_symlink") is False
+        and path_matches
+        and observed.get("executable_sha256")
+        == expected.get(executable_hash_key)
+        and cwd_matches
+        and observed.get("arguments_sha256")
+        == canonical_json_sha256(expected.get("arguments"))
+        and observed.get("process_birth_id_sha256")
+        == expected.get("process_birth_id_sha256")
+        and identity_matches
+        and environment_matches
+    )
+
+
+def _live_fd_graph_matches(
+    observed: object,
+    *,
+    client_pid: object,
+    relay_pid: object,
+    editor_pid: object,
+    reported_endpoint: object,
+    canonical_endpoint: object,
+) -> bool:
+    if (
+        not isinstance(observed, dict)
+        or set(observed) != {"graph", "sha256"}
+        or not isinstance(observed.get("graph"), dict)
+        or observed.get("sha256")
+        != canonical_json_sha256(observed.get("graph"))
+    ):
+        return False
+    graph = observed["graph"]
+    if set(graph) != {
+        "schema_version",
+        "endpoint",
+        "channels",
+        "processes",
+        "residuals",
+    } or graph.get("schema_version") != 1 or graph.get("residuals") != []:
+        return False
+    endpoint = graph.get("endpoint")
+    accepted_paths = {
+        value
+        for value in (reported_endpoint, canonical_endpoint)
+        if isinstance(value, str)
+    }
+    if (
+        not isinstance(endpoint, dict)
+        or set(endpoint)
+        != {
+            "canonical_path",
+            "canonical_path_sha256",
+            "accepted_path_sha256s",
+        }
+        or endpoint.get("canonical_path") != canonical_endpoint
+        or endpoint.get("canonical_path_sha256")
+        != hashlib.sha256(
+            str(canonical_endpoint).encode(
+                "utf-8",
+                errors="surrogateescape",
+            )
+        ).hexdigest()
+        or endpoint.get("accepted_path_sha256s")
+        != sorted(
+            hashlib.sha256(
+                value.encode("utf-8", errors="surrogateescape")
+            ).hexdigest()
+            for value in accepted_paths
+        )
+    ):
+        return False
+    channels = graph.get("channels")
+    if (
+        not isinstance(channels, dict)
+        or set(channels)
+        != {
+            "editor_relay_unix",
+            "client_relay_stdin",
+            "client_relay_stdout",
+        }
+    ):
+        return False
+    channel_specs = {
+        "editor_relay_unix": {
+            "hash_key": "address_sha256",
+            "fd_keys": ("editor_fd", "relay_fd"),
+        },
+        "client_relay_stdin": {
+            "hash_key": "address_pair_sha256",
+            "fd_keys": ("client_fd", "relay_fd"),
+        },
+        "client_relay_stdout": {
+            "hash_key": "address_pair_sha256",
+            "fd_keys": ("client_fd", "relay_fd"),
+        },
+    }
+    channel_hashes: dict[str, str] = {}
+    for name, spec in channel_specs.items():
+        channel = channels.get(name)
+        expected_keys = {spec["hash_key"], *spec["fd_keys"]}
+        if (
+            not isinstance(channel, dict)
+            or set(channel) != expected_keys
+            or re.fullmatch(
+                r"[0-9a-f]{64}",
+                str(channel.get(spec["hash_key"])),
+            )
+            is None
+            or channel.get(spec["hash_key"]) == "0" * 64
+            or any(
+                not isinstance(channel.get(key), int)
+                or isinstance(channel.get(key), bool)
+                or channel.get(key) < 0
+                for key in spec["fd_keys"]
+            )
+        ):
+            return False
+        channel_hashes[name] = channel[spec["hash_key"]]
+    if (
+        len(set(channel_hashes.values())) != 3
+        or channels["client_relay_stdin"]["relay_fd"] != 0
+        or channels["client_relay_stdout"]["relay_fd"] != 1
+        or channels["client_relay_stdin"]["client_fd"]
+        == channels["client_relay_stdout"]["client_fd"]
+    ):
+        return False
+    processes = graph.get("processes")
+    expected_processes = [
+        ("client", client_pid),
+        ("editor", editor_pid),
+        ("relay", relay_pid),
+    ]
+    if not isinstance(processes, list) or len(processes) != 3:
+        return False
+    descriptors_by_role: dict[str, list[dict]] = {}
+    for process, (role, pid) in zip(
+        processes,
+        expected_processes,
+        strict=True,
+    ):
+        if (
+            not isinstance(process, dict)
+            or set(process)
+            != {
+                "role",
+                "pid",
+                "inspection_complete",
+                "inspection_error",
+                "descriptors",
+            }
+            or process.get("role") != role
+            or process.get("pid") != pid
+            or process.get("inspection_complete") is not True
+            or process.get("inspection_error") is not None
+            or not isinstance(process.get("descriptors"), list)
+            or not process.get("descriptors")
+        ):
+            return False
+        descriptors: list[dict] = process["descriptors"]
+        if any(
+            not isinstance(descriptor, dict)
+            or set(descriptor)
+            != {
+                "access",
+                "channel_address_sha256",
+                "fd",
+                "state",
+                "type",
+            }
+            or descriptor.get("access") not in {"r", "w", "u"}
+            or re.fullmatch(
+                r"[0-9a-f]{64}",
+                str(descriptor.get("channel_address_sha256")),
+            )
+            is None
+            or descriptor.get("channel_address_sha256") == "0" * 64
+            or not isinstance(descriptor.get("fd"), int)
+            or isinstance(descriptor.get("fd"), bool)
+            or descriptor.get("fd") < 0
+            or descriptor.get("state") not in {
+                "connected",
+                "listening",
+                "open",
+            }
+            or descriptor.get("type") not in {"pipe", "unix"}
+            for descriptor in descriptors
+        ):
+            return False
+        descriptors_by_role[role] = descriptors
+
+    def descriptor_present(
+        role: str,
+        *,
+        channel_hash: str,
+        fd: int,
+        descriptor_type: str,
+        access: str | None = None,
+    ) -> bool:
+        return any(
+            descriptor["channel_address_sha256"] == channel_hash
+            and descriptor["fd"] == fd
+            and descriptor["type"] == descriptor_type
+            and (access is None or descriptor["access"] == access)
+            for descriptor in descriptors_by_role[role]
+        )
+
+    unix = channels["editor_relay_unix"]
+    stdin = channels["client_relay_stdin"]
+    stdout = channels["client_relay_stdout"]
+    return (
+        descriptor_present(
+            "editor",
+            channel_hash=channel_hashes["editor_relay_unix"],
+            fd=unix["editor_fd"],
+            descriptor_type="unix",
+        )
+        and descriptor_present(
+            "relay",
+            channel_hash=channel_hashes["editor_relay_unix"],
+            fd=unix["relay_fd"],
+            descriptor_type="unix",
+        )
+        and descriptor_present(
+            "client",
+            channel_hash=channel_hashes["client_relay_stdin"],
+            fd=stdin["client_fd"],
+            descriptor_type="pipe",
+            access="w",
+        )
+        and descriptor_present(
+            "relay",
+            channel_hash=channel_hashes["client_relay_stdin"],
+            fd=0,
+            descriptor_type="pipe",
+            access="r",
+        )
+        and descriptor_present(
+            "client",
+            channel_hash=channel_hashes["client_relay_stdout"],
+            fd=stdout["client_fd"],
+            descriptor_type="pipe",
+            access="r",
+        )
+        and descriptor_present(
+            "relay",
+            channel_hash=channel_hashes["client_relay_stdout"],
+            fd=1,
+            descriptor_type="pipe",
+            access="w",
+        )
+    )
+
+
+def validate_wp0001_mcp_live_capture(
+    document: object,
+    *,
+    route: dict,
+    runtime: dict,
+    route_contract_sha256: str,
+    protected_config_sha256: str | None,
+) -> list[str]:
+    """Validate the fixed, read-only OS-derived MCP route capture."""
+    errors: list[str] = []
+    if not isinstance(document, dict):
+        return ["MCP live capture must be an object"]
+    if set(document) != {
+        "schema_version",
+        "validator_version",
+        "packet_id",
+        "captured_at",
+        "result",
+        "checks",
+        "observed",
+    }:
+        errors.append("MCP live capture has unexpected or missing top-level fields")
+    checks = document.get("checks")
+    observed = document.get("observed")
+    if (
+        document.get("schema_version") != 1
+        or document.get("validator_version")
+        != WP0001_MCP_LIVE_VALIDATOR_VERSION
+        or document.get("packet_id") != "WP-0001"
+        or parse_datetime(document.get("captured_at")) is None
+        or document.get("result") != "PASS"
+        or not isinstance(checks, dict)
+        or set(checks) != WP0001_MCP_LIVE_CHECKS
+        or any(value is not True for value in checks.values())
+        or not isinstance(observed, dict)
+    ):
+        errors.append("MCP live capture did not pass the exact verifier checks")
+        return errors
+    expected_observed_keys = {
+        "boot_session_sha256",
+        "route_contract_sha256",
+        "client",
+        "relay",
+        "bridge",
+        "runtime_config_sha256",
+        "protected_config_sha256",
+        "environment_sha256",
+        "enabled_tools_sha256",
+        "effective_server_inventory",
+        "effective_server_inventory_sha256",
+        "connection_file",
+        "endpoint",
+        "fd_graph",
+    }
+    if set(observed) != expected_observed_keys:
+        errors.append("MCP live capture observed inventory is not exact")
+        return errors
+    client = route.get("client") if isinstance(route.get("client"), dict) else {}
+    relay = route.get("relay") if isinstance(route.get("relay"), dict) else {}
+    bridge = route.get("bridge") if isinstance(route.get("bridge"), dict) else {}
+    policy = (
+        route.get("codex_policy")
+        if isinstance(route.get("codex_policy"), dict)
+        else {}
+    )
+    handshake = (
+        route.get("handshake")
+        if isinstance(route.get("handshake"), dict)
+        else {}
+    )
+    session = (
+        route.get("activation_session")
+        if isinstance(route.get("activation_session"), dict)
+        else {}
+    )
+    guard = (
+        policy.get("client_environment_guard")
+        if isinstance(policy.get("client_environment_guard"), dict)
+        else {}
+    )
+    environment_values = {
+        **(
+            policy.get("environment_bindings")
+            if isinstance(policy.get("environment_bindings"), dict)
+            else {}
+        ),
+        **{
+            key: guard.get(key)
+            for key in (
+                "CODEX_HOME",
+                "XDG_CONFIG_HOME",
+                "XDG_CACHE_HOME",
+                "XDG_DATA_HOME",
+                "GIT_CONFIG_NOSYSTEM",
+                "GIT_CONFIG_GLOBAL",
+                "GIT_TERMINAL_PROMPT",
+            )
+        },
+    }
+    if not _live_process_capture_matches(
+        observed.get("client"),
+        client,
+        executable_path_key="path",
+        executable_hash_key="sha256",
+        environment=environment_values,
+    ):
+        errors.append("MCP live capture client facts differ from the boundary")
+    relay_observed = observed.get("relay")
+    relay_process_observed = (
+        {key: value for key, value in relay_observed.items() if key != "package_copy"}
+        if isinstance(relay_observed, dict)
+        else relay_observed
+    )
+    if not _live_process_capture_matches(
+        relay_process_observed,
+        {**relay, "cwd": client.get("cwd")},
+        executable_path_key="path",
+        executable_hash_key="sha256",
+        environment=environment_values,
+    ):
+        errors.append("MCP live capture relay facts differ from the boundary")
+    package_copy = (
+        relay_observed.get("package_copy")
+        if isinstance(relay_observed, dict)
+        else None
+    )
+    if (
+        not isinstance(package_copy, dict)
+        or package_copy.get("path") != relay.get("package_copy_path")
+        or package_copy.get("sha256") != relay.get("package_copy_sha256")
+        or package_copy.get("regular") is not True
+        or package_copy.get("symlink") is not False
+    ):
+        errors.append("MCP live capture relay package copy is invalid")
+    if not _live_process_capture_matches(
+        observed.get("bridge"),
+        bridge,
+        executable_path_key="editor_path",
+        executable_hash_key="editor_sha256",
+        environment=(
+            policy.get("environment_bindings")
+            if isinstance(policy.get("environment_bindings"), dict)
+            else {}
+        ),
+    ):
+        errors.append("MCP live capture Editor facts differ from the boundary")
+    policy_evidence = (
+        policy.get("evidence") if isinstance(policy.get("evidence"), dict) else {}
+    )
+    expected_runtime_hash = policy_evidence.get("sha256")
+    expected_environment_hash = policy.get("environment_sha256")
+    expected_allowlist_hash = policy.get("enabled_tools_sha256")
+    expected_inventory_hash = policy.get(
+        "effective_server_inventory_sha256"
+    )
+    candidate_root = (
+        route.get("_candidate_root")
+        if isinstance(route.get("_candidate_root"), str)
+        else None
+    )
+    if candidate_root is None:
+        client_cwd = client.get("cwd")
+        candidate_root = client_cwd if isinstance(client_cwd, str) else None
+    expected_effective_inventory = (
+        [
+            {
+                "layer": "candidate",
+                "path": f"{candidate_root}/.codex/config.toml",
+                "sha256": protected_config_sha256,
+                "top_level_keys": ["mcp_servers"],
+                "servers": [{"enabled": False, "name": "unity_mcp"}],
+            },
+            {
+                "layer": "runtime",
+                "path": policy.get("runtime_config_path"),
+                "sha256": expected_runtime_hash,
+                "top_level_keys": [
+                    "approval_policy",
+                    "mcp_servers",
+                ],
+                "servers": [
+                    {
+                        "enabled": True,
+                        "name": policy.get("server_name"),
+                    }
+                ],
+            },
+        ]
+        if candidate_root is not None
+        else None
+    )
+    if (
+        observed.get("boot_session_sha256")
+        != runtime.get("boot_session_sha256")
+        or observed.get("route_contract_sha256")
+        != route_contract_sha256
+        or observed.get("runtime_config_sha256") != expected_runtime_hash
+        or handshake.get("runtime_config_sha256") != expected_runtime_hash
+        or session.get("runtime_config_sha256") != expected_runtime_hash
+        or observed.get("environment_sha256") != expected_environment_hash
+        or client.get("environment_sha256") != expected_environment_hash
+        or handshake.get("environment_sha256") != expected_environment_hash
+        or session.get("environment_sha256") != expected_environment_hash
+        or observed.get("enabled_tools_sha256") != expected_allowlist_hash
+        or handshake.get("enabled_tools_sha256") != expected_allowlist_hash
+        or session.get("enabled_tools_sha256") != expected_allowlist_hash
+        or observed.get("effective_server_inventory_sha256")
+        != expected_inventory_hash
+        or client.get("server_inventory_sha256")
+        != expected_inventory_hash
+        or handshake.get("server_inventory_sha256")
+        != expected_inventory_hash
+        or session.get("server_inventory_sha256")
+        != expected_inventory_hash
+        or canonical_json_sha256(
+            observed.get("effective_server_inventory")
+        )
+        != expected_inventory_hash
+        or observed.get("effective_server_inventory")
+        != expected_effective_inventory
+        or observed.get("protected_config_sha256")
+        != protected_config_sha256
+    ):
+        errors.append("MCP live capture hash bindings differ from the boundary")
+    connection = observed.get("connection_file")
+    expected_connection_record = {
+        "connection_type": bridge.get("discovery_connection_type"),
+        "connection_path": bridge.get("endpoint"),
+        "editor_pid": bridge.get("editor_pid"),
+        "project_path": bridge.get("project_path"),
+        "protocol_version": bridge.get("protocol_version"),
+    }
+    if (
+        not isinstance(connection, dict)
+        or set(connection) != {"path", "sha256", "error", "record"}
+        or connection.get("path") != bridge.get("connection_file")
+        or connection.get("sha256") != bridge.get("connection_file_sha256")
+        or connection.get("error") is not None
+        or not isinstance(connection.get("record"), dict)
+        or {
+            key: connection["record"].get(key)
+            for key in expected_connection_record
+        }
+        != expected_connection_record
+        or set(connection["record"])
+        != {
+            "connection_type",
+            "connection_path",
+            "created_date",
+            "editor_pid",
+            "project_path",
+            "protocol_version",
+        }
+        or parse_datetime(connection["record"].get("created_date")) is None
+    ):
+        errors.append("MCP live capture connection record is invalid")
+    endpoint = observed.get("endpoint")
+    expected_canonical_endpoint = (
+        runtime.get("ambient_shared_temp_write_exceptions", [None])[0]
+        if isinstance(
+            runtime.get("ambient_shared_temp_write_exceptions"), list
+        )
+        and len(runtime.get("ambient_shared_temp_write_exceptions")) == 1
+        else None
+    )
+    if (
+        not isinstance(endpoint, dict)
+        or set(endpoint)
+        != {
+            "path",
+            "canonical_path",
+            "exists",
+            "is_socket",
+            "is_symlink",
+            "uid",
+            "mode",
+        }
+        or endpoint.get("path") != bridge.get("endpoint")
+        or endpoint.get("canonical_path") != expected_canonical_endpoint
+        or endpoint.get("exists") is not True
+        or endpoint.get("is_socket") is not True
+        or endpoint.get("is_symlink") is not False
+        or endpoint.get("uid") != bridge.get("endpoint_owner_uid")
+        or endpoint.get("mode") != bridge.get("endpoint_mode")
+    ):
+        errors.append("MCP live capture endpoint is invalid")
+    if not _live_fd_graph_matches(
+        observed.get("fd_graph"),
+        client_pid=client.get("pid"),
+        relay_pid=relay.get("pid"),
+        editor_pid=bridge.get("editor_pid"),
+        reported_endpoint=bridge.get("endpoint"),
+        canonical_endpoint=expected_canonical_endpoint,
+    ):
+        errors.append("MCP live capture FD graph is invalid")
+    fd_graph = observed.get("fd_graph")
+    observed_fd_graph_sha256 = (
+        fd_graph.get("sha256") if isinstance(fd_graph, dict) else None
+    )
+    if (
+        session.get("connection_record_sha256")
+        != bridge.get("connection_file_sha256")
+        or session.get("fd_graph_sha256")
+        != observed_fd_graph_sha256
+        or session.get("session_id_sha256")
+        != wp0001_session_identity_sha256(
+            route,
+            runtime,
+            observed_fd_graph_sha256,
+        )
+    ):
+        errors.append("MCP live capture session identity is invalid")
+    return errors
+
+
+def validate_wp0001_policy_attachment_capture(
+    document: object,
+    *,
+    expected_facts: dict,
+    expected_collector: dict | None,
+) -> list[str]:
+    """Validate exact process-bound sandbox/network attachment evidence."""
+    errors: list[str] = []
+    if not isinstance(document, dict):
+        return ["policy-attachment raw capture must be an object"]
+    if set(document) != {
+        "schema_version",
+        "capture_kind",
+        "packet_id",
+        "captured_at",
+        "collector",
+        "command",
+        "result",
+        "facts",
+        "subjects",
+        "capture_complete",
+        "secret_material_included",
+    }:
+        errors.append(
+            "policy-attachment raw capture has unexpected or missing fields"
+        )
+    collector = document.get("collector")
+    if (
+        document.get("schema_version") != 1
+        or document.get("capture_kind") != "policy-attachment"
+        or document.get("packet_id") != "WP-0001"
+        or parse_datetime(document.get("captured_at")) is None
+        or document.get("result") != "pass"
+        or document.get("facts") != expected_facts
+        or document.get("captured_at") != expected_facts.get("captured_at")
+        or document.get("capture_complete") is not True
+        or document.get("secret_material_included") is not False
+        or not isinstance(collector, dict)
+        or set(collector) != {"name", "version", "path", "sha256"}
+        or any(
+            not isinstance(collector.get(key), str) or not collector.get(key)
+            for key in ("name", "version")
+        )
+        or {
+            "path": collector.get("path"),
+            "sha256": collector.get("sha256"),
+        }
+        != expected_collector
+        or document.get("command")
+        != [
+            "/usr/bin/python3",
+            (
+                expected_collector.get("path")
+                if isinstance(expected_collector, dict)
+                else None
+            ),
+            "policy-attachment",
+        ]
+    ):
+        errors.append("policy-attachment raw capture metadata is invalid")
+    if isinstance(expected_collector, dict):
+        collector_errors = validate_python_collector_source(
+            expected_collector,
+            "policy-attachment raw collector",
+        )
+        errors.extend(collector_errors)
+    expected_subjects = [
+        (
+            "client",
+            expected_facts.get("client_pid"),
+            expected_facts.get("client_process_birth_id_sha256"),
+        ),
+        (
+            "relay",
+            expected_facts.get("relay_pid"),
+            expected_facts.get("relay_process_birth_id_sha256"),
+        ),
+        (
+            "editor",
+            expected_facts.get("editor_pid"),
+            expected_facts.get("editor_process_birth_id_sha256"),
+        ),
+    ]
+    subjects = document.get("subjects")
+    if not isinstance(subjects, list) or len(subjects) != 3:
+        return errors + [
+            "policy-attachment raw capture lacks exact process subjects"
+        ]
+    for index, (subject, expected) in enumerate(
+        zip(subjects, expected_subjects, strict=True)
+    ):
+        role, pid, birth_id = expected
+        if (
+            not isinstance(subject, dict)
+            or set(subject)
+            != {
+                "sequence",
+                "role",
+                "pid",
+                "process_birth_id_sha256",
+                "principal_uid",
+                "sandbox_policy_sha256",
+                "network_policy_sha256",
+                "sandbox_attachment_mode",
+                "network_attachment_mode",
+                "sandbox_attachment_handle_sha256",
+                "network_attachment_handle_sha256",
+                "sandbox_attached",
+                "network_attached",
+                "record_sha256",
+            }
+            or subject.get("sequence") != index
+            or subject.get("role") != role
+            or subject.get("pid") != pid
+            or subject.get("process_birth_id_sha256") != birth_id
+            or subject.get("principal_uid")
+            != expected_facts.get("principal_uid")
+            or subject.get("sandbox_policy_sha256")
+            != expected_facts.get("sandbox_policy_sha256")
+            or subject.get("network_policy_sha256")
+            != expected_facts.get("network_policy_sha256")
+            or subject.get("sandbox_attachment_mode")
+            not in {
+                "kernel-sandbox-query",
+                "read-only-mount-and-path-policy-query",
+            }
+            or subject.get("network_attachment_mode")
+            not in {
+                "kernel-network-policy-query",
+                "uid-bound-pf-anchor-query",
+            }
+            or any(
+                re.fullmatch(r"[0-9a-f]{64}", str(subject.get(key)))
+                is None
+                or subject.get(key) == "0" * 64
+                for key in (
+                    "sandbox_attachment_handle_sha256",
+                    "network_attachment_handle_sha256",
+                )
+            )
+            or subject.get("sandbox_attached") is not True
+            or subject.get("network_attached") is not True
+            or subject.get("record_sha256")
+            != canonical_json_sha256(
+                {
+                    key: value
+                    for key, value in subject.items()
+                    if key != "record_sha256"
+                }
+            )
+        ):
+            errors.append(
+                f"policy-attachment subject {index} is invalid"
+            )
+    return errors
+
+
+def validate_wp0001_protocol_raw_capture(
+    document: object,
+    *,
+    expected_kind: str,
+    expected_facts: dict,
+    enabled_tools: list[str] | None = None,
+    expected_collector: dict | None = None,
+) -> list[str]:
+    """Validate non-empty raw protocol/session/network captures."""
+    errors: list[str] = []
+    capture_kind_by_record = {
+        "clean-handshake": "clean-handshake-raw",
+        "activation-session": "activation-session-live",
+        "network-observation": "network-probes",
+    }
+    capture_kind = capture_kind_by_record.get(expected_kind)
+    if capture_kind is None:
+        return [f"unsupported raw capture kind: {expected_kind}"]
+    if not isinstance(document, dict):
+        return [f"{expected_kind} raw capture must be an object"]
+    common_keys = {
+        "schema_version",
+        "capture_kind",
+        "packet_id",
+        "captured_at",
+        "collector",
+        "command",
+        "result",
+        "facts",
+        "secret_material_included",
+    }
+    body_key = "probes" if expected_kind == "network-observation" else "events"
+    allowed_keys = common_keys | {body_key}
+    if expected_kind == "network-observation":
+        allowed_keys.add("listeners")
+    if set(document) != allowed_keys:
+        errors.append(f"{expected_kind} raw capture has unexpected or missing fields")
+    collector = document.get("collector")
+    if (
+        document.get("schema_version") != 1
+        or document.get("capture_kind") != capture_kind
+        or document.get("packet_id") != "WP-0001"
+        or parse_datetime(document.get("captured_at")) is None
+        or document.get("result") != "pass"
+        or document.get("facts") != expected_facts
+        or document.get("secret_material_included") is not False
+        or not isinstance(collector, dict)
+        or set(collector) != {"name", "version", "path", "sha256"}
+        or not all(
+            isinstance(collector.get(key), str) and collector.get(key)
+            for key in ("name", "version")
+        )
+        or re.fullmatch(r"[0-9a-f]{64}", str(collector.get("sha256"))) is None
+        or collector.get("sha256") == "0" * 64
+        or not isinstance(expected_collector, dict)
+        or {
+            "path": collector.get("path"),
+            "sha256": collector.get("sha256"),
+        }
+        != expected_collector
+        or document.get("command")
+        != [
+            "/usr/bin/python3",
+            (
+                expected_collector.get("path")
+                if isinstance(expected_collector, dict)
+                else None
+            ),
+            expected_kind,
+        ]
+    ):
+        errors.append(f"{expected_kind} raw capture metadata is invalid")
+    if isinstance(expected_collector, dict):
+        collector_errors = validate_python_collector_source(
+            expected_collector,
+            f"{expected_kind} raw collector",
+        )
+        errors.extend(collector_errors)
+    expected_capture_time = expected_facts.get("captured_at")
+    if (
+        isinstance(expected_capture_time, str)
+        and document.get("captured_at") != expected_capture_time
+    ):
+        errors.append(f"{expected_kind} raw capture time differs from its facts")
+
+    if expected_kind in {"clean-handshake", "activation-session"}:
+        events = document.get("events")
+        if not isinstance(events, list) or len(events) < 3:
+            return errors + [f"{expected_kind} raw capture has no protocol events"]
+        allowed_event_keys = {
+            "sequence",
+            "direction",
+            "event_type",
+            "method",
+            "request_id",
+            "tool_names",
+            "state",
+            "record_sha256",
+        }
+        methods: list[str] = []
+        inventories: list[list[str]] = []
+        states: set[str] = set()
+        for index, event in enumerate(events):
+            if (
+                not isinstance(event, dict)
+                or not set(event).issubset(allowed_event_keys)
+                or event.get("sequence") != index
+                or event.get("direction")
+                not in {
+                    "client-to-server",
+                    "server-to-client",
+                    "bridge",
+                    "creator",
+                    "collector",
+                }
+                or event.get("event_type")
+                not in {"request", "response", "notification", "state"}
+                or re.fullmatch(
+                    r"[0-9a-f]{64}",
+                    str(event.get("record_sha256")),
+                )
+                is None
+                or event.get("record_sha256") == "0" * 64
+                or event.get("record_sha256")
+                != canonical_json_sha256(
+                    {
+                        key: value
+                        for key, value in event.items()
+                        if key != "record_sha256"
+                    }
+                )
+            ):
+                errors.append(
+                    f"{expected_kind} raw capture event {index} is invalid"
+                )
+                continue
+            method = event.get("method")
+            if isinstance(method, str):
+                methods.append(method)
+                if method == "tools/call" or method.startswith("Unity_"):
+                    errors.append(
+                        f"{expected_kind} raw capture contains a Unity tool call"
+                    )
+            tool_names = event.get("tool_names")
+            if isinstance(tool_names, list):
+                if any(not isinstance(tool, str) for tool in tool_names):
+                    errors.append(
+                        f"{expected_kind} raw capture has an invalid tool inventory"
+                    )
+                else:
+                    inventories.append(tool_names)
+            state_value = event.get("state")
+            if isinstance(state_value, str):
+                states.add(state_value)
+        expected_inventory = enabled_tools if isinstance(enabled_tools, list) else []
+        tools_list_responses = [
+            event
+            for event in events
+            if isinstance(event, dict)
+            and event.get("method") == "tools/list"
+            and event.get("direction") == "server-to-client"
+            and event.get("event_type") == "response"
+            and event.get("tool_names") == expected_inventory
+        ]
+        tools_list_requests = [
+            event
+            for event in events
+            if isinstance(event, dict)
+            and event.get("method") == "tools/list"
+            and event.get("direction") == "client-to-server"
+            and event.get("event_type") == "request"
+        ]
+        if (
+            inventories != [expected_inventory]
+            or len(tools_list_responses) != 1
+            or len(tools_list_requests) != 1
+        ):
+            errors.append(
+                f"{expected_kind} raw capture lacks the exact tools/list inventory"
+            )
+        if expected_kind == "clean-handshake":
+            allowed_methods = {
+                "initialize",
+                "notifications/initialized",
+                "tools/list",
+                "ping",
+            }
+            required_methods = {
+                "initialize",
+                "notifications/initialized",
+                "tools/list",
+            }
+            if (
+                not required_methods.issubset(methods)
+                or any(method not in allowed_methods for method in methods)
+                or not any(
+                    isinstance(event, dict)
+                    and event.get("method") == "initialize"
+                    and event.get("direction") == "client-to-server"
+                    and event.get("event_type") == "request"
+                    for event in events
+                )
+                or not any(
+                    isinstance(event, dict)
+                    and event.get("method") == "notifications/initialized"
+                    and event.get("direction") == "client-to-server"
+                    and event.get("event_type") == "notification"
+                    for event in events
+                )
+                or "disconnected" not in states
+                or "approval-revoked" not in states
+            ):
+                errors.append(
+                    "clean-handshake raw capture does not prove a revoked "
+                    "handshake-only connection"
+                )
+            expected_sequence = [
+                (
+                    "client-to-server",
+                    "request",
+                    "initialize",
+                    None,
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "method",
+                        "request_id",
+                        "record_sha256",
+                    },
+                ),
+                (
+                    "server-to-client",
+                    "response",
+                    "initialize",
+                    None,
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "method",
+                        "request_id",
+                        "record_sha256",
+                    },
+                ),
+                (
+                    "client-to-server",
+                    "notification",
+                    "notifications/initialized",
+                    None,
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "method",
+                        "record_sha256",
+                    },
+                ),
+                (
+                    "client-to-server",
+                    "request",
+                    "tools/list",
+                    None,
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "method",
+                        "request_id",
+                        "record_sha256",
+                    },
+                ),
+                (
+                    "server-to-client",
+                    "response",
+                    "tools/list",
+                    None,
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "method",
+                        "request_id",
+                        "tool_names",
+                        "record_sha256",
+                    },
+                ),
+                (
+                    "collector",
+                    "state",
+                    None,
+                    "disconnected",
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "state",
+                        "record_sha256",
+                    },
+                ),
+                (
+                    "creator",
+                    "state",
+                    None,
+                    "approval-revoked",
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "state",
+                        "record_sha256",
+                    },
+                ),
+            ]
+            request_pairs = ((0, 1), (3, 4))
+        else:
+            allowed_methods = {
+                "connection/accepted",
+                "approval/creator-approved",
+                "initialize",
+                "notifications/initialized",
+                "tools/list",
+                "ping",
+            }
+            required_methods = {
+                "connection/accepted",
+                "approval/creator-approved",
+                "initialize",
+                "notifications/initialized",
+                "tools/list",
+            }
+            if (
+                not required_methods.issubset(methods)
+                or any(method not in allowed_methods for method in methods)
+                or not any(
+                    isinstance(event, dict)
+                    and event.get("method") == "connection/accepted"
+                    and event.get("direction") == "bridge"
+                    and event.get("event_type") == "state"
+                    for event in events
+                )
+                or not any(
+                    isinstance(event, dict)
+                    and event.get("method") == "approval/creator-approved"
+                    and event.get("direction") == "creator"
+                    and event.get("event_type") == "state"
+                    for event in events
+                )
+                or "connected" not in states
+            ):
+                errors.append(
+                    "activation-session raw capture does not prove the live "
+                    "creator-approved connection"
+                )
+            expected_sequence = [
+                (
+                    "bridge",
+                    "state",
+                    "connection/accepted",
+                    "connected",
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "method",
+                        "state",
+                        "record_sha256",
+                    },
+                ),
+                (
+                    "creator",
+                    "state",
+                    "approval/creator-approved",
+                    "creator-approved",
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "method",
+                        "state",
+                        "record_sha256",
+                    },
+                ),
+                (
+                    "client-to-server",
+                    "request",
+                    "initialize",
+                    None,
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "method",
+                        "request_id",
+                        "record_sha256",
+                    },
+                ),
+                (
+                    "server-to-client",
+                    "response",
+                    "initialize",
+                    None,
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "method",
+                        "request_id",
+                        "record_sha256",
+                    },
+                ),
+                (
+                    "client-to-server",
+                    "notification",
+                    "notifications/initialized",
+                    None,
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "method",
+                        "record_sha256",
+                    },
+                ),
+                (
+                    "client-to-server",
+                    "request",
+                    "tools/list",
+                    None,
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "method",
+                        "request_id",
+                        "record_sha256",
+                    },
+                ),
+                (
+                    "server-to-client",
+                    "response",
+                    "tools/list",
+                    None,
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "method",
+                        "request_id",
+                        "tool_names",
+                        "record_sha256",
+                    },
+                ),
+                (
+                    "collector",
+                    "state",
+                    None,
+                    "connected",
+                    {
+                        "sequence",
+                        "direction",
+                        "event_type",
+                        "state",
+                        "record_sha256",
+                    },
+                ),
+            ]
+            request_pairs = ((2, 3), (5, 6))
+        exact_sequence = (
+            len(events) == len(expected_sequence)
+            and all(
+                isinstance(event, dict)
+                and (
+                    event.get("direction"),
+                    event.get("event_type"),
+                    event.get("method"),
+                    event.get("state"),
+                )
+                == (direction, event_type, method, state)
+                and set(event) == required_keys
+                for event, (
+                    direction,
+                    event_type,
+                    method,
+                    state,
+                    required_keys,
+                ) in zip(events, expected_sequence, strict=True)
+            )
+        )
+        request_ids_exact = (
+            exact_sequence
+            and all(
+                isinstance(events[request_index].get("request_id"), str)
+                and bool(events[request_index]["request_id"])
+                and events[request_index]["request_id"]
+                == events[response_index].get("request_id")
+                for request_index, response_index in request_pairs
+            )
+            and len(
+                {
+                    events[request_index]["request_id"]
+                    for request_index, _ in request_pairs
+                }
+            )
+            == len(request_pairs)
+        )
+        if not exact_sequence or not request_ids_exact:
+            errors.append(
+                f"{expected_kind} raw capture does not match the exact ordered protocol state machine"
+            )
+    else:
+        listeners = document.get("listeners")
+        probes = document.get("probes")
+        if not isinstance(listeners, list) or not isinstance(probes, list):
+            return errors + ["network-observation raw capture is incomplete"]
+        allowed_listener_keys = {
+            "transport",
+            "local_address",
+            "port",
+            "pid",
+            "wildcard",
+            "non_loopback_reachable",
+            "record_sha256",
+        }
+        for index, listener in enumerate(listeners):
+            if (
+                not isinstance(listener, dict)
+                or set(listener) != allowed_listener_keys
+                or listener.get("transport") not in {"tcp4", "tcp6"}
+                or not isinstance(listener.get("local_address"), str)
+                or not isinstance(listener.get("port"), int)
+                or isinstance(listener.get("port"), bool)
+                or not 1 <= listener.get("port", 0) <= 65535
+                or not isinstance(listener.get("pid"), int)
+                or isinstance(listener.get("pid"), bool)
+                or listener.get("pid", 0) < 1
+                or not isinstance(listener.get("wildcard"), bool)
+                or not isinstance(listener.get("non_loopback_reachable"), bool)
+                or re.fullmatch(
+                    r"[0-9a-f]{64}",
+                    str(listener.get("record_sha256")),
+                )
+                is None
+                or listener.get("record_sha256") == "0" * 64
+                or listener.get("record_sha256")
+                != canonical_json_sha256(
+                    {
+                        key: value
+                        for key, value in listener.items()
+                        if key != "record_sha256"
+                    }
+                )
+            ):
+                errors.append(
+                    f"network-observation listener {index} is invalid"
+                )
+        categories = {
+            "non-loopback-listener": (
+                expected_facts.get("non_loopback_probe_count"),
+                expected_facts.get("non_loopback_probe_success_count"),
+                False,
+                "non_loopback_listener",
+            ),
+            "loopback-control": (
+                expected_facts.get("loopback_probe_count"),
+                expected_facts.get("loopback_probe_success_count"),
+                True,
+                "loopback_control",
+            ),
+            "approved-egress": (
+                expected_facts.get("approved_egress_probe_count"),
+                expected_facts.get("approved_egress_probe_success_count"),
+                True,
+                "approved_egress",
+            ),
+            "unapproved-egress": (
+                expected_facts.get("unapproved_egress_probe_count"),
+                expected_facts.get("unapproved_egress_probe_success_count"),
+                False,
+                "unapproved_egress",
+            ),
+        }
+        expected_targets = expected_facts.get("probe_targets")
+        seen: Counter[str] = Counter()
+        successes: Counter[str] = Counter()
+        for index, probe in enumerate(probes):
+            category = probe.get("category") if isinstance(probe, dict) else None
+            expected = categories.get(category)
+            if (
+                not isinstance(probe, dict)
+                or set(probe)
+                != {
+                    "sequence",
+                    "category",
+                    "target",
+                    "attempted",
+                    "success",
+                    "expected_success",
+                    "record_sha256",
+                }
+                or probe.get("sequence") != index
+                or expected is None
+                or not isinstance(probe.get("target"), str)
+                or not isinstance(expected_targets, dict)
+                or probe.get("target")
+                != expected_targets.get(expected[3])
+                or probe.get("attempted") is not True
+                or not isinstance(probe.get("success"), bool)
+                or probe.get("expected_success") is not expected[2]
+                or probe.get("success") is not expected[2]
+                or re.fullmatch(
+                    r"[0-9a-f]{64}",
+                    str(probe.get("record_sha256")),
+                )
+                is None
+                or probe.get("record_sha256") == "0" * 64
+                or probe.get("record_sha256")
+                != canonical_json_sha256(
+                    {
+                        key: value
+                        for key, value in probe.items()
+                        if key != "record_sha256"
+                    }
+                )
+            ):
+                errors.append(f"network-observation probe {index} is invalid")
+                continue
+            seen[category] += 1
+            successes[category] += int(probe["success"])
+        for category, (
+            count,
+            success_count,
+            _expected_success,
+            _target_key,
+        ) in categories.items():
+            if seen[category] != count or successes[category] != success_count:
+                errors.append(
+                    f"network-observation probe totals differ for {category}"
+                )
+        if (
+            len(listeners) != expected_facts.get("tcp_listener_count")
+            or sum(bool(item.get("wildcard")) for item in listeners if isinstance(item, dict))
+            != expected_facts.get("wildcard_listener_count")
+            or sum(
+                bool(item.get("non_loopback_reachable"))
+                for item in listeners
+                if isinstance(item, dict)
+            )
+            != expected_facts.get("non_loopback_reachable_listener_count")
+        ):
+            errors.append("network-observation listener totals differ from facts")
+    return errors
+
+
+def validate_wp0001_evidence_record_data(
+    document: object,
+    *,
+    expected_kind: str,
+    expected_facts: dict,
+    label: str,
+    raw_enabled_tools: list[str] | None = None,
+    raw_route: dict | None = None,
+    raw_runtime: dict | None = None,
+    route_contract_sha256: str | None = None,
+    protected_config_sha256: str | None = None,
+    raw_collectors: dict | None = None,
+) -> list[str]:
+    """Validate one content-addressed WP-0001 record and its exact bound facts."""
+    schema = load_json(WP0001_A1_EVIDENCE_RECORD_SCHEMA)
+    errors = validate_schema_subset(document, schema, schema, label)
+    if not isinstance(document, dict):
+        return errors + [f"{label} must be an object"]
+    if document.get("document_kind") != expected_kind:
+        errors.append(f"{label} has the wrong document kind")
+    if document.get("facts") != expected_facts:
+        errors.append(f"{label} facts differ from the A1 boundary")
+    source_artifacts = document.get("source_artifacts")
+    source_paths: set[str] = set()
+    if isinstance(source_artifacts, list):
+        for source in source_artifacts:
+            if not isinstance(source, dict):
+                continue
+            source_path = source.get("path")
+            if isinstance(source_path, str):
+                source_paths.add(source_path)
+            _, source_errors = validate_repo_evidence_reference(
+                source,
+                f"{label} source artifact",
+            )
+            errors.extend(source_errors)
+    commands_prefix = "docs/evidence/WP-0001/a1-activation/commands/"
+    screenshots_prefix = "docs/evidence/WP-0001/a1-activation/screenshots/"
+    if expected_kind == "project-seed":
+        required_seed_sources = {
+            "Game/Packages/manifest.json",
+            "Game/Packages/packages-lock.json",
+            "Game/ProjectSettings/ProjectSettings.asset",
+            "Game/ProjectSettings/ProjectVersion.txt",
+        }
+        if source_paths != required_seed_sources:
+            errors.append(f"{label} must bind exactly the four protected seed files")
+        if document.get("capture_method") != "protected-git-derivation":
+            errors.append(f"{label} must use protected-git-derivation")
+    elif expected_kind in {"entitlement-linkage", "project-identity"}:
+        if not any(path.startswith(screenshots_prefix) for path in source_paths):
+            errors.append(f"{label} lacks a creator-reviewed screenshot source")
+        if document.get("capture_method") not in {
+            "creator-ui-capture",
+            "creator-command-and-ui-capture",
+        }:
+            errors.append(f"{label} has the wrong capture method")
+    elif expected_kind == "toolchain":
+        if (
+            not any(path.startswith(commands_prefix) for path in source_paths)
+            or not any(path.startswith(screenshots_prefix) for path in source_paths)
+        ):
+            errors.append(f"{label} requires both command and UI source artifacts")
+        if document.get("capture_method") != "creator-command-and-ui-capture":
+            errors.append(f"{label} has the wrong capture method")
+    elif expected_kind == "quarantine":
+        live_capture_path = (
+            "docs/evidence/WP-0001/a1-activation/commands/quarantine-live.json"
+        )
+        policy_attachment_path = WP0001_POLICY_ATTACHMENT_RAW_PATH
+        policy_attachment_collector = (
+            raw_collectors.get("policy_attachment")
+            if isinstance(raw_collectors, dict)
+            else None
+        )
+        policy_attachment_collector_path = (
+            policy_attachment_collector.get("path")
+            if isinstance(policy_attachment_collector, dict)
+            else None
+        )
+        required_policy_sources = {
+            "docs/evidence/WP-0001/a1-activation/sandbox.policy",
+            "docs/evidence/WP-0001/a1-activation/network.policy",
+            WP0001_QUARANTINE_LIVE_VERIFIER_PATH,
+            policy_attachment_path,
+        }
+        if isinstance(policy_attachment_collector_path, str):
+            required_policy_sources.add(policy_attachment_collector_path)
+        if (
+            not required_policy_sources.issubset(source_paths)
+            or live_capture_path not in source_paths
+        ):
+            errors.append(f"{label} lacks policy bytes or command probe sources")
+        live_capture, capture_error = safe_repo_path(
+            live_capture_path,
+            f"{label} live capture path",
+        )
+        if (
+            capture_error is None
+            and live_capture is not None
+            and live_capture.is_file()
+        ):
+            observed = load_json(live_capture)
+            expected_repository = expected_facts.get("repository", {})
+            expected_runtime = expected_facts.get("runtime_boundary", {})
+            checks = observed.get("checks", {}) if isinstance(observed, dict) else {}
+            observed_facts = (
+                observed.get("observed", {}) if isinstance(observed, dict) else {}
+            )
+            if (
+                observed.get("validator_version") != "wp0001-a1-live-v1"
+                or observed.get("result") != "pass"
+                or observed.get("candidate_root")
+                != expected_repository.get("absolute_root")
+                or observed_facts.get("trusted_root")
+                != expected_repository.get("trusted_root")
+                or observed.get("base_commit")
+                != expected_repository.get("base_commit")
+                or not isinstance(checks, dict)
+                or set(checks) != WP0001_LIVE_QUARANTINE_CHECKS
+                or any(value is not True for value in checks.values())
+                or observed_facts.get("principal_uid")
+                != expected_runtime.get("principal_uid")
+                or observed_facts.get("environment_bindings")
+                != expected_runtime.get("environment_bindings")
+                or observed_facts.get("client_environment")
+                != {
+                    key: expected_runtime.get(
+                        "client_environment_guard", {}
+                    ).get(key)
+                    for key in (
+                        "CODEX_HOME",
+                        "XDG_CONFIG_HOME",
+                        "XDG_CACHE_HOME",
+                        "XDG_DATA_HOME",
+                        "GIT_CONFIG_NOSYSTEM",
+                        "GIT_CONFIG_GLOBAL",
+                        "GIT_TERMINAL_PROMPT",
+                    )
+                }
+                or observed_facts.get("boot_session_sha256")
+                != expected_runtime.get("boot_session_sha256")
+                or observed_facts.get("runtime_home")
+                != expected_runtime.get("ephemeral_home_root")
+                or observed_facts.get("runtime_temp")
+                != expected_runtime.get("private_temp_root")
+                or observed_facts.get("shared_temp_roots")
+                != expected_runtime.get("ambient_shared_temp_roots")
+                or observed_facts.get("socket_exception")
+                != expected_runtime.get("ambient_shared_temp_write_exceptions", [None])[0]
+                or observed_facts.get("head")
+                != expected_repository.get("base_commit")
+                or observed_facts.get("git_directory")
+                != f"{expected_repository.get('absolute_root')}/.git"
+                or observed_facts.get("git_common_directory")
+                != f"{expected_repository.get('absolute_root')}/.git"
+                or observed_facts.get("status_porcelain") != []
+                or observed_facts.get("remotes") != []
+                or observed_facts.get("symbolic_head") not in {"", None}
+                or observed_facts.get("forbidden_credential_env_keys_present")
+                != []
+            ):
+                errors.append(f"{label} live quarantine capture does not prove the boundary")
+        attachment_capture, attachment_error = safe_repo_path(
+            policy_attachment_path,
+            f"{label} policy attachment capture path",
+        )
+        if (
+            attachment_error is None
+            and attachment_capture is not None
+            and attachment_capture.is_file()
+        ):
+            route = raw_route if isinstance(raw_route, dict) else {}
+            client = (
+                route.get("client")
+                if isinstance(route.get("client"), dict)
+                else {}
+            )
+            relay = (
+                route.get("relay")
+                if isinstance(route.get("relay"), dict)
+                else {}
+            )
+            bridge = (
+                route.get("bridge")
+                if isinstance(route.get("bridge"), dict)
+                else {}
+            )
+            controls = (
+                route.get("controls")
+                if isinstance(route.get("controls"), dict)
+                else {}
+            )
+            runtime = expected_facts.get("runtime_boundary", {})
+            approved_environment = expected_facts.get(
+                "approved_environment", {}
+            )
+            attachment_facts = {
+                "captured_at": controls.get("captured_at"),
+                "principal_uid": runtime.get("principal_uid"),
+                "boot_session_sha256": runtime.get(
+                    "boot_session_sha256"
+                ),
+                "sandbox_policy_sha256": approved_environment.get(
+                    "sandbox_profile_sha256"
+                ),
+                "network_policy_sha256": approved_environment.get(
+                    "network_policy_sha256"
+                ),
+                "client_pid": client.get("pid"),
+                "relay_pid": relay.get("pid"),
+                "editor_pid": bridge.get("editor_pid"),
+                "client_process_birth_id_sha256": client.get(
+                    "process_birth_id_sha256"
+                ),
+                "relay_process_birth_id_sha256": relay.get(
+                    "process_birth_id_sha256"
+                ),
+                "editor_process_birth_id_sha256": bridge.get(
+                    "process_birth_id_sha256"
+                ),
+            }
+            errors.extend(
+                f"{label} {error}"
+                for error in validate_wp0001_policy_attachment_capture(
+                    load_json(attachment_capture),
+                    expected_facts=attachment_facts,
+                    expected_collector=policy_attachment_collector,
+                )
+            )
+    elif expected_kind in {
+        "mcp-route",
+        "bridge-discovery",
+        "clean-handshake",
+        "activation-session",
+        "network-observation",
+    }:
+        required_raw_source = WP0001_REQUIRED_RAW_SOURCE_BY_KIND[expected_kind]
+        if required_raw_source not in source_paths:
+            errors.append(
+                f"{label} lacks required raw capture {required_raw_source}"
+            )
+        if (
+            expected_kind in {"mcp-route", "bridge-discovery"}
+            and WP0001_MCP_LIVE_VERIFIER_PATH not in source_paths
+        ):
+            errors.append(
+                f"{label} does not bind {WP0001_MCP_LIVE_VERIFIER_PATH}"
+            )
+        raw_path, raw_path_error = safe_repo_path(
+            required_raw_source,
+            f"{label} raw capture path",
+        )
+        if (
+            raw_path_error is None
+            and raw_path is not None
+            and raw_path.is_file()
+            and expected_kind
+            in {
+                "clean-handshake",
+                "activation-session",
+                "network-observation",
+            }
+        ):
+            errors.extend(
+                f"{label} {error}"
+                for error in validate_wp0001_protocol_raw_capture(
+                    load_json(raw_path),
+                    expected_kind=expected_kind,
+                    expected_facts=expected_facts,
+                    enabled_tools=raw_enabled_tools,
+                    expected_collector=(
+                        raw_collectors.get(
+                            "network"
+                            if expected_kind == "network-observation"
+                            else "protocol"
+                        )
+                        if isinstance(raw_collectors, dict)
+                        else None
+                    ),
+                )
+            )
+            raw_document = load_json(raw_path)
+            collector_path = (
+                raw_document.get("collector", {}).get("path")
+                if isinstance(raw_document, dict)
+                and isinstance(raw_document.get("collector"), dict)
+                else None
+            )
+            if collector_path not in source_paths:
+                errors.append(
+                    f"{label} does not bind its raw collector source"
+                )
+        if (
+            raw_path_error is None
+            and raw_path is not None
+            and raw_path.is_file()
+            and expected_kind in {"mcp-route", "bridge-discovery"}
+            and isinstance(raw_route, dict)
+            and isinstance(raw_runtime, dict)
+            and isinstance(route_contract_sha256, str)
+        ):
+            errors.extend(
+                f"{label} {error}"
+                for error in validate_wp0001_mcp_live_capture(
+                    load_json(raw_path),
+                    route=raw_route,
+                    runtime=raw_runtime,
+                    route_contract_sha256=route_contract_sha256,
+                    protected_config_sha256=protected_config_sha256,
+                )
+            )
+    elif expected_kind == "deviations":
+        if "docs/evidence/WP-0001/pre-a1-readiness-20260716.json" not in source_paths:
+            errors.append(f"{label} does not bind the preserved readiness record")
+    return errors
+
+
+def load_json_bytes(raw: bytes, label: str) -> tuple[object | None, list[str]]:
+    try:
+        return json.loads(raw.decode("utf-8")), []
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        return None, [f"{label} is not valid UTF-8 JSON: {exc}"]
+
+
 def validate_a1_boundary_manifest(
     packet: dict,
     state: dict,
@@ -2646,6 +5953,8 @@ def validate_a1_boundary_manifest(
         errors.append(f"{packet_id} boundary manifest binds another packet")
     if manifest.get("packet_contract_sha256") != packet.get("contract_sha256"):
         errors.append(f"{packet_id} boundary manifest binds the wrong packet contract")
+    wp0001_evidence_refs: list[dict] = []
+    wp0001_live_capture_times: list[datetime] = []
 
     reservation = packet.get("reservation", {})
     if manifest.get("repository", {}).get("base_commit") != reservation.get("base_commit"):
@@ -2698,12 +6007,15 @@ def validate_a1_boundary_manifest(
         "runtime-boundary-invalid": "runtime protection record is invalid",
         "runtime-isolation-mode-invalid": "lacks a disposable OS-user or sandbox mode",
         "runtime-principal-invalid": "lacks an exact runtime principal UID",
+        "runtime-boot-session-invalid": "lacks the exact boot-session identity",
         "runtime-root-unsafe": "runtime HOME or private temp root is unsafe",
         "runtime-roots-overlap": "runtime HOME and private temp roots overlap",
         "runtime-environment-binding-mismatch": "HOME/TMP variables differ from runtime roots",
         "ambient-root-invalid": "ambient host HOME or shared temp roots are invalid",
         "ambient-write-denial-mismatch": "ambient write-denial roots are not exact",
         "ambient-write-denial-disabled": "ambient host HOME/shared-temp writes are not denied",
+        "ambient-write-exception-invalid": "shared-temp write exceptions are malformed or duplicated",
+        "ambient-write-exception-outside-shared-temp": "a shared-temp write exception escapes the denied shared-temp roots",
         "runtime-home-overlaps-ambient": "ephemeral HOME overlaps ambient host state",
         "runtime-temp-overlaps-ambient": "private temp overlaps ambient shared temp",
         "runtime-root-symlink-escape": "runtime or ambient roots resolve through a symlink",
@@ -2718,12 +6030,731 @@ def validate_a1_boundary_manifest(
         errors.append(
             f"{packet_id} boundary {runtime_code_messages.get(code, code)}"
         )
+    if packet_id == "WP-0001":
+        repository = manifest.get("repository", {})
+        project_seed = manifest.get("project_seed", {})
+        route = manifest.get("unity_mcp_route", {})
+        wp0001_source_refs: list[dict] = []
+        base_commit = repository.get("base_commit")
+        seed_tree = (
+            git_repo_tree_listing(base_commit, "Game")
+            if isinstance(base_commit, str)
+            else None
+        )
+        observed_seed_tree_sha256 = (
+            hashlib.sha256(seed_tree).hexdigest()
+            if seed_tree is not None
+            else None
+        )
+        route_code_messages = {
+            "wp0001-repository-invalid": "repository record is invalid",
+            "wp0001-runtime-invalid": "runtime record is invalid",
+            "wp0001-project-seed-invalid": "project seed record is invalid",
+            "wp0001-unity-mcp-route-invalid": "Unity MCP route record is invalid",
+            "wp0001-repository-root-invalid": "lacks an exact absolute candidate root",
+            "wp0001-repository-isolation-invalid": "does not prove detached independent Git state",
+            "wp0001-project-seed-mode-invalid": "project seed is not creator-created on the protected base",
+            "wp0001-project-seed-root-invalid": "project seed root is not exactly Game",
+            "wp0001-project-seed-base-mismatch": "project seed base differs from the candidate base",
+            "wp0001-project-seed-attestation-missing": "project seed lacks creator no-implementation attestation",
+            "wp0001-project-seed-evidence-invalid": "project seed evidence reference is invalid",
+            "wp0001-project-seed-tree-mismatch": "project seed Git tree hash mismatches the protected base",
+            "wp0001-toolchain-profile-invalid": "exact D-0047 toolchain profile is missing",
+            "wp0001-toolchain-profile-mismatch": "toolchain profile differs from D-0047",
+            "wp0001-toolchain-package-line-mismatch": "resolved URP or Test Framework version leaves the ratified line",
+            "wp0001-approved-toolchain-mismatch": "approved toolchain records differ from the exact WP-0001 profile",
+            "wp0001-activation-evidence-invalid": "activation evidence references are incomplete or invalid",
+            "wp0001-policy-evidence-mismatch": "sandbox or network policy evidence hash differs from the approved environment",
+            "wp0001-approved-environment-invalid": "approved environment record is invalid",
+            "wp0001-raw-collector-authority-invalid": "raw protocol, network, and policy-attachment collectors are not exact, hash-bound, and creator-authorized",
+            "wp0001-route-selection-mismatch": "route is not UNITY-MCP-EXTERNAL",
+            "wp0001-code-identity-authority-invalid": "client, relay, and Editor signing identities lack explicit creator authority",
+            "wp0001-mcp-project-target-mismatch": "Bridge target differs from the exact candidate Game path",
+            "wp0001-mcp-relay-arguments-mismatch": "relay arguments do not exactly pin project path and Editor PID",
+            "wp0001-mcp-process-parent-mismatch": "relay parent is not the exact Codex client",
+            "wp0001-mcp-client-cwd-mismatch": "Codex working directory differs from the candidate root",
+            "wp0001-mcp-process-identity-invalid": "client, relay, or Editor binary/signing/argv/cwd identity is invalid",
+            "wp0001-mcp-principal-mismatch": "Unity, relay, and Codex do not share the isolated principal UID",
+            "wp0001-mcp-environment-mismatch": "Codex MCP environment differs from the disposable runtime bindings",
+            "wp0001-mcp-config-inventory-invalid": "effective Codex MCP server inventory is absent, drifted, or not session-bound",
+            "wp0001-mcp-tool-scope-mismatch": "Codex allowlist and client-visible tool inventory differ or are empty",
+            "wp0001-mcp-forbidden-tool": "Codex allowlist includes a categorically forbidden A1 tool",
+            "wp0001-mcp-tool-scope-authority-invalid": "Codex allowlist lacks its exact digest or creator authority claim",
+            "wp0001-mcp-relay-package-mismatch": "relay binary differs from the exact package copy",
+            "wp0001-codex-policy-invalid": "Codex MCP policy is not exact, required, prompt-gated, and fail-closed",
+            "wp0001-mcp-runtime-state-escape": "MCP mutable state escapes the disposable runtime HOME",
+            "wp0001-mcp-process-evidence-mismatch": "process observation is absent or differs from activation evidence",
+            "wp0001-mcp-endpoint-invalid": "Bridge endpoint is not the exact project-hash/PID Unix socket",
+            "wp0001-mcp-socket-exception-invalid": "shared-temp policy does not permit exactly the required Bridge socket",
+            "wp0001-mcp-discovery-evidence-invalid": "Bridge discovery evidence is absent or misaddressed",
+            "wp0001-mcp-connection-state-invalid": "connection approval or revocation state is unsafe",
+            "wp0001-mcp-handshake-not-clean": "handshake is incomplete, prompted, invoked a Unity tool, or stayed connected",
+            "wp0001-mcp-handshake-time-invalid": "preflight handshake process birth or capture time is invalid",
+            "wp0001-mcp-activation-session-invalid": "live activation session is absent, stale, disconnected, or not receipt-bound",
+            "wp0001-mcp-activation-session-stale": "live activation session capture is stale or precedes process birth/preflight",
+            "wp0001-mcp-stock-gap-unacknowledged": "stock pending/hidden-tool execution gaps are not acknowledged",
+            "wp0001-mcp-nonloopback-reachable": "a listener is reachable outside loopback/quarantine",
+            "wp0001-mcp-persistent-relay-not-suppressed": "suppression mode still observed a relay process or TCP listener",
+            "wp0001-mcp-network-policy-unproven": "network-denial mode lacks successful loopback and failed non-loopback probes",
+            "wp0001-mcp-mitigation-mode-invalid": "persistent relay has no accepted mitigation mode",
+            "wp0001-unity-entitlement-linkage-invalid": "eligible assigned seat and same-organization project are not verified",
+            "wp0001-project-identity-invalid": "temporary WP-0001 project identity is invalid",
+        }
+        for code in a1_wp0001_boundary_codes(
+            repository,
+            manifest.get("runtime_boundary"),
+            project_seed,
+            route,
+            manifest.get("approved_toolchain"),
+            manifest.get("approved_environment"),
+            manifest.get("wp0001_toolchain_profile"),
+            manifest.get("activation_evidence"),
+            manifest.get("raw_capture_collectors"),
+            observed_seed_tree_sha256=observed_seed_tree_sha256,
+        ):
+            errors.append(
+                f"{packet_id} boundary {route_code_messages.get(code, code)}"
+            )
+        seed_policy_messages = {
+            "wp0001-project-seed-tree-empty": "protected base contains no Game project seed",
+            "wp0001-project-seed-tree-unparseable": "project seed Git tree cannot be parsed",
+            "wp0001-project-seed-symlink": "project seed contains a symlink",
+            "wp0001-project-seed-submodule": "project seed contains a submodule",
+            "wp0001-project-seed-tracks-scratch": "project seed commits Unity scratch",
+            "wp0001-project-seed-assets-not-empty": "project seed contains non-empty Assets content",
+            "wp0001-project-seed-embedded-package": "project seed contains an embedded package tree",
+            "wp0001-project-seed-unexpected-path": "project seed contains a path outside Packages/ProjectSettings",
+            "wp0001-project-seed-required-file-missing": "project seed lacks a required package or ProjectSettings file",
+            "wp0001-project-seed-project-version-invalid": "project seed Editor version or changeset differs from D-0047",
+            "wp0001-project-seed-package-json-invalid": "project seed package manifest or lock is invalid JSON",
+            "wp0001-project-seed-lock-policy-invalid": "project seed package lock policy is not enableLockFile=true and lowest",
+            "wp0001-project-seed-package-source-invalid": "project seed contains a non-Unity-registry or unsafe package source",
+            "wp0001-project-seed-package-lock-incomplete": "project seed package lock omits a direct dependency",
+            "wp0001-project-seed-package-version-mismatch": "project seed package resolution differs from the exact profile",
+            "wp0001-project-seed-identity-invalid": "project seed temporary identity is absent or invalid",
+        }
+        for code in wp0001_seed_tree_policy_codes(seed_tree):
+            errors.append(
+                f"{packet_id} boundary {seed_policy_messages.get(code, code)}"
+            )
+
+        seed_ref = (
+            project_seed.get("evidence")
+            if isinstance(project_seed, dict)
+            else None
+        )
+        seed_blob = (
+            git_repo_blob(base_commit, WP0001_PROJECT_SEED_EVIDENCE_PATH)
+            if isinstance(base_commit, str)
+            else None
+        )
+        if seed_blob is None:
+            errors.append(
+                f"{packet_id} protected base lacks committed project-seed evidence"
+            )
+        _, seed_ref_errors = validate_repo_evidence_reference(
+            seed_ref,
+            f"{packet_id} project seed",
+            expected_path=WP0001_PROJECT_SEED_EVIDENCE_PATH,
+            committed_blob=seed_blob,
+        )
+        errors.extend(seed_ref_errors)
+        if isinstance(base_commit, str):
+            seed_facts, seed_content_codes = wp0001_project_seed_content(
+                base_commit,
+                manifest.get("wp0001_toolchain_profile"),
+            )
+            seed_facts["game_tree_sha256"] = observed_seed_tree_sha256
+            for code in seed_content_codes:
+                errors.append(
+                    f"{packet_id} boundary {seed_policy_messages.get(code, code)}"
+                )
+            if seed_blob is not None:
+                seed_document, seed_document_errors = load_json_bytes(
+                    seed_blob,
+                    f"{packet_id} project seed evidence",
+                )
+                errors.extend(seed_document_errors)
+                if seed_document is not None:
+                    if isinstance(seed_document, dict) and isinstance(
+                        seed_document.get("source_artifacts"), list
+                    ):
+                        wp0001_source_refs.extend(
+                            source
+                            for source in seed_document["source_artifacts"]
+                            if isinstance(source, dict)
+                        )
+                    errors.extend(
+                        validate_wp0001_evidence_record_data(
+                            seed_document,
+                            expected_kind="project-seed",
+                            expected_facts=seed_facts,
+                            label=f"{packet_id} project seed evidence",
+                        )
+                    )
+
+        activation = (
+            manifest.get("activation_evidence")
+            if isinstance(manifest.get("activation_evidence"), dict)
+            else {}
+        )
+        route_refs = [
+            route.get("entitlement", {}).get("evidence")
+            if isinstance(route.get("entitlement"), dict)
+            else None,
+            route.get("project_identity", {}).get("evidence")
+            if isinstance(route.get("project_identity"), dict)
+            else None,
+            route.get("process_observation"),
+            route.get("bridge", {}).get("discovery_record")
+            if isinstance(route.get("bridge"), dict)
+            else None,
+            route.get("codex_policy", {}).get("evidence")
+            if isinstance(route.get("codex_policy"), dict)
+            else None,
+            route.get("handshake", {}).get("transcript")
+            if isinstance(route.get("handshake"), dict)
+            else None,
+            route.get("activation_session", {}).get("evidence")
+            if isinstance(route.get("activation_session"), dict)
+            else None,
+            route.get("controls", {}).get("observation")
+            if isinstance(route.get("controls"), dict)
+            else None,
+        ]
+        activation_refs = [
+            activation.get(key)
+            for key in (
+                "manifest",
+                "toolchain",
+                "quarantine",
+                "route",
+                "activation_session",
+                "deviations",
+                "sandbox_policy",
+                "network_policy",
+            )
+        ]
+        refs_by_path: dict[str, dict] = {}
+        for evidence_ref in [seed_ref, *activation_refs, *route_refs]:
+            if not isinstance(evidence_ref, dict):
+                continue
+            evidence_path = evidence_ref.get("path")
+            if not isinstance(evidence_path, str):
+                continue
+            prior = refs_by_path.get(evidence_path)
+            if prior is not None and prior.get("sha256") != evidence_ref.get("sha256"):
+                errors.append(
+                    f"{packet_id} activation evidence {evidence_path} has conflicting hashes"
+                )
+            refs_by_path[evidence_path] = evidence_ref
+
+        expected_evidence_paths = set(WP0001_ACTIVATION_EVIDENCE_PATHS)
+        if set(refs_by_path) != expected_evidence_paths:
+            missing = sorted(expected_evidence_paths - set(refs_by_path))
+            unexpected = sorted(set(refs_by_path) - expected_evidence_paths)
+            if missing:
+                errors.append(
+                    f"{packet_id} activation evidence omits {', '.join(missing)}"
+                )
+            if unexpected:
+                errors.append(
+                    f"{packet_id} activation evidence references unexpected paths: {', '.join(unexpected)}"
+                )
+        for expected_path in sorted(expected_evidence_paths):
+            evidence_ref = refs_by_path.get(expected_path)
+            if expected_path == WP0001_PROJECT_SEED_EVIDENCE_PATH:
+                continue
+            _, reference_errors = validate_repo_evidence_reference(
+                evidence_ref,
+                f"{packet_id} activation evidence {expected_path}",
+                expected_path=expected_path,
+            )
+            errors.extend(reference_errors)
+        wp0001_evidence_refs = [
+            refs_by_path[path] for path in sorted(refs_by_path)
+        ]
+
+        evidence_manifest_ref = activation.get("manifest")
+        artifact_refs: dict[str, str] = {}
+        evidence_manifest_path, _ = validate_repo_evidence_reference(
+            evidence_manifest_ref,
+            f"{packet_id} activation evidence manifest",
+            expected_path="docs/evidence/WP-0001/a1-activation/evidence-manifest.json",
+        )
+        if evidence_manifest_path is not None and evidence_manifest_path.is_file():
+            errors.extend(
+                validate_instance_shape(
+                    evidence_manifest_path,
+                    WP0001_A1_EVIDENCE_SCHEMA,
+                )
+            )
+            evidence_manifest = load_json(evidence_manifest_path)
+            if evidence_manifest.get("base_commit") != base_commit:
+                errors.append(
+                    f"{packet_id} activation evidence manifest binds the wrong base"
+                )
+            if (
+                evidence_manifest.get("producer", {}).get("principal_uid")
+                != manifest.get("runtime_boundary", {}).get("principal_uid")
+            ):
+                errors.append(
+                    f"{packet_id} activation evidence manifest names the wrong runtime UID"
+                )
+            artifact_rows = evidence_manifest.get("artifacts", [])
+            for artifact in artifact_rows if isinstance(artifact_rows, list) else []:
+                if not isinstance(artifact, dict):
+                    continue
+                artifact_path = artifact.get("path")
+                artifact_hash = artifact.get("sha256")
+                if not isinstance(artifact_path, str):
+                    continue
+                if artifact_path in artifact_refs:
+                    errors.append(
+                        f"{packet_id} activation evidence manifest repeats {artifact_path}"
+                    )
+                artifact_refs[artifact_path] = artifact_hash
+                resolved_path, path_error = safe_repo_path(
+                    artifact_path,
+                    f"{packet_id} activation artifact path",
+                )
+                if path_error:
+                    errors.append(path_error)
+                    continue
+                if (
+                    resolved_path is None
+                    or not resolved_path.is_file()
+                    or sha256_file(resolved_path) != artifact_hash
+                    or resolved_path.stat().st_size != artifact.get("byte_size")
+                ):
+                    errors.append(
+                        f"{packet_id} activation artifact {artifact_path} differs from its manifest"
+                    )
+            required_artifact_refs = {
+                path: reference.get("sha256")
+                for path, reference in refs_by_path.items()
+                if path
+                != "docs/evidence/WP-0001/a1-activation/evidence-manifest.json"
+            }
+            for artifact_path, artifact_hash in required_artifact_refs.items():
+                if artifact_refs.get(artifact_path) != artifact_hash:
+                    errors.append(
+                        f"{packet_id} activation evidence manifest does not bind {artifact_path}"
+                    )
+
+        entitlement = (
+            route.get("entitlement")
+            if isinstance(route.get("entitlement"), dict)
+            else {}
+        )
+        identity = (
+            route.get("project_identity")
+            if isinstance(route.get("project_identity"), dict)
+            else {}
+        )
+        bridge = (
+            route.get("bridge")
+            if isinstance(route.get("bridge"), dict)
+            else {}
+        )
+        handshake = (
+            route.get("handshake")
+            if isinstance(route.get("handshake"), dict)
+            else {}
+        )
+        controls = (
+            route.get("controls")
+            if isinstance(route.get("controls"), dict)
+            else {}
+        )
+        toolchain_facts = {
+            "approved_toolchain": manifest.get("approved_toolchain"),
+            "profile": manifest.get("wp0001_toolchain_profile"),
+        }
+        entitlement_facts = {
+            key: value for key, value in entitlement.items() if key != "evidence"
+        }
+        identity_facts = {
+            key: value for key, value in identity.items() if key != "evidence"
+        }
+        quarantine_facts = {
+            "repository": repository,
+            "approved_environment": manifest.get("approved_environment"),
+            "runtime_boundary": manifest.get("runtime_boundary"),
+            "protection_boundary": manifest.get("protection_boundary"),
+            "credential_boundary": manifest.get("credential_boundary"),
+            "manual_import_boundary": manifest.get("manual_import_boundary"),
+        }
+        route_facts = json.loads(json.dumps(route))
+        route_facts.pop("process_observation", None)
+        for section, key in (
+            ("bridge", "discovery_record"),
+            ("entitlement", "evidence"),
+            ("project_identity", "evidence"),
+            ("codex_policy", "evidence"),
+            ("handshake", "transcript"),
+            ("activation_session", "evidence"),
+            ("controls", "observation"),
+        ):
+            if isinstance(route_facts.get(section), dict):
+                route_facts[section].pop(key, None)
+        bridge_discovery_facts = {
+            "connection_type": bridge.get("discovery_connection_type"),
+            "connection_path": bridge.get("endpoint"),
+            "project_path": bridge.get("project_path"),
+            "protocol_version": bridge.get("protocol_version"),
+            "editor_pid": bridge.get("editor_pid"),
+            "source_file": bridge.get("connection_file"),
+            "source_file_sha256": bridge.get("connection_file_sha256"),
+            "endpoint_owner_uid": bridge.get("endpoint_owner_uid"),
+            "endpoint_mode": bridge.get("endpoint_mode"),
+        }
+        policy_for_facts = (
+            route.get("codex_policy")
+            if isinstance(route.get("codex_policy"), dict)
+            else {}
+        )
+        protected_config_blob_for_capture = (
+            git_repo_blob(base_commit, ".codex/config.toml")
+            if isinstance(base_commit, str)
+            else None
+        )
+        protected_config_sha256_for_capture = (
+            hashlib.sha256(protected_config_blob_for_capture).hexdigest()
+            if protected_config_blob_for_capture is not None
+            else None
+        )
+        handshake_facts = {
+            "client_pid": handshake.get("client_pid"),
+            "relay_pid": handshake.get("relay_pid"),
+            "editor_pid": handshake.get("editor_pid"),
+            "client_started_at": handshake.get("client_started_at"),
+            "relay_started_at": handshake.get("relay_started_at"),
+            "editor_started_at": handshake.get("editor_started_at"),
+            "client_process_birth_id_sha256": handshake.get(
+                "client_process_birth_id_sha256"
+            ),
+            "relay_process_birth_id_sha256": handshake.get(
+                "relay_process_birth_id_sha256"
+            ),
+            "editor_process_birth_id_sha256": handshake.get(
+                "editor_process_birth_id_sha256"
+            ),
+            "project_path": bridge.get("project_path"),
+            "runtime_config_sha256": handshake.get("runtime_config_sha256"),
+            "enabled_tools_sha256": handshake.get("enabled_tools_sha256"),
+            "environment_sha256": handshake.get("environment_sha256"),
+            "server_inventory_sha256": handshake.get(
+                "server_inventory_sha256"
+            ),
+            "captured_at": handshake.get("captured_at"),
+            "observed_methods": handshake.get("observed_methods"),
+            "capture_complete": handshake.get("capture_complete"),
+            "model_prompt_count": handshake.get("model_prompt_count"),
+            "unity_tool_call_count": handshake.get("unity_tool_call_count"),
+            "disconnected": handshake.get("disconnected"),
+            "approval_revoked_after_disconnect": handshake.get(
+                "approval_revoked_after_disconnect"
+            ),
+        }
+        activation_session_record = (
+            route.get("activation_session")
+            if isinstance(route.get("activation_session"), dict)
+            else {}
+        )
+        activation_session_facts = {
+            key: value
+            for key, value in activation_session_record.items()
+            if key != "evidence"
+        }
+        approved_environment_for_facts = (
+            manifest.get("approved_environment")
+            if isinstance(manifest.get("approved_environment"), dict)
+            else {}
+        )
+        network_facts = {
+            **{
+                key: value
+                for key, value in controls.items()
+                if key != "observation"
+            },
+            "network_policy_sha256": approved_environment_for_facts.get(
+                "network_policy_sha256"
+            ),
+        }
+        deviations_facts = {
+            "preserved_deviation_ids": list(WP0001_PRESERVED_DEVIATION_IDS)
+        }
+        expected_record_facts = {
+            "docs/evidence/WP-0001/a1-activation/toolchain.json": (
+                "toolchain",
+                toolchain_facts,
+            ),
+            "docs/evidence/WP-0001/a1-activation/entitlement-linkage.json": (
+                "entitlement-linkage",
+                entitlement_facts,
+            ),
+            "docs/evidence/WP-0001/a1-activation/project-identity.json": (
+                "project-identity",
+                identity_facts,
+            ),
+            "docs/evidence/WP-0001/a1-activation/quarantine.json": (
+                "quarantine",
+                quarantine_facts,
+            ),
+            "docs/evidence/WP-0001/a1-activation/mcp-route.json": (
+                "mcp-route",
+                route_facts,
+            ),
+            "docs/evidence/WP-0001/a1-activation/bridge-discovery.json": (
+                "bridge-discovery",
+                bridge_discovery_facts,
+            ),
+            "docs/evidence/WP-0001/a1-activation/clean-handshake.json": (
+                "clean-handshake",
+                handshake_facts,
+            ),
+            "docs/evidence/WP-0001/a1-activation/activation-session.json": (
+                "activation-session",
+                activation_session_facts,
+            ),
+            "docs/evidence/WP-0001/a1-activation/network-observation.json": (
+                "network-observation",
+                network_facts,
+            ),
+            "docs/evidence/WP-0001/a1-activation/deviations.json": (
+                "deviations",
+                deviations_facts,
+            ),
+        }
+        for evidence_path, (kind, facts) in expected_record_facts.items():
+            record_path, path_error = safe_repo_path(
+                evidence_path,
+                f"{packet_id} {kind} evidence path",
+            )
+            if path_error or record_path is None or not record_path.is_file():
+                continue
+            record = load_json(record_path)
+            if isinstance(record, dict) and isinstance(
+                record.get("source_artifacts"), list
+            ):
+                wp0001_source_refs.extend(
+                    source
+                    for source in record["source_artifacts"]
+                    if isinstance(source, dict)
+                )
+            errors.extend(
+                validate_wp0001_evidence_record_data(
+                    record,
+                    expected_kind=kind,
+                    expected_facts=facts,
+                    label=f"{packet_id} {kind} evidence",
+                    raw_enabled_tools=(
+                        policy_for_facts.get("enabled_tools")
+                        if isinstance(
+                            policy_for_facts.get("enabled_tools"), list
+                        )
+                        else None
+                    ),
+                    raw_route=route,
+                    raw_runtime=(
+                        manifest.get("runtime_boundary")
+                        if isinstance(
+                            manifest.get("runtime_boundary"), dict
+                        )
+                        else None
+                    ),
+                    route_contract_sha256=canonical_json_sha256(
+                        wp0001_mcp_route_contract(manifest)
+                    ),
+                    protected_config_sha256=(
+                        protected_config_sha256_for_capture
+                    ),
+                    raw_collectors=(
+                        manifest.get("raw_capture_collectors")
+                        if isinstance(
+                            manifest.get("raw_capture_collectors"), dict
+                        )
+                        else None
+                    ),
+                )
+            )
+        for source_ref in wp0001_source_refs:
+            source_path = source_ref.get("path")
+            source_hash = source_ref.get("sha256")
+            if artifact_refs.get(source_path) != source_hash:
+                errors.append(
+                    f"{packet_id} activation evidence manifest does not bind source artifact {source_path}"
+                )
+        quarantine_live_path, quarantine_live_error = safe_repo_path(
+            "docs/evidence/WP-0001/a1-activation/commands/quarantine-live.json",
+            f"{packet_id} quarantine live capture path",
+        )
+        if (
+            quarantine_live_error is None
+            and quarantine_live_path is not None
+            and quarantine_live_path.is_file()
+        ):
+            quarantine_live = load_json(quarantine_live_path)
+            quarantine_capture = parse_datetime(
+                quarantine_live.get("captured_at")
+                if isinstance(quarantine_live, dict)
+                else None
+            )
+            if quarantine_capture is not None:
+                wp0001_live_capture_times.append(quarantine_capture)
+        for live_capture_relative in (
+            WP0001_REQUIRED_RAW_SOURCE_BY_KIND["mcp-route"],
+            WP0001_REQUIRED_RAW_SOURCE_BY_KIND["clean-handshake"],
+            WP0001_REQUIRED_RAW_SOURCE_BY_KIND["activation-session"],
+            WP0001_REQUIRED_RAW_SOURCE_BY_KIND["network-observation"],
+        ):
+            live_capture_path, live_capture_error = safe_repo_path(
+                live_capture_relative,
+                f"{packet_id} live capture path",
+            )
+            if (
+                live_capture_error is None
+                and live_capture_path is not None
+                and live_capture_path.is_file()
+            ):
+                live_capture = load_json(live_capture_path)
+                live_capture_time = parse_datetime(
+                    live_capture.get("captured_at")
+                    if isinstance(live_capture, dict)
+                    else None
+                )
+                if live_capture_time is not None:
+                    wp0001_live_capture_times.append(live_capture_time)
+
+        policy = route.get("codex_policy", {}) if isinstance(route, dict) else {}
+        relay = route.get("relay", {}) if isinstance(route, dict) else {}
+        runtime_config_ref = (
+            policy.get("evidence") if isinstance(policy, dict) else None
+        )
+        runtime_config_path, _ = validate_repo_evidence_reference(
+            runtime_config_ref,
+            f"{packet_id} Codex runtime config",
+            expected_path=WP0001_RUNTIME_CONFIG_EVIDENCE_PATH,
+        )
+        if runtime_config_path is not None and runtime_config_path.is_file():
+            try:
+                runtime_config = tomllib.loads(
+                    runtime_config_path.read_text(encoding="utf-8")
+                )
+            except (OSError, UnicodeDecodeError, tomllib.TOMLDecodeError) as exc:
+                errors.append(
+                    f"{packet_id} Codex runtime config cannot be parsed: {exc}"
+                )
+            else:
+                server_name = policy.get("server_name")
+                configured_servers = runtime_config.get("mcp_servers", {})
+                server = (
+                    configured_servers.get(server_name, {})
+                    if isinstance(configured_servers, dict)
+                    else {}
+                )
+                expected_server = {
+                    "command": relay.get("path"),
+                    "args": relay.get("arguments"),
+                    "enabled": True,
+                    "required": True,
+                    "enabled_tools": policy.get("enabled_tools"),
+                    "default_tools_approval_mode": "prompt",
+                    "env": {
+                        **(
+                            policy.get("environment_bindings")
+                            if isinstance(
+                                policy.get("environment_bindings"), dict
+                            )
+                            else {}
+                        ),
+                        **{
+                            key: policy.get(
+                                "client_environment_guard", {}
+                            ).get(key)
+                            for key in (
+                                "CODEX_HOME",
+                                "XDG_CONFIG_HOME",
+                                "XDG_CACHE_HOME",
+                                "XDG_DATA_HOME",
+                                "GIT_CONFIG_NOSYSTEM",
+                                "GIT_CONFIG_GLOBAL",
+                                "GIT_TERMINAL_PROMPT",
+                            )
+                        },
+                    },
+                }
+                if runtime_config.get("approval_policy") != "on-request":
+                    errors.append(
+                        f"{packet_id} Codex runtime config approval_policy is not on-request"
+                    )
+                if set(runtime_config) != {"approval_policy", "mcp_servers"}:
+                    errors.append(
+                        f"{packet_id} Codex runtime config contains undeclared top-level settings"
+                    )
+                if set(configured_servers) != {server_name}:
+                    errors.append(
+                        f"{packet_id} Codex runtime config contains undeclared MCP servers"
+                    )
+                if set(server) != set(expected_server):
+                    errors.append(
+                        f"{packet_id} Codex runtime MCP server contains undeclared settings"
+                    )
+                for key, expected_value in expected_server.items():
+                    if server.get(key) != expected_value:
+                        errors.append(
+                            f"{packet_id} Codex runtime config {server_name}.{key} differs from the boundary"
+                        )
+
+        protected_config = protected_config_blob_for_capture
+        if protected_config is None:
+            errors.append(
+                f"{packet_id} protected base lacks fail-closed .codex/config.toml"
+            )
+        else:
+            try:
+                protected_toml = tomllib.loads(protected_config.decode("utf-8"))
+            except (UnicodeDecodeError, tomllib.TOMLDecodeError):
+                errors.append(
+                    f"{packet_id} protected base .codex/config.toml is invalid"
+                )
+            else:
+                protected_servers = protected_toml.get("mcp_servers", {})
+                protected_server = (
+                    protected_servers.get("unity_mcp", {})
+                    if isinstance(protected_servers, dict)
+                    else {}
+                )
+                expected_protected_server = {
+                    "command": (
+                        "/Users/sasha/.unity/relay/relay_mac_arm64.app/"
+                        "Contents/MacOS/relay_mac_arm64"
+                    ),
+                    "args": [
+                        "--mcp",
+                        "--project-path",
+                        "/REPLACE-WITH-RECEIPT-BOUND-A1-CLONE/Game",
+                    ],
+                    "startup_timeout_sec": 120,
+                    "enabled": False,
+                }
+                if (
+                    set(protected_toml) != {"mcp_servers"}
+                    or not isinstance(protected_servers, dict)
+                    or set(protected_servers) != {"unity_mcp"}
+                    or protected_server != expected_protected_server
+                ):
+                    errors.append(
+                        f"{packet_id} protected base .codex/config.toml is not the exact fail-closed entry"
+                    )
     protected_required = {
         "docs/foundation-v0.1/00-GAME-CONSTITUTION.md",
         "docs/foundation-v0.1/ledger/decisions.jsonl",
         "docs/foundation-v0.1/governance/",
         "docs/foundation-v0.1/ledger/receipts/",
         ".git/refs/heads/main",
+        ".codex/",
     }
     if not protected_required.issubset(set(protection.get("protected_paths", []))):
         errors.append(f"{packet_id} boundary omits a required protected path")
@@ -2734,16 +6765,117 @@ def validate_a1_boundary_manifest(
     denied = set(manifest.get("credential_boundary", {}).get("denied_capabilities", []))
     if not denied_required.issubset(denied):
         errors.append(f"{packet_id} boundary credential denial is incomplete")
+    if (
+        packet_id == "WP-0001"
+        and manifest.get("credential_boundary", {}).get(
+            "approved_credential_ids"
+        )
+        != []
+    ):
+        errors.append(
+            f"{packet_id} boundary must approve no credential IDs"
+        )
 
     if not isinstance(activation_receipt, dict):
         errors.append(f"{packet_id} boundary has no activation receipt")
     else:
+        required_activation_claims = {
+            "A1-QUARANTINE-BOUNDARY-VERIFIED",
+            f"ACTIVATE-A1-{packet_id}",
+        }
+        if packet_id == "WP-0001":
+            required_activation_claims.update(
+                {
+                    "AUTHORIZE-WP0001-MCP-ALLOWLIST",
+                    "AUTHORIZE-WP0001-RAW-COLLECTORS",
+                    "AUTHORIZE-WP0001-CODE-IDENTITIES",
+                }
+            )
+        receipt_claims = subject_claims(activation_receipt).get(
+            packet_id, set()
+        )
+        if (
+            activation_receipt.get("receipt_kind") != "packet-activation"
+            or activation_receipt.get("issuer_role") != "creator"
+            or activation_receipt.get("sealed") is not True
+            or not isinstance(
+                activation_receipt.get("artifact_resolver"), dict
+            )
+            or activation_receipt["artifact_resolver"].get("type")
+            != "external-protected"
+            or not isinstance(
+                activation_receipt["artifact_resolver"].get(
+                    "resolver_reference"
+                ),
+                str,
+            )
+            or not activation_receipt["artifact_resolver"].get(
+                "resolver_reference"
+            )
+            or not isinstance(
+                activation_receipt.get("signature_reference"), str
+            )
+            or not activation_receipt.get("signature_reference")
+            or set(activation_receipt.get("subject_ids", []))
+            != {packet_id}
+            or not required_activation_claims.issubset(receipt_claims)
+        ):
+            errors.append(
+                f"{packet_id} activation receipt lacks exact external-protected creator activation authority"
+            )
         if manifest.get("attestation_receipt_id") != activation_receipt.get("receipt_id"):
             errors.append(f"{packet_id} manifest names a different attestation receipt")
         if manifest.get("attested_by") != activation_receipt.get("issued_by"):
             errors.append(f"{packet_id} manifest attestor differs from receipt issuer")
         if activation_receipt.get("artifact_sha256", {}).get(reference.get("path")) != actual_hash:
             errors.append(f"{packet_id} activation receipt does not bind exact boundary-manifest bytes")
+        for evidence_ref in wp0001_evidence_refs:
+            evidence_path = evidence_ref.get("path")
+            evidence_sha256 = evidence_ref.get("sha256")
+            if (
+                activation_receipt.get("artifact_sha256", {}).get(evidence_path)
+                != evidence_sha256
+            ):
+                errors.append(
+                    f"{packet_id} activation receipt does not bind {evidence_path}"
+                )
+        if packet_id == "WP-0001":
+            activation_session = manifest.get("unity_mcp_route", {}).get(
+                "activation_session", {}
+            )
+            session_capture = parse_datetime(
+                activation_session.get("captured_at")
+                if isinstance(activation_session, dict)
+                else None
+            )
+            manifest_created = parse_datetime(manifest.get("created_at"))
+            receipt_issued = parse_datetime(activation_receipt.get("issued_at"))
+            if (
+                session_capture is None
+                or manifest_created is None
+                or receipt_issued is None
+                or not (
+                    session_capture
+                    <= manifest_created
+                    <= receipt_issued
+                )
+                or receipt_issued - session_capture > timedelta(minutes=5)
+            ):
+                errors.append(
+                    f"{packet_id} activation receipt is not fresh for the live MCP session"
+                )
+            if (
+                receipt_issued is None
+                or not wp0001_live_capture_times
+                or any(
+                    capture > receipt_issued
+                    or receipt_issued - capture > timedelta(minutes=15)
+                    for capture in wp0001_live_capture_times
+                )
+            ):
+                errors.append(
+                    f"{packet_id} activation receipt is not fresh for live boundary captures"
+                )
         expected_receipt_foundation = {
             "constitution_sha256": state.get("constitution_sha256"),
             "decision_ledger_sha256": state.get("decision_ledger_sha256"),
@@ -2899,6 +7031,7 @@ def main() -> int:
     errors.extend(validate_supersession_fixtures())
     errors.extend(validate_a1_scratch_fixtures())
     errors.extend(validate_a1_runtime_fixtures())
+    errors.extend(validate_a1_wp0001_boundary_fixtures())
     errors.extend(
         validate_wp0001_pre_a1_readiness(
             ROOT,
@@ -3198,6 +7331,10 @@ def main() -> int:
             "A1-QUARANTINE-BOUNDARY-VERIFIED",
             activation_claim,
         }
+        if packet_id == "WP-0001":
+            quarantine_claims.add("AUTHORIZE-WP0001-MCP-ALLOWLIST")
+            quarantine_claims.add("AUTHORIZE-WP0001-RAW-COLLECTORS")
+            quarantine_claims.add("AUTHORIZE-WP0001-CODE-IDENTITIES")
         quarantine_requirements = [
             requirement
             for requirement in receipt_requirements
@@ -3218,7 +7355,7 @@ def main() -> int:
                 set(quarantine_requirement.get("required_claims", []))
             ):
                 errors.append(
-                    f"{packet_id} quarantine receipt declaration lacks both activation claims"
+                    f"{packet_id} quarantine receipt declaration lacks required activation authority claims"
                 )
 
         quarantine_receipt_id = quarantine_requirement.get("receipt_id")

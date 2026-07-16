@@ -61,6 +61,19 @@ An A1-required packet may enter `active`, `verifying`, or `candidate` only when 
 6. The complete, unique, chronological status-event chain is retained from `null -> proposed`; every `active`, `verifying`, and `candidate` transition references the same activation receipt, including after release, rejection, or rollback.
 7. Activating it does not exceed `a1_max_active_packets`; today that cap is exactly one.
 
+WP-0001 additionally requires schema-v4 evidence for a creator-created
+protected empty project seed, exact registry-only package graph and D-0047
+profile, actual detached candidate Git boundary, exact direct-MCP
+client/relay/Editor/socket/config identity, a creator-claimed sanitized
+allowlist and digest, a disconnected/revoked zero-tool preflight, and a
+distinct connected live activation session. The packet-activation receipt must
+include `AUTHORIZE-WP0001-MCP-ALLOWLIST` and
+`AUTHORIZE-WP0001-RAW-COLLECTORS` plus
+`AUTHORIZE-WP0001-CODE-IDENTITIES`, bind the exact collector sources, signing
+identity tuples, and every evidence hash, and be issued within five minutes of
+the live-session capture. Reconnect, collector drift, or identity drift
+revokes A1.
+
 Missing or inconsistent state keeps the packet proposed/accepted but non-executable. A passing bootstrap lint alone never activates A1.
 
 ## 4. Separation of duties

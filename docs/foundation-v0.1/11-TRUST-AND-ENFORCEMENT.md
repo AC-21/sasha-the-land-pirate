@@ -121,7 +121,7 @@ Every attack must be rejected by a trusted check outside the candidate's write a
 
 [`governance/ratification-state.json`](governance/ratification-state.json) is the single draft statement of what can start:
 
-- WP-0001 remains accepted at its immutable contract, while owner-authenticated D-0051 and packet route-successor receipts protect `UNITY-MCP-EXTERNAL`; D-0050 permits only creator-operated candidate setup, and A1 still requires the exact seat/project/Bridge/relay/client/target/approved-connection profile, installed D-0047 tuple, clean zero-tool-call handshake, and packet-specific quarantine to be physically verified and separately activated;
+- WP-0001 remains accepted at its immutable contract, while owner-authenticated D-0051 and packet route-successor receipts protect `UNITY-MCP-EXTERNAL`; D-0050 permits only creator-operated candidate setup, and A1 still requires the protected empty seed, exact seat/project/D-0047 tuple, actual candidate quarantine, direct-MCP process/socket/config/allowlist profile, revoked zero-tool preflight, and distinct fresh live activation session to be physically verified and separately activated;
 - the ugly gameplay toy requires the listed identity decisions, its own explicit acceptance, and a separate packet-specific WP-0002 quarantine receipt;
 - WP-0002 cannot advance from proposal until WP-0001 is `released` and a sealed creator `packet-completion` receipt binds `ACCEPT-COMPLETION-WP-0001` plus WP-0001's immutable packet-contract hash;
 - the slice kernel additionally requires the city grammar decision;
@@ -146,9 +146,36 @@ Before any A1 packet command runs, a creator-controlled process must materialize
 
 The manifest also binds the current constitution and decision-ledger hashes, the last sealed creator receipt, exact lease/fence/expiry/paths/domains, read-only protected paths, denied merge/release/governance/receipt credentials, and any named local-observation baseline exceptions. Scratch is boundary infrastructure, not packet output: it is never included in the reservation or creator import, must be disjoint from every protected/reserved path, and is destroyed when the quarantine closes. WP-0001 permits exactly `Game/Library/`, `Game/Temp/`, `Game/Logs/`, `Game/Obj/`, `Game/UserSettings/`, `Game/MemoryCaptures/`, and `Game/Recordings/` as repository-ignored scratch; build evidence goes directly to declared `BuildArtifacts/WP-0001/` paths rather than `Game/Builds/`.
 
-Mutable Unity, relay, licensing, package-cache, log, and MCP connection state outside the repository must resolve only inside an exact disposable runtime HOME and private temp namespace. The manifest binds their absolute roots, runtime principal/UID, environment-variable bindings, creator-home/shared-temp denial roots, symlink-free/no-escape attestation, destroy-on-close and non-importability, plus raw SHA-256 hashes of the exact sandbox and network policies. The runtime HOME/private temp are not reservation paths or packet evidence; any retained evidence must first be copied to a declared output and recorded. An active baseline may never retain a `pending://` URI. A non-content-addressed baseline is allowed only as an explicit manifest-attested evidence ID with a concrete `local-observation://` URI.
+Mutable Unity, relay, licensing, package-cache, log, and MCP connection state outside the repository must resolve only inside an exact disposable runtime HOME and private temp namespace. The manifest binds their absolute roots, runtime principal/UID, environment-variable bindings, creator-home/shared-temp default-denial roots, exact packet-required shared-temp exceptions, symlink-free/no-escape attestation, destroy-on-close and non-importability, plus raw SHA-256 hashes of the exact sandbox and network policies. WP-0001 permits only the exact resolved `/private/tmp/unity-mcp-<project-hash>-<editor-pid>` socket exception, with matching owner UID and mode `0600`. The runtime HOME/private temp are not reservation paths or packet evidence; any retained evidence must first be copied to a declared output and recorded. An active baseline may never retain a `pending://` URI. A non-content-addressed baseline is allowed only as an explicit manifest-attested evidence ID with a concrete `local-observation://` URI.
 
-The same packet-specific receipt binds the physical boundary claim `A1-QUARANTINE-BOUNDARY-VERIFIED` and the packet activation claim (`ACTIVATE-A1-WP-0001` or `ACTIVATE-A1-WP-0002`). Combining those claims records one approval of one verified boundary; it does not invent a fifth independent approval.
+WP-0001 schema v4 also requires a creator-created protected setup commit with
+no implementation, embedded package tree, local/Git/file dependency, or
+non-empty Assets content; the complete Unity-registry package graph and exact
+D-0047 profile are content-addressed. Direct MCP activation binds sanitized
+client-visible tool names, their canonical digest, and the creator claim
+`AUTHORIZE-WP0001-MCP-ALLOWLIST`; arbitrary C# execution, package mutation, and
+external-model import tools are excluded. A disconnected/revoked zero-tool
+preflight is followed by a distinct connected activation session with exact
+PIDs, process starts, boot-session-bound birth IDs, config/allowlist hashes,
+isolated Codex/XDG/Git environment, effective-server-inventory hash, and
+connection/session hashes. Fixed raw protocol/listener/probe captures and the
+read-only live route collector must agree. The route capture proves the
+Editor/relay Unix FD peer plus reciprocal client/relay stdin/stdout pipes and
+derives the session hash from that FD graph. The raw captures must name exact
+repository collector paths, fixed invocations, and source hashes authorized by
+`AUTHORIZE-WP0001-RAW-COLLECTORS`; copied summaries or unbound collector code
+cannot substitute. Network probes use exact policy-bound targets, and a third
+collector binds sandbox/network attachment to each process birth identity.
+The creator receipt must follow that capture within five minutes. Disconnect
+or collector/config/process drift requires a new receipt.
+
+The same packet-specific receipt binds the physical boundary claim `A1-QUARANTINE-BOUNDARY-VERIFIED` and the packet activation claim (`ACTIVATE-A1-WP-0001` or `ACTIVATE-A1-WP-0002`). WP-0001's receipt additionally carries `AUTHORIZE-WP0001-MCP-ALLOWLIST` for the exact digest-bound list in that same boundary. Combining these claims records one approval of one verified packet boundary; it does not invent another independent approval.
+WP-0001 also carries `AUTHORIZE-WP0001-RAW-COLLECTORS` for the exact
+content-addressed protocol, network, and policy-attachment collectors named by
+that boundary.
+It additionally carries `AUTHORIZE-WP0001-CODE-IDENTITIES` for the exact
+strict-signature tuples of the client, relay, and Editor; internal equality
+without that creator authority is not sufficient.
 
 WP-0001's packet-acceptance receipt also binds `AUTHORIZE-TEMP-WP0001-IDENTITY` to the exact disposable company, product, bundle, and dev/test profile values inside the packet. This authorizes only its non-shipping spike namespace and does not resolve durable D-0038.
 

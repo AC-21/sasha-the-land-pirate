@@ -1,0 +1,742 @@
+{
+  "base_case": {
+    "repository": {
+      "resolver_type": "local-git",
+      "repository_root": ".",
+      "absolute_root": "/private/var/wp0001/repo",
+      "trusted_root": "/Users/sasha/Documents/Codex/sasha-the-land-pirate",
+      "trusted_remote_url": "https://github.com/AC-21/sasha-the-land-pirate",
+      "base_commit": "1111111111111111111111111111111111111111",
+      "git_directory": ".git",
+      "git_common_directory": ".git",
+      "detached_head": true,
+      "remote_count": 0,
+      "alternates_present": false
+    },
+    "approved_toolchain": [
+      {
+        "name": "Unity Hub",
+        "version": "3.19.5",
+        "source": "fixture",
+        "sha256": "1919191919191919191919191919191919191919191919191919191919191919"
+      },
+      {
+        "name": "Unity Editor ARM64",
+        "version": "6000.3.19f1",
+        "source": "fixture",
+        "sha256": "2020202020202020202020202020202020202020202020202020202020202020"
+      },
+      {
+        "name": "Mac Build Support (IL2CPP)",
+        "version": "6000.3.19f1",
+        "source": "fixture",
+        "sha256": "2121212121212121212121212121212121212121212121212121212121212121"
+      },
+      {
+        "name": "Xcode",
+        "version": "26.3",
+        "source": "fixture",
+        "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      {
+        "name": ".NET SDK",
+        "version": "10.0.301",
+        "source": "fixture",
+        "sha256": "2323232323232323232323232323232323232323232323232323232323232323"
+      },
+      {
+        "name": "com.unity.ai.assistant",
+        "version": "2.14.0-pre.1",
+        "source": "fixture",
+        "sha256": "2424242424242424242424242424242424242424242424242424242424242424"
+      },
+      {
+        "name": "URP",
+        "version": "17.3.0",
+        "source": "fixture",
+        "sha256": "2525252525252525252525252525252525252525252525252525252525252525"
+      },
+      {
+        "name": "Unity Test Framework",
+        "version": "1.6.0",
+        "source": "fixture",
+        "sha256": "2626262626262626262626262626262626262626262626262626262626262626"
+      }
+    ],
+    "approved_environment": {
+      "sandbox_profile_sha256": "2727272727272727272727272727272727272727272727272727272727272727",
+      "network_policy_sha256": "2828282828282828282828282828282828282828282828282828282828282828"
+    },
+    "runtime_boundary": {
+      "isolation_mode": "dedicated-ephemeral-os-user",
+      "instance_id": "wp0001-fixture-runtime",
+      "principal_id": "wp0001-fixture",
+      "principal_uid": 777,
+      "boot_session_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+      "ephemeral_home_root": "/private/var/wp0001/home",
+      "private_temp_root": "/private/var/wp0001/temp",
+      "environment_bindings": {
+        "HOME": "/private/var/wp0001/home",
+        "TMPDIR": "/private/var/wp0001/temp",
+        "TMP": "/private/var/wp0001/temp",
+        "TEMP": "/private/var/wp0001/temp"
+      },
+      "client_environment_guard": {
+        "CODEX_HOME": "/private/var/wp0001/home/.codex",
+        "XDG_CONFIG_HOME": "/private/var/wp0001/home/.config",
+        "XDG_CACHE_HOME": "/private/var/wp0001/home/.cache",
+        "XDG_DATA_HOME": "/private/var/wp0001/home/.local/share",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_CONFIG_GLOBAL": "/private/var/wp0001/home/.gitconfig",
+        "GIT_TERMINAL_PROMPT": "0",
+        "absent_variables": [
+          "AWS_ACCESS_KEY_ID",
+          "AWS_SECRET_ACCESS_KEY",
+          "AWS_SESSION_TOKEN",
+          "GH_TOKEN",
+          "GITHUB_TOKEN",
+          "GIT_ASKPASS",
+          "SSH_AUTH_SOCK",
+          "VERCEL_TOKEN"
+        ]
+      },
+      "ambient_host_home_root": "/Users/creator",
+      "ambient_shared_temp_roots": [
+        "/private/tmp"
+      ],
+      "denied_ambient_write_roots": [
+        "/Users/creator",
+        "/private/tmp"
+      ],
+      "ambient_shared_temp_write_exceptions": [
+        "/private/tmp/unity-mcp-675b4900-303"
+      ],
+      "ambient_host_home_write_denied": true,
+      "ambient_shared_temp_write_denied": true,
+      "symlink_escape_forbidden": true,
+      "runtime_roots_symlink_free": true,
+      "runtime_roots_importable": false,
+      "destroy_on_close": true
+    },
+    "project_seed": {
+      "mode": "creator-created-protected-base",
+      "project_root": "Game",
+      "base_commit": "1111111111111111111111111111111111111111",
+      "git_tree_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "evidence": {
+        "path": "docs/evidence/WP-0001/a1-activation/project-seed.json",
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "creator_attested_no_implementation": true
+    },
+    "wp0001_toolchain_profile": {
+      "hub_version": "3.19.5",
+      "editor_version": "6000.3.19f1",
+      "editor_changeset": "7689f4515d75",
+      "editor_architecture": "arm64",
+      "mac_il2cpp_installed": true,
+      "mac_il2cpp_editor_version": "6000.3.19f1",
+      "xcode_version": "26.3",
+      "rosetta_installed": true,
+      "dotnet_sdk_version": "10.0.301",
+      "assistant_package_version": "2.14.0-pre.1",
+      "resolved_urp_version": "17.3.0",
+      "resolved_test_framework_version": "1.6.0",
+      "mono_iteration_authorized": true,
+      "il2cpp_arm64_acceptance": true
+    },
+    "activation_evidence": {
+      "manifest": {
+        "path": "docs/evidence/WP-0001/a1-activation/evidence-manifest.json",
+        "sha256": "2929292929292929292929292929292929292929292929292929292929292929"
+      },
+      "toolchain": {
+        "path": "docs/evidence/WP-0001/a1-activation/toolchain.json",
+        "sha256": "3030303030303030303030303030303030303030303030303030303030303030"
+      },
+      "quarantine": {
+        "path": "docs/evidence/WP-0001/a1-activation/quarantine.json",
+        "sha256": "3131313131313131313131313131313131313131313131313131313131313131"
+      },
+      "route": {
+        "path": "docs/evidence/WP-0001/a1-activation/mcp-route.json",
+        "sha256": "3232323232323232323232323232323232323232323232323232323232323232"
+      },
+      "activation_session": {
+        "path": "docs/evidence/WP-0001/a1-activation/activation-session.json",
+        "sha256": "3636363636363636363636363636363636363636363636363636363636363636"
+      },
+      "deviations": {
+        "path": "docs/evidence/WP-0001/a1-activation/deviations.json",
+        "sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+      },
+      "sandbox_policy": {
+        "path": "docs/evidence/WP-0001/a1-activation/sandbox.policy",
+        "sha256": "2727272727272727272727272727272727272727272727272727272727272727"
+      },
+      "network_policy": {
+        "path": "docs/evidence/WP-0001/a1-activation/network.policy",
+        "sha256": "2828282828282828282828282828282828282828282828282828282828282828"
+      }
+    },
+    "raw_capture_collectors": {
+      "protocol": {
+        "path": "docs/foundation-v0.1/tools/capture_wp0001_protocol.py",
+        "sha256": "5656565656565656565656565656565656565656565656565656565656565656"
+      },
+      "network": {
+        "path": "docs/foundation-v0.1/tools/capture_wp0001_network.py",
+        "sha256": "5757575757575757575757575757575757575757575757575757575757575757"
+      },
+      "policy_attachment": {
+        "path": "docs/foundation-v0.1/tools/capture_wp0001_policy_attachment.py",
+        "sha256": "5858585858585858585858585858585858585858585858585858585858585858"
+      },
+      "authority_claim": "AUTHORIZE-WP0001-RAW-COLLECTORS"
+    },
+    "unity_mcp_route": {
+      "route": "UNITY-MCP-EXTERNAL",
+      "code_identity_authority_claim": "AUTHORIZE-WP0001-CODE-IDENTITIES",
+      "client": {
+        "path": "/private/var/wp0001/home/bin/codex",
+        "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "version": "codex-cli fixture",
+        "publisher": "OpenAI OpCo, LLC",
+        "signing_identity": {
+          "verification_scope": "codesign-strict-component",
+          "identifier": "com.openai.codex.fixture",
+          "team_identifier": "OPENAI1234",
+          "cdhash": "cccccccccccccccccccccccccccccccccccccccc",
+          "designated_requirement_sha256": "4646464646464646464646464646464646464646464646464646464646464646",
+          "authorities_sha256": "4747474747474747474747474747474747474747474747474747474747474747"
+        },
+        "pid": 101,
+        "started_at": "2026-07-16T12:10:00Z",
+        "process_birth_id_sha256": "3939393939393939393939393939393939393939393939393939393939393939",
+        "environment_sha256": "73cc29665d475debdac4da36ce4c99006351708a9f1cb7dd021a5880b016381e",
+        "environment_names_sha256": "d2b1fd7163a70bbe9e9b607510b83ab8fe8780364f69da9495a68fade60b4221",
+        "server_inventory_sha256": "4545454545454545454545454545454545454545454545454545454545454545",
+        "principal_uid": 777,
+        "cwd": "/private/var/wp0001/repo",
+        "arguments": [
+          "codex",
+          "mcp-client"
+        ]
+      },
+      "relay": {
+        "path": "/private/var/wp0001/home/.unity/relay/relay_mac_arm64.app/Contents/MacOS/relay_mac_arm64",
+        "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "package_copy_path": "/private/var/wp0001/repo/Game/Library/PackageCache/com.unity.ai.assistant@fixture/Server/relay_mac_arm64",
+        "package_copy_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "version": "1.0.12-build.96",
+        "signing_identity": {
+          "verification_scope": "codesign-strict-component",
+          "identifier": "com.unity.relay.fixture",
+          "team_identifier": "UNITY12345",
+          "cdhash": "dddddddddddddddddddddddddddddddddddddddd",
+          "designated_requirement_sha256": "4848484848484848484848484848484848484848484848484848484848484848",
+          "authorities_sha256": "4949494949494949494949494949494949494949494949494949494949494949"
+        },
+        "pid": 202,
+        "started_at": "2026-07-16T12:10:01Z",
+        "process_birth_id_sha256": "4040404040404040404040404040404040404040404040404040404040404040",
+        "environment_names_sha256": "d2b1fd7163a70bbe9e9b607510b83ab8fe8780364f69da9495a68fade60b4221",
+        "parent_pid": 101,
+        "principal_uid": 777,
+        "arguments": [
+          "--mcp",
+          "--project-path",
+          "/private/var/wp0001/repo/Game",
+          "--instance-id",
+          "303"
+        ]
+      },
+      "bridge": {
+        "editor_pid": 303,
+        "started_at": "2026-07-16T12:00:00Z",
+        "process_birth_id_sha256": "4141414141414141414141414141414141414141414141414141414141414141",
+        "environment_names_sha256": "b3ce93c3aa535aa186e1c1174c1604f3c6f8bc9322596c4df80a54f8f6e9f901",
+        "editor_path": "/Applications/Unity/Hub/Editor/6000.3.19f1/Unity.app/Contents/MacOS/Unity",
+        "editor_sha256": "2020202020202020202020202020202020202020202020202020202020202020",
+        "editor_version": "6000.3.19f1",
+        "editor_changeset": "7689f4515d75",
+        "signing_identity": {
+          "verification_scope": "codesign-strict-component",
+          "identifier": "com.unity.editor.fixture",
+          "team_identifier": "UNITY12345",
+          "cdhash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "designated_requirement_sha256": "5050505050505050505050505050505050505050505050505050505050505050",
+          "authorities_sha256": "5151515151515151515151515151515151515151515151515151515151515151"
+        },
+        "principal_uid": 777,
+        "cwd": "/private/var/wp0001/repo/Game",
+        "arguments": [
+          "Unity",
+          "-projectPath",
+          "/private/var/wp0001/repo/Game"
+        ],
+        "project_path": "/private/var/wp0001/repo/Game",
+        "connection_file": "/private/var/wp0001/home/.unity/mcp/connections/bridge-675b4900-303.json",
+        "connection_file_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "protocol_version": "2.0",
+        "discovery_connection_type": "named_pipe",
+        "physical_transport": "unix_socket",
+        "endpoint": "/tmp/unity-mcp-675b4900-303",
+        "endpoint_owner_uid": 777,
+        "endpoint_mode": "0600",
+        "shared_temp_exception": true,
+        "discovery_record": {
+          "path": "docs/evidence/WP-0001/a1-activation/bridge-discovery.json",
+          "sha256": "3434343434343434343434343434343434343434343434343434343434343434"
+        }
+      },
+      "entitlement": {
+        "eligible_assigned_seat_verified": true,
+        "organization_id_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "cloud_project_id_sha256": "1212121212121212121212121212121212121212121212121212121212121212",
+        "same_organization_project_linkage_verified": true,
+        "license_secret_material_copied": false,
+        "evidence": {
+          "path": "docs/evidence/WP-0001/a1-activation/entitlement-linkage.json",
+          "sha256": "1313131313131313131313131313131313131313131313131313131313131313"
+        }
+      },
+      "project_identity": {
+        "company": "LocalFoundationLab",
+        "product": "SashaAtomicLandPirate_WP0001",
+        "bundle_id": "local.foundation.sashaatomiclandpirate.wp0001",
+        "dev_profile": "wp0001-dev-v1",
+        "test_profile": "wp0001-test-v1",
+        "temporary_non_shipping": true,
+        "prior_root_discovery_forbidden": true,
+        "evidence": {
+          "path": "docs/evidence/WP-0001/a1-activation/project-identity.json",
+          "sha256": "1414141414141414141414141414141414141414141414141414141414141414"
+        }
+      },
+      "codex_policy": {
+        "runtime_config_path": "/private/var/wp0001/home/.codex/config.toml",
+        "evidence": {
+          "path": "docs/evidence/WP-0001/a1-activation/codex-runtime-config.toml",
+          "sha256": "1515151515151515151515151515151515151515151515151515151515151515"
+        },
+        "server_name": "unity_mcp_a1_wp0001",
+        "approval_policy": "on-request",
+        "default_tools_approval_mode": "prompt",
+        "required": true,
+        "enabled_tools": [
+          "Unity_ReadConsole"
+        ],
+        "enabled_tools_sha256": "0c5bcebec28b268ea121a252b6c4d886d30025a31205785bc80de8a12a1fe2a5",
+        "client_visible_tools": [
+          "Unity_ReadConsole"
+        ],
+        "tool_scope_authority_claim": "AUTHORIZE-WP0001-MCP-ALLOWLIST",
+        "exact_command_identity_enforced": true,
+        "project_config_disabled": true,
+        "global_unity_mcp_absent": true,
+        "environment_bindings": {
+          "HOME": "/private/var/wp0001/home",
+          "TMPDIR": "/private/var/wp0001/temp",
+          "TMP": "/private/var/wp0001/temp",
+          "TEMP": "/private/var/wp0001/temp"
+        },
+        "client_environment_guard": {
+          "CODEX_HOME": "/private/var/wp0001/home/.codex",
+          "XDG_CONFIG_HOME": "/private/var/wp0001/home/.config",
+          "XDG_CACHE_HOME": "/private/var/wp0001/home/.cache",
+          "XDG_DATA_HOME": "/private/var/wp0001/home/.local/share",
+          "GIT_CONFIG_NOSYSTEM": "1",
+          "GIT_CONFIG_GLOBAL": "/private/var/wp0001/home/.gitconfig",
+          "GIT_TERMINAL_PROMPT": "0",
+          "absent_variables": [
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "AWS_SESSION_TOKEN",
+            "GH_TOKEN",
+            "GITHUB_TOKEN",
+            "GIT_ASKPASS",
+            "SSH_AUTH_SOCK",
+            "VERCEL_TOKEN"
+          ]
+        },
+        "environment_sha256": "73cc29665d475debdac4da36ce4c99006351708a9f1cb7dd021a5880b016381e",
+        "effective_server_inventory_sha256": "4545454545454545454545454545454545454545454545454545454545454545"
+      },
+      "process_observation": {
+        "path": "docs/evidence/WP-0001/a1-activation/mcp-route.json",
+        "sha256": "3232323232323232323232323232323232323232323232323232323232323232"
+      },
+      "connection": {
+        "prior_approval_history_absent": true,
+        "preflight_approval_revoked": true,
+        "publisher_fallback_used": false,
+        "batch_auto_approve": false,
+        "direct_requires_approval": true,
+        "gateway_allowed": false,
+        "first_connection_creator_approved": true,
+        "final_state": "connected"
+      },
+      "handshake": {
+        "transcript": {
+          "path": "docs/evidence/WP-0001/a1-activation/clean-handshake.json",
+          "sha256": "1616161616161616161616161616161616161616161616161616161616161616"
+        },
+        "client_pid": 91,
+        "relay_pid": 192,
+        "editor_pid": 303,
+        "client_started_at": "2026-07-16T12:05:00Z",
+        "relay_started_at": "2026-07-16T12:05:01Z",
+        "editor_started_at": "2026-07-16T12:00:00Z",
+        "client_process_birth_id_sha256": "4242424242424242424242424242424242424242424242424242424242424242",
+        "relay_process_birth_id_sha256": "4343434343434343434343434343434343434343434343434343434343434343",
+        "editor_process_birth_id_sha256": "4141414141414141414141414141414141414141414141414141414141414141",
+        "runtime_config_sha256": "1515151515151515151515151515151515151515151515151515151515151515",
+        "enabled_tools_sha256": "0c5bcebec28b268ea121a252b6c4d886d30025a31205785bc80de8a12a1fe2a5",
+        "environment_sha256": "73cc29665d475debdac4da36ce4c99006351708a9f1cb7dd021a5880b016381e",
+        "server_inventory_sha256": "4545454545454545454545454545454545454545454545454545454545454545",
+        "captured_at": "2026-07-16T12:05:05Z",
+        "capture_complete": true,
+        "observed_methods": [
+          "initialize",
+          "notifications/initialized",
+          "tools/list"
+        ],
+        "model_prompt_count": 0,
+        "unity_tool_call_count": 0,
+        "disconnected": true,
+        "approval_revoked_after_disconnect": true
+      },
+      "activation_session": {
+        "evidence": {
+          "path": "docs/evidence/WP-0001/a1-activation/activation-session.json",
+          "sha256": "3636363636363636363636363636363636363636363636363636363636363636"
+        },
+        "session_id_sha256": "6bd3023ee537b411b53b40d26152bfd21d0cef6f6e853394e9efa141467dda58",
+        "connection_record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "fd_graph_sha256": "5959595959595959595959595959595959595959595959595959595959595959",
+        "client_pid": 101,
+        "relay_pid": 202,
+        "editor_pid": 303,
+        "client_started_at": "2026-07-16T12:10:00Z",
+        "relay_started_at": "2026-07-16T12:10:01Z",
+        "editor_started_at": "2026-07-16T12:00:00Z",
+        "client_process_birth_id_sha256": "3939393939393939393939393939393939393939393939393939393939393939",
+        "relay_process_birth_id_sha256": "4040404040404040404040404040404040404040404040404040404040404040",
+        "editor_process_birth_id_sha256": "4141414141414141414141414141414141414141414141414141414141414141",
+        "runtime_config_sha256": "1515151515151515151515151515151515151515151515151515151515151515",
+        "enabled_tools_sha256": "0c5bcebec28b268ea121a252b6c4d886d30025a31205785bc80de8a12a1fe2a5",
+        "environment_sha256": "73cc29665d475debdac4da36ce4c99006351708a9f1cb7dd021a5880b016381e",
+        "server_inventory_sha256": "4545454545454545454545454545454545454545454545454545454545454545",
+        "approval_history_absent_before_connection": true,
+        "creator_approved": true,
+        "publisher_fallback_used": false,
+        "connected": true,
+        "capture_complete": true,
+        "model_prompt_count": 0,
+        "unity_tool_call_count": 0,
+        "captured_at": "2026-07-16T12:10:05Z",
+        "receipt_must_be_reissued_on_drift": true
+      },
+      "controls": {
+        "pending_execution_gap_acknowledged": true,
+        "hidden_tool_gap_acknowledged": true,
+        "os_quarantine_authoritative": true,
+        "mitigation_mode": "persistent-relay-suppressed",
+        "persistent_relay_process_count": 0,
+        "tcp_listener_count": 0,
+        "wildcard_listener_count": 0,
+        "non_loopback_reachable_listener_count": 0,
+        "network_policy_enforced": true,
+        "network_policy_sha256": "2828282828282828282828282828282828282828282828282828282828282828",
+        "boot_session_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "captured_at": "2026-07-16T12:10:04Z",
+        "probe_targets": {
+          "non_loopback_listener": "external-observer://abababababababababababababababababababababababababababababababab",
+          "loopback_control": "unix:///private/tmp/unity-mcp-675b4900-303",
+          "approved_egress": "https://packages.unity.com/",
+          "unapproved_egress": "https://example.com/"
+        },
+        "probe_targets_sha256": "29677c4d7779c2bb387bf86a49142fbbcca7b2c1068694e312c028eee65782de",
+        "non_loopback_probe_count": 1,
+        "non_loopback_probe_success_count": 0,
+        "loopback_probe_count": 1,
+        "loopback_probe_success_count": 1,
+        "approved_egress_probe_count": 1,
+        "approved_egress_probe_success_count": 1,
+        "unapproved_egress_probe_count": 1,
+        "unapproved_egress_probe_success_count": 0,
+        "observation": {
+          "path": "docs/evidence/WP-0001/a1-activation/network-observation.json",
+          "sha256": "1717171717171717171717171717171717171717171717171717171717171717"
+        }
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "wp0001-a1-route-valid",
+      "mutations": [],
+      "observed_seed_tree_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected_codes": []
+    },
+    {
+      "id": "wp0001-a1-target-drift-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.bridge.project_path",
+          "value": "/private/var/wp0001/wrong/Game"
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-project-target-mismatch"
+      ]
+    },
+    {
+      "id": "wp0001-a1-pid-drift-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.bridge.editor_pid",
+          "value": 404
+        },
+        {
+          "path": "unity_mcp_route.handshake.editor_pid",
+          "value": 404
+        },
+        {
+          "path": "unity_mcp_route.activation_session.editor_pid",
+          "value": 404
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-endpoint-invalid",
+        "wp0001-mcp-relay-arguments-mismatch",
+        "wp0001-mcp-socket-exception-invalid"
+      ]
+    },
+    {
+      "id": "wp0001-a1-config-environment-drift-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.codex_policy.environment_bindings.HOME",
+          "value": "/Users/creator"
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-environment-mismatch"
+      ]
+    },
+    {
+      "id": "wp0001-a1-client-environment-guard-drift-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.codex_policy.client_environment_guard.CODEX_HOME",
+          "value": "/Users/creator/.codex"
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-environment-mismatch"
+      ]
+    },
+    {
+      "id": "wp0001-a1-effective-server-inventory-drift-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.activation_session.server_inventory_sha256",
+          "value": "9999999999999999999999999999999999999999999999999999999999999999"
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-config-inventory-invalid"
+      ]
+    },
+    {
+      "id": "wp0001-a1-nonzero-tool-call-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.handshake.unity_tool_call_count",
+          "value": 1
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-handshake-not-clean"
+      ]
+    },
+    {
+      "id": "wp0001-a1-inherited-approval-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.connection.prior_approval_history_absent",
+          "value": false
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-connection-state-invalid"
+      ]
+    },
+    {
+      "id": "wp0001-a1-persistent-relay-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.controls.persistent_relay_process_count",
+          "value": 1
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-persistent-relay-not-suppressed"
+      ]
+    },
+    {
+      "id": "wp0001-a1-wildcard-listener-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.controls.tcp_listener_count",
+          "value": 1
+        },
+        {
+          "path": "unity_mcp_route.controls.wildcard_listener_count",
+          "value": 1
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-persistent-relay-not-suppressed"
+      ]
+    },
+    {
+      "id": "wp0001-a1-project-seed-tree-mismatch-invalid",
+      "mutations": [],
+      "observed_seed_tree_sha256": "1818181818181818181818181818181818181818181818181818181818181818",
+      "expected_codes": [
+        "wp0001-project-seed-tree-mismatch"
+      ]
+    },
+    {
+      "id": "wp0001-a1-visible-tool-scope-drift-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.codex_policy.client_visible_tools",
+          "value": [
+            "Unity_ManageScene"
+          ]
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-tool-scope-mismatch"
+      ]
+    },
+    {
+      "id": "wp0001-a1-forbidden-sanitized-tool-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.codex_policy.enabled_tools",
+          "value": [
+            "Unity_RunCommand"
+          ]
+        },
+        {
+          "path": "unity_mcp_route.codex_policy.client_visible_tools",
+          "value": [
+            "Unity_RunCommand"
+          ]
+        },
+        {
+          "path": "unity_mcp_route.codex_policy.enabled_tools_sha256",
+          "value": "726907906fe6b3c4384e490490b16c424614a14716a56da827d3edec5ee16d5c"
+        },
+        {
+          "path": "unity_mcp_route.handshake.enabled_tools_sha256",
+          "value": "726907906fe6b3c4384e490490b16c424614a14716a56da827d3edec5ee16d5c"
+        },
+        {
+          "path": "unity_mcp_route.activation_session.enabled_tools_sha256",
+          "value": "726907906fe6b3c4384e490490b16c424614a14716a56da827d3edec5ee16d5c"
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-activation-session-invalid",
+        "wp0001-mcp-forbidden-tool"
+      ]
+    },
+    {
+      "id": "wp0001-a1-allowlist-digest-drift-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.codex_policy.enabled_tools_sha256",
+          "value": "3535353535353535353535353535353535353535353535353535353535353535"
+        },
+        {
+          "path": "unity_mcp_route.handshake.enabled_tools_sha256",
+          "value": "3535353535353535353535353535353535353535353535353535353535353535"
+        },
+        {
+          "path": "unity_mcp_route.activation_session.enabled_tools_sha256",
+          "value": "3535353535353535353535353535353535353535353535353535353535353535"
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-activation-session-invalid",
+        "wp0001-mcp-tool-scope-authority-invalid"
+      ]
+    },
+    {
+      "id": "wp0001-a1-noncanonical-runtime-config-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.codex_policy.runtime_config_path",
+          "value": "/private/var/wp0001/home/.codex/wp0001.config.toml"
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-runtime-state-escape"
+      ]
+    },
+    {
+      "id": "wp0001-a1-network-denial-without-probes-invalid",
+      "mutations": [
+        {
+          "path": "unity_mcp_route.controls.mitigation_mode",
+          "value": "os-network-denied"
+        },
+        {
+          "path": "unity_mcp_route.controls.persistent_relay_process_count",
+          "value": 1
+        },
+        {
+          "path": "unity_mcp_route.controls.tcp_listener_count",
+          "value": 1
+        },
+        {
+          "path": "unity_mcp_route.controls.wildcard_listener_count",
+          "value": 1
+        },
+        {
+          "path": "unity_mcp_route.controls.non_loopback_probe_count",
+          "value": 0
+        },
+        {
+          "path": "unity_mcp_route.controls.loopback_probe_count",
+          "value": 0
+        },
+        {
+          "path": "unity_mcp_route.controls.loopback_probe_success_count",
+          "value": 0
+        },
+        {
+          "path": "unity_mcp_route.controls.approved_egress_probe_count",
+          "value": 0
+        },
+        {
+          "path": "unity_mcp_route.controls.approved_egress_probe_success_count",
+          "value": 0
+        },
+        {
+          "path": "unity_mcp_route.controls.unapproved_egress_probe_count",
+          "value": 0
+        }
+      ],
+      "expected_codes": [
+        "wp0001-mcp-network-policy-unproven"
+      ]
+    }
+  ]
+}

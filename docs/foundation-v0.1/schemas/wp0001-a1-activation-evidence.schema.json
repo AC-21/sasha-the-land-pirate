@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/wp0001-a1-activation-evidence.schema.json",
+  "title": "WP-0001 A1 activation evidence manifest",
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "safePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "manifest_id",
+    "packet_id",
+    "packet_contract_sha256",
+    "base_commit",
+    "created_at",
+    "producer",
+    "artifacts",
+    "preserved_deviation_ids",
+    "complete",
+    "secret_material_included"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "manifest_id": {
+      "type": "string",
+      "pattern": "^A1E-WP-0001-[A-Z0-9-]+$"
+    },
+    "packet_id": { "const": "WP-0001" },
+    "packet_contract_sha256": {
+      "const": "eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3"
+    },
+    "base_commit": {
+      "type": "string",
+      "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "principal_id", "principal_uid"],
+      "properties": {
+        "role": { "const": "creator" },
+        "principal_id": { "type": "string", "minLength": 1 },
+        "principal_uid": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 12,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256",
+          "byte_size",
+          "media_type",
+          "captured_at",
+          "producer",
+          "source",
+          "known_limitations",
+          "redaction_status"
+        ],
+        "properties": {
+          "path": { "$ref": "#/$defs/safePath" },
+          "sha256": { "$ref": "#/$defs/sha256" },
+          "byte_size": { "type": "integer", "minimum": 0 },
+          "media_type": { "type": "string", "minLength": 1 },
+          "captured_at": { "type": "string", "format": "date-time" },
+          "producer": { "type": "string", "minLength": 1 },
+          "source": { "type": "string", "minLength": 1 },
+          "known_limitations": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "redaction_status": {
+            "enum": [
+              "not-required",
+              "redacted-and-reviewed"
+            ]
+          }
+        }
+      }
+    },
+    "preserved_deviation_ids": {
+      "const": [
+        "DEV-WP0001-PRE-D0051-UNITY-READ-CONSOLE",
+        "DEV-WP0001-PRE-A1-EDITOR-VERSION-PROBE",
+        "DEV-WP0001-PRE-A1-HUB-LIST-PROBE"
+      ]
+    },
+    "complete": { "const": true },
+    "secret_material_included": { "const": false }
+  }
+}

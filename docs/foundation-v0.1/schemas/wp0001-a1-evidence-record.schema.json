@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/wp0001-a1-evidence-record.schema.json",
+  "title": "WP-0001 content-addressed A1 evidence record",
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "safePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "document_kind",
+    "packet_id",
+    "packet_contract_sha256",
+    "captured_at",
+    "producer_role",
+    "producer_id",
+    "capture_method",
+    "facts_derivation",
+    "facts",
+    "source_artifacts",
+    "known_limitations",
+    "complete",
+    "secret_material_included"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "document_kind": {
+      "enum": [
+        "project-seed",
+        "toolchain",
+        "entitlement-linkage",
+        "project-identity",
+        "quarantine",
+        "mcp-route",
+        "bridge-discovery",
+        "clean-handshake",
+        "activation-session",
+        "network-observation",
+        "deviations"
+      ]
+    },
+    "packet_id": { "const": "WP-0001" },
+    "packet_contract_sha256": {
+      "const": "eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3"
+    },
+    "captured_at": { "type": "string", "format": "date-time" },
+    "producer_role": { "const": "creator" },
+    "producer_id": { "type": "string", "minLength": 1 },
+    "capture_method": {
+      "enum": [
+        "protected-git-derivation",
+        "creator-command-capture",
+        "creator-ui-capture",
+        "creator-command-and-ui-capture"
+      ]
+    },
+    "facts_derivation": { "type": "string", "minLength": 1 },
+    "facts": {
+      "type": "object"
+    },
+    "source_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "$ref": "#/$defs/safePath" },
+          "sha256": { "$ref": "#/$defs/sha256" }
+        }
+      }
+    },
+    "known_limitations": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "complete": { "const": true },
+    "secret_material_included": { "const": false }
+  }
+}
