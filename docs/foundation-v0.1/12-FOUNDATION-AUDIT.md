@@ -53,6 +53,10 @@ Bootstrap lint can catch internal drift and malformed draft records. It cannot p
 4. The installed 6000.5.4f1 Editor does not satisfy the proposed D-0047 6000.3.19f1 + Mac IL2CPP + Xcode 26.3 tuple.
 5. The A1 quarantine boundary has not been physically established or receipt-bound.
 
+The repaired WP-0001 proposal has canonical contract hash `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`. Its exact acceptance domain now includes the official Unity AI package/seat/project/client evidence, locked headless SDK, shared-source Unity/.NET boundary, native ARM64 smoke/Metal proof, and standalone-clone quarantine. This is a reviewable proposal hash, not an acceptance or activation claim.
+
+During this A0 hardening pass, unsealed `RR-CREATOR-20260715-03` advanced only its `08-BUILD-ROADMAP.md` materialization hash from `281941fcdc74786e545090b39d0d679bd7bc138449eb8e6775f9e35953e9df6a` to `fa4135cc1b4429de7d07b3330722049cf8174323a92b8a2ad47db407a7a0458c` so the roadmap no longer authorizes a shared-Git-worktree A1 boundary. Its creator source hash, claims, decision-event bindings, sealed status, and protected authority remain unchanged; Git history retains the prior draft.
+
 Until all five are true, the project remains A0 and no game implementation starts under this constitution.
 
 ## Honest blockers before gameplay graybox

@@ -11,7 +11,7 @@ Deliverables:
 - explicitly accept WP-0001 before any narrowly scoped A1 experiment;
 - resolve D-0048 through documented Authorized Agentic Access, a creator-bound human-invoked Unity boundary, or a superseding Godot fallback;
 - approve the exact D-0047 Unity installation;
-- establish the disposable A1 branch/worktree boundary in Section 8 of the trust document, pinned to a creator-approved base and with manual diff/import.
+- establish the standalone disposable A1 clone/sandbox boundary in Section 8 of the trust document, with an independent `.git` directory, pinned to a creator-approved base, and a manual diff/import-or-reject seam.
 
 Exit: the reversible gameplay-neutral technical spike has explicit creator authorization and an actual quarantine boundary. It may start without silently ratifying the game's design center.
 

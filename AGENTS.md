@@ -102,7 +102,7 @@ Before editing:
 1. Reproduce the packet baseline; stop if it differs.
 2. Confirm packet status and approval receipt, not merely its filename.
 3. Acquire the required reservation: exact base commit, paths, state domains/content IDs, lease, expiry, heartbeat, and fencing token.
-4. Work only in the packet's isolated branch/worktree or asset package.
+4. Work only in the packet's standalone disposable clone/sandbox with an independent `.git` directory, or its isolated asset package.
 5. Touch only declared paths and interfaces. Ask to amend scope before crossing them.
 
 At A1, the foundation and trusted state must be read-only/hash-checked inputs, only packet outputs may be writable, and merge/release credentials must be absent. A folder named `sandbox` is not proof of quarantine.
