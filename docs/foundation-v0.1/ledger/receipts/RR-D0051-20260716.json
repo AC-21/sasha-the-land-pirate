@@ -1,0 +1,51 @@
+{
+  "receipt_id": "RR-D0051-20260716",
+  "issued_at": "2026-07-16T00:21:44-07:00",
+  "issued_by": "AC-21",
+  "issuer_role": "creator",
+  "receipt_kind": "decision-ratification",
+  "artifact_resolver": {
+    "type": "local-git-tree"
+  },
+  "source_reference": "ledger/receipts/RR-D0051-20260716.source.md",
+  "subject_ids": ["D-0051", "WP-0001", "MCP-SMOKE-20260716"],
+  "subject_claims": [
+    {
+      "subject_id": "D-0051",
+      "claims": [
+        "AUTHORIZED-AGENTIC-ACCESS",
+        "UNITY-MCP-EXTERNAL",
+        "SUPERSEDE-UNITY-AI-GATEWAY-CODEX"
+      ]
+    },
+    {
+      "subject_id": "WP-0001",
+      "claims": [
+        "UNITY-MCP-EXTERNAL",
+        "PRESERVE-ACCEPTED-WP0001-CONTRACT"
+      ]
+    },
+    {
+      "subject_id": "MCP-SMOKE-20260716",
+      "claims": [
+        "ACKNOWLEDGE-PRE-A1-READONLY-SMOKE",
+        "FORBID-AS-A1-ACTIVATION-EVIDENCE"
+      ]
+    }
+  ],
+  "approval_text_sha256": "60f39102db658ffe43dba12bed49f240ee11a92e2a17e54ab9f920887a4c5590",
+  "accepted_commit": null,
+  "artifact_sha256": {
+    "ledger/decisions.jsonl": "2433d5004911bf3acc886d63176a0d16f85cd748d242e5ec7b2689fb09ca6465",
+    "work-packets/proposed/WP-0001.json": "70035d37fb9c7e525a4f774c0997b518e39f16484e4c706fcce1b1b4e7abec56"
+  },
+  "subject_contract_sha256": {
+    "WP-0001": "eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3"
+  },
+  "subject_event_sha256": {
+    "D-0051": "f0cb055daade12fd2ced21b5e58b3bbb91f8dd09a6aef99daed7f004148a6b33"
+  },
+  "foundation_binding": null,
+  "signature_reference": null,
+  "sealed": false
+}

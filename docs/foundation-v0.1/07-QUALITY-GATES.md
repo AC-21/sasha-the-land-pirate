@@ -22,8 +22,8 @@ Pass when:
 - content/ledger/work-packet/save/asset instances validate through a pinned Draft 2020-12 validator with format checking, positive fixtures, deliberately invalid fixtures, and semantic governance checks;
 - no generated caches, secrets, sole binary sources, or unlicensed inputs enter the change;
 - dependency/license inventory is current;
-- D-0049's selected `UNITY-AI-GATEWAY-CODEX` path is receipt-bound and its exact seat, linked project, Gateway, bundled client, scope/rate-limit, initiation-identity, and revocation evidence is verified; selecting another route requires a superseding decision and revised packet;
-- no agent or CI directly invoked a Unity process; before A1, only D-0050's receipt-bound creator-operated setup may install/open the exact candidate, and it must record zero AI Unity tool calls or implementation work;
+- D-0051's selected `UNITY-MCP-EXTERNAL` path is protected by both its active creator decision and a creator-controlled external `packet-acceptance` route-amendment receipt bound to WP-0001's exact contract; its exact seat, linked project, Bridge, relay path/digest/version/arguments, Codex client/version, explicit project target, creator-approved connection, scope/rate-limit, initiation-identity, and revocation evidence is verified; global MCP configuration is absent and the trusted A0 checkout's repo-scoped entry remains disabled;
+- no agent or CI directly invoked a Unity process; before A1, only D-0050's receipt-bound creator-operated setup may install/open the exact candidate. The pre-D-0051 read-only console smoke is retained as a deviation and cannot satisfy activation evidence; a new clean setup handshake must record zero Unity tool calls or implementation work;
 - native Apple Silicon build succeeds.
 
 ## Gate 2 — Simulation correctness

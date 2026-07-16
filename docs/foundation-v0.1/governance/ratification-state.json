@@ -28,11 +28,12 @@
     "technical_spike": {
       "status": "awaiting-creator",
       "decision_requirements": [
-        {"decision_id":"D-0049","accepted_statuses":["ratified"],"allowed_claims":["UNITY-AI-GATEWAY-CODEX"],"receipt_id":"RR-D0049-20260715","mismatch_action":"block-Unity-or-supersede-WP-0001-with-Godot"},
+        {"decision_id":"D-0049","accepted_statuses":["ratified"],"allowed_claims":["UNITY-MCP-EXTERNAL"],"receipt_id":"RR-D0051-20260716","mismatch_action":"block-Unity-or-select-another-authorized-route"},
         {"decision_id":"D-0050","accepted_statuses":["ratified"],"allowed_claims":["AUTHORIZE-CREATOR-OPERATED-D0047-SETUP"],"receipt_id":"RR-D0050-20260715","mismatch_action":"block-creator-setup-and-A1-activation"}
       ],
       "receipt_requirements": [
-        {"purpose":"accept-WP-0001","receipt_id":"RR-WP0001-ACCEPT-20260715","subject_ids":["WP-0001"],"required_claims":["ACCEPT-WP-0001","AUTHORIZE-TEMP-WP0001-IDENTITY","UNITY-AI-GATEWAY-CODEX"]},
+        {"purpose":"accept-WP-0001","receipt_id":"RR-WP0001-ACCEPT-20260715","subject_ids":["WP-0001"],"required_claims":["ACCEPT-WP-0001","AUTHORIZE-TEMP-WP0001-IDENTITY"]},
+        {"purpose":"accept-WP-0001-route-successor","receipt_id":null,"subject_ids":["WP-0001"],"required_claims":["UNITY-MCP-EXTERNAL","PRESERVE-ACCEPTED-WP0001-CONTRACT"],"required_receipt_kind":"packet-acceptance","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0001":"eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3"}},
         {"purpose":"approve-repository-location","receipt_id":"RR-WP0001-ACCEPT-20260715","subject_ids":["WP-0001"],"required_claims":["APPROVE-REPOSITORY-LOCATION"]},
         {"purpose":"approve-Unity-installation","receipt_id":"RR-WP0001-ACCEPT-20260715","subject_ids":["WP-0001"],"required_claims":["APPROVE-UNITY-INSTALLATION"]},
         {"purpose":"establish-A1-quarantine","receipt_id":null,"subject_ids":["WP-0001"],"required_claims":["A1-QUARANTINE-BOUNDARY-VERIFIED","ACTIVATE-A1-WP-0001"]}

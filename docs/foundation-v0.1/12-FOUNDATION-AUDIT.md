@@ -37,7 +37,7 @@ The creator's later 2026-07-15 direction is captured in unsealed receipt `RR-CRE
 
 “Other than that. Let's go for it” safely authorizes continued A0 design work. It does not name the repository path, accept either exact work packet, approve a Unity installation, answer the open worksheet values, create the quarantine boundary, or promote autonomy.
 
-The repository and Unity-first source captures remain unsealed historical evidence, while authenticated creator authority now seals D-0049 and WP-0001 acceptance against protected main commit `ed14ae664e7c0efea790d334546538584e85c083`. The selected route is `UNITY-AI-GATEWAY-CODEX`; the exact packet contract, temporary identity, repository location, and authorization to install the D-0047 candidate are accepted. D-0050 narrows that authorization to creator-operated setup without engine ratification. Read-only inspection has not yet proved the assigned Unity seat, same-organization project linkage, Gateway/bundled-client profile, exact D-0047 Editor/IL2CPP/Xcode installation, or standalone A1 quarantine.
+The repository and Unity-first source captures remain historical evidence, while authenticated creator authority seals D-0049 and WP-0001 acceptance against protected main commit `ed14ae664e7c0efea790d334546538584e85c083`. D-0051 now supersedes D-0049's route choice with `UNITY-MCP-EXTERNAL` without changing the accepted WP-0001 contract, temporary identity, repository location, or creator-operated D-0047 installation authority. Its current Codex-conversation receipt is intentionally unsealed, so it records the creator's exact successor choice but does not yet satisfy protected decision authority or the immutable packet's separate packet-acceptance route binding. Read-only inspection has not yet proved the assigned Unity seat, same-organization project linkage, exact Bridge/relay/client/project-target/connection profile, exact D-0047 Editor/IL2CPP/Xcode installation, or standalone A1 quarantine.
 
 ## What this audit does not claim
 
@@ -48,15 +48,16 @@ Bootstrap lint can catch internal drift and malformed draft records. It cannot p
 ## Honest blockers before A1
 
 1. The assigned Unity AI subscription/seat and same-organization project linkage have not been physically verified.
-2. The selected Gateway, Unity-bundled Codex/version, provider/model metadata, credential presence, scopes/rate limits, initiation identity, and revocation state have not been captured without secrets.
+2. D-0051 is not externally protected, and no creator-controlled external `packet-acceptance` route-amendment receipt binds `UNITY-MCP-EXTERNAL` to the exact immutable WP-0001 contract; the exact Unity MCP Bridge, relay path/digest/version/arguments, Codex client/version, explicit project target, approved connection, scopes/rate limits, initiation identity, and revocation state also have not been captured without secrets.
 3. The installed 6000.5.4f1 Editor does not satisfy the creator-approved D-0047 6000.3.19f1 + Mac IL2CPP + Xcode 26.3 candidate.
 4. The standalone A1 quarantine and creator-operated import/reject boundary have not been physically established or receipt-bound.
+5. A read-only `Unity_ReadConsole` smoke ran before D-0051 and A1. It returned zero entries and no known mutation, but it is a recorded setup-boundary deviation and cannot count toward the required zero-tool-call handshake or activation evidence.
 
 The accepted WP-0001 contract hash is `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`. Acceptance authorizes only its bounded creator-operated setup phase; it is not evidence that the engine, route, build, save contracts, performance, or quarantine have passed, and it is not A1 activation.
 
-Across the A0 hardening and acceptance passes, unsealed `RR-CREATOR-20260715-03` advanced only derived materialization hashes alongside the audited draft artifacts, including `01-DECISION-LEDGER.md` at `6b3a4fc5ec2d3df7bf311e744d03ecb33324d0dbc6925d07b483756025bd15b7` and `08-BUILD-ROADMAP.md` at `09e07838281619513ce04eac4855f9073ca9a257bca879a8fb9e6bbdb21c21c3`. Its creator source hash, claims, decision-event bindings, and unsealed status remain unchanged; Git history retains every prior draft.
+Across A0 hardening and successor passes, unsealed creator-source receipts advance only their derived live-materialization hashes when append-only decisions change the draft views. Their creator source hashes, claims, decision-event bindings, and unsealed status remain unchanged; Git history retains every prior snapshot.
 
-Until all four are true and a separate activation receipt is sealed, the project remains A0 and no game implementation starts under this constitution.
+Until all five are true and a separate activation receipt is sealed, the project remains A0 and no game implementation starts under this constitution.
 
 ## Honest blockers before gameplay graybox
 
@@ -83,7 +84,7 @@ Until all four are true and a separate activation receipt is sealed, the project
 ## Deferred evidence, not hidden assumptions
 
 - installation proof for the creator-approved D-0047 Unity/tool/package candidate;
-- physical seat/project/Gateway/bundled-client evidence for D-0049's selected route;
+- protected D-0051 authority, creator-controlled external packet route amendment, and physical seat/project/Bridge/relay/Codex-client/target/approved-connection evidence for the selected route;
 - lowest supported shipping Mac;
 - accepted city manipulation grammar;
 - final road-control embodiment and travel topology;
