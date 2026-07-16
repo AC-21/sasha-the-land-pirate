@@ -37,7 +37,7 @@ Validate the bootstrap foundation from the repository root:
 python3 docs/foundation-v0.1/tools/validate_foundation.py
 ```
 
-Expected current result: the foundation lint passes with nine receipts: six intentionally unsealed creator-source/route captures and three sealed historical receipts for D-0049, D-0050, and WP-0001 acceptance.
+Expected current result: the foundation lint passes with ten receipts: five intentionally unsealed bootstrap creator-source captures and five sealed receipts for D-0049, D-0050, D-0051, WP-0001 acceptance, and the WP-0001 direct-MCP route successor.
 
 ## Planned seams
 
@@ -45,4 +45,4 @@ The accepted technical packet may create `Game/`, `SimulationCore/`, `SaveContra
 
 ## Next gate
 
-Sealed historical receipts accept WP-0001 contract `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`, its temporary identity, repository location, creator-operated installation of the exact D-0047 candidate, and the now-superseded Gateway route. D-0051 records the creator's direct-MCP successor choice, but its local receipt is unsealed and the immutable packet still requires a separate creator-controlled external `packet-acceptance` route-amendment receipt binding `UNITY-MCP-EXTERNAL` to the same contract. The packet is `accepted`, not `active`: that protected route amendment, the assigned Unity seat and same-organization project, exact Bridge/relay/client/target/connection profile, installed toolchain, and standalone quarantine/manual-import boundary still require evidence and a separate activation receipt. No further agent Unity interaction is authorized, and autonomy remains A0.
+Sealed historical receipts accept WP-0001 contract `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`, its temporary identity, repository location, creator-operated installation of the exact D-0047 candidate, and the now-superseded Gateway route. Owner-authenticated D-0051 and packet route-successor receipts now protect `UNITY-MCP-EXTERNAL` against that unchanged contract. The packet is `accepted`, not `active`: the assigned Unity seat and same-organization project, exact Bridge/relay/client/target/connection profile, installed toolchain, clean zero-tool-call handshake, and standalone quarantine/manual-import boundary still require evidence and a separate activation receipt. No further agent Unity interaction is authorized, and autonomy remains A0.
