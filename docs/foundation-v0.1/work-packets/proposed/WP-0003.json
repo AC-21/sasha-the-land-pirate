@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "id": "WP-0003",
-  "status": "proposed",
+  "status": "accepted",
   "class": "architecture",
   "declared_risk": "high",
   "derived_risk": "high",
@@ -13,8 +13,8 @@
   "value": "Starts building the game while retaining Git checkpoints, protected review, explicit Unity targeting, creator-controlled credentials, and reversible local iteration.",
   "requested_by": "creator-direction:2026-07-16:lets-do-it",
   "required_approver": "creator",
-  "approved_by": null,
-  "approval_receipt_id": null,
+  "approved_by": "AC-21",
+  "approval_receipt_id": "RR-WP0003-ACCEPT-20260716",
   "contract_sha256": "fb8b7362f3c6915447964e134486123ede6d8b22430fe744f5c0a03c0537bd47",
   "a1_boundary_manifest": null,
   "implementer": null,
@@ -272,8 +272,16 @@
       "from": null,
       "to": "proposed",
       "actor": "creator-requested-control-plane",
-      "at": "2026-07-16T16:00:00-07:00",
+      "at": "2026-07-16T11:54:52-07:00",
       "receipt_id": null
+    },
+    {
+      "event_id": "WPE-WP0003-ACCEPTED",
+      "from": "proposed",
+      "to": "accepted",
+      "actor": "creator",
+      "at": "2026-07-16T18:59:28Z",
+      "receipt_id": "RR-WP0003-ACCEPT-20260716"
     }
   ]
 }

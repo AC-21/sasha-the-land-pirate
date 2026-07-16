@@ -30,10 +30,10 @@
     "local_development": {
       "status": "awaiting-creator",
       "decision_requirements": [
-        {"decision_id":"D-0052","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-LEAN-A1-LOCAL"],"receipt_id":null,"required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","mismatch_action":"keep-WP-0003-proposed-and-A0"}
+        {"decision_id":"D-0052","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-LEAN-A1-LOCAL"],"receipt_id":"RR-D0052-20260716","required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","mismatch_action":"keep-WP-0003-accepted-and-A0"}
       ],
       "receipt_requirements": [
-        {"purpose":"accept-WP-0003","receipt_id":null,"subject_ids":["WP-0003"],"required_claims":["ACCEPT-WP-0003"],"required_receipt_kind":"packet-acceptance","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0003":"fb8b7362f3c6915447964e134486123ede6d8b22430fe744f5c0a03c0537bd47"}},
+        {"purpose":"accept-WP-0003","receipt_id":"RR-WP0003-ACCEPT-20260716","subject_ids":["WP-0003"],"required_claims":["ACCEPT-WP-0003"],"required_receipt_kind":"packet-acceptance","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0003":"fb8b7362f3c6915447964e134486123ede6d8b22430fe744f5c0a03c0537bd47"}},
         {"purpose":"activate-WP-0003-local-development","receipt_id":null,"subject_ids":["WP-0003"],"required_claims":["A1-LOCAL-BOUNDARY-VERIFIED","ACTIVATE-A1-WP-0003"],"required_receipt_kind":"packet-activation","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0003":"fb8b7362f3c6915447964e134486123ede6d8b22430fe744f5c0a03c0537bd47"}}
       ]
     },
