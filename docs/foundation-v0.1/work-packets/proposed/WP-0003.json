@@ -1,0 +1,279 @@
+{
+  "schema_version": 1,
+  "id": "WP-0003",
+  "status": "proposed",
+  "class": "architecture",
+  "declared_risk": "high",
+  "derived_risk": "high",
+  "effective_risk": "high",
+  "save_risk": "S0",
+  "created_on": "2026-07-16",
+  "title": "Lean local Unity development bootstrap",
+  "objective": "Establish a practical A1 local-development lane for Sasha using the installed Unity 6000.5.4f1 Editor and creator-approved direct MCP route, then create the Unity project skeleton, deterministic code seams, tests, and a non-gameplay technical interaction sandbox without production release authority.",
+  "value": "Starts building the game while retaining Git checkpoints, protected review, explicit Unity targeting, creator-controlled credentials, and reversible local iteration.",
+  "requested_by": "creator-direction:2026-07-16:lets-do-it",
+  "required_approver": "creator",
+  "approved_by": null,
+  "approval_receipt_id": null,
+  "contract_sha256": "fb8b7362f3c6915447964e134486123ede6d8b22430fe744f5c0a03c0537bd47",
+  "a1_boundary_manifest": null,
+  "implementer": null,
+  "verifier": null,
+  "integrator": null,
+  "constitutional_links": [
+    "INV-011",
+    "INV-012",
+    "INV-013",
+    "INV-014"
+  ],
+  "decision_links": [
+    "D-0020",
+    "D-0028",
+    "D-0051",
+    "D-0052"
+  ],
+  "system_contracts": [
+    "15-LEAN-A1-LOCAL-DEVELOPMENT.md",
+    "04-TECHNICAL-ARCHITECTURE.md",
+    "11-TRUST-AND-ENFORCEMENT.md"
+  ],
+  "baseline_evidence": [
+    {
+      "id": "BASE-WP0003-REPOSITORY",
+      "type": "repository-observation",
+      "uri": "local-observation://github.com/AC-21/sasha-the-land-pirate?commit=d68c460ce33db1e0eb55d63f26cab19ec431906a",
+      "sha256": null
+    },
+    {
+      "id": "BASE-WP0003-UNITY",
+      "type": "tool-observation",
+      "uri": "local-observation://unity-editor-6000.5.4f1-arm64-and-direct-mcp-bridge-2026-07-16",
+      "sha256": null
+    },
+    {
+      "id": "BASE-WP0003-MAC",
+      "type": "hardware-profile",
+      "uri": "local-observation://m3-max-48gb-macos-15.7.7",
+      "sha256": null
+    }
+  ],
+  "in_scope": [
+    "Activate repository/bootstrap work before Game exists; the creator may then create and open Game using Unity 6000.5.4f1 and record actual package versions.",
+    "Use only the creator-approved UNITY-MCP-EXTERNAL route for agent-originated Unity interaction; the creator opens the Editor and approves the exact Game project connection.",
+    "Create the smallest coherent project skeleton, deterministic SimulationCore and non-persisting SaveContracts interfaces, edit/play-mode tests, one non-gameplay technical scene, and basic camera/debug UI. This packet writes no save bytes or frozen save schema.",
+    "Use ordinary non-main Git branches, pre-change checkpoints, protected pull requests, and required checks. The initial project/CI merge is creator-controlled; later auto-merge requires a new WP-0003 CI required check.",
+    "Keep Unity caches and user-local generated state ignored while committing inspectable source, project settings, manifests, and tests.",
+    "Capture screenshots, test results, changed paths, and known limits under BuildArtifacts/WP-0003 and docs/evidence/WP-0003."
+  ],
+  "non_goals": [
+    "Production-engine ratification, native release acceptance, distribution, publishing, monetization, or store integration.",
+    "Unity account, organization, seat, license, billing, purchase, or cloud-service changes.",
+    "Direct agent or CI invocation of Unity Hub, Editor, Unity CLI, executable, or batchmode.",
+    "Unapproved package, SDK, dependency, external-tool, or service installation.",
+    "Production art, final narrative, final economy balance, final save migration, or irreversible content commitments.",
+    "City grammar, colony simulation, vehicle embodiment, faction behavior, economy, or other creator-owned gameplay decisions.",
+    "Constitutional, governance, credential, dependency, save-migration, release, or publishing auto-merge."
+  ],
+  "affected_domains": [
+    "audit",
+    "presentation",
+    "tooling",
+    "save"
+  ],
+  "interfaces": [
+    "Codex -> conditional first-use gate -> creator-approved Unity MCP Bridge -> exact Game project",
+    "Git checkpoint -> bounded local edit -> tests/captures -> protected pull request",
+    "Plain C# deterministic state -> thin Unity presentation adapter",
+    "Non-persisting SaveContracts interfaces -> later separately reviewed save implementation"
+  ],
+  "dependencies": [],
+  "reservation": {
+    "status": "unreserved",
+    "lease_id": null,
+    "base_commit": null,
+    "paths": [],
+    "domains": [],
+    "expires_at": null,
+    "fencing_token": null
+  },
+  "declared_paths": [
+    "Game/",
+    "SimulationCore/",
+    "SaveContracts/",
+    "Tools/",
+    "Tests/",
+    ".github/workflows/wp0003-ci.yml",
+    "BuildArtifacts/WP-0003/",
+    "docs/evidence/WP-0003/",
+    "docs/adr/",
+    "docs/known-issues/",
+    "docs/licenses/",
+    "docs/manifests/"
+  ],
+  "actual_paths": [],
+  "scenario_pins": [
+    {
+      "id": "SCN_WP0003_LOCAL",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_WP0003_LOCAL/r1.json",
+      "sha256": "759ca929554f61ba9899e1435afc3ecce5db5aeee985a9ab11f49d7f4c5c5323",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_WP0003_LOCAL/r1.fixture.json",
+      "fixture_manifest_sha256": "3f4ccfdc1e93e5e150b4b4eebc164c7bd7f2359fba48ff77fbb6a8e6215ad813"
+    }
+  ],
+  "save_impact": {
+    "summary": "S0 for activation: no existing player saves and no migration. Any save-format freeze or migration requires a later reviewed change.",
+    "schema_changes": [],
+    "migration_ids": [],
+    "compatibility": "Development saves are disposable until a later packet explicitly freezes a versioned contract.",
+    "golden_scenarios": []
+  },
+  "acceptance_tests": [
+    {
+      "id": "T-A1-LOCAL-BOUNDARY",
+      "kind": "manual",
+      "scenario_id": null,
+      "command": null,
+      "oracle": "A creator-protected activation receipt binds the compact local boundary manifest, exact packet contract, clean non-main Git checkpoint, intended Game target, Unity 6000.5.4f1 development authority, conditional first-use MCP mode, and allowed/denied action sets.",
+      "required": true
+    },
+    {
+      "id": "T-MCP-PROJECT-TARGET",
+      "kind": "manual",
+      "scenario_id": null,
+      "command": null,
+      "oracle": "Unity Bridge is running, Codex is selected and approved, and the connection targets exactly the repository Game project before any Unity tool call.",
+      "required": true
+    },
+    {
+      "id": "T-FOUNDATION",
+      "kind": "integration",
+      "scenario_id": null,
+      "command": "python3 docs/foundation-v0.1/tools/validate_foundation.py",
+      "oracle": "Foundation validation passes without weakening protected history or repository enforcement.",
+      "required": true
+    },
+    {
+      "id": "T-GIT-DIFF",
+      "kind": "integration",
+      "scenario_id": null,
+      "command": "git diff --check",
+      "oracle": "The candidate contains no whitespace errors and remains within declared paths.",
+      "required": true
+    },
+    {
+      "id": "T-UNITY-COMPILE",
+      "kind": "manual",
+      "scenario_id": null,
+      "command": null,
+      "oracle": "The creator-opened Game project imports and compiles without Unity console errors.",
+      "required": true
+    },
+    {
+      "id": "T-UNITY-EDITMODE",
+      "kind": "manual",
+      "scenario_id": null,
+      "command": null,
+      "oracle": "The WP-0003 EditMode test set passes through the creator-approved Unity MCP route.",
+      "required": true
+    },
+    {
+      "id": "T-UNITY-PLAYMODE",
+      "kind": "manual",
+      "scenario_id": null,
+      "command": null,
+      "oracle": "The non-gameplay technical interaction sandbox enters Play Mode, responds to its bounded input, and exits cleanly.",
+      "required": true
+    },
+    {
+      "id": "T-DETERMINISTIC-CORE-SMOKE",
+      "kind": "manual",
+      "scenario_id": null,
+      "command": null,
+      "oracle": "Two identical fixed-tick technical input sequences produce identical canonical core-state hashes.",
+      "required": true
+    },
+    {
+      "id": "T-TECHNICAL-CAPTURE",
+      "kind": "manual",
+      "scenario_id": null,
+      "command": null,
+      "oracle": "One screenshot records the compiling technical scene and debug state without claiming production art or gameplay acceptance.",
+      "required": true
+    }
+  ],
+  "performance_metrics": [
+    {
+      "name": "required-test-failures",
+      "scenario": "SCN_WP0003_LOCAL",
+      "unit": "count",
+      "baseline": null,
+      "target": 0,
+      "regression_ceiling": 0,
+      "comparator": "equal"
+    }
+  ],
+  "visual_evidence": [],
+  "rollout": {
+    "required_autonomy": "A1",
+    "feature_flag": null,
+    "stages": [
+      "dev-only"
+    ],
+    "health_signals": [
+      {
+        "name": "required-test-failures",
+        "scenario": "SCN_WP0003_LOCAL",
+        "unit": "count",
+        "baseline": null,
+        "target": 0,
+        "regression_ceiling": 0,
+        "comparator": "equal"
+      }
+    ],
+    "minimum_runs": 1,
+    "minimum_observation_hours": 0,
+    "required_approver": "creator"
+  },
+  "rollback": {
+    "target_build": null,
+    "triggers": [
+      "The MCP target differs from Game.",
+      "A requested action crosses the denied-action boundary.",
+      "Required checks fail or protected repository settings drift.",
+      "Unity, package, save, or project changes become unrecoverable by ordinary Git reversal."
+    ],
+    "steps": [
+      "Stop Unity MCP work and preserve logs and screenshots.",
+      "Revert the bounded branch or delete it without rewriting main history.",
+      "Restore the last clean Git checkpoint and reopen only after creator review."
+    ],
+    "save_recovery": "Development saves are disposable. Preserve any useful failing fixture separately before deleting the development profile.",
+    "drill_required": false,
+    "drill_evidence": []
+  },
+  "evidence_manifest": [],
+  "candidate_evidence": {
+    "diff_artifact_id": null,
+    "artifact_manifest_id": null,
+    "command_log_artifact_id": null,
+    "known_limits": []
+  },
+  "verification": {
+    "status": "not-run",
+    "verifier": null,
+    "gate_results": [],
+    "evidence_ids": []
+  },
+  "release_id": null,
+  "status_events": [
+    {
+      "event_id": "WPE-WP0003-PROPOSED",
+      "from": null,
+      "to": "proposed",
+      "actor": "creator-requested-control-plane",
+      "at": "2026-07-16T16:00:00-07:00",
+      "receipt_id": null
+    }
+  ]
+}

@@ -35,6 +35,16 @@ Agents inspect, benchmark, simulate, and propose. They may edit draft documentat
 
 Agents may create prototypes, generated assets, and reports only inside a standalone disposable clone/sandbox with an independent `.git` directory after the A1 quarantine boundary is actually established. Shared Git worktrees are forbidden because they can mutate trusted repository state through the common `.git` directory. Nothing merges at A1; the creator manually inspects and imports or rejects the bounded diff/artifacts.
 
+The sole proposed exception is `WP-0003` under
+[`15-LEAN-A1-LOCAL-DEVELOPMENT.md`](15-LEAN-A1-LOCAL-DEVELOPMENT.md). Only after
+D-0052 is protected and ratified, WP-0003 is separately accepted, and a
+distinct activation receipt binds its local boundary may that packet work on a
+valid non-`main` `agent/*` branch in the durable repository and submit protected
+pull requests. The creator merges the initial Unity-project/CI change; agents
+still cannot accept their own evidence, merge protected changes, weaken
+governance, publish, release, or advance autonomy. Until all three authorities
+exist, the generic quarantine rule above remains the only A1 rule.
+
 ### A2 — Accepted work packets
 
 Agents may implement creator/integrator-accepted work packets and assemble a release candidate. Independent verification and human merge remain required.
@@ -55,7 +65,7 @@ An A1-required packet may enter `active`, `verifying`, or `candidate` only when 
 
 1. `governance/ratification-state.json` maps the packet ID to exactly one entry gate.
 2. The mapped gate is `passed`; every decision requirement resolves to its active supersession head, and every decision and receipt claim is value-matching, protected, and sealed.
-3. The packet-specific quarantine receipt binds both `A1-QUARANTINE-BOUNDARY-VERIFIED` and `ACTIVATE-A1-<packet-id>` to that packet, its immutable packet-contract hash, and the exact raw SHA-256 of its canonical A1 boundary manifest. This is one physical-boundary approval, not an additional independent blocker.
+3. The packet-specific activation receipt binds `ACTIVATE-A1-<packet-id>`, the packet contract, and the exact boundary bytes. It also binds `A1-QUARANTINE-BOUNDARY-VERIFIED` under the generic boundary or `A1-LOCAL-BOUNDARY-VERIFIED` for WP-0003. This is one boundary approval, not an additional independent blocker.
 4. Canonical `active_autonomy` is `A1`; `active_a1_packet_id` names the sole packet; and the same creator-issued activation receipt binds the current constitution hash, decision-ledger hash, and last sealed creator receipt ID.
 5. The packet has a `held` reservation with the exact approved base commit, non-null lease ID, fencing token, and expiry later than the activation event, plus explicit path and state-domain ownership matching its declared scope.
 6. The complete, unique, chronological status-event chain is retained from `null -> proposed`; every `active`, `verifying`, and `candidate` transition references the same activation receipt, including after release, rejection, or rollback.
@@ -78,7 +88,7 @@ Missing or inconsistent state keeps the packet proposed/accepted but non-executa
 
 ## 4. Separation of duties
 
-The principal-separation matrix in `11-TRUST-AND-ENFORCEMENT.md` is authoritative. At A1, sibling agents may implement and provide advisory review inside quarantine but cannot independently accept or integrate output; the creator owns the manual diff/import boundary. At A2–A4, every accepted packet—including low/medium work—requires pairwise distinct trusted implementer, verifier, and integrator principals. A single actor cannot implement and verify merely because another actor performs the merge.
+The principal-separation matrix in `11-TRUST-AND-ENFORCEMENT.md` is authoritative. At A1, sibling agents may implement and provide advisory review inside the active packet boundary but cannot independently accept or integrate output; the creator owns either the generic manual import or WP-0003 protected-merge boundary. At A2–A4, every accepted packet—including low/medium work—requires pairwise distinct trusted implementer, verifier, and integrator principals. A single actor cannot implement and verify merely because another actor performs the merge.
 
 Recommended roles:
 
@@ -140,7 +150,7 @@ A packet is not implementable until it contains:
 1. Read the constitution, active decision records, relevant system contract, and work packet.
 2. Verify the baseline; if it cannot be reproduced, stop and amend the packet rather than inventing a new problem.
 3. Acquire an atomic reservation with base commit, exact paths/domains/content IDs, expiry, heartbeat, and fencing token. Also reserve scarce Unity license/build/GPU-profiler runners when applicable.
-4. Work in a standalone disposable clone/sandbox with an independent `.git` directory, or an isolated asset package.
+4. Work in a standalone disposable clone/sandbox with an independent `.git` directory or an isolated asset package; only an active WP-0003 may instead use its exact creator-attested durable-repository `agent/*` branch.
 5. Preserve unrelated user changes and avoid broad mechanical rewrites.
 6. Add or update tests with the implementation, including save migration if applicable.
 7. Run fast gates continuously and full relevant gates before handoff.

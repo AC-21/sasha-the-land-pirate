@@ -3,6 +3,22 @@
 Version: 0.1 draft\
 Scheduling principle: calendar commitments follow measured engine and asset throughput, not reference-game ambition.
 
+## M0L — Proposed lean local bootstrap
+
+Canonical packet: WP-0003.
+
+This is a parallel alternative to WP-0001, not a shortcut into WP-0002. It
+remains A0-only until D-0052 is protected and ratified, a distinct receipt
+accepts the exact WP-0003 contract, and another distinct receipt activates the
+compact local boundary. Once active, it may create the project skeleton,
+deterministic seams, non-persisting save interfaces, tests, and one technical
+scene on a protected `agent/*` branch. It cannot decide gameplay, invoke Unity
+directly, install dependencies, publish, release, or merge itself.
+
+Exit: the technical sandbox passes all nine packet checks and remains
+reversible. WP-0002 still waits for WP-0001 completion unless a later protected
+decision explicitly changes that dependency.
+
 ## M0T — Authorize the isolated technical proof
 
 Deliverables:

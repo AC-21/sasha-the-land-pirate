@@ -2,7 +2,7 @@
 
 Version: 0.1 draft\
 Audit date: 2026-07-16\
-Verdict: **coherent bootstrap specification with protected route authority; WP-0001 is accepted but remains A0-blocked by exact toolchain, entitlement, route-cleanliness, and physical-quarantine evidence**
+Verdict: **coherent bootstrap specification with protected route authority; WP-0001 remains A0-blocked, while WP-0003 is a simpler but still unratified local-development proposal**
 
 ## Audit coverage
 
@@ -22,7 +22,7 @@ Material findings were incorporated rather than merely logged. Notable correctio
 - the technical spike and gameplay toy are separate packets and gates;
 - Save Envelope v1 now has exact bytes, checksum domains, caps, pointer/header digest equality, genesis-or-protected-anchor recovery, crash-safe retention/pruning, independent version axes, and non-circular migration receipts;
 - Mac performance scenarios have immutable definitions and SHA-256 registry entries;
-- A1 requires a real disposable quarantine plus manual creator import, while A2 requires an external trusted gatekeeper and hostile-test proof.
+- generic A1 requires a real disposable quarantine plus manual creator import; proposed WP-0003 defines a narrower protected-branch exception, while A2 still requires an external trusted gatekeeper and hostile-test proof.
 
 ## Post-audit creator direction
 
@@ -41,13 +41,23 @@ The repository and Unity-first source captures remain historical evidence, while
 
 Filesystem and log inspection now records the actual local state instead of treating it as an unanswered screenshot checklist. The canonical blocked snapshot is `docs/evidence/WP-0001/pre-a1-readiness-20260716.json`. Unity Hub 3.19.5 and Editor 6000.5.4f1 (`d550df8bd089`) are installed; the observed `/Users/sasha/Sashas` project is `DefaultCompany` / `Sashas`, not WP-0001's accepted temporary identity. Assistant 2.14.0-pre.1 is exact, while URP 17.5.0 and Test Framework 1.7.0 differ from the D-0047 candidate. Mac player variations are Mono-only, the `mac-il2cpp` module is not installed, full Xcode and .NET SDK 10.0.301 are absent, and Rosetta is present. The bridge targets the observation project, the installed relay is Unity-signed and byte-identical to the package copy, and the current Codex and relay digests are captured without credentials. These observations are blocker evidence, not activation evidence.
 
+## Lean successor status
+
+D-0052, WP-0003, and the compact local-boundary schema are proposals, not
+authority. They intentionally preserve WP-0001's sealed history while offering
+a practical A1 lane based on protected `main`, a valid `agent/*` branch, a real
+checkpoint, creator-controlled merge, and conditional first Unity MCP use. The
+proposal cannot execute until three distinct protected receipts ratify D-0052,
+accept WP-0003, and activate the exact boundary. WP-0003 does not satisfy or
+replace WP-0001's completion dependency for WP-0002.
+
 ## What this audit does not claim
 
 Bootstrap lint can catch internal drift and malformed draft records. It cannot prove game fun, engine suitability, commercial rights, save correctness in an implementation, or that an agent with the same credentials did not rewrite the checker. The foundation intentionally says so.
 
 “Flawless” here means no known ambiguity is allowed to masquerade as a decision. It does **not** mean the draft is immutable, the selected engine has passed, or the background loop is safe today.
 
-## Honest blockers before A1
+## Honest blockers before WP-0001 A1
 
 1. An eligible assigned Unity AI subscription/seat is not verified. Local logs repeatedly report zero matching requested entitlement groups/free entitlements; no activation claim may infer a seat from the ordinary Unity Personal license.
 2. The observed project is the wrong project and identity. WP-0001 still needs its exact temporary project linked to the approved organization, committed as a protected no-implementation seed containing only the exact registry package graph and required project settings, then cloned into a detached, independent, remote-free candidate whose raw `Game` tree hash is receipt-bound.
@@ -73,12 +83,15 @@ though the formal machine gate remains v4.
 
 The accepted WP-0001 contract hash is `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`. Acceptance authorizes only its bounded creator-operated setup phase; it is not evidence that the engine, route, build, save contracts, performance, or quarantine have passed, and it is not A1 activation.
 
-Across A0 hardening and successor passes, unsealed creator-source receipts advance only their derived live-materialization hashes when append-only decisions change the draft views. Their creator source hashes, claims, decision-event bindings, and unsealed status remain unchanged; Git history retains every prior snapshot.
+Unsealed creator-source receipts bind their exact source text, subject-event
+hashes, and stable materialized artifacts. They do not bind mutable aggregate
+ledger views, so a later append cannot make an older dated receipt appear to
+attest bytes that did not yet exist. Git history retains every prior draft.
 
-Until all six schema-v4 blocker classes are resolved, the later A0 findings
-receive a protected disposition, and a separate activation receipt is sealed,
-the project remains A0 and no game implementation starts under this
-constitution.
+Until all six schema-v4 blocker classes are resolved and its activation receipt
+is sealed, WP-0001 remains at A0. The project as a whole also remains A0 unless
+the separate WP-0003 ratification, acceptance, and local activation path is
+completed. No game implementation starts merely because the proposal exists.
 
 ## Honest blockers before gameplay graybox
 

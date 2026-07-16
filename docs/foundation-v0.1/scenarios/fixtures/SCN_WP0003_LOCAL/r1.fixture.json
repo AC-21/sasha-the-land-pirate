@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_WP0003_LOCAL",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "no-runtime-state-v1",
+      "path": "scenarios/artifacts/SCN_WP0003_LOCAL/r1/starting-state.json",
+      "sha256": "1bc9c85ce3b47eac1c1dd26d2e0f6cdbe9ddd432f6d08103a0c3f79ba7806ced",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "no-runtime-content-v1",
+      "path": "scenarios/artifacts/SCN_WP0003_LOCAL/r1/content-set.json",
+      "sha256": "522aa6a8b2605e69e4fb1d3d5a180eff6a542fe1ce2c510c3db3de9f5533d6c3",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "aggregate-wp0003-local-evidence-v1",
+      "path": "scenarios/artifacts/SCN_WP0003_LOCAL/r1/input-script.json",
+      "sha256": "f14d6f3ea476a92c91f472c9fff79442c115d2b8b6ec5c7e702048f9de2374ee",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

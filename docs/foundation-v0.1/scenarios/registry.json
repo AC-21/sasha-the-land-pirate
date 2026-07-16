@@ -155,6 +155,14 @@
       "sha256": "2ab9e04bd8b3b55da390afa2701b2e56099ebd5853fc58761e35b26e8cf44d12",
       "fixture_manifest_path": "scenarios/fixtures/SCN_WP0002_GATE/r1.fixture.json",
       "fixture_manifest_sha256": "f5a400df8ba08b399c7aa854f3c0b0089cd83358ccfaac59dda4c156a241cbf5"
+    },
+    {
+      "id": "SCN_WP0003_LOCAL",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_WP0003_LOCAL/r1.json",
+      "sha256": "759ca929554f61ba9899e1435afc3ecce5db5aeee985a9ab11f49d7f4c5c5323",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_WP0003_LOCAL/r1.fixture.json",
+      "fixture_manifest_sha256": "3f4ccfdc1e93e5e150b4b4eebc164c7bd7f2359fba48ff77fbb6a8e6215ad813"
     }
   ]
 }

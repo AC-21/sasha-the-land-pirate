@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/local-a1-boundary.schema.json",
+  "title": "Lean local A1 development boundary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "manifest_id",
+    "boundary_mode",
+    "packet_id",
+    "packet_contract_sha256",
+    "created_at",
+    "attested_by",
+    "attestation_receipt_id",
+    "repository",
+    "reservation",
+    "foundation_binding",
+    "unity",
+    "git_safety",
+    "permission_boundary",
+    "credential_boundary",
+    "local_observation_exceptions"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "manifest_id": { "const": "A1B-WP-0003-LOCAL-DEV" },
+    "boundary_mode": { "const": "local-development" },
+    "packet_id": { "const": "WP-0003" },
+    "packet_contract_sha256": { "$ref": "#/$defs/sha256" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "attested_by": { "type": "string", "minLength": 1 },
+    "attestation_receipt_id": { "type": "string", "pattern": "^RR-[A-Z0-9-]+$" },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root",
+        "remote_url",
+        "base_commit",
+        "branch",
+        "branch_head_commit",
+        "branch_is_main",
+        "independent_git_directory",
+        "shared_worktree",
+        "clean_at_activation",
+        "game_project_path"
+      ],
+      "properties": {
+        "root": { "const": "/Users/sasha/Documents/Codex/sasha-the-land-pirate" },
+        "remote_url": { "const": "https://github.com/AC-21/sasha-the-land-pirate" },
+        "base_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "branch": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^agent/[a-z0-9][a-z0-9._/-]*$"
+        },
+        "branch_head_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "branch_is_main": { "const": false },
+        "independent_git_directory": { "const": true },
+        "shared_worktree": { "const": false },
+        "clean_at_activation": { "const": true },
+        "game_project_path": { "const": "/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game" }
+      }
+    },
+    "reservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lease_id", "fencing_token", "expires_at", "paths", "domains"],
+      "properties": {
+        "lease_id": { "type": "string", "minLength": 1 },
+        "fencing_token": { "type": "string", "minLength": 1 },
+        "expires_at": { "type": "string", "format": "date-time" },
+        "paths": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "domains": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "foundation_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["constitution_sha256", "decision_ledger_sha256", "last_creator_receipt_id"],
+      "properties": {
+        "constitution_sha256": { "$ref": "#/$defs/sha256" },
+        "decision_ledger_sha256": { "$ref": "#/$defs/sha256" },
+        "last_creator_receipt_id": { "type": "string", "pattern": "^RR-[A-Z0-9-]+$" }
+      }
+    },
+    "unity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "editor_version",
+        "project_path",
+        "project_state",
+        "mcp_authorization_mode",
+        "first_use_preconditions"
+      ],
+      "properties": {
+        "editor_version": { "const": "6000.5.4f1" },
+        "project_path": { "const": "/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game" },
+        "project_state": { "const": "bootstrap-pending" },
+        "mcp_authorization_mode": { "const": "conditional-first-use" },
+        "first_use_preconditions": {
+          "const": [
+            "creator-opened-exact-game-project",
+            "creator-confirmed-licensed-editor",
+            "bridge-running",
+            "codex-selected-and-approved",
+            "target-matches-game",
+            "requested-call-within-allowed-actions"
+          ]
+        }
+      }
+    },
+    "git_safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpoint_commit",
+        "main_protected",
+        "pull_requests_required",
+        "required_checks",
+        "force_push_disabled"
+      ],
+      "properties": {
+        "checkpoint_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "main_protected": { "const": true },
+        "pull_requests_required": { "const": true },
+        "required_checks": {
+          "const": [
+            "Cursor Approval Agent: Pull Request Approver",
+            "validate"
+          ]
+        },
+        "force_push_disabled": { "const": true }
+      }
+    },
+    "permission_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_actions", "denied_actions"],
+      "properties": {
+        "allowed_actions": {
+          "const": [
+            "edit-declared-repository-paths",
+            "unity-mcp-project-and-object-edits",
+            "unity-mcp-play-mode",
+            "unity-mcp-project-tests",
+            "unity-mcp-console-read",
+            "unity-mcp-screen-capture",
+            "local-nondestructive-validation",
+            "git-commit-push-protected-pr"
+          ]
+        },
+        "denied_actions": {
+          "const": [
+            "direct-unity-process-invocation",
+            "dependency-or-tool-install-without-creator",
+            "account-seat-license-billing-purchase-change",
+            "credential-or-secret-access",
+            "publish-release-deploy-monetize",
+            "external-third-party-contact",
+            "git-history-rewrite-or-protection-bypass",
+            "direct-agent-write-outside-repository",
+            "constitutional-governance-credential-dependency-save-release-auto-merge"
+          ]
+        }
+      }
+    },
+    "credential_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["secrets_committed", "opaque_git_transport_authorized", "credential_material_access_authorized", "release_credentials_available"],
+      "properties": {
+        "secrets_committed": { "const": false },
+        "opaque_git_transport_authorized": { "const": true },
+        "credential_material_access_authorized": { "const": false },
+        "release_credentials_available": { "const": false }
+      }
+    },
+    "local_observation_exceptions": {
+      "const": [
+        "BASE-WP0003-MAC",
+        "BASE-WP0003-REPOSITORY",
+        "BASE-WP0003-UNITY"
+      ]
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}
