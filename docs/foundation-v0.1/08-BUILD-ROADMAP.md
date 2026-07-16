@@ -9,7 +9,7 @@ Deliverables:
 
 - preserve the creator-approved durable checkout `/Users/sasha/Documents/Codex/sasha-the-land-pirate`, remote `https://github.com/AC-21/sasha-the-land-pirate`, CI commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`, and successful Foundation run `29465142421` as A0 evidence;
 - preserve sealed WP-0001 acceptance before any narrowly scoped A1 experiment;
-- preserve D-0049's selected `UNITY-AI-GATEWAY-CODEX` route and verify its exact seat/project/Gateway/client evidence profile;
+- preserve D-0051's selected `UNITY-MCP-EXTERNAL` successor, obtain the creator-controlled external packet route-amendment receipt bound to the unchanged WP-0001 contract, and verify the exact seat/project/Bridge/relay/Codex-client/project-target/approved-connection evidence profile without reusing the pre-activation console smoke;
 - install and prove the exact creator-approved D-0047 candidate through D-0050's creator-operated setup boundary without treating it as engine ratification;
 - establish the standalone disposable A1 clone/sandbox boundary in Section 8 of the trust document, with an independent `.git` directory, pinned to a creator-approved base, and a manual diff/import-or-reject seam.
 

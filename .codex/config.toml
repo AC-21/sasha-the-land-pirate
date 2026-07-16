@@ -1,0 +1,13 @@
+# Protected main remains A0 and must never auto-connect to Unity.
+# A future receipt-bound standalone A1 clone may enable this entry only after
+# replacing the target with that clone's exact approved Game project path.
+
+[mcp_servers.unity_mcp]
+command = "/Users/sasha/.unity/relay/relay_mac_arm64.app/Contents/MacOS/relay_mac_arm64"
+args = [
+  "--mcp",
+  "--project-path",
+  "/REPLACE-WITH-RECEIPT-BOUND-A1-CLONE/Game",
+]
+startup_timeout_sec = 120
+enabled = false

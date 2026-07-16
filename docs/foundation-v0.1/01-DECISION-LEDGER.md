@@ -69,6 +69,7 @@ This view is for humans. The JSONL log is the **draft canonical representation**
 | D-0048 | production | Open | Choose a Unity Terms §17.2(ff) path: Authorized Agentic Access, a legally confirmed human-invoked boundary, or an equivalent benchmark on exact fallback Godot .NET 4.7.1 commit `a13da4feb` (Universal macOS, matching templates, .NET 8+, Forward+ Metal, headless CI, MIT). | Hard gate before Unity install, invocation, or A1 activation |
 | D-0049 | production | Ratified | For WP-0001, select authorized Unity AI Gateway with Unity-bundled Codex; direct agent/CI Unity executable invocation stays prohibited. | Creator-selected route; A1 still awaits seat and quarantine verification |
 | D-0050 | technical | Ratified | Preserve D-0047 as the WP-0001 candidate; the creator may install/open its exact tuple during bounded pre-A1 setup solely to produce activation evidence. | Creator clarification; no engine ratification or agent invocation |
+| D-0051 | production | Ratified | Replace D-0049's Gateway route with `UNITY-MCP-EXTERNAL`: Codex connects through Unity's MCP Bridge and exact Unity-installed relay; direct Unity process invocation remains prohibited. | Creator-selected successor; protected packet route amendment, clean handshake, and A1 evidence remain blocked |
 
 ## Immediate ratification queue
 
@@ -90,7 +91,7 @@ The first creator review should answer only these high-leverage issues:
 14. Define the world-population milestone and caravaner exchange rules before the post-slice economy packet.
 15. Confirm whether storybook salvage remains the emotional filter beneath Texas iron × brutalist opera.
 16. Install and verify the creator-approved D-0047 candidate only through bounded setup; production engine ratification remains evidence-dependent.
-17. Verify the assigned Unity seat, selected Gateway profile, exact D-0047 installation, and standalone A1 quarantine before separate activation.
+17. Bind the selected direct-MCP claim to the immutable WP-0001 contract in a creator-controlled external `packet-acceptance` route-amendment receipt; then verify the assigned Unity seat/project, exact relay/client/project target and approved connection, exact D-0047 installation, and standalone A1 quarantine before separate activation. Repeat a clean zero-tool-call setup handshake because the earlier console smoke is deviation evidence only.
 
 All other open choices can remain deferred until a graybox or profiling spike produces evidence.
 

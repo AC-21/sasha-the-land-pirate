@@ -2692,6 +2692,54 @@ def main() -> int:
                         f"{sorted(missing_claims)} for {subject_id}"
                     )
                     gate_resolved = False
+            required_kind = requirement.get("required_receipt_kind")
+            if required_kind is not None and receipt.get("receipt_kind") != required_kind:
+                errors.append(
+                    f"ratification state {gate_name} receipt {receipt_id} has kind "
+                    f"{receipt.get('receipt_kind')!r}, expected {required_kind!r}"
+                )
+                gate_resolved = False
+            required_role = requirement.get("required_issuer_role")
+            if required_role is not None and receipt.get("issuer_role") != required_role:
+                errors.append(
+                    f"ratification state {gate_name} receipt {receipt_id} has issuer role "
+                    f"{receipt.get('issuer_role')!r}, expected {required_role!r}"
+                )
+                gate_resolved = False
+            required_resolver = requirement.get("required_resolver_type")
+            resolver = receipt.get("artifact_resolver")
+            actual_resolver = resolver.get("type") if isinstance(resolver, dict) else None
+            if required_resolver is not None and actual_resolver != required_resolver:
+                errors.append(
+                    f"ratification state {gate_name} receipt {receipt_id} has resolver "
+                    f"{actual_resolver!r}, expected {required_resolver!r}"
+                )
+                gate_resolved = False
+            required_contracts = requirement.get("required_subject_contract_sha256", {})
+            if not isinstance(required_contracts, dict):
+                errors.append(
+                    f"ratification state {gate_name} receipt requirement has malformed contract bindings"
+                )
+                gate_resolved = False
+            else:
+                undeclared_contract_subjects = set(required_contracts) - set(requirement.get("subject_ids", []))
+                if undeclared_contract_subjects:
+                    errors.append(
+                        f"ratification state {gate_name} receipt requirement binds undeclared contract "
+                        f"subjects {sorted(undeclared_contract_subjects)}"
+                    )
+                    gate_resolved = False
+                actual_contracts = receipt.get("subject_contract_sha256")
+                if not isinstance(actual_contracts, dict):
+                    actual_contracts = {}
+                for subject_id, expected_hash in required_contracts.items():
+                    actual_hash = actual_contracts.get(subject_id)
+                    if actual_hash != expected_hash:
+                        errors.append(
+                            f"ratification state {gate_name} receipt {receipt_id} binds contract "
+                            f"{actual_hash!r} for {subject_id}, expected {expected_hash!r}"
+                        )
+                        gate_resolved = False
             if not receipt.get("sealed"):
                 gate_resolved = False
         if len(receipt_purposes) != len(set(receipt_purposes)):
