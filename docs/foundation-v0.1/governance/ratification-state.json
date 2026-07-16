@@ -28,7 +28,7 @@
     "technical_spike": {
       "status": "awaiting-creator",
       "decision_requirements": [
-        {"decision_id":"D-0048","accepted_statuses":["ratified"],"allowed_claims":["AUTHORIZED-AGENTIC-ACCESS","HUMAN-INVOKED-UNITY"],"receipt_id":"RR-D0049-20260715","mismatch_action":"block-Unity-or-supersede-WP-0001-with-Godot"}
+        {"decision_id":"D-0049","accepted_statuses":["ratified"],"allowed_claims":["UNITY-AI-GATEWAY-CODEX"],"receipt_id":"RR-D0049-20260715","mismatch_action":"block-Unity-or-supersede-WP-0001-with-Godot"}
       ],
       "receipt_requirements": [
         {"purpose":"accept-WP-0001","receipt_id":"RR-WP0001-ACCEPT-20260715","subject_ids":["WP-0001"],"required_claims":["ACCEPT-WP-0001","AUTHORIZE-TEMP-WP0001-IDENTITY","UNITY-AI-GATEWAY-CODEX"]},
