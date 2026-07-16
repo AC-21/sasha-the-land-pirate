@@ -1,15 +1,18 @@
 # Lean A1 local-development successor
 
-Status: **creator-ratified / packet accepted / inactive pending separate activation**
+Status: **creator-ratified / packet accepted / A1 active under separate protected activation**
 
 Date: 2026-07-16
 
 This successor creates a practical alternative to the current WP-0001
-activation ceremony for day-to-day local game development. It does not activate
-A1, authorize a Unity call, replace WP-0001 completion evidence, or change
-current A0 authority until the still-missing third receipt activates the exact
-local boundary. D-0052 ratification and WP-0003 acceptance are already sealed
-under separate receipts.
+activation ceremony for day-to-day local game development. Its third distinct
+receipt now activates A1 for exact WP-0003 repository/bootstrap work. It still
+does not itself authorize a Unity call, replace WP-0001 completion evidence, or
+expand authority beyond the sealed local boundary.
+
+The active state is effective only when the complete activation tree is
+contained in protected `main`. A pull-request branch may encode that future
+state for validation but remains non-executable before protected merge.
 
 ## Why this exists
 
@@ -22,7 +25,7 @@ the actual purpose of the repository: building and testing the game.
 Historical WP-0001 evidence and deviations remain immutable. This successor
 uses a new packet instead of rewriting the sealed WP-0001 contract.
 
-## Ratified authority, inactive until activation
+## Active ratified authority
 
 `A1-LOCAL-DEV` means one bounded local-development packet may:
 
@@ -39,8 +42,8 @@ The initial Unity project/CI change remains creator-merged. Status-gated
 auto-merge may be enabled for later implementation only after WP-0003 CI exists
 and its required check is added to branch protection.
 
-Upon exact WP-0003 activation, Unity `6000.5.4f1` would be authorized as the
-initial local-development Editor because it is already installed. This is not
+Under exact WP-0003 activation, Unity `6000.5.4f1` is the authorized initial
+local-development Editor because it is already installed. This is not
 production-engine ratification and does not waive later native-build, Mac
 performance, package-compatibility, or rollback gates. IL2CPP, full Xcode, and
 the standalone .NET SDK are later proof requirements rather than A1 entry
@@ -53,9 +56,11 @@ boundary manifest. The validator proves durable Git facts and exact byte/hash
 bindings; the creator receipt attests transient clean-checkout and visible
 Unity state. Together they establish:
 
-1. a clean, valid `agent/*` branch whose creator-attested head equals the real
-   activation commit and whose real base/checkpoint exists in
-   `origin/main` ancestry;
+1. a clean, valid `agent/*` activation branch whose creator-attested initial
+   head is the durable checkpoint and receipt `accepted_commit`, with that
+   checkpoint in `origin/main` ancestry; the external-protected receipt
+   separately binds the exact manifest bytes, and protected merge materializes
+   the active state;
 2. the exact repository root and exact `Game` project path;
 3. a pre-change Git checkpoint;
 4. Unity `6000.5.4f1` as the authorized development Editor and `Game` as the
@@ -75,6 +80,12 @@ receipt window is required.
 
 This intentionally permits A1 to begin before the Unity project exists, so the
 boundary does not recreate the circular setup blocker it replaces.
+
+The manifest branch is an activation attestation snapshot, not a perpetual
+work branch. After activation enters protected `main`, each implementation pass
+starts from a fresh protected-main checkpoint on a new valid `agent/*` branch
+inside the unchanged reservation. Automatic deletion of the merged activation
+PR branch therefore does not delete or recreate the receipt-bound checkpoint.
 
 ## First Unity MCP use gate
 
@@ -143,7 +154,7 @@ non-persisting save interfaces, tests, and technical scenes. It does not itself
 unblock the gameplay packet. Production content, release, store, monetization,
 and background rollout remain out of scope.
 
-## Ratification record and remaining activation
+## Ratification and activation record
 
 The authenticated owner comment on PR #18 ratifies the exact proposal and
 packet contract. After its squash merge, the owner confirmation on PR #19 binds
@@ -151,6 +162,9 @@ the byte-identical proposal artifacts to durable protected main commit
 `bf335654e57c9c300060d5e8bdcf5795f0462c62`. That PR #19 comment is the direct
 protected source for two separate sealed receipts: `RR-D0052-20260716`
 ratifies the constitutional successor and `RR-WP0003-ACCEPT-20260716` accepts
-WP-0003. Both comments preserve the explicit delegation disclosure. Activation
-remains pending until the compact boundary manifest exists and a third,
-distinct `packet-activation` receipt binds it.
+WP-0003. Both comments preserve the explicit delegation disclosure. The owner
+activation comment on PR #20 binds the compact manifest, reservation,
+foundation state, protected checkpoint, conditional Unity first-use gate, and
+claims `A1-LOCAL-BOUNDARY-VERIFIED` plus `ACTIVATE-A1-WP-0003`. The distinct
+sealed `RR-WP0003-ACTIVATE-20260716` receipt activates WP-0003 as the sole A1
+packet when PR #20 enters protected `main`.

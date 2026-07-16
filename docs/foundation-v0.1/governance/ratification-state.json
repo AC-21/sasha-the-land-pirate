@@ -2,13 +2,13 @@
   "schema_version": 1,
   "foundation_version": "0.1-draft",
   "foundation_status": "draft",
-  "active_autonomy": "A0",
-  "active_a1_packet_id": null,
+  "active_autonomy": "A1",
+  "active_a1_packet_id": "WP-0003",
   "a1_max_active_packets": 1,
   "trusted_gatekeeper_status": "not-implemented",
-  "constitution_sha256": null,
-  "decision_ledger_sha256": null,
-  "last_creator_receipt_id": null,
+  "constitution_sha256": "ff6d7938c14a074acf796619868b97551cefd1681147559983a293792c20afb8",
+  "decision_ledger_sha256": "df5a4840f468676d6e3b428be1eda957310ef12c812241c5be3cdde6bd4601ef",
+  "last_creator_receipt_id": "RR-WP0003-ACCEPT-20260716",
   "packet_entry_gates": {
     "WP-0001": "technical_spike",
     "WP-0002": "ugly_gameplay_toy",
@@ -28,13 +28,13 @@
   },
   "entry_gates": {
     "local_development": {
-      "status": "awaiting-creator",
+      "status": "passed",
       "decision_requirements": [
         {"decision_id":"D-0052","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-LEAN-A1-LOCAL"],"receipt_id":"RR-D0052-20260716","required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","mismatch_action":"keep-WP-0003-accepted-and-A0"}
       ],
       "receipt_requirements": [
         {"purpose":"accept-WP-0003","receipt_id":"RR-WP0003-ACCEPT-20260716","subject_ids":["WP-0003"],"required_claims":["ACCEPT-WP-0003"],"required_receipt_kind":"packet-acceptance","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0003":"fb8b7362f3c6915447964e134486123ede6d8b22430fe744f5c0a03c0537bd47"}},
-        {"purpose":"activate-WP-0003-local-development","receipt_id":null,"subject_ids":["WP-0003"],"required_claims":["A1-LOCAL-BOUNDARY-VERIFIED","ACTIVATE-A1-WP-0003"],"required_receipt_kind":"packet-activation","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0003":"fb8b7362f3c6915447964e134486123ede6d8b22430fe744f5c0a03c0537bd47"}}
+        {"purpose":"activate-WP-0003-local-development","receipt_id":"RR-WP0003-ACTIVATE-20260716","subject_ids":["WP-0003"],"required_claims":["A1-LOCAL-BOUNDARY-VERIFIED","ACTIVATE-A1-WP-0003"],"required_receipt_kind":"packet-activation","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0003":"fb8b7362f3c6915447964e134486123ede6d8b22430fe744f5c0a03c0537bd47"}}
       ]
     },
     "technical_spike": {

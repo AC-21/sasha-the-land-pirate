@@ -10,9 +10,9 @@ Use **Unity 6000.3.19f1 ARM64** as the exact WP-0001 editor candidate on native 
 
 This tuple is D-0047's provisional spike target, not an installation approval or engine ratification. WP-0001 must archive the exact installers/terms, package resolution, support lifecycle, Xcode compatibility, relevant known issues, and rollback materials. Unity 6 supports Apple M1-or-newer Macs and Metal, but those general claims do not substitute for patch-specific proof. [Unity 6000.3.19f1 release](https://unity.com/releases/editor/whats-new/6000.3.19f1), [Unity 6 lifecycle](https://unity.com/releases/unity-6), [Unity 6.3 system requirements](https://docs.unity3d.com/6000.3/Documentation/Manual/system-requirements.html), [Unity 6.3 command line](https://docs.unity3d.com/6000.3/Documentation/Manual/EditorCommandLineArguments.html)
 
-Accepted WP-0003 separately authorizes the already-installed Unity
-`6000.5.4f1` Editor for bounded local bootstrap only after exact
-local-boundary activation. That exception does not
+Active WP-0003 separately authorizes the already-installed Unity
+`6000.5.4f1` Editor for bounded local bootstrap under its exact sealed local
+boundary and conditional first-use gate. That exception does not
 amend WP-0001's candidate tuple, ratify the production engine, or waive later
 IL2CPP, Xcode, package, performance, and rollback proof.
 
@@ -57,7 +57,7 @@ Even if Unity is ratified:
   README.md
   .gitignore
   docs/
-    foundation-v0.1/                  # current A0 constitution/control plane
+    foundation-v0.1/                  # current draft constitution/control plane
       00-GAME-CONSTITUTION.md
       governance/
       ledger/
@@ -109,7 +109,7 @@ Even if Unity is ratified:
   BuildArtifacts/<packet-id>/
 ```
 
-Only `AGENTS.md`, `README.md`, `.gitignore`, and `docs/foundation-v0.1/` exist at A0. Every other seam is created only by an accepted packet that names its exact paths. The nested foundation remains the authority until a separate creator-approved migration packet atomically relocates it and updates every link, receipt, hash, gate, and agent instruction; agents must not create duplicate root `ledger/`, `governance/`, or `work-packets/` authorities from this diagram.
+Only `AGENTS.md`, `README.md`, `.gitignore`, and `docs/foundation-v0.1/` existed before WP-0003 activation. Active WP-0003 may now create only its exact declared seams; every other seam still requires a separately accepted packet that names its paths. The nested foundation remains the authority until a creator-approved migration packet atomically relocates it and updates every link, receipt, hash, gate, and agent instruction; agents must not create duplicate root `ledger/`, `governance/`, or `work-packets/` authorities from this diagram.
 
 Unity-generated `Library`, `Temp`, `Logs`, `Obj`, user settings, and local build caches never enter version control. Source assets, manifests, accepted reference captures, migrations, and packet-bounded evidence do. Unity folder creation also writes adjacent `.meta` files; a packet that authorizes a new `Assets/` subtree must declare the required parent and child `.meta` paths rather than treating them as invisible side effects.
 

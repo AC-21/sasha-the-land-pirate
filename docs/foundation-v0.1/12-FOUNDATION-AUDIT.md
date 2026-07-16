@@ -2,7 +2,7 @@
 
 Version: 0.1 draft\
 Audit date: 2026-07-16\
-Verdict: **coherent bootstrap specification with protected route authority; WP-0001 remains A0-blocked, while WP-0003 is ratified and accepted but still awaits separate local activation**
+Verdict: **coherent bootstrap specification with protected route authority; WP-0001 remains A0-blocked, while WP-0003 is the sole active A1 local-development packet**
 
 ## Audit coverage
 
@@ -43,15 +43,13 @@ Filesystem and log inspection now records the actual local state instead of trea
 
 ## Lean successor status
 
-D-0052 is protected and ratified, and WP-0003 is protected and accepted under
-distinct receipts derived from the PR #18 owner ratification and PR #19
-protected-main sealing confirmation. They
-preserve WP-0001's sealed history while offering a practical A1 lane based on
+D-0052 is protected and ratified, and WP-0003 is protected, accepted, and
+active under three distinct receipts derived from the PR #18 ratification, PR
+#19 protected-main sealing, and PR #20 activation attestation. They preserve
+WP-0001's sealed history while establishing a practical A1 lane based on
 protected `main`, a valid `agent/*` branch, a real checkpoint,
-creator-controlled merge, and conditional first Unity MCP use. The packet
-cannot execute until a third, distinct protected receipt activates the exact
-boundary. WP-0003 does not satisfy or replace WP-0001's completion dependency
-for WP-0002.
+creator-controlled merge, and conditional first Unity MCP use. WP-0003 does
+not satisfy or replace WP-0001's completion dependency for WP-0002.
 
 ## What this audit does not claim
 
@@ -91,9 +89,9 @@ ledger views, so a later append cannot make an older dated receipt appear to
 attest bytes that did not yet exist. Git history retains every prior draft.
 
 Until all six schema-v4 blocker classes are resolved and its activation receipt
-is sealed, WP-0001 remains at A0. The project as a whole also remains A0 unless
-the separate WP-0003 local activation path is completed. No game
-implementation starts merely because ratification and acceptance exist.
+is sealed, WP-0001 remains at A0. The project is A1 only through active
+WP-0003; that authority covers repository/bootstrap work, not gameplay or
+WP-0001 execution, and Unity remains conditional on the first-use gate.
 
 ## Honest blockers before gameplay graybox
 
