@@ -35,7 +35,7 @@ Agents inspect, benchmark, simulate, and propose. They may edit draft documentat
 
 Agents may create prototypes, generated assets, and reports only inside a standalone disposable clone/sandbox with an independent `.git` directory after the A1 quarantine boundary is actually established. Shared Git worktrees are forbidden because they can mutate trusted repository state through the common `.git` directory. Nothing merges at A1; the creator manually inspects and imports or rejects the bounded diff/artifacts.
 
-The sole packet-specific exception is `WP-0003` under
+The sole proposed exception is `WP-0003` under
 [`15-LEAN-A1-LOCAL-DEVELOPMENT.md`](15-LEAN-A1-LOCAL-DEVELOPMENT.md). Only after
 D-0052 is protected and ratified, WP-0003 is separately accepted, and a
 distinct activation receipt binds its local boundary may that packet work on a
@@ -43,7 +43,7 @@ valid non-`main` `agent/*` branch in the durable repository and submit protected
 pull requests. The creator merges the initial Unity-project/CI change; agents
 still cannot accept their own evidence, merge protected changes, weaken
 governance, publish, release, or advance autonomy. Until all three authorities
-exist, the generic quarantine rule above remains the only executable A1 rule.
+exist, the generic quarantine rule above remains the only A1 rule.
 
 ### A2 — Accepted work packets
 

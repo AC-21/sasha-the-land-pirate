@@ -10,9 +10,9 @@ Use **Unity 6000.3.19f1 ARM64** as the exact WP-0001 editor candidate on native 
 
 This tuple is D-0047's provisional spike target, not an installation approval or engine ratification. WP-0001 must archive the exact installers/terms, package resolution, support lifecycle, Xcode compatibility, relevant known issues, and rollback materials. Unity 6 supports Apple M1-or-newer Macs and Metal, but those general claims do not substitute for patch-specific proof. [Unity 6000.3.19f1 release](https://unity.com/releases/editor/whats-new/6000.3.19f1), [Unity 6 lifecycle](https://unity.com/releases/unity-6), [Unity 6.3 system requirements](https://docs.unity3d.com/6000.3/Documentation/Manual/system-requirements.html), [Unity 6.3 command line](https://docs.unity3d.com/6000.3/Documentation/Manual/EditorCommandLineArguments.html)
 
-Accepted WP-0003 separately authorizes the already-installed Unity
-`6000.5.4f1` Editor for bounded local bootstrap only after exact
-local-boundary activation. That exception does not
+Proposed WP-0003 separately authorizes the already-installed Unity
+`6000.5.4f1` Editor for bounded local bootstrap only after D-0052 ratification,
+packet acceptance, and exact local-boundary activation. That exception does not
 amend WP-0001's candidate tuple, ratify the production engine, or waive later
 IL2CPP, Xcode, package, performance, and rollback proof.
 

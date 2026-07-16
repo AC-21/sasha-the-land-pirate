@@ -28,7 +28,7 @@ This repository is currently **documentation/control-plane work only**.
 - Repository creation does not advance autonomy.
 - Historical sealed receipts `RR-D0049-20260715` and `RR-WP0001-ACCEPT-20260715` remain immutable. Owner-authenticated receipts `RR-D0051-20260716` and `RR-WP0001-ROUTE-20260716` now protect the direct-MCP successor and bind `UNITY-MCP-EXTERNAL` to unchanged WP-0001 contract `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`. WP-0001 may enter A1 only after schema-v4 evidence binds the creator-created protected empty seed and registry-only package graph, exact D-0047 tuple, assigned seat/linkage, actual detached quarantine, exact client/relay/Editor/socket/config/FD identity, creator-claimed allowlist and code identities, three exact raw collectors, revoked zero-tool preflight, and distinct live activation session. Its fresh external-protected creator receipt must carry every packet-specific activation claim.
 - At most one A1 packet may be active. A1 output is manually inspected and imported or rejected by the creator; agents do not merge it.
-- D-0052 is protected and ratified, and WP-0003 is protected and accepted. Its lean local-development boundary remains inactive until a distinct creator receipt activates it; until then every current A0 prohibition above still wins.
+- `WP-0003` and the lean local-development boundary are proposed, inactive successors. Until protected creator receipts ratify D-0052, accept WP-0003, and separately activate it, every current A0 prohibition above still wins.
 
 If requested work exceeds A0, stop and name the missing authorization. Do not “prepare ahead” by creating implementation scaffolding.
 

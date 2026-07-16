@@ -3,13 +3,13 @@
 Version: 0.1 draft\
 Scheduling principle: calendar commitments follow measured engine and asset throughput, not reference-game ambition.
 
-## M0L — Accepted lean local bootstrap
+## M0L — Proposed lean local bootstrap
 
 Canonical packet: WP-0003.
 
-This is a parallel alternative to WP-0001, not a shortcut into WP-0002. D-0052
-is protected and ratified, and a distinct receipt accepts the exact WP-0003
-contract. It remains A0-only until another distinct receipt activates the
+This is a parallel alternative to WP-0001, not a shortcut into WP-0002. It
+remains A0-only until D-0052 is protected and ratified, a distinct receipt
+accepts the exact WP-0003 contract, and another distinct receipt activates the
 compact local boundary. Once active, it may create the project skeleton,
 deterministic seams, non-persisting save interfaces, tests, and one technical
 scene on a protected `agent/*` branch. It cannot decide gameplay, invoke Unity

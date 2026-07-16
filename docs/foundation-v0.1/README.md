@@ -24,7 +24,7 @@ This is the foundation specification for a future protected control plane for an
 13. [`12-FOUNDATION-AUDIT.md`](12-FOUNDATION-AUDIT.md) records what independent design, technical, and governance audits corrected—and what honestly remains blocked.
 14. [`13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md`](13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md) defines the phased physical-stock economy, population milestone hypothesis, caravaner institution, conservation laws, and proof boundary.
 15. [`14-CREATIVE-DIRECTION.md`](14-CREATIVE-DIRECTION.md) translates Texas iron × brutalist opera, tungsten over neon, reference roles, and comedy/story energy into original visual and narrative laws.
-16. [`15-LEAN-A1-LOCAL-DEVELOPMENT.md`](15-LEAN-A1-LOCAL-DEVELOPMENT.md) defines the creator-ratified practical local-development successor that preserves Git/MCP safety while removing the disproportionate WP-0001 certification ceremony.
+16. [`15-LEAN-A1-LOCAL-DEVELOPMENT.md`](15-LEAN-A1-LOCAL-DEVELOPMENT.md) proposes a practical local-development successor that preserves Git/MCP safety while removing the disproportionate WP-0001 certification ceremony.
 
 Machine-readable schemas, value-sensitive entry gates, proposed work packets, and hash-registered immutable scenarios sit beside these documents. [`schemas/a1-boundary-manifest.schema.json`](schemas/a1-boundary-manifest.schema.json) defines the exact creator-attested quarantine boundary required for any future A1 activation, including a strict distinction between reserved packet outputs, repository-ignored project scratch, and a separately isolated ephemeral runtime HOME/private temp for Unity and relay state. For WP-0001, schema v4 additionally binds the protected empty project seed, exact D-0047 profile, registry-only package graph, direct-MCP process/socket/config/allowlist profile, isolated Codex/XDG/Git environment, exact effective-server inventory, disconnected/revoked preflight, fresh live activation session, raw-source-backed evidence, and physical candidate record. [`tools/validate_wp0001_a1_live.py`](tools/validate_wp0001_a1_live.py) and [`tools/validate_wp0001_mcp_live.py`](tools/validate_wp0001_mcp_live.py) are non-Unity, read-only collectors for the physical quarantine and already-running route; strict raw event/listener/probe parsers reject blank restatements. [`tools/inspect_wp0001_toolchain_static.py`](tools/inspect_wp0001_toolchain_static.py) separately performs an A0-only, filesystem-only D-0047 diagnostic without starting Unity, Hub, Xcode, dotnet, or any other external process; [`schemas/wp0001-static-host-toolchain-observation.schema.json`](schemas/wp0001-static-host-toolchain-observation.schema.json) keeps that output structurally non-authoritative and incompatible with activation evidence. [`schemas/wp0001-a1-activation-evidence.schema.json`](schemas/wp0001-a1-activation-evidence.schema.json) and [`schemas/wp0001-a1-evidence-record.schema.json`](schemas/wp0001-a1-evidence-record.schema.json) define the activation evidence chain. All non-output state is destroy-on-close and non-importable. These are draft control-plane inputs, not evidence that the protected control plane already exists.
 
@@ -32,10 +32,10 @@ Current A0 activation preparation uses the creator-approved durable checkout `/U
 
 The machine-readable snapshot at `docs/evidence/WP-0001/pre-a1-readiness-20260716.json` records the current state as **blocked** without secrets. The installed Editor/tool/package tuple is not D-0047; the observed project is not the packet project; an eligible Unity AI seat is unverified; the inherited client approval, 54-tool handshakes, non-loopback relay listener, earlier console call, and later direct Editor/Hub probes cannot satisfy the required clean connection cycle; and no standalone physical quarantine exists. The snapshot is A0 observation evidence only. WP-0001 is accepted but inactive; autonomy remains A0.
 
-`WP-0003` is protected and accepted under ratified D-0052.
-`schemas/local-a1-boundary.schema.json` defines its still-dormant activation
-boundary. They permit no implementation or Unity call until a distinct
-protected creator receipt activates that exact boundary.
+`WP-0003` and `schemas/local-a1-boundary.schema.json` are dormant proposal
+artifacts for the lean successor. They permit no implementation or Unity call
+until protected creator receipts ratify D-0052, accept WP-0003, and separately
+activate its exact boundary.
 
 ## Source-of-truth order
 

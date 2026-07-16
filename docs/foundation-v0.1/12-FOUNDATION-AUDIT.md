@@ -2,7 +2,7 @@
 
 Version: 0.1 draft\
 Audit date: 2026-07-16\
-Verdict: **coherent bootstrap specification with protected route authority; WP-0001 remains A0-blocked, while WP-0003 is ratified and accepted but still awaits separate local activation**
+Verdict: **coherent bootstrap specification with protected route authority; WP-0001 remains A0-blocked, while WP-0003 is a simpler but still unratified local-development proposal**
 
 ## Audit coverage
 
@@ -22,7 +22,7 @@ Material findings were incorporated rather than merely logged. Notable correctio
 - the technical spike and gameplay toy are separate packets and gates;
 - Save Envelope v1 now has exact bytes, checksum domains, caps, pointer/header digest equality, genesis-or-protected-anchor recovery, crash-safe retention/pruning, independent version axes, and non-circular migration receipts;
 - Mac performance scenarios have immutable definitions and SHA-256 registry entries;
-- generic A1 requires a real disposable quarantine plus manual creator import; accepted WP-0003 defines a narrower protected-branch exception, while A2 still requires an external trusted gatekeeper and hostile-test proof.
+- generic A1 requires a real disposable quarantine plus manual creator import; proposed WP-0003 defines a narrower protected-branch exception, while A2 still requires an external trusted gatekeeper and hostile-test proof.
 
 ## Post-audit creator direction
 
@@ -43,14 +43,13 @@ Filesystem and log inspection now records the actual local state instead of trea
 
 ## Lean successor status
 
-D-0052 is protected and ratified, and WP-0003 is protected and accepted under
-distinct receipts derived from the owner-authenticated PR #18 comment. They
-preserve WP-0001's sealed history while offering a practical A1 lane based on
-protected `main`, a valid `agent/*` branch, a real checkpoint,
-creator-controlled merge, and conditional first Unity MCP use. The packet
-cannot execute until a third, distinct protected receipt activates the exact
-boundary. WP-0003 does not satisfy or replace WP-0001's completion dependency
-for WP-0002.
+D-0052, WP-0003, and the compact local-boundary schema are proposals, not
+authority. They intentionally preserve WP-0001's sealed history while offering
+a practical A1 lane based on protected `main`, a valid `agent/*` branch, a real
+checkpoint, creator-controlled merge, and conditional first Unity MCP use. The
+proposal cannot execute until three distinct protected receipts ratify D-0052,
+accept WP-0003, and activate the exact boundary. WP-0003 does not satisfy or
+replace WP-0001's completion dependency for WP-0002.
 
 ## What this audit does not claim
 
@@ -91,8 +90,8 @@ attest bytes that did not yet exist. Git history retains every prior draft.
 
 Until all six schema-v4 blocker classes are resolved and its activation receipt
 is sealed, WP-0001 remains at A0. The project as a whole also remains A0 unless
-the separate WP-0003 local activation path is completed. No game
-implementation starts merely because ratification and acceptance exist.
+the separate WP-0003 ratification, acceptance, and local activation path is
+completed. No game implementation starts merely because the proposal exists.
 
 ## Honest blockers before gameplay graybox
 
