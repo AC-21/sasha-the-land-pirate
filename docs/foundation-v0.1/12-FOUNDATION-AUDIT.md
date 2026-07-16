@@ -1,8 +1,8 @@
 # Foundation Audit and Residual Blockers
 
 Version: 0.1 draft\
-Audit date: 2026-07-15\
-Verdict: **coherent bootstrap specification; core identity is partly creator-ratified, but receipts are not yet protected and the control plane is not technically enforced**
+Audit date: 2026-07-16\
+Verdict: **coherent bootstrap specification with protected route authority; WP-0001 is accepted but remains A0-blocked by exact toolchain, entitlement, route-cleanliness, and physical-quarantine evidence**
 
 ## Audit coverage
 
@@ -37,7 +37,9 @@ The creator's later 2026-07-15 direction is captured in unsealed receipt `RR-CRE
 
 “Other than that. Let's go for it” safely authorizes continued A0 design work. It does not name the repository path, accept either exact work packet, approve a Unity installation, answer the open worksheet values, create the quarantine boundary, or promote autonomy.
 
-The repository and Unity-first source captures remain historical evidence, while authenticated creator authority seals D-0049 and WP-0001 acceptance against protected main commit `ed14ae664e7c0efea790d334546538584e85c083`. Owner comment `https://github.com/AC-21/sasha-the-land-pirate/pull/6#issuecomment-4989428688` now protects D-0051's `UNITY-MCP-EXTERNAL` successor and the packet route amendment against merged commit `08fdb95e4981b4b7062a2c3991d6753611f23ad5`, without changing the accepted WP-0001 contract, temporary identity, repository location, or creator-operated D-0047 installation authority. Read-only inspection has not yet proved the assigned Unity seat, same-organization project linkage, exact Bridge/relay/client/project-target/connection profile, clean zero-tool-call handshake, exact D-0047 Editor/IL2CPP/Xcode installation, or standalone A1 quarantine.
+The repository and Unity-first source captures remain historical evidence, while authenticated creator authority seals D-0049 and WP-0001 acceptance against protected main commit `ed14ae664e7c0efea790d334546538584e85c083`. Owner comment `https://github.com/AC-21/sasha-the-land-pirate/pull/6#issuecomment-4989428688` protects D-0051's `UNITY-MCP-EXTERNAL` successor and the packet route amendment; merged PR #7 seals both successor receipts at protected main commit `3e336ce7f5bf9823fde57b3a3f016945696399d9`, without changing the accepted WP-0001 contract, temporary identity, repository location, or creator-operated D-0047 installation authority.
+
+Filesystem and log inspection now records the actual local state instead of treating it as an unanswered screenshot checklist. The canonical blocked snapshot is `docs/evidence/WP-0001/pre-a1-readiness-20260716.json`. Unity Hub 3.19.5 and Editor 6000.5.4f1 (`d550df8bd089`) are installed; the observed `/Users/sasha/Sashas` project is `DefaultCompany` / `Sashas`, not WP-0001's accepted temporary identity. Assistant 2.14.0-pre.1 is exact, while URP 17.5.0 and Test Framework 1.7.0 differ from the D-0047 candidate. Mac player variations are Mono-only, the `mac-il2cpp` module is not installed, full Xcode and .NET SDK 10.0.301 are absent, and Rosetta is present. The bridge targets the observation project, the installed relay is Unity-signed and byte-identical to the package copy, and the current Codex and relay digests are captured without credentials. These observations are blocker evidence, not activation evidence.
 
 ## What this audit does not claim
 
@@ -47,17 +49,18 @@ Bootstrap lint can catch internal drift and malformed draft records. It cannot p
 
 ## Honest blockers before A1
 
-1. The assigned Unity AI subscription/seat and same-organization project linkage have not been physically verified.
-2. The exact Unity MCP Bridge, relay path/digest/version/arguments, Codex client/version, explicit project target, approved connection, scopes/rate limits, initiation identity, and revocation state have not been captured without secrets.
-3. The installed 6000.5.4f1 Editor does not satisfy the creator-approved D-0047 6000.3.19f1 + Mac IL2CPP + Xcode 26.3 candidate.
-4. The standalone A1 quarantine and creator-operated import/reject boundary have not been physically established or receipt-bound.
-5. A read-only `Unity_ReadConsole` smoke ran before D-0051 and A1. It returned zero entries and no known mutation, but it is a recorded setup-boundary deviation and cannot count toward the required zero-tool-call handshake or activation evidence.
+1. An eligible assigned Unity AI subscription/seat is not verified. Local logs repeatedly report zero matching requested entitlement groups/free entitlements; no activation claim may infer a seat from the ordinary Unity Personal license.
+2. The observed project is the wrong project and identity. WP-0001 still needs its exact temporary project linked to the approved organization, plus an explicit receipt-bound project target.
+3. The route is not activation-clean. Approval was manually granted to Codex 0.144.2, current Codex 0.144.5 inherited that approval, 31 handshakes advertised all 54 tools, and the relay's MCP-client port listens beyond loopback. The connection must be revoked and rebuilt with the pinned client, explicit target, least scopes, loopback-only transport, creator approval, and zero tool calls.
+4. The installed 6000.5.4f1 Editor does not satisfy the creator-approved D-0047 6000.3.19f1 (`7689f4515d75`) ARM64 candidate. Mac Build Support (IL2CPP), full Xcode 26.3, and .NET SDK 10.0.301 are absent; URP 17.5.0 and Test Framework 1.7.0 also differ from 17.3 and 1.6.
+5. The standalone A1 quarantine and creator-operated import/reject boundary have not been physically established or receipt-bound. Unity's ignored project caches require an explicit ephemeral-scratch boundary distinct from reserved packet outputs, while Unity/relay/license/log/connection state outside the repository requires a separately isolated disposable runtime HOME and private temp namespace. Ambient creator-home and shared-temp writes must be denied and all runtime state destroyed on close.
+6. Three pre-A1 deviations are preserved. One `Unity_ReadConsole` smoke ran before D-0051 and returned zero entries. During the 2026-07-16 A0 preflight, one shell probe invoked the installed Unity executable with `-version`, and a delegated evidence probe launched Unity Hub with a headless editor-list argument. Neither direct probe intentionally opened or changed a project, but absence of mutation is not treated as proven. All three events crossed their applicable no-call/no-direct-invocation boundaries, none authorizes implementation, and none can count toward a clean activation cycle.
 
 The accepted WP-0001 contract hash is `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`. Acceptance authorizes only its bounded creator-operated setup phase; it is not evidence that the engine, route, build, save contracts, performance, or quarantine have passed, and it is not A1 activation.
 
 Across A0 hardening and successor passes, unsealed creator-source receipts advance only their derived live-materialization hashes when append-only decisions change the draft views. Their creator source hashes, claims, decision-event bindings, and unsealed status remain unchanged; Git history retains every prior snapshot.
 
-Until all five are true and a separate activation receipt is sealed, the project remains A0 and no game implementation starts under this constitution.
+Until all six blocker classes are resolved and a separate activation receipt is sealed, the project remains A0 and no game implementation starts under this constitution.
 
 ## Honest blockers before gameplay graybox
 

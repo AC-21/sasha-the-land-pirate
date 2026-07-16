@@ -1,0 +1,310 @@
+{
+  "cases": [
+    {
+      "id": "disposable-runtime-boundary-valid",
+      "approved_environment": {
+        "sandbox_profile_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "network_policy_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "runtime_boundary": {
+        "isolation_mode": "equivalent-os-sandbox",
+        "instance_id": "sandbox-fixture-01",
+        "principal_id": "a1-fixture",
+        "principal_uid": 501,
+        "ephemeral_home_root": "/private/var/a1-fixtures/runtime-home",
+        "private_temp_root": "/private/var/a1-fixtures/runtime-temp",
+        "environment_bindings": {
+          "HOME": "/private/var/a1-fixtures/runtime-home",
+          "TMPDIR": "/private/var/a1-fixtures/runtime-temp",
+          "TMP": "/private/var/a1-fixtures/runtime-temp",
+          "TEMP": "/private/var/a1-fixtures/runtime-temp"
+        },
+        "ambient_host_home_root": "/Users/creator",
+        "ambient_shared_temp_roots": [
+          "/private/tmp",
+          "/private/var/folders/ambient/T"
+        ],
+        "denied_ambient_write_roots": [
+          "/Users/creator",
+          "/private/tmp",
+          "/private/var/folders/ambient/T"
+        ],
+        "ambient_host_home_write_denied": true,
+        "ambient_shared_temp_write_denied": true,
+        "symlink_escape_forbidden": true,
+        "runtime_roots_symlink_free": true,
+        "runtime_roots_importable": false,
+        "destroy_on_close": true
+      },
+      "expected_codes": []
+    },
+    {
+      "id": "runtime-environment-binding-invalid",
+      "approved_environment": {
+        "sandbox_profile_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "network_policy_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "runtime_boundary": {
+        "isolation_mode": "dedicated-ephemeral-os-user",
+        "instance_id": "sandbox-fixture-02",
+        "principal_id": "a1-fixture",
+        "principal_uid": 502,
+        "ephemeral_home_root": "/private/var/a1-fixtures/runtime-home",
+        "private_temp_root": "/private/var/a1-fixtures/runtime-temp",
+        "environment_bindings": {
+          "HOME": "/Users/creator",
+          "TMPDIR": "/private/var/a1-fixtures/runtime-temp",
+          "TMP": "/private/var/a1-fixtures/runtime-temp",
+          "TEMP": "/private/var/a1-fixtures/runtime-temp"
+        },
+        "ambient_host_home_root": "/Users/creator",
+        "ambient_shared_temp_roots": [
+          "/private/tmp"
+        ],
+        "denied_ambient_write_roots": [
+          "/Users/creator",
+          "/private/tmp"
+        ],
+        "ambient_host_home_write_denied": true,
+        "ambient_shared_temp_write_denied": true,
+        "symlink_escape_forbidden": true,
+        "runtime_roots_symlink_free": true,
+        "runtime_roots_importable": false,
+        "destroy_on_close": true
+      },
+      "expected_codes": [
+        "runtime-environment-binding-mismatch"
+      ]
+    },
+    {
+      "id": "runtime-policy-hash-invalid",
+      "approved_environment": {
+        "sandbox_profile_sha256": "pending",
+        "network_policy_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "runtime_boundary": {
+        "isolation_mode": "equivalent-os-sandbox",
+        "instance_id": "sandbox-fixture-03",
+        "principal_id": "a1-fixture",
+        "principal_uid": 501,
+        "ephemeral_home_root": "/private/var/a1-fixtures/runtime-home",
+        "private_temp_root": "/private/var/a1-fixtures/runtime-temp",
+        "environment_bindings": {
+          "HOME": "/private/var/a1-fixtures/runtime-home",
+          "TMPDIR": "/private/var/a1-fixtures/runtime-temp",
+          "TMP": "/private/var/a1-fixtures/runtime-temp",
+          "TEMP": "/private/var/a1-fixtures/runtime-temp"
+        },
+        "ambient_host_home_root": "/Users/creator",
+        "ambient_shared_temp_roots": [
+          "/private/tmp"
+        ],
+        "denied_ambient_write_roots": [
+          "/Users/creator",
+          "/private/tmp"
+        ],
+        "ambient_host_home_write_denied": true,
+        "ambient_shared_temp_write_denied": true,
+        "symlink_escape_forbidden": true,
+        "runtime_roots_symlink_free": true,
+        "runtime_roots_importable": false,
+        "destroy_on_close": true
+      },
+      "expected_codes": [
+        "runtime-policy-hash-invalid"
+      ]
+    },
+    {
+      "id": "ambient-write-denial-invalid",
+      "approved_environment": {
+        "sandbox_profile_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "network_policy_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "runtime_boundary": {
+        "isolation_mode": "equivalent-os-sandbox",
+        "instance_id": "sandbox-fixture-04",
+        "principal_id": "a1-fixture",
+        "principal_uid": 501,
+        "ephemeral_home_root": "/private/var/a1-fixtures/runtime-home",
+        "private_temp_root": "/private/var/a1-fixtures/runtime-temp",
+        "environment_bindings": {
+          "HOME": "/private/var/a1-fixtures/runtime-home",
+          "TMPDIR": "/private/var/a1-fixtures/runtime-temp",
+          "TMP": "/private/var/a1-fixtures/runtime-temp",
+          "TEMP": "/private/var/a1-fixtures/runtime-temp"
+        },
+        "ambient_host_home_root": "/Users/creator",
+        "ambient_shared_temp_roots": [
+          "/private/tmp"
+        ],
+        "denied_ambient_write_roots": [
+          "/Users/creator"
+        ],
+        "ambient_host_home_write_denied": true,
+        "ambient_shared_temp_write_denied": false,
+        "symlink_escape_forbidden": true,
+        "runtime_roots_symlink_free": true,
+        "runtime_roots_importable": false,
+        "destroy_on_close": true
+      },
+      "expected_codes": [
+        "ambient-write-denial-disabled",
+        "ambient-write-denial-mismatch"
+      ]
+    },
+    {
+      "id": "runtime-roots-overlap-invalid",
+      "approved_environment": {
+        "sandbox_profile_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "network_policy_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "runtime_boundary": {
+        "isolation_mode": "equivalent-os-sandbox",
+        "instance_id": "sandbox-fixture-05",
+        "principal_id": "a1-fixture",
+        "principal_uid": 501,
+        "ephemeral_home_root": "/private/var/a1-fixtures/runtime",
+        "private_temp_root": "/private/var/a1-fixtures/runtime/temp",
+        "environment_bindings": {
+          "HOME": "/private/var/a1-fixtures/runtime",
+          "TMPDIR": "/private/var/a1-fixtures/runtime/temp",
+          "TMP": "/private/var/a1-fixtures/runtime/temp",
+          "TEMP": "/private/var/a1-fixtures/runtime/temp"
+        },
+        "ambient_host_home_root": "/Users/creator",
+        "ambient_shared_temp_roots": [
+          "/private/tmp"
+        ],
+        "denied_ambient_write_roots": [
+          "/Users/creator",
+          "/private/tmp"
+        ],
+        "ambient_host_home_write_denied": true,
+        "ambient_shared_temp_write_denied": true,
+        "symlink_escape_forbidden": true,
+        "runtime_roots_symlink_free": true,
+        "runtime_roots_importable": false,
+        "destroy_on_close": true
+      },
+      "expected_codes": [
+        "runtime-roots-overlap"
+      ]
+    },
+    {
+      "id": "runtime-retention-and-symlink-guards-invalid",
+      "approved_environment": {
+        "sandbox_profile_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "network_policy_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "runtime_boundary": {
+        "isolation_mode": "equivalent-os-sandbox",
+        "instance_id": "sandbox-fixture-06",
+        "principal_id": "a1-fixture",
+        "principal_uid": 501,
+        "ephemeral_home_root": "/private/var/a1-fixtures/runtime-home",
+        "private_temp_root": "/private/var/a1-fixtures/runtime-temp",
+        "environment_bindings": {
+          "HOME": "/private/var/a1-fixtures/runtime-home",
+          "TMPDIR": "/private/var/a1-fixtures/runtime-temp",
+          "TMP": "/private/var/a1-fixtures/runtime-temp",
+          "TEMP": "/private/var/a1-fixtures/runtime-temp"
+        },
+        "ambient_host_home_root": "/Users/creator",
+        "ambient_shared_temp_roots": [
+          "/private/tmp"
+        ],
+        "denied_ambient_write_roots": [
+          "/Users/creator",
+          "/private/tmp"
+        ],
+        "ambient_host_home_write_denied": true,
+        "ambient_shared_temp_write_denied": true,
+        "symlink_escape_forbidden": false,
+        "runtime_roots_symlink_free": false,
+        "runtime_roots_importable": true,
+        "destroy_on_close": false
+      },
+      "expected_codes": [
+        "runtime-not-destroyed-on-close",
+        "runtime-roots-importable",
+        "runtime-symlink-guard-disabled"
+      ]
+    },
+    {
+      "id": "runtime-home-overlaps-ambient-invalid",
+      "approved_environment": {
+        "sandbox_profile_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "network_policy_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "runtime_boundary": {
+        "isolation_mode": "equivalent-os-sandbox",
+        "instance_id": "sandbox-fixture-07",
+        "principal_id": "a1-fixture",
+        "principal_uid": 501,
+        "ephemeral_home_root": "/Users/creator/a1-runtime-home",
+        "private_temp_root": "/private/var/a1-fixtures/runtime-temp",
+        "environment_bindings": {
+          "HOME": "/Users/creator/a1-runtime-home",
+          "TMPDIR": "/private/var/a1-fixtures/runtime-temp",
+          "TMP": "/private/var/a1-fixtures/runtime-temp",
+          "TEMP": "/private/var/a1-fixtures/runtime-temp"
+        },
+        "ambient_host_home_root": "/Users/creator",
+        "ambient_shared_temp_roots": [
+          "/private/tmp"
+        ],
+        "denied_ambient_write_roots": [
+          "/Users/creator",
+          "/private/tmp"
+        ],
+        "ambient_host_home_write_denied": true,
+        "ambient_shared_temp_write_denied": true,
+        "symlink_escape_forbidden": true,
+        "runtime_roots_symlink_free": true,
+        "runtime_roots_importable": false,
+        "destroy_on_close": true
+      },
+      "expected_codes": [
+        "runtime-home-overlaps-ambient"
+      ]
+    },
+    {
+      "id": "root-runtime-principal-invalid",
+      "approved_environment": {
+        "sandbox_profile_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "network_policy_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "runtime_boundary": {
+        "isolation_mode": "equivalent-os-sandbox",
+        "instance_id": "sandbox-fixture-08",
+        "principal_id": "root",
+        "principal_uid": 0,
+        "ephemeral_home_root": "/private/var/a1-fixtures/runtime-home",
+        "private_temp_root": "/private/var/a1-fixtures/runtime-temp",
+        "environment_bindings": {
+          "HOME": "/private/var/a1-fixtures/runtime-home",
+          "TMPDIR": "/private/var/a1-fixtures/runtime-temp",
+          "TMP": "/private/var/a1-fixtures/runtime-temp",
+          "TEMP": "/private/var/a1-fixtures/runtime-temp"
+        },
+        "ambient_host_home_root": "/Users/creator",
+        "ambient_shared_temp_roots": [
+          "/private/tmp"
+        ],
+        "denied_ambient_write_roots": [
+          "/Users/creator",
+          "/private/tmp"
+        ],
+        "ambient_host_home_write_denied": true,
+        "ambient_shared_temp_write_denied": true,
+        "symlink_escape_forbidden": true,
+        "runtime_roots_symlink_free": true,
+        "runtime_roots_importable": false,
+        "destroy_on_close": true
+      },
+      "expected_codes": [
+        "runtime-principal-invalid"
+      ]
+    }
+  ]
+}

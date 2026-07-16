@@ -2,6 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://local.invalid/wasteland-game/a1-boundary-manifest.schema.json",
   "title": "Creator-attested A1 quarantine boundary",
+  "$defs": {
+    "absoluteRuntimeRoot": {
+      "type": "string",
+      "pattern": "^/(?:[^/]+/)*[^/]+$"
+    }
+  },
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -16,6 +22,7 @@
     "reservation",
     "approved_toolchain",
     "approved_environment",
+    "runtime_boundary",
     "foundation_binding",
     "protection_boundary",
     "credential_boundary",
@@ -23,7 +30,7 @@
     "local_observation_exceptions"
   ],
   "properties": {
-    "schema_version": { "const": 1 },
+    "schema_version": { "const": 3 },
     "manifest_id": { "type": "string", "pattern": "^A1B-WP-[0-9]{4}-[A-Z0-9-]+$" },
     "packet_id": { "type": "string", "pattern": "^WP-[0-9]{4}$" },
     "packet_contract_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
@@ -71,14 +78,91 @@
     "approved_environment": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["os", "os_version", "architecture", "hardware_id", "sandbox_profile", "network_policy"],
+      "required": [
+        "os",
+        "os_version",
+        "architecture",
+        "hardware_id",
+        "sandbox_profile",
+        "sandbox_profile_sha256",
+        "network_policy",
+        "network_policy_sha256"
+      ],
       "properties": {
         "os": { "type": "string", "minLength": 1 },
         "os_version": { "type": "string", "minLength": 1 },
         "architecture": { "type": "string", "minLength": 1 },
         "hardware_id": { "type": "string", "minLength": 1 },
         "sandbox_profile": { "type": "string", "minLength": 1 },
-        "network_policy": { "type": "string", "minLength": 1 }
+        "sandbox_profile_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "network_policy": { "type": "string", "minLength": 1 },
+        "network_policy_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "runtime_boundary": {
+      "description": "Creator-attested disposable process namespace for mutable tool, relay, licensing, cache, and log state outside the repository.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "isolation_mode",
+        "instance_id",
+        "principal_id",
+        "principal_uid",
+        "ephemeral_home_root",
+        "private_temp_root",
+        "environment_bindings",
+        "ambient_host_home_root",
+        "ambient_shared_temp_roots",
+        "denied_ambient_write_roots",
+        "ambient_host_home_write_denied",
+        "ambient_shared_temp_write_denied",
+        "symlink_escape_forbidden",
+        "runtime_roots_symlink_free",
+        "runtime_roots_importable",
+        "destroy_on_close"
+      ],
+      "properties": {
+        "isolation_mode": {
+          "enum": [
+            "dedicated-ephemeral-os-user",
+            "equivalent-os-sandbox"
+          ]
+        },
+        "instance_id": { "type": "string", "minLength": 1 },
+        "principal_id": { "type": "string", "minLength": 1 },
+        "principal_uid": { "type": "integer", "minimum": 1 },
+        "ephemeral_home_root": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+        "private_temp_root": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+        "environment_bindings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["HOME", "TMPDIR", "TMP", "TEMP"],
+          "properties": {
+            "HOME": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+            "TMPDIR": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+            "TMP": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+            "TEMP": { "$ref": "#/$defs/absoluteRuntimeRoot" }
+          }
+        },
+        "ambient_host_home_root": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+        "ambient_shared_temp_roots": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/absoluteRuntimeRoot" }
+        },
+        "denied_ambient_write_roots": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/absoluteRuntimeRoot" }
+        },
+        "ambient_host_home_write_denied": { "const": true },
+        "ambient_shared_temp_write_denied": { "const": true },
+        "symlink_escape_forbidden": { "const": true },
+        "runtime_roots_symlink_free": { "const": true },
+        "runtime_roots_importable": { "const": false },
+        "destroy_on_close": { "const": true }
       }
     },
     "foundation_binding": {
@@ -96,10 +180,23 @@
     "protection_boundary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["protected_paths", "writable_paths", "foundation_read_only"],
+      "required": [
+        "protected_paths",
+        "writable_paths",
+        "ephemeral_scratch_paths",
+        "scratch_destroy_on_close",
+        "foundation_read_only"
+      ],
       "properties": {
         "protected_paths": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
         "writable_paths": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "ephemeral_scratch_paths": {
+          "description": "Exact non-output scratch roots needed by the approved toolchain. They are outside the packet reservation, cannot be imported, and must be repository-ignored.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "scratch_destroy_on_close": { "const": true },
         "foundation_read_only": { "const": true }
       }
     },
@@ -129,5 +226,34 @@
       "uniqueItems": true,
       "items": { "type": "string", "minLength": 1 }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["packet_id"],
+        "properties": {
+          "packet_id": { "const": "WP-0001" }
+        }
+      },
+      "then": {
+        "properties": {
+          "protection_boundary": {
+            "properties": {
+              "ephemeral_scratch_paths": {
+                "const": [
+                  "Game/Library/",
+                  "Game/Temp/",
+                  "Game/Logs/",
+                  "Game/Obj/",
+                  "Game/UserSettings/",
+                  "Game/MemoryCaptures/",
+                  "Game/Recordings/"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

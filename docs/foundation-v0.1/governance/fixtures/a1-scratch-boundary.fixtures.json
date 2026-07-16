@@ -1,0 +1,245 @@
+{
+  "cases": [
+    {
+      "id": "wp0001-exact-unity-scratch-valid",
+      "packet_id": "WP-0001",
+      "reservation_paths": [
+        "Game/Assets/Game/Bootstrap/"
+      ],
+      "protection_boundary": {
+        "protected_paths": [
+          "docs/foundation-v0.1/governance/"
+        ],
+        "writable_paths": [
+          "Game/Assets/Game/Bootstrap/"
+        ],
+        "ephemeral_scratch_paths": [
+          "Game/Library/",
+          "Game/Temp/",
+          "Game/Logs/",
+          "Game/Obj/",
+          "Game/UserSettings/",
+          "Game/MemoryCaptures/",
+          "Game/Recordings/"
+        ],
+        "scratch_destroy_on_close": true,
+        "foundation_read_only": true
+      },
+      "expected_codes": []
+    },
+    {
+      "id": "wp0001-incomplete-unity-scratch-invalid",
+      "packet_id": "WP-0001",
+      "reservation_paths": [
+        "Game/Assets/Game/Bootstrap/"
+      ],
+      "protection_boundary": {
+        "protected_paths": [
+          "docs/foundation-v0.1/governance/"
+        ],
+        "writable_paths": [
+          "Game/Assets/Game/Bootstrap/"
+        ],
+        "ephemeral_scratch_paths": [
+          "Game/Library/",
+          "Game/Temp/",
+          "Game/Logs/",
+          "Game/Obj/",
+          "Game/UserSettings/",
+          "Game/MemoryCaptures/"
+        ],
+        "scratch_destroy_on_close": true,
+        "foundation_read_only": true
+      },
+      "expected_codes": [
+        "wp0001-scratch-set-mismatch"
+      ]
+    },
+    {
+      "id": "wp0001-reordered-unity-scratch-invalid",
+      "packet_id": "WP-0001",
+      "reservation_paths": [
+        "Game/Assets/Game/Bootstrap/"
+      ],
+      "protection_boundary": {
+        "protected_paths": [
+          "docs/foundation-v0.1/governance/"
+        ],
+        "writable_paths": [
+          "Game/Assets/Game/Bootstrap/"
+        ],
+        "ephemeral_scratch_paths": [
+          "Game/Temp/",
+          "Game/Library/",
+          "Game/Logs/",
+          "Game/Obj/",
+          "Game/UserSettings/",
+          "Game/MemoryCaptures/",
+          "Game/Recordings/"
+        ],
+        "scratch_destroy_on_close": true,
+        "foundation_read_only": true
+      },
+      "expected_codes": [
+        "wp0001-scratch-set-mismatch"
+      ]
+    },
+    {
+      "id": "wp0001-scratch-reservation-overlap-invalid",
+      "packet_id": "WP-0001",
+      "reservation_paths": [
+        "Game/"
+      ],
+      "protection_boundary": {
+        "protected_paths": [
+          "docs/foundation-v0.1/governance/"
+        ],
+        "writable_paths": [
+          "Game/"
+        ],
+        "ephemeral_scratch_paths": [
+          "Game/Library/",
+          "Game/Temp/",
+          "Game/Logs/",
+          "Game/Obj/",
+          "Game/UserSettings/",
+          "Game/MemoryCaptures/",
+          "Game/Recordings/"
+        ],
+        "scratch_destroy_on_close": true,
+        "foundation_read_only": true
+      },
+      "expected_codes": [
+        "scratch-reservation-overlap"
+      ]
+    },
+    {
+      "id": "wp0001-scratch-protected-overlap-invalid",
+      "packet_id": "WP-0001",
+      "reservation_paths": [
+        "Game/Assets/Game/Bootstrap/"
+      ],
+      "protection_boundary": {
+        "protected_paths": [
+          "Game/"
+        ],
+        "writable_paths": [
+          "Game/Assets/Game/Bootstrap/"
+        ],
+        "ephemeral_scratch_paths": [
+          "Game/Library/",
+          "Game/Temp/",
+          "Game/Logs/",
+          "Game/Obj/",
+          "Game/UserSettings/",
+          "Game/MemoryCaptures/",
+          "Game/Recordings/"
+        ],
+        "scratch_destroy_on_close": true,
+        "foundation_read_only": true
+      },
+      "expected_codes": [
+        "scratch-protected-overlap"
+      ]
+    },
+    {
+      "id": "wp0001-scratch-cleanup-disabled-invalid",
+      "packet_id": "WP-0001",
+      "reservation_paths": [
+        "Game/Assets/Game/Bootstrap/"
+      ],
+      "protection_boundary": {
+        "protected_paths": [
+          "docs/foundation-v0.1/governance/"
+        ],
+        "writable_paths": [
+          "Game/Assets/Game/Bootstrap/"
+        ],
+        "ephemeral_scratch_paths": [
+          "Game/Library/",
+          "Game/Temp/",
+          "Game/Logs/",
+          "Game/Obj/",
+          "Game/UserSettings/",
+          "Game/MemoryCaptures/",
+          "Game/Recordings/"
+        ],
+        "scratch_destroy_on_close": false,
+        "foundation_read_only": true
+      },
+      "expected_codes": [
+        "scratch-not-destroyed-on-close"
+      ]
+    },
+    {
+      "id": "generic-scratch-not-ignored-invalid",
+      "packet_id": "WP-9999",
+      "reservation_paths": [
+        "docs/evidence/WP-9999/"
+      ],
+      "protection_boundary": {
+        "protected_paths": [
+          "docs/foundation-v0.1/governance/"
+        ],
+        "writable_paths": [
+          "docs/evidence/WP-9999/"
+        ],
+        "ephemeral_scratch_paths": [
+          "A1UnignoredScratch/"
+        ],
+        "scratch_destroy_on_close": true,
+        "foundation_read_only": true
+      },
+      "expected_codes": [
+        "scratch-not-gitignored"
+      ]
+    },
+    {
+      "id": "generic-scratch-roots-overlap-invalid",
+      "packet_id": "WP-9999",
+      "reservation_paths": [
+        "docs/evidence/WP-9999/"
+      ],
+      "protection_boundary": {
+        "protected_paths": [
+          "docs/foundation-v0.1/governance/"
+        ],
+        "writable_paths": [
+          "docs/evidence/WP-9999/"
+        ],
+        "ephemeral_scratch_paths": [
+          ".scratch/",
+          ".scratch/nested/"
+        ],
+        "scratch_destroy_on_close": true,
+        "foundation_read_only": true
+      },
+      "expected_codes": [
+        "scratch-internal-overlap"
+      ]
+    },
+    {
+      "id": "generic-scratch-unsafe-path-invalid",
+      "packet_id": "WP-9999",
+      "reservation_paths": [
+        "docs/evidence/WP-9999/"
+      ],
+      "protection_boundary": {
+        "protected_paths": [
+          "docs/foundation-v0.1/governance/"
+        ],
+        "writable_paths": [
+          "docs/evidence/WP-9999/"
+        ],
+        "ephemeral_scratch_paths": [
+          "../Escape/"
+        ],
+        "scratch_destroy_on_close": true,
+        "foundation_read_only": true
+      },
+      "expected_codes": [
+        "scratch-path-unsafe"
+      ]
+    }
+  ]
+}
