@@ -18,7 +18,7 @@
   "accepted_commit": null,
   "artifact_sha256": {
     "00-GAME-CONSTITUTION.md": "ff6d7938c14a074acf796619868b97551cefd1681147559983a293792c20afb8",
-    "ledger/decisions.jsonl": "ad256abc5a682304920d9a10ef9768a3b53e4c1f5e8e67c44119606705b6c843",
+    "ledger/decisions.jsonl": "d3ce2d34c9b4ee2092b2df47d2e8e42e0e115eda28b87212f8f6a9094bd5648c",
     "ledger/receipts/RR-PROMPT-20260715.source.md": "688eaa11017a0f00ac34de23cd98635350546c180ce59f038fd85795c401e373"
   },
   "subject_contract_sha256": {},
