@@ -7,7 +7,7 @@
   "branch": "agent/wp0003-bootstrap-001",
   "candidate_tree": {
     "file_count": 40,
-    "sha256": "32fc27eac4d45cf705dc5f9229f7cb06a0df901295578f46ababe09517f13a55",
+    "sha256": "d23368dfd212ae0a002bcff2bf22aabc4d5ec44368833811d735644b169c798f",
     "path_set": "All paths changed from base_commit in the containing Git tree, excluding excluded_paths.",
     "algorithm": "For every path in path_set, sorted by UTF-8 path: SHA-256(path + NUL + decimal byte length + NUL + raw bytes).",
     "excluded_paths": [
