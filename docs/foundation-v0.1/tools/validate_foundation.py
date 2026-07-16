@@ -932,9 +932,36 @@ def validate_schema_subset(
                 for right in range(left + 1, len(instance))
             ):
                 errors.append(f"{label} violates uniqueItems")
+        prefix_items = schema.get("prefixItems")
+        prefix_count = 0
+        if isinstance(prefix_items, list):
+            prefix_count = len(prefix_items)
+            for index, item_schema in enumerate(prefix_items):
+                if index >= len(instance):
+                    break
+                errors.extend(
+                    validate_schema_subset(
+                        instance[index],
+                        item_schema,
+                        root_schema,
+                        f"{label}[{index}]",
+                    )
+                )
         if "items" in schema:
-            for index, item in enumerate(instance):
-                errors.extend(validate_schema_subset(item, schema["items"], root_schema, f"{label}[{index}]"))
+            item_schema = schema["items"]
+            start = prefix_count if isinstance(prefix_items, list) else 0
+            if item_schema is False and len(instance) > start:
+                errors.append(f"{label} has items beyond its allowed prefix")
+            elif item_schema is not False:
+                for index in range(start, len(instance)):
+                    errors.extend(
+                        validate_schema_subset(
+                            instance[index],
+                            item_schema,
+                            root_schema,
+                            f"{label}[{index}]",
+                        )
+                    )
 
     if isinstance(instance, dict):
         if len(instance) < schema.get("minProperties", 0):
