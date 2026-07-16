@@ -23,7 +23,7 @@ Pass when:
 - no generated caches, secrets, sole binary sources, or unlicensed inputs enter the change;
 - dependency/license inventory is current;
 - D-0049's selected `UNITY-AI-GATEWAY-CODEX` path is receipt-bound and its exact seat, linked project, Gateway, bundled client, scope/rate-limit, initiation-identity, and revocation evidence is verified; selecting another route requires a superseding decision and revised packet;
-- no Unity Hub, Editor, or CLI process ran before that operating boundary and the protected install/packet/A1 gates passed;
+- no agent or CI directly invoked a Unity process; before A1, only D-0050's receipt-bound creator-operated setup may install/open the exact candidate, and it must record zero AI Unity tool calls or implementation work;
 - native Apple Silicon build succeeds.
 
 ## Gate 2 — Simulation correctness

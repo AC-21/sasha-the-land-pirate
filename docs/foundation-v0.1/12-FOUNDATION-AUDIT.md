@@ -37,7 +37,7 @@ The creator's later 2026-07-15 direction is captured in unsealed receipt `RR-CRE
 
 “Other than that. Let's go for it” safely authorizes continued A0 design work. It does not name the repository path, accept either exact work packet, approve a Unity installation, answer the open worksheet values, create the quarantine boundary, or promote autonomy.
 
-The repository and Unity-first source captures remain unsealed historical evidence, while authenticated creator authority now seals D-0049 and WP-0001 acceptance against protected main commit `ed14ae664e7c0efea790d334546538584e85c083`. The selected route is `UNITY-AI-GATEWAY-CODEX`; the exact packet contract, temporary identity, repository location, and D-0047 installation are accepted. Read-only inspection has not yet proved the assigned Unity seat, same-organization project linkage, Gateway/bundled-client profile, exact D-0047 Editor/IL2CPP/Xcode installation, or standalone A1 quarantine.
+The repository and Unity-first source captures remain unsealed historical evidence, while authenticated creator authority now seals D-0049 and WP-0001 acceptance against protected main commit `ed14ae664e7c0efea790d334546538584e85c083`. The selected route is `UNITY-AI-GATEWAY-CODEX`; the exact packet contract, temporary identity, repository location, and authorization to install the D-0047 candidate are accepted. D-0050 narrows that authorization to creator-operated setup without engine ratification. Read-only inspection has not yet proved the assigned Unity seat, same-organization project linkage, Gateway/bundled-client profile, exact D-0047 Editor/IL2CPP/Xcode installation, or standalone A1 quarantine.
 
 ## What this audit does not claim
 
@@ -49,12 +49,12 @@ Bootstrap lint can catch internal drift and malformed draft records. It cannot p
 
 1. The assigned Unity AI subscription/seat and same-organization project linkage have not been physically verified.
 2. The selected Gateway, Unity-bundled Codex/version, provider/model metadata, credential presence, scopes/rate limits, initiation identity, and revocation state have not been captured without secrets.
-3. The installed 6000.5.4f1 Editor does not satisfy the accepted D-0047 6000.3.19f1 + Mac IL2CPP + Xcode 26.3 tuple.
+3. The installed 6000.5.4f1 Editor does not satisfy the creator-approved D-0047 6000.3.19f1 + Mac IL2CPP + Xcode 26.3 candidate.
 4. The standalone A1 quarantine and creator-operated import/reject boundary have not been physically established or receipt-bound.
 
 The accepted WP-0001 contract hash is `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`. Acceptance authorizes only its bounded creator-operated setup phase; it is not evidence that the engine, route, build, save contracts, performance, or quarantine have passed, and it is not A1 activation.
 
-Across the A0 hardening and acceptance passes, unsealed `RR-CREATOR-20260715-03` advanced only derived materialization hashes alongside the audited draft artifacts, including `01-DECISION-LEDGER.md` at `89e132368d99dea2d335031fefd1cd2cd88b3d3980f165e13487e933dc552632` and `08-BUILD-ROADMAP.md` at `e70c7d1894df8dc6aa5b218934b3371943ec05e4c47b1a78a48f9843e9579990`. Its creator source hash, claims, decision-event bindings, and unsealed status remain unchanged; Git history retains every prior draft.
+Across the A0 hardening and acceptance passes, unsealed `RR-CREATOR-20260715-03` advanced only derived materialization hashes alongside the audited draft artifacts, including `01-DECISION-LEDGER.md` at `6b3a4fc5ec2d3df7bf311e744d03ecb33324d0dbc6925d07b483756025bd15b7` and `08-BUILD-ROADMAP.md` at `09e07838281619513ce04eac4855f9073ca9a257bca879a8fb9e6bbdb21c21c3`. Its creator source hash, claims, decision-event bindings, and unsealed status remain unchanged; Git history retains every prior draft.
 
 Until all four are true and a separate activation receipt is sealed, the project remains A0 and no game implementation starts under this constitution.
 
@@ -82,7 +82,7 @@ Until all four are true and a separate activation receipt is sealed, the project
 
 ## Deferred evidence, not hidden assumptions
 
-- installation proof for the accepted D-0047 Unity/tool/package tuple;
+- installation proof for the creator-approved D-0047 Unity/tool/package candidate;
 - physical seat/project/Gateway/bundled-client evidence for D-0049's selected route;
 - lowest supported shipping Mac;
 - accepted city manipulation grammar;

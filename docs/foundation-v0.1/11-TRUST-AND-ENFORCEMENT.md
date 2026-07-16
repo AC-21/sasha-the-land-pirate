@@ -38,7 +38,7 @@ This table is authoritative wherever another document is ambiguous:
 
 | Autonomy | Implementation | Verification | Acceptance/integration |
 |---|---|---|---|
-| A0 | analysis plus creator-requested draft documentation/control-plane edits only; no game/tool/asset implementation or installs | advisory review only | creator only; draft edits cannot authorize themselves |
+| A0 | analysis plus creator-requested documentation/control-plane edits only; no agent game/tool/asset implementation or installs; D-0050's receipt-bound creator-operated setup is outside agent authority | advisory review only | creator only; agent edits cannot authorize themselves |
 | A1 | one sandbox principal may implement in a standalone disposable clone/sandbox with an independent `.git` directory; shared Git worktrees are forbidden | another agent may provide advisory review, but shared credentials do not make it trusted verification | creator manually inspects the diff/artifacts and imports or rejects them; no agent acceptance or merge |
 | A2–A4 | accepted packets only | every accepted packet has a verifier principal distinct from implementer | trusted integrator is distinct from both for every accepted packet; creator remains required where the authority matrix says so |
 
@@ -121,7 +121,7 @@ Every attack must be rejected by a trusted check outside the candidate's write a
 
 [`governance/ratification-state.json`](governance/ratification-state.json) is the single draft statement of what can start:
 
-- WP-0001 is accepted under D-0049's `UNITY-AI-GATEWAY-CODEX` operating boundary, but may enter A1 only after the exact seat/project/Gateway/client profile, D-0047 tool installation, and packet-specific quarantine are physically verified and separately activated;
+- WP-0001 is accepted under D-0049's `UNITY-AI-GATEWAY-CODEX` boundary; D-0050 permits only creator-operated candidate setup, and A1 still requires the exact seat/project/Gateway/client profile, installed D-0047 tuple, and packet-specific quarantine to be physically verified and separately activated;
 - the ugly gameplay toy requires the listed identity decisions, its own explicit acceptance, and a separate packet-specific WP-0002 quarantine receipt;
 - WP-0002 cannot advance from proposal until WP-0001 is `released` and a sealed creator `packet-completion` receipt binds `ACCEPT-COMPLETION-WP-0001` plus WP-0001's immutable packet-contract hash;
 - the slice kernel additionally requires the city grammar decision;
