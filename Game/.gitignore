@@ -1,0 +1,14 @@
+# Unity-generated project-local state
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+/[Bb]uilds/
+/*.csproj
+/*.sln
+/*.slnx
+/*.suo
+/*.user

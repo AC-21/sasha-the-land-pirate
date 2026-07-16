@@ -22,8 +22,9 @@ ratification remain outside this packet.
   it defines no snapshot, capture, restore, serializer, path, stream, version,
   migration, envelope, or byte-schema API.
 - Both libraries are valid local Unity package shells with
-  `noEngineReferences`. `Game` has an empty dependency graph and does not link
-  them until creator approval.
+  `noEngineReferences`. At ADR-0001 acceptance, `Game` had an empty dependency
+  graph and did not link them. ADR-0002 supersedes that baseline package state;
+  local links to these libraries still require separate creator approval.
 - A package-free console test runner compiles both libraries and verifies a
   frozen golden hash, repeated process output, clean repeated DLL hashes, and
   identical DLLs from two independently initialized checkout roots.
