@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_ECONOMY_24H",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "last-bearing-balanced-town-v1",
+      "path": "scenarios/artifacts/SCN_ECONOMY_24H/r1/starting-state.json",
+      "sha256": "180cbb57c5cd937388e22488b5a9d2b50ec78d0defe2b05efdaaeabed8994aa8",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "last-bearing-graybox-content-v1",
+      "path": "scenarios/artifacts/SCN_ECONOMY_24H/r1/content-set.json",
+      "sha256": "491f52afc9fe80d8ad90d7869f66831fca9a39bb60fec1dd78a4c7584cb0f1d0",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "economy-no-rescue-24h-v1",
+      "path": "scenarios/artifacts/SCN_ECONOMY_24H/r1/input-script.json",
+      "sha256": "2da2a793ce2648241ddc952ee22223cdbf4a996473899a6a19be6949fc45ec2f",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

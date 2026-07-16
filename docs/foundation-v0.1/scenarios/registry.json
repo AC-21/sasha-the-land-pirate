@@ -1,0 +1,160 @@
+{
+  "schema_version": 2,
+  "hash_algorithm": "sha256",
+  "hash_domain": "raw-file-bytes",
+  "revision_baseline": "initial-commit-r1",
+  "scenarios": [
+    {
+      "id": "SCN_BEARING_COOPERATE",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_BEARING_COOPERATE/r1.json",
+      "sha256": "12aa4bce297fa9766a4c979c4b5a99d11791cd6d0b0326d3e6cdec02bcae248a",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_BEARING_COOPERATE/r1.fixture.json",
+      "fixture_manifest_sha256": "ff3da18bc53b9fc45a4c15b2d539a4fd90d9e4f232028a80fe082f5250524500"
+    },
+    {
+      "id": "SCN_BEARING_TAKE",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_BEARING_TAKE/r1.json",
+      "sha256": "9be20e321a86395bfb32e8224c8a758974fe201f241db92004be659f9b018cef",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_BEARING_TAKE/r1.fixture.json",
+      "fixture_manifest_sha256": "35d022dc33c07a7db0296791e91ad5e525b284b0474c09e2dca9f5a5dc56364f"
+    },
+    {
+      "id": "SCN_CITY_CAPACITY",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_CITY_CAPACITY/r1.json",
+      "sha256": "08dc4d37b6bcfb9df363be3151ecd961324c906e2371bbdb223eeecedf3c70d9",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_CITY_CAPACITY/r1.fixture.json",
+      "fixture_manifest_sha256": "93d7b1e064ee0e5a30e06b0ec260b4be60e52ed1190979303430cc63959438b5"
+    },
+    {
+      "id": "SCN_COLONY_COMPOSITION_MATRIX",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_COLONY_COMPOSITION_MATRIX/r1.json",
+      "sha256": "33653ebb2cd24d78d79f57412482520c828a0adb7fad1d09bf3a47b01d9f1916",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_COLONY_COMPOSITION_MATRIX/r1.fixture.json",
+      "fixture_manifest_sha256": "bd60681d1108fae92a990f37eb38fd3ee9a379d96257e0bcbcabe5a15b48b8f0"
+    },
+    {
+      "id": "SCN_COMPOSITION_LOOP_SMOKE",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_COMPOSITION_LOOP_SMOKE/r1.json",
+      "sha256": "b6e704710a66122958ed855517e24456858207a4a5df6f06c5f593b4d0a4d3e0",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_COMPOSITION_LOOP_SMOKE/r1.fixture.json",
+      "fixture_manifest_sha256": "99ab3570c70c41294cdf3c30c2c85d1281cbca1557bb530bf37a811b282860b7"
+    },
+    {
+      "id": "SCN_ECONOMY_24H",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_ECONOMY_24H/r1.json",
+      "sha256": "b462c8c045f186e614281fe9b17a25580403d913be2ab1acca4700103d32c0cc",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_ECONOMY_24H/r1.fixture.json",
+      "fixture_manifest_sha256": "c45e632d233e919e42b0aa9ffd269271e7b3cbb0ea6a78fddbd535f360189d8e"
+    },
+    {
+      "id": "SCN_FACTION_WAIT_CLAIM",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_FACTION_WAIT_CLAIM/r1.json",
+      "sha256": "b4faa15defbed165a13fe2cdbb7a3a4badcd459d0e51517f7c1a06194bed74ea",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_FACTION_WAIT_CLAIM/r1.fixture.json",
+      "fixture_manifest_sha256": "824228f2b2ef037befa0c27fa46c12db20dbdcdac0a67e0849d39e9ffbea2925"
+    },
+    {
+      "id": "SCN_MIGRATION_MATRIX",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_MIGRATION_MATRIX/r1.json",
+      "sha256": "4bf7103dbb2c6e74871775edb7fccc7f06ce3678158f5c7fafd64a4b520bb9ce",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_MIGRATION_MATRIX/r1.fixture.json",
+      "fixture_manifest_sha256": "9666325a58adec21c8cb6eceb686b4cc814919b2b755b8a4e4bdd4448594e67e"
+    },
+    {
+      "id": "SCN_NEW_TOWN_30M",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_NEW_TOWN_30M/r1.json",
+      "sha256": "a3f64f3eaa2834492f9e3c95d5c0f33a90e1d60f5f23e963c304fd3c8e20a11d",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_NEW_TOWN_30M/r1.fixture.json",
+      "fixture_manifest_sha256": "02e26ab176d0d4a73143fe6cb379338ef089aac2ad83773d97013122bbca8071"
+    },
+    {
+      "id": "SCN_PREPARATION_MODULE_MATRIX",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_PREPARATION_MODULE_MATRIX/r1.json",
+      "sha256": "1dd0ced51deb1c3c5b2a808a37262eb47fdd521be83e2255b0c29ced0043253c",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_PREPARATION_MODULE_MATRIX/r1.fixture.json",
+      "fixture_manifest_sha256": "5e271da24f57c4149f1bd9019bbcef846a82a460451d6f53f294f2763517d1ec"
+    },
+    {
+      "id": "SCN_RETURN_LATE_DAMAGED",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_RETURN_LATE_DAMAGED/r1.json",
+      "sha256": "792698b60fcbebc6644b222774932b7f01cacf69557c678376371f638e246c32",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_RETURN_LATE_DAMAGED/r1.fixture.json",
+      "fixture_manifest_sha256": "2817489351af6658fe597f5d7313b89ea31523ac98d950719e1b3de07a2b4cf0"
+    },
+    {
+      "id": "SCN_ROAD_WORST_CASE",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_ROAD_WORST_CASE/r1.json",
+      "sha256": "375d46318c90a9c75d3efcfe9b3a3325244973c5dd7d5b8fc04ad9570c86ecf9",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_ROAD_WORST_CASE/r1.fixture.json",
+      "fixture_manifest_sha256": "4f5706ca39175225a0a62794616052e0b49d8b42483e7a585ff9a8fc798b6ee9"
+    },
+    {
+      "id": "SCN_ROLLBACK_DRILL",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_ROLLBACK_DRILL/r1.json",
+      "sha256": "47f3eee3f7f2b6be549a8bf1344bbb0135e73ff1ae0acf8c09b4ce5bbd5fc5f0",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_ROLLBACK_DRILL/r1.fixture.json",
+      "fixture_manifest_sha256": "d426d3b52758c3bd8ebda57cca6ef5c4e8f1b6c462ca578d5dc79e8c514c7378"
+    },
+    {
+      "id": "SCN_SAVE_TRANSITIONS",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_SAVE_TRANSITIONS/r1.json",
+      "sha256": "66bc9b4a35b6fe28f9231bb64a29a148af852e5428025a4e49952bacc648090b",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_SAVE_TRANSITIONS/r1.fixture.json",
+      "fixture_manifest_sha256": "405d1282e16dde2c5adbd6f18921be34405450b3534f4293f1c29e3f2f0a4fc0"
+    },
+    {
+      "id": "SCN_SPIKE_SLICE",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_SPIKE_SLICE/r1.json",
+      "sha256": "7b84129a3d696becb06fab37a91ddcc5bca8914f3aa3e97c076df77f9c79480b",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_SPIKE_SLICE/r1.fixture.json",
+      "fixture_manifest_sha256": "e8a158aa4d4f1d1fc1a8f1d73b592824a7c05aa66ecf16ddc32deed6a39e9095"
+    },
+    {
+      "id": "SCN_TIME_POLICY",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_TIME_POLICY/r1.json",
+      "sha256": "713f22fc96413285b39f98665215c3da824fae2be73ff0ca778a3807ffef6e7c",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_TIME_POLICY/r1.fixture.json",
+      "fixture_manifest_sha256": "498222940aca74c92b10a74aef6fa9f76e80a7480637821f837feef7e366d51f"
+    },
+    {
+      "id": "SCN_UGLY_TOY",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_UGLY_TOY/r1.json",
+      "sha256": "ad49d09dc523a7c7ce85060d1ae7268c258a400f9dc8824a9d4be4fe54012530",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_UGLY_TOY/r1.fixture.json",
+      "fixture_manifest_sha256": "681b04b93519cbc3c71366613a81ee7155083baa7a8e635de22bf4d56241647f"
+    },
+    {
+      "id": "SCN_WP0001_GATE",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_WP0001_GATE/r1.json",
+      "sha256": "2efcc4d1cf1eaefa7c181683a5c2bd44ad61d5fcfabb3bb16be6ddfa7c6d88e7",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_WP0001_GATE/r1.fixture.json",
+      "fixture_manifest_sha256": "c60a0460f2f7dd46c3fc4ff3090c325aa3bc619f359515571fdd668931a965fe"
+    },
+    {
+      "id": "SCN_WP0002_GATE",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_WP0002_GATE/r1.json",
+      "sha256": "2ab9e04bd8b3b55da390afa2701b2e56099ebd5853fc58761e35b26e8cf44d12",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_WP0002_GATE/r1.fixture.json",
+      "fixture_manifest_sha256": "f5a400df8ba08b399c7aa854f3c0b0089cd83358ccfaac59dda4c156a241cbf5"
+    }
+  ]
+}

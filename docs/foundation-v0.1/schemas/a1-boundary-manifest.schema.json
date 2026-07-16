@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/a1-boundary-manifest.schema.json",
+  "title": "Creator-attested A1 quarantine boundary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "manifest_id",
+    "packet_id",
+    "packet_contract_sha256",
+    "created_at",
+    "attested_by",
+    "attestation_receipt_id",
+    "repository",
+    "reservation",
+    "approved_toolchain",
+    "approved_environment",
+    "foundation_binding",
+    "protection_boundary",
+    "credential_boundary",
+    "manual_import_boundary",
+    "local_observation_exceptions"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "manifest_id": { "type": "string", "pattern": "^A1B-WP-[0-9]{4}-[A-Z0-9-]+$" },
+    "packet_id": { "type": "string", "pattern": "^WP-[0-9]{4}$" },
+    "packet_contract_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "attested_by": { "type": "string", "minLength": 1 },
+    "attestation_receipt_id": { "type": "string", "pattern": "^RR-[A-Z0-9-]+$" },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resolver_type", "repository_root", "base_commit"],
+      "properties": {
+        "resolver_type": { "const": "local-git" },
+        "repository_root": { "const": "." },
+        "base_commit": { "type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$" }
+      }
+    },
+    "reservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lease_id", "fencing_token", "expires_at", "paths", "domains"],
+      "properties": {
+        "lease_id": { "type": "string", "minLength": 1 },
+        "fencing_token": { "type": "string", "minLength": 1 },
+        "expires_at": { "type": "string", "format": "date-time" },
+        "paths": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "domains": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "approved_toolchain": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "version", "source", "sha256"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "minLength": 1 },
+          "source": { "type": "string", "minLength": 1 },
+          "sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    },
+    "approved_environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["os", "os_version", "architecture", "hardware_id", "sandbox_profile", "network_policy"],
+      "properties": {
+        "os": { "type": "string", "minLength": 1 },
+        "os_version": { "type": "string", "minLength": 1 },
+        "architecture": { "type": "string", "minLength": 1 },
+        "hardware_id": { "type": "string", "minLength": 1 },
+        "sandbox_profile": { "type": "string", "minLength": 1 },
+        "network_policy": { "type": "string", "minLength": 1 }
+      }
+    },
+    "foundation_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["constitution_path", "constitution_sha256", "decision_ledger_path", "decision_ledger_sha256", "last_creator_receipt_id"],
+      "properties": {
+        "constitution_path": { "const": "00-GAME-CONSTITUTION.md" },
+        "constitution_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "decision_ledger_path": { "const": "ledger/decisions.jsonl" },
+        "decision_ledger_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "last_creator_receipt_id": { "type": "string", "pattern": "^RR-[A-Z0-9-]+$" }
+      }
+    },
+    "protection_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protected_paths", "writable_paths", "foundation_read_only"],
+      "properties": {
+        "protected_paths": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "writable_paths": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "foundation_read_only": { "const": true }
+      }
+    },
+    "credential_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approved_credential_ids", "denied_capabilities"],
+      "properties": {
+        "approved_credential_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "denied_capabilities": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "manual_import_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "agent_can_merge", "agent_can_release", "agent_can_accept_evidence", "creator_review_required"],
+      "properties": {
+        "mode": { "const": "creator-operated-import-or-reject" },
+        "agent_can_merge": { "const": false },
+        "agent_can_release": { "const": false },
+        "agent_can_accept_evidence": { "const": false },
+        "creator_review_required": { "const": true }
+      }
+    },
+    "local_observation_exceptions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

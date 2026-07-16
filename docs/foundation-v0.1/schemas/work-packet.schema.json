@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/work-packet.schema.json",
+  "title": "Canonical agent work packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "status",
+    "class",
+    "declared_risk",
+    "derived_risk",
+    "effective_risk",
+    "save_risk",
+    "created_on",
+    "title",
+    "objective",
+    "value",
+    "requested_by",
+    "required_approver",
+    "approved_by",
+    "approval_receipt_id",
+    "contract_sha256",
+    "a1_boundary_manifest",
+    "implementer",
+    "verifier",
+    "integrator",
+    "constitutional_links",
+    "decision_links",
+    "system_contracts",
+    "baseline_evidence",
+    "in_scope",
+    "non_goals",
+    "affected_domains",
+    "interfaces",
+    "dependencies",
+    "reservation",
+    "declared_paths",
+    "actual_paths",
+    "scenario_pins",
+    "save_impact",
+    "acceptance_tests",
+    "performance_metrics",
+    "visual_evidence",
+    "rollout",
+    "rollback",
+    "evidence_manifest",
+    "candidate_evidence",
+    "verification",
+    "release_id",
+    "status_events"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "id": { "type": "string", "pattern": "^WP-[0-9]{4}$" },
+    "status": { "enum": ["proposed", "accepted", "active", "verifying", "candidate", "released", "rejected", "rolled-back", "superseded"] },
+    "class": { "enum": ["feature", "bug", "optimization", "content", "asset", "tooling", "architecture"] },
+    "declared_risk": { "$ref": "#/$defs/risk" },
+    "derived_risk": { "oneOf": [{ "$ref": "#/$defs/risk" }, { "type": "null" }] },
+    "effective_risk": { "oneOf": [{ "$ref": "#/$defs/risk" }, { "type": "null" }] },
+    "save_risk": { "enum": ["S0", "S1", "S2", "S3"] },
+    "created_on": { "type": "string", "format": "date" },
+    "title": { "type": "string", "minLength": 1 },
+    "objective": { "type": "string", "minLength": 1 },
+    "value": { "type": "string", "minLength": 1 },
+    "requested_by": { "type": "string", "minLength": 1 },
+    "required_approver": { "type": "string", "minLength": 1 },
+    "approved_by": { "type": ["string", "null"] },
+    "approval_receipt_id": { "type": ["string", "null"] },
+    "contract_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "a1_boundary_manifest": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/boundaryManifestRef" }
+      ]
+    },
+    "implementer": { "type": ["string", "null"] },
+    "verifier": { "type": ["string", "null"] },
+    "integrator": { "type": ["string", "null"] },
+    "constitutional_links": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^(P[1-6]|INV-[0-9]{3})$" }, "minItems": 1 },
+    "decision_links": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^D-[0-9]{4}$" } },
+    "system_contracts": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "baseline_evidence": { "type": "array", "items": { "$ref": "#/$defs/artifact" }, "minItems": 1 },
+    "in_scope": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "non_goals": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "affected_domains": { "type": "array", "uniqueItems": true, "items": { "enum": ["world", "settlement", "population", "logistics", "vehicle", "expedition", "faction", "crisis", "progression", "audit", "presentation", "tooling", "governance", "save"] }, "minItems": 1 },
+    "interfaces": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "dependencies": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^WP-[0-9]{4}$" } },
+    "reservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "lease_id", "base_commit", "paths", "domains", "expires_at", "fencing_token"],
+      "properties": {
+        "status": { "enum": ["unreserved", "held", "released", "expired"] },
+        "lease_id": { "type": ["string", "null"] },
+        "base_commit": { "type": ["string", "null"] },
+        "paths": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "domains": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "expires_at": { "type": ["string", "null"], "format": "date-time" },
+        "fencing_token": { "type": ["string", "null"] }
+      }
+    },
+    "declared_paths": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "actual_paths": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "scenario_pins": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/scenarioPin" } },
+    "save_impact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "schema_changes", "migration_ids", "compatibility", "golden_scenarios"],
+      "properties": {
+        "summary": { "type": "string", "minLength": 1 },
+        "schema_changes": { "type": "array", "items": { "type": "string" } },
+        "migration_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+        "compatibility": { "type": "string", "minLength": 1 },
+        "golden_scenarios": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "acceptance_tests": { "type": "array", "items": { "$ref": "#/$defs/test" }, "minItems": 1 },
+    "performance_metrics": { "type": "array", "items": { "$ref": "#/$defs/metric" }, "minItems": 1 },
+    "visual_evidence": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
+    "rollout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_autonomy", "feature_flag", "stages", "health_signals", "minimum_runs", "minimum_observation_hours", "required_approver"],
+      "properties": {
+        "required_autonomy": { "enum": ["A0", "A1", "A2", "A3", "A4"] },
+        "feature_flag": { "type": ["string", "null"] },
+        "stages": { "type": "array", "minItems": 1, "items": { "enum": ["dev-only", "internal-off", "canary", "default-on", "settled"] } },
+        "health_signals": { "type": "array", "items": { "$ref": "#/$defs/metric" } },
+        "minimum_runs": { "type": "integer", "minimum": 0 },
+        "minimum_observation_hours": { "type": "number", "minimum": 0 },
+        "required_approver": { "type": "string", "minLength": 1 }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_build", "triggers", "steps", "save_recovery", "drill_required", "drill_evidence"],
+      "properties": {
+        "target_build": { "type": ["string", "null"] },
+        "triggers": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "steps": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "save_recovery": { "type": "string", "minLength": 1 },
+        "drill_required": { "type": "boolean" },
+        "drill_evidence": { "type": "array", "items": { "$ref": "#/$defs/artifact" } }
+      }
+    },
+    "evidence_manifest": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
+    "candidate_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["diff_artifact_id", "artifact_manifest_id", "command_log_artifact_id", "known_limits"],
+      "properties": {
+        "diff_artifact_id": { "type": ["string", "null"], "minLength": 1 },
+        "artifact_manifest_id": { "type": ["string", "null"], "minLength": 1 },
+        "command_log_artifact_id": { "type": ["string", "null"], "minLength": 1 },
+        "known_limits": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "verifier", "gate_results", "evidence_ids"],
+      "properties": {
+        "status": { "enum": ["not-run", "passed", "failed"] },
+        "verifier": { "type": ["string", "null"] },
+        "gate_results": { "type": "array", "items": { "type": "string" } },
+        "evidence_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }
+      }
+    },
+    "release_id": { "type": ["string", "null"] },
+    "status_events": { "type": "array", "items": { "$ref": "#/$defs/statusEvent" }, "minItems": 1 }
+  },
+  "$defs": {
+    "boundaryManifestRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manifest_id", "path", "sha256"],
+      "properties": {
+        "manifest_id": { "type": "string", "pattern": "^A1B-WP-[0-9]{4}-[A-Z0-9-]+$" },
+        "path": { "type": "string", "pattern": "^governance/a1-boundaries/WP-[0-9]{4}\\.json$" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "risk": { "enum": ["low", "medium", "high", "constitutional"] },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "uri", "sha256"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "minLength": 1 },
+        "uri": { "type": "string", "minLength": 1 },
+        "sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "test": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "scenario_id", "command", "oracle", "required"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["unit", "scenario", "integration", "save", "performance", "visual", "manual", "security"] },
+        "scenario_id": { "type": ["string", "null"], "pattern": "^SCN_[A-Z0-9_]+$" },
+        "command": { "type": ["string", "null"] },
+        "oracle": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" }
+      }
+    },
+    "scenarioPin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "revision", "path", "sha256", "fixture_manifest_path", "fixture_manifest_sha256"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^SCN_[A-Z0-9_]+$" },
+        "revision": { "type": "integer", "minimum": 1 },
+        "path": { "type": "string", "pattern": "^scenarios/definitions/SCN_[A-Z0-9_]+/r[1-9][0-9]*\\.json$" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "fixture_manifest_path": { "type": "string", "pattern": "^scenarios/fixtures/SCN_[A-Z0-9_]+/r[1-9][0-9]*\\.fixture\\.json$" },
+        "fixture_manifest_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "scenario", "unit", "baseline", "target", "regression_ceiling", "comparator"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "scenario": { "type": "string", "minLength": 1 },
+        "unit": { "type": "string", "minLength": 1 },
+        "baseline": { "type": ["number", "null"] },
+        "target": { "type": "number" },
+        "regression_ceiling": { "type": "number" },
+        "comparator": { "enum": ["less-than", "less-or-equal", "greater-or-equal", "equal"] }
+      }
+    },
+    "statusEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "from", "to", "actor", "at", "receipt_id"],
+      "properties": {
+        "event_id": { "type": "string", "minLength": 1 },
+        "from": { "type": ["string", "null"] },
+        "to": { "type": "string", "minLength": 1 },
+        "actor": { "type": "string", "minLength": 1 },
+        "at": { "type": "string", "format": "date-time" },
+        "receipt_id": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

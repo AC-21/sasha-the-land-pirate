@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_CITY_CAPACITY",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "provisional-city-capacity-v1",
+      "path": "scenarios/artifacts/SCN_CITY_CAPACITY/r1/starting-state.json",
+      "sha256": "5722563f548ef204599c04beba2398bbb8b8e0fd9e3bd273582cc4950219d8f4",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "capacity-graybox-content-v1",
+      "path": "scenarios/artifacts/SCN_CITY_CAPACITY/r1/content-set.json",
+      "sha256": "1ce6f48b65769eb99c0ec2a41d1c5cccc01d59a0ac27e8b2a91b2301f5fda9e8",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "city-capacity-camera-logistics-v1",
+      "path": "scenarios/artifacts/SCN_CITY_CAPACITY/r1/input-script.json",
+      "sha256": "6d2a489f5ef04601e5dc5500a797c6475c092310ce3a5e9441cb58b61a074d28",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

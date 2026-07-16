@@ -1,0 +1,54 @@
+# macOS and editors
+.DS_Store
+.AppleDouble
+.LSOverride
+.idea/
+.vscode/
+.vs/
+*.swp
+*.swo
+
+# Python validation cache
+__pycache__/
+*.py[cod]
+
+# Local credentials and machine configuration
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.key
+
+# Unity-generated state (the Game project is created only by an accepted packet)
+/Game/[Ll]ibrary/
+/Game/[Tt]emp/
+/Game/[Oo]bj/
+/Game/[Ll]ogs/
+/Game/[Uu]ser[Ss]ettings/
+/Game/[Mm]emoryCaptures/
+/Game/[Rr]ecordings/
+/Game/[Bb]uilds/
+/Game/*.csproj
+/Game/*.sln
+/Game/*.suo
+/Game/*.user
+sysinfo.txt
+
+# .NET build output; project and solution definitions remain tracked
+**/bin/
+**/obj/
+TestResults/
+
+# Blender recovery/autosave artifacts; canonical .blend files remain tracked
+*.blend1
+*.blend2
+*.blend3
+*.blend@
+*.blend~
+
+# Local scratch and quarantined transient output
+/.scratch/
+/.quarantine/
+/BuildArtifacts/**/local-only/
+/releases/evidence/_scratch/

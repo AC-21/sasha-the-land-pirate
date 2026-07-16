@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_BEARING_TAKE",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "last-bearing-new-town-v1",
+      "path": "scenarios/artifacts/SCN_BEARING_TAKE/r1/starting-state.json",
+      "sha256": "999f39658b1e29525073002831879ad840e9eb3d98e86a92d1d884ffd02d1233",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "last-bearing-graybox-content-v1",
+      "path": "scenarios/artifacts/SCN_BEARING_TAKE/r1/content-set.json",
+      "sha256": "d697ea07d5e6acda89f8c6f681f9536bd4503bb24f4cc1b82d1682fd3495f19c",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "buffer-range-take-v1",
+      "path": "scenarios/artifacts/SCN_BEARING_TAKE/r1/input-script.json",
+      "sha256": "c929806461b948d33426cd57dff51045aac9662cb519fd840d78ad89f7237b11",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

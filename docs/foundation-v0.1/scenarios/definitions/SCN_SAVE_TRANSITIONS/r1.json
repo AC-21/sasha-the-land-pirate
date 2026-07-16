@@ -1,0 +1,280 @@
+{
+  "schema_version": 2,
+  "id": "SCN_SAVE_TRANSITIONS",
+  "revision": 1,
+  "kind": "save",
+  "title": "Save and recover every ownership transition phase",
+  "purpose": "Exercise immutable generations, exact embedded historical pointer artifacts, zero-field pointer digests, every pointer/head cross-field, and retention anchors whose active root is the unique terminal receipt of one non-forked supersession chain. Coexisting ancestors are valid; forks or multiple terminal tips require review.",
+  "applies_to_packets": [
+    "WP-0001",
+    "WP-0002"
+  ],
+  "fixture": {
+    "world_seed": "1002",
+    "starting_tick": "600",
+    "tick_rate_hz": 10,
+    "warmup_ticks": 0,
+    "duration_ticks": 1800,
+    "warmup_seconds": 0,
+    "duration_seconds": 180,
+    "starting_state_id": "ownership-transition-state-v1",
+    "content_set_id": "ownership-transition-content-v1",
+    "input_script_id": "all-transition-and-retention-anchor-phases-v2",
+    "fixture_manifest": {
+      "path": "scenarios/fixtures/SCN_SAVE_TRANSITIONS/r1.fixture.json",
+      "sha256": "405d1282e16dde2c5adbd6f18921be34405450b3534f4293f1c29e3f2f0a4fc0"
+    }
+  },
+  "counts": {
+    "state": {
+      "authoritative_records": 32,
+      "save_sections": 6,
+      "content_definitions": 4,
+      "transactions": 1,
+      "save_generations": 9
+    },
+    "entities": {
+      "total": 9,
+      "settlements": 1,
+      "buildings": 2,
+      "households": 1,
+      "specialists": 1,
+      "robots": 0,
+      "vehicles": 1,
+      "factions": 1,
+      "crises": 1,
+      "expeditions": 1
+    },
+    "objects": {
+      "placed_total": 0,
+      "dynamic": 0,
+      "static": 0,
+      "lod0": 0,
+      "lod1": 0,
+      "lod2": 0
+    },
+    "lights": {
+      "total": 0,
+      "directional": 0,
+      "point": 0,
+      "spot": 0,
+      "shadowed": 0
+    },
+    "crowd": {
+      "authoritative_people": 5,
+      "visible_agents": 0,
+      "offscreen_people": 5
+    },
+    "inputs": {
+      "scripted_commands": 18,
+      "keyboard_events": 0,
+      "controller_events": 0,
+      "pointer_events": 0,
+      "fault_injections": 82
+    }
+  },
+  "parameters": [
+    {
+      "name": "transition-phases",
+      "value": 6,
+      "unit": "phases"
+    },
+    {
+      "name": "save-checkpoints-per-phase",
+      "value": 1,
+      "unit": "checkpoints"
+    },
+    {
+      "name": "writers",
+      "value": 2,
+      "unit": "manual-and-autosave"
+    },
+    {
+      "name": "retention-anchor-crash-boundaries",
+      "value": 8,
+      "unit": "boundaries"
+    },
+    {
+      "name": "anchor-advance-crash-boundaries",
+      "value": 8,
+      "unit": "boundaries"
+    },
+    {
+      "name": "historical-pointer-binding",
+      "value": "embedded-canonical-pointer-v1",
+      "unit": null
+    },
+    {
+      "name": "pointer-digest-domain",
+      "value": "rfc8785-sha256-pointer-digest-zeroed",
+      "unit": null
+    },
+    {
+      "name": "active-anchor-selection",
+      "value": "unique-terminal-of-one-non-forked-supersession-chain",
+      "unit": null
+    },
+    {
+      "name": "coexisting-anchor-receipts-on-valid-chain",
+      "value": 3,
+      "unit": "receipts"
+    },
+    {
+      "name": "injected-anchor-supersession-forks",
+      "value": 1,
+      "unit": "forks"
+    },
+    {
+      "name": "injected-multiple-terminal-tip-sets",
+      "value": 1,
+      "unit": "sets"
+    },
+    {
+      "name": "pointer-head-cross-field-coverage",
+      "value": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at",
+      "unit": null
+    }
+  ],
+  "oracles": [
+    {
+      "id": "ORC_SAVE_PAUSE_P95",
+      "subject": "save-snapshot-pause-p95",
+      "operator": "less-or-equal",
+      "expected": 50.0,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_SAVE_STATE_MATCH",
+      "subject": "canonical-state-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_DUPLICATION",
+      "subject": "duplicate-or-lost-ownership",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_INVARIANTS",
+      "subject": "save-invariant-violations",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_OWNERSHIP_INVARIANTS",
+      "subject": "ownership-invariant-violations",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_PRIOR_GENERATION",
+      "subject": "prior-generation-losses",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_STALE_CAS",
+      "subject": "stale-cas-accepted",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_POINTER_HEADER",
+      "subject": "pointer-header-mismatches-accepted",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_INVALID_ANCHORS",
+      "subject": "invalid-retention-anchors-accepted",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_PROTECTED_GENERATION",
+      "subject": "protected-generation-losses",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_ANCHOR_RECOVERY",
+      "subject": "anchor-rooted-recovery-failures",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_UNKNOWN_FILE_DELETE",
+      "subject": "unrecognized-or-forked-files-deleted",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_POINTER_PREIMAGE",
+      "subject": "historical-pointer-preimage-mismatches-accepted",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_POINTER_DIGEST",
+      "subject": "historical-pointer-digest-mismatches-accepted",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_ANCHOR_POINTER_HEAD",
+      "subject": "anchor-pointer-head-cross-field-mismatches-accepted",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_VALID_ANCESTORS",
+      "subject": "valid-coexisting-historical-anchors-rejected",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_NONTERMINAL",
+      "subject": "nonterminal-anchor-selected-as-active",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_TERMINAL",
+      "subject": "unique-terminal-anchor-selection-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_ANCHOR_FORK",
+      "subject": "forked-anchor-supersession-chains-auto-selected",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SAVE_MULTI_TIP",
+      "subject": "multiple-terminal-anchor-tips-auto-selected",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    }
+  ]
+}

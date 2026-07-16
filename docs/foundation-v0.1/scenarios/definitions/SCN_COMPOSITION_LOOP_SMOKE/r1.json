@@ -1,0 +1,375 @@
+{
+  "schema_version": 2,
+  "id": "SCN_COMPOSITION_LOOP_SMOKE",
+  "revision": 1,
+  "kind": "gameplay",
+  "title": "End-to-end composition loop smoke",
+  "purpose": "Run human-only, robot-only, and mixed cases through the same city need, commitment, expedition, return, and save path without crossing them with the four preparation/module permutations.",
+  "applies_to_packets": [
+    "WP-0002"
+  ],
+  "fixture": {
+    "world_seed": "2011",
+    "starting_tick": "0",
+    "tick_rate_hz": 10,
+    "warmup_ticks": 0,
+    "duration_ticks": 18000,
+    "warmup_seconds": 0,
+    "duration_seconds": 1800,
+    "starting_state_id": "composition-loop-smoke-state-v1",
+    "content_set_id": "last-bearing-graybox-content-v1",
+    "input_script_id": "composition-loop-three-cases-v1",
+    "fixture_manifest": {
+      "path": "scenarios/fixtures/SCN_COMPOSITION_LOOP_SMOKE/r1.fixture.json",
+      "sha256": "99ab3570c70c41294cdf3c30c2c85d1281cbca1557bb530bf37a811b282860b7"
+    }
+  },
+  "counts": {
+    "state": {
+      "authoritative_records": 120,
+      "save_sections": 10,
+      "content_definitions": 24,
+      "transactions": 3,
+      "save_generations": 12
+    },
+    "entities": {
+      "total": 12,
+      "settlements": 1,
+      "buildings": 5,
+      "households": 1,
+      "specialists": 0,
+      "robots": 1,
+      "vehicles": 1,
+      "factions": 1,
+      "crises": 1,
+      "expeditions": 1
+    },
+    "objects": {
+      "placed_total": 0,
+      "dynamic": 0,
+      "static": 0,
+      "lod0": 0,
+      "lod1": 0,
+      "lod2": 0
+    },
+    "lights": {
+      "total": 0,
+      "directional": 0,
+      "point": 0,
+      "spot": 0,
+      "shadowed": 0
+    },
+    "crowd": {
+      "authoritative_people": 1,
+      "visible_agents": 2,
+      "offscreen_people": 0
+    },
+    "inputs": {
+      "scripted_commands": 240,
+      "keyboard_events": 0,
+      "controller_events": 0,
+      "pointer_events": 0,
+      "fault_injections": 0
+    }
+  },
+  "parameters": [
+    {
+      "name": "case-order",
+      "value": "human-only,robot-only,mixed",
+      "unit": null
+    },
+    {
+      "name": "base-path",
+      "value": "workshop-push+winch+cooperate",
+      "unit": null
+    },
+    {
+      "name": "cross-with-2x2",
+      "value": false,
+      "unit": null
+    }
+  ],
+  "oracles": [
+    {
+      "id": "ORC_LOOP_CASES",
+      "subject": "composition-loop-cases-completed",
+      "operator": "equal",
+      "expected": 3,
+      "unit": "cases"
+    },
+    {
+      "id": "ORC_LOOP_HIDDEN",
+      "subject": "hidden-human-dependencies",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_LOOP_SAVE",
+      "subject": "composition-loop-save-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    }
+  ],
+  "cases": [
+    {
+      "id": "human-only",
+      "counts": {
+        "state": {
+          "authoritative_records": 116,
+          "save_sections": 10,
+          "content_definitions": 24,
+          "transactions": 1,
+          "save_generations": 4
+        },
+        "entities": {
+          "total": 11,
+          "settlements": 1,
+          "buildings": 5,
+          "households": 1,
+          "specialists": 0,
+          "robots": 0,
+          "vehicles": 1,
+          "factions": 1,
+          "crises": 1,
+          "expeditions": 1
+        },
+        "objects": {
+          "placed_total": 0,
+          "dynamic": 0,
+          "static": 0,
+          "lod0": 0,
+          "lod1": 0,
+          "lod2": 0
+        },
+        "lights": {
+          "total": 0,
+          "directional": 0,
+          "point": 0,
+          "spot": 0,
+          "shadowed": 0
+        },
+        "crowd": {
+          "authoritative_people": 1,
+          "visible_agents": 1,
+          "offscreen_people": 0
+        },
+        "inputs": {
+          "scripted_commands": 80,
+          "keyboard_events": 0,
+          "controller_events": 0,
+          "pointer_events": 0,
+          "fault_injections": 0
+        }
+      },
+      "parameters": [
+        {
+          "name": "path",
+          "value": "workshop-push+winch+cooperate",
+          "unit": null
+        },
+        {
+          "name": "case-composition",
+          "value": "human-only",
+          "unit": null
+        }
+      ],
+      "oracles": [
+        {
+          "id": "ORC_LOOP_HUMAN_ONLY_COMPLETE",
+          "subject": "human-only.city-commit-expedition-return-save-complete",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_LOOP_HUMAN_ONLY_HIDDEN",
+          "subject": "human-only.hidden-human-dependencies",
+          "operator": "equal",
+          "expected": 0,
+          "unit": "count"
+        },
+        {
+          "id": "ORC_LOOP_HUMAN_ONLY_SAVE",
+          "subject": "human-only.canonical-state-mismatches-after-reload",
+          "operator": "equal",
+          "expected": 0,
+          "unit": "count"
+        }
+      ]
+    },
+    {
+      "id": "robot-only",
+      "counts": {
+        "state": {
+          "authoritative_records": 116,
+          "save_sections": 10,
+          "content_definitions": 24,
+          "transactions": 1,
+          "save_generations": 4
+        },
+        "entities": {
+          "total": 11,
+          "settlements": 1,
+          "buildings": 5,
+          "households": 0,
+          "specialists": 0,
+          "robots": 1,
+          "vehicles": 1,
+          "factions": 1,
+          "crises": 1,
+          "expeditions": 1
+        },
+        "objects": {
+          "placed_total": 0,
+          "dynamic": 0,
+          "static": 0,
+          "lod0": 0,
+          "lod1": 0,
+          "lod2": 0
+        },
+        "lights": {
+          "total": 0,
+          "directional": 0,
+          "point": 0,
+          "spot": 0,
+          "shadowed": 0
+        },
+        "crowd": {
+          "authoritative_people": 0,
+          "visible_agents": 2,
+          "offscreen_people": 0
+        },
+        "inputs": {
+          "scripted_commands": 80,
+          "keyboard_events": 0,
+          "controller_events": 0,
+          "pointer_events": 0,
+          "fault_injections": 0
+        }
+      },
+      "parameters": [
+        {
+          "name": "path",
+          "value": "workshop-push+winch+cooperate",
+          "unit": null
+        },
+        {
+          "name": "case-composition",
+          "value": "robot-only",
+          "unit": null
+        }
+      ],
+      "oracles": [
+        {
+          "id": "ORC_LOOP_ROBOT_ONLY_COMPLETE",
+          "subject": "robot-only.city-commit-expedition-return-save-complete",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_LOOP_ROBOT_ONLY_HIDDEN",
+          "subject": "robot-only.hidden-human-dependencies",
+          "operator": "equal",
+          "expected": 0,
+          "unit": "count"
+        },
+        {
+          "id": "ORC_LOOP_ROBOT_ONLY_SAVE",
+          "subject": "robot-only.canonical-state-mismatches-after-reload",
+          "operator": "equal",
+          "expected": 0,
+          "unit": "count"
+        }
+      ]
+    },
+    {
+      "id": "mixed",
+      "counts": {
+        "state": {
+          "authoritative_records": 116,
+          "save_sections": 10,
+          "content_definitions": 24,
+          "transactions": 1,
+          "save_generations": 4
+        },
+        "entities": {
+          "total": 12,
+          "settlements": 1,
+          "buildings": 5,
+          "households": 1,
+          "specialists": 0,
+          "robots": 1,
+          "vehicles": 1,
+          "factions": 1,
+          "crises": 1,
+          "expeditions": 1
+        },
+        "objects": {
+          "placed_total": 0,
+          "dynamic": 0,
+          "static": 0,
+          "lod0": 0,
+          "lod1": 0,
+          "lod2": 0
+        },
+        "lights": {
+          "total": 0,
+          "directional": 0,
+          "point": 0,
+          "spot": 0,
+          "shadowed": 0
+        },
+        "crowd": {
+          "authoritative_people": 1,
+          "visible_agents": 2,
+          "offscreen_people": 0
+        },
+        "inputs": {
+          "scripted_commands": 80,
+          "keyboard_events": 0,
+          "controller_events": 0,
+          "pointer_events": 0,
+          "fault_injections": 0
+        }
+      },
+      "parameters": [
+        {
+          "name": "path",
+          "value": "workshop-push+winch+cooperate",
+          "unit": null
+        },
+        {
+          "name": "case-composition",
+          "value": "mixed",
+          "unit": null
+        }
+      ],
+      "oracles": [
+        {
+          "id": "ORC_LOOP_MIXED_COMPLETE",
+          "subject": "mixed.city-commit-expedition-return-save-complete",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_LOOP_MIXED_HIDDEN",
+          "subject": "mixed.hidden-human-dependencies",
+          "operator": "equal",
+          "expected": 0,
+          "unit": "count"
+        },
+        {
+          "id": "ORC_LOOP_MIXED_SAVE",
+          "subject": "mixed.canonical-state-mismatches-after-reload",
+          "operator": "equal",
+          "expected": 0,
+          "unit": "count"
+        }
+      ]
+    }
+  ]
+}

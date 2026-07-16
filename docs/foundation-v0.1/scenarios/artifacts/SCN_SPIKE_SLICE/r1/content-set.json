@@ -1,0 +1,688 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "content-set",
+  "semantic_id": "technical-building-set-v1",
+  "scenario_id": "SCN_SPIKE_SLICE",
+  "scenario_revision": 1,
+  "canonicalization": "json-utf8-explicit-definition-order-v1",
+  "definitions": [
+    {
+      "id": "scn_spike_slice:definition:0001",
+      "kind": "resource",
+      "version": 1,
+      "tags": [
+        "resource",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "unit": "items",
+        "storage_class": "dry",
+        "minimum": 0,
+        "maximum": 9999
+      }
+    },
+    {
+      "id": "scn_spike_slice:definition:0002",
+      "kind": "recipe",
+      "version": 1,
+      "tags": [
+        "recipe",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "inputs": {
+          "salvage": 2,
+          "parts": 1
+        },
+        "outputs": {
+          "bearing-service": 1
+        },
+        "duration_ticks": 120,
+        "capability": "bearing-service"
+      }
+    },
+    {
+      "id": "scn_spike_slice:definition:0003",
+      "kind": "building",
+      "version": 1,
+      "tags": [
+        "building",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "footprint_metres": [
+          4,
+          4
+        ],
+        "power_demand": 3,
+        "staff_slots": 1,
+        "states": [
+          "idle",
+          "working",
+          "blocked",
+          "failed"
+        ]
+      }
+    },
+    {
+      "id": "scn_spike_slice:definition:0004",
+      "kind": "capability",
+      "version": 1,
+      "tags": [
+        "capability",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "provided_by": [
+          "human-bearing-service",
+          "robot-bearing-service-tool"
+        ],
+        "consumes": [],
+        "verb": "repair"
+      }
+    },
+    {
+      "id": "scn_spike_slice:definition:0005",
+      "kind": "route",
+      "version": 1,
+      "tags": [
+        "route",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "distance_milli": 1000,
+        "fuel_cost": 2,
+        "required_tags": [],
+        "hazards": [
+          "dust-front"
+        ]
+      }
+    },
+    {
+      "id": "scn_spike_slice:definition:0006",
+      "kind": "faction-rule",
+      "version": 1,
+      "tags": [
+        "faction-rule",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "intent": "claim-depot",
+        "advance_per_tick_milli": 1,
+        "telegraph_threshold_milli": 100,
+        "claim_threshold_milli": 1000
+      }
+    },
+    {
+      "id": "scn_spike_slice:definition:0007",
+      "kind": "save-section",
+      "version": 1,
+      "tags": [
+        "save-section",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "section_id": "section-0007",
+        "version": 1,
+        "critical": true,
+        "absence_default": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:definition:0008",
+      "kind": "presentation-binding",
+      "version": 1,
+      "tags": [
+        "presentation-binding",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "read_model": "read-model-0008",
+        "authoritative": false,
+        "source_domain": "settlement"
+      }
+    },
+    {
+      "id": "scn_spike_slice:definition:0009",
+      "kind": "resource",
+      "version": 1,
+      "tags": [
+        "resource",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "unit": "items",
+        "storage_class": "dry",
+        "minimum": 0,
+        "maximum": 9999
+      }
+    },
+    {
+      "id": "scn_spike_slice:definition:0010",
+      "kind": "recipe",
+      "version": 1,
+      "tags": [
+        "recipe",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "inputs": {
+          "salvage": 2,
+          "parts": 1
+        },
+        "outputs": {
+          "bearing-service": 1
+        },
+        "duration_ticks": 120,
+        "capability": "bearing-service"
+      }
+    },
+    {
+      "id": "scn_spike_slice:definition:0011",
+      "kind": "building",
+      "version": 1,
+      "tags": [
+        "building",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "footprint_metres": [
+          4,
+          4
+        ],
+        "power_demand": 3,
+        "staff_slots": 1,
+        "states": [
+          "idle",
+          "working",
+          "blocked",
+          "failed"
+        ]
+      }
+    },
+    {
+      "id": "scn_spike_slice:definition:0012",
+      "kind": "capability",
+      "version": 1,
+      "tags": [
+        "capability",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "provided_by": [
+          "human-bearing-service",
+          "robot-bearing-service-tool"
+        ],
+        "consumes": [],
+        "verb": "repair"
+      }
+    }
+  ],
+  "render_workload": {
+    "manifest_id": "technical-city-render-workload-v1",
+    "archetypes": [
+      {
+        "id": "technical-building-01",
+        "lods": [
+          {
+            "lod": 0,
+            "triangles": 8000,
+            "vertices": 5000
+          },
+          {
+            "lod": 1,
+            "triangles": 2500,
+            "vertices": 1600
+          },
+          {
+            "lod": 2,
+            "triangles": 1000,
+            "vertices": 700
+          }
+        ],
+        "material_indices": [
+          1
+        ],
+        "submeshes": 1
+      },
+      {
+        "id": "technical-building-02",
+        "lods": [
+          {
+            "lod": 0,
+            "triangles": 8000,
+            "vertices": 5000
+          },
+          {
+            "lod": 1,
+            "triangles": 2500,
+            "vertices": 1600
+          },
+          {
+            "lod": 2,
+            "triangles": 1000,
+            "vertices": 700
+          }
+        ],
+        "material_indices": [
+          2
+        ],
+        "submeshes": 1
+      },
+      {
+        "id": "technical-building-03",
+        "lods": [
+          {
+            "lod": 0,
+            "triangles": 8000,
+            "vertices": 5000
+          },
+          {
+            "lod": 1,
+            "triangles": 2500,
+            "vertices": 1600
+          },
+          {
+            "lod": 2,
+            "triangles": 1000,
+            "vertices": 700
+          }
+        ],
+        "material_indices": [
+          3
+        ],
+        "submeshes": 1
+      },
+      {
+        "id": "technical-building-04",
+        "lods": [
+          {
+            "lod": 0,
+            "triangles": 8000,
+            "vertices": 5000
+          },
+          {
+            "lod": 1,
+            "triangles": 2500,
+            "vertices": 1600
+          },
+          {
+            "lod": 2,
+            "triangles": 1000,
+            "vertices": 700
+          }
+        ],
+        "material_indices": [
+          4
+        ],
+        "submeshes": 1
+      },
+      {
+        "id": "technical-building-05",
+        "lods": [
+          {
+            "lod": 0,
+            "triangles": 8000,
+            "vertices": 5000
+          },
+          {
+            "lod": 1,
+            "triangles": 2500,
+            "vertices": 1600
+          },
+          {
+            "lod": 2,
+            "triangles": 1000,
+            "vertices": 700
+          }
+        ],
+        "material_indices": [
+          5
+        ],
+        "submeshes": 1
+      },
+      {
+        "id": "technical-building-06",
+        "lods": [
+          {
+            "lod": 0,
+            "triangles": 8000,
+            "vertices": 5000
+          },
+          {
+            "lod": 1,
+            "triangles": 2500,
+            "vertices": 1600
+          },
+          {
+            "lod": 2,
+            "triangles": 1000,
+            "vertices": 700
+          }
+        ],
+        "material_indices": [
+          6
+        ],
+        "submeshes": 1
+      },
+      {
+        "id": "technical-building-07",
+        "lods": [
+          {
+            "lod": 0,
+            "triangles": 8000,
+            "vertices": 5000
+          },
+          {
+            "lod": 1,
+            "triangles": 2500,
+            "vertices": 1600
+          },
+          {
+            "lod": 2,
+            "triangles": 1000,
+            "vertices": 700
+          }
+        ],
+        "material_indices": [
+          7
+        ],
+        "submeshes": 1
+      },
+      {
+        "id": "technical-building-08",
+        "lods": [
+          {
+            "lod": 0,
+            "triangles": 8000,
+            "vertices": 5000
+          },
+          {
+            "lod": 1,
+            "triangles": 2500,
+            "vertices": 1600
+          },
+          {
+            "lod": 2,
+            "triangles": 1000,
+            "vertices": 700
+          }
+        ],
+        "material_indices": [
+          0
+        ],
+        "submeshes": 1
+      },
+      {
+        "id": "technical-building-09",
+        "lods": [
+          {
+            "lod": 0,
+            "triangles": 8000,
+            "vertices": 5000
+          },
+          {
+            "lod": 1,
+            "triangles": 2500,
+            "vertices": 1600
+          },
+          {
+            "lod": 2,
+            "triangles": 1000,
+            "vertices": 700
+          }
+        ],
+        "material_indices": [
+          1
+        ],
+        "submeshes": 1
+      },
+      {
+        "id": "technical-building-10",
+        "lods": [
+          {
+            "lod": 0,
+            "triangles": 8000,
+            "vertices": 5000
+          },
+          {
+            "lod": 1,
+            "triangles": 2500,
+            "vertices": 1600
+          },
+          {
+            "lod": 2,
+            "triangles": 1000,
+            "vertices": 700
+          }
+        ],
+        "material_indices": [
+          2
+        ],
+        "submeshes": 1
+      },
+      {
+        "id": "technical-building-11",
+        "lods": [
+          {
+            "lod": 0,
+            "triangles": 8000,
+            "vertices": 5000
+          },
+          {
+            "lod": 1,
+            "triangles": 2500,
+            "vertices": 1600
+          },
+          {
+            "lod": 2,
+            "triangles": 1000,
+            "vertices": 700
+          }
+        ],
+        "material_indices": [
+          3
+        ],
+        "submeshes": 1
+      },
+      {
+        "id": "technical-building-12",
+        "lods": [
+          {
+            "lod": 0,
+            "triangles": 8000,
+            "vertices": 5000
+          },
+          {
+            "lod": 1,
+            "triangles": 2500,
+            "vertices": 1600
+          },
+          {
+            "lod": 2,
+            "triangles": 1000,
+            "vertices": 700
+          }
+        ],
+        "material_indices": [
+          4
+        ],
+        "submeshes": 1
+      }
+    ],
+    "textures": [
+      {
+        "id": "technical-texture-01",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-02",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-03",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-04",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-05",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-06",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-07",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-08",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-09",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-10",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-11",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-12",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-13",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-14",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-15",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-16",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-17",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-18",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-19",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-20",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-21",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-22",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-23",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      },
+      {
+        "id": "technical-texture-24",
+        "gpu_bytes": 11184810,
+        "import": "2k-opaque-trim-linear-or-srgb-by-role"
+      }
+    ],
+    "instances": {
+      "count": 512,
+      "transform_formula": "grid-32x16-two-metre-cells-v1",
+      "dynamic": 64,
+      "static": 448,
+      "lod_occupancy": {
+        "lod0": 128,
+        "lod1": 256,
+        "lod2": 128
+      }
+    },
+    "materials": 8,
+    "logical_opaque_submesh_submissions": 896,
+    "light_probe_samples": 2048,
+    "reflection_probes": 8,
+    "shadow_casters": 192,
+    "reference_lineup": {
+      "id": "technical-city-render-lineup-v1",
+      "archetype_ids": [
+        "technical-building-01",
+        "technical-building-02",
+        "technical-building-03",
+        "technical-building-04",
+        "technical-building-05",
+        "technical-building-06",
+        "technical-building-07",
+        "technical-building-08",
+        "technical-building-09",
+        "technical-building-10",
+        "technical-building-11",
+        "technical-building-12"
+      ],
+      "placed_instances": 512,
+      "lod_occupancy": {
+        "lod0": 128,
+        "lod1": 256,
+        "lod2": 128
+      }
+    },
+    "reference_lineup_sha256": "4f70e6338c4c17cb17c41a84817c3ea7e766b7b52b13c91499a93390a48afb2c"
+  }
+}

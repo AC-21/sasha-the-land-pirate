@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_COLONY_COMPOSITION_MATRIX",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "last-bearing-composition-baseline-v1",
+      "path": "scenarios/artifacts/SCN_COLONY_COMPOSITION_MATRIX/r1/starting-state.json",
+      "sha256": "960d313e2f541d927be4e3599953070cb6a346bc88eba593823df213acae9a7e",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "last-bearing-graybox-content-v1",
+      "path": "scenarios/artifacts/SCN_COLONY_COMPOSITION_MATRIX/r1/content-set.json",
+      "sha256": "7e9aa96eb4c46b039f7e46c434135d68964eb0e7657e62948618595e7aa12b1f",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "composition-matrix-three-cases-v1",
+      "path": "scenarios/artifacts/SCN_COLONY_COMPOSITION_MATRIX/r1/input-script.json",
+      "sha256": "51a4e3c269c0028e3a463bb0c729a9e58614267cf79a22da56ac42ce881672c8",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

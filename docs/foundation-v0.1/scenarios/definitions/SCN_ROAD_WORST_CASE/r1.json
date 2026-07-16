@@ -1,0 +1,139 @@
+{
+  "schema_version": 2,
+  "id": "SCN_ROAD_WORST_CASE",
+  "revision": 1,
+  "kind": "performance",
+  "title": "Road weather, salvage, VFX, and encounter worst case",
+  "purpose": "Freeze the heaviest bounded road-zone workload for native-Mac profiling: maximum slice weather, salvage interaction, visible actors, vehicle motion, and effects together.",
+  "applies_to_packets": [
+    "WP-0002"
+  ],
+  "fixture": {
+    "world_seed": "3004",
+    "starting_tick": "7200",
+    "tick_rate_hz": 10,
+    "warmup_ticks": 3000,
+    "duration_ticks": 12000,
+    "warmup_seconds": 300,
+    "duration_seconds": 1200,
+    "starting_state_id": "road-worst-case-v1",
+    "content_set_id": "road-graybox-content-v1",
+    "input_script_id": "road-worst-case-keyboard-v1",
+    "fixture_manifest": {
+      "path": "scenarios/fixtures/SCN_ROAD_WORST_CASE/r1.fixture.json",
+      "sha256": "4f5706ca39175225a0a62794616052e0b49d8b42483e7a585ff9a8fc798b6ee9"
+    }
+  },
+  "counts": {
+    "state": {
+      "authoritative_records": 300,
+      "save_sections": 9,
+      "content_definitions": 40,
+      "transactions": 1,
+      "save_generations": 2
+    },
+    "entities": {
+      "total": 12,
+      "settlements": 0,
+      "buildings": 0,
+      "households": 0,
+      "specialists": 3,
+      "robots": 1,
+      "vehicles": 4,
+      "factions": 2,
+      "crises": 1,
+      "expeditions": 1
+    },
+    "objects": {
+      "placed_total": 512,
+      "dynamic": 128,
+      "static": 384,
+      "lod0": 256,
+      "lod1": 192,
+      "lod2": 64
+    },
+    "lights": {
+      "total": 17,
+      "directional": 1,
+      "point": 8,
+      "spot": 8,
+      "shadowed": 8
+    },
+    "crowd": {
+      "authoritative_people": 8,
+      "visible_agents": 8,
+      "offscreen_people": 0
+    },
+    "inputs": {
+      "scripted_commands": 300,
+      "keyboard_events": 1800,
+      "controller_events": 0,
+      "pointer_events": 60,
+      "fault_injections": 0
+    }
+  },
+  "parameters": [
+    {
+      "name": "backbuffer",
+      "value": "2560x1600",
+      "unit": "pixels"
+    },
+    {
+      "name": "quality-preset",
+      "value": "slice-quality",
+      "unit": null
+    },
+    {
+      "name": "weather",
+      "value": "maximum-slice-dust-front",
+      "unit": null
+    },
+    {
+      "name": "vfx-emitters",
+      "value": 64,
+      "unit": "emitters"
+    },
+    {
+      "name": "salvage-tools-active",
+      "value": 1,
+      "unit": "tools"
+    }
+  ],
+  "oracles": [
+    {
+      "id": "ORC_ROAD_FRAME_P95",
+      "subject": "whole-frame-p95",
+      "operator": "less-or-equal",
+      "expected": 16.7,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_ROAD_FRAME_P99",
+      "subject": "whole-frame-p99",
+      "operator": "less-or-equal",
+      "expected": 25.0,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_ROAD_GPU_P95",
+      "subject": "gpu-frame-p95",
+      "operator": "less-or-equal",
+      "expected": 15.0,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_ROAD_SIM_P95",
+      "subject": "simulation-tick-p95",
+      "operator": "less-or-equal",
+      "expected": 4.0,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_ROAD_OWNERSHIP",
+      "subject": "ownership-invariant-violations",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    }
+  ]
+}

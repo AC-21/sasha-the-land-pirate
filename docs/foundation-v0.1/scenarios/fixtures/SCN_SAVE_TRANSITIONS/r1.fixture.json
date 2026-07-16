@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_SAVE_TRANSITIONS",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "ownership-transition-state-v1",
+      "path": "scenarios/artifacts/SCN_SAVE_TRANSITIONS/r1/starting-state.json",
+      "sha256": "7dd357687f67a9aa812658edefaba0bf7cd87294a67dbb795bbc029eb0f24422",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "ownership-transition-content-v1",
+      "path": "scenarios/artifacts/SCN_SAVE_TRANSITIONS/r1/content-set.json",
+      "sha256": "ec38318c0958f2c3ac764705b8da287b0cbdda3a36cfb3305a97f9920515eb26",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "all-transition-and-retention-anchor-phases-v2",
+      "path": "scenarios/artifacts/SCN_SAVE_TRANSITIONS/r1/input-script.json",
+      "sha256": "a375db5ea298edbcef9618645f8da7e9018c65f57d841718b02f9572904e2e41",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

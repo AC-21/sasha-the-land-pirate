@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_TIME_POLICY",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "last-bearing-time-policy-state-v1",
+      "path": "scenarios/artifacts/SCN_TIME_POLICY/r1/starting-state.json",
+      "sha256": "4f690c7a757de509af23f774946782d897a990c06af8ed78e7ab370efe7dfd54",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "last-bearing-graybox-content-v1",
+      "path": "scenarios/artifacts/SCN_TIME_POLICY/r1/content-set.json",
+      "sha256": "e9aebd6e79ceb0d9f69c8e715e9b3a81e5aa339ddda4d04d3ccad135e8963b70",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "time-policy-three-cases-v1",
+      "path": "scenarios/artifacts/SCN_TIME_POLICY/r1/input-script.json",
+      "sha256": "f9cf620470891163bbcf20625be40c5a654c05ad812d90c882645155c0c161b4",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "starting-state",
+  "semantic_id": "no-runtime-state-v1",
+  "scenario_id": "SCN_WP0001_GATE",
+  "scenario_revision": 1,
+  "world_seed": "1005",
+  "starting_tick": "0",
+  "canonicalization": "json-utf8-explicit-record-order-v1",
+  "canonical_entities": [],
+  "canonical_state_records": [],
+  "case_states": []
+}

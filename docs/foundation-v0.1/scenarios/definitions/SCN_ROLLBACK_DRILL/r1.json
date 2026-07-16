@@ -1,0 +1,223 @@
+{
+  "schema_version": 2,
+  "id": "SCN_ROLLBACK_DRILL",
+  "revision": 1,
+  "kind": "rollback",
+  "title": "Failed canary save rollback drill",
+  "purpose": "Fail a cloned-profile canary after pointer promotion; inspect the pre-canary generation read-only, quarantine every rejected newer descendant outside the bounded recovery-scan domain with a hash-bound incident manifest, and continue only by creating generation 1 of a new slot_id/save_id lineage whose lineage_provenance binds the inspected source. Never repoint a writable source slot to an ancestor.",
+  "applies_to_packets": [
+    "WP-0001"
+  ],
+  "fixture": {
+    "world_seed": "1004",
+    "starting_tick": "900",
+    "tick_rate_hz": 10,
+    "warmup_ticks": 0,
+    "duration_ticks": 600,
+    "warmup_seconds": 0,
+    "duration_seconds": 60,
+    "starting_state_id": "rollback-canary-clone-v1",
+    "content_set_id": "rollback-content-v1",
+    "input_script_id": "forced-canary-failure-v1",
+    "fixture_manifest": {
+      "path": "scenarios/fixtures/SCN_ROLLBACK_DRILL/r1.fixture.json",
+      "sha256": "d426d3b52758c3bd8ebda57cca6ef5c4e8f1b6c462ca578d5dc79e8c514c7378"
+    }
+  },
+  "counts": {
+    "state": {
+      "authoritative_records": 32,
+      "save_sections": 6,
+      "content_definitions": 4,
+      "transactions": 1,
+      "save_generations": 3
+    },
+    "entities": {
+      "total": 9,
+      "settlements": 1,
+      "buildings": 2,
+      "households": 1,
+      "specialists": 1,
+      "robots": 0,
+      "vehicles": 1,
+      "factions": 1,
+      "crises": 1,
+      "expeditions": 1
+    },
+    "objects": {
+      "placed_total": 0,
+      "dynamic": 0,
+      "static": 0,
+      "lod0": 0,
+      "lod1": 0,
+      "lod2": 0
+    },
+    "lights": {
+      "total": 0,
+      "directional": 0,
+      "point": 0,
+      "spot": 0,
+      "shadowed": 0
+    },
+    "crowd": {
+      "authoritative_people": 5,
+      "visible_agents": 0,
+      "offscreen_people": 5
+    },
+    "inputs": {
+      "scripted_commands": 6,
+      "keyboard_events": 0,
+      "controller_events": 0,
+      "pointer_events": 0,
+      "fault_injections": 1
+    }
+  },
+  "parameters": [
+    {
+      "name": "profiles-cloned",
+      "value": 1,
+      "unit": "profiles"
+    },
+    {
+      "name": "forced-failure-boundary",
+      "value": "after-pointer-promotion",
+      "unit": null
+    },
+    {
+      "name": "rollback-source-mode",
+      "value": "read-only-inspection",
+      "unit": null
+    },
+    {
+      "name": "continuation-mode",
+      "value": "new-slot-save-lineage-genesis",
+      "unit": null
+    },
+    {
+      "name": "rejected-descendant-disposition",
+      "value": "incident-quarantine-outside-recovery-scan",
+      "unit": null
+    },
+    {
+      "name": "source-generation",
+      "value": "pre-canary-generation",
+      "unit": null
+    },
+    {
+      "name": "new-lineage-initial-generation",
+      "value": 1,
+      "unit": "generation"
+    },
+    {
+      "name": "new-lineage-identifiers",
+      "value": "distinct-slot-id-and-save-id",
+      "unit": null
+    },
+    {
+      "name": "quarantine-manifest-required",
+      "value": true,
+      "unit": null
+    },
+    {
+      "name": "lineage-provenance-kind",
+      "value": "rollback-fork",
+      "unit": null
+    },
+    {
+      "name": "lineage-provenance-source-fields",
+      "value": "product_id,slot_id,save_id,generation,generation_digest",
+      "unit": null
+    },
+    {
+      "name": "lineage-provenance-required-fields",
+      "value": "source,incident_id,incident_manifest_sha256,reason,tool_build_id",
+      "unit": null
+    }
+  ],
+  "oracles": [
+    {
+      "id": "ORC_ROLLBACK_LIVE_PROFILE",
+      "subject": "live-profile-mutations",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ROLLBACK_STATE",
+      "subject": "canonical-state-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ROLLBACK_INCIDENT",
+      "subject": "incident-records",
+      "operator": "equal",
+      "expected": 1,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ROLLBACK_SOURCE_WRITE",
+      "subject": "source-lineage-write-attempts",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ROLLBACK_REPROMOTE",
+      "subject": "source-pointer-repromotions",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ROLLBACK_NEW_GENESIS",
+      "subject": "new-lineage-genesis-violations",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ROLLBACK_IDS",
+      "subject": "reused-source-slot-or-save-ids",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ROLLBACK_PROVENANCE",
+      "subject": "fork-source-provenance-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ROLLBACK_SCAN",
+      "subject": "rejected-descendants-visible-to-recovery-scan",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ROLLBACK_DESC_HASH",
+      "subject": "rejected-descendant-hash-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ROLLBACK_MANIFEST",
+      "subject": "quarantine-manifest-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ROLLBACK_REJECTED_HEAD",
+      "subject": "recovery-selected-rejected-heads",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    }
+  ]
+}

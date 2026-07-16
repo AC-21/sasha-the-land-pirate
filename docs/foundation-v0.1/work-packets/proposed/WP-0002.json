@@ -1,0 +1,540 @@
+{
+  "schema_version": 1,
+  "id": "WP-0002",
+  "status": "proposed",
+  "class": "feature",
+  "declared_risk": "high",
+  "derived_risk": "high",
+  "effective_risk": "high",
+  "save_risk": "S1",
+  "created_on": "2026-07-15",
+  "title": "Ugly constitutional city-road-faction toy",
+  "objective": "Use the creator-ratified Sasha identity, human/robot/mixed colony boundary, remaining core decisions, explicit city-comparison authorization, and WP-0001's accepted technical foundation to build an ugly, slice-scale Last Bearing toy that compares the city grammar, proves the selected road-control embodiment in 30 seconds, runs one autonomous faction intent, exercises both module verbs and four preparation permutations, proves all three composition loops and, only under D-0039 / MECHANICAL-COMPOSITIONS, their bounded differentiated staffing mechanics, and persists exact cross-mode consequences.",
+  "value": "This is the earliest evidence that the city, road, and faction systems form one enjoyable game before generalized architecture or production art begins.",
+  "requested_by": "creator-goal:2026-07-15",
+  "required_approver": "creator",
+  "approved_by": null,
+  "approval_receipt_id": null,
+  "contract_sha256": "7b2e6f4392b8f3ac5fede97d7f9b053a6c987174d149150efc8e9fea2845b2ab",
+  "a1_boundary_manifest": null,
+  "implementer": null,
+  "verifier": null,
+  "integrator": null,
+  "constitutional_links": [
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P6",
+    "INV-004",
+    "INV-005",
+    "INV-006",
+    "INV-007",
+    "INV-011",
+    "INV-015",
+    "INV-017",
+    "INV-018"
+  ],
+  "decision_links": [
+    "D-0006",
+    "D-0007",
+    "D-0008",
+    "D-0009",
+    "D-0010",
+    "D-0011",
+    "D-0012",
+    "D-0021",
+    "D-0027",
+    "D-0029",
+    "D-0030",
+    "D-0035",
+    "D-0036",
+    "D-0037",
+    "D-0039"
+  ],
+  "system_contracts": [
+    "00-GAME-CONSTITUTION.md#4-the-constitutional-loop",
+    "02-SYSTEM-MAP.md#5-open-city-building-grammar",
+    "02-SYSTEM-MAP.md#8-human-and-robot-colony-contract",
+    "02-SYSTEM-MAP.md#cross-mode-ownership-transaction",
+    "02-SYSTEM-MAP.md#11-faction-contract",
+    "03-VERTICAL-SLICE.md#4-systemic-permutation-matrix",
+    "03-VERTICAL-SLICE.md#provisional-colony-composition-proof-kept-orthogonal"
+  ],
+  "baseline_evidence": [
+    {
+      "id": "BASE-WP0001",
+      "type": "dependency-release",
+      "uri": "pending://WP-0001-accepted-evidence",
+      "sha256": null
+    },
+    {
+      "id": "BASE-IDENTITY",
+      "type": "creator-ratification",
+      "uri": "pending://creator-identity-ratification",
+      "sha256": null
+    },
+    {
+      "id": "BASE-CORE",
+      "type": "creator-ratification",
+      "uri": "pending://creator-core-ratification",
+      "sha256": null
+    },
+    {
+      "id": "BASE-CITY-COMPARISON",
+      "type": "creator-authorization",
+      "uri": "pending://authorize-city-comparison",
+      "sha256": null
+    },
+    {
+      "id": "BASE-CAMERA",
+      "type": "comparison-control",
+      "uri": "pending://d0022-provisional-camera-config",
+      "sha256": null
+    },
+    {
+      "id": "BASE-SLICE",
+      "type": "creator-ratification",
+      "uri": "pending://last-bearing-ratification",
+      "sha256": null
+    }
+  ],
+  "in_scope": [
+    "Compare the bounded D-0030 placement/logistics/population/scale hypotheses using one primitive district while holding one documented provisional D-0022 camera setup constant.",
+    "Implement one visible water bottleneck, Workshop Push, and Civic Buffer preparation states.",
+    "Implement and record the creator-selected D-0008 clock policy, explicitly covering settlement production, faction intent, crisis/weather, road movement, pause, and forecast behavior.",
+    "Implement the creator-selected D-0007 road-control embodiment in one primitive two-path corridor.",
+    "Implement Winch Assembly and Sealed Range Tank with distinct preparation, traversal/command, and return effects.",
+    "Run one faction need -> telegraphed intent -> autonomous depot claim -> city/economic consequence loop.",
+    "Exercise all four preparation/module permutations with at least two viable strategies.",
+    "Under the required RATIFY-SLICE claim, test the provisional slice role bundle by representing Sasha as the persistent player-facing protagonist, colony decision-maker, expedition leader, save addressee, and consequence addressee; prove one human-only, robot-only, and mixed end-to-end loop smoke without crossing the 2x2 matrix; run the differentiated staffing/needs matrix only after D-0039 / MECHANICAL-COMPOSITIONS is creator-bound.",
+    "Use WP-0001's ownership transaction and Save Envelope v1 at all supported city/road checkpoints.",
+    "Conduct creator play plus at least two additional observed play sessions.",
+    "Emit any candidate scenario/control-plane revision and hashes only under `BuildArtifacts/WP-0002/candidate-control-plane/`; A1 cannot edit the protected foundation, registry, or accepted scenario pins."
+  ],
+  "non_goals": [
+    "Production art, final UI, narrative volume, or campaign lore.",
+    "Production-scale population, city, faction, or road capacity.",
+    "Third module, convoy escorts, deep combat, procedural open world, or second faction.",
+    "Generalized economy/faction frameworks beyond the slice state.",
+    "Final Sasha character model, voice, backstory, pronouns, moral alignment, or final meaning of Atomic Land Pirate; final robot personhood, origin, or society lore.",
+    "Automatic merge, rollout, or autonomy promotion."
+  ],
+  "affected_domains": [
+    "world",
+    "settlement",
+    "population",
+    "logistics",
+    "vehicle",
+    "expedition",
+    "faction",
+    "crisis",
+    "audit",
+    "presentation",
+    "save"
+  ],
+  "interfaces": [
+    "Creator-ratified Sasha protagonist identity + RATIFY-SLICE -> provisional slice decision-maker/expedition-leader/save-addressee/consequence-addressee roles",
+    "Selected city grammar -> commands/read models",
+    "Typed resident set -> derived human-only/robot-only/mixed composition -> staffing/needs/read models",
+    "Preparation state -> expedition timing and city opportunity cost",
+    "Vehicle capability tags -> route/tool/return outcomes",
+    "Faction autonomous intent -> depot claim and doctrine-shaped city consequence",
+    "Ownership transaction -> Save Envelope v1 -> canonical outcome comparison"
+  ],
+  "dependencies": [
+    "WP-0001"
+  ],
+  "reservation": {
+    "status": "unreserved",
+    "lease_id": null,
+    "base_commit": null,
+    "paths": [],
+    "domains": [],
+    "expires_at": null,
+    "fencing_token": null
+  },
+  "declared_paths": [
+    "SimulationCore/LastBearing/",
+    "Tests/SimulationCore/LastBearing/",
+    "Game/Assets/Game/LastBearing.meta",
+    "Game/Assets/Game/LastBearing/Adapters/",
+    "Game/Assets/Game/LastBearing/Adapters.meta",
+    "Game/Assets/Game/LastBearing/Presentation/",
+    "Game/Assets/Game/LastBearing/Presentation.meta",
+    "Game/Assets/Game/LastBearing/UI/",
+    "Game/Assets/Game/LastBearing/UI.meta",
+    "Game/Assets/Game/LastBearing/Content/",
+    "Game/Assets/Game/LastBearing/Content.meta",
+    "Game/Assets/Game/LastBearing/Tests/",
+    "Game/Assets/Game/LastBearing/Tests.meta",
+    "Tests/Scenarios/",
+    "Tests/GoldenSaves/",
+    "SaveContracts/Sections/LastBearing/",
+    "BuildArtifacts/WP-0002/",
+    "BuildArtifacts/WP-0002/candidate-control-plane/",
+    "docs/evidence/WP-0002/",
+    "docs/playtests/"
+  ],
+  "actual_paths": [],
+  "save_impact": {
+    "summary": "S1 additive: add Sasha identity, typed human/robot resident membership and derived composition, plus slice-specific city, module, faction-intent, crisis, and outcome state without redefining WP-0001's accepted envelope/root/pointer contracts.",
+    "schema_changes": [
+      "Add new named protagonist, resident/composition, and slice sections with manifest-declared absence defaults; any touched accepted section must bump its own version and carry a migration."
+    ],
+    "migration_ids": [],
+    "compatibility": "WP-0001 golden technical fixtures must remain readable and canonically stable. An old writer cannot rewrite unknown authoritative sections. No distributed player save exists, but fixture compatibility is still a release gate.",
+    "golden_scenarios": [
+      "SCN_BEARING_COOPERATE",
+      "SCN_BEARING_TAKE",
+      "SCN_COLONY_COMPOSITION_MATRIX",
+      "SCN_RETURN_LATE_DAMAGED",
+      "SCN_SAVE_TRANSITIONS",
+      "SCN_COMPOSITION_LOOP_SMOKE",
+      "SCN_PREPARATION_MODULE_MATRIX",
+      "SCN_FACTION_WAIT_CLAIM",
+      "SCN_TIME_POLICY"
+    ]
+  },
+  "acceptance_tests": [
+    {
+      "id": "T-GATE-IDENTITY",
+      "kind": "security",
+      "command": "python3 Tools/Validation/validate_wp0002_entry_gate.py --packet docs/foundation-v0.1/work-packets/proposed/WP-0002.json --ratification-state docs/foundation-v0.1/governance/ratification-state.json --require-claim AUTHORIZE-CITY-COMPARISON --report BuildArtifacts/WP-0002/entry-gate.json",
+      "oracle": "Protected, sealed receipts resolve every value-sensitive identity/core constraint and explicit AUTHORIZE-CITY-COMPARISON claim required by the ugly-gameplay-toy gate before implementation starts.",
+      "required": true,
+      "scenario_id": null
+    },
+    {
+      "id": "T-A1-QUARANTINE",
+      "kind": "manual",
+      "command": null,
+      "oracle": "Before any WP-0002 command runs, the creator verifies and receipt-binds a disposable exact-base quarantine with protected foundation/governance/receipt/release state non-writable, only packet-declared outputs writable, no merge or release credentials, a complete command/diff/artifact record, and a creator-operated import-or-reject boundary; no other A1 packet is active.",
+      "required": true,
+      "scenario_id": null
+    },
+    {
+      "id": "T-COLONY-COMPOSITION",
+      "kind": "scenario",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_COLONY_COMPOSITION_MATRIX",
+      "oracle": "After a creator-bound D-0039 / MECHANICAL-COMPOSITIONS claim, the exact one-cohort/one-unit cases prove human food/water/rest dependency and repair capability, robot power/maintenance dependency and tool capability, and a mixed complementary assignment/shared-power choice; all exact resident sets survive save/load with no substitution.",
+      "required": true,
+      "scenario_id": "SCN_COLONY_COMPOSITION_MATRIX"
+    },
+    {
+      "id": "T-COMPOSITION-LOOP",
+      "kind": "scenario",
+      "scenario_id": "SCN_COMPOSITION_LOOP_SMOKE",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_COMPOSITION_LOOP_SMOKE",
+      "oracle": "Human-only, robot-only, and mixed cases each complete the same bounded city need through commitment, expedition, return, and save path with exact resident sets and no hidden human dependency; this is not multiplied across the four preparation/module cases.",
+      "required": true
+    },
+    {
+      "id": "T-CITY-GRAMMAR",
+      "kind": "manual",
+      "command": null,
+      "oracle": "The creator can compare the bounded city grammars under one hash-recorded provisional D-0022 camera configuration and ratify/supersede D-0030 before M2 generalization.",
+      "required": true,
+      "scenario_id": null
+    },
+    {
+      "id": "T-TIME-POLICY",
+      "kind": "scenario",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_TIME_POLICY",
+      "oracle": "For the selected D-0008 value, settlement, faction, crisis/weather, and road clocks advance or pause exactly as declared across departure, road play, player pause, auto-pause, encounter, and return.",
+      "required": true,
+      "scenario_id": "SCN_TIME_POLICY"
+    },
+    {
+      "id": "T-CITY-5MIN",
+      "kind": "manual",
+      "command": null,
+      "oracle": "A new player identifies and acts on the water bottleneck within five minutes without external instruction.",
+      "required": true,
+      "scenario_id": null
+    },
+    {
+      "id": "T-ROAD-30SEC",
+      "kind": "manual",
+      "command": null,
+      "oracle": "The selected road-control mode is understandable and pleasurable enough to continue within 30 seconds on keyboard and controller.",
+      "required": true,
+      "scenario_id": null
+    },
+    {
+      "id": "T-MODULES",
+      "kind": "scenario",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_PREPARATION_MODULE_MATRIX",
+      "oracle": "Both modules create distinct preparation, route/action, capacity, and return consequences.",
+      "required": true,
+      "scenario_id": "SCN_PREPARATION_MODULE_MATRIX"
+    },
+    {
+      "id": "T-PERMUTATIONS",
+      "kind": "scenario",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_PREPARATION_MODULE_MATRIX",
+      "oracle": "All four preparation/module permutations complete, at least two remain viable, and at least two returns change the next city decision.",
+      "required": true,
+      "scenario_id": "SCN_PREPARATION_MODULE_MATRIX"
+    },
+    {
+      "id": "T-FACTION-AUTONOMY",
+      "kind": "scenario",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_FACTION_WAIT_CLAIM",
+      "oracle": "Waiting without departure allows the telegraphed faction claim to advance and alter depot/world/city state independently.",
+      "required": true,
+      "scenario_id": "SCN_FACTION_WAIT_CLAIM"
+    },
+    {
+      "id": "T-FACTION-DOCTRINE",
+      "kind": "scenario",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_BEARING_COOPERATE",
+      "oracle": "Faction doctrine changes one recipe, maintenance burden, obligation, institution, or logistics decision and two later behaviors.",
+      "required": true,
+      "scenario_id": "SCN_BEARING_COOPERATE"
+    },
+    {
+      "id": "T-SAVE-PERMUTATIONS",
+      "kind": "save",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_SAVE_TRANSITIONS",
+      "oracle": "Every supported checkpoint in every permutation reloads to the canonical outcome with no duplicate/lost state.",
+      "required": true,
+      "scenario_id": "SCN_SAVE_TRANSITIONS"
+    },
+    {
+      "id": "T-PLAY-THESIS",
+      "kind": "manual",
+      "command": null,
+      "oracle": "The creator and at least two observers describe the central fantasy as building/caring for a home rather than collecting loot.",
+      "required": true,
+      "scenario_id": null
+    }
+  ],
+  "performance_metrics": [
+    {
+      "name": "whole-frame-p95",
+      "scenario": "SCN_UGLY_TOY",
+      "unit": "ms",
+      "baseline": null,
+      "target": 16.7,
+      "regression_ceiling": 16.7,
+      "comparator": "less-or-equal"
+    },
+    {
+      "name": "whole-frame-p99",
+      "scenario": "SCN_UGLY_TOY",
+      "unit": "ms",
+      "baseline": null,
+      "target": 25.0,
+      "regression_ceiling": 25.0,
+      "comparator": "less-or-equal"
+    },
+    {
+      "name": "simulation-tick-p95",
+      "scenario": "SCN_UGLY_TOY",
+      "unit": "ms",
+      "baseline": null,
+      "target": 4.0,
+      "regression_ceiling": 4.0,
+      "comparator": "less-or-equal"
+    },
+    {
+      "name": "save-snapshot-pause-p95",
+      "scenario": "SCN_SAVE_TRANSITIONS",
+      "unit": "ms",
+      "baseline": null,
+      "target": 50.0,
+      "regression_ceiling": 50.0,
+      "comparator": "less-or-equal"
+    }
+  ],
+  "visual_evidence": [
+    {
+      "id": "VIS-CITY-GRAMMAR",
+      "type": "comparison-capture",
+      "uri": "pending://city-grammar-comparison",
+      "sha256": null
+    },
+    {
+      "id": "VIS-ROAD-CONTROL",
+      "type": "input-video",
+      "uri": "pending://road-control-30-second-test",
+      "sha256": null
+    },
+    {
+      "id": "VIS-PERMUTATIONS",
+      "type": "state-contact-sheet",
+      "uri": "pending://four-permutation-outcomes",
+      "sha256": null
+    },
+    {
+      "id": "VIS-FACTION-ACTION",
+      "type": "timeline-capture",
+      "uri": "pending://autonomous-faction-claim",
+      "sha256": null
+    }
+  ],
+  "rollout": {
+    "required_autonomy": "A1",
+    "feature_flag": null,
+    "stages": [
+      "dev-only"
+    ],
+    "health_signals": [
+      {
+        "name": "required-test-failures",
+        "scenario": "SCN_WP0002_GATE",
+        "unit": "count",
+        "baseline": null,
+        "target": 0.0,
+        "regression_ceiling": 0.0,
+        "comparator": "less-or-equal"
+      },
+      {
+        "name": "ownership-invariant-violations",
+        "scenario": "SCN_SAVE_TRANSITIONS",
+        "unit": "count",
+        "baseline": null,
+        "target": 0.0,
+        "regression_ceiling": 0.0,
+        "comparator": "less-or-equal"
+      }
+    ],
+    "minimum_runs": 4,
+    "minimum_observation_hours": 1.5,
+    "required_approver": "creator"
+  },
+  "rollback": {
+    "target_build": null,
+    "triggers": [
+      "City grammar fails creator comprehension or manipulation preference.",
+      "Selected road-control mode fails the 30-second play gate.",
+      "The four paths collapse to one dominant or scripted solution.",
+      "Faction behavior remains reactive reputation rather than autonomous state.",
+      "Any save/ownership invariant fails."
+    ],
+    "steps": [
+      "Freeze and preserve toy build, playtest notes, seeds, saves, videos, and failing scenarios.",
+      "Return the failed decision to provisional/open with evidence instead of generalizing the kernel.",
+      "Revert the toy feature branch while retaining the accepted WP-0001 technical foundation.",
+      "Open one narrower comparison packet for the failed city, road, faction, or coupling seam."
+    ],
+    "save_recovery": "No distributed player saves exist. Discard the disposable toy profile, or inspect an older good generation read-only and continue only at generation 1 in a distinct slot_id/save_id lineage with completed rollback-fork provenance and rejected descendants quarantined outside recovery scan. Never repoint a writable old slot to an ancestor.",
+    "drill_required": true,
+    "drill_evidence": []
+  },
+  "evidence_manifest": [],
+  "candidate_evidence": {
+    "diff_artifact_id": null,
+    "artifact_manifest_id": null,
+    "command_log_artifact_id": null,
+    "known_limits": []
+  },
+  "verification": {
+    "status": "not-run",
+    "verifier": null,
+    "gate_results": [],
+    "evidence_ids": []
+  },
+  "release_id": null,
+  "status_events": [
+    {
+      "event_id": "WPE-WP0002-PROPOSED",
+      "from": null,
+      "to": "proposed",
+      "actor": "foundation-designer",
+      "at": "2026-07-15T00:00:00-07:00",
+      "receipt_id": null
+    }
+  ],
+  "scenario_pins": [
+    {
+      "id": "SCN_BEARING_COOPERATE",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_BEARING_COOPERATE/r1.json",
+      "sha256": "12aa4bce297fa9766a4c979c4b5a99d11791cd6d0b0326d3e6cdec02bcae248a",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_BEARING_COOPERATE/r1.fixture.json",
+      "fixture_manifest_sha256": "ff3da18bc53b9fc45a4c15b2d539a4fd90d9e4f232028a80fe082f5250524500"
+    },
+    {
+      "id": "SCN_BEARING_TAKE",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_BEARING_TAKE/r1.json",
+      "sha256": "9be20e321a86395bfb32e8224c8a758974fe201f241db92004be659f9b018cef",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_BEARING_TAKE/r1.fixture.json",
+      "fixture_manifest_sha256": "35d022dc33c07a7db0296791e91ad5e525b284b0474c09e2dca9f5a5dc56364f"
+    },
+    {
+      "id": "SCN_COLONY_COMPOSITION_MATRIX",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_COLONY_COMPOSITION_MATRIX/r1.json",
+      "sha256": "33653ebb2cd24d78d79f57412482520c828a0adb7fad1d09bf3a47b01d9f1916",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_COLONY_COMPOSITION_MATRIX/r1.fixture.json",
+      "fixture_manifest_sha256": "bd60681d1108fae92a990f37eb38fd3ee9a379d96257e0bcbcabe5a15b48b8f0"
+    },
+    {
+      "id": "SCN_COMPOSITION_LOOP_SMOKE",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_COMPOSITION_LOOP_SMOKE/r1.json",
+      "sha256": "b6e704710a66122958ed855517e24456858207a4a5df6f06c5f593b4d0a4d3e0",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_COMPOSITION_LOOP_SMOKE/r1.fixture.json",
+      "fixture_manifest_sha256": "99ab3570c70c41294cdf3c30c2c85d1281cbca1557bb530bf37a811b282860b7"
+    },
+    {
+      "id": "SCN_FACTION_WAIT_CLAIM",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_FACTION_WAIT_CLAIM/r1.json",
+      "sha256": "b4faa15defbed165a13fe2cdbb7a3a4badcd459d0e51517f7c1a06194bed74ea",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_FACTION_WAIT_CLAIM/r1.fixture.json",
+      "fixture_manifest_sha256": "824228f2b2ef037befa0c27fa46c12db20dbdcdac0a67e0849d39e9ffbea2925"
+    },
+    {
+      "id": "SCN_PREPARATION_MODULE_MATRIX",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_PREPARATION_MODULE_MATRIX/r1.json",
+      "sha256": "1dd0ced51deb1c3c5b2a808a37262eb47fdd521be83e2255b0c29ced0043253c",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_PREPARATION_MODULE_MATRIX/r1.fixture.json",
+      "fixture_manifest_sha256": "5e271da24f57c4149f1bd9019bbcef846a82a460451d6f53f294f2763517d1ec"
+    },
+    {
+      "id": "SCN_RETURN_LATE_DAMAGED",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_RETURN_LATE_DAMAGED/r1.json",
+      "sha256": "792698b60fcbebc6644b222774932b7f01cacf69557c678376371f638e246c32",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_RETURN_LATE_DAMAGED/r1.fixture.json",
+      "fixture_manifest_sha256": "2817489351af6658fe597f5d7313b89ea31523ac98d950719e1b3de07a2b4cf0"
+    },
+    {
+      "id": "SCN_SAVE_TRANSITIONS",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_SAVE_TRANSITIONS/r1.json",
+      "sha256": "66bc9b4a35b6fe28f9231bb64a29a148af852e5428025a4e49952bacc648090b",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_SAVE_TRANSITIONS/r1.fixture.json",
+      "fixture_manifest_sha256": "405d1282e16dde2c5adbd6f18921be34405450b3534f4293f1c29e3f2f0a4fc0"
+    },
+    {
+      "id": "SCN_TIME_POLICY",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_TIME_POLICY/r1.json",
+      "sha256": "713f22fc96413285b39f98665215c3da824fae2be73ff0ca778a3807ffef6e7c",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_TIME_POLICY/r1.fixture.json",
+      "fixture_manifest_sha256": "498222940aca74c92b10a74aef6fa9f76e80a7480637821f837feef7e366d51f"
+    },
+    {
+      "id": "SCN_UGLY_TOY",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_UGLY_TOY/r1.json",
+      "sha256": "ad49d09dc523a7c7ce85060d1ae7268c258a400f9dc8824a9d4be4fe54012530",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_UGLY_TOY/r1.fixture.json",
+      "fixture_manifest_sha256": "681b04b93519cbc3c71366613a81ee7155083baa7a8e635de22bf4d56241647f"
+    },
+    {
+      "id": "SCN_WP0002_GATE",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_WP0002_GATE/r1.json",
+      "sha256": "2ab9e04bd8b3b55da390afa2701b2e56099ebd5853fc58761e35b26e8cf44d12",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_WP0002_GATE/r1.fixture.json",
+      "fixture_manifest_sha256": "f5a400df8ba08b399c7aa854f3c0b0089cd83358ccfaac59dda4c156a241cbf5"
+    }
+  ]
+}

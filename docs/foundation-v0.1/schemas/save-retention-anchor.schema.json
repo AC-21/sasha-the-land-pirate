@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/save-retention-anchor.schema.json",
+  "title": "Save retention protected pruning anchor receipt v1",
+  "description": "Canonical immutable receipt authorizing absence of one fully validated ancestor prefix. Cross-field and envelope/pointer equality rules are normative in 04-TECHNICAL-ARCHITECTURE.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "magic",
+    "anchor_format_version",
+    "product_id",
+    "slot_id",
+    "anchor_generation",
+    "anchor_save_id",
+    "anchor_generation_digest",
+    "anchor_previous_generation",
+    "anchor_previous_generation_digest",
+    "validated_head_generation",
+    "validated_head_save_id",
+    "validated_head_generation_digest",
+    "validated_pointer",
+    "validated_pointer_digest",
+    "prune_before_generation",
+    "retention_policy_id",
+    "tool_build_id",
+    "supersedes_anchor_generation",
+    "supersedes_anchor_receipt_digest",
+    "created_at",
+    "receipt_digest"
+  ],
+  "properties": {
+    "magic": { "const": "WASTELAND_RETENTION_ANCHOR" },
+    "anchor_format_version": { "const": 1 },
+    "product_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "slot_id": { "type": "string", "format": "uuid" },
+    "anchor_generation": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "anchor_save_id": {
+      "description": "Stable save_id shared by the anchor, validated head, embedded pointer, and every generation in this lineage.",
+      "type": "string",
+      "format": "uuid"
+    },
+    "anchor_generation_digest": {
+      "description": "Exact whole_envelope_digest from the protected anchor generation header.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "anchor_previous_generation": {
+      "description": "Immediate predecessor generation number, or null only when the anchor is genesis.",
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "anchor_previous_generation_digest": {
+      "description": "Exact previous_generation_digest from the anchor header; retained even when the predecessor prefix is pruned.",
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "validated_head_generation": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "validated_head_save_id": {
+      "description": "Must equal anchor_save_id and validated_pointer.save_id.",
+      "type": "string",
+      "format": "uuid"
+    },
+    "validated_head_generation_digest": {
+      "description": "Exact whole_envelope_digest of the durable head validated when this receipt was created.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "validated_pointer": {
+      "description": "Exact immutable canonical slot-pointer object that selected validated_head_generation when this receipt was created. It remains inside the receipt after mutable slot.current advances.",
+      "$ref": "save-slot-pointer.schema.json"
+    },
+    "validated_pointer_digest": {
+      "description": "Must equal validated_pointer.pointer_digest after that embedded pointer independently passes the pointer v1 zero-field digest and every pointer-to-head equality rule.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "prune_before_generation": {
+      "description": "Must equal anchor_generation; only confirmed ancestor-chain members with smaller generations are eligible.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "retention_policy_id": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{0,127}$" },
+    "tool_build_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "supersedes_anchor_generation": {
+      "description": "Immediate predecessor receipt's anchor generation in the same non-forked supersession chain, or null only for the chain root.",
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "supersedes_anchor_receipt_digest": {
+      "description": "Immediate predecessor receipt digest in the same non-forked supersession chain, or null only for the chain root.",
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "created_at": { "type": "string", "format": "date-time", "maxLength": 64 },
+    "receipt_digest": {
+      "description": "SHA-256 of the canonical receipt with this field replaced by 64 ASCII zeroes.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

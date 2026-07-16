@@ -1,0 +1,122 @@
+{
+  "schema_version": 2,
+  "id": "SCN_FACTION_WAIT_CLAIM",
+  "revision": 1,
+  "kind": "gameplay",
+  "title": "Faction claim advances while Sasha waits",
+  "purpose": "Begin before the neighboring faction claim, issue no departure or player intervention, and prove its telegraphed intent autonomously advances to a depot claim with persistent world and city consequences.",
+  "applies_to_packets": [
+    "WP-0002"
+  ],
+  "fixture": {
+    "world_seed": "2013",
+    "starting_tick": "0",
+    "tick_rate_hz": 10,
+    "warmup_ticks": 0,
+    "duration_ticks": 9000,
+    "warmup_seconds": 0,
+    "duration_seconds": 900,
+    "starting_state_id": "last-bearing-preclaim-state-v1",
+    "content_set_id": "last-bearing-graybox-content-v1",
+    "input_script_id": "wait-without-departure-v1",
+    "fixture_manifest": {
+      "path": "scenarios/fixtures/SCN_FACTION_WAIT_CLAIM/r1.fixture.json",
+      "sha256": "824228f2b2ef037befa0c27fa46c12db20dbdcdac0a67e0849d39e9ffbea2925"
+    }
+  },
+  "counts": {
+    "state": {
+      "authoritative_records": 92,
+      "save_sections": 9,
+      "content_definitions": 18,
+      "transactions": 0,
+      "save_generations": 2
+    },
+    "entities": {
+      "total": 11,
+      "settlements": 1,
+      "buildings": 4,
+      "households": 1,
+      "specialists": 1,
+      "robots": 1,
+      "vehicles": 1,
+      "factions": 1,
+      "crises": 1,
+      "expeditions": 0
+    },
+    "objects": {
+      "placed_total": 0,
+      "dynamic": 0,
+      "static": 0,
+      "lod0": 0,
+      "lod1": 0,
+      "lod2": 0
+    },
+    "lights": {
+      "total": 0,
+      "directional": 0,
+      "point": 0,
+      "spot": 0,
+      "shadowed": 0
+    },
+    "crowd": {
+      "authoritative_people": 5,
+      "visible_agents": 3,
+      "offscreen_people": 2
+    },
+    "inputs": {
+      "scripted_commands": 0,
+      "keyboard_events": 0,
+      "controller_events": 0,
+      "pointer_events": 0,
+      "fault_injections": 0
+    }
+  },
+  "parameters": [
+    {
+      "name": "player-interventions",
+      "value": 0,
+      "unit": "count"
+    },
+    {
+      "name": "starting-claim-state",
+      "value": "telegraphed-intent",
+      "unit": null
+    },
+    {
+      "name": "ending-claim-state",
+      "value": "depot-claimed",
+      "unit": null
+    }
+  ],
+  "oracles": [
+    {
+      "id": "ORC_WAIT_CLAIM",
+      "subject": "faction-depot-claim-advanced",
+      "operator": "equal",
+      "expected": true,
+      "unit": null
+    },
+    {
+      "id": "ORC_WAIT_AUTONOMY",
+      "subject": "player-triggered-faction-actions",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_WAIT_WORLD",
+      "subject": "persistent-world-state-changes",
+      "operator": "greater-or-equal",
+      "expected": 1,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_WAIT_CITY",
+      "subject": "persistent-city-economic-changes",
+      "operator": "greater-or-equal",
+      "expected": 1,
+      "unit": "count"
+    }
+  ]
+}

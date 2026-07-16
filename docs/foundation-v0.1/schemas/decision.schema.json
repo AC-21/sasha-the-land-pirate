@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/decision.schema.json",
+  "title": "Game decision record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "event_id",
+    "sequence",
+    "previous_event_hash",
+    "event_hash",
+    "recorded_on",
+    "actor_id",
+    "approval_receipt_id",
+    "class",
+    "status",
+    "authority",
+    "title",
+    "decision",
+    "rationale",
+    "consequences",
+    "revisit_triggers",
+    "supersedes"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^D-[0-9]{4}$" },
+    "event_id": { "type": "string", "pattern": "^de_[0-9a-f]{32}$" },
+    "sequence": { "type": "integer", "minimum": 1 },
+    "previous_event_hash": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "event_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "recorded_on": { "type": "string", "format": "date" },
+    "actor_id": { "type": "string", "minLength": 1 },
+    "approval_receipt_id": { "type": ["string", "null"] },
+    "class": {
+      "enum": ["constitutional", "experience", "scope", "technical", "art", "production"]
+    },
+    "status": {
+      "enum": ["ratified", "provisional", "open", "rejected", "superseded"]
+    },
+    "authority": {
+      "enum": ["creator-prompt", "creator-clarification", "creator-ratification", "design-recommendation", "technical-recommendation"]
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "decision": { "type": "string", "minLength": 1 },
+    "recommended_default": { "type": "string" },
+    "rationale": { "type": "string", "minLength": 1 },
+    "evidence": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "consequences": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "revisit_triggers": { "type": "array", "items": { "type": "string" } },
+    "supersedes": { "type": ["string", "null"], "pattern": "^D-[0-9]{4}$" }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "input-script",
+  "semantic_id": "wait-without-departure-v1",
+  "scenario_id": "SCN_FACTION_WAIT_CLAIM",
+  "scenario_revision": 1,
+  "tick_rate_hz": 10,
+  "warmup_ticks": 0,
+  "duration_ticks": 9000,
+  "normative_execution": {
+    "ordering": "ascending (tick,sequence); sequence is unique and contiguous from zero",
+    "fixed_tick_rule": "apply every event whose tick equals the current authoritative tick before advancing systems",
+    "case_isolation": "each case begins from its matching case_state; no state is shared between cases",
+    "unknown_command_rule": "reject scenario before first tick",
+    "integer_rule": "all *_milli values use signed integer arithmetic with checked overflow",
+    "autonomous_tick_rule": "world, settlement, faction, crisis, and expedition systems advance once per declared fixed tick even when events is empty",
+    "target_resolution_rule": "resolve every scripted command payload.target by exact logical_target_id before tick zero; canonical bindings select resolved_id in the base run and the matching case_resolutions entry in a case run; scenario selectors resolve only by their declared selector_kind and selector_value",
+    "unresolved_target_rule": "reject the scenario before tick zero on a missing or duplicate binding, an unreferenced binding, an unknown selector, a missing case resolution, a kind mismatch, or an ID absent from the hash-bound starting-state or content-set artifact; never infer, fabricate, or fall back",
+    "target_binding_hash_rule": "target_bindings_sha256 is SHA-256 of canonical JSON for the complete ordered target_bindings array"
+  },
+  "events": [],
+  "case_events": [],
+  "oracle_observations": [
+    {
+      "sequence": 0,
+      "tick": 9000,
+      "subject": "faction-depot-claim-advanced",
+      "selector": "metrics/faction-depot-claim-advanced",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_WAIT_CLAIM"
+    },
+    {
+      "sequence": 1,
+      "tick": 9000,
+      "subject": "player-triggered-faction-actions",
+      "selector": "metrics/player-triggered-faction-actions",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_WAIT_AUTONOMY"
+    },
+    {
+      "sequence": 2,
+      "tick": 9000,
+      "subject": "persistent-world-state-changes",
+      "selector": "metrics/persistent-world-state-changes",
+      "operator": "greater-or-equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_WAIT_WORLD"
+    },
+    {
+      "sequence": 3,
+      "tick": 9000,
+      "subject": "persistent-city-economic-changes",
+      "selector": "metrics/persistent-city-economic-changes",
+      "operator": "greater-or-equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_WAIT_CITY"
+    }
+  ],
+  "target_bindings_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "target_bindings": []
+}

@@ -1,0 +1,548 @@
+{
+  "schema_version": 2,
+  "id": "SCN_SPIKE_SLICE",
+  "revision": 1,
+  "kind": "performance",
+  "title": "Mac technical spike representative render and simulation load",
+  "purpose": "Freeze the native ARM64 Unity/URP workload used to accept or reject the engine and renderer candidate: five warm-up minutes followed by exactly 30 measured minutes of representative render and simulation, six save/load/mode-transition cycles, and continuously queued high-priority path/logistics requests without claiming production city scale.",
+  "applies_to_packets": [
+    "WP-0001"
+  ],
+  "fixture": {
+    "world_seed": "1001",
+    "starting_tick": "0",
+    "tick_rate_hz": 10,
+    "warmup_ticks": 3000,
+    "duration_ticks": 18000,
+    "warmup_seconds": 300,
+    "duration_seconds": 1800,
+    "starting_state_id": "technical-spike-state-v1",
+    "content_set_id": "technical-building-set-v1",
+    "input_script_id": "technical-spike-soak-v2",
+    "fixture_manifest": {
+      "path": "scenarios/fixtures/SCN_SPIKE_SLICE/r1.fixture.json",
+      "sha256": "e8a158aa4d4f1d1fc1a8f1d73b592824a7c05aa66ecf16ddc32deed6a39e9095"
+    }
+  },
+  "counts": {
+    "state": {
+      "authoritative_records": 64,
+      "save_sections": 5,
+      "content_definitions": 12,
+      "transactions": 6,
+      "save_generations": 7
+    },
+    "entities": {
+      "total": 66,
+      "settlements": 1,
+      "buildings": 64,
+      "households": 0,
+      "specialists": 0,
+      "robots": 0,
+      "vehicles": 0,
+      "factions": 0,
+      "crises": 0,
+      "expeditions": 1
+    },
+    "objects": {
+      "placed_total": 512,
+      "dynamic": 64,
+      "static": 448,
+      "lod0": 128,
+      "lod1": 256,
+      "lod2": 128
+    },
+    "lights": {
+      "total": 65,
+      "directional": 1,
+      "point": 32,
+      "spot": 32,
+      "shadowed": 16
+    },
+    "crowd": {
+      "authoritative_people": 0,
+      "visible_agents": 0,
+      "offscreen_people": 0
+    },
+    "inputs": {
+      "scripted_commands": 1818,
+      "keyboard_events": 0,
+      "controller_events": 0,
+      "pointer_events": 0,
+      "fault_injections": 0
+    }
+  },
+  "parameters": [
+    {
+      "name": "backbuffer",
+      "value": "2560x1600",
+      "unit": "pixels"
+    },
+    {
+      "name": "quality-preset",
+      "value": "slice-quality",
+      "unit": null
+    },
+    {
+      "name": "faction-condition-variants",
+      "value": 8,
+      "unit": "variants"
+    },
+    {
+      "name": "measured-soak",
+      "value": 30,
+      "unit": "minutes"
+    },
+    {
+      "name": "metric-window",
+      "value": 10,
+      "unit": "minutes"
+    },
+    {
+      "name": "save-cycles",
+      "value": 6,
+      "unit": "cycles"
+    },
+    {
+      "name": "load-cycles",
+      "value": 6,
+      "unit": "cycles"
+    },
+    {
+      "name": "mode-transition-cycles",
+      "value": 6,
+      "unit": "cycles"
+    },
+    {
+      "name": "high-priority-path-logistics-requests",
+      "value": 1800,
+      "unit": "requests"
+    },
+    {
+      "name": "high-priority-path-logistics-request-period",
+      "value": 1,
+      "unit": "seconds"
+    },
+    {
+      "name": "mode-transition-offsets-seconds",
+      "value": "180,480,780,1080,1380,1680",
+      "unit": "seconds-from-measured-start"
+    },
+    {
+      "name": "save-offsets-seconds",
+      "value": "240,540,840,1140,1440,1740",
+      "unit": "seconds-from-measured-start"
+    },
+    {
+      "name": "load-offsets-seconds",
+      "value": "240,540,840,1140,1440,1740",
+      "unit": "seconds-from-measured-start"
+    },
+    {
+      "name": "coincident-save-load-order",
+      "value": "save-completion-then-load",
+      "unit": null
+    },
+    {
+      "name": "render-content-manifest-id",
+      "value": "technical-city-render-workload-v1",
+      "unit": null
+    },
+    {
+      "name": "camera-path-id",
+      "value": "technical-city-overview-loop-v1",
+      "unit": null
+    },
+    {
+      "name": "camera-loop-duration",
+      "value": 60,
+      "unit": "seconds"
+    },
+    {
+      "name": "camera-path-samples",
+      "value": 600,
+      "unit": "samples"
+    },
+    {
+      "name": "camera-loops",
+      "value": 30,
+      "unit": "loops"
+    },
+    {
+      "name": "building-archetypes",
+      "value": 12,
+      "unit": "archetypes"
+    },
+    {
+      "name": "lod-mesh-variants",
+      "value": 36,
+      "unit": "meshes"
+    },
+    {
+      "name": "lod0-triangles-per-instance",
+      "value": 8000,
+      "unit": "triangles"
+    },
+    {
+      "name": "lod1-triangles-per-instance",
+      "value": 2500,
+      "unit": "triangles"
+    },
+    {
+      "name": "lod2-triangles-per-instance",
+      "value": 1000,
+      "unit": "triangles"
+    },
+    {
+      "name": "lod0-vertices-per-instance",
+      "value": 5000,
+      "unit": "vertices"
+    },
+    {
+      "name": "lod1-vertices-per-instance",
+      "value": 1600,
+      "unit": "vertices"
+    },
+    {
+      "name": "lod2-vertices-per-instance",
+      "value": 700,
+      "unit": "vertices"
+    },
+    {
+      "name": "visible-triangles-calibration-frame",
+      "value": 1792000,
+      "unit": "triangles"
+    },
+    {
+      "name": "visible-vertices-calibration-frame",
+      "value": 1139200,
+      "unit": "vertices"
+    },
+    {
+      "name": "shared-material-definitions",
+      "value": 8,
+      "unit": "materials"
+    },
+    {
+      "name": "per-instance-material-clones",
+      "value": 0,
+      "unit": "materials"
+    },
+    {
+      "name": "texture-assets",
+      "value": 24,
+      "unit": "textures"
+    },
+    {
+      "name": "imported-texture-gpu-bytes-max",
+      "value": 268435456,
+      "unit": "bytes"
+    },
+    {
+      "name": "logical-opaque-submesh-submissions",
+      "value": 896,
+      "unit": "submissions"
+    },
+    {
+      "name": "batched-opaque-draw-submissions-max",
+      "value": 800,
+      "unit": "draws"
+    },
+    {
+      "name": "light-probe-samples",
+      "value": 2048,
+      "unit": "samples"
+    },
+    {
+      "name": "reflection-probes",
+      "value": 8,
+      "unit": "probes"
+    },
+    {
+      "name": "shadow-casting-renderers",
+      "value": 192,
+      "unit": "renderers"
+    },
+    {
+      "name": "lod0-screen-relative-height",
+      "value": 0.18,
+      "unit": "ratio"
+    },
+    {
+      "name": "lod1-screen-relative-height",
+      "value": 0.06,
+      "unit": "ratio"
+    },
+    {
+      "name": "lod2-screen-relative-height",
+      "value": 0.015,
+      "unit": "ratio"
+    },
+    {
+      "name": "cull-screen-relative-height",
+      "value": 0.005,
+      "unit": "ratio"
+    }
+  ],
+  "oracles": [
+    {
+      "id": "ORC_SPIKE_FRAME_P95",
+      "subject": "whole-frame-p95",
+      "operator": "less-or-equal",
+      "expected": 16.7,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_SPIKE_FRAME_P99",
+      "subject": "whole-frame-p99",
+      "operator": "less-or-equal",
+      "expected": 25.0,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_SPIKE_LONG_FRAME_WINDOW",
+      "subject": "unclassified-frames-over-50ms-max-per-10m-window",
+      "operator": "less-or-equal",
+      "expected": 2,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SPIKE_CPU_MAIN_P95",
+      "subject": "cpu-main-thread-p95",
+      "operator": "less-than",
+      "expected": 12.0,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_SPIKE_GPU_P95",
+      "subject": "gpu-frame-time-p95",
+      "operator": "less-than",
+      "expected": 15.0,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_SPIKE_SIM_P95",
+      "subject": "simulation-tick-p95",
+      "operator": "less-than",
+      "expected": 4.0,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_SPIKE_RSS",
+      "subject": "process-rss-peak",
+      "operator": "less-than",
+      "expected": 6.0,
+      "unit": "GB"
+    },
+    {
+      "id": "ORC_SPIKE_METAL_ALLOCATION",
+      "subject": "tracked-metal-allocation-peak",
+      "operator": "less-than",
+      "expected": 3.5,
+      "unit": "GB"
+    },
+    {
+      "id": "ORC_SPIKE_METAL_TIMEOUT",
+      "subject": "metal-timeout-or-freeze-count",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SPIKE_MANAGED_P95",
+      "subject": "managed-allocation-p95",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "B/frame"
+    },
+    {
+      "id": "ORC_SPIKE_MANAGED_AVERAGE",
+      "subject": "managed-allocation-average",
+      "operator": "less-than",
+      "expected": 1024.0,
+      "unit": "B/frame"
+    },
+    {
+      "id": "ORC_SPIKE_SAVE_PAUSE",
+      "subject": "save-snapshot-pause-p95",
+      "operator": "less-than",
+      "expected": 50.0,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_SPIKE_SAVE_COMPLETE",
+      "subject": "slice-save-complete-max",
+      "operator": "less-than",
+      "expected": 2000.0,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_SPIKE_LOAD_INTERACTION",
+      "subject": "load-to-interaction-max",
+      "operator": "less-than",
+      "expected": 3000.0,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_SPIKE_SAVE_SIZE",
+      "subject": "slice-save-size-max",
+      "operator": "less-than",
+      "expected": 25.0,
+      "unit": "MB"
+    },
+    {
+      "id": "ORC_SPIKE_MODE_INTERACTION",
+      "subject": "mode-transition-to-interaction-max",
+      "operator": "less-than",
+      "expected": 3000.0,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_SPIKE_PATH_AGE",
+      "subject": "high-priority-path-logistics-request-age-p99",
+      "operator": "less-than",
+      "expected": 500.0,
+      "unit": "ms"
+    },
+    {
+      "id": "ORC_SPIKE_FRAME_DEGRADATION",
+      "subject": "whole-frame-p95-degradation-30m",
+      "operator": "less-than",
+      "expected": 10.0,
+      "unit": "percent"
+    },
+    {
+      "id": "ORC_SPIKE_MEMORY_GROWTH",
+      "subject": "retained-memory-growth-30m",
+      "operator": "less-than",
+      "expected": 5.0,
+      "unit": "percent"
+    },
+    {
+      "id": "ORC_SPIKE_RENDER_ERRORS",
+      "subject": "render-state-errors",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SPIKE_TRIANGLES",
+      "subject": "calibration-visible-triangles",
+      "operator": "equal",
+      "expected": 1792000,
+      "unit": "triangles"
+    },
+    {
+      "id": "ORC_SPIKE_VERTICES",
+      "subject": "calibration-visible-vertices",
+      "operator": "equal",
+      "expected": 1139200,
+      "unit": "vertices"
+    },
+    {
+      "id": "ORC_SPIKE_LOD_OCCUPANCY",
+      "subject": "lod-occupancy-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SPIKE_ASSET_MANIFEST",
+      "subject": "mesh-material-texture-manifest-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SPIKE_MATERIAL_CLONES",
+      "subject": "per-instance-material-clones",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "materials"
+    },
+    {
+      "id": "ORC_SPIKE_TEXTURE_BYTES",
+      "subject": "imported-texture-gpu-bytes",
+      "operator": "less-or-equal",
+      "expected": 268435456,
+      "unit": "bytes"
+    },
+    {
+      "id": "ORC_SPIKE_LOGICAL_SUBMESH",
+      "subject": "logical-opaque-submesh-submissions",
+      "operator": "equal",
+      "expected": 896,
+      "unit": "submissions"
+    },
+    {
+      "id": "ORC_SPIKE_BATCHED_DRAWS",
+      "subject": "batched-opaque-draw-submissions",
+      "operator": "less-or-equal",
+      "expected": 800,
+      "unit": "draws"
+    },
+    {
+      "id": "ORC_SPIKE_LIGHT_PROBES",
+      "subject": "light-probe-count",
+      "operator": "equal",
+      "expected": 2048,
+      "unit": "samples"
+    },
+    {
+      "id": "ORC_SPIKE_REFLECTION_PROBES",
+      "subject": "reflection-probe-count",
+      "operator": "equal",
+      "expected": 8,
+      "unit": "probes"
+    },
+    {
+      "id": "ORC_SPIKE_SHADOW_RENDERERS",
+      "subject": "shadow-casting-renderer-count",
+      "operator": "equal",
+      "expected": 192,
+      "unit": "renderers"
+    },
+    {
+      "id": "ORC_SPIKE_INSTANCE_STATE",
+      "subject": "per-instance-faction-condition-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SPIKE_LOD_TRANSITION",
+      "subject": "lod-transition-state-errors",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_SPIKE_CONTENT_HASH",
+      "subject": "content-manifest-hash",
+      "operator": "equal",
+      "expected": "a0d11b4a87f5bc9300774d97b05d5e707288f1cd518a1bd145c9584734bbe94e",
+      "unit": "sha256"
+    },
+    {
+      "id": "ORC_SPIKE_CAMERA_HASH",
+      "subject": "camera-path-hash",
+      "operator": "equal",
+      "expected": "0b998b77d40852fe014392fd4f9377cc22b6707b8a062854afdcb81cd2804e70",
+      "unit": "sha256"
+    },
+    {
+      "id": "ORC_SPIKE_LINEUP_ID",
+      "subject": "representative-building-lineup-reference-id",
+      "operator": "equal",
+      "expected": "technical-city-render-lineup-v1",
+      "unit": null
+    },
+    {
+      "id": "ORC_SPIKE_LINEUP_HASH",
+      "subject": "representative-building-lineup-reference-hash",
+      "operator": "equal",
+      "expected": "4f70e6338c4c17cb17c41a84817c3ea7e766b7b52b13c91499a93390a48afb2c",
+      "unit": "sha256"
+    }
+  ]
+}

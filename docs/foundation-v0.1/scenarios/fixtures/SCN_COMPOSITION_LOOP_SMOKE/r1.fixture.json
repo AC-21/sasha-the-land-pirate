@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_COMPOSITION_LOOP_SMOKE",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "composition-loop-smoke-state-v1",
+      "path": "scenarios/artifacts/SCN_COMPOSITION_LOOP_SMOKE/r1/starting-state.json",
+      "sha256": "86b8e72f7a446b996368c2e0e899ed9227b6bbf32e8ac560c346eec118d5c41f",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "last-bearing-graybox-content-v1",
+      "path": "scenarios/artifacts/SCN_COMPOSITION_LOOP_SMOKE/r1/content-set.json",
+      "sha256": "a32dff01d902d71e1b887e93592ebf760f50df1f2288e3f6c34f99ccdefea1ce",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "composition-loop-three-cases-v1",
+      "path": "scenarios/artifacts/SCN_COMPOSITION_LOOP_SMOKE/r1/input-script.json",
+      "sha256": "981796be4ec79c0d56e907c9fc6e25b230bdbdbecbd23075550c4d8faa04d639",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

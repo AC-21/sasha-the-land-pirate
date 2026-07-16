@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_UGLY_TOY",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "last-bearing-ugly-toy-v1",
+      "path": "scenarios/artifacts/SCN_UGLY_TOY/r1/starting-state.json",
+      "sha256": "fa806cb6cec33fe8b880e5e06348e6cfbb8f37f9d9498178cf637bd95a2d2b30",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "last-bearing-graybox-content-v1",
+      "path": "scenarios/artifacts/SCN_UGLY_TOY/r1/content-set.json",
+      "sha256": "ae6a2909a5e5b5ae4d93e4e8d0b23327aa7f5928f76d9e60ae47255176d18c22",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "workshop-winch-keyboard-path-v1",
+      "path": "scenarios/artifacts/SCN_UGLY_TOY/r1/input-script.json",
+      "sha256": "e45fc09f1b88b7fd31375a43fdd30da5943b8a32fc7e95d6bee0dfb61ab78f8a",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

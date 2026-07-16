@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_ROLLBACK_DRILL",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "rollback-canary-clone-v1",
+      "path": "scenarios/artifacts/SCN_ROLLBACK_DRILL/r1/starting-state.json",
+      "sha256": "9057434799723c9f7057e92e5eeadb9b03a40e322756ba22340695a51e2f9f16",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "rollback-content-v1",
+      "path": "scenarios/artifacts/SCN_ROLLBACK_DRILL/r1/content-set.json",
+      "sha256": "1cc880a23a3bd6e5e905e068ac2cd8b465c4af06b6c31a0f41e728b605d160bb",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "forced-canary-failure-v1",
+      "path": "scenarios/artifacts/SCN_ROLLBACK_DRILL/r1/input-script.json",
+      "sha256": "8bb348e6569d63215ee3d8dd1530dd4a706fe0ea53883decb4e2facdec052a61",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

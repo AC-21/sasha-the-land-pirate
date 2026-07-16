@@ -1,0 +1,35 @@
+{
+  "receipt_id": "RR-PROMPT-20260715",
+  "issued_at": "2026-07-15T00:00:00-07:00",
+  "issued_by": "creator-source-capture",
+  "issuer_role": "creator",
+  "receipt_kind": "creator-source-capture",
+  "artifact_resolver": {"type":"local-git-tree"},
+  "source_reference": "ledger/receipts/RR-PROMPT-20260715.source.md",
+  "subject_ids": ["D-0001", "D-0002", "D-0003", "D-0004", "D-0005"],
+  "subject_claims": [
+    {"subject_id":"D-0001","claims":["CREATOR-PROMPT-SOURCE-CAPTURE"]},
+    {"subject_id":"D-0002","claims":["CREATOR-PROMPT-SOURCE-CAPTURE"]},
+    {"subject_id":"D-0003","claims":["CREATOR-PROMPT-SOURCE-CAPTURE"]},
+    {"subject_id":"D-0004","claims":["CREATOR-PROMPT-SOURCE-CAPTURE"]},
+    {"subject_id":"D-0005","claims":["CREATOR-PROMPT-SOURCE-CAPTURE"]}
+  ],
+  "approval_text_sha256": "688eaa11017a0f00ac34de23cd98635350546c180ce59f038fd85795c401e373",
+  "accepted_commit": null,
+  "artifact_sha256": {
+    "00-GAME-CONSTITUTION.md": "2c0b98d41a149cb1d73e57743eb9eb6446f26dcd67e58ee2c5cc07bfd6aff8b3",
+    "ledger/decisions.jsonl": "052af71d13256e47c47cfb43c300cb329c9be0615e6910a687a69a0ea1f06676",
+    "ledger/receipts/RR-PROMPT-20260715.source.md": "688eaa11017a0f00ac34de23cd98635350546c180ce59f038fd85795c401e373"
+  },
+  "subject_contract_sha256": {},
+  "subject_event_sha256": {
+    "D-0001": "3c1859d1f92e1cee3139181b27bae0f76becd68a92d50cc05b4c4dd4ff2f184c",
+    "D-0002": "8868aa5220bf11c028dc6451da520f80ae1316384100749921812f0fce03f87d",
+    "D-0003": "27f2f192e9ae8b9882a9bcd144be947e104530834c664579bb2a01a7b3f768cd",
+    "D-0004": "2d54bfa26c9b2b4f99bb949f70bdd4a67aa220bba9f180a57ce21365606f69f4",
+    "D-0005": "05aa06a3e08503fa038fc9019b51c5705505d3050f9f951a453b9eea73d03c96"
+  },
+  "foundation_binding": null,
+  "signature_reference": null,
+  "sealed": false
+}

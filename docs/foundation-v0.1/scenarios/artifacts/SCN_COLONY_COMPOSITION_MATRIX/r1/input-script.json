@@ -1,0 +1,3928 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "input-script",
+  "semantic_id": "composition-matrix-three-cases-v1",
+  "scenario_id": "SCN_COLONY_COMPOSITION_MATRIX",
+  "scenario_revision": 1,
+  "tick_rate_hz": 10,
+  "warmup_ticks": 0,
+  "duration_ticks": 27000,
+  "normative_execution": {
+    "ordering": "ascending (tick,sequence); sequence is unique and contiguous from zero",
+    "fixed_tick_rule": "apply every event whose tick equals the current authoritative tick before advancing systems",
+    "case_isolation": "each case begins from its matching case_state; no state is shared between cases",
+    "unknown_command_rule": "reject scenario before first tick",
+    "integer_rule": "all *_milli values use signed integer arithmetic with checked overflow",
+    "autonomous_tick_rule": "world, settlement, faction, crisis, and expedition systems advance once per declared fixed tick even when events is empty",
+    "target_resolution_rule": "resolve every scripted command payload.target by exact logical_target_id before tick zero; canonical bindings select resolved_id in the base run and the matching case_resolutions entry in a case run; scenario selectors resolve only by their declared selector_kind and selector_value",
+    "unresolved_target_rule": "reject the scenario before tick zero on a missing or duplicate binding, an unreferenced binding, an unknown selector, a missing case resolution, a kind mismatch, or an ID absent from the hash-bound starting-state or content-set artifact; never infer, fabricate, or fall back",
+    "target_binding_hash_rule": "target_bindings_sha256 is SHA-256 of canonical JSON for the complete ordered target_bindings array"
+  },
+  "events": [
+    {
+      "sequence": 0,
+      "tick": 0,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectWaterFailure",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00001",
+        "target": "scn_colony_composition_matrix:target:0001",
+        "arguments": {
+          "ordinal": 1,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 1,
+      "tick": 300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ApplyDependencyAblation",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00002",
+        "target": "scn_colony_composition_matrix:target:0002",
+        "arguments": {
+          "ordinal": 2,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 2,
+      "tick": 600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreDependency",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00003",
+        "target": "scn_colony_composition_matrix:target:0003",
+        "arguments": {
+          "ordinal": 3,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 3,
+      "tick": 900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignRepairCapability",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00004",
+        "target": "scn_colony_composition_matrix:target:0004",
+        "arguments": {
+          "ordinal": 4,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 4,
+      "tick": 1200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreWorkshopPower",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00005",
+        "target": "scn_colony_composition_matrix:target:0005",
+        "arguments": {
+          "ordinal": 5,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 5,
+      "tick": 1500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RepairWaterTurbineBearing",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00006",
+        "target": "scn_colony_composition_matrix:target:0006",
+        "arguments": {
+          "ordinal": 6,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 6,
+      "tick": 1800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveWaterService",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00007",
+        "target": "scn_colony_composition_matrix:target:0007",
+        "arguments": {
+          "ordinal": 7,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 7,
+      "tick": 2100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00008",
+        "target": "scn_colony_composition_matrix:target:0008",
+        "arguments": {
+          "ordinal": 8,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 8,
+      "tick": 2400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00009",
+        "target": "scn_colony_composition_matrix:target:0009",
+        "arguments": {
+          "ordinal": 9,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 9,
+      "tick": 2700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectWaterFailure",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00010",
+        "target": "scn_colony_composition_matrix:target:0010",
+        "arguments": {
+          "ordinal": 10,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 10,
+      "tick": 3000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ApplyDependencyAblation",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00011",
+        "target": "scn_colony_composition_matrix:target:0011",
+        "arguments": {
+          "ordinal": 11,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 11,
+      "tick": 3300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreDependency",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00012",
+        "target": "scn_colony_composition_matrix:target:0012",
+        "arguments": {
+          "ordinal": 12,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 12,
+      "tick": 3600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignRepairCapability",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00013",
+        "target": "scn_colony_composition_matrix:target:0013",
+        "arguments": {
+          "ordinal": 13,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 13,
+      "tick": 3900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreWorkshopPower",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00014",
+        "target": "scn_colony_composition_matrix:target:0014",
+        "arguments": {
+          "ordinal": 14,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 14,
+      "tick": 4200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RepairWaterTurbineBearing",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00015",
+        "target": "scn_colony_composition_matrix:target:0015",
+        "arguments": {
+          "ordinal": 15,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 15,
+      "tick": 4500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveWaterService",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00016",
+        "target": "scn_colony_composition_matrix:target:0016",
+        "arguments": {
+          "ordinal": 16,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 16,
+      "tick": 4800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00017",
+        "target": "scn_colony_composition_matrix:target:0001",
+        "arguments": {
+          "ordinal": 17,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 17,
+      "tick": 5100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00018",
+        "target": "scn_colony_composition_matrix:target:0002",
+        "arguments": {
+          "ordinal": 18,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 18,
+      "tick": 5400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectWaterFailure",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00019",
+        "target": "scn_colony_composition_matrix:target:0003",
+        "arguments": {
+          "ordinal": 19,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 19,
+      "tick": 5700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ApplyDependencyAblation",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00020",
+        "target": "scn_colony_composition_matrix:target:0004",
+        "arguments": {
+          "ordinal": 20,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 20,
+      "tick": 6000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreDependency",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00021",
+        "target": "scn_colony_composition_matrix:target:0005",
+        "arguments": {
+          "ordinal": 21,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 21,
+      "tick": 6300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignRepairCapability",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00022",
+        "target": "scn_colony_composition_matrix:target:0006",
+        "arguments": {
+          "ordinal": 22,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 22,
+      "tick": 6600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreWorkshopPower",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00023",
+        "target": "scn_colony_composition_matrix:target:0007",
+        "arguments": {
+          "ordinal": 23,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 23,
+      "tick": 6900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RepairWaterTurbineBearing",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00024",
+        "target": "scn_colony_composition_matrix:target:0008",
+        "arguments": {
+          "ordinal": 24,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 24,
+      "tick": 7200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveWaterService",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00025",
+        "target": "scn_colony_composition_matrix:target:0009",
+        "arguments": {
+          "ordinal": 25,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 25,
+      "tick": 7500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00026",
+        "target": "scn_colony_composition_matrix:target:0010",
+        "arguments": {
+          "ordinal": 26,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 26,
+      "tick": 7800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00027",
+        "target": "scn_colony_composition_matrix:target:0011",
+        "arguments": {
+          "ordinal": 27,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 27,
+      "tick": 8100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectWaterFailure",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00028",
+        "target": "scn_colony_composition_matrix:target:0012",
+        "arguments": {
+          "ordinal": 28,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 28,
+      "tick": 8400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ApplyDependencyAblation",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00029",
+        "target": "scn_colony_composition_matrix:target:0013",
+        "arguments": {
+          "ordinal": 29,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 29,
+      "tick": 8700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreDependency",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00030",
+        "target": "scn_colony_composition_matrix:target:0014",
+        "arguments": {
+          "ordinal": 30,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 30,
+      "tick": 9000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignRepairCapability",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00031",
+        "target": "scn_colony_composition_matrix:target:0015",
+        "arguments": {
+          "ordinal": 31,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 31,
+      "tick": 9300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreWorkshopPower",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00032",
+        "target": "scn_colony_composition_matrix:target:0016",
+        "arguments": {
+          "ordinal": 32,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 32,
+      "tick": 9600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RepairWaterTurbineBearing",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00033",
+        "target": "scn_colony_composition_matrix:target:0001",
+        "arguments": {
+          "ordinal": 33,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 33,
+      "tick": 9900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveWaterService",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00034",
+        "target": "scn_colony_composition_matrix:target:0002",
+        "arguments": {
+          "ordinal": 34,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 34,
+      "tick": 10200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00035",
+        "target": "scn_colony_composition_matrix:target:0003",
+        "arguments": {
+          "ordinal": 35,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 35,
+      "tick": 10500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00036",
+        "target": "scn_colony_composition_matrix:target:0004",
+        "arguments": {
+          "ordinal": 36,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 36,
+      "tick": 10800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectWaterFailure",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00037",
+        "target": "scn_colony_composition_matrix:target:0005",
+        "arguments": {
+          "ordinal": 37,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 37,
+      "tick": 11100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ApplyDependencyAblation",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00038",
+        "target": "scn_colony_composition_matrix:target:0006",
+        "arguments": {
+          "ordinal": 38,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 38,
+      "tick": 11400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreDependency",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00039",
+        "target": "scn_colony_composition_matrix:target:0007",
+        "arguments": {
+          "ordinal": 39,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 39,
+      "tick": 11700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignRepairCapability",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00040",
+        "target": "scn_colony_composition_matrix:target:0008",
+        "arguments": {
+          "ordinal": 40,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 40,
+      "tick": 12000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreWorkshopPower",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00041",
+        "target": "scn_colony_composition_matrix:target:0009",
+        "arguments": {
+          "ordinal": 41,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 41,
+      "tick": 12300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RepairWaterTurbineBearing",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00042",
+        "target": "scn_colony_composition_matrix:target:0010",
+        "arguments": {
+          "ordinal": 42,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 42,
+      "tick": 12600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveWaterService",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00043",
+        "target": "scn_colony_composition_matrix:target:0011",
+        "arguments": {
+          "ordinal": 43,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 43,
+      "tick": 12900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00044",
+        "target": "scn_colony_composition_matrix:target:0012",
+        "arguments": {
+          "ordinal": 44,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 44,
+      "tick": 13200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00045",
+        "target": "scn_colony_composition_matrix:target:0013",
+        "arguments": {
+          "ordinal": 45,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 45,
+      "tick": 13500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectWaterFailure",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00046",
+        "target": "scn_colony_composition_matrix:target:0014",
+        "arguments": {
+          "ordinal": 46,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 46,
+      "tick": 13800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ApplyDependencyAblation",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00047",
+        "target": "scn_colony_composition_matrix:target:0015",
+        "arguments": {
+          "ordinal": 47,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 47,
+      "tick": 14100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreDependency",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00048",
+        "target": "scn_colony_composition_matrix:target:0016",
+        "arguments": {
+          "ordinal": 48,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 48,
+      "tick": 14400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignRepairCapability",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00049",
+        "target": "scn_colony_composition_matrix:target:0001",
+        "arguments": {
+          "ordinal": 49,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 49,
+      "tick": 14700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreWorkshopPower",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00050",
+        "target": "scn_colony_composition_matrix:target:0002",
+        "arguments": {
+          "ordinal": 50,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 50,
+      "tick": 15000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RepairWaterTurbineBearing",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00051",
+        "target": "scn_colony_composition_matrix:target:0003",
+        "arguments": {
+          "ordinal": 51,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 51,
+      "tick": 15300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveWaterService",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00052",
+        "target": "scn_colony_composition_matrix:target:0004",
+        "arguments": {
+          "ordinal": 52,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 52,
+      "tick": 15600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00053",
+        "target": "scn_colony_composition_matrix:target:0005",
+        "arguments": {
+          "ordinal": 53,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 53,
+      "tick": 15900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00054",
+        "target": "scn_colony_composition_matrix:target:0006",
+        "arguments": {
+          "ordinal": 54,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 54,
+      "tick": 16200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectWaterFailure",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00055",
+        "target": "scn_colony_composition_matrix:target:0007",
+        "arguments": {
+          "ordinal": 55,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 55,
+      "tick": 16500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ApplyDependencyAblation",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00056",
+        "target": "scn_colony_composition_matrix:target:0008",
+        "arguments": {
+          "ordinal": 56,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 56,
+      "tick": 16800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreDependency",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00057",
+        "target": "scn_colony_composition_matrix:target:0009",
+        "arguments": {
+          "ordinal": 57,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 57,
+      "tick": 17100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignRepairCapability",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00058",
+        "target": "scn_colony_composition_matrix:target:0010",
+        "arguments": {
+          "ordinal": 58,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 58,
+      "tick": 17400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreWorkshopPower",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00059",
+        "target": "scn_colony_composition_matrix:target:0011",
+        "arguments": {
+          "ordinal": 59,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 59,
+      "tick": 17700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RepairWaterTurbineBearing",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00060",
+        "target": "scn_colony_composition_matrix:target:0012",
+        "arguments": {
+          "ordinal": 60,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 60,
+      "tick": 18000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveWaterService",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00061",
+        "target": "scn_colony_composition_matrix:target:0013",
+        "arguments": {
+          "ordinal": 61,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 61,
+      "tick": 18300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00062",
+        "target": "scn_colony_composition_matrix:target:0014",
+        "arguments": {
+          "ordinal": 62,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 62,
+      "tick": 18600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00063",
+        "target": "scn_colony_composition_matrix:target:0015",
+        "arguments": {
+          "ordinal": 63,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 63,
+      "tick": 18900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectWaterFailure",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00064",
+        "target": "scn_colony_composition_matrix:target:0016",
+        "arguments": {
+          "ordinal": 64,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 64,
+      "tick": 19200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ApplyDependencyAblation",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00065",
+        "target": "scn_colony_composition_matrix:target:0001",
+        "arguments": {
+          "ordinal": 65,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 65,
+      "tick": 19500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreDependency",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00066",
+        "target": "scn_colony_composition_matrix:target:0002",
+        "arguments": {
+          "ordinal": 66,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 66,
+      "tick": 19800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignRepairCapability",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00067",
+        "target": "scn_colony_composition_matrix:target:0003",
+        "arguments": {
+          "ordinal": 67,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 67,
+      "tick": 20100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreWorkshopPower",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00068",
+        "target": "scn_colony_composition_matrix:target:0004",
+        "arguments": {
+          "ordinal": 68,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 68,
+      "tick": 20400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RepairWaterTurbineBearing",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00069",
+        "target": "scn_colony_composition_matrix:target:0005",
+        "arguments": {
+          "ordinal": 69,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 69,
+      "tick": 20700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveWaterService",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00070",
+        "target": "scn_colony_composition_matrix:target:0006",
+        "arguments": {
+          "ordinal": 70,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 70,
+      "tick": 21000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00071",
+        "target": "scn_colony_composition_matrix:target:0007",
+        "arguments": {
+          "ordinal": 71,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 71,
+      "tick": 21300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00072",
+        "target": "scn_colony_composition_matrix:target:0008",
+        "arguments": {
+          "ordinal": 72,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 72,
+      "tick": 21600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectWaterFailure",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00073",
+        "target": "scn_colony_composition_matrix:target:0009",
+        "arguments": {
+          "ordinal": 73,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 73,
+      "tick": 21900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ApplyDependencyAblation",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00074",
+        "target": "scn_colony_composition_matrix:target:0010",
+        "arguments": {
+          "ordinal": 74,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 74,
+      "tick": 22200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreDependency",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00075",
+        "target": "scn_colony_composition_matrix:target:0011",
+        "arguments": {
+          "ordinal": 75,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 75,
+      "tick": 22500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignRepairCapability",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00076",
+        "target": "scn_colony_composition_matrix:target:0012",
+        "arguments": {
+          "ordinal": 76,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 76,
+      "tick": 22800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreWorkshopPower",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00077",
+        "target": "scn_colony_composition_matrix:target:0013",
+        "arguments": {
+          "ordinal": 77,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 77,
+      "tick": 23100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RepairWaterTurbineBearing",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00078",
+        "target": "scn_colony_composition_matrix:target:0014",
+        "arguments": {
+          "ordinal": 78,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 78,
+      "tick": 23400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveWaterService",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00079",
+        "target": "scn_colony_composition_matrix:target:0015",
+        "arguments": {
+          "ordinal": 79,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 79,
+      "tick": 23700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00080",
+        "target": "scn_colony_composition_matrix:target:0016",
+        "arguments": {
+          "ordinal": 80,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 80,
+      "tick": 24000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00081",
+        "target": "scn_colony_composition_matrix:target:0001",
+        "arguments": {
+          "ordinal": 81,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 81,
+      "tick": 24300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectWaterFailure",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00082",
+        "target": "scn_colony_composition_matrix:target:0002",
+        "arguments": {
+          "ordinal": 82,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 82,
+      "tick": 24600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ApplyDependencyAblation",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00083",
+        "target": "scn_colony_composition_matrix:target:0003",
+        "arguments": {
+          "ordinal": 83,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 83,
+      "tick": 24900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreDependency",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00084",
+        "target": "scn_colony_composition_matrix:target:0004",
+        "arguments": {
+          "ordinal": 84,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 84,
+      "tick": 25200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignRepairCapability",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00085",
+        "target": "scn_colony_composition_matrix:target:0005",
+        "arguments": {
+          "ordinal": 85,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 85,
+      "tick": 25500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RestoreWorkshopPower",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00086",
+        "target": "scn_colony_composition_matrix:target:0006",
+        "arguments": {
+          "ordinal": 86,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 86,
+      "tick": 25800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RepairWaterTurbineBearing",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00087",
+        "target": "scn_colony_composition_matrix:target:0007",
+        "arguments": {
+          "ordinal": 87,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 87,
+      "tick": 26100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveWaterService",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00088",
+        "target": "scn_colony_composition_matrix:target:0008",
+        "arguments": {
+          "ordinal": 88,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 88,
+      "tick": 26400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00089",
+        "target": "scn_colony_composition_matrix:target:0009",
+        "arguments": {
+          "ordinal": 89,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    },
+    {
+      "sequence": 89,
+      "tick": 26700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00090",
+        "target": "scn_colony_composition_matrix:target:0010",
+        "arguments": {
+          "ordinal": 90,
+          "bindings": {
+            "case-order": "human-only,robot-only,mixed",
+            "counts-semantics": "runner-envelope; authoritative counts live per case",
+            "bottleneck": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+            "mechanical-composition-authorization": "open-D-0039:MECHANICAL-COMPOSITIONS",
+            "cross-with-preparation-module-matrix": false
+          }
+        }
+      }
+    }
+  ],
+  "case_events": [
+    {
+      "id": "human-only",
+      "events": [
+        {
+          "sequence": 0,
+          "tick": 0,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "InspectWaterFailure",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00001",
+            "target": "scn_colony_composition_matrix:target:0001",
+            "arguments": {
+              "ordinal": 1,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 1,
+          "tick": 900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ApplyDependencyAblation",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00002",
+            "target": "scn_colony_composition_matrix:target:0002",
+            "arguments": {
+              "ordinal": 2,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 2,
+          "tick": 1800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreDependency",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00003",
+            "target": "scn_colony_composition_matrix:target:0003",
+            "arguments": {
+              "ordinal": 3,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 3,
+          "tick": 2700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AssignRepairCapability",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00004",
+            "target": "scn_colony_composition_matrix:target:0004",
+            "arguments": {
+              "ordinal": 4,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 4,
+          "tick": 3600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreWorkshopPower",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00005",
+            "target": "scn_colony_composition_matrix:target:0005",
+            "arguments": {
+              "ordinal": 5,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 5,
+          "tick": 4500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RepairWaterTurbineBearing",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00006",
+            "target": "scn_colony_composition_matrix:target:0006",
+            "arguments": {
+              "ordinal": 6,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 6,
+          "tick": 5400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveWaterService",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00007",
+            "target": "scn_colony_composition_matrix:target:0007",
+            "arguments": {
+              "ordinal": 7,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 7,
+          "tick": 6300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SaveCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00008",
+            "target": "scn_colony_composition_matrix:target:0008",
+            "arguments": {
+              "ordinal": 8,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 8,
+          "tick": 7200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "LoadCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00009",
+            "target": "scn_colony_composition_matrix:target:0009",
+            "arguments": {
+              "ordinal": 9,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 9,
+          "tick": 8100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "InspectWaterFailure",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00010",
+            "target": "scn_colony_composition_matrix:target:0010",
+            "arguments": {
+              "ordinal": 10,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 10,
+          "tick": 9000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ApplyDependencyAblation",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00011",
+            "target": "scn_colony_composition_matrix:target:0011",
+            "arguments": {
+              "ordinal": 11,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 11,
+          "tick": 9900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreDependency",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00012",
+            "target": "scn_colony_composition_matrix:target:0012",
+            "arguments": {
+              "ordinal": 12,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 12,
+          "tick": 10800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AssignRepairCapability",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00013",
+            "target": "scn_colony_composition_matrix:target:0013",
+            "arguments": {
+              "ordinal": 13,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 13,
+          "tick": 11700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreWorkshopPower",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00014",
+            "target": "scn_colony_composition_matrix:target:0014",
+            "arguments": {
+              "ordinal": 14,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 14,
+          "tick": 12600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RepairWaterTurbineBearing",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00015",
+            "target": "scn_colony_composition_matrix:target:0015",
+            "arguments": {
+              "ordinal": 15,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 15,
+          "tick": 13500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveWaterService",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00016",
+            "target": "scn_colony_composition_matrix:target:0016",
+            "arguments": {
+              "ordinal": 16,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 16,
+          "tick": 14400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SaveCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00017",
+            "target": "scn_colony_composition_matrix:target:0001",
+            "arguments": {
+              "ordinal": 17,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 17,
+          "tick": 15300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "LoadCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00018",
+            "target": "scn_colony_composition_matrix:target:0002",
+            "arguments": {
+              "ordinal": 18,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 18,
+          "tick": 16200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "InspectWaterFailure",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00019",
+            "target": "scn_colony_composition_matrix:target:0003",
+            "arguments": {
+              "ordinal": 19,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 19,
+          "tick": 17100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ApplyDependencyAblation",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00020",
+            "target": "scn_colony_composition_matrix:target:0004",
+            "arguments": {
+              "ordinal": 20,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 20,
+          "tick": 18000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreDependency",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00021",
+            "target": "scn_colony_composition_matrix:target:0005",
+            "arguments": {
+              "ordinal": 21,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 21,
+          "tick": 18900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AssignRepairCapability",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00022",
+            "target": "scn_colony_composition_matrix:target:0006",
+            "arguments": {
+              "ordinal": 22,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 22,
+          "tick": 19800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreWorkshopPower",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00023",
+            "target": "scn_colony_composition_matrix:target:0007",
+            "arguments": {
+              "ordinal": 23,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 23,
+          "tick": 20700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RepairWaterTurbineBearing",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00024",
+            "target": "scn_colony_composition_matrix:target:0008",
+            "arguments": {
+              "ordinal": 24,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 24,
+          "tick": 21600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveWaterService",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00025",
+            "target": "scn_colony_composition_matrix:target:0009",
+            "arguments": {
+              "ordinal": 25,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 25,
+          "tick": 22500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SaveCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00026",
+            "target": "scn_colony_composition_matrix:target:0010",
+            "arguments": {
+              "ordinal": 26,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 26,
+          "tick": 23400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "LoadCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00027",
+            "target": "scn_colony_composition_matrix:target:0011",
+            "arguments": {
+              "ordinal": 27,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 27,
+          "tick": 24300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "InspectWaterFailure",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00028",
+            "target": "scn_colony_composition_matrix:target:0012",
+            "arguments": {
+              "ordinal": 28,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 28,
+          "tick": 25200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ApplyDependencyAblation",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00029",
+            "target": "scn_colony_composition_matrix:target:0013",
+            "arguments": {
+              "ordinal": 29,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 29,
+          "tick": 26100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreDependency",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00030",
+            "target": "scn_colony_composition_matrix:target:0014",
+            "arguments": {
+              "ordinal": 30,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 0,
+                "ablation": "food-water-rest-withheld"
+              }
+            }
+          }
+        }
+      ],
+      "oracle_observations": [
+        {
+          "sequence": 0,
+          "tick": 27000,
+          "subject": "human-only.bottleneck-resolved",
+          "selector": "metrics/human-only/bottleneck-resolved",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_COMP_H_COMPLETE"
+        },
+        {
+          "sequence": 1,
+          "tick": 27000,
+          "subject": "human-only.food-water-rest-ablation-blocks-completion",
+          "selector": "metrics/human-only/food-water-rest-ablation-blocks-completion",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_COMP_H_DEP"
+        },
+        {
+          "sequence": 2,
+          "tick": 27000,
+          "subject": "human-only.human-repair-capability-enables-completion",
+          "selector": "metrics/human-only/human-repair-capability-enables-completion",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_COMP_H_CAP"
+        }
+      ]
+    },
+    {
+      "id": "robot-only",
+      "events": [
+        {
+          "sequence": 0,
+          "tick": 0,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "InspectWaterFailure",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00001",
+            "target": "scn_colony_composition_matrix:target:0001",
+            "arguments": {
+              "ordinal": 1,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 1,
+          "tick": 900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ApplyDependencyAblation",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00002",
+            "target": "scn_colony_composition_matrix:target:0002",
+            "arguments": {
+              "ordinal": 2,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 2,
+          "tick": 1800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreDependency",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00003",
+            "target": "scn_colony_composition_matrix:target:0003",
+            "arguments": {
+              "ordinal": 3,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 3,
+          "tick": 2700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AssignRepairCapability",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00004",
+            "target": "scn_colony_composition_matrix:target:0004",
+            "arguments": {
+              "ordinal": 4,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 4,
+          "tick": 3600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreWorkshopPower",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00005",
+            "target": "scn_colony_composition_matrix:target:0005",
+            "arguments": {
+              "ordinal": 5,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 5,
+          "tick": 4500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RepairWaterTurbineBearing",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00006",
+            "target": "scn_colony_composition_matrix:target:0006",
+            "arguments": {
+              "ordinal": 6,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 6,
+          "tick": 5400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveWaterService",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00007",
+            "target": "scn_colony_composition_matrix:target:0007",
+            "arguments": {
+              "ordinal": 7,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 7,
+          "tick": 6300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SaveCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00008",
+            "target": "scn_colony_composition_matrix:target:0008",
+            "arguments": {
+              "ordinal": 8,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 8,
+          "tick": 7200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "LoadCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00009",
+            "target": "scn_colony_composition_matrix:target:0009",
+            "arguments": {
+              "ordinal": 9,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 9,
+          "tick": 8100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "InspectWaterFailure",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00010",
+            "target": "scn_colony_composition_matrix:target:0010",
+            "arguments": {
+              "ordinal": 10,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 10,
+          "tick": 9000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ApplyDependencyAblation",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00011",
+            "target": "scn_colony_composition_matrix:target:0011",
+            "arguments": {
+              "ordinal": 11,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 11,
+          "tick": 9900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreDependency",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00012",
+            "target": "scn_colony_composition_matrix:target:0012",
+            "arguments": {
+              "ordinal": 12,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 12,
+          "tick": 10800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AssignRepairCapability",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00013",
+            "target": "scn_colony_composition_matrix:target:0013",
+            "arguments": {
+              "ordinal": 13,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 13,
+          "tick": 11700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreWorkshopPower",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00014",
+            "target": "scn_colony_composition_matrix:target:0014",
+            "arguments": {
+              "ordinal": 14,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 14,
+          "tick": 12600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RepairWaterTurbineBearing",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00015",
+            "target": "scn_colony_composition_matrix:target:0015",
+            "arguments": {
+              "ordinal": 15,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 15,
+          "tick": 13500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveWaterService",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00016",
+            "target": "scn_colony_composition_matrix:target:0016",
+            "arguments": {
+              "ordinal": 16,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 16,
+          "tick": 14400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SaveCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00017",
+            "target": "scn_colony_composition_matrix:target:0001",
+            "arguments": {
+              "ordinal": 17,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 17,
+          "tick": 15300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "LoadCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00018",
+            "target": "scn_colony_composition_matrix:target:0002",
+            "arguments": {
+              "ordinal": 18,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 18,
+          "tick": 16200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "InspectWaterFailure",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00019",
+            "target": "scn_colony_composition_matrix:target:0003",
+            "arguments": {
+              "ordinal": 19,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 19,
+          "tick": 17100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ApplyDependencyAblation",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00020",
+            "target": "scn_colony_composition_matrix:target:0004",
+            "arguments": {
+              "ordinal": 20,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 20,
+          "tick": 18000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreDependency",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00021",
+            "target": "scn_colony_composition_matrix:target:0005",
+            "arguments": {
+              "ordinal": 21,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 21,
+          "tick": 18900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AssignRepairCapability",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00022",
+            "target": "scn_colony_composition_matrix:target:0006",
+            "arguments": {
+              "ordinal": 22,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 22,
+          "tick": 19800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreWorkshopPower",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00023",
+            "target": "scn_colony_composition_matrix:target:0007",
+            "arguments": {
+              "ordinal": 23,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 23,
+          "tick": 20700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RepairWaterTurbineBearing",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00024",
+            "target": "scn_colony_composition_matrix:target:0008",
+            "arguments": {
+              "ordinal": 24,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 24,
+          "tick": 21600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveWaterService",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00025",
+            "target": "scn_colony_composition_matrix:target:0009",
+            "arguments": {
+              "ordinal": 25,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 25,
+          "tick": 22500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SaveCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00026",
+            "target": "scn_colony_composition_matrix:target:0010",
+            "arguments": {
+              "ordinal": 26,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 26,
+          "tick": 23400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "LoadCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00027",
+            "target": "scn_colony_composition_matrix:target:0011",
+            "arguments": {
+              "ordinal": 27,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 27,
+          "tick": 24300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "InspectWaterFailure",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00028",
+            "target": "scn_colony_composition_matrix:target:0012",
+            "arguments": {
+              "ordinal": 28,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 28,
+          "tick": 25200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ApplyDependencyAblation",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00029",
+            "target": "scn_colony_composition_matrix:target:0013",
+            "arguments": {
+              "ordinal": 29,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 29,
+          "tick": 26100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreDependency",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00030",
+            "target": "scn_colony_composition_matrix:target:0014",
+            "arguments": {
+              "ordinal": 30,
+              "bindings": {
+                "human-cohorts": 0,
+                "robot-units": 1,
+                "ablation": "power-maintenance-withheld"
+              }
+            }
+          }
+        }
+      ],
+      "oracle_observations": [
+        {
+          "sequence": 0,
+          "tick": 27000,
+          "subject": "robot-only.bottleneck-resolved",
+          "selector": "metrics/robot-only/bottleneck-resolved",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_COMP_R_COMPLETE"
+        },
+        {
+          "sequence": 1,
+          "tick": 27000,
+          "subject": "robot-only.power-maintenance-ablation-blocks-completion",
+          "selector": "metrics/robot-only/power-maintenance-ablation-blocks-completion",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_COMP_R_DEP"
+        },
+        {
+          "sequence": 2,
+          "tick": 27000,
+          "subject": "robot-only.robot-tool-capability-enables-completion",
+          "selector": "metrics/robot-only/robot-tool-capability-enables-completion",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_COMP_R_CAP"
+        }
+      ]
+    },
+    {
+      "id": "mixed",
+      "events": [
+        {
+          "sequence": 0,
+          "tick": 0,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "InspectWaterFailure",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00001",
+            "target": "scn_colony_composition_matrix:target:0001",
+            "arguments": {
+              "ordinal": 1,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 1,
+          "tick": 900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ApplyDependencyAblation",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00002",
+            "target": "scn_colony_composition_matrix:target:0002",
+            "arguments": {
+              "ordinal": 2,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 2,
+          "tick": 1800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreDependency",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00003",
+            "target": "scn_colony_composition_matrix:target:0003",
+            "arguments": {
+              "ordinal": 3,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 3,
+          "tick": 2700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AssignRepairCapability",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00004",
+            "target": "scn_colony_composition_matrix:target:0004",
+            "arguments": {
+              "ordinal": 4,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 4,
+          "tick": 3600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreWorkshopPower",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00005",
+            "target": "scn_colony_composition_matrix:target:0005",
+            "arguments": {
+              "ordinal": 5,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 5,
+          "tick": 4500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RepairWaterTurbineBearing",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00006",
+            "target": "scn_colony_composition_matrix:target:0006",
+            "arguments": {
+              "ordinal": 6,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 6,
+          "tick": 5400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveWaterService",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00007",
+            "target": "scn_colony_composition_matrix:target:0007",
+            "arguments": {
+              "ordinal": 7,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 7,
+          "tick": 6300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SaveCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00008",
+            "target": "scn_colony_composition_matrix:target:0008",
+            "arguments": {
+              "ordinal": 8,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 8,
+          "tick": 7200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "LoadCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00009",
+            "target": "scn_colony_composition_matrix:target:0009",
+            "arguments": {
+              "ordinal": 9,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 9,
+          "tick": 8100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "InspectWaterFailure",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00010",
+            "target": "scn_colony_composition_matrix:target:0010",
+            "arguments": {
+              "ordinal": 10,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 10,
+          "tick": 9000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ApplyDependencyAblation",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00011",
+            "target": "scn_colony_composition_matrix:target:0011",
+            "arguments": {
+              "ordinal": 11,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 11,
+          "tick": 9900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreDependency",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00012",
+            "target": "scn_colony_composition_matrix:target:0012",
+            "arguments": {
+              "ordinal": 12,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 12,
+          "tick": 10800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AssignRepairCapability",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00013",
+            "target": "scn_colony_composition_matrix:target:0013",
+            "arguments": {
+              "ordinal": 13,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 13,
+          "tick": 11700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreWorkshopPower",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00014",
+            "target": "scn_colony_composition_matrix:target:0014",
+            "arguments": {
+              "ordinal": 14,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 14,
+          "tick": 12600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RepairWaterTurbineBearing",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00015",
+            "target": "scn_colony_composition_matrix:target:0015",
+            "arguments": {
+              "ordinal": 15,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 15,
+          "tick": 13500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveWaterService",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00016",
+            "target": "scn_colony_composition_matrix:target:0016",
+            "arguments": {
+              "ordinal": 16,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 16,
+          "tick": 14400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SaveCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00017",
+            "target": "scn_colony_composition_matrix:target:0001",
+            "arguments": {
+              "ordinal": 17,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 17,
+          "tick": 15300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "LoadCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00018",
+            "target": "scn_colony_composition_matrix:target:0002",
+            "arguments": {
+              "ordinal": 18,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 18,
+          "tick": 16200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "InspectWaterFailure",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00019",
+            "target": "scn_colony_composition_matrix:target:0003",
+            "arguments": {
+              "ordinal": 19,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 19,
+          "tick": 17100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ApplyDependencyAblation",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00020",
+            "target": "scn_colony_composition_matrix:target:0004",
+            "arguments": {
+              "ordinal": 20,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 20,
+          "tick": 18000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreDependency",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00021",
+            "target": "scn_colony_composition_matrix:target:0005",
+            "arguments": {
+              "ordinal": 21,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 21,
+          "tick": 18900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AssignRepairCapability",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00022",
+            "target": "scn_colony_composition_matrix:target:0006",
+            "arguments": {
+              "ordinal": 22,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 22,
+          "tick": 19800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreWorkshopPower",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00023",
+            "target": "scn_colony_composition_matrix:target:0007",
+            "arguments": {
+              "ordinal": 23,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 23,
+          "tick": 20700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RepairWaterTurbineBearing",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00024",
+            "target": "scn_colony_composition_matrix:target:0008",
+            "arguments": {
+              "ordinal": 24,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 24,
+          "tick": 21600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveWaterService",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00025",
+            "target": "scn_colony_composition_matrix:target:0009",
+            "arguments": {
+              "ordinal": 25,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 25,
+          "tick": 22500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SaveCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00026",
+            "target": "scn_colony_composition_matrix:target:0010",
+            "arguments": {
+              "ordinal": 26,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 26,
+          "tick": 23400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "LoadCheckpoint",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00027",
+            "target": "scn_colony_composition_matrix:target:0011",
+            "arguments": {
+              "ordinal": 27,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 27,
+          "tick": 24300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "InspectWaterFailure",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00028",
+            "target": "scn_colony_composition_matrix:target:0012",
+            "arguments": {
+              "ordinal": 28,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 28,
+          "tick": 25200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ApplyDependencyAblation",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00029",
+            "target": "scn_colony_composition_matrix:target:0013",
+            "arguments": {
+              "ordinal": 29,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 29,
+          "tick": 26100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RestoreDependency",
+            "command_id": "SCN_COLONY_COMPOSITION_MATRIX:cmd:00030",
+            "target": "scn_colony_composition_matrix:target:0014",
+            "arguments": {
+              "ordinal": 30,
+              "bindings": {
+                "human-cohorts": 1,
+                "robot-units": 1,
+                "shared-bottleneck": "workshop-power"
+              }
+            }
+          }
+        }
+      ],
+      "oracle_observations": [
+        {
+          "sequence": 0,
+          "tick": 27000,
+          "subject": "mixed.bottleneck-resolved",
+          "selector": "metrics/mixed/bottleneck-resolved",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_COMP_M_COMPLETE"
+        },
+        {
+          "sequence": 1,
+          "tick": 27000,
+          "subject": "mixed.complementary-assignment-used",
+          "selector": "metrics/mixed/complementary-assignment-used",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_COMP_M_ASSIGN"
+        },
+        {
+          "sequence": 2,
+          "tick": 27000,
+          "subject": "mixed.shared-power-choice-changes-plan",
+          "selector": "metrics/mixed/shared-power-choice-changes-plan",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_COMP_M_POWER"
+        },
+        {
+          "sequence": 3,
+          "tick": 27000,
+          "subject": "mixed.choice-not-present-in-single-composition-cases",
+          "selector": "metrics/mixed/choice-not-present-in-single-composition-cases",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_COMP_M_UNIQUE"
+        }
+      ]
+    }
+  ],
+  "oracle_observations": [
+    {
+      "sequence": 0,
+      "tick": 27000,
+      "subject": "matrix-cases-completed",
+      "selector": "metrics/matrix-cases-completed",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_COMPOSITION_CASES"
+    },
+    {
+      "sequence": 1,
+      "tick": 27000,
+      "subject": "mechanical-composition-authorization-mismatches",
+      "selector": "metrics/mechanical-composition-authorization-mismatches",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_COMPOSITION_AUTH"
+    },
+    {
+      "sequence": 2,
+      "tick": 27000,
+      "subject": "negative-inventory-events",
+      "selector": "metrics/negative-inventory-events",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_COMPOSITION_INVENTORY"
+    },
+    {
+      "sequence": 3,
+      "tick": 27000,
+      "subject": "orphan-staffing-records",
+      "selector": "metrics/orphan-staffing-records",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_COMPOSITION_ORPHANS"
+    },
+    {
+      "sequence": 4,
+      "tick": 27000,
+      "subject": "composition-save-roundtrip-mismatches",
+      "selector": "metrics/composition-save-roundtrip-mismatches",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_COMPOSITION_SAVE"
+    },
+    {
+      "sequence": 5,
+      "tick": 27000,
+      "subject": "unrequested-staff-substitutions",
+      "selector": "metrics/unrequested-staff-substitutions",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_COMPOSITION_SUBSTITUTION"
+    },
+    {
+      "sequence": 6,
+      "tick": 27000,
+      "subject": "worker-identity-losses",
+      "selector": "metrics/worker-identity-losses",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_COMPOSITION_IDENTITY"
+    }
+  ],
+  "target_bindings_sha256": "2cd65e9ce07029f7d80bbbbcdbdb0affb379424358daf0f6eeb9bb654a2b2ad6",
+  "target_bindings": [
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0001",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00009",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00009"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00009"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00009"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0002",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00019",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00019"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00019"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00019"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0003",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00029",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00029"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00029"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00029"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0004",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00039",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00039"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00039"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00039"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0005",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00049",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00049"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00049"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00049"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0006",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00059",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00059"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00059"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00059"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0007",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00069",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00069"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00069"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00069"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0008",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00009",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00009"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00009"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00009"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0009",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00019",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00019"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00019"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00019"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0010",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00029",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00029"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00029"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00029"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0011",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00039",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00039"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00039"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00039"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0012",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00049",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00049"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00049"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00049"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0013",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00059",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00059"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00059"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00059"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0014",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00069",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00069"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00069"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00069"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0015",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00009",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00009"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00009"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00009"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_colony_composition_matrix:target:0016",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_colony_composition_matrix:base:state:00019",
+      "case_resolutions": [
+        {
+          "case_id": "human-only",
+          "resolved_id": "scn_colony_composition_matrix:human-only:state:00019"
+        },
+        {
+          "case_id": "robot-only",
+          "resolved_id": "scn_colony_composition_matrix:robot-only:state:00019"
+        },
+        {
+          "case_id": "mixed",
+          "resolved_id": "scn_colony_composition_matrix:mixed:state:00019"
+        }
+      ]
+    }
+  ]
+}

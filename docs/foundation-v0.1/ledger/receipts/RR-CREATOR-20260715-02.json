@@ -1,0 +1,29 @@
+{
+  "receipt_id": "RR-CREATOR-20260715-02",
+  "issued_at": "2026-07-15T00:00:00-07:00",
+  "issued_by": "creator-source-capture",
+  "issuer_role": "creator",
+  "receipt_kind": "creator-source-capture",
+  "artifact_resolver": {"type":"local-git-tree"},
+  "source_reference": "ledger/receipts/RR-CREATOR-20260715-02.source.md",
+  "subject_ids": ["D-0036", "D-0037"],
+  "subject_claims": [
+    {"subject_id":"D-0036","claims":["TITLE-AND-PROTAGONIST-SASHA"]},
+    {"subject_id":"D-0037","claims":["COLONY-HUMANS-ROBOTS-OR-MIXED"]}
+  ],
+  "approval_text_sha256": "1e880929f2129a66cb1fe6198503eaf6bda3bc9d711e7dc8308008639621bd13",
+  "accepted_commit": null,
+  "artifact_sha256": {
+    "00-GAME-CONSTITUTION.md": "2c0b98d41a149cb1d73e57743eb9eb6446f26dcd67e58ee2c5cc07bfd6aff8b3",
+    "ledger/decisions.jsonl": "052af71d13256e47c47cfb43c300cb329c9be0615e6910a687a69a0ea1f06676",
+    "ledger/receipts/RR-CREATOR-20260715-02.source.md": "1e880929f2129a66cb1fe6198503eaf6bda3bc9d711e7dc8308008639621bd13"
+  },
+  "subject_contract_sha256": {},
+  "subject_event_sha256": {
+    "D-0036": "2a5884aee10522bfb4f48f1da6679997c9ec5439638cb8511a8fb815c8c499b7",
+    "D-0037": "7d54b1eb76e27e755ae1f39a1128b32722ae88c9b4777cd498927c7b2c4d36a1"
+  },
+  "foundation_binding": null,
+  "signature_reference": null,
+  "sealed": false
+}

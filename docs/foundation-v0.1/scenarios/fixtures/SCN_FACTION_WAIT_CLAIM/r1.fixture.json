@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_FACTION_WAIT_CLAIM",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "last-bearing-preclaim-state-v1",
+      "path": "scenarios/artifacts/SCN_FACTION_WAIT_CLAIM/r1/starting-state.json",
+      "sha256": "4a49fcf6cad6bbaf60257c6b511590119bdd83092bf5d13ac9b3351f12eb508d",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "last-bearing-graybox-content-v1",
+      "path": "scenarios/artifacts/SCN_FACTION_WAIT_CLAIM/r1/content-set.json",
+      "sha256": "e6968e7f89f59ec0927949194557748ee143b3519a8e3aad95a4dedf70bc18f7",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "wait-without-departure-v1",
+      "path": "scenarios/artifacts/SCN_FACTION_WAIT_CLAIM/r1/input-script.json",
+      "sha256": "489b2bf6e6fcd5d66e7d15212005394b63214357485cae48d990b279104ef26d",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

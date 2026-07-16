@@ -1,0 +1,623 @@
+{
+  "schema_version": 1,
+  "id": "WP-0001",
+  "status": "proposed",
+  "class": "architecture",
+  "declared_risk": "high",
+  "derived_risk": "high",
+  "effective_risk": "high",
+  "save_risk": "S1",
+  "created_on": "2026-07-15",
+  "title": "Unity Mac engine, save, renderer, and pipeline spike",
+  "objective": "Prove or falsify one exact Unity 6.3 LTS patch/toolchain as the Mac-first technical foundation by producing a reproducible native ARM64 build with a non-Unity fixed-tick state core, synthetic exact-ownership recovery, the byte-exact Save Envelope/root/pointer/protected-retention-anchor v1 contracts, batch automation, a representative dynamic-building render test, and one Blender calibration package.",
+  "value": "This is the smallest reversible implementation that can expose engine, saving, automation, renderer, and asset-pipeline risks without authorizing gameplay assumptions.",
+  "requested_by": "creator-goal:2026-07-15",
+  "required_approver": "creator",
+  "approved_by": null,
+  "approval_receipt_id": null,
+  "contract_sha256": "d04452275baf476e218c2f2391f08f47fa5e3b7dc8ba018f4143f034f6ee8512",
+  "a1_boundary_manifest": null,
+  "implementer": null,
+  "verifier": null,
+  "integrator": null,
+  "constitutional_links": [
+    "P6",
+    "INV-011",
+    "INV-012",
+    "INV-013",
+    "INV-014"
+  ],
+  "decision_links": [
+    "D-0013",
+    "D-0014",
+    "D-0015",
+    "D-0017",
+    "D-0020",
+    "D-0024",
+    "D-0025",
+    "D-0028",
+    "D-0033",
+    "D-0034",
+    "D-0038"
+  ],
+  "system_contracts": [
+    "02-SYSTEM-MAP.md#cross-mode-ownership-transaction",
+    "04-TECHNICAL-ARCHITECTURE.md#7-save-constitution",
+    "04-TECHNICAL-ARCHITECTURE.md#11-engine-spike-before-ratification",
+    "11-TRUST-AND-ENFORCEMENT.md"
+  ],
+  "baseline_evidence": [
+    {
+      "id": "BASE-001",
+      "type": "workspace-observation",
+      "uri": "local://no-game-engine-project-2026-07-15",
+      "sha256": null
+    },
+    {
+      "id": "BASE-002",
+      "type": "tool-observation",
+      "uri": "local://unity-not-detected-2026-07-15",
+      "sha256": null
+    },
+    {
+      "id": "BASE-003",
+      "type": "tool-observation",
+      "uri": "local://blender-5.1.2-installed",
+      "sha256": null
+    },
+    {
+      "id": "BASE-004",
+      "type": "hardware-profile",
+      "uri": "local://m3-max-16cpu-40gpu-48gb-macos-15.7.7",
+      "sha256": null
+    },
+    {
+      "id": "BASE-005",
+      "type": "foundation-lint",
+      "uri": "local://foundation-bootstrap-lint",
+      "sha256": null
+    }
+  ],
+  "in_scope": [
+    "Create a pinned Unity 6.3 LTS URP candidate project in a creator-approved repository location.",
+    "Record exact editor patch, packages, Xcode/toolchain, licenses, known issues, retained installer, and rollback tuple.",
+    "Create a non-Unity C# stable-ID fixed-tick core with injected clock, counter/key RNG, storage, and logging.",
+    "Implement a synthetic two-domain ownership transaction with idempotent retry and crash-phase recovery, without choosing city or road gameplay.",
+    "Implement byte-exact Save Envelope v1, root header v1, initial versioned synthetic sections, slot pointer v1, immutable generations, protected retention-anchor receipt v1, crash-safe pruning/anchor advance, fault injection, bounded recovery scan, load, and canonical state comparison.",
+    "Pin the random algorithm/version, canonical-state encoding/version, and numeric policy through a cross-runtime golden vector.",
+    "Pin a full Draft 2020-12 validator, meta-validate schemas, and commit positive plus adversarial save/pointer/retention-anchor/packet/asset fixtures.",
+    "Create batch test/build/report commands and a native ARM64 application.",
+    "Create the benchmark harness and capture the provisional slice protocol.",
+    "Test a representative dynamic placed-building scene with per-instance faction/condition data, LODs, shadows, probes, and batching compatibility.",
+    "Export and import one Blender calibration package with scale, pivot, material, LOD, collider, socket, manifest, and provenance validation.",
+    "Document Godot fallback triggers.",
+    "The same ACCEPT-WP-0001 receipt must bind `AUTHORIZE-TEMP-WP0001-IDENTITY`: Company `LocalFoundationLab`; Product `SashaAtomicLandPirate_WP0001`; Bundle ID `local.foundation.sashaatomiclandpirate.wp0001`; isolated save profiles `wp0001-dev-v1` and `wp0001-test-v1`; temporary/non-shipping with no prior-root discovery or migration.",
+    "Emit candidate scenario/control-plane revisions and their hashes only under `BuildArtifacts/WP-0001/candidate-control-plane/`; A1 treats the protected foundation and registries as read-only inputs and cannot rewrite them."
+  ],
+  "non_goals": [
+    "Final art direction or production assets.",
+    "Production-scale city or population capacity claims.",
+    "Full DOTS/Entities conversion.",
+    "Final driving physics, combat, AI, or seamless world streaming.",
+    "Production economy balance or campaign content.",
+    "Automatic merge, autonomy promotion, or feature rollout.",
+    "Any city-grammar, vehicle-control, travel-topology, faction, module, or other creator-owned gameplay decision.",
+    "Ratifying durable D-0038 company, product, bundle, or save-root identity; the exact WP-0001 tuple is temporary, non-shipping, and forbidden for distributed saves."
+  ],
+  "affected_domains": [
+    "world",
+    "settlement",
+    "logistics",
+    "vehicle",
+    "expedition",
+    "faction",
+    "audit",
+    "presentation",
+    "tooling",
+    "save"
+  ],
+  "interfaces": [
+    "Command -> authoritative state transition -> domain event -> read model",
+    "Persisted stable-ID allocators and counter/key randomness",
+    "Cross-mode ownership transaction and idempotency ledger",
+    "Save Envelope v1 immutable generation, pointer, and protected retention anchor",
+    "Blender asset manifest -> quarantine validator -> engine prefab",
+    "Batch runner -> tests/build/metrics evidence"
+  ],
+  "dependencies": [],
+  "reservation": {
+    "status": "unreserved",
+    "lease_id": null,
+    "base_commit": null,
+    "paths": [],
+    "domains": [],
+    "expires_at": null,
+    "fencing_token": null
+  },
+  "declared_paths": [
+    "Game/Assets/Game/Bootstrap/",
+    "Game/Assets/Game/Content/TechnicalSpike/",
+    "Game/Assets/Game/Editor/Build/",
+    "Game/Assets/Game/Generated/TechnicalSpike/",
+    "Game/Assets/Game/Presentation/TechnicalSpike/",
+    "Game/Assets/Game/Tests/",
+    "Game/Packages/",
+    "Game/ProjectSettings/",
+    "SimulationCore/",
+    "SaveContracts/",
+    "ContentSource/Blender/Calibration/",
+    "Tools/Build/",
+    "Tools/ScenarioRunner/",
+    "Tools/AssetPipeline/",
+    "Tools/Validation/",
+    "Tools/SaveInspector/",
+    "Tests/BuildSmoke/",
+    "Tests/GoldenSaves/",
+    "Tests/GoldenVectors/",
+    "Tests/Performance/",
+    "Tests/ValidationFixtures/",
+    "BuildArtifacts/WP-0001/",
+    "BuildArtifacts/WP-0001/candidate-control-plane/",
+    "docs/adr/",
+    "docs/decisions/",
+    "docs/evidence/WP-0001/",
+    "docs/known-issues/",
+    "docs/licenses/",
+    "docs/manifests/",
+    "docs/performance/WP-0001/",
+    "Game/Assets/Game.meta",
+    "Game/Assets/Game/Bootstrap.meta",
+    "Game/Assets/Game/Content.meta",
+    "Game/Assets/Game/Content/TechnicalSpike.meta",
+    "Game/Assets/Game/Editor.meta",
+    "Game/Assets/Game/Editor/Build.meta",
+    "Game/Assets/Game/Generated.meta",
+    "Game/Assets/Game/Generated/TechnicalSpike.meta",
+    "Game/Assets/Game/Presentation.meta",
+    "Game/Assets/Game/Presentation/TechnicalSpike.meta",
+    "Game/Assets/Game/Tests.meta"
+  ],
+  "actual_paths": [],
+  "save_impact": {
+    "summary": "S1 additive: establish and then freeze physical envelope v1, root header v1, pointer v1, protected retention-anchor receipt v1, initial versioned synthetic sections, golden fixtures, and recovery tooling before user saves exist.",
+    "schema_changes": [
+      "Create envelope v1, root header v1, slot-pointer v1, protected retention-anchor receipt v1, a save-contract manifest, and independently versioned synthetic state/ownership sections."
+    ],
+    "migration_ids": [],
+    "compatibility": "No pre-existing player save. Acceptance freezes envelope/root/pointer/retention-anchor v1. Later packets may add a named section only with a manifest absence default, or must bump/migrate a touched section; they may not redefine these fixtures.",
+    "golden_scenarios": [
+      "SCN_SAVE_TRANSITIONS",
+      "SCN_MIGRATION_MATRIX",
+      "SCN_ROLLBACK_DRILL"
+    ]
+  },
+  "acceptance_tests": [
+    {
+      "id": "T-A1-QUARANTINE",
+      "kind": "manual",
+      "command": null,
+      "oracle": "A creator-controlled receipt binds the approved base, disposable worktree, non-writable trusted checkout/governance, restricted credentials, and manual diff/import boundary before implementation starts.",
+      "required": true,
+      "scenario_id": null
+    },
+    {
+      "id": "T-SPIKE-IDENTITY",
+      "kind": "integration",
+      "scenario_id": null,
+      "command": "python3 Tools/Validation/validate_wp0001_identity.py --packet docs/foundation-v0.1/work-packets/proposed/WP-0001.json --project Game --company LocalFoundationLab --product SashaAtomicLandPirate_WP0001 --bundle-id local.foundation.sashaatomiclandpirate.wp0001 --dev-profile wp0001-dev-v1 --test-profile wp0001-test-v1 --require-claim AUTHORIZE-TEMP-WP0001-IDENTITY --forbid-prior-root-discovery",
+      "oracle": "The same creator receipt that accepts WP-0001 binds AUTHORIZE-TEMP-WP0001-IDENTITY and exactly Company=LocalFoundationLab, Product=SashaAtomicLandPirate_WP0001, Bundle ID=local.foundation.sashaatomiclandpirate.wp0001, and isolated save profiles wp0001-dev-v1 and wp0001-test-v1; the tuple is temporary/non-shipping and performs no prior-root discovery or migration.",
+      "required": true
+    },
+    {
+      "id": "T-CLEAN-CLONE",
+      "kind": "integration",
+      "command": "python3 Tools/Build/verify_clean_clone.py --packet docs/foundation-v0.1/work-packets/proposed/WP-0001.json --profile wp0001-test-v1 --report BuildArtifacts/WP-0001/clean-clone.json",
+      "oracle": "A clean clone restores the exact tuple and compiles without undeclared installs.",
+      "required": true,
+      "scenario_id": null
+    },
+    {
+      "id": "T-BATCH-BUILD",
+      "kind": "integration",
+      "command": "python3 Tools/Build/run_wp0001.py --packet docs/foundation-v0.1/work-packets/proposed/WP-0001.json --configuration Release --architecture arm64 --launch-smoke --report BuildArtifacts/WP-0001/batch-build.json",
+      "oracle": "A trusted command runs tests, native ARM64 build, launch smoke, and report without manual Editor interaction.",
+      "required": true,
+      "scenario_id": null
+    },
+    {
+      "id": "T-STATE-CORE",
+      "kind": "scenario",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_SPIKE_SLICE --check canonical-authoritative-state --report BuildArtifacts/WP-0001/state-core.json",
+      "oracle": "Identical starting state, commands, allocator counters, and RNG keys produce the expected canonical authoritative state.",
+      "required": true,
+      "scenario_id": "SCN_SPIKE_SLICE"
+    },
+    {
+      "id": "T-DETERMINISM-VECTOR",
+      "kind": "scenario",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_SPIKE_SLICE --check determinism-vector --runtime pure-csharp --runtime unity-standalone --report BuildArtifacts/WP-0001/determinism-vector.json",
+      "oracle": "The pinned RNG algorithm/version/key/counter and canonical-state numeric policy produce identical committed vectors and hashes in the pure C# runner and Unity standalone player.",
+      "required": true,
+      "scenario_id": "SCN_SPIKE_SLICE"
+    },
+    {
+      "id": "T-SAVE-FAULTS",
+      "kind": "save",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_SAVE_TRANSITIONS --check save-fault-matrix --report BuildArtifacts/WP-0001/save-faults.json",
+      "oracle": "Fault injection at every save, pointer, retention-anchor, prefix-deletion, anchor-advance, and rollback-fork boundary preserves a valid protected-root-to-head chain; rollback inspects the source read-only, quarantines rejected descendants outside recovery scan, and continues only in generation 1 of a distinct slot_id/save_id lineage with completed lineage_provenance.",
+      "required": true,
+      "scenario_id": "SCN_SAVE_TRANSITIONS"
+    },
+    {
+      "id": "T-POINTER-RECOVERY",
+      "kind": "save",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_SAVE_TRANSITIONS --check pointer-recovery --report BuildArtifacts/WP-0001/pointer-recovery.json",
+      "oracle": "Pointer fields exactly match the selected envelope; every anchor embeds the immutable canonical validated_pointer plus its zero-field digest; missing, corrupt, stale, forked, and slot-mismatched pointers remain distinct; recovery selects only the unique terminal receipt of one non-forked anchor-supersession chain or a valid genesis head, while forks/multiple terminal tips require review and no pointer is silently repaired.",
+      "required": true,
+      "scenario_id": "SCN_SAVE_TRANSITIONS"
+    },
+    {
+      "id": "T-RETENTION-ANCHOR",
+      "kind": "save",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_SAVE_TRANSITIONS --check retention-anchor --report BuildArtifacts/WP-0001/retention-anchor.json",
+      "oracle": "An immutable anchor receipt embeds and validates the exact historical pointer preimage, repeated zero-field pointer digest, envelope/head cross-fields, and supersession link before pruning; coexisting ancestors on one chain remain valid, the unique terminal receipt is active, forks/multiple tips block, and no protected/descendant/unknown file is deleted.",
+      "required": true,
+      "scenario_id": "SCN_SAVE_TRANSITIONS"
+    },
+    {
+      "id": "T-SCHEMA-VALIDATOR",
+      "kind": "integration",
+      "command": "python3 Tools/Validation/validate_all.py --draft 2020-12 --fixtures Tests/Validation --report BuildArtifacts/WP-0001/schema-validation.json",
+      "oracle": "A pinned full Draft 2020-12 validator meta-validates every schema and passes positive/adversarial save/pointer/retention-anchor/packet/asset/scenario fixtures, including typed hashed starting-state/content/input artifacts, revisioned scenario paths, exact packet scenario pins, semantic uniqueness, bounds, totals, compatibility order, generation/anchor chains, and section totals.",
+      "required": true,
+      "scenario_id": null
+    },
+    {
+      "id": "T-OWNERSHIP",
+      "kind": "save",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_SAVE_TRANSITIONS --check ownership-transaction --report BuildArtifacts/WP-0001/ownership.json",
+      "oracle": "Crash/retry at every abstract handoff phase neither duplicates nor loses synthetic payload units, participant handles, tick budgets, condition deltas, or emitted event tokens; no gameplay semantics are selected.",
+      "required": true,
+      "scenario_id": "SCN_SAVE_TRANSITIONS"
+    },
+    {
+      "id": "T-DYNAMIC-CITY-RENDER",
+      "kind": "performance",
+      "command": "python3 Tools/ScenarioRunner/run.py SCN_SPIKE_SLICE --check dynamic-city-render --samples 600 --report BuildArtifacts/WP-0001/dynamic-city-render.json",
+      "oracle": "The hash-bound 12-archetype/36-LOD render content manifest and 600-sample technical camera loop reproduce the exact 512-instance geometry, material, texture, LOD, probe, shadow, submission, per-instance state, and budget oracles in SCN_SPIKE_SLICE; this camera is not a D-0022 decision.",
+      "required": true,
+      "scenario_id": "SCN_SPIKE_SLICE"
+    },
+    {
+      "id": "T-BLENDER-CALIBRATION",
+      "kind": "visual",
+      "command": "python3 Tools/AssetPipeline/validate_calibration.py --manifest ContentSource/Blender/Calibration/manifest.json --report BuildArtifacts/WP-0001/blender-calibration.json",
+      "oracle": "Calibration package preserves one-metre scale, pivot/axis, materials, LOD names, collider, socket, manifest, and provenance.",
+      "required": true,
+      "scenario_id": null
+    },
+    {
+      "id": "T-METAL-SOAK",
+      "kind": "performance",
+      "command": "python3 Tools/Build/run_metal_soak.py --scenario SCN_SPIKE_SLICE --minutes 30 --report BuildArtifacts/WP-0001/metal-soak.json",
+      "oracle": "Repeated build/launch and 30-minute GPU soak complete without unhandled Metal timeout/freeze; forced failure has a documented recovery path.",
+      "required": true,
+      "scenario_id": "SCN_SPIKE_SLICE"
+    },
+    {
+      "id": "T-ENGINE-DECISION",
+      "kind": "manual",
+      "command": null,
+      "oracle": "Evidence supports ratifying or superseding D-0013 and D-0033 without production content lock-in.",
+      "required": true,
+      "scenario_id": null
+    }
+  ],
+  "performance_metrics": [
+    {
+      "name": "whole-frame-p95",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "ms",
+      "baseline": null,
+      "target": 16.7,
+      "regression_ceiling": 16.7,
+      "comparator": "less-or-equal"
+    },
+    {
+      "name": "whole-frame-p99",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "ms",
+      "baseline": null,
+      "target": 25.0,
+      "regression_ceiling": 25.0,
+      "comparator": "less-or-equal"
+    },
+    {
+      "name": "unclassified-frames-over-50ms-max-per-10m-window",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "count",
+      "baseline": null,
+      "target": 2.0,
+      "regression_ceiling": 2.0,
+      "comparator": "less-or-equal"
+    },
+    {
+      "name": "cpu-main-thread-p95",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "ms",
+      "baseline": null,
+      "target": 12.0,
+      "regression_ceiling": 12.0,
+      "comparator": "less-than"
+    },
+    {
+      "name": "gpu-frame-time-p95",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "ms",
+      "baseline": null,
+      "target": 15.0,
+      "regression_ceiling": 15.0,
+      "comparator": "less-than"
+    },
+    {
+      "name": "simulation-tick-p95",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "ms",
+      "baseline": null,
+      "target": 4.0,
+      "regression_ceiling": 4.0,
+      "comparator": "less-than"
+    },
+    {
+      "name": "process-rss-peak",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "GB",
+      "baseline": null,
+      "target": 6.0,
+      "regression_ceiling": 6.0,
+      "comparator": "less-than"
+    },
+    {
+      "name": "tracked-metal-allocation-peak",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "GB",
+      "baseline": null,
+      "target": 3.5,
+      "regression_ceiling": 3.5,
+      "comparator": "less-than"
+    },
+    {
+      "name": "metal-timeout-or-freeze-count",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "count",
+      "baseline": null,
+      "target": 0.0,
+      "regression_ceiling": 0.0,
+      "comparator": "equal"
+    },
+    {
+      "name": "managed-allocation-p95",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "B/frame",
+      "baseline": null,
+      "target": 0.0,
+      "regression_ceiling": 0.0,
+      "comparator": "equal"
+    },
+    {
+      "name": "managed-allocation-average",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "B/frame",
+      "baseline": null,
+      "target": 1024.0,
+      "regression_ceiling": 1024.0,
+      "comparator": "less-than"
+    },
+    {
+      "name": "save-snapshot-pause-p95",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "ms",
+      "baseline": null,
+      "target": 50.0,
+      "regression_ceiling": 50.0,
+      "comparator": "less-than"
+    },
+    {
+      "name": "slice-save-complete-max",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "ms",
+      "baseline": null,
+      "target": 2000.0,
+      "regression_ceiling": 2000.0,
+      "comparator": "less-than"
+    },
+    {
+      "name": "load-to-interaction-max",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "ms",
+      "baseline": null,
+      "target": 3000.0,
+      "regression_ceiling": 3000.0,
+      "comparator": "less-than"
+    },
+    {
+      "name": "slice-save-size-max",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "MB",
+      "baseline": null,
+      "target": 25.0,
+      "regression_ceiling": 25.0,
+      "comparator": "less-than"
+    },
+    {
+      "name": "mode-transition-to-interaction-max",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "ms",
+      "baseline": null,
+      "target": 3000.0,
+      "regression_ceiling": 3000.0,
+      "comparator": "less-than"
+    },
+    {
+      "name": "high-priority-path-logistics-request-age-p99",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "ms",
+      "baseline": null,
+      "target": 500.0,
+      "regression_ceiling": 500.0,
+      "comparator": "less-than"
+    },
+    {
+      "name": "whole-frame-p95-degradation-30m",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "percent",
+      "baseline": null,
+      "target": 10.0,
+      "regression_ceiling": 10.0,
+      "comparator": "less-than"
+    },
+    {
+      "name": "retained-memory-growth-30m",
+      "scenario": "SCN_SPIKE_SLICE",
+      "unit": "percent",
+      "baseline": null,
+      "target": 5.0,
+      "regression_ceiling": 5.0,
+      "comparator": "less-than"
+    }
+  ],
+  "visual_evidence": [
+    {
+      "id": "VIS-CITY",
+      "type": "capture",
+      "uri": "pending://standalone-city-overview-profile",
+      "sha256": null
+    },
+    {
+      "id": "VIS-CALIBRATION",
+      "type": "contact-sheet",
+      "uri": "pending://blender-engine-calibration",
+      "sha256": null
+    },
+    {
+      "id": "VIS-SAVE-FAULT",
+      "type": "diagnostic-capture",
+      "uri": "pending://truncated-save-recovery",
+      "sha256": null
+    }
+  ],
+  "rollout": {
+    "required_autonomy": "A1",
+    "feature_flag": null,
+    "stages": [
+      "dev-only"
+    ],
+    "health_signals": [
+      {
+        "name": "required-test-failures",
+        "scenario": "SCN_WP0001_GATE",
+        "unit": "count",
+        "baseline": null,
+        "target": 0.0,
+        "regression_ceiling": 0.0,
+        "comparator": "less-or-equal"
+      },
+      {
+        "name": "save-invariant-violations",
+        "scenario": "SCN_SAVE_TRANSITIONS",
+        "unit": "count",
+        "baseline": null,
+        "target": 0.0,
+        "regression_ceiling": 0.0,
+        "comparator": "less-or-equal"
+      }
+    ],
+    "minimum_runs": 3,
+    "minimum_observation_hours": 0.5,
+    "required_approver": "creator"
+  },
+  "rollback": {
+    "target_build": null,
+    "triggers": [
+      "Any required acceptance test fails after the allowed bounded iteration.",
+      "Save generation or ownership transaction can duplicate, lose, or orphan state.",
+      "Known Mac/Metal issue lacks a credible mitigation or recovery path.",
+      "The exact engine/toolchain cannot reproduce from a clean clone."
+    ],
+    "steps": [
+      "Freeze the candidate and preserve logs, saves, seeds, metrics, and failing artifacts.",
+      "Do not promote D-0013/D-0033 or build production content against the candidate.",
+      "Release the worktree/reservations without rewriting foundation history.",
+      "Run an equivalent bounded Godot spike if a decisive Unity gate failed."
+    ],
+    "save_recovery": "No user saves exist. Preserve every golden generation and protected retention-anchor receipt, restore the last verified pointer, and never mutate a failing fixture in place.",
+    "drill_required": true,
+    "drill_evidence": []
+  },
+  "evidence_manifest": [],
+  "candidate_evidence": {
+    "diff_artifact_id": null,
+    "artifact_manifest_id": null,
+    "command_log_artifact_id": null,
+    "known_limits": []
+  },
+  "verification": {
+    "status": "not-run",
+    "verifier": null,
+    "gate_results": [],
+    "evidence_ids": []
+  },
+  "release_id": null,
+  "status_events": [
+    {
+      "event_id": "WPE-WP0001-PROPOSED",
+      "from": null,
+      "to": "proposed",
+      "actor": "foundation-designer",
+      "at": "2026-07-15T00:00:00-07:00",
+      "receipt_id": null
+    }
+  ],
+  "scenario_pins": [
+    {
+      "id": "SCN_MIGRATION_MATRIX",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_MIGRATION_MATRIX/r1.json",
+      "sha256": "4bf7103dbb2c6e74871775edb7fccc7f06ce3678158f5c7fafd64a4b520bb9ce",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_MIGRATION_MATRIX/r1.fixture.json",
+      "fixture_manifest_sha256": "9666325a58adec21c8cb6eceb686b4cc814919b2b755b8a4e4bdd4448594e67e"
+    },
+    {
+      "id": "SCN_ROLLBACK_DRILL",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_ROLLBACK_DRILL/r1.json",
+      "sha256": "47f3eee3f7f2b6be549a8bf1344bbb0135e73ff1ae0acf8c09b4ce5bbd5fc5f0",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_ROLLBACK_DRILL/r1.fixture.json",
+      "fixture_manifest_sha256": "d426d3b52758c3bd8ebda57cca6ef5c4e8f1b6c462ca578d5dc79e8c514c7378"
+    },
+    {
+      "id": "SCN_SAVE_TRANSITIONS",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_SAVE_TRANSITIONS/r1.json",
+      "sha256": "66bc9b4a35b6fe28f9231bb64a29a148af852e5428025a4e49952bacc648090b",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_SAVE_TRANSITIONS/r1.fixture.json",
+      "fixture_manifest_sha256": "405d1282e16dde2c5adbd6f18921be34405450b3534f4293f1c29e3f2f0a4fc0"
+    },
+    {
+      "id": "SCN_SPIKE_SLICE",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_SPIKE_SLICE/r1.json",
+      "sha256": "7b84129a3d696becb06fab37a91ddcc5bca8914f3aa3e97c076df77f9c79480b",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_SPIKE_SLICE/r1.fixture.json",
+      "fixture_manifest_sha256": "e8a158aa4d4f1d1fc1a8f1d73b592824a7c05aa66ecf16ddc32deed6a39e9095"
+    },
+    {
+      "id": "SCN_WP0001_GATE",
+      "revision": 1,
+      "path": "scenarios/definitions/SCN_WP0001_GATE/r1.json",
+      "sha256": "2efcc4d1cf1eaefa7c181683a5c2bd44ad61d5fcfabb3bb16be6ddfa7c6d88e7",
+      "fixture_manifest_path": "scenarios/fixtures/SCN_WP0001_GATE/r1.fixture.json",
+      "fixture_manifest_sha256": "c60a0460f2f7dd46c3fc4ff3090c325aa3bc619f359515571fdd668931a965fe"
+    }
+  ]
+}

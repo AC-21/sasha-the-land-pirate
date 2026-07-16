@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_PREPARATION_MODULE_MATRIX",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "last-bearing-matrix-state-v1",
+      "path": "scenarios/artifacts/SCN_PREPARATION_MODULE_MATRIX/r1/starting-state.json",
+      "sha256": "fcd5a6878706a5c6897cc6dd09418e4c7da2a62457159ce3318b7f392738aab9",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "last-bearing-graybox-content-v1",
+      "path": "scenarios/artifacts/SCN_PREPARATION_MODULE_MATRIX/r1/content-set.json",
+      "sha256": "585e7d3cba121cb3087c50d38137dc72acc170cfd24523efb63de7b487656680",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "preparation-module-four-cases-v1",
+      "path": "scenarios/artifacts/SCN_PREPARATION_MODULE_MATRIX/r1/input-script.json",
+      "sha256": "0e02366bb0cdc350d797196072c79b0114559e801edf18a2367b694162f465d1",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

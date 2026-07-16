@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "content-set",
+  "semantic_id": "no-runtime-content-v1",
+  "scenario_id": "SCN_WP0001_GATE",
+  "scenario_revision": 1,
+  "canonicalization": "json-utf8-explicit-definition-order-v1",
+  "definitions": []
+}

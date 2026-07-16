@@ -1,0 +1,435 @@
+{
+  "schema_version": 2,
+  "id": "SCN_COLONY_COMPOSITION_MATRIX",
+  "revision": 1,
+  "kind": "gameplay",
+  "title": "Conditional differentiated human, robot, and mixed colony matrix",
+  "purpose": "Conditionally under open D-0039 / MECHANICAL-COMPOSITIONS, run human-only, robot-only, and mixed cases against one exact bottleneck: restore workshop power, repair the failing water turbine bearing, and recover water service. This proves differentiated mechanics only after that creator claim; D-0037 alone authorizes composition availability, not these differences.",
+  "applies_to_packets": [
+    "WP-0002"
+  ],
+  "fixture": {
+    "world_seed": "2010",
+    "starting_tick": "0",
+    "tick_rate_hz": 10,
+    "warmup_ticks": 0,
+    "duration_ticks": 27000,
+    "warmup_seconds": 0,
+    "duration_seconds": 2700,
+    "starting_state_id": "last-bearing-composition-baseline-v1",
+    "content_set_id": "last-bearing-graybox-content-v1",
+    "input_script_id": "composition-matrix-three-cases-v1",
+    "fixture_manifest": {
+      "path": "scenarios/fixtures/SCN_COLONY_COMPOSITION_MATRIX/r1.fixture.json",
+      "sha256": "bd60681d1108fae92a990f37eb38fd3ee9a379d96257e0bcbcabe5a15b48b8f0"
+    }
+  },
+  "counts": {
+    "state": {
+      "authoritative_records": 78,
+      "save_sections": 9,
+      "content_definitions": 20,
+      "transactions": 3,
+      "save_generations": 6
+    },
+    "entities": {
+      "total": 8,
+      "settlements": 1,
+      "buildings": 4,
+      "households": 1,
+      "specialists": 0,
+      "robots": 1,
+      "vehicles": 0,
+      "factions": 0,
+      "crises": 1,
+      "expeditions": 0
+    },
+    "objects": {
+      "placed_total": 0,
+      "dynamic": 0,
+      "static": 0,
+      "lod0": 0,
+      "lod1": 0,
+      "lod2": 0
+    },
+    "lights": {
+      "total": 0,
+      "directional": 0,
+      "point": 0,
+      "spot": 0,
+      "shadowed": 0
+    },
+    "crowd": {
+      "authoritative_people": 1,
+      "visible_agents": 2,
+      "offscreen_people": 0
+    },
+    "inputs": {
+      "scripted_commands": 90,
+      "keyboard_events": 0,
+      "controller_events": 0,
+      "pointer_events": 0,
+      "fault_injections": 0
+    }
+  },
+  "parameters": [
+    {
+      "name": "case-order",
+      "value": "human-only,robot-only,mixed",
+      "unit": null
+    },
+    {
+      "name": "counts-semantics",
+      "value": "runner-envelope; authoritative counts live per case",
+      "unit": null
+    },
+    {
+      "name": "bottleneck",
+      "value": "workshop-power+water-turbine-bearing-repair+water-service-restoration",
+      "unit": null
+    },
+    {
+      "name": "mechanical-composition-authorization",
+      "value": "open-D-0039:MECHANICAL-COMPOSITIONS",
+      "unit": null
+    },
+    {
+      "name": "cross-with-preparation-module-matrix",
+      "value": false,
+      "unit": null
+    }
+  ],
+  "oracles": [
+    {
+      "id": "ORC_COMPOSITION_CASES",
+      "subject": "matrix-cases-completed",
+      "operator": "equal",
+      "expected": 3,
+      "unit": "cases"
+    },
+    {
+      "id": "ORC_COMPOSITION_AUTH",
+      "subject": "mechanical-composition-authorization-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_COMPOSITION_INVENTORY",
+      "subject": "negative-inventory-events",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_COMPOSITION_ORPHANS",
+      "subject": "orphan-staffing-records",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_COMPOSITION_SAVE",
+      "subject": "composition-save-roundtrip-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_COMPOSITION_SUBSTITUTION",
+      "subject": "unrequested-staff-substitutions",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_COMPOSITION_IDENTITY",
+      "subject": "worker-identity-losses",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    }
+  ],
+  "cases": [
+    {
+      "id": "human-only",
+      "counts": {
+        "state": {
+          "authoritative_records": 72,
+          "save_sections": 9,
+          "content_definitions": 20,
+          "transactions": 1,
+          "save_generations": 2
+        },
+        "entities": {
+          "total": 7,
+          "settlements": 1,
+          "buildings": 4,
+          "households": 1,
+          "specialists": 0,
+          "robots": 0,
+          "vehicles": 0,
+          "factions": 0,
+          "crises": 1,
+          "expeditions": 0
+        },
+        "objects": {
+          "placed_total": 0,
+          "dynamic": 0,
+          "static": 0,
+          "lod0": 0,
+          "lod1": 0,
+          "lod2": 0
+        },
+        "lights": {
+          "total": 0,
+          "directional": 0,
+          "point": 0,
+          "spot": 0,
+          "shadowed": 0
+        },
+        "crowd": {
+          "authoritative_people": 1,
+          "visible_agents": 1,
+          "offscreen_people": 0
+        },
+        "inputs": {
+          "scripted_commands": 30,
+          "keyboard_events": 0,
+          "controller_events": 0,
+          "pointer_events": 0,
+          "fault_injections": 0
+        }
+      },
+      "parameters": [
+        {
+          "name": "human-cohorts",
+          "value": 1,
+          "unit": "cohorts"
+        },
+        {
+          "name": "robot-units",
+          "value": 0,
+          "unit": "units"
+        },
+        {
+          "name": "ablation",
+          "value": "food-water-rest-withheld",
+          "unit": null
+        }
+      ],
+      "oracles": [
+        {
+          "id": "ORC_COMP_H_COMPLETE",
+          "subject": "human-only.bottleneck-resolved",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_COMP_H_DEP",
+          "subject": "human-only.food-water-rest-ablation-blocks-completion",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_COMP_H_CAP",
+          "subject": "human-only.human-repair-capability-enables-completion",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        }
+      ]
+    },
+    {
+      "id": "robot-only",
+      "counts": {
+        "state": {
+          "authoritative_records": 70,
+          "save_sections": 9,
+          "content_definitions": 20,
+          "transactions": 1,
+          "save_generations": 2
+        },
+        "entities": {
+          "total": 7,
+          "settlements": 1,
+          "buildings": 4,
+          "households": 0,
+          "specialists": 0,
+          "robots": 1,
+          "vehicles": 0,
+          "factions": 0,
+          "crises": 1,
+          "expeditions": 0
+        },
+        "objects": {
+          "placed_total": 0,
+          "dynamic": 0,
+          "static": 0,
+          "lod0": 0,
+          "lod1": 0,
+          "lod2": 0
+        },
+        "lights": {
+          "total": 0,
+          "directional": 0,
+          "point": 0,
+          "spot": 0,
+          "shadowed": 0
+        },
+        "crowd": {
+          "authoritative_people": 0,
+          "visible_agents": 1,
+          "offscreen_people": 0
+        },
+        "inputs": {
+          "scripted_commands": 30,
+          "keyboard_events": 0,
+          "controller_events": 0,
+          "pointer_events": 0,
+          "fault_injections": 0
+        }
+      },
+      "parameters": [
+        {
+          "name": "human-cohorts",
+          "value": 0,
+          "unit": "cohorts"
+        },
+        {
+          "name": "robot-units",
+          "value": 1,
+          "unit": "units"
+        },
+        {
+          "name": "ablation",
+          "value": "power-maintenance-withheld",
+          "unit": null
+        }
+      ],
+      "oracles": [
+        {
+          "id": "ORC_COMP_R_COMPLETE",
+          "subject": "robot-only.bottleneck-resolved",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_COMP_R_DEP",
+          "subject": "robot-only.power-maintenance-ablation-blocks-completion",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_COMP_R_CAP",
+          "subject": "robot-only.robot-tool-capability-enables-completion",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        }
+      ]
+    },
+    {
+      "id": "mixed",
+      "counts": {
+        "state": {
+          "authoritative_records": 78,
+          "save_sections": 9,
+          "content_definitions": 20,
+          "transactions": 1,
+          "save_generations": 2
+        },
+        "entities": {
+          "total": 8,
+          "settlements": 1,
+          "buildings": 4,
+          "households": 1,
+          "specialists": 0,
+          "robots": 1,
+          "vehicles": 0,
+          "factions": 0,
+          "crises": 1,
+          "expeditions": 0
+        },
+        "objects": {
+          "placed_total": 0,
+          "dynamic": 0,
+          "static": 0,
+          "lod0": 0,
+          "lod1": 0,
+          "lod2": 0
+        },
+        "lights": {
+          "total": 0,
+          "directional": 0,
+          "point": 0,
+          "spot": 0,
+          "shadowed": 0
+        },
+        "crowd": {
+          "authoritative_people": 1,
+          "visible_agents": 2,
+          "offscreen_people": 0
+        },
+        "inputs": {
+          "scripted_commands": 30,
+          "keyboard_events": 0,
+          "controller_events": 0,
+          "pointer_events": 0,
+          "fault_injections": 0
+        }
+      },
+      "parameters": [
+        {
+          "name": "human-cohorts",
+          "value": 1,
+          "unit": "cohorts"
+        },
+        {
+          "name": "robot-units",
+          "value": 1,
+          "unit": "units"
+        },
+        {
+          "name": "shared-bottleneck",
+          "value": "workshop-power",
+          "unit": null
+        }
+      ],
+      "oracles": [
+        {
+          "id": "ORC_COMP_M_COMPLETE",
+          "subject": "mixed.bottleneck-resolved",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_COMP_M_ASSIGN",
+          "subject": "mixed.complementary-assignment-used",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_COMP_M_POWER",
+          "subject": "mixed.shared-power-choice-changes-plan",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_COMP_M_UNIQUE",
+          "subject": "mixed.choice-not-present-in-single-composition-cases",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        }
+      ]
+    }
+  ]
+}

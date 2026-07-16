@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_WP0001_GATE",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "no-runtime-state-v1",
+      "path": "scenarios/artifacts/SCN_WP0001_GATE/r1/starting-state.json",
+      "sha256": "368adf70cc918b81ca907ffd9a5a6aff89a698f10bc72301595eaee27acd344d",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "no-runtime-content-v1",
+      "path": "scenarios/artifacts/SCN_WP0001_GATE/r1/content-set.json",
+      "sha256": "aa301c0897592fff70196e1889685ef38a0a691ae593ccce2d33916da9c44fd3",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "aggregate-wp0001-evidence-v1",
+      "path": "scenarios/artifacts/SCN_WP0001_GATE/r1/input-script.json",
+      "sha256": "c2fa9d1b864db0840747de667393dbbaa1b12f6c1492163de24c0930664dba35",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

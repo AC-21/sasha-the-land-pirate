@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/save-slot-pointer.schema.json",
+  "title": "Save slot current-generation pointer v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "magic",
+    "pointer_format_version",
+    "product_id",
+    "slot_id",
+    "generation",
+    "save_id",
+    "generation_digest",
+    "previous_generation",
+    "previous_generation_digest",
+    "cas_token",
+    "updated_at",
+    "pointer_digest"
+  ],
+  "properties": {
+    "magic": { "const": "WASTELAND_SLOT_POINTER" },
+    "pointer_format_version": { "const": 1 },
+    "product_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "slot_id": { "type": "string", "format": "uuid" },
+    "generation": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "save_id": {
+      "description": "Exact stable lineage save_id from the selected generation header.",
+      "type": "string",
+      "format": "uuid"
+    },
+    "generation_digest": {
+      "description": "Exact whole_envelope_digest from the selected generation header.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "previous_generation": {
+      "description": "Selected generation minus one when its header has a predecessor digest, otherwise null for genesis.",
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "previous_generation_digest": {
+      "description": "Exact previous_generation_digest from the selected generation header.",
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "cas_token": {
+      "description": "Exact cas_token from the selected generation header.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "updated_at": {
+      "description": "Exact updated_at value from the selected generation header.",
+      "type": "string",
+      "format": "date-time",
+      "maxLength": 64
+    },
+    "pointer_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

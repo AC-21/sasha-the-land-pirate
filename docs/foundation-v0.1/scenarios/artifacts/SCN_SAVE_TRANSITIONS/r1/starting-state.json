@@ -1,0 +1,552 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "starting-state",
+  "semantic_id": "ownership-transition-state-v1",
+  "scenario_id": "SCN_SAVE_TRANSITIONS",
+  "scenario_revision": 1,
+  "world_seed": "1002",
+  "starting_tick": "600",
+  "canonicalization": "json-utf8-explicit-record-order-v1",
+  "canonical_entities": [
+    {
+      "id": "world:1002:base:settlement:0001",
+      "type": "settlement",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "name": "Settlement 1",
+        "inventory": {
+          "water": 120,
+          "food": 90,
+          "parts": 24,
+          "fuel": 18
+        },
+        "power_capacity": 40,
+        "power_load": 26
+      }
+    },
+    {
+      "id": "world:1002:base:building:0001",
+      "type": "building",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "water-turbine",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1002:base:building:0002",
+      "type": "building",
+      "ordinal": 2,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "workshop",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1002:base:household:0001",
+      "type": "household",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "member_count": 1,
+        "food_milli": 1000,
+        "water_milli": 1000,
+        "rest_milli": 1000,
+        "capabilities": [
+          "general-labor",
+          "bearing-service"
+        ]
+      }
+    },
+    {
+      "id": "world:1002:base:specialist:0001",
+      "type": "specialist",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "name": "Specialist 1",
+        "capabilities": [
+          "precision-repair",
+          "expedition-lead"
+        ],
+        "assignment": "available"
+      }
+    },
+    {
+      "id": "world:1002:base:vehicle:0001",
+      "type": "vehicle",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "chassis": "utility-scout-r1",
+        "fuel_milli": 1000,
+        "cargo_capacity": 12,
+        "modules": [],
+        "status": "at-home"
+      }
+    },
+    {
+      "id": "world:1002:base:faction:0001",
+      "type": "faction",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "content_id": "faction-01",
+        "intent": "telegraphed-depot-claim",
+        "claim_progress_milli": 0,
+        "trust": 0,
+        "grievance": 0
+      }
+    },
+    {
+      "id": "world:1002:base:crisis:0001",
+      "type": "crisis",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "kind": "dust-front",
+        "forecast_ticks": 6000,
+        "severity_milli": 400,
+        "status": "forecast"
+      }
+    },
+    {
+      "id": "world:1002:base:expedition:0001",
+      "type": "expedition",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "status": "prepared",
+        "route_id": "route-last-bearing",
+        "cargo": {},
+        "elapsed_ticks": 0,
+        "transaction_phase": "prepared"
+      }
+    }
+  ],
+  "canonical_state_records": [
+    {
+      "id": "scn_save_transitions:base:state:00001",
+      "domain": "world",
+      "ordinal": 1,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 97,
+        "tick_offset": 0,
+        "parameter_binding": {
+          "transition-phases": 6,
+          "save-checkpoints-per-phase": 1,
+          "writers": 2,
+          "retention-anchor-crash-boundaries": 8,
+          "anchor-advance-crash-boundaries": 8,
+          "historical-pointer-binding": "embedded-canonical-pointer-v1",
+          "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+          "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+          "coexisting-anchor-receipts-on-valid-chain": 3,
+          "injected-anchor-supersession-forks": 1,
+          "injected-multiple-terminal-tip-sets": 1,
+          "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+        }
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00002",
+      "domain": "settlement",
+      "ordinal": 2,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 194,
+        "tick_offset": 1,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00003",
+      "domain": "population",
+      "ordinal": 3,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 291,
+        "tick_offset": 2,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00004",
+      "domain": "logistics",
+      "ordinal": 4,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 388,
+        "tick_offset": 3,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00005",
+      "domain": "vehicle",
+      "ordinal": 5,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 485,
+        "tick_offset": 4,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00006",
+      "domain": "expedition",
+      "ordinal": 6,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 582,
+        "tick_offset": 5,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00007",
+      "domain": "faction",
+      "ordinal": 7,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 679,
+        "tick_offset": 6,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00008",
+      "domain": "crisis",
+      "ordinal": 8,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 776,
+        "tick_offset": 7,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00009",
+      "domain": "audit",
+      "ordinal": 9,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 873,
+        "tick_offset": 8,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00010",
+      "domain": "save",
+      "ordinal": 10,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 970,
+        "tick_offset": 9,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00011",
+      "domain": "world",
+      "ordinal": 11,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1067,
+        "tick_offset": 10,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00012",
+      "domain": "settlement",
+      "ordinal": 12,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1164,
+        "tick_offset": 11,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00013",
+      "domain": "population",
+      "ordinal": 13,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1261,
+        "tick_offset": 12,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00014",
+      "domain": "logistics",
+      "ordinal": 14,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1358,
+        "tick_offset": 13,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00015",
+      "domain": "vehicle",
+      "ordinal": 15,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1455,
+        "tick_offset": 14,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00016",
+      "domain": "expedition",
+      "ordinal": 16,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1552,
+        "tick_offset": 15,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00017",
+      "domain": "faction",
+      "ordinal": 17,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1649,
+        "tick_offset": 16,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00018",
+      "domain": "crisis",
+      "ordinal": 18,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1746,
+        "tick_offset": 17,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00019",
+      "domain": "audit",
+      "ordinal": 19,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1843,
+        "tick_offset": 18,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00020",
+      "domain": "save",
+      "ordinal": 20,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1940,
+        "tick_offset": 19,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00021",
+      "domain": "world",
+      "ordinal": 21,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2037,
+        "tick_offset": 20,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00022",
+      "domain": "settlement",
+      "ordinal": 22,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2134,
+        "tick_offset": 21,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00023",
+      "domain": "population",
+      "ordinal": 23,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2231,
+        "tick_offset": 22,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00024",
+      "domain": "logistics",
+      "ordinal": 24,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2328,
+        "tick_offset": 23,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00025",
+      "domain": "vehicle",
+      "ordinal": 25,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2425,
+        "tick_offset": 24,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00026",
+      "domain": "expedition",
+      "ordinal": 26,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2522,
+        "tick_offset": 25,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00027",
+      "domain": "faction",
+      "ordinal": 27,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2619,
+        "tick_offset": 26,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00028",
+      "domain": "crisis",
+      "ordinal": 28,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2716,
+        "tick_offset": 27,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00029",
+      "domain": "audit",
+      "ordinal": 29,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2813,
+        "tick_offset": 28,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00030",
+      "domain": "save",
+      "ordinal": 30,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2910,
+        "tick_offset": 29,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00031",
+      "domain": "world",
+      "ordinal": 31,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3007,
+        "tick_offset": 30,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_save_transitions:base:state:00032",
+      "domain": "settlement",
+      "ordinal": 32,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3104,
+        "tick_offset": 31,
+        "parameter_binding": {}
+      }
+    }
+  ],
+  "case_states": []
+}

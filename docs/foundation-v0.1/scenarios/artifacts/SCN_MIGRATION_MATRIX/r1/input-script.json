@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "input-script",
+  "semantic_id": "migration-matrix-v1",
+  "scenario_id": "SCN_MIGRATION_MATRIX",
+  "scenario_revision": 1,
+  "tick_rate_hz": 10,
+  "warmup_ticks": 0,
+  "duration_ticks": 0,
+  "normative_execution": {
+    "ordering": "ascending (tick,sequence); sequence is unique and contiguous from zero",
+    "fixed_tick_rule": "apply every event whose tick equals the current authoritative tick before advancing systems",
+    "case_isolation": "each case begins from its matching case_state; no state is shared between cases",
+    "unknown_command_rule": "reject scenario before first tick",
+    "integer_rule": "all *_milli values use signed integer arithmetic with checked overflow",
+    "autonomous_tick_rule": "world, settlement, faction, crisis, and expedition systems advance once per declared fixed tick even when events is empty",
+    "target_resolution_rule": "resolve every scripted command payload.target by exact logical_target_id before tick zero; canonical bindings select resolved_id in the base run and the matching case_resolutions entry in a case run; scenario selectors resolve only by their declared selector_kind and selector_value",
+    "unresolved_target_rule": "reject the scenario before tick zero on a missing or duplicate binding, an unreferenced binding, an unknown selector, a missing case resolution, a kind mismatch, or an ID absent from the hash-bound starting-state or content-set artifact; never infer, fabricate, or fall back",
+    "target_binding_hash_rule": "target_bindings_sha256 is SHA-256 of canonical JSON for the complete ordered target_bindings array"
+  },
+  "events": [
+    {
+      "sequence": 0,
+      "tick": 0,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectNeed",
+        "command_id": "SCN_MIGRATION_MATRIX:cmd:00001",
+        "target": "scn_migration_matrix:target:0001",
+        "arguments": {
+          "ordinal": 1,
+          "bindings": {
+            "historical-fixtures": 3,
+            "migration-runs-per-fixture": 2
+          }
+        }
+      }
+    },
+    {
+      "sequence": 1,
+      "tick": 0,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignResident",
+        "command_id": "SCN_MIGRATION_MATRIX:cmd:00002",
+        "target": "scn_migration_matrix:target:0002",
+        "arguments": {
+          "ordinal": 2,
+          "bindings": {
+            "historical-fixtures": 3,
+            "migration-runs-per-fixture": 2
+          }
+        }
+      }
+    },
+    {
+      "sequence": 2,
+      "tick": 0,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PlaceOrActivateBuilding",
+        "command_id": "SCN_MIGRATION_MATRIX:cmd:00003",
+        "target": "scn_migration_matrix:target:0003",
+        "arguments": {
+          "ordinal": 3,
+          "bindings": {
+            "historical-fixtures": 3,
+            "migration-runs-per-fixture": 2
+          }
+        }
+      }
+    },
+    {
+      "sequence": 3,
+      "tick": 0,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetCivicPriority",
+        "command_id": "SCN_MIGRATION_MATRIX:cmd:00004",
+        "target": "scn_migration_matrix:target:0004",
+        "arguments": {
+          "ordinal": 4,
+          "bindings": {
+            "historical-fixtures": 3,
+            "migration-runs-per-fixture": 2
+          }
+        }
+      }
+    },
+    {
+      "sequence": 4,
+      "tick": 0,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "CommitExpedition",
+        "command_id": "SCN_MIGRATION_MATRIX:cmd:00005",
+        "target": "scn_migration_matrix:target:0005",
+        "arguments": {
+          "ordinal": 5,
+          "bindings": {
+            "historical-fixtures": 3,
+            "migration-runs-per-fixture": 2
+          }
+        }
+      }
+    },
+    {
+      "sequence": 5,
+      "tick": 0,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoute",
+        "command_id": "SCN_MIGRATION_MATRIX:cmd:00006",
+        "target": "scn_migration_matrix:target:0006",
+        "arguments": {
+          "ordinal": 6,
+          "bindings": {
+            "historical-fixtures": 3,
+            "migration-runs-per-fixture": 2
+          }
+        }
+      }
+    }
+  ],
+  "case_events": [],
+  "oracle_observations": [
+    {
+      "sequence": 0,
+      "tick": 0,
+      "subject": "unresolved-fixtures",
+      "selector": "metrics/unresolved-fixtures",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_MIGRATION_UNRESOLVED"
+    },
+    {
+      "sequence": 1,
+      "tick": 0,
+      "subject": "canonical-state-mismatches",
+      "selector": "metrics/canonical-state-mismatches",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_MIGRATION_STATE"
+    },
+    {
+      "sequence": 2,
+      "tick": 0,
+      "subject": "non-idempotent-migrations",
+      "selector": "metrics/non-idempotent-migrations",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_MIGRATION_IDEMPOTENCY"
+    },
+    {
+      "sequence": 3,
+      "tick": 0,
+      "subject": "processed-fixtures",
+      "selector": "metrics/processed-fixtures",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_MIGRATION_INPUTS"
+    }
+  ],
+  "target_bindings_sha256": "8f4201b6a37b79f1e8672ddd4e7cfac632b755881abf391a36119e12a98a7c6c",
+  "target_bindings": [
+    {
+      "logical_target_id": "scn_migration_matrix:target:0001",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_migration_matrix:base:state:00009",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_migration_matrix:target:0002",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_migration_matrix:base:state:00019",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_migration_matrix:target:0003",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_migration_matrix:base:state:00029",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_migration_matrix:target:0004",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_migration_matrix:base:state:00039",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_migration_matrix:target:0005",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_migration_matrix:base:state:00049",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_migration_matrix:target:0006",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_migration_matrix:base:state:00059",
+      "case_resolutions": []
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "schema_version": 2,
+  "id": "SCN_ECONOMY_24H",
+  "revision": 1,
+  "kind": "gameplay",
+  "title": "Twenty-four-hour headless settlement economy",
+  "purpose": "Run the bounded Last Bearing settlement for exactly twenty-four simulation hours without player rescue to expose negative stocks, unexplained stalls, orphan state, and non-terminating crises.",
+  "applies_to_packets": [
+    "WP-0002"
+  ],
+  "fixture": {
+    "world_seed": "3002",
+    "starting_tick": "0",
+    "tick_rate_hz": 10,
+    "warmup_ticks": 0,
+    "duration_ticks": 864000,
+    "warmup_seconds": 0,
+    "duration_seconds": 86400,
+    "starting_state_id": "last-bearing-balanced-town-v1",
+    "content_set_id": "last-bearing-graybox-content-v1",
+    "input_script_id": "economy-no-rescue-24h-v1",
+    "fixture_manifest": {
+      "path": "scenarios/fixtures/SCN_ECONOMY_24H/r1.fixture.json",
+      "sha256": "c45e632d233e919e42b0aa9ffd269271e7b3cbb0ea6a78fddbd535f360189d8e"
+    }
+  },
+  "counts": {
+    "state": {
+      "authoritative_records": 180,
+      "save_sections": 0,
+      "content_definitions": 32,
+      "transactions": 0,
+      "save_generations": 0
+    },
+    "entities": {
+      "total": 22,
+      "settlements": 1,
+      "buildings": 10,
+      "households": 6,
+      "specialists": 1,
+      "robots": 1,
+      "vehicles": 1,
+      "factions": 1,
+      "crises": 1,
+      "expeditions": 0
+    },
+    "objects": {
+      "placed_total": 0,
+      "dynamic": 0,
+      "static": 0,
+      "lod0": 0,
+      "lod1": 0,
+      "lod2": 0
+    },
+    "lights": {
+      "total": 0,
+      "directional": 0,
+      "point": 0,
+      "spot": 0,
+      "shadowed": 0
+    },
+    "crowd": {
+      "authoritative_people": 30,
+      "visible_agents": 0,
+      "offscreen_people": 30
+    },
+    "inputs": {
+      "scripted_commands": 1,
+      "keyboard_events": 0,
+      "controller_events": 0,
+      "pointer_events": 0,
+      "fault_injections": 0
+    }
+  },
+  "parameters": [
+    {
+      "name": "simulation-hours",
+      "value": 24,
+      "unit": "hours"
+    },
+    {
+      "name": "player-interventions",
+      "value": 0,
+      "unit": "count"
+    },
+    {
+      "name": "production-chains",
+      "value": 3,
+      "unit": "chains"
+    }
+  ],
+  "oracles": [
+    {
+      "id": "ORC_ECONOMY_NEGATIVE",
+      "subject": "negative-resource-events",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ECONOMY_ORPHANS",
+      "subject": "orphan-reference-events",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ECONOMY_STALLS",
+      "subject": "unexplained-stall-events",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ECONOMY_CRISIS",
+      "subject": "non-terminating-crises",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_ECONOMY_INVARIANTS",
+      "subject": "simulation-invariant-violations",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    }
+  ]
+}

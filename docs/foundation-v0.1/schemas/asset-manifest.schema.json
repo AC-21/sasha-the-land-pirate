@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/asset-manifest.schema.json",
+  "title": "Game asset manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asset_id",
+    "version",
+    "status",
+    "class",
+    "source_file",
+    "source_sha256",
+    "source_bytes",
+    "generated_artifacts",
+    "units",
+    "pivot_rule",
+    "forward_axis",
+    "lod_triangles",
+    "materials",
+    "textures",
+    "sockets",
+    "colliders",
+    "provenance",
+    "validation"
+  ],
+  "properties": {
+    "asset_id": { "type": "string", "pattern": "^(bld|veh|char|prop|env|kit|vfx)_[a-z0-9_]+$" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "status": { "enum": ["brief", "blockout", "quarantined", "review", "accepted", "rejected", "retired"] },
+    "class": { "enum": ["building", "vehicle", "character", "prop", "environment", "kit", "vfx"] },
+    "source_file": { "$ref": "#/$defs/safePath" },
+    "source_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "source_bytes": { "type": ["integer", "null"], "minimum": 1, "maximum": 10737418240 },
+    "generated_artifacts": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
+    "units": { "const": "meters" },
+    "pivot_rule": { "type": "string", "minLength": 1 },
+    "forward_axis": { "type": "string", "minLength": 1 },
+    "lod_triangles": {
+      "type": "object",
+      "propertyNames": { "pattern": "^lod[0-9]+$" },
+      "additionalProperties": { "type": "integer", "minimum": 0 },
+      "minProperties": 1
+    },
+    "materials": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "textures": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/artifact" } },
+    "sockets": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "colliders": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ai_assisted", "creator", "source_licenses", "ship_clearance", "approval_receipt_id"],
+      "properties": {
+        "ai_assisted": { "type": "boolean" },
+        "tool": { "type": ["string", "null"] },
+        "model_version": { "type": ["string", "null"] },
+        "account_tier": { "type": ["string", "null"] },
+        "generated_on": { "type": ["string", "null"], "format": "date" },
+        "prompt_record": { "oneOf": [{ "$ref": "#/$defs/artifact" }, { "type": "null" }] },
+        "raw_output": { "oneOf": [{ "$ref": "#/$defs/artifact" }, { "type": "null" }] },
+        "terms_artifact": { "oneOf": [{ "$ref": "#/$defs/artifact" }, { "type": "null" }] },
+        "creator": { "type": "string", "minLength": 1 },
+        "source_licenses": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/artifact" } },
+        "human_modifications": { "type": "array", "items": { "type": "string", "minLength": 1 }, "default": [] },
+        "ship_clearance": { "enum": ["prototype-only", "pending", "ship-cleared", "rejected"] },
+        "approval_receipt_id": { "type": ["string", "null"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "ai_assisted": { "const": true } } },
+          "then": {
+            "properties": {
+              "tool": { "type": "string", "minLength": 1 },
+              "model_version": { "type": "string", "minLength": 1 },
+              "account_tier": { "type": "string", "minLength": 1 },
+              "generated_on": { "type": "string", "format": "date" },
+              "prompt_record": { "$ref": "#/$defs/artifact" },
+              "raw_output": { "$ref": "#/$defs/artifact" },
+              "terms_artifact": { "$ref": "#/$defs/artifact" }
+            }
+          }
+        }
+      ]
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["report", "engine_build", "camera_sheet", "art_approved", "approved_by", "approval_receipt_id"],
+      "properties": {
+        "report": { "oneOf": [{ "$ref": "#/$defs/artifact" }, { "type": "null" }] },
+        "engine_build": { "type": ["string", "null"] },
+        "camera_sheet": { "oneOf": [{ "$ref": "#/$defs/artifact" }, { "type": "null" }] },
+        "art_approved": { "type": "boolean" },
+        "approved_by": { "type": ["string", "null"] },
+        "approval_receipt_id": { "type": ["string", "null"] }
+      }
+    }
+  },
+  "$defs": {
+    "safePath": { "type": "string", "pattern": "^(?!/)(?!.*\\.\\.)[A-Za-z0-9._/-]+\\.blend$" },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "bytes", "media_type"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^(?!/)(?!.*\\.\\.)[A-Za-z0-9._/-]+$" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "bytes": { "type": "integer", "minimum": 1, "maximum": 10737418240 },
+        "media_type": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    }
+  },
+  "allOf": [
+    {"if":{"properties":{"class":{"const":"building"}}},"then":{"properties":{"asset_id":{"pattern":"^bld_"}}}},
+    {"if":{"properties":{"class":{"const":"vehicle"}}},"then":{"properties":{"asset_id":{"pattern":"^veh_"}}}},
+    {"if":{"properties":{"class":{"const":"character"}}},"then":{"properties":{"asset_id":{"pattern":"^char_"}}}},
+    {"if":{"properties":{"class":{"const":"prop"}}},"then":{"properties":{"asset_id":{"pattern":"^prop_"}}}},
+    {"if":{"properties":{"class":{"const":"environment"}}},"then":{"properties":{"asset_id":{"pattern":"^env_"}}}},
+    {"if":{"properties":{"class":{"const":"kit"}}},"then":{"properties":{"asset_id":{"pattern":"^kit_"}}}},
+    {"if":{"properties":{"class":{"const":"vfx"}}},"then":{"properties":{"asset_id":{"pattern":"^vfx_"}}}},
+    {
+      "if": { "properties": { "status": { "const": "accepted" } } },
+      "then": {
+        "properties": {
+          "source_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "source_bytes": { "type": "integer", "minimum": 1 },
+          "generated_artifacts": { "type": "array", "minItems": 1 },
+          "provenance": {
+            "properties": {
+              "ship_clearance": { "const": "ship-cleared" },
+              "approval_receipt_id": { "type": "string", "minLength": 1 }
+            }
+          },
+          "validation": {
+            "properties": {
+              "report": { "$ref": "#/$defs/artifact" },
+              "engine_build": { "type": "string", "minLength": 1 },
+              "camera_sheet": { "$ref": "#/$defs/artifact" },
+              "art_approved": { "const": true },
+              "approved_by": { "type": "string", "minLength": 1 },
+              "approval_receipt_id": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

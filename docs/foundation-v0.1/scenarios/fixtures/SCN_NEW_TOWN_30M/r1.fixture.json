@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_NEW_TOWN_30M",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "last-bearing-new-town-v1",
+      "path": "scenarios/artifacts/SCN_NEW_TOWN_30M/r1/starting-state.json",
+      "sha256": "6494d3691482707fcf6cd76c1d9b3cf07a3a153ab10c9d5d2591af217d84c392",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "last-bearing-graybox-content-v1",
+      "path": "scenarios/artifacts/SCN_NEW_TOWN_30M/r1/content-set.json",
+      "sha256": "0908b8507949a5ea0cda29c6c8ad46a476babbd58cc90ca3c43696d371ecdb81",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "new-town-workshop-winch-cooperate-v1",
+      "path": "scenarios/artifacts/SCN_NEW_TOWN_30M/r1/input-script.json",
+      "sha256": "40ea730f8eba5d4867130bec9624d02a26cb1f2d93e67fd92e07482f86c5d8d8",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

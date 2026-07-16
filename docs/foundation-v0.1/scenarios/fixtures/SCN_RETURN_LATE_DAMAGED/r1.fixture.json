@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_RETURN_LATE_DAMAGED",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "last-bearing-new-town-v1",
+      "path": "scenarios/artifacts/SCN_RETURN_LATE_DAMAGED/r1/starting-state.json",
+      "sha256": "cedc1ccab54761b75f4c6b026d1cb1649fbf42c385ec72f40f6c885d8d66cbba",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "last-bearing-graybox-content-v1",
+      "path": "scenarios/artifacts/SCN_RETURN_LATE_DAMAGED/r1/content-set.json",
+      "sha256": "2bb47348acac4ff0eb4f9d79c1baf928222f8eb80be0bc5730271e4c870cc459",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "buffer-winch-late-damaged-v1",
+      "path": "scenarios/artifacts/SCN_RETURN_LATE_DAMAGED/r1/input-script.json",
+      "sha256": "0e7f6769f3f25e61087b0293b4e264047f4f255de4cc2aa2804cda9f8164a6bf",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

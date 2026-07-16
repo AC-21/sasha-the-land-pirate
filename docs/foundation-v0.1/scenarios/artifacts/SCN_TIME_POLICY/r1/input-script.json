@@ -1,0 +1,6326 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "input-script",
+  "semantic_id": "time-policy-three-cases-v1",
+  "scenario_id": "SCN_TIME_POLICY",
+  "scenario_revision": 1,
+  "tick_rate_hz": 10,
+  "warmup_ticks": 0,
+  "duration_ticks": 18000,
+  "normative_execution": {
+    "ordering": "ascending (tick,sequence); sequence is unique and contiguous from zero",
+    "fixed_tick_rule": "apply every event whose tick equals the current authoritative tick before advancing systems",
+    "case_isolation": "each case begins from its matching case_state; no state is shared between cases",
+    "unknown_command_rule": "reject scenario before first tick",
+    "integer_rule": "all *_milli values use signed integer arithmetic with checked overflow",
+    "autonomous_tick_rule": "world, settlement, faction, crisis, and expedition systems advance once per declared fixed tick even when events is empty",
+    "target_resolution_rule": "resolve every scripted command payload.target by exact logical_target_id before tick zero; canonical bindings select resolved_id in the base run and the matching case_resolutions entry in a case run; scenario selectors resolve only by their declared selector_kind and selector_value",
+    "unresolved_target_rule": "reject the scenario before tick zero on a missing or duplicate binding, an unreferenced binding, an unknown selector, a missing case resolution, a kind mismatch, or an ID absent from the hash-bound starting-state or content-set artifact; never infer, fabricate, or fall back",
+    "target_binding_hash_rule": "target_bindings_sha256 is SHA-256 of canonical JSON for the complete ordered target_bindings array"
+  },
+  "events": [
+    {
+      "sequence": 0,
+      "tick": 0,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00001",
+        "target": "scn_time_policy:target:0001",
+        "arguments": {
+          "ordinal": 1,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 1,
+      "tick": 100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00002",
+        "target": "scn_time_policy:target:0002",
+        "arguments": {
+          "ordinal": 2,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 2,
+      "tick": 200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00003",
+        "target": "scn_time_policy:target:0003",
+        "arguments": {
+          "ordinal": 3,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 3,
+      "tick": 300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00004",
+        "target": "scn_time_policy:target:0004",
+        "arguments": {
+          "ordinal": 4,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 4,
+      "tick": 400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00005",
+        "target": "scn_time_policy:target:0005",
+        "arguments": {
+          "ordinal": 5,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 5,
+      "tick": 500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00006",
+        "target": "scn_time_policy:target:0006",
+        "arguments": {
+          "ordinal": 6,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 6,
+      "tick": 600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00007",
+        "target": "scn_time_policy:target:0007",
+        "arguments": {
+          "ordinal": 7,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 7,
+      "tick": 700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00008",
+        "target": "scn_time_policy:target:0008",
+        "arguments": {
+          "ordinal": 8,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 8,
+      "tick": 800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00009",
+        "target": "scn_time_policy:target:0009",
+        "arguments": {
+          "ordinal": 9,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 9,
+      "tick": 900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00010",
+        "target": "scn_time_policy:target:0010",
+        "arguments": {
+          "ordinal": 10,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 10,
+      "tick": 1000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00011",
+        "target": "scn_time_policy:target:0011",
+        "arguments": {
+          "ordinal": 11,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 11,
+      "tick": 1100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00012",
+        "target": "scn_time_policy:target:0012",
+        "arguments": {
+          "ordinal": 12,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 12,
+      "tick": 1200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00013",
+        "target": "scn_time_policy:target:0013",
+        "arguments": {
+          "ordinal": 13,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 13,
+      "tick": 1300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00014",
+        "target": "scn_time_policy:target:0014",
+        "arguments": {
+          "ordinal": 14,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 14,
+      "tick": 1400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00015",
+        "target": "scn_time_policy:target:0015",
+        "arguments": {
+          "ordinal": 15,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 15,
+      "tick": 1500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00016",
+        "target": "scn_time_policy:target:0016",
+        "arguments": {
+          "ordinal": 16,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 16,
+      "tick": 1600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00017",
+        "target": "scn_time_policy:target:0001",
+        "arguments": {
+          "ordinal": 17,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 17,
+      "tick": 1700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00018",
+        "target": "scn_time_policy:target:0002",
+        "arguments": {
+          "ordinal": 18,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 18,
+      "tick": 1800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00019",
+        "target": "scn_time_policy:target:0003",
+        "arguments": {
+          "ordinal": 19,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 19,
+      "tick": 1900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00020",
+        "target": "scn_time_policy:target:0004",
+        "arguments": {
+          "ordinal": 20,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 20,
+      "tick": 2000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00021",
+        "target": "scn_time_policy:target:0005",
+        "arguments": {
+          "ordinal": 21,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 21,
+      "tick": 2100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00022",
+        "target": "scn_time_policy:target:0006",
+        "arguments": {
+          "ordinal": 22,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 22,
+      "tick": 2200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00023",
+        "target": "scn_time_policy:target:0007",
+        "arguments": {
+          "ordinal": 23,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 23,
+      "tick": 2300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00024",
+        "target": "scn_time_policy:target:0008",
+        "arguments": {
+          "ordinal": 24,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 24,
+      "tick": 2400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00025",
+        "target": "scn_time_policy:target:0009",
+        "arguments": {
+          "ordinal": 25,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 25,
+      "tick": 2500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00026",
+        "target": "scn_time_policy:target:0010",
+        "arguments": {
+          "ordinal": 26,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 26,
+      "tick": 2600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00027",
+        "target": "scn_time_policy:target:0011",
+        "arguments": {
+          "ordinal": 27,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 27,
+      "tick": 2700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00028",
+        "target": "scn_time_policy:target:0012",
+        "arguments": {
+          "ordinal": 28,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 28,
+      "tick": 2800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00029",
+        "target": "scn_time_policy:target:0013",
+        "arguments": {
+          "ordinal": 29,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 29,
+      "tick": 2900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00030",
+        "target": "scn_time_policy:target:0014",
+        "arguments": {
+          "ordinal": 30,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 30,
+      "tick": 3000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00031",
+        "target": "scn_time_policy:target:0015",
+        "arguments": {
+          "ordinal": 31,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 31,
+      "tick": 3100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00032",
+        "target": "scn_time_policy:target:0016",
+        "arguments": {
+          "ordinal": 32,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 32,
+      "tick": 3200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00033",
+        "target": "scn_time_policy:target:0001",
+        "arguments": {
+          "ordinal": 33,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 33,
+      "tick": 3300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00034",
+        "target": "scn_time_policy:target:0002",
+        "arguments": {
+          "ordinal": 34,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 34,
+      "tick": 3400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00035",
+        "target": "scn_time_policy:target:0003",
+        "arguments": {
+          "ordinal": 35,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 35,
+      "tick": 3500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00036",
+        "target": "scn_time_policy:target:0004",
+        "arguments": {
+          "ordinal": 36,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 36,
+      "tick": 3600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00037",
+        "target": "scn_time_policy:target:0005",
+        "arguments": {
+          "ordinal": 37,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 37,
+      "tick": 3700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00038",
+        "target": "scn_time_policy:target:0006",
+        "arguments": {
+          "ordinal": 38,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 38,
+      "tick": 3800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00039",
+        "target": "scn_time_policy:target:0007",
+        "arguments": {
+          "ordinal": 39,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 39,
+      "tick": 3900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00040",
+        "target": "scn_time_policy:target:0008",
+        "arguments": {
+          "ordinal": 40,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 40,
+      "tick": 4000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00041",
+        "target": "scn_time_policy:target:0009",
+        "arguments": {
+          "ordinal": 41,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 41,
+      "tick": 4100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00042",
+        "target": "scn_time_policy:target:0010",
+        "arguments": {
+          "ordinal": 42,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 42,
+      "tick": 4200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00043",
+        "target": "scn_time_policy:target:0011",
+        "arguments": {
+          "ordinal": 43,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 43,
+      "tick": 4300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00044",
+        "target": "scn_time_policy:target:0012",
+        "arguments": {
+          "ordinal": 44,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 44,
+      "tick": 4400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00045",
+        "target": "scn_time_policy:target:0013",
+        "arguments": {
+          "ordinal": 45,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 45,
+      "tick": 4500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00046",
+        "target": "scn_time_policy:target:0014",
+        "arguments": {
+          "ordinal": 46,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 46,
+      "tick": 4600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00047",
+        "target": "scn_time_policy:target:0015",
+        "arguments": {
+          "ordinal": 47,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 47,
+      "tick": 4700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00048",
+        "target": "scn_time_policy:target:0016",
+        "arguments": {
+          "ordinal": 48,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 48,
+      "tick": 4800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00049",
+        "target": "scn_time_policy:target:0001",
+        "arguments": {
+          "ordinal": 49,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 49,
+      "tick": 4900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00050",
+        "target": "scn_time_policy:target:0002",
+        "arguments": {
+          "ordinal": 50,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 50,
+      "tick": 5000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00051",
+        "target": "scn_time_policy:target:0003",
+        "arguments": {
+          "ordinal": 51,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 51,
+      "tick": 5100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00052",
+        "target": "scn_time_policy:target:0004",
+        "arguments": {
+          "ordinal": 52,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 52,
+      "tick": 5200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00053",
+        "target": "scn_time_policy:target:0005",
+        "arguments": {
+          "ordinal": 53,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 53,
+      "tick": 5300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00054",
+        "target": "scn_time_policy:target:0006",
+        "arguments": {
+          "ordinal": 54,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 54,
+      "tick": 5400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00055",
+        "target": "scn_time_policy:target:0007",
+        "arguments": {
+          "ordinal": 55,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 55,
+      "tick": 5500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00056",
+        "target": "scn_time_policy:target:0008",
+        "arguments": {
+          "ordinal": 56,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 56,
+      "tick": 5600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00057",
+        "target": "scn_time_policy:target:0009",
+        "arguments": {
+          "ordinal": 57,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 57,
+      "tick": 5700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00058",
+        "target": "scn_time_policy:target:0010",
+        "arguments": {
+          "ordinal": 58,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 58,
+      "tick": 5800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00059",
+        "target": "scn_time_policy:target:0011",
+        "arguments": {
+          "ordinal": 59,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 59,
+      "tick": 5900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00060",
+        "target": "scn_time_policy:target:0012",
+        "arguments": {
+          "ordinal": 60,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 60,
+      "tick": 6000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00061",
+        "target": "scn_time_policy:target:0013",
+        "arguments": {
+          "ordinal": 61,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 61,
+      "tick": 6100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00062",
+        "target": "scn_time_policy:target:0014",
+        "arguments": {
+          "ordinal": 62,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 62,
+      "tick": 6200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00063",
+        "target": "scn_time_policy:target:0015",
+        "arguments": {
+          "ordinal": 63,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 63,
+      "tick": 6300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00064",
+        "target": "scn_time_policy:target:0016",
+        "arguments": {
+          "ordinal": 64,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 64,
+      "tick": 6400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00065",
+        "target": "scn_time_policy:target:0001",
+        "arguments": {
+          "ordinal": 65,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 65,
+      "tick": 6500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00066",
+        "target": "scn_time_policy:target:0002",
+        "arguments": {
+          "ordinal": 66,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 66,
+      "tick": 6600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00067",
+        "target": "scn_time_policy:target:0003",
+        "arguments": {
+          "ordinal": 67,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 67,
+      "tick": 6700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00068",
+        "target": "scn_time_policy:target:0004",
+        "arguments": {
+          "ordinal": 68,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 68,
+      "tick": 6800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00069",
+        "target": "scn_time_policy:target:0005",
+        "arguments": {
+          "ordinal": 69,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 69,
+      "tick": 6900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00070",
+        "target": "scn_time_policy:target:0006",
+        "arguments": {
+          "ordinal": 70,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 70,
+      "tick": 7000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00071",
+        "target": "scn_time_policy:target:0007",
+        "arguments": {
+          "ordinal": 71,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 71,
+      "tick": 7100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00072",
+        "target": "scn_time_policy:target:0008",
+        "arguments": {
+          "ordinal": 72,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 72,
+      "tick": 7200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00073",
+        "target": "scn_time_policy:target:0009",
+        "arguments": {
+          "ordinal": 73,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 73,
+      "tick": 7300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00074",
+        "target": "scn_time_policy:target:0010",
+        "arguments": {
+          "ordinal": 74,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 74,
+      "tick": 7400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00075",
+        "target": "scn_time_policy:target:0011",
+        "arguments": {
+          "ordinal": 75,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 75,
+      "tick": 7500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00076",
+        "target": "scn_time_policy:target:0012",
+        "arguments": {
+          "ordinal": 76,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 76,
+      "tick": 7600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00077",
+        "target": "scn_time_policy:target:0013",
+        "arguments": {
+          "ordinal": 77,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 77,
+      "tick": 7700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00078",
+        "target": "scn_time_policy:target:0014",
+        "arguments": {
+          "ordinal": 78,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 78,
+      "tick": 7800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00079",
+        "target": "scn_time_policy:target:0015",
+        "arguments": {
+          "ordinal": 79,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 79,
+      "tick": 7900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00080",
+        "target": "scn_time_policy:target:0016",
+        "arguments": {
+          "ordinal": 80,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 80,
+      "tick": 8000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00081",
+        "target": "scn_time_policy:target:0001",
+        "arguments": {
+          "ordinal": 81,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 81,
+      "tick": 8100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00082",
+        "target": "scn_time_policy:target:0002",
+        "arguments": {
+          "ordinal": 82,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 82,
+      "tick": 8200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00083",
+        "target": "scn_time_policy:target:0003",
+        "arguments": {
+          "ordinal": 83,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 83,
+      "tick": 8300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00084",
+        "target": "scn_time_policy:target:0004",
+        "arguments": {
+          "ordinal": 84,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 84,
+      "tick": 8400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00085",
+        "target": "scn_time_policy:target:0005",
+        "arguments": {
+          "ordinal": 85,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 85,
+      "tick": 8500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00086",
+        "target": "scn_time_policy:target:0006",
+        "arguments": {
+          "ordinal": 86,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 86,
+      "tick": 8600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00087",
+        "target": "scn_time_policy:target:0007",
+        "arguments": {
+          "ordinal": 87,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 87,
+      "tick": 8700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00088",
+        "target": "scn_time_policy:target:0008",
+        "arguments": {
+          "ordinal": 88,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 88,
+      "tick": 8800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00089",
+        "target": "scn_time_policy:target:0009",
+        "arguments": {
+          "ordinal": 89,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 89,
+      "tick": 8900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00090",
+        "target": "scn_time_policy:target:0010",
+        "arguments": {
+          "ordinal": 90,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 90,
+      "tick": 9000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00091",
+        "target": "scn_time_policy:target:0011",
+        "arguments": {
+          "ordinal": 91,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 91,
+      "tick": 9100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00092",
+        "target": "scn_time_policy:target:0012",
+        "arguments": {
+          "ordinal": 92,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 92,
+      "tick": 9200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00093",
+        "target": "scn_time_policy:target:0013",
+        "arguments": {
+          "ordinal": 93,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 93,
+      "tick": 9300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00094",
+        "target": "scn_time_policy:target:0014",
+        "arguments": {
+          "ordinal": 94,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 94,
+      "tick": 9400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00095",
+        "target": "scn_time_policy:target:0015",
+        "arguments": {
+          "ordinal": 95,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 95,
+      "tick": 9500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00096",
+        "target": "scn_time_policy:target:0016",
+        "arguments": {
+          "ordinal": 96,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 96,
+      "tick": 9600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00097",
+        "target": "scn_time_policy:target:0001",
+        "arguments": {
+          "ordinal": 97,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 97,
+      "tick": 9700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00098",
+        "target": "scn_time_policy:target:0002",
+        "arguments": {
+          "ordinal": 98,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 98,
+      "tick": 9800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00099",
+        "target": "scn_time_policy:target:0003",
+        "arguments": {
+          "ordinal": 99,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 99,
+      "tick": 9900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00100",
+        "target": "scn_time_policy:target:0004",
+        "arguments": {
+          "ordinal": 100,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 100,
+      "tick": 10000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00101",
+        "target": "scn_time_policy:target:0005",
+        "arguments": {
+          "ordinal": 101,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 101,
+      "tick": 10100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00102",
+        "target": "scn_time_policy:target:0006",
+        "arguments": {
+          "ordinal": 102,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 102,
+      "tick": 10200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00103",
+        "target": "scn_time_policy:target:0007",
+        "arguments": {
+          "ordinal": 103,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 103,
+      "tick": 10300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00104",
+        "target": "scn_time_policy:target:0008",
+        "arguments": {
+          "ordinal": 104,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 104,
+      "tick": 10400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00105",
+        "target": "scn_time_policy:target:0009",
+        "arguments": {
+          "ordinal": 105,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 105,
+      "tick": 10500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00106",
+        "target": "scn_time_policy:target:0010",
+        "arguments": {
+          "ordinal": 106,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 106,
+      "tick": 10600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00107",
+        "target": "scn_time_policy:target:0011",
+        "arguments": {
+          "ordinal": 107,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 107,
+      "tick": 10700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00108",
+        "target": "scn_time_policy:target:0012",
+        "arguments": {
+          "ordinal": 108,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 108,
+      "tick": 10800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00109",
+        "target": "scn_time_policy:target:0013",
+        "arguments": {
+          "ordinal": 109,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 109,
+      "tick": 10900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00110",
+        "target": "scn_time_policy:target:0014",
+        "arguments": {
+          "ordinal": 110,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 110,
+      "tick": 11000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00111",
+        "target": "scn_time_policy:target:0015",
+        "arguments": {
+          "ordinal": 111,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 111,
+      "tick": 11100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00112",
+        "target": "scn_time_policy:target:0016",
+        "arguments": {
+          "ordinal": 112,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 112,
+      "tick": 11200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00113",
+        "target": "scn_time_policy:target:0001",
+        "arguments": {
+          "ordinal": 113,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 113,
+      "tick": 11300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00114",
+        "target": "scn_time_policy:target:0002",
+        "arguments": {
+          "ordinal": 114,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 114,
+      "tick": 11400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00115",
+        "target": "scn_time_policy:target:0003",
+        "arguments": {
+          "ordinal": 115,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 115,
+      "tick": 11500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00116",
+        "target": "scn_time_policy:target:0004",
+        "arguments": {
+          "ordinal": 116,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 116,
+      "tick": 11600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00117",
+        "target": "scn_time_policy:target:0005",
+        "arguments": {
+          "ordinal": 117,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 117,
+      "tick": 11700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00118",
+        "target": "scn_time_policy:target:0006",
+        "arguments": {
+          "ordinal": 118,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 118,
+      "tick": 11800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00119",
+        "target": "scn_time_policy:target:0007",
+        "arguments": {
+          "ordinal": 119,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 119,
+      "tick": 11900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00120",
+        "target": "scn_time_policy:target:0008",
+        "arguments": {
+          "ordinal": 120,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 120,
+      "tick": 12000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00121",
+        "target": "scn_time_policy:target:0009",
+        "arguments": {
+          "ordinal": 121,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 121,
+      "tick": 12100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00122",
+        "target": "scn_time_policy:target:0010",
+        "arguments": {
+          "ordinal": 122,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 122,
+      "tick": 12200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00123",
+        "target": "scn_time_policy:target:0011",
+        "arguments": {
+          "ordinal": 123,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 123,
+      "tick": 12300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00124",
+        "target": "scn_time_policy:target:0012",
+        "arguments": {
+          "ordinal": 124,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 124,
+      "tick": 12400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00125",
+        "target": "scn_time_policy:target:0013",
+        "arguments": {
+          "ordinal": 125,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 125,
+      "tick": 12500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00126",
+        "target": "scn_time_policy:target:0014",
+        "arguments": {
+          "ordinal": 126,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 126,
+      "tick": 12600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00127",
+        "target": "scn_time_policy:target:0015",
+        "arguments": {
+          "ordinal": 127,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 127,
+      "tick": 12700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00128",
+        "target": "scn_time_policy:target:0016",
+        "arguments": {
+          "ordinal": 128,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 128,
+      "tick": 12800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00129",
+        "target": "scn_time_policy:target:0001",
+        "arguments": {
+          "ordinal": 129,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 129,
+      "tick": 12900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00130",
+        "target": "scn_time_policy:target:0002",
+        "arguments": {
+          "ordinal": 130,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 130,
+      "tick": 13000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00131",
+        "target": "scn_time_policy:target:0003",
+        "arguments": {
+          "ordinal": 131,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 131,
+      "tick": 13100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00132",
+        "target": "scn_time_policy:target:0004",
+        "arguments": {
+          "ordinal": 132,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 132,
+      "tick": 13200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00133",
+        "target": "scn_time_policy:target:0005",
+        "arguments": {
+          "ordinal": 133,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 133,
+      "tick": 13300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00134",
+        "target": "scn_time_policy:target:0006",
+        "arguments": {
+          "ordinal": 134,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 134,
+      "tick": 13400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00135",
+        "target": "scn_time_policy:target:0007",
+        "arguments": {
+          "ordinal": 135,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 135,
+      "tick": 13500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00136",
+        "target": "scn_time_policy:target:0008",
+        "arguments": {
+          "ordinal": 136,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 136,
+      "tick": 13600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00137",
+        "target": "scn_time_policy:target:0009",
+        "arguments": {
+          "ordinal": 137,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 137,
+      "tick": 13700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00138",
+        "target": "scn_time_policy:target:0010",
+        "arguments": {
+          "ordinal": 138,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 138,
+      "tick": 13800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00139",
+        "target": "scn_time_policy:target:0011",
+        "arguments": {
+          "ordinal": 139,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 139,
+      "tick": 13900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00140",
+        "target": "scn_time_policy:target:0012",
+        "arguments": {
+          "ordinal": 140,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 140,
+      "tick": 14000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00141",
+        "target": "scn_time_policy:target:0013",
+        "arguments": {
+          "ordinal": 141,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 141,
+      "tick": 14100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00142",
+        "target": "scn_time_policy:target:0014",
+        "arguments": {
+          "ordinal": 142,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 142,
+      "tick": 14200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00143",
+        "target": "scn_time_policy:target:0015",
+        "arguments": {
+          "ordinal": 143,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 143,
+      "tick": 14300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00144",
+        "target": "scn_time_policy:target:0016",
+        "arguments": {
+          "ordinal": 144,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 144,
+      "tick": 14400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00145",
+        "target": "scn_time_policy:target:0001",
+        "arguments": {
+          "ordinal": 145,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 145,
+      "tick": 14500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00146",
+        "target": "scn_time_policy:target:0002",
+        "arguments": {
+          "ordinal": 146,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 146,
+      "tick": 14600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00147",
+        "target": "scn_time_policy:target:0003",
+        "arguments": {
+          "ordinal": 147,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 147,
+      "tick": 14700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00148",
+        "target": "scn_time_policy:target:0004",
+        "arguments": {
+          "ordinal": 148,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 148,
+      "tick": 14800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00149",
+        "target": "scn_time_policy:target:0005",
+        "arguments": {
+          "ordinal": 149,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 149,
+      "tick": 14900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00150",
+        "target": "scn_time_policy:target:0006",
+        "arguments": {
+          "ordinal": 150,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 150,
+      "tick": 15000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00151",
+        "target": "scn_time_policy:target:0007",
+        "arguments": {
+          "ordinal": 151,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 151,
+      "tick": 15100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00152",
+        "target": "scn_time_policy:target:0008",
+        "arguments": {
+          "ordinal": 152,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 152,
+      "tick": 15200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00153",
+        "target": "scn_time_policy:target:0009",
+        "arguments": {
+          "ordinal": 153,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 153,
+      "tick": 15300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00154",
+        "target": "scn_time_policy:target:0010",
+        "arguments": {
+          "ordinal": 154,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 154,
+      "tick": 15400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00155",
+        "target": "scn_time_policy:target:0011",
+        "arguments": {
+          "ordinal": 155,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 155,
+      "tick": 15500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00156",
+        "target": "scn_time_policy:target:0012",
+        "arguments": {
+          "ordinal": 156,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 156,
+      "tick": 15600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00157",
+        "target": "scn_time_policy:target:0013",
+        "arguments": {
+          "ordinal": 157,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 157,
+      "tick": 15700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00158",
+        "target": "scn_time_policy:target:0014",
+        "arguments": {
+          "ordinal": 158,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 158,
+      "tick": 15800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00159",
+        "target": "scn_time_policy:target:0015",
+        "arguments": {
+          "ordinal": 159,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 159,
+      "tick": 15900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00160",
+        "target": "scn_time_policy:target:0016",
+        "arguments": {
+          "ordinal": 160,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 160,
+      "tick": 16000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00161",
+        "target": "scn_time_policy:target:0001",
+        "arguments": {
+          "ordinal": 161,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 161,
+      "tick": 16100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00162",
+        "target": "scn_time_policy:target:0002",
+        "arguments": {
+          "ordinal": 162,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 162,
+      "tick": 16200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00163",
+        "target": "scn_time_policy:target:0003",
+        "arguments": {
+          "ordinal": 163,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 163,
+      "tick": 16300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00164",
+        "target": "scn_time_policy:target:0004",
+        "arguments": {
+          "ordinal": 164,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 164,
+      "tick": 16400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00165",
+        "target": "scn_time_policy:target:0005",
+        "arguments": {
+          "ordinal": 165,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 165,
+      "tick": 16500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00166",
+        "target": "scn_time_policy:target:0006",
+        "arguments": {
+          "ordinal": 166,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 166,
+      "tick": 16600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00167",
+        "target": "scn_time_policy:target:0007",
+        "arguments": {
+          "ordinal": 167,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 167,
+      "tick": 16700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00168",
+        "target": "scn_time_policy:target:0008",
+        "arguments": {
+          "ordinal": 168,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 168,
+      "tick": 16800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00169",
+        "target": "scn_time_policy:target:0009",
+        "arguments": {
+          "ordinal": 169,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 169,
+      "tick": 16900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00170",
+        "target": "scn_time_policy:target:0010",
+        "arguments": {
+          "ordinal": 170,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 170,
+      "tick": 17000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00171",
+        "target": "scn_time_policy:target:0011",
+        "arguments": {
+          "ordinal": 171,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 171,
+      "tick": 17100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00172",
+        "target": "scn_time_policy:target:0012",
+        "arguments": {
+          "ordinal": 172,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 172,
+      "tick": 17200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "TriggerAutoPauseAlert",
+        "command_id": "SCN_TIME_POLICY:cmd:00173",
+        "target": "scn_time_policy:target:0013",
+        "arguments": {
+          "ordinal": 173,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 173,
+      "tick": 17300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_TIME_POLICY:cmd:00174",
+        "target": "scn_time_policy:target:0014",
+        "arguments": {
+          "ordinal": 174,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 174,
+      "tick": 17400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00175",
+        "target": "scn_time_policy:target:0015",
+        "arguments": {
+          "ordinal": 175,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 175,
+      "tick": 17500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveDomainClocks",
+        "command_id": "SCN_TIME_POLICY:cmd:00176",
+        "target": "scn_time_policy:target:0016",
+        "arguments": {
+          "ordinal": 176,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 176,
+      "tick": 17600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetClockPolicy",
+        "command_id": "SCN_TIME_POLICY:cmd:00177",
+        "target": "scn_time_policy:target:0001",
+        "arguments": {
+          "ordinal": 177,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 177,
+      "tick": 17700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DepartExpedition",
+        "command_id": "SCN_TIME_POLICY:cmd:00178",
+        "target": "scn_time_policy:target:0002",
+        "arguments": {
+          "ordinal": 178,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 178,
+      "tick": 17800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoadTick",
+        "command_id": "SCN_TIME_POLICY:cmd:00179",
+        "target": "scn_time_policy:target:0003",
+        "arguments": {
+          "ordinal": 179,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 179,
+      "tick": 17900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RequestPause",
+        "command_id": "SCN_TIME_POLICY:cmd:00180",
+        "target": "scn_time_policy:target:0004",
+        "arguments": {
+          "ordinal": 180,
+          "bindings": {
+            "supported-policies": "slowed,paused,full",
+            "packet-selected-policy-source": "D-0008-ratified-receipt"
+          }
+        }
+      }
+    }
+  ],
+  "case_events": [
+    {
+      "id": "slowed",
+      "events": [
+        {
+          "sequence": 0,
+          "tick": 0,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00001",
+            "target": "scn_time_policy:target:0001",
+            "arguments": {
+              "ordinal": 1,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 1,
+          "tick": 300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00002",
+            "target": "scn_time_policy:target:0002",
+            "arguments": {
+              "ordinal": 2,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 2,
+          "tick": 600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00003",
+            "target": "scn_time_policy:target:0003",
+            "arguments": {
+              "ordinal": 3,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 3,
+          "tick": 900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00004",
+            "target": "scn_time_policy:target:0004",
+            "arguments": {
+              "ordinal": 4,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 4,
+          "tick": 1200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00005",
+            "target": "scn_time_policy:target:0005",
+            "arguments": {
+              "ordinal": 5,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 5,
+          "tick": 1500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00006",
+            "target": "scn_time_policy:target:0006",
+            "arguments": {
+              "ordinal": 6,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 6,
+          "tick": 1800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00007",
+            "target": "scn_time_policy:target:0007",
+            "arguments": {
+              "ordinal": 7,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 7,
+          "tick": 2100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00008",
+            "target": "scn_time_policy:target:0008",
+            "arguments": {
+              "ordinal": 8,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 8,
+          "tick": 2400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00009",
+            "target": "scn_time_policy:target:0009",
+            "arguments": {
+              "ordinal": 9,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 9,
+          "tick": 2700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00010",
+            "target": "scn_time_policy:target:0010",
+            "arguments": {
+              "ordinal": 10,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 10,
+          "tick": 3000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00011",
+            "target": "scn_time_policy:target:0011",
+            "arguments": {
+              "ordinal": 11,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 11,
+          "tick": 3300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00012",
+            "target": "scn_time_policy:target:0012",
+            "arguments": {
+              "ordinal": 12,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 12,
+          "tick": 3600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00013",
+            "target": "scn_time_policy:target:0013",
+            "arguments": {
+              "ordinal": 13,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 13,
+          "tick": 3900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00014",
+            "target": "scn_time_policy:target:0014",
+            "arguments": {
+              "ordinal": 14,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 14,
+          "tick": 4200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00015",
+            "target": "scn_time_policy:target:0015",
+            "arguments": {
+              "ordinal": 15,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 15,
+          "tick": 4500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00016",
+            "target": "scn_time_policy:target:0016",
+            "arguments": {
+              "ordinal": 16,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 16,
+          "tick": 4800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00017",
+            "target": "scn_time_policy:target:0001",
+            "arguments": {
+              "ordinal": 17,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 17,
+          "tick": 5100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00018",
+            "target": "scn_time_policy:target:0002",
+            "arguments": {
+              "ordinal": 18,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 18,
+          "tick": 5400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00019",
+            "target": "scn_time_policy:target:0003",
+            "arguments": {
+              "ordinal": 19,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 19,
+          "tick": 5700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00020",
+            "target": "scn_time_policy:target:0004",
+            "arguments": {
+              "ordinal": 20,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 20,
+          "tick": 6000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00021",
+            "target": "scn_time_policy:target:0005",
+            "arguments": {
+              "ordinal": 21,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 21,
+          "tick": 6300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00022",
+            "target": "scn_time_policy:target:0006",
+            "arguments": {
+              "ordinal": 22,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 22,
+          "tick": 6600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00023",
+            "target": "scn_time_policy:target:0007",
+            "arguments": {
+              "ordinal": 23,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 23,
+          "tick": 6900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00024",
+            "target": "scn_time_policy:target:0008",
+            "arguments": {
+              "ordinal": 24,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 24,
+          "tick": 7200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00025",
+            "target": "scn_time_policy:target:0009",
+            "arguments": {
+              "ordinal": 25,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 25,
+          "tick": 7500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00026",
+            "target": "scn_time_policy:target:0010",
+            "arguments": {
+              "ordinal": 26,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 26,
+          "tick": 7800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00027",
+            "target": "scn_time_policy:target:0011",
+            "arguments": {
+              "ordinal": 27,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 27,
+          "tick": 8100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00028",
+            "target": "scn_time_policy:target:0012",
+            "arguments": {
+              "ordinal": 28,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 28,
+          "tick": 8400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00029",
+            "target": "scn_time_policy:target:0013",
+            "arguments": {
+              "ordinal": 29,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 29,
+          "tick": 8700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00030",
+            "target": "scn_time_policy:target:0014",
+            "arguments": {
+              "ordinal": 30,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 30,
+          "tick": 9000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00031",
+            "target": "scn_time_policy:target:0015",
+            "arguments": {
+              "ordinal": 31,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 31,
+          "tick": 9300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00032",
+            "target": "scn_time_policy:target:0016",
+            "arguments": {
+              "ordinal": 32,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 32,
+          "tick": 9600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00033",
+            "target": "scn_time_policy:target:0001",
+            "arguments": {
+              "ordinal": 33,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 33,
+          "tick": 9900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00034",
+            "target": "scn_time_policy:target:0002",
+            "arguments": {
+              "ordinal": 34,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 34,
+          "tick": 10200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00035",
+            "target": "scn_time_policy:target:0003",
+            "arguments": {
+              "ordinal": 35,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 35,
+          "tick": 10500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00036",
+            "target": "scn_time_policy:target:0004",
+            "arguments": {
+              "ordinal": 36,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 36,
+          "tick": 10800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00037",
+            "target": "scn_time_policy:target:0005",
+            "arguments": {
+              "ordinal": 37,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 37,
+          "tick": 11100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00038",
+            "target": "scn_time_policy:target:0006",
+            "arguments": {
+              "ordinal": 38,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 38,
+          "tick": 11400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00039",
+            "target": "scn_time_policy:target:0007",
+            "arguments": {
+              "ordinal": 39,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 39,
+          "tick": 11700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00040",
+            "target": "scn_time_policy:target:0008",
+            "arguments": {
+              "ordinal": 40,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 40,
+          "tick": 12000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00041",
+            "target": "scn_time_policy:target:0009",
+            "arguments": {
+              "ordinal": 41,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 41,
+          "tick": 12300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00042",
+            "target": "scn_time_policy:target:0010",
+            "arguments": {
+              "ordinal": 42,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 42,
+          "tick": 12600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00043",
+            "target": "scn_time_policy:target:0011",
+            "arguments": {
+              "ordinal": 43,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 43,
+          "tick": 12900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00044",
+            "target": "scn_time_policy:target:0012",
+            "arguments": {
+              "ordinal": 44,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 44,
+          "tick": 13200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00045",
+            "target": "scn_time_policy:target:0013",
+            "arguments": {
+              "ordinal": 45,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 45,
+          "tick": 13500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00046",
+            "target": "scn_time_policy:target:0014",
+            "arguments": {
+              "ordinal": 46,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 46,
+          "tick": 13800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00047",
+            "target": "scn_time_policy:target:0015",
+            "arguments": {
+              "ordinal": 47,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 47,
+          "tick": 14100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00048",
+            "target": "scn_time_policy:target:0016",
+            "arguments": {
+              "ordinal": 48,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 48,
+          "tick": 14400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00049",
+            "target": "scn_time_policy:target:0001",
+            "arguments": {
+              "ordinal": 49,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 49,
+          "tick": 14700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00050",
+            "target": "scn_time_policy:target:0002",
+            "arguments": {
+              "ordinal": 50,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 50,
+          "tick": 15000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00051",
+            "target": "scn_time_policy:target:0003",
+            "arguments": {
+              "ordinal": 51,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 51,
+          "tick": 15300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00052",
+            "target": "scn_time_policy:target:0004",
+            "arguments": {
+              "ordinal": 52,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 52,
+          "tick": 15600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00053",
+            "target": "scn_time_policy:target:0005",
+            "arguments": {
+              "ordinal": 53,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 53,
+          "tick": 15900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00054",
+            "target": "scn_time_policy:target:0006",
+            "arguments": {
+              "ordinal": 54,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 54,
+          "tick": 16200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00055",
+            "target": "scn_time_policy:target:0007",
+            "arguments": {
+              "ordinal": 55,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 55,
+          "tick": 16500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00056",
+            "target": "scn_time_policy:target:0008",
+            "arguments": {
+              "ordinal": 56,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 56,
+          "tick": 16800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00057",
+            "target": "scn_time_policy:target:0009",
+            "arguments": {
+              "ordinal": 57,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 57,
+          "tick": 17100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00058",
+            "target": "scn_time_policy:target:0010",
+            "arguments": {
+              "ordinal": 58,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 58,
+          "tick": 17400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00059",
+            "target": "scn_time_policy:target:0011",
+            "arguments": {
+              "ordinal": 59,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 59,
+          "tick": 17700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00060",
+            "target": "scn_time_policy:target:0012",
+            "arguments": {
+              "ordinal": 60,
+              "bindings": {
+                "clock-policy": "slowed"
+              }
+            }
+          }
+        }
+      ],
+      "oracle_observations": [
+        {
+          "sequence": 0,
+          "tick": 18000,
+          "subject": "slowed.settlement-clock-mismatches",
+          "selector": "metrics/slowed/settlement-clock-mismatches",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_TIME_SLOWED_SETTLEMENT"
+        },
+        {
+          "sequence": 1,
+          "tick": 18000,
+          "subject": "slowed.faction-clock-mismatches",
+          "selector": "metrics/slowed/faction-clock-mismatches",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_TIME_SLOWED_FACTION"
+        },
+        {
+          "sequence": 2,
+          "tick": 18000,
+          "subject": "slowed.crisis-weather-clock-mismatches",
+          "selector": "metrics/slowed/crisis-weather-clock-mismatches",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_TIME_SLOWED_CRISIS"
+        },
+        {
+          "sequence": 3,
+          "tick": 18000,
+          "subject": "slowed.road-clock-mismatches",
+          "selector": "metrics/slowed/road-clock-mismatches",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_TIME_SLOWED_ROAD"
+        }
+      ]
+    },
+    {
+      "id": "paused",
+      "events": [
+        {
+          "sequence": 0,
+          "tick": 0,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00001",
+            "target": "scn_time_policy:target:0001",
+            "arguments": {
+              "ordinal": 1,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 1,
+          "tick": 300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00002",
+            "target": "scn_time_policy:target:0002",
+            "arguments": {
+              "ordinal": 2,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 2,
+          "tick": 600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00003",
+            "target": "scn_time_policy:target:0003",
+            "arguments": {
+              "ordinal": 3,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 3,
+          "tick": 900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00004",
+            "target": "scn_time_policy:target:0004",
+            "arguments": {
+              "ordinal": 4,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 4,
+          "tick": 1200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00005",
+            "target": "scn_time_policy:target:0005",
+            "arguments": {
+              "ordinal": 5,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 5,
+          "tick": 1500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00006",
+            "target": "scn_time_policy:target:0006",
+            "arguments": {
+              "ordinal": 6,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 6,
+          "tick": 1800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00007",
+            "target": "scn_time_policy:target:0007",
+            "arguments": {
+              "ordinal": 7,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 7,
+          "tick": 2100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00008",
+            "target": "scn_time_policy:target:0008",
+            "arguments": {
+              "ordinal": 8,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 8,
+          "tick": 2400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00009",
+            "target": "scn_time_policy:target:0009",
+            "arguments": {
+              "ordinal": 9,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 9,
+          "tick": 2700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00010",
+            "target": "scn_time_policy:target:0010",
+            "arguments": {
+              "ordinal": 10,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 10,
+          "tick": 3000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00011",
+            "target": "scn_time_policy:target:0011",
+            "arguments": {
+              "ordinal": 11,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 11,
+          "tick": 3300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00012",
+            "target": "scn_time_policy:target:0012",
+            "arguments": {
+              "ordinal": 12,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 12,
+          "tick": 3600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00013",
+            "target": "scn_time_policy:target:0013",
+            "arguments": {
+              "ordinal": 13,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 13,
+          "tick": 3900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00014",
+            "target": "scn_time_policy:target:0014",
+            "arguments": {
+              "ordinal": 14,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 14,
+          "tick": 4200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00015",
+            "target": "scn_time_policy:target:0015",
+            "arguments": {
+              "ordinal": 15,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 15,
+          "tick": 4500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00016",
+            "target": "scn_time_policy:target:0016",
+            "arguments": {
+              "ordinal": 16,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 16,
+          "tick": 4800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00017",
+            "target": "scn_time_policy:target:0001",
+            "arguments": {
+              "ordinal": 17,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 17,
+          "tick": 5100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00018",
+            "target": "scn_time_policy:target:0002",
+            "arguments": {
+              "ordinal": 18,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 18,
+          "tick": 5400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00019",
+            "target": "scn_time_policy:target:0003",
+            "arguments": {
+              "ordinal": 19,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 19,
+          "tick": 5700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00020",
+            "target": "scn_time_policy:target:0004",
+            "arguments": {
+              "ordinal": 20,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 20,
+          "tick": 6000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00021",
+            "target": "scn_time_policy:target:0005",
+            "arguments": {
+              "ordinal": 21,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 21,
+          "tick": 6300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00022",
+            "target": "scn_time_policy:target:0006",
+            "arguments": {
+              "ordinal": 22,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 22,
+          "tick": 6600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00023",
+            "target": "scn_time_policy:target:0007",
+            "arguments": {
+              "ordinal": 23,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 23,
+          "tick": 6900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00024",
+            "target": "scn_time_policy:target:0008",
+            "arguments": {
+              "ordinal": 24,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 24,
+          "tick": 7200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00025",
+            "target": "scn_time_policy:target:0009",
+            "arguments": {
+              "ordinal": 25,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 25,
+          "tick": 7500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00026",
+            "target": "scn_time_policy:target:0010",
+            "arguments": {
+              "ordinal": 26,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 26,
+          "tick": 7800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00027",
+            "target": "scn_time_policy:target:0011",
+            "arguments": {
+              "ordinal": 27,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 27,
+          "tick": 8100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00028",
+            "target": "scn_time_policy:target:0012",
+            "arguments": {
+              "ordinal": 28,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 28,
+          "tick": 8400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00029",
+            "target": "scn_time_policy:target:0013",
+            "arguments": {
+              "ordinal": 29,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 29,
+          "tick": 8700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00030",
+            "target": "scn_time_policy:target:0014",
+            "arguments": {
+              "ordinal": 30,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 30,
+          "tick": 9000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00031",
+            "target": "scn_time_policy:target:0015",
+            "arguments": {
+              "ordinal": 31,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 31,
+          "tick": 9300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00032",
+            "target": "scn_time_policy:target:0016",
+            "arguments": {
+              "ordinal": 32,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 32,
+          "tick": 9600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00033",
+            "target": "scn_time_policy:target:0001",
+            "arguments": {
+              "ordinal": 33,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 33,
+          "tick": 9900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00034",
+            "target": "scn_time_policy:target:0002",
+            "arguments": {
+              "ordinal": 34,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 34,
+          "tick": 10200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00035",
+            "target": "scn_time_policy:target:0003",
+            "arguments": {
+              "ordinal": 35,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 35,
+          "tick": 10500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00036",
+            "target": "scn_time_policy:target:0004",
+            "arguments": {
+              "ordinal": 36,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 36,
+          "tick": 10800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00037",
+            "target": "scn_time_policy:target:0005",
+            "arguments": {
+              "ordinal": 37,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 37,
+          "tick": 11100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00038",
+            "target": "scn_time_policy:target:0006",
+            "arguments": {
+              "ordinal": 38,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 38,
+          "tick": 11400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00039",
+            "target": "scn_time_policy:target:0007",
+            "arguments": {
+              "ordinal": 39,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 39,
+          "tick": 11700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00040",
+            "target": "scn_time_policy:target:0008",
+            "arguments": {
+              "ordinal": 40,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 40,
+          "tick": 12000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00041",
+            "target": "scn_time_policy:target:0009",
+            "arguments": {
+              "ordinal": 41,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 41,
+          "tick": 12300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00042",
+            "target": "scn_time_policy:target:0010",
+            "arguments": {
+              "ordinal": 42,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 42,
+          "tick": 12600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00043",
+            "target": "scn_time_policy:target:0011",
+            "arguments": {
+              "ordinal": 43,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 43,
+          "tick": 12900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00044",
+            "target": "scn_time_policy:target:0012",
+            "arguments": {
+              "ordinal": 44,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 44,
+          "tick": 13200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00045",
+            "target": "scn_time_policy:target:0013",
+            "arguments": {
+              "ordinal": 45,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 45,
+          "tick": 13500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00046",
+            "target": "scn_time_policy:target:0014",
+            "arguments": {
+              "ordinal": 46,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 46,
+          "tick": 13800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00047",
+            "target": "scn_time_policy:target:0015",
+            "arguments": {
+              "ordinal": 47,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 47,
+          "tick": 14100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00048",
+            "target": "scn_time_policy:target:0016",
+            "arguments": {
+              "ordinal": 48,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 48,
+          "tick": 14400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00049",
+            "target": "scn_time_policy:target:0001",
+            "arguments": {
+              "ordinal": 49,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 49,
+          "tick": 14700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00050",
+            "target": "scn_time_policy:target:0002",
+            "arguments": {
+              "ordinal": 50,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 50,
+          "tick": 15000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00051",
+            "target": "scn_time_policy:target:0003",
+            "arguments": {
+              "ordinal": 51,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 51,
+          "tick": 15300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00052",
+            "target": "scn_time_policy:target:0004",
+            "arguments": {
+              "ordinal": 52,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 52,
+          "tick": 15600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00053",
+            "target": "scn_time_policy:target:0005",
+            "arguments": {
+              "ordinal": 53,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 53,
+          "tick": 15900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00054",
+            "target": "scn_time_policy:target:0006",
+            "arguments": {
+              "ordinal": 54,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 54,
+          "tick": 16200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00055",
+            "target": "scn_time_policy:target:0007",
+            "arguments": {
+              "ordinal": 55,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 55,
+          "tick": 16500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00056",
+            "target": "scn_time_policy:target:0008",
+            "arguments": {
+              "ordinal": 56,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 56,
+          "tick": 16800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00057",
+            "target": "scn_time_policy:target:0009",
+            "arguments": {
+              "ordinal": 57,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 57,
+          "tick": 17100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00058",
+            "target": "scn_time_policy:target:0010",
+            "arguments": {
+              "ordinal": 58,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 58,
+          "tick": 17400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00059",
+            "target": "scn_time_policy:target:0011",
+            "arguments": {
+              "ordinal": 59,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 59,
+          "tick": 17700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00060",
+            "target": "scn_time_policy:target:0012",
+            "arguments": {
+              "ordinal": 60,
+              "bindings": {
+                "clock-policy": "paused"
+              }
+            }
+          }
+        }
+      ],
+      "oracle_observations": [
+        {
+          "sequence": 0,
+          "tick": 18000,
+          "subject": "paused.settlement-clock-mismatches",
+          "selector": "metrics/paused/settlement-clock-mismatches",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_TIME_PAUSED_SETTLEMENT"
+        },
+        {
+          "sequence": 1,
+          "tick": 18000,
+          "subject": "paused.faction-clock-mismatches",
+          "selector": "metrics/paused/faction-clock-mismatches",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_TIME_PAUSED_FACTION"
+        },
+        {
+          "sequence": 2,
+          "tick": 18000,
+          "subject": "paused.crisis-weather-clock-mismatches",
+          "selector": "metrics/paused/crisis-weather-clock-mismatches",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_TIME_PAUSED_CRISIS"
+        },
+        {
+          "sequence": 3,
+          "tick": 18000,
+          "subject": "paused.road-clock-mismatches",
+          "selector": "metrics/paused/road-clock-mismatches",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_TIME_PAUSED_ROAD"
+        }
+      ]
+    },
+    {
+      "id": "full",
+      "events": [
+        {
+          "sequence": 0,
+          "tick": 0,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00001",
+            "target": "scn_time_policy:target:0001",
+            "arguments": {
+              "ordinal": 1,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 1,
+          "tick": 300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00002",
+            "target": "scn_time_policy:target:0002",
+            "arguments": {
+              "ordinal": 2,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 2,
+          "tick": 600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00003",
+            "target": "scn_time_policy:target:0003",
+            "arguments": {
+              "ordinal": 3,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 3,
+          "tick": 900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00004",
+            "target": "scn_time_policy:target:0004",
+            "arguments": {
+              "ordinal": 4,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 4,
+          "tick": 1200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00005",
+            "target": "scn_time_policy:target:0005",
+            "arguments": {
+              "ordinal": 5,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 5,
+          "tick": 1500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00006",
+            "target": "scn_time_policy:target:0006",
+            "arguments": {
+              "ordinal": 6,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 6,
+          "tick": 1800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00007",
+            "target": "scn_time_policy:target:0007",
+            "arguments": {
+              "ordinal": 7,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 7,
+          "tick": 2100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00008",
+            "target": "scn_time_policy:target:0008",
+            "arguments": {
+              "ordinal": 8,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 8,
+          "tick": 2400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00009",
+            "target": "scn_time_policy:target:0009",
+            "arguments": {
+              "ordinal": 9,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 9,
+          "tick": 2700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00010",
+            "target": "scn_time_policy:target:0010",
+            "arguments": {
+              "ordinal": 10,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 10,
+          "tick": 3000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00011",
+            "target": "scn_time_policy:target:0011",
+            "arguments": {
+              "ordinal": 11,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 11,
+          "tick": 3300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00012",
+            "target": "scn_time_policy:target:0012",
+            "arguments": {
+              "ordinal": 12,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 12,
+          "tick": 3600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00013",
+            "target": "scn_time_policy:target:0013",
+            "arguments": {
+              "ordinal": 13,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 13,
+          "tick": 3900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00014",
+            "target": "scn_time_policy:target:0014",
+            "arguments": {
+              "ordinal": 14,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 14,
+          "tick": 4200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00015",
+            "target": "scn_time_policy:target:0015",
+            "arguments": {
+              "ordinal": 15,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 15,
+          "tick": 4500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00016",
+            "target": "scn_time_policy:target:0016",
+            "arguments": {
+              "ordinal": 16,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 16,
+          "tick": 4800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00017",
+            "target": "scn_time_policy:target:0001",
+            "arguments": {
+              "ordinal": 17,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 17,
+          "tick": 5100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00018",
+            "target": "scn_time_policy:target:0002",
+            "arguments": {
+              "ordinal": 18,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 18,
+          "tick": 5400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00019",
+            "target": "scn_time_policy:target:0003",
+            "arguments": {
+              "ordinal": 19,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 19,
+          "tick": 5700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00020",
+            "target": "scn_time_policy:target:0004",
+            "arguments": {
+              "ordinal": 20,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 20,
+          "tick": 6000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00021",
+            "target": "scn_time_policy:target:0005",
+            "arguments": {
+              "ordinal": 21,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 21,
+          "tick": 6300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00022",
+            "target": "scn_time_policy:target:0006",
+            "arguments": {
+              "ordinal": 22,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 22,
+          "tick": 6600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00023",
+            "target": "scn_time_policy:target:0007",
+            "arguments": {
+              "ordinal": 23,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 23,
+          "tick": 6900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00024",
+            "target": "scn_time_policy:target:0008",
+            "arguments": {
+              "ordinal": 24,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 24,
+          "tick": 7200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00025",
+            "target": "scn_time_policy:target:0009",
+            "arguments": {
+              "ordinal": 25,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 25,
+          "tick": 7500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00026",
+            "target": "scn_time_policy:target:0010",
+            "arguments": {
+              "ordinal": 26,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 26,
+          "tick": 7800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00027",
+            "target": "scn_time_policy:target:0011",
+            "arguments": {
+              "ordinal": 27,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 27,
+          "tick": 8100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00028",
+            "target": "scn_time_policy:target:0012",
+            "arguments": {
+              "ordinal": 28,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 28,
+          "tick": 8400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00029",
+            "target": "scn_time_policy:target:0013",
+            "arguments": {
+              "ordinal": 29,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 29,
+          "tick": 8700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00030",
+            "target": "scn_time_policy:target:0014",
+            "arguments": {
+              "ordinal": 30,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 30,
+          "tick": 9000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00031",
+            "target": "scn_time_policy:target:0015",
+            "arguments": {
+              "ordinal": 31,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 31,
+          "tick": 9300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00032",
+            "target": "scn_time_policy:target:0016",
+            "arguments": {
+              "ordinal": 32,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 32,
+          "tick": 9600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00033",
+            "target": "scn_time_policy:target:0001",
+            "arguments": {
+              "ordinal": 33,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 33,
+          "tick": 9900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00034",
+            "target": "scn_time_policy:target:0002",
+            "arguments": {
+              "ordinal": 34,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 34,
+          "tick": 10200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00035",
+            "target": "scn_time_policy:target:0003",
+            "arguments": {
+              "ordinal": 35,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 35,
+          "tick": 10500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00036",
+            "target": "scn_time_policy:target:0004",
+            "arguments": {
+              "ordinal": 36,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 36,
+          "tick": 10800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00037",
+            "target": "scn_time_policy:target:0005",
+            "arguments": {
+              "ordinal": 37,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 37,
+          "tick": 11100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00038",
+            "target": "scn_time_policy:target:0006",
+            "arguments": {
+              "ordinal": 38,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 38,
+          "tick": 11400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00039",
+            "target": "scn_time_policy:target:0007",
+            "arguments": {
+              "ordinal": 39,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 39,
+          "tick": 11700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00040",
+            "target": "scn_time_policy:target:0008",
+            "arguments": {
+              "ordinal": 40,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 40,
+          "tick": 12000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00041",
+            "target": "scn_time_policy:target:0009",
+            "arguments": {
+              "ordinal": 41,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 41,
+          "tick": 12300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00042",
+            "target": "scn_time_policy:target:0010",
+            "arguments": {
+              "ordinal": 42,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 42,
+          "tick": 12600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00043",
+            "target": "scn_time_policy:target:0011",
+            "arguments": {
+              "ordinal": 43,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 43,
+          "tick": 12900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00044",
+            "target": "scn_time_policy:target:0012",
+            "arguments": {
+              "ordinal": 44,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 44,
+          "tick": 13200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00045",
+            "target": "scn_time_policy:target:0013",
+            "arguments": {
+              "ordinal": 45,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 45,
+          "tick": 13500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00046",
+            "target": "scn_time_policy:target:0014",
+            "arguments": {
+              "ordinal": 46,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 46,
+          "tick": 13800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00047",
+            "target": "scn_time_policy:target:0015",
+            "arguments": {
+              "ordinal": 47,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 47,
+          "tick": 14100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00048",
+            "target": "scn_time_policy:target:0016",
+            "arguments": {
+              "ordinal": 48,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 48,
+          "tick": 14400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00049",
+            "target": "scn_time_policy:target:0001",
+            "arguments": {
+              "ordinal": 49,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 49,
+          "tick": 14700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00050",
+            "target": "scn_time_policy:target:0002",
+            "arguments": {
+              "ordinal": 50,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 50,
+          "tick": 15000,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00051",
+            "target": "scn_time_policy:target:0003",
+            "arguments": {
+              "ordinal": 51,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 51,
+          "tick": 15300,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00052",
+            "target": "scn_time_policy:target:0004",
+            "arguments": {
+              "ordinal": 52,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 52,
+          "tick": 15600,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "TriggerAutoPauseAlert",
+            "command_id": "SCN_TIME_POLICY:cmd:00053",
+            "target": "scn_time_policy:target:0005",
+            "arguments": {
+              "ordinal": 53,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 53,
+          "tick": 15900,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ResolveEncounter",
+            "command_id": "SCN_TIME_POLICY:cmd:00054",
+            "target": "scn_time_policy:target:0006",
+            "arguments": {
+              "ordinal": 54,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 54,
+          "tick": 16200,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ReturnExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00055",
+            "target": "scn_time_policy:target:0007",
+            "arguments": {
+              "ordinal": 55,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 55,
+          "tick": 16500,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "ObserveDomainClocks",
+            "command_id": "SCN_TIME_POLICY:cmd:00056",
+            "target": "scn_time_policy:target:0008",
+            "arguments": {
+              "ordinal": 56,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 56,
+          "tick": 16800,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "SetClockPolicy",
+            "command_id": "SCN_TIME_POLICY:cmd:00057",
+            "target": "scn_time_policy:target:0009",
+            "arguments": {
+              "ordinal": 57,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 57,
+          "tick": 17100,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "DepartExpedition",
+            "command_id": "SCN_TIME_POLICY:cmd:00058",
+            "target": "scn_time_policy:target:0010",
+            "arguments": {
+              "ordinal": 58,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 58,
+          "tick": 17400,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "AdvanceRoadTick",
+            "command_id": "SCN_TIME_POLICY:cmd:00059",
+            "target": "scn_time_policy:target:0011",
+            "arguments": {
+              "ordinal": 59,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        },
+        {
+          "sequence": 59,
+          "tick": 17700,
+          "kind": "scripted_commands",
+          "payload": {
+            "command": "RequestPause",
+            "command_id": "SCN_TIME_POLICY:cmd:00060",
+            "target": "scn_time_policy:target:0012",
+            "arguments": {
+              "ordinal": 60,
+              "bindings": {
+                "clock-policy": "full"
+              }
+            }
+          }
+        }
+      ],
+      "oracle_observations": [
+        {
+          "sequence": 0,
+          "tick": 18000,
+          "subject": "full.settlement-clock-mismatches",
+          "selector": "metrics/full/settlement-clock-mismatches",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_TIME_FULL_SETTLEMENT"
+        },
+        {
+          "sequence": 1,
+          "tick": 18000,
+          "subject": "full.faction-clock-mismatches",
+          "selector": "metrics/full/faction-clock-mismatches",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_TIME_FULL_FACTION"
+        },
+        {
+          "sequence": 2,
+          "tick": 18000,
+          "subject": "full.crisis-weather-clock-mismatches",
+          "selector": "metrics/full/crisis-weather-clock-mismatches",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_TIME_FULL_CRISIS"
+        },
+        {
+          "sequence": 3,
+          "tick": 18000,
+          "subject": "full.road-clock-mismatches",
+          "selector": "metrics/full/road-clock-mismatches",
+          "operator": "equal",
+          "expected_source": "scenario-definition",
+          "oracle_id": "ORC_TIME_FULL_ROAD"
+        }
+      ]
+    }
+  ],
+  "oracle_observations": [
+    {
+      "sequence": 0,
+      "tick": 18000,
+      "subject": "time-policy-cases-completed",
+      "selector": "metrics/time-policy-cases-completed",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_TIME_CASES"
+    },
+    {
+      "sequence": 1,
+      "tick": 18000,
+      "subject": "packet-selected-policy-receipt-mismatches",
+      "selector": "metrics/packet-selected-policy-receipt-mismatches",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_TIME_SELECTED"
+    },
+    {
+      "sequence": 2,
+      "tick": 18000,
+      "subject": "forecast-behavior-mismatches",
+      "selector": "metrics/forecast-behavior-mismatches",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_TIME_FORECAST"
+    }
+  ],
+  "target_bindings_sha256": "c435e70f51475d2e6555f88416c0a707278c24b4595ee0c1e2ab96714f5b1861",
+  "target_bindings": [
+    {
+      "logical_target_id": "scn_time_policy:target:0001",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "clock-subsystem",
+      "selector_value": "clock"
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0002",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_time_policy:base:state:00019",
+      "case_resolutions": [
+        {
+          "case_id": "slowed",
+          "resolved_id": "scn_time_policy:slowed:state:00019"
+        },
+        {
+          "case_id": "paused",
+          "resolved_id": "scn_time_policy:paused:state:00019"
+        },
+        {
+          "case_id": "full",
+          "resolved_id": "scn_time_policy:full:state:00019"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0003",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_time_policy:base:state:00029",
+      "case_resolutions": [
+        {
+          "case_id": "slowed",
+          "resolved_id": "scn_time_policy:slowed:state:00029"
+        },
+        {
+          "case_id": "paused",
+          "resolved_id": "scn_time_policy:paused:state:00029"
+        },
+        {
+          "case_id": "full",
+          "resolved_id": "scn_time_policy:full:state:00029"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0004",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "clock-subsystem",
+      "selector_value": "clock"
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0005",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "clock-subsystem",
+      "selector_value": "clock"
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0006",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_time_policy:base:state:00059",
+      "case_resolutions": [
+        {
+          "case_id": "slowed",
+          "resolved_id": "scn_time_policy:slowed:state:00059"
+        },
+        {
+          "case_id": "paused",
+          "resolved_id": "scn_time_policy:paused:state:00059"
+        },
+        {
+          "case_id": "full",
+          "resolved_id": "scn_time_policy:full:state:00059"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0007",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_time_policy:base:state:00069",
+      "case_resolutions": [
+        {
+          "case_id": "slowed",
+          "resolved_id": "scn_time_policy:slowed:state:00069"
+        },
+        {
+          "case_id": "paused",
+          "resolved_id": "scn_time_policy:paused:state:00069"
+        },
+        {
+          "case_id": "full",
+          "resolved_id": "scn_time_policy:full:state:00069"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0008",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "clock-subsystem",
+      "selector_value": "clock"
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0009",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "clock-subsystem",
+      "selector_value": "clock"
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0010",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_time_policy:base:state:00009",
+      "case_resolutions": [
+        {
+          "case_id": "slowed",
+          "resolved_id": "scn_time_policy:slowed:state:00019"
+        },
+        {
+          "case_id": "paused",
+          "resolved_id": "scn_time_policy:paused:state:00019"
+        },
+        {
+          "case_id": "full",
+          "resolved_id": "scn_time_policy:full:state:00019"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0011",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_time_policy:base:state:00019",
+      "case_resolutions": [
+        {
+          "case_id": "slowed",
+          "resolved_id": "scn_time_policy:slowed:state:00029"
+        },
+        {
+          "case_id": "paused",
+          "resolved_id": "scn_time_policy:paused:state:00029"
+        },
+        {
+          "case_id": "full",
+          "resolved_id": "scn_time_policy:full:state:00029"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0012",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "clock-subsystem",
+      "selector_value": "clock"
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0013",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "clock-subsystem",
+      "selector_value": "clock"
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0014",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_time_policy:base:state:00049",
+      "case_resolutions": [
+        {
+          "case_id": "slowed",
+          "resolved_id": "scn_time_policy:slowed:state:00059"
+        },
+        {
+          "case_id": "paused",
+          "resolved_id": "scn_time_policy:paused:state:00059"
+        },
+        {
+          "case_id": "full",
+          "resolved_id": "scn_time_policy:full:state:00059"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0015",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_time_policy:base:state:00059",
+      "case_resolutions": [
+        {
+          "case_id": "slowed",
+          "resolved_id": "scn_time_policy:slowed:state:00069"
+        },
+        {
+          "case_id": "paused",
+          "resolved_id": "scn_time_policy:paused:state:00069"
+        },
+        {
+          "case_id": "full",
+          "resolved_id": "scn_time_policy:full:state:00069"
+        }
+      ]
+    },
+    {
+      "logical_target_id": "scn_time_policy:target:0016",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "clock-subsystem",
+      "selector_value": "clock"
+    }
+  ]
+}

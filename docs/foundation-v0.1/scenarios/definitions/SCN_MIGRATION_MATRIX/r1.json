@@ -1,0 +1,117 @@
+{
+  "schema_version": 2,
+  "id": "SCN_MIGRATION_MATRIX",
+  "revision": 1,
+  "kind": "migration",
+  "title": "Technical golden-save migration matrix",
+  "purpose": "Migrate or explicitly reject each accepted historical technical fixture, then repeat each migration to prove idempotency and canonical-state preservation.",
+  "applies_to_packets": [
+    "WP-0001"
+  ],
+  "fixture": {
+    "world_seed": "1003",
+    "starting_tick": "0",
+    "tick_rate_hz": 10,
+    "warmup_ticks": 0,
+    "duration_ticks": 0,
+    "warmup_seconds": 0,
+    "duration_seconds": 0,
+    "starting_state_id": "three-technical-golden-saves-v1",
+    "content_set_id": "technical-migration-content-v1",
+    "input_script_id": "migration-matrix-v1",
+    "fixture_manifest": {
+      "path": "scenarios/fixtures/SCN_MIGRATION_MATRIX/r1.fixture.json",
+      "sha256": "9666325a58adec21c8cb6eceb686b4cc814919b2b755b8a4e4bdd4448594e67e"
+    }
+  },
+  "counts": {
+    "state": {
+      "authoritative_records": 96,
+      "save_sections": 18,
+      "content_definitions": 12,
+      "transactions": 3,
+      "save_generations": 6
+    },
+    "entities": {
+      "total": 27,
+      "settlements": 3,
+      "buildings": 6,
+      "households": 3,
+      "specialists": 3,
+      "robots": 0,
+      "vehicles": 3,
+      "factions": 3,
+      "crises": 3,
+      "expeditions": 3
+    },
+    "objects": {
+      "placed_total": 0,
+      "dynamic": 0,
+      "static": 0,
+      "lod0": 0,
+      "lod1": 0,
+      "lod2": 0
+    },
+    "lights": {
+      "total": 0,
+      "directional": 0,
+      "point": 0,
+      "spot": 0,
+      "shadowed": 0
+    },
+    "crowd": {
+      "authoritative_people": 15,
+      "visible_agents": 0,
+      "offscreen_people": 15
+    },
+    "inputs": {
+      "scripted_commands": 6,
+      "keyboard_events": 0,
+      "controller_events": 0,
+      "pointer_events": 0,
+      "fault_injections": 0
+    }
+  },
+  "parameters": [
+    {
+      "name": "historical-fixtures",
+      "value": 3,
+      "unit": "saves"
+    },
+    {
+      "name": "migration-runs-per-fixture",
+      "value": 2,
+      "unit": "runs"
+    }
+  ],
+  "oracles": [
+    {
+      "id": "ORC_MIGRATION_UNRESOLVED",
+      "subject": "unresolved-fixtures",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_MIGRATION_STATE",
+      "subject": "canonical-state-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_MIGRATION_IDEMPOTENCY",
+      "subject": "non-idempotent-migrations",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_MIGRATION_INPUTS",
+      "subject": "processed-fixtures",
+      "operator": "equal",
+      "expected": 3,
+      "unit": "count"
+    }
+  ]
+}

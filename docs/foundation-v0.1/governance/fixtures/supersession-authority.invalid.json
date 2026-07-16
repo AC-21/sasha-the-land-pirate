@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "rule": "lower-authority records cannot supersede creator-authority records; creator constitutional replacements require a protected creator receipt",
+  "cases": [
+    {
+      "id": "INVALID-DESIGN-OVER-CREATOR",
+      "predecessor": {
+        "id": "D-9101",
+        "class": "constitutional",
+        "status": "ratified",
+        "authority": "creator-prompt",
+        "approval_receipt_id": "RR-CREATOR-OLD"
+      },
+      "successor": {
+        "id": "D-9102",
+        "class": "constitutional",
+        "status": "open",
+        "authority": "design-recommendation",
+        "approval_receipt_id": null,
+        "supersedes": "D-9101"
+      },
+      "receipt": null,
+      "expected_valid": false,
+      "expected_error": "lower-authority-cannot-supersede-creator-authority"
+    },
+    {
+      "id": "INVALID-TECHNICAL-OVER-CREATOR",
+      "predecessor": {
+        "id": "D-9103",
+        "class": "technical",
+        "status": "ratified",
+        "authority": "creator-clarification",
+        "approval_receipt_id": "RR-CREATOR-OLD"
+      },
+      "successor": {
+        "id": "D-9104",
+        "class": "technical",
+        "status": "provisional",
+        "authority": "technical-recommendation",
+        "approval_receipt_id": null,
+        "supersedes": "D-9103"
+      },
+      "receipt": null,
+      "expected_valid": false,
+      "expected_error": "lower-authority-cannot-supersede-creator-authority"
+    },
+    {
+      "id": "INVALID-CREATOR-CONSTITUTIONAL-NO-RECEIPT",
+      "predecessor": {
+        "id": "D-9105",
+        "class": "constitutional",
+        "status": "ratified",
+        "authority": "creator-prompt",
+        "approval_receipt_id": "RR-CREATOR-OLD"
+      },
+      "successor": {
+        "id": "D-9106",
+        "class": "constitutional",
+        "status": "ratified",
+        "authority": "creator-ratification",
+        "approval_receipt_id": null,
+        "supersedes": "D-9105"
+      },
+      "receipt": null,
+      "expected_valid": false,
+      "expected_error": "creator-constitutional-supersession-requires-protected-receipt"
+    },
+    {
+      "id": "INVALID-CREATOR-CONSTITUTIONAL-UNSEALED",
+      "predecessor": {
+        "id": "D-9107",
+        "class": "constitutional",
+        "status": "ratified",
+        "authority": "creator-clarification",
+        "approval_receipt_id": "RR-CREATOR-OLD"
+      },
+      "successor": {
+        "id": "D-9108",
+        "event_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+        "class": "constitutional",
+        "status": "ratified",
+        "authority": "creator-ratification",
+        "approval_receipt_id": "RR-CREATOR-NEW",
+        "supersedes": "D-9107"
+      },
+      "receipt": {
+        "receipt_id": "RR-CREATOR-NEW",
+        "issuer_role": "creator",
+        "receipt_kind": "decision-ratification",
+        "sealed": false,
+        "accepted_commit": null,
+        "subject_ids": ["D-9108"],
+        "subject_event_sha256": {
+          "D-9108": "3333333333333333333333333333333333333333333333333333333333333333"
+        }
+      },
+      "expected_valid": false,
+      "expected_error": "creator-constitutional-supersession-requires-protected-receipt"
+    },
+    {
+      "id": "INVALID-CREATOR-CONSTITUTIONAL-WRONG-EVENT-HASH",
+      "predecessor": {
+        "id": "D-9109",
+        "class": "constitutional",
+        "status": "ratified",
+        "authority": "creator-prompt",
+        "approval_receipt_id": "RR-CREATOR-OLD"
+      },
+      "successor": {
+        "id": "D-9110",
+        "event_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+        "class": "constitutional",
+        "status": "ratified",
+        "authority": "creator-ratification",
+        "approval_receipt_id": "RR-CREATOR-NEW",
+        "supersedes": "D-9109"
+      },
+      "receipt": {
+        "receipt_id": "RR-CREATOR-NEW",
+        "issuer_role": "creator",
+        "receipt_kind": "decision-ratification",
+        "sealed": true,
+        "accepted_commit": "1111111111111111111111111111111111111111",
+        "subject_ids": ["D-9110"],
+        "subject_event_sha256": {
+          "D-9110": "5555555555555555555555555555555555555555555555555555555555555555"
+        }
+      },
+      "expected_valid": false,
+      "expected_error": "creator-constitutional-supersession-requires-protected-receipt"
+    },
+    {
+      "id": "INVALID-CREATOR-CONSTITUTIONAL-WRONG-AUTHORITY",
+      "predecessor": {
+        "id": "D-9111",
+        "class": "constitutional",
+        "status": "ratified",
+        "authority": "creator-prompt",
+        "approval_receipt_id": "RR-CREATOR-OLD"
+      },
+      "successor": {
+        "id": "D-9112",
+        "event_hash": "6666666666666666666666666666666666666666666666666666666666666666",
+        "class": "constitutional",
+        "status": "ratified",
+        "authority": "creator-clarification",
+        "approval_receipt_id": "RR-CREATOR-NEW",
+        "supersedes": "D-9111"
+      },
+      "receipt": {
+        "receipt_id": "RR-CREATOR-NEW",
+        "issuer_role": "creator",
+        "receipt_kind": "decision-ratification",
+        "sealed": true,
+        "accepted_commit": "1111111111111111111111111111111111111111",
+        "subject_ids": ["D-9112"],
+        "subject_event_sha256": {
+          "D-9112": "6666666666666666666666666666666666666666666666666666666666666666"
+        }
+      },
+      "expected_valid": false,
+      "expected_error": "constitutional-successor-requires-exact-creator-ratification-authority"
+    }
+  ]
+}

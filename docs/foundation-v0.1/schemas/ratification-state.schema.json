@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/ratification-state.schema.json",
+  "title": "Foundation ratification state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "foundation_version",
+    "foundation_status",
+    "active_autonomy",
+    "active_a1_packet_id",
+    "a1_max_active_packets",
+    "trusted_gatekeeper_status",
+    "constitution_sha256",
+    "decision_ledger_sha256",
+    "last_creator_receipt_id",
+    "packet_entry_gates",
+    "packet_dependency_release_requirements",
+    "entry_gates"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "foundation_version": { "type": "string", "minLength": 1 },
+    "foundation_status": { "enum": ["draft", "partially-ratified", "ratified", "superseded"] },
+    "active_autonomy": { "enum": ["A0", "A1", "A2", "A3", "A4"] },
+    "active_a1_packet_id": { "type": ["string", "null"], "pattern": "^WP-[0-9]{4}$" },
+    "a1_max_active_packets": { "const": 1 },
+    "trusted_gatekeeper_status": { "enum": ["not-implemented", "candidate", "passed", "revoked"] },
+    "constitution_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "decision_ledger_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "last_creator_receipt_id": { "type": ["string", "null"] },
+    "packet_entry_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["WP-0001", "WP-0002"],
+      "properties": {
+        "WP-0001": { "const": "technical_spike" },
+        "WP-0002": { "const": "ugly_gameplay_toy" }
+      }
+    },
+    "packet_dependency_release_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["WP-0001", "WP-0002"],
+      "properties": {
+        "WP-0001": { "type": "array", "maxItems": 0 },
+        "WP-0002": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/dependencyReleaseRequirement" }
+        }
+      }
+    },
+    "entry_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["technical_spike", "ugly_gameplay_toy", "slice_kernel", "production_content", "background_integration"],
+      "properties": {
+        "technical_spike": { "$ref": "#/$defs/gate" },
+        "ugly_gameplay_toy": { "$ref": "#/$defs/gate" },
+        "slice_kernel": { "$ref": "#/$defs/gate" },
+        "production_content": { "$ref": "#/$defs/gate" },
+        "background_integration": { "$ref": "#/$defs/gate" }
+      }
+    }
+  },
+  "$defs": {
+    "dependencyReleaseRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dependency_id", "required_status", "completion_receipt_id", "required_claims"],
+      "properties": {
+        "dependency_id": { "type": "string", "pattern": "^WP-[0-9]{4}$" },
+        "required_status": { "const": "released" },
+        "completion_receipt_id": { "type": ["string", "null"], "pattern": "^RR-[A-Z0-9-]+$" },
+        "required_claims": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^[A-Z0-9+_-]+$" } }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "decision_requirements", "receipt_requirements"],
+      "properties": {
+        "status": { "enum": ["blocked", "awaiting-creator", "ready", "passed", "revoked"] },
+        "decision_requirements": { "type": "array", "items": { "$ref": "#/$defs/decisionRequirement" } },
+        "receipt_requirements": { "type": "array", "items": { "$ref": "#/$defs/receiptRequirement" } }
+      }
+    },
+    "decisionRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision_id", "accepted_statuses", "allowed_claims", "receipt_id", "mismatch_action"],
+      "properties": {
+        "decision_id": { "type": "string", "pattern": "^D-[0-9]{4}$" },
+        "accepted_statuses": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["ratified"] } },
+        "allowed_claims": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^[A-Z0-9+_-]+$" } },
+        "receipt_id": { "type": ["string", "null"] },
+        "mismatch_action": { "type": "string", "minLength": 1 }
+      }
+    },
+    "receiptRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["purpose", "receipt_id", "subject_ids", "required_claims"],
+      "properties": {
+        "purpose": { "type": "string", "minLength": 1 },
+        "receipt_id": { "type": ["string", "null"] },
+        "subject_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "required_claims": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^[A-Z0-9+_-]+$" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,2524 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "starting-state",
+  "semantic_id": "last-bearing-balanced-town-v1",
+  "scenario_id": "SCN_ECONOMY_24H",
+  "scenario_revision": 1,
+  "world_seed": "3002",
+  "starting_tick": "0",
+  "canonicalization": "json-utf8-explicit-record-order-v1",
+  "canonical_entities": [
+    {
+      "id": "world:3002:base:settlement:0001",
+      "type": "settlement",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "name": "Settlement 1",
+        "inventory": {
+          "water": 120,
+          "food": 90,
+          "parts": 24,
+          "fuel": 18
+        },
+        "power_capacity": 40,
+        "power_load": 26
+      }
+    },
+    {
+      "id": "world:3002:base:building:0001",
+      "type": "building",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "water-turbine",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:3002:base:building:0002",
+      "type": "building",
+      "ordinal": 2,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "workshop",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:3002:base:building:0003",
+      "type": "building",
+      "ordinal": 3,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "storage",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:3002:base:building:0004",
+      "type": "building",
+      "ordinal": 4,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "generator",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:3002:base:building:0005",
+      "type": "building",
+      "ordinal": 5,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "shelter",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:3002:base:building:0006",
+      "type": "building",
+      "ordinal": 6,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "garage",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:3002:base:building:0007",
+      "type": "building",
+      "ordinal": 7,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "recycler",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:3002:base:building:0008",
+      "type": "building",
+      "ordinal": 8,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "clinic",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:3002:base:building:0009",
+      "type": "building",
+      "ordinal": 9,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "water-turbine",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:3002:base:building:0010",
+      "type": "building",
+      "ordinal": 10,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "workshop",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:3002:base:household:0001",
+      "type": "household",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "member_count": 1,
+        "food_milli": 1000,
+        "water_milli": 1000,
+        "rest_milli": 1000,
+        "capabilities": [
+          "general-labor",
+          "bearing-service"
+        ]
+      }
+    },
+    {
+      "id": "world:3002:base:household:0002",
+      "type": "household",
+      "ordinal": 2,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "member_count": 1,
+        "food_milli": 1000,
+        "water_milli": 1000,
+        "rest_milli": 1000,
+        "capabilities": [
+          "general-labor",
+          "bearing-service"
+        ]
+      }
+    },
+    {
+      "id": "world:3002:base:household:0003",
+      "type": "household",
+      "ordinal": 3,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "member_count": 1,
+        "food_milli": 1000,
+        "water_milli": 1000,
+        "rest_milli": 1000,
+        "capabilities": [
+          "general-labor",
+          "bearing-service"
+        ]
+      }
+    },
+    {
+      "id": "world:3002:base:household:0004",
+      "type": "household",
+      "ordinal": 4,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "member_count": 1,
+        "food_milli": 1000,
+        "water_milli": 1000,
+        "rest_milli": 1000,
+        "capabilities": [
+          "general-labor",
+          "bearing-service"
+        ]
+      }
+    },
+    {
+      "id": "world:3002:base:household:0005",
+      "type": "household",
+      "ordinal": 5,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "member_count": 1,
+        "food_milli": 1000,
+        "water_milli": 1000,
+        "rest_milli": 1000,
+        "capabilities": [
+          "general-labor",
+          "bearing-service"
+        ]
+      }
+    },
+    {
+      "id": "world:3002:base:household:0006",
+      "type": "household",
+      "ordinal": 6,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "member_count": 1,
+        "food_milli": 1000,
+        "water_milli": 1000,
+        "rest_milli": 1000,
+        "capabilities": [
+          "general-labor",
+          "bearing-service"
+        ]
+      }
+    },
+    {
+      "id": "world:3002:base:specialist:0001",
+      "type": "specialist",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "name": "Specialist 1",
+        "capabilities": [
+          "precision-repair",
+          "expedition-lead"
+        ],
+        "assignment": "available"
+      }
+    },
+    {
+      "id": "world:3002:base:robot:0001",
+      "type": "robot",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "chassis": "original-field-utility-r1",
+        "energy_milli": 1000,
+        "maintenance_milli": 1000,
+        "capabilities": [
+          "powered-lift",
+          "bearing-service-tool"
+        ],
+        "assignment": "available"
+      }
+    },
+    {
+      "id": "world:3002:base:vehicle:0001",
+      "type": "vehicle",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "chassis": "utility-scout-r1",
+        "fuel_milli": 1000,
+        "cargo_capacity": 12,
+        "modules": [],
+        "status": "at-home"
+      }
+    },
+    {
+      "id": "world:3002:base:faction:0001",
+      "type": "faction",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "content_id": "faction-01",
+        "intent": "telegraphed-depot-claim",
+        "claim_progress_milli": 0,
+        "trust": 0,
+        "grievance": 0
+      }
+    },
+    {
+      "id": "world:3002:base:crisis:0001",
+      "type": "crisis",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "kind": "dust-front",
+        "forecast_ticks": 6000,
+        "severity_milli": 400,
+        "status": "forecast"
+      }
+    }
+  ],
+  "canonical_state_records": [
+    {
+      "id": "scn_economy_24h:base:state:00001",
+      "domain": "world",
+      "ordinal": 1,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 97,
+        "tick_offset": 0,
+        "parameter_binding": {
+          "simulation-hours": 24,
+          "player-interventions": 0,
+          "production-chains": 3
+        }
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00002",
+      "domain": "settlement",
+      "ordinal": 2,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 194,
+        "tick_offset": 1,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00003",
+      "domain": "population",
+      "ordinal": 3,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 291,
+        "tick_offset": 2,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00004",
+      "domain": "logistics",
+      "ordinal": 4,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 388,
+        "tick_offset": 3,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00005",
+      "domain": "vehicle",
+      "ordinal": 5,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 485,
+        "tick_offset": 4,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00006",
+      "domain": "expedition",
+      "ordinal": 6,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 582,
+        "tick_offset": 5,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00007",
+      "domain": "faction",
+      "ordinal": 7,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 679,
+        "tick_offset": 6,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00008",
+      "domain": "crisis",
+      "ordinal": 8,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 776,
+        "tick_offset": 7,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00009",
+      "domain": "audit",
+      "ordinal": 9,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 873,
+        "tick_offset": 8,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00010",
+      "domain": "save",
+      "ordinal": 10,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 970,
+        "tick_offset": 9,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00011",
+      "domain": "world",
+      "ordinal": 11,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1067,
+        "tick_offset": 10,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00012",
+      "domain": "settlement",
+      "ordinal": 12,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1164,
+        "tick_offset": 11,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00013",
+      "domain": "population",
+      "ordinal": 13,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1261,
+        "tick_offset": 12,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00014",
+      "domain": "logistics",
+      "ordinal": 14,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1358,
+        "tick_offset": 13,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00015",
+      "domain": "vehicle",
+      "ordinal": 15,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1455,
+        "tick_offset": 14,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00016",
+      "domain": "expedition",
+      "ordinal": 16,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1552,
+        "tick_offset": 15,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00017",
+      "domain": "faction",
+      "ordinal": 17,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1649,
+        "tick_offset": 16,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00018",
+      "domain": "crisis",
+      "ordinal": 18,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1746,
+        "tick_offset": 17,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00019",
+      "domain": "audit",
+      "ordinal": 19,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1843,
+        "tick_offset": 18,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00020",
+      "domain": "save",
+      "ordinal": 20,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1940,
+        "tick_offset": 19,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00021",
+      "domain": "world",
+      "ordinal": 21,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2037,
+        "tick_offset": 20,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00022",
+      "domain": "settlement",
+      "ordinal": 22,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2134,
+        "tick_offset": 21,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00023",
+      "domain": "population",
+      "ordinal": 23,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2231,
+        "tick_offset": 22,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00024",
+      "domain": "logistics",
+      "ordinal": 24,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2328,
+        "tick_offset": 23,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00025",
+      "domain": "vehicle",
+      "ordinal": 25,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2425,
+        "tick_offset": 24,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00026",
+      "domain": "expedition",
+      "ordinal": 26,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2522,
+        "tick_offset": 25,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00027",
+      "domain": "faction",
+      "ordinal": 27,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2619,
+        "tick_offset": 26,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00028",
+      "domain": "crisis",
+      "ordinal": 28,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2716,
+        "tick_offset": 27,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00029",
+      "domain": "audit",
+      "ordinal": 29,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2813,
+        "tick_offset": 28,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00030",
+      "domain": "save",
+      "ordinal": 30,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2910,
+        "tick_offset": 29,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00031",
+      "domain": "world",
+      "ordinal": 31,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3007,
+        "tick_offset": 30,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00032",
+      "domain": "settlement",
+      "ordinal": 32,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3104,
+        "tick_offset": 31,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00033",
+      "domain": "population",
+      "ordinal": 33,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3201,
+        "tick_offset": 32,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00034",
+      "domain": "logistics",
+      "ordinal": 34,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3298,
+        "tick_offset": 33,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00035",
+      "domain": "vehicle",
+      "ordinal": 35,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3395,
+        "tick_offset": 34,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00036",
+      "domain": "expedition",
+      "ordinal": 36,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3492,
+        "tick_offset": 35,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00037",
+      "domain": "faction",
+      "ordinal": 37,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3589,
+        "tick_offset": 36,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00038",
+      "domain": "crisis",
+      "ordinal": 38,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3686,
+        "tick_offset": 37,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00039",
+      "domain": "audit",
+      "ordinal": 39,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3783,
+        "tick_offset": 38,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00040",
+      "domain": "save",
+      "ordinal": 40,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3880,
+        "tick_offset": 39,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00041",
+      "domain": "world",
+      "ordinal": 41,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3977,
+        "tick_offset": 40,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00042",
+      "domain": "settlement",
+      "ordinal": 42,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4074,
+        "tick_offset": 41,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00043",
+      "domain": "population",
+      "ordinal": 43,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4171,
+        "tick_offset": 42,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00044",
+      "domain": "logistics",
+      "ordinal": 44,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4268,
+        "tick_offset": 43,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00045",
+      "domain": "vehicle",
+      "ordinal": 45,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4365,
+        "tick_offset": 44,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00046",
+      "domain": "expedition",
+      "ordinal": 46,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4462,
+        "tick_offset": 45,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00047",
+      "domain": "faction",
+      "ordinal": 47,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4559,
+        "tick_offset": 46,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00048",
+      "domain": "crisis",
+      "ordinal": 48,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4656,
+        "tick_offset": 47,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00049",
+      "domain": "audit",
+      "ordinal": 49,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4753,
+        "tick_offset": 48,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00050",
+      "domain": "save",
+      "ordinal": 50,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4850,
+        "tick_offset": 49,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00051",
+      "domain": "world",
+      "ordinal": 51,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4947,
+        "tick_offset": 50,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00052",
+      "domain": "settlement",
+      "ordinal": 52,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5044,
+        "tick_offset": 51,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00053",
+      "domain": "population",
+      "ordinal": 53,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5141,
+        "tick_offset": 52,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00054",
+      "domain": "logistics",
+      "ordinal": 54,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5238,
+        "tick_offset": 53,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00055",
+      "domain": "vehicle",
+      "ordinal": 55,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5335,
+        "tick_offset": 54,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00056",
+      "domain": "expedition",
+      "ordinal": 56,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5432,
+        "tick_offset": 55,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00057",
+      "domain": "faction",
+      "ordinal": 57,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5529,
+        "tick_offset": 56,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00058",
+      "domain": "crisis",
+      "ordinal": 58,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5626,
+        "tick_offset": 57,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00059",
+      "domain": "audit",
+      "ordinal": 59,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5723,
+        "tick_offset": 58,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00060",
+      "domain": "save",
+      "ordinal": 60,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5820,
+        "tick_offset": 59,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00061",
+      "domain": "world",
+      "ordinal": 61,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5917,
+        "tick_offset": 60,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00062",
+      "domain": "settlement",
+      "ordinal": 62,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6014,
+        "tick_offset": 61,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00063",
+      "domain": "population",
+      "ordinal": 63,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6111,
+        "tick_offset": 62,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00064",
+      "domain": "logistics",
+      "ordinal": 64,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6208,
+        "tick_offset": 63,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00065",
+      "domain": "vehicle",
+      "ordinal": 65,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6305,
+        "tick_offset": 64,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00066",
+      "domain": "expedition",
+      "ordinal": 66,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6402,
+        "tick_offset": 65,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00067",
+      "domain": "faction",
+      "ordinal": 67,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6499,
+        "tick_offset": 66,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00068",
+      "domain": "crisis",
+      "ordinal": 68,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6596,
+        "tick_offset": 67,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00069",
+      "domain": "audit",
+      "ordinal": 69,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6693,
+        "tick_offset": 68,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00070",
+      "domain": "save",
+      "ordinal": 70,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6790,
+        "tick_offset": 69,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00071",
+      "domain": "world",
+      "ordinal": 71,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6887,
+        "tick_offset": 70,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00072",
+      "domain": "settlement",
+      "ordinal": 72,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6984,
+        "tick_offset": 71,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00073",
+      "domain": "population",
+      "ordinal": 73,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7081,
+        "tick_offset": 72,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00074",
+      "domain": "logistics",
+      "ordinal": 74,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7178,
+        "tick_offset": 73,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00075",
+      "domain": "vehicle",
+      "ordinal": 75,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7275,
+        "tick_offset": 74,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00076",
+      "domain": "expedition",
+      "ordinal": 76,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7372,
+        "tick_offset": 75,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00077",
+      "domain": "faction",
+      "ordinal": 77,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7469,
+        "tick_offset": 76,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00078",
+      "domain": "crisis",
+      "ordinal": 78,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7566,
+        "tick_offset": 77,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00079",
+      "domain": "audit",
+      "ordinal": 79,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7663,
+        "tick_offset": 78,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00080",
+      "domain": "save",
+      "ordinal": 80,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7760,
+        "tick_offset": 79,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00081",
+      "domain": "world",
+      "ordinal": 81,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7857,
+        "tick_offset": 80,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00082",
+      "domain": "settlement",
+      "ordinal": 82,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7954,
+        "tick_offset": 81,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00083",
+      "domain": "population",
+      "ordinal": 83,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 8051,
+        "tick_offset": 82,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00084",
+      "domain": "logistics",
+      "ordinal": 84,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 8148,
+        "tick_offset": 83,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00085",
+      "domain": "vehicle",
+      "ordinal": 85,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 8245,
+        "tick_offset": 84,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00086",
+      "domain": "expedition",
+      "ordinal": 86,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 8342,
+        "tick_offset": 85,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00087",
+      "domain": "faction",
+      "ordinal": 87,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 8439,
+        "tick_offset": 86,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00088",
+      "domain": "crisis",
+      "ordinal": 88,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 8536,
+        "tick_offset": 87,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00089",
+      "domain": "audit",
+      "ordinal": 89,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 8633,
+        "tick_offset": 88,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00090",
+      "domain": "save",
+      "ordinal": 90,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 8730,
+        "tick_offset": 89,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00091",
+      "domain": "world",
+      "ordinal": 91,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 8827,
+        "tick_offset": 90,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00092",
+      "domain": "settlement",
+      "ordinal": 92,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 8924,
+        "tick_offset": 91,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00093",
+      "domain": "population",
+      "ordinal": 93,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 9021,
+        "tick_offset": 92,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00094",
+      "domain": "logistics",
+      "ordinal": 94,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 9118,
+        "tick_offset": 93,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00095",
+      "domain": "vehicle",
+      "ordinal": 95,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 9215,
+        "tick_offset": 94,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00096",
+      "domain": "expedition",
+      "ordinal": 96,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 9312,
+        "tick_offset": 95,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00097",
+      "domain": "faction",
+      "ordinal": 97,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 9409,
+        "tick_offset": 96,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00098",
+      "domain": "crisis",
+      "ordinal": 98,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 9506,
+        "tick_offset": 97,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00099",
+      "domain": "audit",
+      "ordinal": 99,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 9603,
+        "tick_offset": 98,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00100",
+      "domain": "save",
+      "ordinal": 100,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 9700,
+        "tick_offset": 99,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00101",
+      "domain": "world",
+      "ordinal": 101,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 9797,
+        "tick_offset": 100,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00102",
+      "domain": "settlement",
+      "ordinal": 102,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 9894,
+        "tick_offset": 101,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00103",
+      "domain": "population",
+      "ordinal": 103,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 9991,
+        "tick_offset": 102,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00104",
+      "domain": "logistics",
+      "ordinal": 104,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 88,
+        "tick_offset": 103,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00105",
+      "domain": "vehicle",
+      "ordinal": 105,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 185,
+        "tick_offset": 104,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00106",
+      "domain": "expedition",
+      "ordinal": 106,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 282,
+        "tick_offset": 105,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00107",
+      "domain": "faction",
+      "ordinal": 107,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 379,
+        "tick_offset": 106,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00108",
+      "domain": "crisis",
+      "ordinal": 108,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 476,
+        "tick_offset": 107,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00109",
+      "domain": "audit",
+      "ordinal": 109,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 573,
+        "tick_offset": 108,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00110",
+      "domain": "save",
+      "ordinal": 110,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 670,
+        "tick_offset": 109,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00111",
+      "domain": "world",
+      "ordinal": 111,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 767,
+        "tick_offset": 110,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00112",
+      "domain": "settlement",
+      "ordinal": 112,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 864,
+        "tick_offset": 111,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00113",
+      "domain": "population",
+      "ordinal": 113,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 961,
+        "tick_offset": 112,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00114",
+      "domain": "logistics",
+      "ordinal": 114,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1058,
+        "tick_offset": 113,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00115",
+      "domain": "vehicle",
+      "ordinal": 115,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1155,
+        "tick_offset": 114,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00116",
+      "domain": "expedition",
+      "ordinal": 116,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1252,
+        "tick_offset": 115,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00117",
+      "domain": "faction",
+      "ordinal": 117,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1349,
+        "tick_offset": 116,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00118",
+      "domain": "crisis",
+      "ordinal": 118,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1446,
+        "tick_offset": 117,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00119",
+      "domain": "audit",
+      "ordinal": 119,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1543,
+        "tick_offset": 118,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00120",
+      "domain": "save",
+      "ordinal": 120,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1640,
+        "tick_offset": 119,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00121",
+      "domain": "world",
+      "ordinal": 121,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1737,
+        "tick_offset": 120,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00122",
+      "domain": "settlement",
+      "ordinal": 122,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1834,
+        "tick_offset": 121,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00123",
+      "domain": "population",
+      "ordinal": 123,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1931,
+        "tick_offset": 122,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00124",
+      "domain": "logistics",
+      "ordinal": 124,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2028,
+        "tick_offset": 123,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00125",
+      "domain": "vehicle",
+      "ordinal": 125,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2125,
+        "tick_offset": 124,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00126",
+      "domain": "expedition",
+      "ordinal": 126,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2222,
+        "tick_offset": 125,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00127",
+      "domain": "faction",
+      "ordinal": 127,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2319,
+        "tick_offset": 126,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00128",
+      "domain": "crisis",
+      "ordinal": 128,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2416,
+        "tick_offset": 127,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00129",
+      "domain": "audit",
+      "ordinal": 129,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2513,
+        "tick_offset": 128,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00130",
+      "domain": "save",
+      "ordinal": 130,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2610,
+        "tick_offset": 129,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00131",
+      "domain": "world",
+      "ordinal": 131,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2707,
+        "tick_offset": 130,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00132",
+      "domain": "settlement",
+      "ordinal": 132,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2804,
+        "tick_offset": 131,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00133",
+      "domain": "population",
+      "ordinal": 133,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2901,
+        "tick_offset": 132,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00134",
+      "domain": "logistics",
+      "ordinal": 134,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2998,
+        "tick_offset": 133,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00135",
+      "domain": "vehicle",
+      "ordinal": 135,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3095,
+        "tick_offset": 134,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00136",
+      "domain": "expedition",
+      "ordinal": 136,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3192,
+        "tick_offset": 135,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00137",
+      "domain": "faction",
+      "ordinal": 137,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3289,
+        "tick_offset": 136,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00138",
+      "domain": "crisis",
+      "ordinal": 138,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3386,
+        "tick_offset": 137,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00139",
+      "domain": "audit",
+      "ordinal": 139,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3483,
+        "tick_offset": 138,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00140",
+      "domain": "save",
+      "ordinal": 140,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3580,
+        "tick_offset": 139,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00141",
+      "domain": "world",
+      "ordinal": 141,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3677,
+        "tick_offset": 140,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00142",
+      "domain": "settlement",
+      "ordinal": 142,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3774,
+        "tick_offset": 141,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00143",
+      "domain": "population",
+      "ordinal": 143,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3871,
+        "tick_offset": 142,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00144",
+      "domain": "logistics",
+      "ordinal": 144,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3968,
+        "tick_offset": 143,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00145",
+      "domain": "vehicle",
+      "ordinal": 145,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4065,
+        "tick_offset": 144,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00146",
+      "domain": "expedition",
+      "ordinal": 146,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4162,
+        "tick_offset": 145,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00147",
+      "domain": "faction",
+      "ordinal": 147,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4259,
+        "tick_offset": 146,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00148",
+      "domain": "crisis",
+      "ordinal": 148,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4356,
+        "tick_offset": 147,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00149",
+      "domain": "audit",
+      "ordinal": 149,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4453,
+        "tick_offset": 148,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00150",
+      "domain": "save",
+      "ordinal": 150,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4550,
+        "tick_offset": 149,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00151",
+      "domain": "world",
+      "ordinal": 151,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4647,
+        "tick_offset": 150,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00152",
+      "domain": "settlement",
+      "ordinal": 152,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4744,
+        "tick_offset": 151,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00153",
+      "domain": "population",
+      "ordinal": 153,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4841,
+        "tick_offset": 152,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00154",
+      "domain": "logistics",
+      "ordinal": 154,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4938,
+        "tick_offset": 153,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00155",
+      "domain": "vehicle",
+      "ordinal": 155,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5035,
+        "tick_offset": 154,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00156",
+      "domain": "expedition",
+      "ordinal": 156,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5132,
+        "tick_offset": 155,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00157",
+      "domain": "faction",
+      "ordinal": 157,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5229,
+        "tick_offset": 156,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00158",
+      "domain": "crisis",
+      "ordinal": 158,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5326,
+        "tick_offset": 157,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00159",
+      "domain": "audit",
+      "ordinal": 159,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5423,
+        "tick_offset": 158,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00160",
+      "domain": "save",
+      "ordinal": 160,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5520,
+        "tick_offset": 159,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00161",
+      "domain": "world",
+      "ordinal": 161,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5617,
+        "tick_offset": 160,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00162",
+      "domain": "settlement",
+      "ordinal": 162,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5714,
+        "tick_offset": 161,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00163",
+      "domain": "population",
+      "ordinal": 163,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5811,
+        "tick_offset": 162,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00164",
+      "domain": "logistics",
+      "ordinal": 164,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5908,
+        "tick_offset": 163,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00165",
+      "domain": "vehicle",
+      "ordinal": 165,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6005,
+        "tick_offset": 164,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00166",
+      "domain": "expedition",
+      "ordinal": 166,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6102,
+        "tick_offset": 165,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00167",
+      "domain": "faction",
+      "ordinal": 167,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6199,
+        "tick_offset": 166,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00168",
+      "domain": "crisis",
+      "ordinal": 168,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6296,
+        "tick_offset": 167,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00169",
+      "domain": "audit",
+      "ordinal": 169,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6393,
+        "tick_offset": 168,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00170",
+      "domain": "save",
+      "ordinal": 170,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6490,
+        "tick_offset": 169,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00171",
+      "domain": "world",
+      "ordinal": 171,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6587,
+        "tick_offset": 170,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00172",
+      "domain": "settlement",
+      "ordinal": 172,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6684,
+        "tick_offset": 171,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00173",
+      "domain": "population",
+      "ordinal": 173,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6781,
+        "tick_offset": 172,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00174",
+      "domain": "logistics",
+      "ordinal": 174,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6878,
+        "tick_offset": 173,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00175",
+      "domain": "vehicle",
+      "ordinal": 175,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6975,
+        "tick_offset": 174,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00176",
+      "domain": "expedition",
+      "ordinal": 176,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7072,
+        "tick_offset": 175,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00177",
+      "domain": "faction",
+      "ordinal": 177,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7169,
+        "tick_offset": 176,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00178",
+      "domain": "crisis",
+      "ordinal": 178,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7266,
+        "tick_offset": 177,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00179",
+      "domain": "audit",
+      "ordinal": 179,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7363,
+        "tick_offset": 178,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_economy_24h:base:state:00180",
+      "domain": "save",
+      "ordinal": 180,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 7460,
+        "tick_offset": 179,
+        "parameter_binding": {}
+      }
+    }
+  ],
+  "case_states": []
+}

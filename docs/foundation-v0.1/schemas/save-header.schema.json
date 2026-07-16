@@ -1,0 +1,274 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/save-header.schema.json",
+  "title": "Logical Save Envelope v1 root header",
+  "description": "Codec-independent logical header. The physical byte contract is normative in 04-TECHNICAL-ARCHITECTURE.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "magic",
+    "envelope_format_version",
+    "product_id",
+    "slot_id",
+    "save_id",
+    "lineage_provenance",
+    "generation",
+    "previous_generation_digest",
+    "cas_token",
+    "save_schema_version",
+    "save_contract_manifest_hash",
+    "codec",
+    "compression",
+    "game_build_id",
+    "engine_toolchain_id",
+    "content_manifest_hash",
+    "read_compatibility",
+    "world_seed",
+    "authoritative_tick",
+    "id_allocators",
+    "random_streams",
+    "canonical_state_contract",
+    "world_mode",
+    "clock_policy_id",
+    "pause_state",
+    "speed",
+    "transition",
+    "created_at",
+    "updated_at",
+    "checksum_algorithm",
+    "total_encoded_section_bytes",
+    "total_decoded_section_bytes",
+    "sections",
+    "migration_history",
+    "whole_envelope_digest"
+  ],
+  "properties": {
+    "magic": { "const": "WASTELAND_SAVE" },
+    "envelope_format_version": { "const": 1 },
+    "product_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "slot_id": { "type": "string", "format": "uuid" },
+    "save_id": {
+      "description": "Stable UUID for one immutable generation lineage. Every generation after genesis in that lineage carries the same save_id. Continuing from an older generation creates a new slot_id/save_id lineage rather than reusing this identifier.",
+      "type": "string",
+      "format": "uuid"
+    },
+    "lineage_provenance": {
+      "description": "Immutable origin of this lineage. A rollback/recovery fork creates a new generation-1 lineage and binds the exact inspected source plus its incident/quarantine manifest.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "source",
+        "incident_id",
+        "incident_manifest_sha256",
+        "reason",
+        "tool_build_id"
+      ],
+      "properties": {
+        "kind": { "enum": ["new-game", "rollback-fork", "recovery-fork"] },
+        "source": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["product_id", "slot_id", "save_id", "generation", "generation_digest"],
+              "properties": {
+                "product_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+                "slot_id": { "type": "string", "format": "uuid" },
+                "save_id": { "type": "string", "format": "uuid" },
+                "generation": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+                "generation_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+              }
+            }
+          ]
+        },
+        "incident_id": { "type": ["string", "null"], "pattern": "^[A-Za-z0-9._-]{1,128}$" },
+        "incident_manifest_sha256": {
+          "description": "SHA-256 of the durable completed incident/quarantine manifest; null only for a new-game lineage.",
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "reason": { "type": ["string", "null"], "minLength": 1, "maxLength": 1024 },
+        "tool_build_id": { "type": "string", "minLength": 1, "maxLength": 256 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "new-game" } }, "required": ["kind"] },
+          "then": {
+            "properties": {
+              "source": { "type": "null" },
+              "incident_id": { "type": "null" },
+              "incident_manifest_sha256": { "type": "null" },
+              "reason": { "type": "null" }
+            }
+          },
+          "else": {
+            "properties": {
+              "source": { "type": "object" },
+              "incident_id": { "type": "string", "minLength": 1 },
+              "incident_manifest_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+              "reason": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      ]
+    },
+    "generation": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "previous_generation_digest": {
+      "description": "Exact whole_envelope_digest from the immediate predecessor generation header, or null only for generation 1/genesis.",
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "cas_token": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "save_schema_version": { "const": 1 },
+    "save_contract_manifest_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "codec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "enum": ["json-utf8", "binary-v1"] },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "compression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "enum": ["none", "zstd"] },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "game_build_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "engine_toolchain_id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "content_manifest_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "read_compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum_schema", "maximum_schema"],
+      "properties": {
+        "minimum_schema": { "type": "integer", "minimum": 1 },
+        "maximum_schema": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "world_seed": { "type": "string", "pattern": "^[0-9]+$" },
+    "authoritative_tick": { "type": "string", "pattern": "^[0-9]+$" },
+    "id_allocators": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1024,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["namespace", "next_value"],
+        "properties": {
+          "namespace": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{0,127}$" },
+          "next_value": { "type": "string", "pattern": "^[0-9]+$" }
+        }
+      }
+    },
+    "random_streams": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stream_id", "algorithm_id", "algorithm_version", "key_hex", "counter"],
+        "properties": {
+          "stream_id": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{0,127}$" },
+          "algorithm_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "algorithm_version": { "type": "integer", "minimum": 1 },
+          "key_hex": { "type": "string", "pattern": "^[0-9a-f]{16,128}$" },
+          "counter": { "type": "string", "pattern": "^[0-9]+$" }
+        }
+      }
+    },
+    "canonical_state_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["encoding_id", "encoding_version", "numeric_policy_id", "authoritative_state_digest"],
+      "properties": {
+        "encoding_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "encoding_version": { "type": "integer", "minimum": 1 },
+        "numeric_policy_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "authoritative_state_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "world_mode": { "enum": ["city", "road", "encounter", "transition"] },
+    "clock_policy_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "pause_state": { "enum": ["running", "player-paused", "auto-paused", "system-checkpoint"] },
+    "speed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": { "type": "integer", "minimum": 0, "maximum": 64 },
+        "denominator": { "type": "integer", "minimum": 1, "maximum": 64 }
+      }
+    },
+    "transition": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "phase", "last_applied_sequence"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "type": { "enum": ["city-to-road", "road-to-city"] },
+            "phase": { "enum": ["prepared", "city-debited", "road-owned", "return-pending", "city-credited", "finalized"] },
+            "last_applied_sequence": { "type": "string", "pattern": "^[0-9]+$" }
+          }
+        }
+      ]
+    },
+    "created_at": { "type": "string", "format": "date-time", "maxLength": 64 },
+    "updated_at": { "type": "string", "format": "date-time", "maxLength": 64 },
+    "platform_diagnostic": { "type": ["string", "null"], "maxLength": 1024 },
+    "checksum_algorithm": { "const": "sha256" },
+    "total_encoded_section_bytes": { "type": "integer", "minimum": 0, "maximum": 536870912 },
+    "total_decoded_section_bytes": { "type": "integer", "minimum": 0, "maximum": 1073741824 },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "version", "criticality", "offset", "encoded_length", "decoded_length", "checksum"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,63}$" },
+          "version": { "type": "integer", "minimum": 1 },
+          "criticality": { "enum": ["authoritative", "recoverable-diagnostic"] },
+          "offset": { "type": "integer", "minimum": 32, "maximum": 536870871 },
+          "encoded_length": { "type": "integer", "minimum": 0, "maximum": 134217728 },
+          "decoded_length": { "type": "integer", "minimum": 0, "maximum": 268435456 },
+          "checksum": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    },
+    "migration_history": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["migration_id", "target_kind", "target_name", "from_version", "to_version", "tool_build", "input_state_digest", "output_state_digest", "applied_at"],
+        "properties": {
+          "migration_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "target_kind": { "enum": ["root", "section"] },
+          "target_name": { "type": ["string", "null"], "pattern": "^[a-z][a-z0-9_-]{0,63}$" },
+          "from_version": { "type": "integer", "minimum": 1 },
+          "to_version": { "type": "integer", "minimum": 1 },
+          "tool_build": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "input_state_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "output_state_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "applied_at": { "type": "string", "format": "date-time", "maxLength": 64 }
+        }
+      }
+    },
+    "whole_envelope_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "schema_version": 2,
+  "id": "SCN_WP0001_GATE",
+  "revision": 1,
+  "kind": "aggregate",
+  "title": "WP-0001 gate aggregation",
+  "purpose": "Aggregate only immutable WP-0001 scenario and test evidence; this record executes no simulation and therefore freezes every technical count at zero.",
+  "applies_to_packets": [
+    "WP-0001"
+  ],
+  "fixture": {
+    "world_seed": "1005",
+    "starting_tick": "0",
+    "tick_rate_hz": 1,
+    "warmup_ticks": 0,
+    "duration_ticks": 0,
+    "warmup_seconds": 0,
+    "duration_seconds": 0,
+    "starting_state_id": "no-runtime-state-v1",
+    "content_set_id": "no-runtime-content-v1",
+    "input_script_id": "aggregate-wp0001-evidence-v1",
+    "fixture_manifest": {
+      "path": "scenarios/fixtures/SCN_WP0001_GATE/r1.fixture.json",
+      "sha256": "c60a0460f2f7dd46c3fc4ff3090c325aa3bc619f359515571fdd668931a965fe"
+    }
+  },
+  "counts": {
+    "state": {
+      "authoritative_records": 0,
+      "save_sections": 0,
+      "content_definitions": 0,
+      "transactions": 0,
+      "save_generations": 0
+    },
+    "entities": {
+      "total": 0,
+      "settlements": 0,
+      "buildings": 0,
+      "households": 0,
+      "specialists": 0,
+      "robots": 0,
+      "vehicles": 0,
+      "factions": 0,
+      "crises": 0,
+      "expeditions": 0
+    },
+    "objects": {
+      "placed_total": 0,
+      "dynamic": 0,
+      "static": 0,
+      "lod0": 0,
+      "lod1": 0,
+      "lod2": 0
+    },
+    "lights": {
+      "total": 0,
+      "directional": 0,
+      "point": 0,
+      "spot": 0,
+      "shadowed": 0
+    },
+    "crowd": {
+      "authoritative_people": 0,
+      "visible_agents": 0,
+      "offscreen_people": 0
+    },
+    "inputs": {
+      "scripted_commands": 0,
+      "keyboard_events": 0,
+      "controller_events": 0,
+      "pointer_events": 0,
+      "fault_injections": 0
+    }
+  },
+  "parameters": [
+    {
+      "name": "required-acceptance-tests",
+      "value": 15,
+      "unit": "tests"
+    },
+    {
+      "name": "minimum-runs",
+      "value": 3,
+      "unit": "runs"
+    }
+  ],
+  "oracles": [
+    {
+      "id": "ORC_WP0001_TESTS",
+      "subject": "required-test-failures",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_WP0001_SAVE",
+      "subject": "save-invariant-violations",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    }
+  ]
+}

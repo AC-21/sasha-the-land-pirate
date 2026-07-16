@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "foundation_version": "0.1-draft",
+  "foundation_status": "draft",
+  "active_autonomy": "A0",
+  "active_a1_packet_id": null,
+  "a1_max_active_packets": 1,
+  "trusted_gatekeeper_status": "not-implemented",
+  "constitution_sha256": null,
+  "decision_ledger_sha256": null,
+  "last_creator_receipt_id": null,
+  "packet_entry_gates": {
+    "WP-0001": "technical_spike",
+    "WP-0002": "ugly_gameplay_toy"
+  },
+  "packet_dependency_release_requirements": {
+    "WP-0001": [],
+    "WP-0002": [
+      {
+        "dependency_id": "WP-0001",
+        "required_status": "released",
+        "completion_receipt_id": null,
+        "required_claims": ["ACCEPT-COMPLETION-WP-0001"]
+      }
+    ]
+  },
+  "entry_gates": {
+    "technical_spike": {
+      "status": "awaiting-creator",
+      "decision_requirements": [],
+      "receipt_requirements": [
+        {"purpose":"accept-WP-0001","receipt_id":null,"subject_ids":["WP-0001"],"required_claims":["ACCEPT-WP-0001","AUTHORIZE-TEMP-WP0001-IDENTITY"]},
+        {"purpose":"approve-repository-location","receipt_id":null,"subject_ids":["WP-0001"],"required_claims":["APPROVE-REPOSITORY-LOCATION"]},
+        {"purpose":"approve-Unity-installation","receipt_id":null,"subject_ids":["WP-0001"],"required_claims":["APPROVE-UNITY-INSTALLATION"]},
+        {"purpose":"establish-A1-quarantine","receipt_id":null,"subject_ids":["WP-0001"],"required_claims":["A1-QUARANTINE-BOUNDARY-VERIFIED","ACTIVATE-A1-WP-0001"]}
+      ]
+    },
+    "ugly_gameplay_toy": {
+      "status": "blocked",
+      "decision_requirements": [
+        {"decision_id":"D-0006","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-THESIS"],"receipt_id":null,"mismatch_action":"block-and-revise-constitution-or-packet"},
+        {"decision_id":"D-0007","accepted_statuses":["ratified"],"allowed_claims":["DRIVE","COMMAND"],"receipt_id":null,"mismatch_action":"block-and-revise-packet"},
+        {"decision_id":"D-0008","accepted_statuses":["ratified"],"allowed_claims":["SLOWED","PAUSED","FULL"],"receipt_id":null,"mismatch_action":"block-and-revise-packet"},
+        {"decision_id":"D-0009","accepted_statuses":["ratified"],"allowed_claims":["SCARS"],"receipt_id":null,"mismatch_action":"branch-to-harsh-or-custom-cruelty-proof-packet"},
+        {"decision_id":"D-0010","accepted_statuses":["ratified"],"allowed_claims":["CULTURES"],"receipt_id":null,"mismatch_action":"branch-to-conquest-compatible-packet"},
+        {"decision_id":"D-0011","accepted_statuses":["ratified"],"allowed_claims":["ACCENT","NONE"],"receipt_id":null,"mismatch_action":"branch-to-combat-pillar-packet"},
+        {"decision_id":"D-0012","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-SLICE"],"receipt_id":null,"mismatch_action":"block-and-revise-slice-and-packet"},
+        {"decision_id":"D-0021","accepted_statuses":["ratified"],"allowed_claims":["SOLO-OFFLINE"],"receipt_id":null,"mismatch_action":"branch-to-connected-architecture-packet"},
+        {"decision_id":"D-0029","accepted_statuses":["ratified"],"allowed_claims":["ROUTE+ROAD"],"receipt_id":null,"mismatch_action":"branch-to-selected-topology-packet"},
+        {"decision_id":"D-0035","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-CORE"],"receipt_id":null,"mismatch_action":"block-and-revise-constitution-or-packet"},
+        {"decision_id":"D-0036","accepted_statuses":["ratified"],"allowed_claims":["TITLE-AND-PROTAGONIST-SASHA"],"receipt_id":"RR-CREATOR-20260715-02","mismatch_action":"block-and-repair-title-protagonist-binding"},
+        {"decision_id":"D-0037","accepted_statuses":["ratified"],"allowed_claims":["COLONY-HUMANS-ROBOTS-OR-MIXED"],"receipt_id":"RR-CREATOR-20260715-02","mismatch_action":"block-and-revise-composition-proof"},
+        {"decision_id":"D-0039","accepted_statuses":["ratified"],"allowed_claims":["MECHANICAL-COMPOSITIONS"],"receipt_id":null,"mismatch_action":"branch-to-representational-composition-packet"}
+      ],
+      "receipt_requirements": [
+        {"purpose":"accept-WP-0002","receipt_id":null,"subject_ids":["WP-0002"],"required_claims":["ACCEPT-WP-0002"]},
+        {"purpose":"authorize-city-comparison","receipt_id":null,"subject_ids":["D-0030","WP-0002"],"required_claims":["AUTHORIZE-CITY-COMPARISON"]},
+        {"purpose":"establish-A1-quarantine-WP-0002","receipt_id":null,"subject_ids":["WP-0002"],"required_claims":["A1-QUARANTINE-BOUNDARY-VERIFIED","ACTIVATE-A1-WP-0002"]}
+      ]
+    },
+    "slice_kernel": {
+      "status": "blocked",
+      "decision_requirements": [
+        {"decision_id":"D-0030","accepted_statuses":["ratified"],"allowed_claims":["HYBRID-CITY","INDIVIDUAL-CITY","DISTRICT-CITY","FREEFORM-CITY","CUSTOM-CITY"],"receipt_id":null,"mismatch_action":"block-and-revise-kernel-packet"}
+      ],
+      "receipt_requirements": [
+        {"purpose":"ugly-toy-acceptance","receipt_id":null,"subject_ids":["WP-0002"],"required_claims":["ACCEPT-UGLY-TOY-EVIDENCE"]}
+      ]
+    },
+    "production_content": {
+      "status": "blocked",
+      "decision_requirements": [
+        {"decision_id":"D-0016","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-STORYBOOK-SALVAGE","RATIFY-REVISED-ART-DIRECTION"],"receipt_id":null,"mismatch_action":"block-and-revise-art-pipeline"},
+        {"decision_id":"D-0018","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-CUTS"],"receipt_id":null,"mismatch_action":"block-and-rescope-production"},
+        {"decision_id":"D-0019","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-CUTS"],"receipt_id":null,"mismatch_action":"block-and-rescope-production"},
+        {"decision_id":"D-0031","accepted_statuses":["ratified"],"allowed_claims":["ACCEPT-PRODUCTION-ENVELOPE"],"receipt_id":null,"mismatch_action":"block-and-rescope-production"}
+      ],
+      "receipt_requirements": [
+        {"purpose":"vertical-slice-acceptance","receipt_id":null,"subject_ids":["VS-3"],"required_claims":["ACCEPT-VERTICAL-SLICE"]},
+        {"purpose":"golden-art-acceptance","receipt_id":null,"subject_ids":["VS-2"],"required_claims":["ACCEPT-GOLDEN-ART"]}
+      ]
+    },
+    "background_integration": {
+      "status": "blocked",
+      "decision_requirements": [
+        {"decision_id":"D-0020","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-AGENT-AUTHORITY"],"receipt_id":null,"mismatch_action":"block-autonomy-promotion"},
+        {"decision_id":"D-0028","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-RELEASE-LAW"],"receipt_id":null,"mismatch_action":"block-autonomy-promotion"}
+      ],
+      "receipt_requirements": [
+        {"purpose":"trusted-gatekeeper-pass","receipt_id":null,"subject_ids":["GATEKEEPER-V1"],"required_claims":["GATEKEEPER-ATTACK-SUITE-PASSED"]},
+        {"purpose":"agent-pilot-pass","receipt_id":null,"subject_ids":["AGENT-PILOT"],"required_claims":["AGENT-PILOT-PASSED"]},
+        {"purpose":"creator-autonomy-promotion","receipt_id":null,"subject_ids":["A2"],"required_claims":["PROMOTE-TO-A2"]}
+      ]
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_ROAD_WORST_CASE",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "road-worst-case-v1",
+      "path": "scenarios/artifacts/SCN_ROAD_WORST_CASE/r1/starting-state.json",
+      "sha256": "aa1f3253d3386bcdb8b4de448d6f35dfd9ff35328695e553f0e886643e9eb7fc",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "road-graybox-content-v1",
+      "path": "scenarios/artifacts/SCN_ROAD_WORST_CASE/r1/content-set.json",
+      "sha256": "2a9d3de402a66f15b02c14adbc6aa964adef7c5fb864a84b56b7db8d2238b971",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "road-worst-case-keyboard-v1",
+      "path": "scenarios/artifacts/SCN_ROAD_WORST_CASE/r1/input-script.json",
+      "sha256": "465d58f1bf053617b357aa4e300cd1064f45c0f56aee93104ac196213411f412",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}

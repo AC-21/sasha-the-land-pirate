@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/sasha-atomic-land-pirate/scenario-fixture-manifest.schema.json",
+  "title": "Artifact-backed scenario fixture manifest v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "scenario_id", "scenario_revision", "hash_algorithm", "artifacts"],
+  "properties": {
+    "schema_version": { "const": 2 },
+    "scenario_id": { "type": "string", "pattern": "^SCN_[A-Z0-9_]+$" },
+    "scenario_revision": { "type": "integer", "minimum": 1 },
+    "hash_algorithm": { "const": "sha256" },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["starting_state", "content_set", "input_script"],
+      "properties": {
+        "starting_state": { "$ref": "#/$defs/artifact" },
+        "content_set": { "$ref": "#/$defs/artifact" },
+        "input_script": { "$ref": "#/$defs/artifact" }
+      }
+    }
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "semantic_id", "path", "sha256", "media_type", "schema_version"],
+      "properties": {
+        "kind": { "enum": ["starting-state", "content-set", "input-script"] },
+        "semantic_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]+$" },
+        "path": { "type": "string", "pattern": "^scenarios/artifacts/SCN_[A-Z0-9_]+/r[1-9][0-9]*/(starting-state|content-set|input-script)\\.json$" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "media_type": { "const": "application/json" },
+        "schema_version": { "const": 1 }
+      }
+    }
+  }
+}

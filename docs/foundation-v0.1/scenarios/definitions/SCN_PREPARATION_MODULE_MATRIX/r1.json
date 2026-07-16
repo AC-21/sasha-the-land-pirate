@@ -1,0 +1,435 @@
+{
+  "schema_version": 2,
+  "id": "SCN_PREPARATION_MODULE_MATRIX",
+  "revision": 1,
+  "kind": "gameplay",
+  "title": "Preparation and vehicle-module 2x2 matrix",
+  "purpose": "Execute all four Workshop Push/Civic Buffer by Winch Assembly/Sealed Range Tank combinations on one fixed mixed-colony base without adding another map.",
+  "applies_to_packets": [
+    "WP-0002"
+  ],
+  "fixture": {
+    "world_seed": "2012",
+    "starting_tick": "0",
+    "tick_rate_hz": 10,
+    "warmup_ticks": 0,
+    "duration_ticks": 36000,
+    "warmup_seconds": 0,
+    "duration_seconds": 3600,
+    "starting_state_id": "last-bearing-matrix-state-v1",
+    "content_set_id": "last-bearing-graybox-content-v1",
+    "input_script_id": "preparation-module-four-cases-v1",
+    "fixture_manifest": {
+      "path": "scenarios/fixtures/SCN_PREPARATION_MODULE_MATRIX/r1.fixture.json",
+      "sha256": "5e271da24f57c4149f1bd9019bbcef846a82a460451d6f53f294f2763517d1ec"
+    }
+  },
+  "counts": {
+    "state": {
+      "authoritative_records": 160,
+      "save_sections": 10,
+      "content_definitions": 26,
+      "transactions": 4,
+      "save_generations": 12
+    },
+    "entities": {
+      "total": 15,
+      "settlements": 1,
+      "buildings": 7,
+      "households": 1,
+      "specialists": 1,
+      "robots": 1,
+      "vehicles": 1,
+      "factions": 1,
+      "crises": 1,
+      "expeditions": 1
+    },
+    "objects": {
+      "placed_total": 0,
+      "dynamic": 0,
+      "static": 0,
+      "lod0": 0,
+      "lod1": 0,
+      "lod2": 0
+    },
+    "lights": {
+      "total": 0,
+      "directional": 0,
+      "point": 0,
+      "spot": 0,
+      "shadowed": 0
+    },
+    "crowd": {
+      "authoritative_people": 6,
+      "visible_agents": 6,
+      "offscreen_people": 0
+    },
+    "inputs": {
+      "scripted_commands": 360,
+      "keyboard_events": 0,
+      "controller_events": 0,
+      "pointer_events": 0,
+      "fault_injections": 0
+    }
+  },
+  "parameters": [
+    {
+      "name": "case-order",
+      "value": "workshop-winch,workshop-tank,buffer-winch,buffer-tank",
+      "unit": null
+    },
+    {
+      "name": "case-count",
+      "value": 4,
+      "unit": "cases"
+    }
+  ],
+  "oracles": [
+    {
+      "id": "ORC_MATRIX_COMPLETE",
+      "subject": "matrix-cases-completed",
+      "operator": "equal",
+      "expected": 4,
+      "unit": "cases"
+    },
+    {
+      "id": "ORC_MATRIX_VIABLE",
+      "subject": "strategically-viable-cases",
+      "operator": "greater-or-equal",
+      "expected": 2,
+      "unit": "cases"
+    },
+    {
+      "id": "ORC_MATRIX_CITY_CHANGE",
+      "subject": "returns-changing-next-city-decision",
+      "operator": "greater-or-equal",
+      "expected": 2,
+      "unit": "cases"
+    },
+    {
+      "id": "ORC_MATRIX_DISTINCT",
+      "subject": "module-or-preparation-distinction-mismatches",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    }
+  ],
+  "cases": [
+    {
+      "id": "workshop-winch",
+      "counts": {
+        "state": {
+          "authoritative_records": 150,
+          "save_sections": 10,
+          "content_definitions": 26,
+          "transactions": 1,
+          "save_generations": 3
+        },
+        "entities": {
+          "total": 15,
+          "settlements": 1,
+          "buildings": 7,
+          "households": 1,
+          "specialists": 1,
+          "robots": 1,
+          "vehicles": 1,
+          "factions": 1,
+          "crises": 1,
+          "expeditions": 1
+        },
+        "objects": {
+          "placed_total": 0,
+          "dynamic": 0,
+          "static": 0,
+          "lod0": 0,
+          "lod1": 0,
+          "lod2": 0
+        },
+        "lights": {
+          "total": 0,
+          "directional": 0,
+          "point": 0,
+          "spot": 0,
+          "shadowed": 0
+        },
+        "crowd": {
+          "authoritative_people": 6,
+          "visible_agents": 6,
+          "offscreen_people": 0
+        },
+        "inputs": {
+          "scripted_commands": 90,
+          "keyboard_events": 0,
+          "controller_events": 0,
+          "pointer_events": 0,
+          "fault_injections": 0
+        }
+      },
+      "parameters": [
+        {
+          "name": "preparation",
+          "value": "workshop-push",
+          "unit": null
+        },
+        {
+          "name": "vehicle-module",
+          "value": "winch-assembly",
+          "unit": null
+        }
+      ],
+      "oracles": [
+        {
+          "id": "ORC_MATRIX_WORKSHOP_WINCH_COMPLETE",
+          "subject": "workshop-winch.completed",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_MATRIX_WORKSHOP_WINCH_DISTINCT",
+          "subject": "workshop-winch.declared-systemic-difference-observed",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        }
+      ]
+    },
+    {
+      "id": "workshop-tank",
+      "counts": {
+        "state": {
+          "authoritative_records": 150,
+          "save_sections": 10,
+          "content_definitions": 26,
+          "transactions": 1,
+          "save_generations": 3
+        },
+        "entities": {
+          "total": 15,
+          "settlements": 1,
+          "buildings": 7,
+          "households": 1,
+          "specialists": 1,
+          "robots": 1,
+          "vehicles": 1,
+          "factions": 1,
+          "crises": 1,
+          "expeditions": 1
+        },
+        "objects": {
+          "placed_total": 0,
+          "dynamic": 0,
+          "static": 0,
+          "lod0": 0,
+          "lod1": 0,
+          "lod2": 0
+        },
+        "lights": {
+          "total": 0,
+          "directional": 0,
+          "point": 0,
+          "spot": 0,
+          "shadowed": 0
+        },
+        "crowd": {
+          "authoritative_people": 6,
+          "visible_agents": 6,
+          "offscreen_people": 0
+        },
+        "inputs": {
+          "scripted_commands": 90,
+          "keyboard_events": 0,
+          "controller_events": 0,
+          "pointer_events": 0,
+          "fault_injections": 0
+        }
+      },
+      "parameters": [
+        {
+          "name": "preparation",
+          "value": "workshop-push",
+          "unit": null
+        },
+        {
+          "name": "vehicle-module",
+          "value": "sealed-range-tank",
+          "unit": null
+        }
+      ],
+      "oracles": [
+        {
+          "id": "ORC_MATRIX_WORKSHOP_TANK_COMPLETE",
+          "subject": "workshop-tank.completed",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_MATRIX_WORKSHOP_TANK_DISTINCT",
+          "subject": "workshop-tank.declared-systemic-difference-observed",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        }
+      ]
+    },
+    {
+      "id": "buffer-winch",
+      "counts": {
+        "state": {
+          "authoritative_records": 150,
+          "save_sections": 10,
+          "content_definitions": 26,
+          "transactions": 1,
+          "save_generations": 3
+        },
+        "entities": {
+          "total": 15,
+          "settlements": 1,
+          "buildings": 7,
+          "households": 1,
+          "specialists": 1,
+          "robots": 1,
+          "vehicles": 1,
+          "factions": 1,
+          "crises": 1,
+          "expeditions": 1
+        },
+        "objects": {
+          "placed_total": 0,
+          "dynamic": 0,
+          "static": 0,
+          "lod0": 0,
+          "lod1": 0,
+          "lod2": 0
+        },
+        "lights": {
+          "total": 0,
+          "directional": 0,
+          "point": 0,
+          "spot": 0,
+          "shadowed": 0
+        },
+        "crowd": {
+          "authoritative_people": 6,
+          "visible_agents": 6,
+          "offscreen_people": 0
+        },
+        "inputs": {
+          "scripted_commands": 90,
+          "keyboard_events": 0,
+          "controller_events": 0,
+          "pointer_events": 0,
+          "fault_injections": 0
+        }
+      },
+      "parameters": [
+        {
+          "name": "preparation",
+          "value": "civic-buffer",
+          "unit": null
+        },
+        {
+          "name": "vehicle-module",
+          "value": "winch-assembly",
+          "unit": null
+        }
+      ],
+      "oracles": [
+        {
+          "id": "ORC_MATRIX_BUFFER_WINCH_COMPLETE",
+          "subject": "buffer-winch.completed",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_MATRIX_BUFFER_WINCH_DISTINCT",
+          "subject": "buffer-winch.declared-systemic-difference-observed",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        }
+      ]
+    },
+    {
+      "id": "buffer-tank",
+      "counts": {
+        "state": {
+          "authoritative_records": 150,
+          "save_sections": 10,
+          "content_definitions": 26,
+          "transactions": 1,
+          "save_generations": 3
+        },
+        "entities": {
+          "total": 15,
+          "settlements": 1,
+          "buildings": 7,
+          "households": 1,
+          "specialists": 1,
+          "robots": 1,
+          "vehicles": 1,
+          "factions": 1,
+          "crises": 1,
+          "expeditions": 1
+        },
+        "objects": {
+          "placed_total": 0,
+          "dynamic": 0,
+          "static": 0,
+          "lod0": 0,
+          "lod1": 0,
+          "lod2": 0
+        },
+        "lights": {
+          "total": 0,
+          "directional": 0,
+          "point": 0,
+          "spot": 0,
+          "shadowed": 0
+        },
+        "crowd": {
+          "authoritative_people": 6,
+          "visible_agents": 6,
+          "offscreen_people": 0
+        },
+        "inputs": {
+          "scripted_commands": 90,
+          "keyboard_events": 0,
+          "controller_events": 0,
+          "pointer_events": 0,
+          "fault_injections": 0
+        }
+      },
+      "parameters": [
+        {
+          "name": "preparation",
+          "value": "civic-buffer",
+          "unit": null
+        },
+        {
+          "name": "vehicle-module",
+          "value": "sealed-range-tank",
+          "unit": null
+        }
+      ],
+      "oracles": [
+        {
+          "id": "ORC_MATRIX_BUFFER_TANK_COMPLETE",
+          "subject": "buffer-tank.completed",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        },
+        {
+          "id": "ORC_MATRIX_BUFFER_TANK_DISTINCT",
+          "subject": "buffer-tank.declared-systemic-difference-observed",
+          "operator": "equal",
+          "expected": true,
+          "unit": null
+        }
+      ]
+    }
+  ]
+}

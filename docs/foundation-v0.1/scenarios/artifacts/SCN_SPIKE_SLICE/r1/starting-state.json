@@ -1,0 +1,1756 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "starting-state",
+  "semantic_id": "technical-spike-state-v1",
+  "scenario_id": "SCN_SPIKE_SLICE",
+  "scenario_revision": 1,
+  "world_seed": "1001",
+  "starting_tick": "0",
+  "canonicalization": "json-utf8-explicit-record-order-v1",
+  "canonical_entities": [
+    {
+      "id": "world:1001:base:settlement:0001",
+      "type": "settlement",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "name": "Settlement 1",
+        "inventory": {
+          "water": 120,
+          "food": 90,
+          "parts": 24,
+          "fuel": 18
+        },
+        "power_capacity": 40,
+        "power_load": 26
+      }
+    },
+    {
+      "id": "world:1001:base:building:0001",
+      "type": "building",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "water-turbine",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0002",
+      "type": "building",
+      "ordinal": 2,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "workshop",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0003",
+      "type": "building",
+      "ordinal": 3,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "storage",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0004",
+      "type": "building",
+      "ordinal": 4,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "generator",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0005",
+      "type": "building",
+      "ordinal": 5,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "shelter",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0006",
+      "type": "building",
+      "ordinal": 6,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "garage",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0007",
+      "type": "building",
+      "ordinal": 7,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "recycler",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0008",
+      "type": "building",
+      "ordinal": 8,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "clinic",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0009",
+      "type": "building",
+      "ordinal": 9,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "water-turbine",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0010",
+      "type": "building",
+      "ordinal": 10,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "workshop",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0011",
+      "type": "building",
+      "ordinal": 11,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "storage",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0012",
+      "type": "building",
+      "ordinal": 12,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "generator",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0013",
+      "type": "building",
+      "ordinal": 13,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "shelter",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0014",
+      "type": "building",
+      "ordinal": 14,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "garage",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0015",
+      "type": "building",
+      "ordinal": 15,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "recycler",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0016",
+      "type": "building",
+      "ordinal": 16,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "clinic",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0017",
+      "type": "building",
+      "ordinal": 17,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "water-turbine",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0018",
+      "type": "building",
+      "ordinal": 18,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "workshop",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0019",
+      "type": "building",
+      "ordinal": 19,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "storage",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0020",
+      "type": "building",
+      "ordinal": 20,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "generator",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0021",
+      "type": "building",
+      "ordinal": 21,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "shelter",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0022",
+      "type": "building",
+      "ordinal": 22,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "garage",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0023",
+      "type": "building",
+      "ordinal": 23,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "recycler",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0024",
+      "type": "building",
+      "ordinal": 24,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "clinic",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0025",
+      "type": "building",
+      "ordinal": 25,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "water-turbine",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0026",
+      "type": "building",
+      "ordinal": 26,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "workshop",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0027",
+      "type": "building",
+      "ordinal": 27,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "storage",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0028",
+      "type": "building",
+      "ordinal": 28,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "generator",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0029",
+      "type": "building",
+      "ordinal": 29,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "shelter",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0030",
+      "type": "building",
+      "ordinal": 30,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "garage",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0031",
+      "type": "building",
+      "ordinal": 31,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "recycler",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0032",
+      "type": "building",
+      "ordinal": 32,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "clinic",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0033",
+      "type": "building",
+      "ordinal": 33,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "water-turbine",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0034",
+      "type": "building",
+      "ordinal": 34,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "workshop",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0035",
+      "type": "building",
+      "ordinal": 35,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "storage",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0036",
+      "type": "building",
+      "ordinal": 36,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "generator",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0037",
+      "type": "building",
+      "ordinal": 37,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "shelter",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0038",
+      "type": "building",
+      "ordinal": 38,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "garage",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0039",
+      "type": "building",
+      "ordinal": 39,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "recycler",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0040",
+      "type": "building",
+      "ordinal": 40,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "clinic",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0041",
+      "type": "building",
+      "ordinal": 41,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "water-turbine",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0042",
+      "type": "building",
+      "ordinal": 42,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "workshop",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0043",
+      "type": "building",
+      "ordinal": 43,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "storage",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0044",
+      "type": "building",
+      "ordinal": 44,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "generator",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0045",
+      "type": "building",
+      "ordinal": 45,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "shelter",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0046",
+      "type": "building",
+      "ordinal": 46,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "garage",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0047",
+      "type": "building",
+      "ordinal": 47,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "recycler",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0048",
+      "type": "building",
+      "ordinal": 48,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "clinic",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0049",
+      "type": "building",
+      "ordinal": 49,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "water-turbine",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0050",
+      "type": "building",
+      "ordinal": 50,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "workshop",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0051",
+      "type": "building",
+      "ordinal": 51,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "storage",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0052",
+      "type": "building",
+      "ordinal": 52,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "generator",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0053",
+      "type": "building",
+      "ordinal": 53,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "shelter",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0054",
+      "type": "building",
+      "ordinal": 54,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "garage",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0055",
+      "type": "building",
+      "ordinal": 55,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "recycler",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0056",
+      "type": "building",
+      "ordinal": 56,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "clinic",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0057",
+      "type": "building",
+      "ordinal": 57,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "water-turbine",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0058",
+      "type": "building",
+      "ordinal": 58,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "workshop",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0059",
+      "type": "building",
+      "ordinal": 59,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "storage",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0060",
+      "type": "building",
+      "ordinal": 60,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "generator",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0061",
+      "type": "building",
+      "ordinal": 61,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "shelter",
+        "staff_slots": 1,
+        "power_demand": 3,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0062",
+      "type": "building",
+      "ordinal": 62,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "garage",
+        "staff_slots": 1,
+        "power_demand": 4,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0063",
+      "type": "building",
+      "ordinal": 63,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "recycler",
+        "staff_slots": 1,
+        "power_demand": 5,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:building:0064",
+      "type": "building",
+      "ordinal": 64,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "archetype": "clinic",
+        "staff_slots": 1,
+        "power_demand": 2,
+        "status": "operating"
+      }
+    },
+    {
+      "id": "world:1001:base:expedition:0001",
+      "type": "expedition",
+      "ordinal": 1,
+      "value": {
+        "active": true,
+        "condition_milli": 1000,
+        "revision": 1,
+        "status": "prepared",
+        "route_id": "route-last-bearing",
+        "cargo": {},
+        "elapsed_ticks": 0,
+        "transaction_phase": "prepared"
+      }
+    }
+  ],
+  "canonical_state_records": [
+    {
+      "id": "scn_spike_slice:base:state:00001",
+      "domain": "world",
+      "ordinal": 1,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 97,
+        "tick_offset": 0,
+        "parameter_binding": {
+          "backbuffer": "2560x1600",
+          "quality-preset": "slice-quality",
+          "faction-condition-variants": 8,
+          "measured-soak": 30,
+          "metric-window": 10,
+          "save-cycles": 6,
+          "load-cycles": 6,
+          "mode-transition-cycles": 6,
+          "high-priority-path-logistics-requests": 1800,
+          "high-priority-path-logistics-request-period": 1,
+          "mode-transition-offsets-seconds": "180,480,780,1080,1380,1680",
+          "save-offsets-seconds": "240,540,840,1140,1440,1740",
+          "load-offsets-seconds": "240,540,840,1140,1440,1740",
+          "coincident-save-load-order": "save-completion-then-load",
+          "render-content-manifest-id": "technical-city-render-workload-v1",
+          "camera-path-id": "technical-city-overview-loop-v1",
+          "camera-loop-duration": 60,
+          "camera-path-samples": 600,
+          "camera-loops": 30,
+          "building-archetypes": 12,
+          "lod-mesh-variants": 36,
+          "lod0-triangles-per-instance": 8000,
+          "lod1-triangles-per-instance": 2500,
+          "lod2-triangles-per-instance": 1000,
+          "lod0-vertices-per-instance": 5000,
+          "lod1-vertices-per-instance": 1600,
+          "lod2-vertices-per-instance": 700,
+          "visible-triangles-calibration-frame": 1792000,
+          "visible-vertices-calibration-frame": 1139200,
+          "shared-material-definitions": 8,
+          "per-instance-material-clones": 0,
+          "texture-assets": 24,
+          "imported-texture-gpu-bytes-max": 268435456,
+          "logical-opaque-submesh-submissions": 896,
+          "batched-opaque-draw-submissions-max": 800,
+          "light-probe-samples": 2048,
+          "reflection-probes": 8,
+          "shadow-casting-renderers": 192,
+          "lod0-screen-relative-height": 0.18,
+          "lod1-screen-relative-height": 0.06,
+          "lod2-screen-relative-height": 0.015,
+          "cull-screen-relative-height": 0.005
+        }
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00002",
+      "domain": "settlement",
+      "ordinal": 2,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 194,
+        "tick_offset": 1,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00003",
+      "domain": "population",
+      "ordinal": 3,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 291,
+        "tick_offset": 2,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00004",
+      "domain": "logistics",
+      "ordinal": 4,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 388,
+        "tick_offset": 3,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00005",
+      "domain": "vehicle",
+      "ordinal": 5,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 485,
+        "tick_offset": 4,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00006",
+      "domain": "expedition",
+      "ordinal": 6,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 582,
+        "tick_offset": 5,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00007",
+      "domain": "faction",
+      "ordinal": 7,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 679,
+        "tick_offset": 6,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00008",
+      "domain": "crisis",
+      "ordinal": 8,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 776,
+        "tick_offset": 7,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00009",
+      "domain": "audit",
+      "ordinal": 9,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 873,
+        "tick_offset": 8,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00010",
+      "domain": "save",
+      "ordinal": 10,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 970,
+        "tick_offset": 9,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00011",
+      "domain": "world",
+      "ordinal": 11,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1067,
+        "tick_offset": 10,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00012",
+      "domain": "settlement",
+      "ordinal": 12,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1164,
+        "tick_offset": 11,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00013",
+      "domain": "population",
+      "ordinal": 13,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1261,
+        "tick_offset": 12,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00014",
+      "domain": "logistics",
+      "ordinal": 14,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1358,
+        "tick_offset": 13,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00015",
+      "domain": "vehicle",
+      "ordinal": 15,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1455,
+        "tick_offset": 14,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00016",
+      "domain": "expedition",
+      "ordinal": 16,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1552,
+        "tick_offset": 15,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00017",
+      "domain": "faction",
+      "ordinal": 17,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1649,
+        "tick_offset": 16,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00018",
+      "domain": "crisis",
+      "ordinal": 18,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1746,
+        "tick_offset": 17,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00019",
+      "domain": "audit",
+      "ordinal": 19,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1843,
+        "tick_offset": 18,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00020",
+      "domain": "save",
+      "ordinal": 20,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 1940,
+        "tick_offset": 19,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00021",
+      "domain": "world",
+      "ordinal": 21,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2037,
+        "tick_offset": 20,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00022",
+      "domain": "settlement",
+      "ordinal": 22,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2134,
+        "tick_offset": 21,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00023",
+      "domain": "population",
+      "ordinal": 23,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2231,
+        "tick_offset": 22,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00024",
+      "domain": "logistics",
+      "ordinal": 24,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2328,
+        "tick_offset": 23,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00025",
+      "domain": "vehicle",
+      "ordinal": 25,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2425,
+        "tick_offset": 24,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00026",
+      "domain": "expedition",
+      "ordinal": 26,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2522,
+        "tick_offset": 25,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00027",
+      "domain": "faction",
+      "ordinal": 27,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2619,
+        "tick_offset": 26,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00028",
+      "domain": "crisis",
+      "ordinal": 28,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2716,
+        "tick_offset": 27,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00029",
+      "domain": "audit",
+      "ordinal": 29,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2813,
+        "tick_offset": 28,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00030",
+      "domain": "save",
+      "ordinal": 30,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 2910,
+        "tick_offset": 29,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00031",
+      "domain": "world",
+      "ordinal": 31,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3007,
+        "tick_offset": 30,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00032",
+      "domain": "settlement",
+      "ordinal": 32,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3104,
+        "tick_offset": 31,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00033",
+      "domain": "population",
+      "ordinal": 33,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3201,
+        "tick_offset": 32,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00034",
+      "domain": "logistics",
+      "ordinal": 34,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3298,
+        "tick_offset": 33,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00035",
+      "domain": "vehicle",
+      "ordinal": 35,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3395,
+        "tick_offset": 34,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00036",
+      "domain": "expedition",
+      "ordinal": 36,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3492,
+        "tick_offset": 35,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00037",
+      "domain": "faction",
+      "ordinal": 37,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3589,
+        "tick_offset": 36,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00038",
+      "domain": "crisis",
+      "ordinal": 38,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3686,
+        "tick_offset": 37,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00039",
+      "domain": "audit",
+      "ordinal": 39,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3783,
+        "tick_offset": 38,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00040",
+      "domain": "save",
+      "ordinal": 40,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3880,
+        "tick_offset": 39,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00041",
+      "domain": "world",
+      "ordinal": 41,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 3977,
+        "tick_offset": 40,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00042",
+      "domain": "settlement",
+      "ordinal": 42,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4074,
+        "tick_offset": 41,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00043",
+      "domain": "population",
+      "ordinal": 43,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4171,
+        "tick_offset": 42,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00044",
+      "domain": "logistics",
+      "ordinal": 44,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4268,
+        "tick_offset": 43,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00045",
+      "domain": "vehicle",
+      "ordinal": 45,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4365,
+        "tick_offset": 44,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00046",
+      "domain": "expedition",
+      "ordinal": 46,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4462,
+        "tick_offset": 45,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00047",
+      "domain": "faction",
+      "ordinal": 47,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4559,
+        "tick_offset": 46,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00048",
+      "domain": "crisis",
+      "ordinal": 48,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4656,
+        "tick_offset": 47,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00049",
+      "domain": "audit",
+      "ordinal": 49,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4753,
+        "tick_offset": 48,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00050",
+      "domain": "save",
+      "ordinal": 50,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4850,
+        "tick_offset": 49,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00051",
+      "domain": "world",
+      "ordinal": 51,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 4947,
+        "tick_offset": 50,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00052",
+      "domain": "settlement",
+      "ordinal": 52,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5044,
+        "tick_offset": 51,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00053",
+      "domain": "population",
+      "ordinal": 53,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5141,
+        "tick_offset": 52,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00054",
+      "domain": "logistics",
+      "ordinal": 54,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5238,
+        "tick_offset": 53,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00055",
+      "domain": "vehicle",
+      "ordinal": 55,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5335,
+        "tick_offset": 54,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00056",
+      "domain": "expedition",
+      "ordinal": 56,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5432,
+        "tick_offset": 55,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00057",
+      "domain": "faction",
+      "ordinal": 57,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5529,
+        "tick_offset": 56,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00058",
+      "domain": "crisis",
+      "ordinal": 58,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5626,
+        "tick_offset": 57,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00059",
+      "domain": "audit",
+      "ordinal": 59,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5723,
+        "tick_offset": 58,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00060",
+      "domain": "save",
+      "ordinal": 60,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5820,
+        "tick_offset": 59,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00061",
+      "domain": "world",
+      "ordinal": 61,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 5917,
+        "tick_offset": 60,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00062",
+      "domain": "settlement",
+      "ordinal": 62,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6014,
+        "tick_offset": 61,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00063",
+      "domain": "population",
+      "ordinal": 63,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6111,
+        "tick_offset": 62,
+        "parameter_binding": {}
+      }
+    },
+    {
+      "id": "scn_spike_slice:base:state:00064",
+      "domain": "logistics",
+      "ordinal": 64,
+      "version": 1,
+      "value": {
+        "enabled": true,
+        "quantity_milli": 6208,
+        "tick_offset": 63,
+        "parameter_binding": {}
+      }
+    }
+  ],
+  "case_states": []
+}

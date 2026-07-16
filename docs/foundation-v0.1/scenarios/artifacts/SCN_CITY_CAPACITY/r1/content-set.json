@@ -1,0 +1,1162 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "content-set",
+  "semantic_id": "capacity-graybox-content-v1",
+  "scenario_id": "SCN_CITY_CAPACITY",
+  "scenario_revision": 1,
+  "canonicalization": "json-utf8-explicit-definition-order-v1",
+  "definitions": [
+    {
+      "id": "scn_city_capacity:definition:0001",
+      "kind": "resource",
+      "version": 1,
+      "tags": [
+        "resource",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "unit": "items",
+        "storage_class": "dry",
+        "minimum": 0,
+        "maximum": 9999
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0002",
+      "kind": "recipe",
+      "version": 1,
+      "tags": [
+        "recipe",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "inputs": {
+          "salvage": 2,
+          "parts": 1
+        },
+        "outputs": {
+          "bearing-service": 1
+        },
+        "duration_ticks": 120,
+        "capability": "bearing-service"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0003",
+      "kind": "building",
+      "version": 1,
+      "tags": [
+        "building",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "footprint_metres": [
+          4,
+          4
+        ],
+        "power_demand": 3,
+        "staff_slots": 1,
+        "states": [
+          "idle",
+          "working",
+          "blocked",
+          "failed"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0004",
+      "kind": "capability",
+      "version": 1,
+      "tags": [
+        "capability",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "provided_by": [
+          "human-bearing-service",
+          "robot-bearing-service-tool"
+        ],
+        "consumes": [],
+        "verb": "repair"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0005",
+      "kind": "route",
+      "version": 1,
+      "tags": [
+        "route",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "distance_milli": 1000,
+        "fuel_cost": 2,
+        "required_tags": [],
+        "hazards": [
+          "dust-front"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0006",
+      "kind": "faction-rule",
+      "version": 1,
+      "tags": [
+        "faction-rule",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "intent": "claim-depot",
+        "advance_per_tick_milli": 1,
+        "telegraph_threshold_milli": 100,
+        "claim_threshold_milli": 1000
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0007",
+      "kind": "save-section",
+      "version": 1,
+      "tags": [
+        "save-section",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "section_id": "section-0007",
+        "version": 1,
+        "critical": true,
+        "absence_default": {}
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0008",
+      "kind": "presentation-binding",
+      "version": 1,
+      "tags": [
+        "presentation-binding",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "read_model": "read-model-0008",
+        "authoritative": false,
+        "source_domain": "settlement"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0009",
+      "kind": "resource",
+      "version": 1,
+      "tags": [
+        "resource",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "unit": "items",
+        "storage_class": "dry",
+        "minimum": 0,
+        "maximum": 9999
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0010",
+      "kind": "recipe",
+      "version": 1,
+      "tags": [
+        "recipe",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "inputs": {
+          "salvage": 2,
+          "parts": 1
+        },
+        "outputs": {
+          "bearing-service": 1
+        },
+        "duration_ticks": 120,
+        "capability": "bearing-service"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0011",
+      "kind": "building",
+      "version": 1,
+      "tags": [
+        "building",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "footprint_metres": [
+          4,
+          4
+        ],
+        "power_demand": 3,
+        "staff_slots": 1,
+        "states": [
+          "idle",
+          "working",
+          "blocked",
+          "failed"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0012",
+      "kind": "capability",
+      "version": 1,
+      "tags": [
+        "capability",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "provided_by": [
+          "human-bearing-service",
+          "robot-bearing-service-tool"
+        ],
+        "consumes": [],
+        "verb": "repair"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0013",
+      "kind": "route",
+      "version": 1,
+      "tags": [
+        "route",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "distance_milli": 1000,
+        "fuel_cost": 2,
+        "required_tags": [],
+        "hazards": [
+          "dust-front"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0014",
+      "kind": "faction-rule",
+      "version": 1,
+      "tags": [
+        "faction-rule",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "intent": "claim-depot",
+        "advance_per_tick_milli": 1,
+        "telegraph_threshold_milli": 100,
+        "claim_threshold_milli": 1000
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0015",
+      "kind": "save-section",
+      "version": 1,
+      "tags": [
+        "save-section",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "section_id": "section-0015",
+        "version": 1,
+        "critical": true,
+        "absence_default": {}
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0016",
+      "kind": "presentation-binding",
+      "version": 1,
+      "tags": [
+        "presentation-binding",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "read_model": "read-model-0016",
+        "authoritative": false,
+        "source_domain": "settlement"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0017",
+      "kind": "resource",
+      "version": 1,
+      "tags": [
+        "resource",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "unit": "items",
+        "storage_class": "dry",
+        "minimum": 0,
+        "maximum": 9999
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0018",
+      "kind": "recipe",
+      "version": 1,
+      "tags": [
+        "recipe",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "inputs": {
+          "salvage": 2,
+          "parts": 1
+        },
+        "outputs": {
+          "bearing-service": 1
+        },
+        "duration_ticks": 120,
+        "capability": "bearing-service"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0019",
+      "kind": "building",
+      "version": 1,
+      "tags": [
+        "building",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "footprint_metres": [
+          4,
+          4
+        ],
+        "power_demand": 3,
+        "staff_slots": 1,
+        "states": [
+          "idle",
+          "working",
+          "blocked",
+          "failed"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0020",
+      "kind": "capability",
+      "version": 1,
+      "tags": [
+        "capability",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "provided_by": [
+          "human-bearing-service",
+          "robot-bearing-service-tool"
+        ],
+        "consumes": [],
+        "verb": "repair"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0021",
+      "kind": "route",
+      "version": 1,
+      "tags": [
+        "route",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "distance_milli": 1000,
+        "fuel_cost": 2,
+        "required_tags": [],
+        "hazards": [
+          "dust-front"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0022",
+      "kind": "faction-rule",
+      "version": 1,
+      "tags": [
+        "faction-rule",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "intent": "claim-depot",
+        "advance_per_tick_milli": 1,
+        "telegraph_threshold_milli": 100,
+        "claim_threshold_milli": 1000
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0023",
+      "kind": "save-section",
+      "version": 1,
+      "tags": [
+        "save-section",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "section_id": "section-0023",
+        "version": 1,
+        "critical": true,
+        "absence_default": {}
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0024",
+      "kind": "presentation-binding",
+      "version": 1,
+      "tags": [
+        "presentation-binding",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "read_model": "read-model-0024",
+        "authoritative": false,
+        "source_domain": "settlement"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0025",
+      "kind": "resource",
+      "version": 1,
+      "tags": [
+        "resource",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "unit": "items",
+        "storage_class": "dry",
+        "minimum": 0,
+        "maximum": 9999
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0026",
+      "kind": "recipe",
+      "version": 1,
+      "tags": [
+        "recipe",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "inputs": {
+          "salvage": 2,
+          "parts": 1
+        },
+        "outputs": {
+          "bearing-service": 1
+        },
+        "duration_ticks": 120,
+        "capability": "bearing-service"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0027",
+      "kind": "building",
+      "version": 1,
+      "tags": [
+        "building",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "footprint_metres": [
+          4,
+          4
+        ],
+        "power_demand": 3,
+        "staff_slots": 1,
+        "states": [
+          "idle",
+          "working",
+          "blocked",
+          "failed"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0028",
+      "kind": "capability",
+      "version": 1,
+      "tags": [
+        "capability",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "provided_by": [
+          "human-bearing-service",
+          "robot-bearing-service-tool"
+        ],
+        "consumes": [],
+        "verb": "repair"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0029",
+      "kind": "route",
+      "version": 1,
+      "tags": [
+        "route",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "distance_milli": 1000,
+        "fuel_cost": 2,
+        "required_tags": [],
+        "hazards": [
+          "dust-front"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0030",
+      "kind": "faction-rule",
+      "version": 1,
+      "tags": [
+        "faction-rule",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "intent": "claim-depot",
+        "advance_per_tick_milli": 1,
+        "telegraph_threshold_milli": 100,
+        "claim_threshold_milli": 1000
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0031",
+      "kind": "save-section",
+      "version": 1,
+      "tags": [
+        "save-section",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "section_id": "section-0031",
+        "version": 1,
+        "critical": true,
+        "absence_default": {}
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0032",
+      "kind": "presentation-binding",
+      "version": 1,
+      "tags": [
+        "presentation-binding",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "read_model": "read-model-0032",
+        "authoritative": false,
+        "source_domain": "settlement"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0033",
+      "kind": "resource",
+      "version": 1,
+      "tags": [
+        "resource",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "unit": "items",
+        "storage_class": "dry",
+        "minimum": 0,
+        "maximum": 9999
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0034",
+      "kind": "recipe",
+      "version": 1,
+      "tags": [
+        "recipe",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "inputs": {
+          "salvage": 2,
+          "parts": 1
+        },
+        "outputs": {
+          "bearing-service": 1
+        },
+        "duration_ticks": 120,
+        "capability": "bearing-service"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0035",
+      "kind": "building",
+      "version": 1,
+      "tags": [
+        "building",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "footprint_metres": [
+          4,
+          4
+        ],
+        "power_demand": 3,
+        "staff_slots": 1,
+        "states": [
+          "idle",
+          "working",
+          "blocked",
+          "failed"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0036",
+      "kind": "capability",
+      "version": 1,
+      "tags": [
+        "capability",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "provided_by": [
+          "human-bearing-service",
+          "robot-bearing-service-tool"
+        ],
+        "consumes": [],
+        "verb": "repair"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0037",
+      "kind": "route",
+      "version": 1,
+      "tags": [
+        "route",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "distance_milli": 1000,
+        "fuel_cost": 2,
+        "required_tags": [],
+        "hazards": [
+          "dust-front"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0038",
+      "kind": "faction-rule",
+      "version": 1,
+      "tags": [
+        "faction-rule",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "intent": "claim-depot",
+        "advance_per_tick_milli": 1,
+        "telegraph_threshold_milli": 100,
+        "claim_threshold_milli": 1000
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0039",
+      "kind": "save-section",
+      "version": 1,
+      "tags": [
+        "save-section",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "section_id": "section-0039",
+        "version": 1,
+        "critical": true,
+        "absence_default": {}
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0040",
+      "kind": "presentation-binding",
+      "version": 1,
+      "tags": [
+        "presentation-binding",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "read_model": "read-model-0040",
+        "authoritative": false,
+        "source_domain": "settlement"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0041",
+      "kind": "resource",
+      "version": 1,
+      "tags": [
+        "resource",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "unit": "items",
+        "storage_class": "dry",
+        "minimum": 0,
+        "maximum": 9999
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0042",
+      "kind": "recipe",
+      "version": 1,
+      "tags": [
+        "recipe",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "inputs": {
+          "salvage": 2,
+          "parts": 1
+        },
+        "outputs": {
+          "bearing-service": 1
+        },
+        "duration_ticks": 120,
+        "capability": "bearing-service"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0043",
+      "kind": "building",
+      "version": 1,
+      "tags": [
+        "building",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "footprint_metres": [
+          4,
+          4
+        ],
+        "power_demand": 3,
+        "staff_slots": 1,
+        "states": [
+          "idle",
+          "working",
+          "blocked",
+          "failed"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0044",
+      "kind": "capability",
+      "version": 1,
+      "tags": [
+        "capability",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "provided_by": [
+          "human-bearing-service",
+          "robot-bearing-service-tool"
+        ],
+        "consumes": [],
+        "verb": "repair"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0045",
+      "kind": "route",
+      "version": 1,
+      "tags": [
+        "route",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "distance_milli": 1000,
+        "fuel_cost": 2,
+        "required_tags": [],
+        "hazards": [
+          "dust-front"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0046",
+      "kind": "faction-rule",
+      "version": 1,
+      "tags": [
+        "faction-rule",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "intent": "claim-depot",
+        "advance_per_tick_milli": 1,
+        "telegraph_threshold_milli": 100,
+        "claim_threshold_milli": 1000
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0047",
+      "kind": "save-section",
+      "version": 1,
+      "tags": [
+        "save-section",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "section_id": "section-0047",
+        "version": 1,
+        "critical": true,
+        "absence_default": {}
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0048",
+      "kind": "presentation-binding",
+      "version": 1,
+      "tags": [
+        "presentation-binding",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "read_model": "read-model-0048",
+        "authoritative": false,
+        "source_domain": "settlement"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0049",
+      "kind": "resource",
+      "version": 1,
+      "tags": [
+        "resource",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "unit": "items",
+        "storage_class": "dry",
+        "minimum": 0,
+        "maximum": 9999
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0050",
+      "kind": "recipe",
+      "version": 1,
+      "tags": [
+        "recipe",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "inputs": {
+          "salvage": 2,
+          "parts": 1
+        },
+        "outputs": {
+          "bearing-service": 1
+        },
+        "duration_ticks": 120,
+        "capability": "bearing-service"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0051",
+      "kind": "building",
+      "version": 1,
+      "tags": [
+        "building",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "footprint_metres": [
+          4,
+          4
+        ],
+        "power_demand": 3,
+        "staff_slots": 1,
+        "states": [
+          "idle",
+          "working",
+          "blocked",
+          "failed"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0052",
+      "kind": "capability",
+      "version": 1,
+      "tags": [
+        "capability",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "provided_by": [
+          "human-bearing-service",
+          "robot-bearing-service-tool"
+        ],
+        "consumes": [],
+        "verb": "repair"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0053",
+      "kind": "route",
+      "version": 1,
+      "tags": [
+        "route",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "distance_milli": 1000,
+        "fuel_cost": 2,
+        "required_tags": [],
+        "hazards": [
+          "dust-front"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0054",
+      "kind": "faction-rule",
+      "version": 1,
+      "tags": [
+        "faction-rule",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "intent": "claim-depot",
+        "advance_per_tick_milli": 1,
+        "telegraph_threshold_milli": 100,
+        "claim_threshold_milli": 1000
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0055",
+      "kind": "save-section",
+      "version": 1,
+      "tags": [
+        "save-section",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "section_id": "section-0055",
+        "version": 1,
+        "critical": true,
+        "absence_default": {}
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0056",
+      "kind": "presentation-binding",
+      "version": 1,
+      "tags": [
+        "presentation-binding",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "read_model": "read-model-0056",
+        "authoritative": false,
+        "source_domain": "settlement"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0057",
+      "kind": "resource",
+      "version": 1,
+      "tags": [
+        "resource",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "unit": "items",
+        "storage_class": "dry",
+        "minimum": 0,
+        "maximum": 9999
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0058",
+      "kind": "recipe",
+      "version": 1,
+      "tags": [
+        "recipe",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "inputs": {
+          "salvage": 2,
+          "parts": 1
+        },
+        "outputs": {
+          "bearing-service": 1
+        },
+        "duration_ticks": 120,
+        "capability": "bearing-service"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0059",
+      "kind": "building",
+      "version": 1,
+      "tags": [
+        "building",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "footprint_metres": [
+          4,
+          4
+        ],
+        "power_demand": 3,
+        "staff_slots": 1,
+        "states": [
+          "idle",
+          "working",
+          "blocked",
+          "failed"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0060",
+      "kind": "capability",
+      "version": 1,
+      "tags": [
+        "capability",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "provided_by": [
+          "human-bearing-service",
+          "robot-bearing-service-tool"
+        ],
+        "consumes": [],
+        "verb": "repair"
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0061",
+      "kind": "route",
+      "version": 1,
+      "tags": [
+        "route",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "distance_milli": 1000,
+        "fuel_cost": 2,
+        "required_tags": [],
+        "hazards": [
+          "dust-front"
+        ]
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0062",
+      "kind": "faction-rule",
+      "version": 1,
+      "tags": [
+        "faction-rule",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "intent": "claim-depot",
+        "advance_per_tick_milli": 1,
+        "telegraph_threshold_milli": 100,
+        "claim_threshold_milli": 1000
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0063",
+      "kind": "save-section",
+      "version": 1,
+      "tags": [
+        "save-section",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "section_id": "section-0063",
+        "version": 1,
+        "critical": true,
+        "absence_default": {}
+      }
+    },
+    {
+      "id": "scn_city_capacity:definition:0064",
+      "kind": "presentation-binding",
+      "version": 1,
+      "tags": [
+        "presentation-binding",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "read_model": "read-model-0064",
+        "authoritative": false,
+        "source_domain": "settlement"
+      }
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "rule": "lower-authority records cannot supersede creator-authority records; creator constitutional replacements require a protected creator receipt",
+  "cases": [
+    {
+      "id": "VALID-RECOMMENDATION-REVISION",
+      "predecessor": {
+        "id": "D-9001",
+        "class": "technical",
+        "status": "provisional",
+        "authority": "technical-recommendation",
+        "approval_receipt_id": null
+      },
+      "successor": {
+        "id": "D-9002",
+        "class": "technical",
+        "status": "provisional",
+        "authority": "technical-recommendation",
+        "approval_receipt_id": null,
+        "supersedes": "D-9001"
+      },
+      "receipt": null,
+      "expected_valid": true
+    },
+    {
+      "id": "VALID-CREATOR-CONSTITUTIONAL-REPLACEMENT",
+      "predecessor": {
+        "id": "D-9003",
+        "class": "constitutional",
+        "status": "ratified",
+        "authority": "creator-clarification",
+        "approval_receipt_id": "RR-CREATOR-OLD"
+      },
+      "successor": {
+        "id": "D-9004",
+        "event_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "class": "constitutional",
+        "status": "ratified",
+        "authority": "creator-ratification",
+        "approval_receipt_id": "RR-CREATOR-NEW",
+        "supersedes": "D-9003"
+      },
+      "receipt": {
+        "receipt_id": "RR-CREATOR-NEW",
+        "issuer_role": "creator",
+        "receipt_kind": "decision-ratification",
+        "sealed": true,
+        "accepted_commit": "1111111111111111111111111111111111111111",
+        "subject_ids": ["D-9004"],
+        "subject_event_sha256": {
+          "D-9004": "2222222222222222222222222222222222222222222222222222222222222222"
+        }
+      },
+      "expected_valid": true
+    }
+  ]
+}

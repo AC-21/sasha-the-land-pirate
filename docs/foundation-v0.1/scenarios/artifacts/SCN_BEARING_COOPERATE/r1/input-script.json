@@ -1,0 +1,2450 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "input-script",
+  "semantic_id": "workshop-winch-cooperate-v1",
+  "scenario_id": "SCN_BEARING_COOPERATE",
+  "scenario_revision": 1,
+  "tick_rate_hz": 10,
+  "warmup_ticks": 0,
+  "duration_ticks": 18000,
+  "normative_execution": {
+    "ordering": "ascending (tick,sequence); sequence is unique and contiguous from zero",
+    "fixed_tick_rule": "apply every event whose tick equals the current authoritative tick before advancing systems",
+    "case_isolation": "each case begins from its matching case_state; no state is shared between cases",
+    "unknown_command_rule": "reject scenario before first tick",
+    "integer_rule": "all *_milli values use signed integer arithmetic with checked overflow",
+    "autonomous_tick_rule": "world, settlement, faction, crisis, and expedition systems advance once per declared fixed tick even when events is empty",
+    "target_resolution_rule": "resolve every scripted command payload.target by exact logical_target_id before tick zero; canonical bindings select resolved_id in the base run and the matching case_resolutions entry in a case run; scenario selectors resolve only by their declared selector_kind and selector_value",
+    "unresolved_target_rule": "reject the scenario before tick zero on a missing or duplicate binding, an unreferenced binding, an unknown selector, a missing case resolution, a kind mismatch, or an ID absent from the hash-bound starting-state or content-set artifact; never infer, fabricate, or fall back",
+    "target_binding_hash_rule": "target_bindings_sha256 is SHA-256 of canonical JSON for the complete ordered target_bindings array"
+  },
+  "events": [
+    {
+      "sequence": 0,
+      "tick": 0,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectNeed",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00001",
+        "target": "scn_bearing_cooperate:target:0001",
+        "arguments": {
+          "ordinal": 1,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 1,
+      "tick": 150,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignResident",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00002",
+        "target": "scn_bearing_cooperate:target:0002",
+        "arguments": {
+          "ordinal": 2,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 2,
+      "tick": 300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PlaceOrActivateBuilding",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00003",
+        "target": "scn_bearing_cooperate:target:0003",
+        "arguments": {
+          "ordinal": 3,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 3,
+      "tick": 450,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetCivicPriority",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00004",
+        "target": "scn_bearing_cooperate:target:0004",
+        "arguments": {
+          "ordinal": 4,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 4,
+      "tick": 600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "CommitExpedition",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00005",
+        "target": "scn_bearing_cooperate:target:0005",
+        "arguments": {
+          "ordinal": 5,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 5,
+      "tick": 750,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoute",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00006",
+        "target": "scn_bearing_cooperate:target:0006",
+        "arguments": {
+          "ordinal": 6,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 6,
+      "tick": 900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00007",
+        "target": "scn_bearing_cooperate:target:0007",
+        "arguments": {
+          "ordinal": 7,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 7,
+      "tick": 1050,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnPayload",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00008",
+        "target": "scn_bearing_cooperate:target:0008",
+        "arguments": {
+          "ordinal": 8,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 8,
+      "tick": 1200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceFactionIntent",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00009",
+        "target": "scn_bearing_cooperate:target:0009",
+        "arguments": {
+          "ordinal": 9,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 9,
+      "tick": 1350,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00010",
+        "target": "scn_bearing_cooperate:target:0010",
+        "arguments": {
+          "ordinal": 10,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 10,
+      "tick": 1500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00011",
+        "target": "scn_bearing_cooperate:target:0011",
+        "arguments": {
+          "ordinal": 11,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 11,
+      "tick": 1650,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveOracle",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00012",
+        "target": "scn_bearing_cooperate:target:0012",
+        "arguments": {
+          "ordinal": 12,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 12,
+      "tick": 1800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectNeed",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00013",
+        "target": "scn_bearing_cooperate:target:0013",
+        "arguments": {
+          "ordinal": 13,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 13,
+      "tick": 1950,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignResident",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00014",
+        "target": "scn_bearing_cooperate:target:0014",
+        "arguments": {
+          "ordinal": 14,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 14,
+      "tick": 2100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PlaceOrActivateBuilding",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00015",
+        "target": "scn_bearing_cooperate:target:0015",
+        "arguments": {
+          "ordinal": 15,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 15,
+      "tick": 2250,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetCivicPriority",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00016",
+        "target": "scn_bearing_cooperate:target:0016",
+        "arguments": {
+          "ordinal": 16,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 16,
+      "tick": 2400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "CommitExpedition",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00017",
+        "target": "scn_bearing_cooperate:target:0001",
+        "arguments": {
+          "ordinal": 17,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 17,
+      "tick": 2550,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoute",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00018",
+        "target": "scn_bearing_cooperate:target:0002",
+        "arguments": {
+          "ordinal": 18,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 18,
+      "tick": 2700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00019",
+        "target": "scn_bearing_cooperate:target:0003",
+        "arguments": {
+          "ordinal": 19,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 19,
+      "tick": 2850,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnPayload",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00020",
+        "target": "scn_bearing_cooperate:target:0004",
+        "arguments": {
+          "ordinal": 20,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 20,
+      "tick": 3000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceFactionIntent",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00021",
+        "target": "scn_bearing_cooperate:target:0005",
+        "arguments": {
+          "ordinal": 21,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 21,
+      "tick": 3150,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00022",
+        "target": "scn_bearing_cooperate:target:0006",
+        "arguments": {
+          "ordinal": 22,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 22,
+      "tick": 3300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00023",
+        "target": "scn_bearing_cooperate:target:0007",
+        "arguments": {
+          "ordinal": 23,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 23,
+      "tick": 3450,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveOracle",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00024",
+        "target": "scn_bearing_cooperate:target:0008",
+        "arguments": {
+          "ordinal": 24,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 24,
+      "tick": 3600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectNeed",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00025",
+        "target": "scn_bearing_cooperate:target:0009",
+        "arguments": {
+          "ordinal": 25,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 25,
+      "tick": 3750,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignResident",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00026",
+        "target": "scn_bearing_cooperate:target:0010",
+        "arguments": {
+          "ordinal": 26,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 26,
+      "tick": 3900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PlaceOrActivateBuilding",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00027",
+        "target": "scn_bearing_cooperate:target:0011",
+        "arguments": {
+          "ordinal": 27,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 27,
+      "tick": 4050,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetCivicPriority",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00028",
+        "target": "scn_bearing_cooperate:target:0012",
+        "arguments": {
+          "ordinal": 28,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 28,
+      "tick": 4200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "CommitExpedition",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00029",
+        "target": "scn_bearing_cooperate:target:0013",
+        "arguments": {
+          "ordinal": 29,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 29,
+      "tick": 4350,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoute",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00030",
+        "target": "scn_bearing_cooperate:target:0014",
+        "arguments": {
+          "ordinal": 30,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 30,
+      "tick": 4500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00031",
+        "target": "scn_bearing_cooperate:target:0015",
+        "arguments": {
+          "ordinal": 31,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 31,
+      "tick": 4650,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnPayload",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00032",
+        "target": "scn_bearing_cooperate:target:0016",
+        "arguments": {
+          "ordinal": 32,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 32,
+      "tick": 4800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceFactionIntent",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00033",
+        "target": "scn_bearing_cooperate:target:0001",
+        "arguments": {
+          "ordinal": 33,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 33,
+      "tick": 4950,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00034",
+        "target": "scn_bearing_cooperate:target:0002",
+        "arguments": {
+          "ordinal": 34,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 34,
+      "tick": 5100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00035",
+        "target": "scn_bearing_cooperate:target:0003",
+        "arguments": {
+          "ordinal": 35,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 35,
+      "tick": 5250,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveOracle",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00036",
+        "target": "scn_bearing_cooperate:target:0004",
+        "arguments": {
+          "ordinal": 36,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 36,
+      "tick": 5400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectNeed",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00037",
+        "target": "scn_bearing_cooperate:target:0005",
+        "arguments": {
+          "ordinal": 37,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 37,
+      "tick": 5550,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignResident",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00038",
+        "target": "scn_bearing_cooperate:target:0006",
+        "arguments": {
+          "ordinal": 38,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 38,
+      "tick": 5700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PlaceOrActivateBuilding",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00039",
+        "target": "scn_bearing_cooperate:target:0007",
+        "arguments": {
+          "ordinal": 39,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 39,
+      "tick": 5850,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetCivicPriority",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00040",
+        "target": "scn_bearing_cooperate:target:0008",
+        "arguments": {
+          "ordinal": 40,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 40,
+      "tick": 6000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "CommitExpedition",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00041",
+        "target": "scn_bearing_cooperate:target:0009",
+        "arguments": {
+          "ordinal": 41,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 41,
+      "tick": 6150,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoute",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00042",
+        "target": "scn_bearing_cooperate:target:0010",
+        "arguments": {
+          "ordinal": 42,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 42,
+      "tick": 6300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00043",
+        "target": "scn_bearing_cooperate:target:0011",
+        "arguments": {
+          "ordinal": 43,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 43,
+      "tick": 6450,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnPayload",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00044",
+        "target": "scn_bearing_cooperate:target:0012",
+        "arguments": {
+          "ordinal": 44,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 44,
+      "tick": 6600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceFactionIntent",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00045",
+        "target": "scn_bearing_cooperate:target:0013",
+        "arguments": {
+          "ordinal": 45,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 45,
+      "tick": 6750,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00046",
+        "target": "scn_bearing_cooperate:target:0014",
+        "arguments": {
+          "ordinal": 46,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 46,
+      "tick": 6900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00047",
+        "target": "scn_bearing_cooperate:target:0015",
+        "arguments": {
+          "ordinal": 47,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 47,
+      "tick": 7050,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveOracle",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00048",
+        "target": "scn_bearing_cooperate:target:0016",
+        "arguments": {
+          "ordinal": 48,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 48,
+      "tick": 7200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectNeed",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00049",
+        "target": "scn_bearing_cooperate:target:0001",
+        "arguments": {
+          "ordinal": 49,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 49,
+      "tick": 7350,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignResident",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00050",
+        "target": "scn_bearing_cooperate:target:0002",
+        "arguments": {
+          "ordinal": 50,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 50,
+      "tick": 7500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PlaceOrActivateBuilding",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00051",
+        "target": "scn_bearing_cooperate:target:0003",
+        "arguments": {
+          "ordinal": 51,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 51,
+      "tick": 7650,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetCivicPriority",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00052",
+        "target": "scn_bearing_cooperate:target:0004",
+        "arguments": {
+          "ordinal": 52,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 52,
+      "tick": 7800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "CommitExpedition",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00053",
+        "target": "scn_bearing_cooperate:target:0005",
+        "arguments": {
+          "ordinal": 53,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 53,
+      "tick": 7950,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoute",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00054",
+        "target": "scn_bearing_cooperate:target:0006",
+        "arguments": {
+          "ordinal": 54,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 54,
+      "tick": 8100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00055",
+        "target": "scn_bearing_cooperate:target:0007",
+        "arguments": {
+          "ordinal": 55,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 55,
+      "tick": 8250,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnPayload",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00056",
+        "target": "scn_bearing_cooperate:target:0008",
+        "arguments": {
+          "ordinal": 56,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 56,
+      "tick": 8400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceFactionIntent",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00057",
+        "target": "scn_bearing_cooperate:target:0009",
+        "arguments": {
+          "ordinal": 57,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 57,
+      "tick": 8550,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00058",
+        "target": "scn_bearing_cooperate:target:0010",
+        "arguments": {
+          "ordinal": 58,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 58,
+      "tick": 8700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00059",
+        "target": "scn_bearing_cooperate:target:0011",
+        "arguments": {
+          "ordinal": 59,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 59,
+      "tick": 8850,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveOracle",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00060",
+        "target": "scn_bearing_cooperate:target:0012",
+        "arguments": {
+          "ordinal": 60,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 60,
+      "tick": 9000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectNeed",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00061",
+        "target": "scn_bearing_cooperate:target:0013",
+        "arguments": {
+          "ordinal": 61,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 61,
+      "tick": 9150,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignResident",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00062",
+        "target": "scn_bearing_cooperate:target:0014",
+        "arguments": {
+          "ordinal": 62,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 62,
+      "tick": 9300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PlaceOrActivateBuilding",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00063",
+        "target": "scn_bearing_cooperate:target:0015",
+        "arguments": {
+          "ordinal": 63,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 63,
+      "tick": 9450,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetCivicPriority",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00064",
+        "target": "scn_bearing_cooperate:target:0016",
+        "arguments": {
+          "ordinal": 64,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 64,
+      "tick": 9600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "CommitExpedition",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00065",
+        "target": "scn_bearing_cooperate:target:0001",
+        "arguments": {
+          "ordinal": 65,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 65,
+      "tick": 9750,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoute",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00066",
+        "target": "scn_bearing_cooperate:target:0002",
+        "arguments": {
+          "ordinal": 66,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 66,
+      "tick": 9900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00067",
+        "target": "scn_bearing_cooperate:target:0003",
+        "arguments": {
+          "ordinal": 67,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 67,
+      "tick": 10050,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnPayload",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00068",
+        "target": "scn_bearing_cooperate:target:0004",
+        "arguments": {
+          "ordinal": 68,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 68,
+      "tick": 10200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceFactionIntent",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00069",
+        "target": "scn_bearing_cooperate:target:0005",
+        "arguments": {
+          "ordinal": 69,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 69,
+      "tick": 10350,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00070",
+        "target": "scn_bearing_cooperate:target:0006",
+        "arguments": {
+          "ordinal": 70,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 70,
+      "tick": 10500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00071",
+        "target": "scn_bearing_cooperate:target:0007",
+        "arguments": {
+          "ordinal": 71,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 71,
+      "tick": 10650,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveOracle",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00072",
+        "target": "scn_bearing_cooperate:target:0008",
+        "arguments": {
+          "ordinal": 72,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 72,
+      "tick": 10800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectNeed",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00073",
+        "target": "scn_bearing_cooperate:target:0009",
+        "arguments": {
+          "ordinal": 73,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 73,
+      "tick": 10950,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignResident",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00074",
+        "target": "scn_bearing_cooperate:target:0010",
+        "arguments": {
+          "ordinal": 74,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 74,
+      "tick": 11100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PlaceOrActivateBuilding",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00075",
+        "target": "scn_bearing_cooperate:target:0011",
+        "arguments": {
+          "ordinal": 75,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 75,
+      "tick": 11250,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetCivicPriority",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00076",
+        "target": "scn_bearing_cooperate:target:0012",
+        "arguments": {
+          "ordinal": 76,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 76,
+      "tick": 11400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "CommitExpedition",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00077",
+        "target": "scn_bearing_cooperate:target:0013",
+        "arguments": {
+          "ordinal": 77,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 77,
+      "tick": 11550,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoute",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00078",
+        "target": "scn_bearing_cooperate:target:0014",
+        "arguments": {
+          "ordinal": 78,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 78,
+      "tick": 11700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00079",
+        "target": "scn_bearing_cooperate:target:0015",
+        "arguments": {
+          "ordinal": 79,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 79,
+      "tick": 11850,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnPayload",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00080",
+        "target": "scn_bearing_cooperate:target:0016",
+        "arguments": {
+          "ordinal": 80,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 80,
+      "tick": 12000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceFactionIntent",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00081",
+        "target": "scn_bearing_cooperate:target:0001",
+        "arguments": {
+          "ordinal": 81,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 81,
+      "tick": 12150,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00082",
+        "target": "scn_bearing_cooperate:target:0002",
+        "arguments": {
+          "ordinal": 82,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 82,
+      "tick": 12300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00083",
+        "target": "scn_bearing_cooperate:target:0003",
+        "arguments": {
+          "ordinal": 83,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 83,
+      "tick": 12450,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveOracle",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00084",
+        "target": "scn_bearing_cooperate:target:0004",
+        "arguments": {
+          "ordinal": 84,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 84,
+      "tick": 12600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectNeed",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00085",
+        "target": "scn_bearing_cooperate:target:0005",
+        "arguments": {
+          "ordinal": 85,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 85,
+      "tick": 12750,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignResident",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00086",
+        "target": "scn_bearing_cooperate:target:0006",
+        "arguments": {
+          "ordinal": 86,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 86,
+      "tick": 12900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PlaceOrActivateBuilding",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00087",
+        "target": "scn_bearing_cooperate:target:0007",
+        "arguments": {
+          "ordinal": 87,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 87,
+      "tick": 13050,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetCivicPriority",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00088",
+        "target": "scn_bearing_cooperate:target:0008",
+        "arguments": {
+          "ordinal": 88,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 88,
+      "tick": 13200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "CommitExpedition",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00089",
+        "target": "scn_bearing_cooperate:target:0009",
+        "arguments": {
+          "ordinal": 89,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 89,
+      "tick": 13350,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoute",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00090",
+        "target": "scn_bearing_cooperate:target:0010",
+        "arguments": {
+          "ordinal": 90,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 90,
+      "tick": 13500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00091",
+        "target": "scn_bearing_cooperate:target:0011",
+        "arguments": {
+          "ordinal": 91,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 91,
+      "tick": 13650,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnPayload",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00092",
+        "target": "scn_bearing_cooperate:target:0012",
+        "arguments": {
+          "ordinal": 92,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 92,
+      "tick": 13800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceFactionIntent",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00093",
+        "target": "scn_bearing_cooperate:target:0013",
+        "arguments": {
+          "ordinal": 93,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 93,
+      "tick": 13950,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00094",
+        "target": "scn_bearing_cooperate:target:0014",
+        "arguments": {
+          "ordinal": 94,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 94,
+      "tick": 14100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00095",
+        "target": "scn_bearing_cooperate:target:0015",
+        "arguments": {
+          "ordinal": 95,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 95,
+      "tick": 14250,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveOracle",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00096",
+        "target": "scn_bearing_cooperate:target:0016",
+        "arguments": {
+          "ordinal": 96,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 96,
+      "tick": 14400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectNeed",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00097",
+        "target": "scn_bearing_cooperate:target:0001",
+        "arguments": {
+          "ordinal": 97,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 97,
+      "tick": 14550,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignResident",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00098",
+        "target": "scn_bearing_cooperate:target:0002",
+        "arguments": {
+          "ordinal": 98,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 98,
+      "tick": 14700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PlaceOrActivateBuilding",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00099",
+        "target": "scn_bearing_cooperate:target:0003",
+        "arguments": {
+          "ordinal": 99,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 99,
+      "tick": 14850,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetCivicPriority",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00100",
+        "target": "scn_bearing_cooperate:target:0004",
+        "arguments": {
+          "ordinal": 100,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 100,
+      "tick": 15000,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "CommitExpedition",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00101",
+        "target": "scn_bearing_cooperate:target:0005",
+        "arguments": {
+          "ordinal": 101,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 101,
+      "tick": 15150,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoute",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00102",
+        "target": "scn_bearing_cooperate:target:0006",
+        "arguments": {
+          "ordinal": 102,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 102,
+      "tick": 15300,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00103",
+        "target": "scn_bearing_cooperate:target:0007",
+        "arguments": {
+          "ordinal": 103,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 103,
+      "tick": 15450,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnPayload",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00104",
+        "target": "scn_bearing_cooperate:target:0008",
+        "arguments": {
+          "ordinal": 104,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 104,
+      "tick": 15600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceFactionIntent",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00105",
+        "target": "scn_bearing_cooperate:target:0009",
+        "arguments": {
+          "ordinal": 105,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 105,
+      "tick": 15750,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00106",
+        "target": "scn_bearing_cooperate:target:0010",
+        "arguments": {
+          "ordinal": 106,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 106,
+      "tick": 15900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00107",
+        "target": "scn_bearing_cooperate:target:0011",
+        "arguments": {
+          "ordinal": 107,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 107,
+      "tick": 16050,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveOracle",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00108",
+        "target": "scn_bearing_cooperate:target:0012",
+        "arguments": {
+          "ordinal": 108,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 108,
+      "tick": 16200,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectNeed",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00109",
+        "target": "scn_bearing_cooperate:target:0013",
+        "arguments": {
+          "ordinal": 109,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 109,
+      "tick": 16350,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AssignResident",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00110",
+        "target": "scn_bearing_cooperate:target:0014",
+        "arguments": {
+          "ordinal": 110,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 110,
+      "tick": 16500,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PlaceOrActivateBuilding",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00111",
+        "target": "scn_bearing_cooperate:target:0015",
+        "arguments": {
+          "ordinal": 111,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 111,
+      "tick": 16650,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SetCivicPriority",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00112",
+        "target": "scn_bearing_cooperate:target:0016",
+        "arguments": {
+          "ordinal": 112,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 112,
+      "tick": 16800,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "CommitExpedition",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00113",
+        "target": "scn_bearing_cooperate:target:0001",
+        "arguments": {
+          "ordinal": 113,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 113,
+      "tick": 16950,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceRoute",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00114",
+        "target": "scn_bearing_cooperate:target:0002",
+        "arguments": {
+          "ordinal": 114,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 114,
+      "tick": 17100,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ResolveEncounter",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00115",
+        "target": "scn_bearing_cooperate:target:0003",
+        "arguments": {
+          "ordinal": 115,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 115,
+      "tick": 17250,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ReturnPayload",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00116",
+        "target": "scn_bearing_cooperate:target:0004",
+        "arguments": {
+          "ordinal": 116,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 116,
+      "tick": 17400,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceFactionIntent",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00117",
+        "target": "scn_bearing_cooperate:target:0005",
+        "arguments": {
+          "ordinal": 117,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 117,
+      "tick": 17550,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "SaveCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00118",
+        "target": "scn_bearing_cooperate:target:0006",
+        "arguments": {
+          "ordinal": 118,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 118,
+      "tick": 17700,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "LoadCheckpoint",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00119",
+        "target": "scn_bearing_cooperate:target:0007",
+        "arguments": {
+          "ordinal": 119,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 119,
+      "tick": 17850,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "ObserveOracle",
+        "command_id": "SCN_BEARING_COOPERATE:cmd:00120",
+        "target": "scn_bearing_cooperate:target:0008",
+        "arguments": {
+          "ordinal": 120,
+          "bindings": {
+            "preparation": "workshop-push",
+            "vehicle-module": "winch-assembly",
+            "depot-resolution": "cooperate",
+            "arrival-state": "before-faction-claim"
+          }
+        }
+      }
+    }
+  ],
+  "case_events": [],
+  "oracle_observations": [
+    {
+      "sequence": 0,
+      "tick": 18000,
+      "subject": "canonical-state-mismatches-after-reload",
+      "selector": "metrics/canonical-state-mismatches-after-reload",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_COOPERATE_STATE"
+    },
+    {
+      "sequence": 1,
+      "tick": 18000,
+      "subject": "persistent-cross-domain-changes",
+      "selector": "metrics/persistent-cross-domain-changes",
+      "operator": "greater-or-equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_COOPERATE_CHANGES"
+    },
+    {
+      "sequence": 2,
+      "tick": 18000,
+      "subject": "faction-behavior-changes",
+      "selector": "metrics/faction-behavior-changes",
+      "operator": "greater-or-equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_COOPERATE_BEHAVIORS"
+    },
+    {
+      "sequence": 3,
+      "tick": 18000,
+      "subject": "doctrine-shaped-city-changes",
+      "selector": "metrics/doctrine-shaped-city-changes",
+      "operator": "greater-or-equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_COOPERATE_DOCTRINE"
+    },
+    {
+      "sequence": 4,
+      "tick": 18000,
+      "subject": "duplicate-or-lost-ownership",
+      "selector": "metrics/duplicate-or-lost-ownership",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_COOPERATE_DUPLICATION"
+    }
+  ],
+  "target_bindings_sha256": "be3cf848317d7915a66daaef373c1d68ef4cba0da953d180789f98b1ead7b77a",
+  "target_bindings": [
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0001",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00009",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0002",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00019",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0003",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00029",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0004",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00039",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0005",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00049",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0006",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00059",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0007",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00069",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0008",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00079",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0009",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00089",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0010",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00099",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0011",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00109",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0012",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00119",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0013",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00129",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0014",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00139",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0015",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00149",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_bearing_cooperate:target:0016",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_bearing_cooperate:base:state:00159",
+      "case_resolutions": []
+    }
+  ]
+}

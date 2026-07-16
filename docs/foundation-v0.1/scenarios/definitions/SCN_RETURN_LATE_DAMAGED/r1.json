@@ -1,0 +1,134 @@
+{
+  "schema_version": 2,
+  "id": "SCN_RETURN_LATE_DAMAGED",
+  "revision": 1,
+  "kind": "gameplay",
+  "title": "Late damaged but recoverable return",
+  "purpose": "Freeze a late Civic Buffer plus Winch Assembly return with vehicle damage, an advanced dust crisis, and a city state that remains recoverable after reload.",
+  "applies_to_packets": [
+    "WP-0002"
+  ],
+  "fixture": {
+    "world_seed": "2004",
+    "starting_tick": "0",
+    "tick_rate_hz": 10,
+    "warmup_ticks": 0,
+    "duration_ticks": 18000,
+    "warmup_seconds": 0,
+    "duration_seconds": 1800,
+    "starting_state_id": "last-bearing-new-town-v1",
+    "content_set_id": "last-bearing-graybox-content-v1",
+    "input_script_id": "buffer-winch-late-damaged-v1",
+    "fixture_manifest": {
+      "path": "scenarios/fixtures/SCN_RETURN_LATE_DAMAGED/r1.fixture.json",
+      "sha256": "2817489351af6658fe597f5d7313b89ea31523ac98d950719e1b3de07a2b4cf0"
+    }
+  },
+  "counts": {
+    "state": {
+      "authoritative_records": 240,
+      "save_sections": 9,
+      "content_definitions": 32,
+      "transactions": 1,
+      "save_generations": 4
+    },
+    "entities": {
+      "total": 23,
+      "settlements": 1,
+      "buildings": 10,
+      "households": 6,
+      "specialists": 1,
+      "robots": 1,
+      "vehicles": 1,
+      "factions": 1,
+      "crises": 1,
+      "expeditions": 1
+    },
+    "objects": {
+      "placed_total": 0,
+      "dynamic": 0,
+      "static": 0,
+      "lod0": 0,
+      "lod1": 0,
+      "lod2": 0
+    },
+    "lights": {
+      "total": 0,
+      "directional": 0,
+      "point": 0,
+      "spot": 0,
+      "shadowed": 0
+    },
+    "crowd": {
+      "authoritative_people": 30,
+      "visible_agents": 0,
+      "offscreen_people": 30
+    },
+    "inputs": {
+      "scripted_commands": 132,
+      "keyboard_events": 0,
+      "controller_events": 0,
+      "pointer_events": 0,
+      "fault_injections": 0
+    }
+  },
+  "parameters": [
+    {
+      "name": "preparation",
+      "value": "civic-buffer",
+      "unit": null
+    },
+    {
+      "name": "vehicle-module",
+      "value": "winch-assembly",
+      "unit": null
+    },
+    {
+      "name": "return-state",
+      "value": "late-damaged",
+      "unit": null
+    },
+    {
+      "name": "vehicle-condition-percent",
+      "value": 35,
+      "unit": "percent"
+    }
+  ],
+  "oracles": [
+    {
+      "id": "ORC_LATE_STATE",
+      "subject": "canonical-state-mismatches-after-reload",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_LATE_RECOVERABLE",
+      "subject": "recoverable-city-state",
+      "operator": "equal",
+      "expected": true,
+      "unit": null
+    },
+    {
+      "id": "ORC_LATE_CHANGES",
+      "subject": "persistent-cross-domain-changes",
+      "operator": "greater-or-equal",
+      "expected": 3,
+      "unit": "count"
+    },
+    {
+      "id": "ORC_LATE_DAMAGE",
+      "subject": "vehicle-condition-percent",
+      "operator": "equal",
+      "expected": 35,
+      "unit": "percent"
+    },
+    {
+      "id": "ORC_LATE_DUPLICATION",
+      "subject": "duplicate-or-lost-ownership",
+      "operator": "equal",
+      "expected": 0,
+      "unit": "count"
+    }
+  ]
+}

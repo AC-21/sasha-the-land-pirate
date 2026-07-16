@@ -1,0 +1,1611 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "input-script",
+  "semantic_id": "all-transition-and-retention-anchor-phases-v2",
+  "scenario_id": "SCN_SAVE_TRANSITIONS",
+  "scenario_revision": 1,
+  "tick_rate_hz": 10,
+  "warmup_ticks": 0,
+  "duration_ticks": 1800,
+  "normative_execution": {
+    "ordering": "ascending (tick,sequence); sequence is unique and contiguous from zero",
+    "fixed_tick_rule": "apply every event whose tick equals the current authoritative tick before advancing systems",
+    "case_isolation": "each case begins from its matching case_state; no state is shared between cases",
+    "unknown_command_rule": "reject scenario before first tick",
+    "integer_rule": "all *_milli values use signed integer arithmetic with checked overflow",
+    "autonomous_tick_rule": "world, settlement, faction, crisis, and expedition systems advance once per declared fixed tick even when events is empty",
+    "target_resolution_rule": "resolve every scripted command payload.target by exact logical_target_id before tick zero; canonical bindings select resolved_id in the base run and the matching case_resolutions entry in a case run; scenario selectors resolve only by their declared selector_kind and selector_value",
+    "unresolved_target_rule": "reject the scenario before tick zero on a missing or duplicate binding, an unreferenced binding, an unknown selector, a missing case resolution, a kind mismatch, or an ID absent from the hash-bound starting-state or content-set artifact; never infer, fabricate, or fall back",
+    "target_binding_hash_rule": "target_bindings_sha256 is SHA-256 of canonical JSON for the complete ordered target_bindings array"
+  },
+  "events": [
+    {
+      "sequence": 0,
+      "tick": 600,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PrepareManifest",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00001",
+        "target": "scn_save_transitions:target:0001",
+        "arguments": {
+          "ordinal": 1,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 1,
+      "tick": 618,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DebitCity",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00002",
+        "target": "scn_save_transitions:target:0002",
+        "arguments": {
+          "ordinal": 2,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 2,
+      "tick": 636,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PromotePointer",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00003",
+        "target": "scn_save_transitions:target:0003",
+        "arguments": {
+          "ordinal": 3,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 3,
+      "tick": 654,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "EmbedHistoricalPointerInAnchor",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00004",
+        "target": "scn_save_transitions:target:0004",
+        "arguments": {
+          "ordinal": 4,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 4,
+      "tick": 672,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceAnchorSupersession",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00005",
+        "target": "scn_save_transitions:target:0005",
+        "arguments": {
+          "ordinal": 5,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 5,
+      "tick": 690,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InjectAnchorFork",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00006",
+        "target": "scn_save_transitions:target:0006",
+        "arguments": {
+          "ordinal": 6,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 6,
+      "tick": 708,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RecoverUniqueTerminalAnchor",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00007",
+        "target": "scn_save_transitions:target:0007",
+        "arguments": {
+          "ordinal": 7,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 7,
+      "tick": 726,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "FinalizeOwnership",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00008",
+        "target": "scn_save_transitions:target:0008",
+        "arguments": {
+          "ordinal": 8,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 8,
+      "tick": 744,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PrepareManifest",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00009",
+        "target": "scn_save_transitions:target:0009",
+        "arguments": {
+          "ordinal": 9,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 9,
+      "tick": 762,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DebitCity",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00010",
+        "target": "scn_save_transitions:target:0010",
+        "arguments": {
+          "ordinal": 10,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 10,
+      "tick": 780,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PromotePointer",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00011",
+        "target": "scn_save_transitions:target:0011",
+        "arguments": {
+          "ordinal": 11,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 11,
+      "tick": 798,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "EmbedHistoricalPointerInAnchor",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00012",
+        "target": "scn_save_transitions:target:0012",
+        "arguments": {
+          "ordinal": 12,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 12,
+      "tick": 816,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "AdvanceAnchorSupersession",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00013",
+        "target": "scn_save_transitions:target:0013",
+        "arguments": {
+          "ordinal": 13,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 13,
+      "tick": 834,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InjectAnchorFork",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00014",
+        "target": "scn_save_transitions:target:0014",
+        "arguments": {
+          "ordinal": 14,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 14,
+      "tick": 852,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "RecoverUniqueTerminalAnchor",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00015",
+        "target": "scn_save_transitions:target:0015",
+        "arguments": {
+          "ordinal": 15,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 15,
+      "tick": 870,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "FinalizeOwnership",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00016",
+        "target": "scn_save_transitions:target:0016",
+        "arguments": {
+          "ordinal": 16,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 16,
+      "tick": 888,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PrepareManifest",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00017",
+        "target": "scn_save_transitions:target:0001",
+        "arguments": {
+          "ordinal": 17,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 17,
+      "tick": 906,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "DebitCity",
+        "command_id": "SCN_SAVE_TRANSITIONS:cmd:00018",
+        "target": "scn_save_transitions:target:0002",
+        "arguments": {
+          "ordinal": 18,
+          "bindings": {
+            "transition-phases": 6,
+            "save-checkpoints-per-phase": 1,
+            "writers": 2,
+            "retention-anchor-crash-boundaries": 8,
+            "anchor-advance-crash-boundaries": 8,
+            "historical-pointer-binding": "embedded-canonical-pointer-v1",
+            "pointer-digest-domain": "rfc8785-sha256-pointer-digest-zeroed",
+            "active-anchor-selection": "unique-terminal-of-one-non-forked-supersession-chain",
+            "coexisting-anchor-receipts-on-valid-chain": 3,
+            "injected-anchor-supersession-forks": 1,
+            "injected-multiple-terminal-tip-sets": 1,
+            "pointer-head-cross-field-coverage": "product_id,slot_id,save_id,generation,generation_digest,previous_generation_digest,cas_token,updated_at"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 18,
+      "tick": 924,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-generation-write",
+        "fault": "process-termination",
+        "occurrence": 1
+      }
+    },
+    {
+      "sequence": 19,
+      "tick": 942,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-generation-fsync",
+        "fault": "process-termination",
+        "occurrence": 2
+      }
+    },
+    {
+      "sequence": 20,
+      "tick": 960,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 3
+      }
+    },
+    {
+      "sequence": 21,
+      "tick": 978,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 4
+      }
+    },
+    {
+      "sequence": 22,
+      "tick": 996,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-anchor-write",
+        "fault": "process-termination",
+        "occurrence": 5
+      }
+    },
+    {
+      "sequence": 23,
+      "tick": 1014,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-anchor-fsync",
+        "fault": "process-termination",
+        "occurrence": 6
+      }
+    },
+    {
+      "sequence": 24,
+      "tick": 1032,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-prefix-quarantine",
+        "fault": "process-termination",
+        "occurrence": 7
+      }
+    },
+    {
+      "sequence": 25,
+      "tick": 1050,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-incident-manifest",
+        "fault": "process-termination",
+        "occurrence": 8
+      }
+    },
+    {
+      "sequence": 26,
+      "tick": 1068,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-generation-write",
+        "fault": "process-termination",
+        "occurrence": 9
+      }
+    },
+    {
+      "sequence": 27,
+      "tick": 1086,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-generation-fsync",
+        "fault": "process-termination",
+        "occurrence": 10
+      }
+    },
+    {
+      "sequence": 28,
+      "tick": 1104,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 11
+      }
+    },
+    {
+      "sequence": 29,
+      "tick": 1122,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 12
+      }
+    },
+    {
+      "sequence": 30,
+      "tick": 1140,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-anchor-write",
+        "fault": "process-termination",
+        "occurrence": 13
+      }
+    },
+    {
+      "sequence": 31,
+      "tick": 1158,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-anchor-fsync",
+        "fault": "process-termination",
+        "occurrence": 14
+      }
+    },
+    {
+      "sequence": 32,
+      "tick": 1176,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-prefix-quarantine",
+        "fault": "process-termination",
+        "occurrence": 15
+      }
+    },
+    {
+      "sequence": 33,
+      "tick": 1194,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-incident-manifest",
+        "fault": "process-termination",
+        "occurrence": 16
+      }
+    },
+    {
+      "sequence": 34,
+      "tick": 1212,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-generation-write",
+        "fault": "process-termination",
+        "occurrence": 17
+      }
+    },
+    {
+      "sequence": 35,
+      "tick": 1230,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-generation-fsync",
+        "fault": "process-termination",
+        "occurrence": 18
+      }
+    },
+    {
+      "sequence": 36,
+      "tick": 1248,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 19
+      }
+    },
+    {
+      "sequence": 37,
+      "tick": 1266,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 20
+      }
+    },
+    {
+      "sequence": 38,
+      "tick": 1284,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-anchor-write",
+        "fault": "process-termination",
+        "occurrence": 21
+      }
+    },
+    {
+      "sequence": 39,
+      "tick": 1302,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-anchor-fsync",
+        "fault": "process-termination",
+        "occurrence": 22
+      }
+    },
+    {
+      "sequence": 40,
+      "tick": 1320,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-prefix-quarantine",
+        "fault": "process-termination",
+        "occurrence": 23
+      }
+    },
+    {
+      "sequence": 41,
+      "tick": 1338,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-incident-manifest",
+        "fault": "process-termination",
+        "occurrence": 24
+      }
+    },
+    {
+      "sequence": 42,
+      "tick": 1356,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-generation-write",
+        "fault": "process-termination",
+        "occurrence": 25
+      }
+    },
+    {
+      "sequence": 43,
+      "tick": 1374,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-generation-fsync",
+        "fault": "process-termination",
+        "occurrence": 26
+      }
+    },
+    {
+      "sequence": 44,
+      "tick": 1392,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 27
+      }
+    },
+    {
+      "sequence": 45,
+      "tick": 1410,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 28
+      }
+    },
+    {
+      "sequence": 46,
+      "tick": 1428,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-anchor-write",
+        "fault": "process-termination",
+        "occurrence": 29
+      }
+    },
+    {
+      "sequence": 47,
+      "tick": 1446,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-anchor-fsync",
+        "fault": "process-termination",
+        "occurrence": 30
+      }
+    },
+    {
+      "sequence": 48,
+      "tick": 1464,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-prefix-quarantine",
+        "fault": "process-termination",
+        "occurrence": 31
+      }
+    },
+    {
+      "sequence": 49,
+      "tick": 1482,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-incident-manifest",
+        "fault": "process-termination",
+        "occurrence": 32
+      }
+    },
+    {
+      "sequence": 50,
+      "tick": 1500,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-generation-write",
+        "fault": "process-termination",
+        "occurrence": 33
+      }
+    },
+    {
+      "sequence": 51,
+      "tick": 1518,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-generation-fsync",
+        "fault": "process-termination",
+        "occurrence": 34
+      }
+    },
+    {
+      "sequence": 52,
+      "tick": 1536,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 35
+      }
+    },
+    {
+      "sequence": 53,
+      "tick": 1554,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 36
+      }
+    },
+    {
+      "sequence": 54,
+      "tick": 1572,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-anchor-write",
+        "fault": "process-termination",
+        "occurrence": 37
+      }
+    },
+    {
+      "sequence": 55,
+      "tick": 1590,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-anchor-fsync",
+        "fault": "process-termination",
+        "occurrence": 38
+      }
+    },
+    {
+      "sequence": 56,
+      "tick": 1608,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-prefix-quarantine",
+        "fault": "process-termination",
+        "occurrence": 39
+      }
+    },
+    {
+      "sequence": 57,
+      "tick": 1626,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-incident-manifest",
+        "fault": "process-termination",
+        "occurrence": 40
+      }
+    },
+    {
+      "sequence": 58,
+      "tick": 1644,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-generation-write",
+        "fault": "process-termination",
+        "occurrence": 41
+      }
+    },
+    {
+      "sequence": 59,
+      "tick": 1662,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-generation-fsync",
+        "fault": "process-termination",
+        "occurrence": 42
+      }
+    },
+    {
+      "sequence": 60,
+      "tick": 1680,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 43
+      }
+    },
+    {
+      "sequence": 61,
+      "tick": 1698,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 44
+      }
+    },
+    {
+      "sequence": 62,
+      "tick": 1716,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-anchor-write",
+        "fault": "process-termination",
+        "occurrence": 45
+      }
+    },
+    {
+      "sequence": 63,
+      "tick": 1734,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-anchor-fsync",
+        "fault": "process-termination",
+        "occurrence": 46
+      }
+    },
+    {
+      "sequence": 64,
+      "tick": 1752,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-prefix-quarantine",
+        "fault": "process-termination",
+        "occurrence": 47
+      }
+    },
+    {
+      "sequence": 65,
+      "tick": 1770,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-incident-manifest",
+        "fault": "process-termination",
+        "occurrence": 48
+      }
+    },
+    {
+      "sequence": 66,
+      "tick": 1788,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-generation-write",
+        "fault": "process-termination",
+        "occurrence": 49
+      }
+    },
+    {
+      "sequence": 67,
+      "tick": 1806,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-generation-fsync",
+        "fault": "process-termination",
+        "occurrence": 50
+      }
+    },
+    {
+      "sequence": 68,
+      "tick": 1824,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 51
+      }
+    },
+    {
+      "sequence": 69,
+      "tick": 1842,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 52
+      }
+    },
+    {
+      "sequence": 70,
+      "tick": 1860,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-anchor-write",
+        "fault": "process-termination",
+        "occurrence": 53
+      }
+    },
+    {
+      "sequence": 71,
+      "tick": 1878,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-anchor-fsync",
+        "fault": "process-termination",
+        "occurrence": 54
+      }
+    },
+    {
+      "sequence": 72,
+      "tick": 1896,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-prefix-quarantine",
+        "fault": "process-termination",
+        "occurrence": 55
+      }
+    },
+    {
+      "sequence": 73,
+      "tick": 1914,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-incident-manifest",
+        "fault": "process-termination",
+        "occurrence": 56
+      }
+    },
+    {
+      "sequence": 74,
+      "tick": 1932,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-generation-write",
+        "fault": "process-termination",
+        "occurrence": 57
+      }
+    },
+    {
+      "sequence": 75,
+      "tick": 1950,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-generation-fsync",
+        "fault": "process-termination",
+        "occurrence": 58
+      }
+    },
+    {
+      "sequence": 76,
+      "tick": 1968,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 59
+      }
+    },
+    {
+      "sequence": 77,
+      "tick": 1986,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 60
+      }
+    },
+    {
+      "sequence": 78,
+      "tick": 2004,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-anchor-write",
+        "fault": "process-termination",
+        "occurrence": 61
+      }
+    },
+    {
+      "sequence": 79,
+      "tick": 2022,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-anchor-fsync",
+        "fault": "process-termination",
+        "occurrence": 62
+      }
+    },
+    {
+      "sequence": 80,
+      "tick": 2040,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-prefix-quarantine",
+        "fault": "process-termination",
+        "occurrence": 63
+      }
+    },
+    {
+      "sequence": 81,
+      "tick": 2058,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-incident-manifest",
+        "fault": "process-termination",
+        "occurrence": 64
+      }
+    },
+    {
+      "sequence": 82,
+      "tick": 2076,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-generation-write",
+        "fault": "process-termination",
+        "occurrence": 65
+      }
+    },
+    {
+      "sequence": 83,
+      "tick": 2094,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-generation-fsync",
+        "fault": "process-termination",
+        "occurrence": 66
+      }
+    },
+    {
+      "sequence": 84,
+      "tick": 2112,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 67
+      }
+    },
+    {
+      "sequence": 85,
+      "tick": 2130,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 68
+      }
+    },
+    {
+      "sequence": 86,
+      "tick": 2148,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-anchor-write",
+        "fault": "process-termination",
+        "occurrence": 69
+      }
+    },
+    {
+      "sequence": 87,
+      "tick": 2166,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-anchor-fsync",
+        "fault": "process-termination",
+        "occurrence": 70
+      }
+    },
+    {
+      "sequence": 88,
+      "tick": 2184,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-prefix-quarantine",
+        "fault": "process-termination",
+        "occurrence": 71
+      }
+    },
+    {
+      "sequence": 89,
+      "tick": 2202,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-incident-manifest",
+        "fault": "process-termination",
+        "occurrence": 72
+      }
+    },
+    {
+      "sequence": 90,
+      "tick": 2220,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-generation-write",
+        "fault": "process-termination",
+        "occurrence": 73
+      }
+    },
+    {
+      "sequence": 91,
+      "tick": 2238,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-generation-fsync",
+        "fault": "process-termination",
+        "occurrence": 74
+      }
+    },
+    {
+      "sequence": 92,
+      "tick": 2256,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 75
+      }
+    },
+    {
+      "sequence": 93,
+      "tick": 2274,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-pointer-promote",
+        "fault": "process-termination",
+        "occurrence": 76
+      }
+    },
+    {
+      "sequence": 94,
+      "tick": 2292,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-anchor-write",
+        "fault": "process-termination",
+        "occurrence": 77
+      }
+    },
+    {
+      "sequence": 95,
+      "tick": 2310,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-anchor-fsync",
+        "fault": "process-termination",
+        "occurrence": 78
+      }
+    },
+    {
+      "sequence": 96,
+      "tick": 2328,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-prefix-quarantine",
+        "fault": "process-termination",
+        "occurrence": 79
+      }
+    },
+    {
+      "sequence": 97,
+      "tick": 2346,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-incident-manifest",
+        "fault": "process-termination",
+        "occurrence": 80
+      }
+    },
+    {
+      "sequence": 98,
+      "tick": 2364,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-generation-write",
+        "fault": "process-termination",
+        "occurrence": 81
+      }
+    },
+    {
+      "sequence": 99,
+      "tick": 2382,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "after-generation-fsync",
+        "fault": "process-termination",
+        "occurrence": 82
+      }
+    }
+  ],
+  "case_events": [],
+  "oracle_observations": [
+    {
+      "sequence": 0,
+      "tick": 2400,
+      "subject": "save-snapshot-pause-p95",
+      "selector": "metrics/save-snapshot-pause-p95",
+      "operator": "less-or-equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_PAUSE_P95"
+    },
+    {
+      "sequence": 1,
+      "tick": 2400,
+      "subject": "canonical-state-mismatches",
+      "selector": "metrics/canonical-state-mismatches",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_STATE_MATCH"
+    },
+    {
+      "sequence": 2,
+      "tick": 2400,
+      "subject": "duplicate-or-lost-ownership",
+      "selector": "metrics/duplicate-or-lost-ownership",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_DUPLICATION"
+    },
+    {
+      "sequence": 3,
+      "tick": 2400,
+      "subject": "save-invariant-violations",
+      "selector": "metrics/save-invariant-violations",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_INVARIANTS"
+    },
+    {
+      "sequence": 4,
+      "tick": 2400,
+      "subject": "ownership-invariant-violations",
+      "selector": "metrics/ownership-invariant-violations",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_OWNERSHIP_INVARIANTS"
+    },
+    {
+      "sequence": 5,
+      "tick": 2400,
+      "subject": "prior-generation-losses",
+      "selector": "metrics/prior-generation-losses",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_PRIOR_GENERATION"
+    },
+    {
+      "sequence": 6,
+      "tick": 2400,
+      "subject": "stale-cas-accepted",
+      "selector": "metrics/stale-cas-accepted",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_STALE_CAS"
+    },
+    {
+      "sequence": 7,
+      "tick": 2400,
+      "subject": "pointer-header-mismatches-accepted",
+      "selector": "metrics/pointer-header-mismatches-accepted",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_POINTER_HEADER"
+    },
+    {
+      "sequence": 8,
+      "tick": 2400,
+      "subject": "invalid-retention-anchors-accepted",
+      "selector": "metrics/invalid-retention-anchors-accepted",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_INVALID_ANCHORS"
+    },
+    {
+      "sequence": 9,
+      "tick": 2400,
+      "subject": "protected-generation-losses",
+      "selector": "metrics/protected-generation-losses",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_PROTECTED_GENERATION"
+    },
+    {
+      "sequence": 10,
+      "tick": 2400,
+      "subject": "anchor-rooted-recovery-failures",
+      "selector": "metrics/anchor-rooted-recovery-failures",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_ANCHOR_RECOVERY"
+    },
+    {
+      "sequence": 11,
+      "tick": 2400,
+      "subject": "unrecognized-or-forked-files-deleted",
+      "selector": "metrics/unrecognized-or-forked-files-deleted",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_UNKNOWN_FILE_DELETE"
+    },
+    {
+      "sequence": 12,
+      "tick": 2400,
+      "subject": "historical-pointer-preimage-mismatches-accepted",
+      "selector": "metrics/historical-pointer-preimage-mismatches-accepted",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_POINTER_PREIMAGE"
+    },
+    {
+      "sequence": 13,
+      "tick": 2400,
+      "subject": "historical-pointer-digest-mismatches-accepted",
+      "selector": "metrics/historical-pointer-digest-mismatches-accepted",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_POINTER_DIGEST"
+    },
+    {
+      "sequence": 14,
+      "tick": 2400,
+      "subject": "anchor-pointer-head-cross-field-mismatches-accepted",
+      "selector": "metrics/anchor-pointer-head-cross-field-mismatches-accepted",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_ANCHOR_POINTER_HEAD"
+    },
+    {
+      "sequence": 15,
+      "tick": 2400,
+      "subject": "valid-coexisting-historical-anchors-rejected",
+      "selector": "metrics/valid-coexisting-historical-anchors-rejected",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_VALID_ANCESTORS"
+    },
+    {
+      "sequence": 16,
+      "tick": 2400,
+      "subject": "nonterminal-anchor-selected-as-active",
+      "selector": "metrics/nonterminal-anchor-selected-as-active",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_NONTERMINAL"
+    },
+    {
+      "sequence": 17,
+      "tick": 2400,
+      "subject": "unique-terminal-anchor-selection-mismatches",
+      "selector": "metrics/unique-terminal-anchor-selection-mismatches",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_TERMINAL"
+    },
+    {
+      "sequence": 18,
+      "tick": 2400,
+      "subject": "forked-anchor-supersession-chains-auto-selected",
+      "selector": "metrics/forked-anchor-supersession-chains-auto-selected",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_ANCHOR_FORK"
+    },
+    {
+      "sequence": 19,
+      "tick": 2400,
+      "subject": "multiple-terminal-anchor-tips-auto-selected",
+      "selector": "metrics/multiple-terminal-anchor-tips-auto-selected",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_SAVE_MULTI_TIP"
+    }
+  ],
+  "target_bindings_sha256": "448c46f32c96d8c717ec9493abdbe0ddb9e5e1403a640c54bdced026fa9505b1",
+  "target_bindings": [
+    {
+      "logical_target_id": "scn_save_transitions:target:0001",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0002",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_save_transitions:base:state:00019",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0003",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0004",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0005",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0006",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0007",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0008",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_save_transitions:base:state:00019",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0009",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0010",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_save_transitions:base:state:00009",
+      "case_resolutions": []
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0011",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0012",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0013",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0014",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0015",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_save_transitions:target:0016",
+      "binding_kind": "canonical-state-record",
+      "resolved_id": "scn_save_transitions:base:state:00009",
+      "case_resolutions": []
+    }
+  ]
+}

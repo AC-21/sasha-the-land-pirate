@@ -1,0 +1,345 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "input-script",
+  "semantic_id": "forced-canary-failure-v1",
+  "scenario_id": "SCN_ROLLBACK_DRILL",
+  "scenario_revision": 1,
+  "tick_rate_hz": 10,
+  "warmup_ticks": 0,
+  "duration_ticks": 600,
+  "normative_execution": {
+    "ordering": "ascending (tick,sequence); sequence is unique and contiguous from zero",
+    "fixed_tick_rule": "apply every event whose tick equals the current authoritative tick before advancing systems",
+    "case_isolation": "each case begins from its matching case_state; no state is shared between cases",
+    "unknown_command_rule": "reject scenario before first tick",
+    "integer_rule": "all *_milli values use signed integer arithmetic with checked overflow",
+    "autonomous_tick_rule": "world, settlement, faction, crisis, and expedition systems advance once per declared fixed tick even when events is empty",
+    "target_resolution_rule": "resolve every scripted command payload.target by exact logical_target_id before tick zero; canonical bindings select resolved_id in the base run and the matching case_resolutions entry in a case run; scenario selectors resolve only by their declared selector_kind and selector_value",
+    "unresolved_target_rule": "reject the scenario before tick zero on a missing or duplicate binding, an unreferenced binding, an unknown selector, a missing case resolution, a kind mismatch, or an ID absent from the hash-bound starting-state or content-set artifact; never infer, fabricate, or fall back",
+    "target_binding_hash_rule": "target_bindings_sha256 is SHA-256 of canonical JSON for the complete ordered target_bindings array"
+  },
+  "events": [
+    {
+      "sequence": 0,
+      "tick": 900,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "PromoteCanaryPointer",
+        "command_id": "SCN_ROLLBACK_DRILL:cmd:00001",
+        "target": "scn_rollback_drill:target:0001",
+        "arguments": {
+          "ordinal": 1,
+          "bindings": {
+            "profiles-cloned": 1,
+            "forced-failure-boundary": "after-pointer-promotion",
+            "rollback-source-mode": "read-only-inspection",
+            "continuation-mode": "new-slot-save-lineage-genesis",
+            "rejected-descendant-disposition": "incident-quarantine-outside-recovery-scan",
+            "source-generation": "pre-canary-generation",
+            "new-lineage-initial-generation": 1,
+            "new-lineage-identifiers": "distinct-slot-id-and-save-id",
+            "quarantine-manifest-required": true,
+            "lineage-provenance-kind": "rollback-fork",
+            "lineage-provenance-source-fields": "product_id,slot_id,save_id,generation,generation_digest",
+            "lineage-provenance-required-fields": "source,incident_id,incident_manifest_sha256,reason,tool_build_id"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 1,
+      "tick": 985,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "FailCanary",
+        "command_id": "SCN_ROLLBACK_DRILL:cmd:00002",
+        "target": "scn_rollback_drill:target:0002",
+        "arguments": {
+          "ordinal": 2,
+          "bindings": {
+            "profiles-cloned": 1,
+            "forced-failure-boundary": "after-pointer-promotion",
+            "rollback-source-mode": "read-only-inspection",
+            "continuation-mode": "new-slot-save-lineage-genesis",
+            "rejected-descendant-disposition": "incident-quarantine-outside-recovery-scan",
+            "source-generation": "pre-canary-generation",
+            "new-lineage-initial-generation": 1,
+            "new-lineage-identifiers": "distinct-slot-id-and-save-id",
+            "quarantine-manifest-required": true,
+            "lineage-provenance-kind": "rollback-fork",
+            "lineage-provenance-source-fields": "product_id,slot_id,save_id,generation,generation_digest",
+            "lineage-provenance-required-fields": "source,incident_id,incident_manifest_sha256,reason,tool_build_id"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 2,
+      "tick": 1071,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "InspectSourceReadOnly",
+        "command_id": "SCN_ROLLBACK_DRILL:cmd:00003",
+        "target": "scn_rollback_drill:target:0003",
+        "arguments": {
+          "ordinal": 3,
+          "bindings": {
+            "profiles-cloned": 1,
+            "forced-failure-boundary": "after-pointer-promotion",
+            "rollback-source-mode": "read-only-inspection",
+            "continuation-mode": "new-slot-save-lineage-genesis",
+            "rejected-descendant-disposition": "incident-quarantine-outside-recovery-scan",
+            "source-generation": "pre-canary-generation",
+            "new-lineage-initial-generation": 1,
+            "new-lineage-identifiers": "distinct-slot-id-and-save-id",
+            "quarantine-manifest-required": true,
+            "lineage-provenance-kind": "rollback-fork",
+            "lineage-provenance-source-fields": "product_id,slot_id,save_id,generation,generation_digest",
+            "lineage-provenance-required-fields": "source,incident_id,incident_manifest_sha256,reason,tool_build_id"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 3,
+      "tick": 1157,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "QuarantineRejectedDescendant",
+        "command_id": "SCN_ROLLBACK_DRILL:cmd:00004",
+        "target": "scn_rollback_drill:target:0004",
+        "arguments": {
+          "ordinal": 4,
+          "bindings": {
+            "profiles-cloned": 1,
+            "forced-failure-boundary": "after-pointer-promotion",
+            "rollback-source-mode": "read-only-inspection",
+            "continuation-mode": "new-slot-save-lineage-genesis",
+            "rejected-descendant-disposition": "incident-quarantine-outside-recovery-scan",
+            "source-generation": "pre-canary-generation",
+            "new-lineage-initial-generation": 1,
+            "new-lineage-identifiers": "distinct-slot-id-and-save-id",
+            "quarantine-manifest-required": true,
+            "lineage-provenance-kind": "rollback-fork",
+            "lineage-provenance-source-fields": "product_id,slot_id,save_id,generation,generation_digest",
+            "lineage-provenance-required-fields": "source,incident_id,incident_manifest_sha256,reason,tool_build_id"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 4,
+      "tick": 1242,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "WriteIncidentManifest",
+        "command_id": "SCN_ROLLBACK_DRILL:cmd:00005",
+        "target": "scn_rollback_drill:target:0005",
+        "arguments": {
+          "ordinal": 5,
+          "bindings": {
+            "profiles-cloned": 1,
+            "forced-failure-boundary": "after-pointer-promotion",
+            "rollback-source-mode": "read-only-inspection",
+            "continuation-mode": "new-slot-save-lineage-genesis",
+            "rejected-descendant-disposition": "incident-quarantine-outside-recovery-scan",
+            "source-generation": "pre-canary-generation",
+            "new-lineage-initial-generation": 1,
+            "new-lineage-identifiers": "distinct-slot-id-and-save-id",
+            "quarantine-manifest-required": true,
+            "lineage-provenance-kind": "rollback-fork",
+            "lineage-provenance-source-fields": "product_id,slot_id,save_id,generation,generation_digest",
+            "lineage-provenance-required-fields": "source,incident_id,incident_manifest_sha256,reason,tool_build_id"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 5,
+      "tick": 1328,
+      "kind": "scripted_commands",
+      "payload": {
+        "command": "CreateRollbackForkGenesis",
+        "command_id": "SCN_ROLLBACK_DRILL:cmd:00006",
+        "target": "scn_rollback_drill:target:0006",
+        "arguments": {
+          "ordinal": 6,
+          "bindings": {
+            "profiles-cloned": 1,
+            "forced-failure-boundary": "after-pointer-promotion",
+            "rollback-source-mode": "read-only-inspection",
+            "continuation-mode": "new-slot-save-lineage-genesis",
+            "rejected-descendant-disposition": "incident-quarantine-outside-recovery-scan",
+            "source-generation": "pre-canary-generation",
+            "new-lineage-initial-generation": 1,
+            "new-lineage-identifiers": "distinct-slot-id-and-save-id",
+            "quarantine-manifest-required": true,
+            "lineage-provenance-kind": "rollback-fork",
+            "lineage-provenance-source-fields": "product_id,slot_id,save_id,generation,generation_digest",
+            "lineage-provenance-required-fields": "source,incident_id,incident_manifest_sha256,reason,tool_build_id"
+          }
+        }
+      }
+    },
+    {
+      "sequence": 6,
+      "tick": 1414,
+      "kind": "fault_injections",
+      "payload": {
+        "boundary": "before-generation-write",
+        "fault": "process-termination",
+        "occurrence": 1
+      }
+    }
+  ],
+  "case_events": [],
+  "oracle_observations": [
+    {
+      "sequence": 0,
+      "tick": 1500,
+      "subject": "live-profile-mutations",
+      "selector": "metrics/live-profile-mutations",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_ROLLBACK_LIVE_PROFILE"
+    },
+    {
+      "sequence": 1,
+      "tick": 1500,
+      "subject": "canonical-state-mismatches",
+      "selector": "metrics/canonical-state-mismatches",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_ROLLBACK_STATE"
+    },
+    {
+      "sequence": 2,
+      "tick": 1500,
+      "subject": "incident-records",
+      "selector": "metrics/incident-records",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_ROLLBACK_INCIDENT"
+    },
+    {
+      "sequence": 3,
+      "tick": 1500,
+      "subject": "source-lineage-write-attempts",
+      "selector": "metrics/source-lineage-write-attempts",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_ROLLBACK_SOURCE_WRITE"
+    },
+    {
+      "sequence": 4,
+      "tick": 1500,
+      "subject": "source-pointer-repromotions",
+      "selector": "metrics/source-pointer-repromotions",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_ROLLBACK_REPROMOTE"
+    },
+    {
+      "sequence": 5,
+      "tick": 1500,
+      "subject": "new-lineage-genesis-violations",
+      "selector": "metrics/new-lineage-genesis-violations",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_ROLLBACK_NEW_GENESIS"
+    },
+    {
+      "sequence": 6,
+      "tick": 1500,
+      "subject": "reused-source-slot-or-save-ids",
+      "selector": "metrics/reused-source-slot-or-save-ids",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_ROLLBACK_IDS"
+    },
+    {
+      "sequence": 7,
+      "tick": 1500,
+      "subject": "fork-source-provenance-mismatches",
+      "selector": "metrics/fork-source-provenance-mismatches",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_ROLLBACK_PROVENANCE"
+    },
+    {
+      "sequence": 8,
+      "tick": 1500,
+      "subject": "rejected-descendants-visible-to-recovery-scan",
+      "selector": "metrics/rejected-descendants-visible-to-recovery-scan",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_ROLLBACK_SCAN"
+    },
+    {
+      "sequence": 9,
+      "tick": 1500,
+      "subject": "rejected-descendant-hash-mismatches",
+      "selector": "metrics/rejected-descendant-hash-mismatches",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_ROLLBACK_DESC_HASH"
+    },
+    {
+      "sequence": 10,
+      "tick": 1500,
+      "subject": "quarantine-manifest-mismatches",
+      "selector": "metrics/quarantine-manifest-mismatches",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_ROLLBACK_MANIFEST"
+    },
+    {
+      "sequence": 11,
+      "tick": 1500,
+      "subject": "recovery-selected-rejected-heads",
+      "selector": "metrics/recovery-selected-rejected-heads",
+      "operator": "equal",
+      "expected_source": "scenario-definition",
+      "oracle_id": "ORC_ROLLBACK_REJECTED_HEAD"
+    }
+  ],
+  "target_bindings_sha256": "7498312bc6647604a1e76a8ba707c7838c83a9c2fde345377e136db89c096619",
+  "target_bindings": [
+    {
+      "logical_target_id": "scn_rollback_drill:target:0001",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_rollback_drill:target:0002",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_rollback_drill:target:0003",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_rollback_drill:target:0004",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_rollback_drill:target:0005",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    },
+    {
+      "logical_target_id": "scn_rollback_drill:target:0006",
+      "binding_kind": "scenario-selector",
+      "selector_kind": "save-subsystem",
+      "selector_value": "save"
+    }
+  ]
+}

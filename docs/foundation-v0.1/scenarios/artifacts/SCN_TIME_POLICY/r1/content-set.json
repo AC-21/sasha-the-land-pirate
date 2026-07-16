@@ -1,0 +1,233 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "content-set",
+  "semantic_id": "last-bearing-graybox-content-v1",
+  "scenario_id": "SCN_TIME_POLICY",
+  "scenario_revision": 1,
+  "canonicalization": "json-utf8-explicit-definition-order-v1",
+  "definitions": [
+    {
+      "id": "scn_time_policy:definition:0001",
+      "kind": "resource",
+      "version": 1,
+      "tags": [
+        "resource",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "unit": "items",
+        "storage_class": "dry",
+        "minimum": 0,
+        "maximum": 9999
+      }
+    },
+    {
+      "id": "scn_time_policy:definition:0002",
+      "kind": "recipe",
+      "version": 1,
+      "tags": [
+        "recipe",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "inputs": {
+          "salvage": 2,
+          "parts": 1
+        },
+        "outputs": {
+          "bearing-service": 1
+        },
+        "duration_ticks": 120,
+        "capability": "bearing-service"
+      }
+    },
+    {
+      "id": "scn_time_policy:definition:0003",
+      "kind": "building",
+      "version": 1,
+      "tags": [
+        "building",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "footprint_metres": [
+          4,
+          4
+        ],
+        "power_demand": 3,
+        "staff_slots": 1,
+        "states": [
+          "idle",
+          "working",
+          "blocked",
+          "failed"
+        ]
+      }
+    },
+    {
+      "id": "scn_time_policy:definition:0004",
+      "kind": "capability",
+      "version": 1,
+      "tags": [
+        "capability",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "provided_by": [
+          "human-bearing-service",
+          "robot-bearing-service-tool"
+        ],
+        "consumes": [],
+        "verb": "repair"
+      }
+    },
+    {
+      "id": "scn_time_policy:definition:0005",
+      "kind": "route",
+      "version": 1,
+      "tags": [
+        "route",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "distance_milli": 1000,
+        "fuel_cost": 2,
+        "required_tags": [],
+        "hazards": [
+          "dust-front"
+        ]
+      }
+    },
+    {
+      "id": "scn_time_policy:definition:0006",
+      "kind": "faction-rule",
+      "version": 1,
+      "tags": [
+        "faction-rule",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "intent": "claim-depot",
+        "advance_per_tick_milli": 1,
+        "telegraph_threshold_milli": 100,
+        "claim_threshold_milli": 1000
+      }
+    },
+    {
+      "id": "scn_time_policy:definition:0007",
+      "kind": "save-section",
+      "version": 1,
+      "tags": [
+        "save-section",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "section_id": "section-0007",
+        "version": 1,
+        "critical": true,
+        "absence_default": {}
+      }
+    },
+    {
+      "id": "scn_time_policy:definition:0008",
+      "kind": "presentation-binding",
+      "version": 1,
+      "tags": [
+        "presentation-binding",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "read_model": "read-model-0008",
+        "authoritative": false,
+        "source_domain": "settlement"
+      }
+    },
+    {
+      "id": "scn_time_policy:definition:0009",
+      "kind": "resource",
+      "version": 1,
+      "tags": [
+        "resource",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "unit": "items",
+        "storage_class": "dry",
+        "minimum": 0,
+        "maximum": 9999
+      }
+    },
+    {
+      "id": "scn_time_policy:definition:0010",
+      "kind": "recipe",
+      "version": 1,
+      "tags": [
+        "recipe",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "inputs": {
+          "salvage": 2,
+          "parts": 1
+        },
+        "outputs": {
+          "bearing-service": 1
+        },
+        "duration_ticks": 120,
+        "capability": "bearing-service"
+      }
+    },
+    {
+      "id": "scn_time_policy:definition:0011",
+      "kind": "building",
+      "version": 1,
+      "tags": [
+        "building",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "footprint_metres": [
+          4,
+          4
+        ],
+        "power_demand": 3,
+        "staff_slots": 1,
+        "states": [
+          "idle",
+          "working",
+          "blocked",
+          "failed"
+        ]
+      }
+    },
+    {
+      "id": "scn_time_policy:definition:0012",
+      "kind": "capability",
+      "version": 1,
+      "tags": [
+        "capability",
+        "scenario-bound"
+      ],
+      "enabled": true,
+      "contract": {
+        "provided_by": [
+          "human-bearing-service",
+          "robot-bearing-service-tool"
+        ],
+        "consumes": [],
+        "verb": "repair"
+      }
+    }
+  ]
+}

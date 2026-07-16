@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "scenario_id": "SCN_BEARING_COOPERATE",
+  "scenario_revision": 1,
+  "hash_algorithm": "sha256",
+  "artifacts": {
+    "starting_state": {
+      "kind": "starting-state",
+      "semantic_id": "last-bearing-new-town-v1",
+      "path": "scenarios/artifacts/SCN_BEARING_COOPERATE/r1/starting-state.json",
+      "sha256": "2e7c2cd0575c79abc69ec1ec07072071ad39cf92b6977c348872ae810b5de63d",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "content_set": {
+      "kind": "content-set",
+      "semantic_id": "last-bearing-graybox-content-v1",
+      "path": "scenarios/artifacts/SCN_BEARING_COOPERATE/r1/content-set.json",
+      "sha256": "b8906031e29ee2433a6882eda55cc0aa2529908fbb4ec90d4975fed9662db26c",
+      "media_type": "application/json",
+      "schema_version": 1
+    },
+    "input_script": {
+      "kind": "input-script",
+      "semantic_id": "workshop-winch-cooperate-v1",
+      "path": "scenarios/artifacts/SCN_BEARING_COOPERATE/r1/input-script.json",
+      "sha256": "7cc63ab6d5fa76bc098f3e4ae3e9da2c3af22e4481ce9b213dcb06a21f80092a",
+      "media_type": "application/json",
+      "schema_version": 1
+    }
+  }
+}
