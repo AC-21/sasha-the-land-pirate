@@ -40,10 +40,10 @@ The sole packet-specific exception is `WP-0003` under
 D-0052 is protected and ratified, WP-0003 is separately accepted, and a
 distinct activation receipt binds its local boundary may that packet work on a
 valid non-`main` `agent/*` branch in the durable repository and submit protected
-pull requests. The creator merges the initial Unity-project/CI change; agents
-still cannot accept their own evidence, merge protected changes, weaken
-governance, publish, release, or advance autonomy. Until all three authorities
-exist, the generic quarantine rule above remains the only executable A1 rule.
+pull requests. Those three authorities now exist for WP-0003. The creator
+controls the initial Unity-project/CI merge; agents still cannot accept their
+own evidence, autonomously merge protected changes, weaken governance,
+publish, release, or advance autonomy.
 
 ### A2 — Accepted work packets
 
@@ -57,7 +57,16 @@ Low-risk fixes, tests, tooling, and semantic-preserving optimizations may auto-m
 
 Accepted low/medium-risk features may progress from internal flag → canary build → default-on after predetermined evidence and an observation window. High-risk, save-breaking, economy-wide, art-pillar, or constitutional changes remain human-gated.
 
-The project remains at **A0** while this foundation is a draft. Repository creation does not promote autonomy. Only explicitly creator-approved packets may enter A1, and the canonical `a1_max_active_packets` value in [`governance/ratification-state.json`](governance/ratification-state.json) permits exactly one active A1 packet. Changing that cap requires a creator receipt plus an explicit schema/state revision; a receipt alone does not silently override the current value. Advancement requires the trusted gatekeeper in [`11-TRUST-AND-ENFORCEMENT.md`](11-TRUST-AND-ENFORCEMENT.md), the required packet mix, every failed/aborted attempt in the audit denominator, no unresolved serious incident, and a creator promotion receipt.
+The project is at **A1 for WP-0003 only**. Repository creation did not promote
+autonomy; the distinct protected activation receipt did. The canonical
+`a1_max_active_packets` value in
+[`governance/ratification-state.json`](governance/ratification-state.json)
+permits exactly one active A1 packet. Changing that cap requires a creator
+receipt plus an explicit schema/state revision. Advancement beyond A1 requires
+the trusted gatekeeper in
+[`11-TRUST-AND-ENFORCEMENT.md`](11-TRUST-AND-ENFORCEMENT.md), the required
+packet mix, every failed/aborted attempt in the audit denominator, no
+unresolved serious incident, and a creator promotion receipt.
 
 ### Exact A1 activation preconditions
 
