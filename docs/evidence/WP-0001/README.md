@@ -12,6 +12,9 @@ authorizes a Unity tool call.
 - [`RAW-CAPTURE-PROVIDER-DECISION.md`](RAW-CAPTURE-PROVIDER-DECISION.md) —
   A0-only proposal separating the unresolved protocol, network, and
   policy-attachment evidence-provider decisions.
+- [`A1-MCP-ALLOWLIST-PROPOSAL.md`](A1-MCP-ALLOWLIST-PROPOSAL.md) — A0-only,
+  source-grounded proposal for the exact observation-only client allowlist and
+  its phase-gated expansion rule.
 - [`CREATOR-A1-ACTIVATION-RUNBOOK.md`](CREATOR-A1-ACTIVATION-RUNBOOK.md) —
   creator-operated, fail-closed activation procedure.
 - [`POST-A1-IMPLEMENTATION-SEQUENCE.md`](POST-A1-IMPLEMENTATION-SEQUENCE.md) —
