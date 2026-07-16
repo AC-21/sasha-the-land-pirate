@@ -1,0 +1,48 @@
+name: Foundation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Report Python version
+        run: python3 --version
+
+      - name: Validate foundation
+        run: python3 -B docs/foundation-v0.1/tools/validate_foundation.py
+
+      - name: Reject whitespace errors
+        run: git show --check --format= --no-ext-diff HEAD
+
+      - name: Enforce AGENTS.md line budget
+        run: |
+          lines="$(wc -l < AGENTS.md)"
+          if (( lines >= 200 )); then
+            echo "::error file=AGENTS.md::AGENTS.md must remain under 200 lines; found ${lines}."
+            exit 1
+          fi
