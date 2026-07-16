@@ -121,13 +121,15 @@ Every attack must be rejected by a trusted check outside the candidate's write a
 
 [`governance/ratification-state.json`](governance/ratification-state.json) is the single draft statement of what can start:
 
-- a narrow technical spike can enter A1 only after WP-0001, repository location, tool installation, and WP-0001's packet-specific quarantine are explicitly approved;
+- a narrow technical spike can enter A1 only after WP-0001, D-0048's Unity operating boundary, the exact D-0047 tool installation, and WP-0001's packet-specific quarantine are explicitly approved; an unsealed repository/CI greenlight is evidence, not protected packet acceptance;
 - the ugly gameplay toy requires the listed identity decisions, its own explicit acceptance, and a separate packet-specific WP-0002 quarantine receipt;
 - WP-0002 cannot advance from proposal until WP-0001 is `released` and a sealed creator `packet-completion` receipt binds `ACCEPT-COMPLETION-WP-0001` plus WP-0001's immutable packet-contract hash;
 - the slice kernel additionally requires the city grammar decision;
 - production content and autonomous integration have later, stricter gates.
 
 Repository creation alone never promotes autonomy. `packet_entry_gates` in the canonical state maps each executable packet to exactly one gate; WP-0001 maps to `technical_spike` and WP-0002 maps to `ugly_gameplay_toy`. The canonical `a1_max_active_packets` value is `1`, so no second A1 packet may start until the active packet has ended and its status is recorded.
+
+Unity Terms §17.2(ff) is an independent hard stop. Until D-0048 is protected, no agent or CI credential may start Unity Hub, Editor, or CLI. The compliant branches are documented Unity-granted Authorized Agentic Access for the exact identity/runner/use; a human initiating every Unity action while agents only prepare inputs and analyze outputs; or a Godot fallback that supersedes/revises WP-0001. Creator permission to create CI or proceed at A0 cannot waive third-party terms.
 
 ### A1 quarantine minimum
 

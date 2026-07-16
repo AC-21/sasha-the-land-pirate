@@ -6,9 +6,9 @@ Known creator hardware: Apple M3 Max, 16 CPU cores, 40 GPU cores, 48 GB RAM, Met
 
 ## 1. Recommendation
 
-Use **Unity 6.3 LTS** as the engine candidate on native Apple Silicon. Test **URP Forward+** separately as the renderer candidate. Begin the authoritative simulation in plain deterministic C#; adopt Jobs, Burst, or Entities only after profiling identifies a hot path and an ADR proves the benefit.
+Use **Unity 6000.3.19f1 ARM64** as the exact WP-0001 editor candidate on native Apple Silicon, installed through **Unity Hub 3.19.5** with **Mac Build Support (IL2CPP)**. Pair it with **Xcode 26.3**, **URP 17.3**, **Unity Test Framework 1.6**, and Rosetta 2 as required by Unity's Apple Silicon system requirements. Use Mono for iteration, but treat only a native IL2CPP ARM64 standalone build as acceptance authority. Begin the authoritative simulation in plain deterministic C#; adopt Jobs, Burst, or Entities only after profiling identifies a hot path and an ADR proves the benefit.
 
-This is provisional, not a sunk-cost decision. Unity currently lists 6.3 LTS support through December 2027; the spike must still record the remaining lifecycle, exact patch, package versions, Xcode/toolchain tuple, and disposition of every relevant known issue rather than treating “6.3” as sufficiently pinned. For example, the official 6000.3.18f1 notes available during this review list a Metal command-buffer timeout freeze, so that patch is evidence for the soak gate—not an automatic selection. Unity 6 supports Apple M1-or-newer Macs and Metal. Its batch mode, optional first-party Jobs/Burst/Entities stack, AI Navigation, and URP rendering make it the strongest current candidate for a simulation-heavy stylized 3D game that must later be operated by agents. [Unity 6 lifecycle](https://unity.com/releases/unity-6), [Unity 6000.3.18f1 known issues](https://unity.com/releases/editor/whats-new/6000.3.18f1), [Unity 6 system requirements](https://docs.unity3d.com/6000.0/Documentation/Manual/system-requirements.html), [Unity command line](https://docs.unity3d.com/6000.0/Documentation/Manual/EditorCommandLineArguments.html)
+This tuple is D-0047's provisional spike target, not an installation approval or engine ratification. WP-0001 must archive the exact installers/terms, package resolution, support lifecycle, Xcode compatibility, relevant known issues, and rollback materials. Unity 6 supports Apple M1-or-newer Macs and Metal, but those general claims do not substitute for patch-specific proof. [Unity 6000.3.19f1 release](https://unity.com/releases/editor/whats-new/6000.3.19f1), [Unity 6 lifecycle](https://unity.com/releases/unity-6), [Unity 6.3 system requirements](https://docs.unity3d.com/6000.3/Documentation/Manual/system-requirements.html), [Unity 6.3 command line](https://docs.unity3d.com/6000.3/Documentation/Manual/EditorCommandLineArguments.html)
 
 Renderer hypothesis to test:
 
@@ -24,14 +24,16 @@ Renderer hypothesis to test:
 | Engine | Position | Why | Decisive risk |
 |---|---|---|---|
 | Unity 6.3 LTS | Recommended candidate | Strong Mac/Metal support; balanced stylized rendering; optional Jobs/Burst/Entities; batch automation; mature tooling | Proprietary terms; patch-specific Metal issues; license management for automated machines |
-| Godot 4.6 | Runner-up | MIT ownership; excellent headless workflow; Apple Silicon/Metal; direct glTF orientation | More custom work for large data-oriented simulation and production tooling |
+| Godot .NET 4.7.1 | Runner-up | MIT ownership; official headless workflow; Universal Apple Silicon/Metal build; direct glTF orientation | More custom work for large data-oriented simulation and production tooling |
 | Unreal 5.x | Not default | Highest cinematic ceiling; Mass, navigation, save, and automation are capable | Heavy workflow; Mac renderer limitations in flagship features; integration complexity; royalty exposure |
 
-Godot becomes the default if engine ownership and licensing safety outweigh the cost of building more simulation infrastructure. Unreal becomes reasonable only if the product pivots toward close-up cinematic exploration whose visual ceiling justifies it. [Godot license](https://godotengine.org/license/), [Godot system requirements](https://docs.godotengine.org/en/4.6/about/system_requirements.html), [Unreal macOS requirements](https://dev.epicgames.com/documentation/unreal-engine/macos-development-requirements-for-unreal-engine)
+The exact fallback/comparison candidate is **Godot .NET 4.7.1 commit `a13da4feb`**, Universal macOS ARM64/x86_64, matching .NET export templates, .NET SDK 8+, Forward+ native Metal, official headless CI, and MIT license. It must run the same representative benchmark before engine ratification; it is not installed or preselected. Unreal becomes reasonable only if the product pivots toward close-up cinematic exploration whose visual ceiling justifies it. [Godot license](https://godotengine.org/license/), [Godot system requirements](https://docs.godotengine.org/en/4.7/about/system_requirements.html), [Unreal macOS requirements](https://dev.epicgames.com/documentation/unreal-engine/macos-development-requirements-for-unreal-engine)
 
 ## 3. Constitutional technical boundaries
 
 Even if Unity is ratified:
+
+- Unity Terms §17.2(ff) is a hard operating gate. An agent or CI runner may not invoke Hub, Editor, or Unity CLI unless Unity has documented Authorized Agentic Access for the exact identity, runner, and use. Otherwise every Unity action is human-invoked while agents only prepare inputs and analyze outputs; if that cannot satisfy WP-0001, supersede it with the Godot fallback. Creator repository/CI permission cannot waive vendor terms.
 
 - Unity scenes and GameObjects are presentation and authoring containers, not canonical game state.
 - Save data never serializes scene paths, prefab instances, `MonoBehaviour` object graphs, or raw ECS chunks.

@@ -7,9 +7,10 @@ Scheduling principle: calendar commitments follow measured engine and asset thro
 
 Deliverables:
 
-- choose repository location while autonomy remains A0;
+- preserve the creator-approved durable checkout `/Users/sasha/Documents/Codex/sasha-the-land-pirate`, remote `https://github.com/AC-21/sasha-the-land-pirate`, CI commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`, and successful Foundation run `29465142421` as A0 evidence;
 - explicitly accept WP-0001 before any narrowly scoped A1 experiment;
-- approve the exact Unity installation;
+- resolve D-0048 through documented Authorized Agentic Access, a creator-bound human-invoked Unity boundary, or a superseding Godot fallback;
+- approve the exact D-0047 Unity installation;
 - establish the disposable A1 branch/worktree boundary in Section 8 of the trust document, pinned to a creator-approved base and with manual diff/import.
 
 Exit: the reversible gameplay-neutral technical spike has explicit creator authorization and an actual quarantine boundary. It may start without silently ratifying the game's design center.
@@ -34,8 +35,8 @@ Exit: WP-0002 has value-matching creator receipt claims, and no gameplay/content
 
 Canonical packet: WP-0001.
 
-- native Unity 6.3 LTS URP project on Apple Silicon;
-- exact candidate editor/package/Xcode tuple and known-issues disposition;
+- native Unity 6000.3.19f1 IL2CPP ARM64 project on Apple Silicon, using Hub 3.19.5, Xcode 26.3, URP 17.3, Test Framework 1.6, and Unity-required Rosetta 2;
+- Mono iteration plus IL2CPP ARM64 acceptance, with exact package resolution, terms/access evidence, installer retention, and known-issues disposition;
 - pure C# fixed-tick simulation shell;
 - batch test/build command;
 - versioned save round trip;

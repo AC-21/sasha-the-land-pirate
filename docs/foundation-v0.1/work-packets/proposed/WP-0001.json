@@ -9,13 +9,13 @@
   "save_risk": "S1",
   "created_on": "2026-07-15",
   "title": "Unity Mac engine, save, renderer, and pipeline spike",
-  "objective": "Prove or falsify one exact Unity 6.3 LTS patch/toolchain as the Mac-first technical foundation by producing a reproducible native ARM64 build with a non-Unity fixed-tick state core, synthetic exact-ownership recovery, the byte-exact Save Envelope/root/pointer/protected-retention-anchor v1 contracts, batch automation, a representative dynamic-building render test, and one Blender calibration package.",
+  "objective": "Prove or falsify the exact D-0047 Unity 6000.3.19f1 ARM64 toolchain as the Mac-first technical foundation, under the D-0048-compliant operating boundary, by producing a reproducible native IL2CPP ARM64 build with a non-Unity fixed-tick state core, synthetic exact-ownership recovery, the byte-exact Save Envelope/root/pointer/protected-retention-anchor v1 contracts, batch automation, a representative dynamic-building render test, and one Blender calibration package.",
   "value": "This is the smallest reversible implementation that can expose engine, saving, automation, renderer, and asset-pipeline risks without authorizing gameplay assumptions.",
   "requested_by": "creator-goal:2026-07-15",
   "required_approver": "creator",
   "approved_by": null,
   "approval_receipt_id": null,
-  "contract_sha256": "d04452275baf476e218c2f2391f08f47fa5e3b7dc8ba018f4143f034f6ee8512",
+  "contract_sha256": "dcec48c5080d6a746de44471b304bb239c4a8682d35f0f79fdc052cb9e0f54f0",
   "a1_boundary_manifest": null,
   "implementer": null,
   "verifier": null,
@@ -38,7 +38,9 @@
     "D-0028",
     "D-0033",
     "D-0034",
-    "D-0038"
+    "D-0038",
+    "D-0047",
+    "D-0048"
   ],
   "system_contracts": [
     "02-SYSTEM-MAP.md#cross-mode-ownership-transaction",
@@ -50,47 +52,61 @@
     {
       "id": "BASE-001",
       "type": "workspace-observation",
-      "uri": "local://no-game-engine-project-2026-07-15",
+      "uri": "local-observation://no-game-engine-project-2026-07-15",
       "sha256": null
     },
     {
       "id": "BASE-002",
       "type": "tool-observation",
-      "uri": "local://unity-not-detected-2026-07-15",
+      "uri": "local-observation://unity-not-detected-2026-07-15",
       "sha256": null
     },
     {
       "id": "BASE-003",
       "type": "tool-observation",
-      "uri": "local://blender-5.1.2-installed",
+      "uri": "local-observation://blender-5.1.2-installed",
       "sha256": null
     },
     {
       "id": "BASE-004",
       "type": "hardware-profile",
-      "uri": "local://m3-max-16cpu-40gpu-48gb-macos-15.7.7",
+      "uri": "local-observation://m3-max-16cpu-40gpu-48gb-macos-15.7.7",
       "sha256": null
     },
     {
       "id": "BASE-005",
       "type": "foundation-lint",
-      "uri": "local://foundation-bootstrap-lint",
+      "uri": "local-observation://foundation-bootstrap-lint",
+      "sha256": null
+    },
+    {
+      "id": "BASE-006",
+      "type": "repository-observation",
+      "uri": "local-observation://github.com/AC-21/sasha-the-land-pirate?checkout=%2FUsers%2Fsasha%2FDocuments%2FCodex%2Fsasha-the-land-pirate&commit=a07411199c5ab4600cfcce60fb8e4e9e4daea9f1",
+      "sha256": null
+    },
+    {
+      "id": "BASE-007",
+      "type": "ci-observation",
+      "uri": "local-observation://github.com/AC-21/sasha-the-land-pirate/actions/runs/29465142421?workflow=Foundation&commit=a07411199c5ab4600cfcce60fb8e4e9e4daea9f1&conclusion=success",
       "sha256": null
     }
   ],
   "in_scope": [
-    "Create a pinned Unity 6.3 LTS URP candidate project in a creator-approved repository location.",
-    "Record exact editor patch, packages, Xcode/toolchain, licenses, known issues, retained installer, and rollback tuple.",
+    "Create the D-0047 candidate project only after protected entry: Unity Hub 3.19.5; Unity 6000.3.19f1 ARM64 with Mac Build Support (IL2CPP); Xcode 26.3; Unity-required Rosetta 2; URP 17.3; Unity Test Framework 1.6; Mono iteration; IL2CPP ARM64 acceptance.",
+    "Record exact package resolution, Xcode/toolchain, accepted terms, D-0048 access evidence, known issues, retained installers, and rollback tuple.",
     "Create a non-Unity C# stable-ID fixed-tick core with injected clock, counter/key RNG, storage, and logging.",
     "Implement a synthetic two-domain ownership transaction with idempotent retry and crash-phase recovery, without choosing city or road gameplay.",
     "Implement byte-exact Save Envelope v1, root header v1, initial versioned synthetic sections, slot pointer v1, immutable generations, protected retention-anchor receipt v1, crash-safe pruning/anchor advance, fault injection, bounded recovery scan, load, and canonical state comparison.",
     "Pin the random algorithm/version, canonical-state encoding/version, and numeric policy through a cross-runtime golden vector.",
     "Pin a full Draft 2020-12 validator, meta-validate schemas, and commit positive plus adversarial save/pointer/retention-anchor/packet/asset fixtures.",
     "Create batch test/build/report commands and a native ARM64 application.",
+    "Create candidate `.github/workflows/wp0001-ci.yml` with read-only permissions and no deploy, merge, release, or receipt credentials; foundation and pure-C# jobs remain independent, and every Unity job remains manual and disabled until the protected D-0048 boundary permits the exact invoker.",
     "Create the benchmark harness and capture the provisional slice protocol.",
     "Test a representative dynamic placed-building scene with per-instance faction/condition data, LODs, shadows, probes, and batching compatibility.",
     "Export and import one Blender calibration package with scale, pivot, material, LOD, collider, socket, manifest, and provenance validation.",
     "Document Godot fallback triggers.",
+    "If D-0048 selects fallback, supersede this packet with the same representative benchmark on Godot .NET 4.7.1 commit a13da4feb, Universal macOS ARM64/x86_64, matching .NET export templates, .NET SDK 8+, Forward+ native Metal, official headless CI, and MIT license; do not install or preselect it here.",
     "The same ACCEPT-WP-0001 receipt must bind `AUTHORIZE-TEMP-WP0001-IDENTITY`: Company `LocalFoundationLab`; Product `SashaAtomicLandPirate_WP0001`; Bundle ID `local.foundation.sashaatomiclandpirate.wp0001`; isolated save profiles `wp0001-dev-v1` and `wp0001-test-v1`; temporary/non-shipping with no prior-root discovery or migration.",
     "Emit candidate scenario/control-plane revisions and their hashes only under `BuildArtifacts/WP-0001/candidate-control-plane/`; A1 treats the protected foundation and registries as read-only inputs and cannot rewrite them."
   ],
@@ -102,7 +118,9 @@
     "Production economy balance or campaign content.",
     "Automatic merge, autonomy promotion, or feature rollout.",
     "Any city-grammar, vehicle-control, travel-topology, faction, module, or other creator-owned gameplay decision.",
-    "Ratifying durable D-0038 company, product, bundle, or save-root identity; the exact WP-0001 tuple is temporary, non-shipping, and forbidden for distributed saves."
+    "Ratifying durable D-0038 company, product, bundle, or save-root identity; the exact WP-0001 tuple is temporary, non-shipping, and forbidden for distributed saves.",
+    "Any agent or CI invocation of Unity Hub, Editor, or CLI before D-0048 and the protected packet, installation, and A1 gates pass.",
+    "Treating a creator's repository/CI greenlight as a waiver of Unity's terms or as permission for unattended Unity automation."
   ],
   "affected_domains": [
     "world",
@@ -135,6 +153,7 @@
     "fencing_token": null
   },
   "declared_paths": [
+    ".github/workflows/wp0001-ci.yml",
     "Game/Assets/Game/Bootstrap/",
     "Game/Assets/Game/Content/TechnicalSpike/",
     "Game/Assets/Game/Editor/Build/",
@@ -196,7 +215,7 @@
       "id": "T-A1-QUARANTINE",
       "kind": "manual",
       "command": null,
-      "oracle": "A creator-controlled receipt binds the approved base, disposable worktree, non-writable trusted checkout/governance, restricted credentials, and manual diff/import boundary before implementation starts.",
+      "oracle": "A creator-controlled receipt binds the approved base, disposable worktree, non-writable trusted checkout/governance, restricted credentials, manual diff/import boundary, exact D-0047 tuple, and D-0048-compliant invocation path before any implementation or Unity process starts; a Godot choice supersedes this packet and runs the same benchmark.",
       "required": true,
       "scenario_id": null
     },
@@ -220,7 +239,7 @@
       "id": "T-BATCH-BUILD",
       "kind": "integration",
       "command": "python3 Tools/Build/run_wp0001.py --packet docs/foundation-v0.1/work-packets/proposed/WP-0001.json --configuration Release --architecture arm64 --launch-smoke --report BuildArtifacts/WP-0001/batch-build.json",
-      "oracle": "A trusted command runs tests, native ARM64 build, launch smoke, and report without manual Editor interaction.",
+      "oracle": "Under the protected D-0048 boundary, the approved invoker runs tests, native IL2CPP ARM64 build, launch smoke, and report without ad hoc Editor interaction; a human-invoked boundary records the human initiation explicitly.",
       "required": true,
       "scenario_id": null
     },
@@ -542,7 +561,8 @@
       "Any required acceptance test fails after the allowed bounded iteration.",
       "Save generation or ownership transaction can duplicate, lose, or orphan state.",
       "Known Mac/Metal issue lacks a credible mitigation or recovery path.",
-      "The exact engine/toolchain cannot reproduce from a clean clone."
+      "The exact engine/toolchain cannot reproduce from a clean clone.",
+      "Unity terms or access evidence does not support the selected D-0048 operating path."
     ],
     "steps": [
       "Freeze the candidate and preserve logs, saves, seeds, metrics, and failing artifacts.",

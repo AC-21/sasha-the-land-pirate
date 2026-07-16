@@ -27,6 +27,8 @@ This is the foundation specification for a future protected control plane for an
 
 Machine-readable schemas, value-sensitive entry gates, proposed work packets, and hash-registered immutable scenarios sit beside these documents. [`schemas/a1-boundary-manifest.schema.json`](schemas/a1-boundary-manifest.schema.json) defines the exact creator-attested quarantine boundary required for any future A1 activation. They are draft control-plane inputs, not evidence that the protected control plane already exists.
 
+Current A0 activation preparation uses the creator-approved durable checkout `/Users/sasha/Documents/Codex/sasha-the-land-pirate` and remote `https://github.com/AC-21/sasha-the-land-pirate`. Foundation run `29465142421` passed for commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`. `RR-CREATOR-20260715-04` preserves that greenlight but is unsealed; it authorizes A0 preparation for the WP-0001 transition but does not protected-accept the amended packet, approve Unity installation, choose D-0048's legal operating path, establish the A1 boundary, or promote autonomy.
+
 ## Source-of-truth order
 
 When two artifacts conflict, the higher item wins:

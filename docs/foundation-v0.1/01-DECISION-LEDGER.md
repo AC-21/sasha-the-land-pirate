@@ -65,6 +65,8 @@ This view is for humans. The JSONL log is the **draft canonical representation**
 | D-0044 | experience | Open | Exact population metric/threshold, eligibility, prerequisites, consideration, matching, custody/loss, disputes, and caravaner doctrine. | Resolve before accepting the exchange packet |
 | D-0045 | art | Open | Keep storybook salvage as the emotional filter or replace it beneath the new north star. | Recommendation: layered direction |
 | D-0046 | scope | Provisional | Stage the full exchange after the slice, with manufacturing and bilateral trade introduced earlier. | Prove through a dedicated M7E packet |
+| D-0047 | technical | Provisional | WP-0001 exact candidate: Hub 3.19.5; Unity 6000.3.19f1 ARM64 + Mac Build Support (IL2CPP); Xcode 26.3; Unity-required Rosetta 2; URP 17.3; Test Framework 1.6; Mono iteration; IL2CPP ARM64 acceptance. | Approve/revise only after licensing, compatibility, known-issue, and rollback proof |
+| D-0048 | production | Open | Choose a Unity Terms §17.2(ff) path: Authorized Agentic Access, a legally confirmed human-invoked boundary, or an equivalent benchmark on exact fallback Godot .NET 4.7.1 commit `a13da4feb` (Universal macOS, matching templates, .NET 8+, Forward+ Metal, headless CI, MIT). | Hard gate before Unity install, invocation, or A1 activation |
 
 ## Immediate ratification queue
 
@@ -85,6 +87,8 @@ The first creator review should answer only these high-leverage issues:
 13. Choose whether colony compositions are mechanically distinct or primarily representational.
 14. Define the world-population milestone and caravaner exchange rules before the post-slice economy packet.
 15. Confirm whether storybook salvage remains the emotional filter beneath Texas iron × brutalist opera.
+16. Approve or revise the exact D-0047 WP-0001 installation tuple.
+17. Resolve D-0048 with documented Authorized Agentic Access, a creator-bound human-invoked Unity boundary, or a superseding Godot packet.
 
 All other open choices can remain deferred until a graybox or profiling spike produces evidence.
 

@@ -6,7 +6,9 @@ An endearing, real-time, post-apocalyptic city-building and resource-management 
 
 **A0 — foundation and control-plane documentation only.**
 
-This local repository candidate contains no game implementation, Unity project, installed project dependency, production asset, or authorized autonomous integration. Repository creation does not approve WP-0001, Unity installation, the repository's production location, or a higher autonomy level.
+The approved durable checkout is `/Users/sasha/Documents/Codex/sasha-the-land-pirate`, backed by `https://github.com/AC-21/sasha-the-land-pirate`. Foundation CI was established at commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`; Foundation run `29465142421` completed successfully. This records A0 setup only: the repository still contains no game implementation, Unity project, installed project dependency, production asset, or authorized autonomous integration.
+
+The exact WP-0001 candidate is Unity Hub 3.19.5; Unity 6000.3.19f1 ARM64 with Mac Build Support (IL2CPP); Xcode 26.3; Unity's required Rosetta 2 support layer; URP 17.3; and Unity Test Framework 1.6. Mono is the iteration backend; IL2CPP ARM64 is the acceptance-build authority. It is proposed, not installed or protected-accepted. D-0048 also blocks every agent/CI Unity invocation until one evidenced path is chosen: documented Authorized Agentic Access, a legally confirmed creator-bound human-invoked Unity boundary, or a superseding Godot fallback.
 
 Current creator-ratified facts:
 
@@ -35,7 +37,7 @@ Validate the bootstrap foundation from the repository root:
 python3 docs/foundation-v0.1/tools/validate_foundation.py
 ```
 
-Expected current result: the foundation lint passes; all three local creator-source receipts remain intentionally unsealed pending protected repository/receipt infrastructure.
+Expected current result: the foundation lint passes; all four local creator-source receipts remain intentionally unsealed pending protected receipt infrastructure.
 
 ## Planned seams
 
@@ -43,4 +45,4 @@ The accepted technical packet may create `Game/`, `SimulationCore/`, `SaveContra
 
 ## Next gate
 
-WP-0001 remains blocked on four creator-controlled approvals: accept the exact packet, approve this repository location, authorize the Unity Hub/Editor installation, and verify the physical A1 quarantine/manual-import boundary. Until those are receipt-bound, work remains A0.
+The creator greenlit the durable repository, Foundation CI, and A0 preparation for the WP-0001 transition; that exact message is preserved in unsealed `RR-CREATOR-20260715-04` and is not protected acceptance of the amended packet. WP-0001 remains proposed and blocked on protected packet acceptance, D-0048's Unity-access boundary, Unity installation approval, and the physical A1 quarantine/manual-import boundary. No receipt is sealed, no Unity action is authorized, and autonomy remains A0.

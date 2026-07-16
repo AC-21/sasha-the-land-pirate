@@ -22,11 +22,11 @@ The current thesis, pillars, loop, “storybook salvage” phrase, mechanics, lo
 
 This repository is currently **documentation/control-plane work only**.
 
-- Unity is not installed, pinned, or approved for this project.
-- Unity 6.3 LTS and URP Forward+ are candidates, not ratified dependencies.
+- Unity is not installed or approved. D-0047 proposes Unity Hub 3.19.5, Unity 6000.3.19f1 ARM64 + Mac Build Support (IL2CPP), Xcode 26.3, Unity's required Rosetta 2 support layer, URP 17.3, and Test Framework 1.6; Mono is for iteration and only IL2CPP ARM64 may satisfy acceptance.
+- D-0048 is a hard open legal/operating gate: no agent or CI runner may invoke Unity Hub, Editor, or CLI until documented Authorized Agentic Access or a creator-bound human-invoked boundary exists; otherwise use the Godot fallback.
 - No gameplay, production asset, package installation, engine project, or autonomous integration is authorized yet.
 - Repository creation does not advance autonomy.
-- WP-0001 may enter A1 only after creator approval of the exact packet, repository location, tool installation, and its physical quarantine receipt.
+- WP-0001 may enter A1 only after protected creator acceptance of the exact packet, D-0048 resolution, Unity installation approval, and its physical quarantine receipt. The approved repository/CI setup does not satisfy those gates.
 - At most one A1 packet may be active. A1 output is manually inspected and imported or rejected by the creator; agents do not merge it.
 
 If requested work exceeds A0, stop and name the missing authorization. Do not “prepare ahead” by creating implementation scaffolding.

@@ -37,6 +37,8 @@ The creator's later 2026-07-15 direction is captured in unsealed receipt `RR-CRE
 
 “Other than that. Let's go for it” safely authorizes continued A0 design work. It does not name the repository path, accept either exact work packet, approve a Unity installation, answer the open worksheet values, create the quarantine boundary, or promote autonomy.
 
+The creator's latest greenlight is separately preserved in unsealed `RR-CREATOR-20260715-04`. It approves the durable checkout `/Users/sasha/Documents/Codex/sasha-the-land-pirate`, remote `https://github.com/AC-21/sasha-the-land-pirate`, A0 CI setup, and A0 preparation for the WP-0001 transition. Foundation run `29465142421` succeeded for commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`. It does not protected-accept the amended WP-0001, approve or install Unity, resolve D-0048, seal any receipt, establish quarantine, or activate A1.
+
 ## What this audit does not claim
 
 Bootstrap lint can catch internal drift and malformed draft records. It cannot prove game fun, engine suitability, commercial rights, save correctness in an implementation, or that an agent with the same credentials did not rewrite the checker. The foundation intentionally says so.
@@ -46,11 +48,12 @@ Bootstrap lint can catch internal drift and malformed draft records. It cannot p
 ## Honest blockers before A1
 
 1. The creator has not accepted WP-0001.
-2. A local candidate repository exists, but its production location has not yet been creator-approved and receipt-bound.
-3. Unity Hub/Editor installation is not authorized or present.
-4. The A1 quarantine boundary has not been physically established or receipt-bound.
+2. The repository location/CI greenlight is unsealed and therefore not a protected gate receipt.
+3. D-0048 has not selected and protected Authorized Agentic Access, a human-invoked Unity boundary, or the Godot fallback.
+4. Unity Hub/Editor installation is not authorized or present.
+5. The A1 quarantine boundary has not been physically established or receipt-bound.
 
-Until all four are true, the project remains A0 and no game implementation starts under this constitution.
+Until all five are true, the project remains A0 and no game implementation starts under this constitution.
 
 ## Honest blockers before gameplay graybox
 
@@ -76,7 +79,8 @@ Until all four are true, the project remains A0 and no game implementation start
 
 ## Deferred evidence, not hidden assumptions
 
-- exact Unity editor patch and package tuple;
+- approval and installation proof for the proposed D-0047 Unity/tool/package tuple;
+- a protected D-0048 Unity agent-access operating path or superseding Godot packet;
 - lowest supported shipping Mac;
 - accepted city manipulation grammar;
 - final road-control embodiment and travel topology;
