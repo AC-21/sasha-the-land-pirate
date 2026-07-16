@@ -574,7 +574,11 @@ remaining work, not to waive it:
   installed relay/Bridge diagnostics do not provide exact raw protocol frames
   and request IDs. Schema v4 does not yet bind independent providers or retained
   raw bytes, so a protected successor is required before provider independence
-  can become an activation gate;
+  can become an activation gate. The same decision now includes the
+  code-identity-context gap, with
+  `CODE-IDENTITY-CONTEXT-PROVIDER-PROPOSAL.md` defining the proposed exact
+  verifier-context attempt set, protected authority object, and schema-v5
+  machine-enforcement successor;
 - persistent-relay mitigation is not proven;
 - no fresh live capture yet proves the exact Editor-owner/relay-peer Unix FD
   and reciprocal Codex/relay stdin/stdout pipe graph;
@@ -588,14 +592,18 @@ remaining work, not to waive it:
   components, plus a pristine read-only OpenAI reference, fail strict signing
   checks inside the current Codex workspace sandbox, while the same current
   components pass strict verification in a user-approved read-only host
-  diagnostic and their app bundles pass Gatekeeper there. Neither result proves
-  the future A1 boundary. The current schema and live validator do not
-  machine-bind the verifier's own executable, PID, UID, parent/process
-  ancestry, sandbox/policy attachment, filesystem view, or policy hashes.
+  diagnostic and their app bundles pass macOS execute-policy assessment there.
+  Neither result proves the future A1 boundary. The current schema and live
+  validator do not machine-bind the verifier's own executable, PID, UID,
+  parent/process ancestry, sandbox/policy attachment, filesystem view, or
+  policy hashes.
   Protected authority must select and machine-bind either verification inside
-  the exact A1 boundary or a specific creator-ratified external read-only
-  verifier context. Activation then requires successful raw capture through
-  that selected route and fails closed on any mismatch or recurrence;
+  the exact A1 boundary or a separately protected external boundary whose
+  contract explicitly redefines authority and independently authenticates
+  object/view mappings back to every exact A1 component, process birth, vnode,
+  bundle resource, and policy record. Creator ratification alone is
+  insufficient. Activation then requires successful raw capture through that
+  selected route and fails closed on any mismatch or recurrence;
 - activation evidence bytes, boundary manifest, live session, and receipt do
   not exist.
 

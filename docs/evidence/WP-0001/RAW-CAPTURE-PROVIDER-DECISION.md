@@ -3,8 +3,10 @@
 Status: **A0 / proposed / unresolved**
 
 This document grants no authority, activates no packet, and authorizes no
-Unity, Hub, Editor, relay, Codex, or MCP invocation. It records a provider gap
-found through static inspection only. WP-0001 remains `accepted` and blocked.
+Unity, Hub, Editor, relay, Codex, or MCP invocation. It records provider gaps
+found through static inspection and bounded A0 read-only diagnostics. No target
+component was invoked to produce those observations. WP-0001 remains
+`accepted` and blocked.
 
 ## Static observation
 
@@ -55,7 +57,7 @@ Observed static identities:
 These hashes identify the inspected bytes; they do not convert diagnostic logs
 into authoritative raw evidence.
 
-## Three independent provider gaps
+## Four independent provider gaps
 
 ### 1. Protocol provider
 
@@ -105,6 +107,30 @@ Reversible provider options:
 3. a creator-operated isolated-host design whose launch boundary makes policy
    attachment independently observable and fail-closed.
 
+### 4. Code-identity-context provider
+
+Required evidence must prove that strict signing and bundle-appropriate macOS
+execute-policy checks ran through one protected verification context bound to
+the exact A1 components. Target signing tuples and a boolean `strict_verified`
+result do not bind the verifier's own principal, process ancestry, policy
+attachment, filesystem view, system-tool children, commands, or raw outputs.
+
+`COMPONENT-SIGNATURE-RECHECK-20260716.md` demonstrates the practical gap:
+identical current components fail inside the Codex workspace sandbox and pass
+in a user-approved read-only host diagnostic. Neither context is activation
+authority.
+
+Reversible provider options:
+
+1. in-boundary verification from the exact A1 principal and policy boundary;
+2. an independent external provider only under a protected contract that
+   explicitly redefines the authoritative verification boundary and
+   cross-binds it to the exact A1 component and policy state.
+
+`CODE-IDENTITY-CONTEXT-PROVIDER-PROPOSAL.md` defines the proposed raw artifact,
+context hash, command records, cross-bindings, fail-closed cases, and
+machine-enforcement work. No option is selected by that proposal.
+
 ## Evidence separation
 
 A collector may copy authoritative raw bytes from the selected provider and a
@@ -137,8 +163,8 @@ may be described as provider-independent proof.
 To adopt this proposal as a binding activation prerequisite, the creator and
 protected control plane would need to decide and protect:
 
-1. the selected provider option for each of protocol, network, and policy
-   attachment;
+1. the selected provider option for each of protocol, network, policy
+   attachment, and code-identity context;
 2. whether any provider changes the direct route, process identity, privilege
    boundary, or threat model;
 3. exact executable/API identity, version, source or binary hash, invocation,
@@ -156,9 +182,9 @@ proposal is selected by default.
 ## Recommendation
 
 Recommended next protected decision: defer pass-producing collector
-implementation, select and ratify the underlying evidence providers, revise the
-machine-enforced evidence contract, and then design each collector as the
-smallest content-addressed adapter to retained provider output.
+implementation, select and ratify the four underlying evidence providers,
+revise the machine-enforced evidence contract, and then design each collector
+as the smallest content-addressed adapter to retained provider output.
 
 Until those decisions exist, keep A0, keep WP-0001 blocked, keep the protected
 repo MCP entry disabled, and keep Unity tool invocations at zero.

@@ -10,8 +10,12 @@ authorizes a Unity tool call.
 - [`UNITY-MCP-STATIC-SECURITY-AUDIT-20260716.md`](UNITY-MCP-STATIC-SECURITY-AUDIT-20260716.md)
   — source-level audit of the installed Unity Assistant direct-MCP path.
 - [`RAW-CAPTURE-PROVIDER-DECISION.md`](RAW-CAPTURE-PROVIDER-DECISION.md) —
-  A0-only proposal separating the unresolved protocol, network, and
-  policy-attachment evidence-provider decisions.
+  A0-only proposal separating the unresolved protocol, network,
+  policy-attachment, and code-identity-context evidence-provider decisions.
+- [`CODE-IDENTITY-CONTEXT-PROVIDER-PROPOSAL.md`](CODE-IDENTITY-CONTEXT-PROVIDER-PROPOSAL.md)
+  — exact A0-only proposal for binding signing commands, verifier identity,
+  policy attachment, filesystem view, and raw outputs through a fourth provider
+  domain.
 - [`A1-MCP-ALLOWLIST-PROPOSAL.md`](A1-MCP-ALLOWLIST-PROPOSAL.md) — A0-only,
   source-grounded proposal for the exact observation-only client allowlist and
   its phase-gated expansion rule.
@@ -38,7 +42,9 @@ summary facts or blank command files are insufficient. Those raw captures must
 come from the exact source-hashed protocol, network, and policy-attachment
 collectors authorized by
 `AUTHORIZE-WP0001-RAW-COLLECTORS`. The collectors are deliberately not yet
-implemented. `RAW-CAPTURE-PROVIDER-DECISION.md` recommends selecting independent
+implemented. The proposed fourth code-identity-context collector and provider
+are not present in schema v4 and are not covered by that authority claim.
+`RAW-CAPTURE-PROVIDER-DECISION.md` recommends selecting independent
 raw-evidence providers and revising the machine-enforced evidence contract
 before pass-producing collector implementation. That recommendation is not yet
 a protected gate; schema v4 still cannot prove provider independence. A1
