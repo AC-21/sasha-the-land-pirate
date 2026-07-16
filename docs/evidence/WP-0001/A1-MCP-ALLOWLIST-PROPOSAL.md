@@ -180,9 +180,10 @@ creator-operated, content-addressed native wrapper.
 If agent-driven native gates later become necessary, the safer successor is a
 dedicated tool such as `Unity_WP0001_RunGate` with enumerated actions, fixed
 inputs, fixed output paths, no arbitrary code/menu/path parameters, and
-machine-readable results. The current protected seed forbids that code, and
-adding it after activation changes the tool inventory. It requires a protected
-seed/boundary revision and a fresh activation, not an allowlist edit in place.
+machine-readable results. The schema-required seed profile, once created,
+forbids that code. Adding it after activation changes the tool inventory and
+requires a protected seed/boundary revision plus a fresh activation, not an
+allowlist edit in place.
 
 ## Exact inspected inventory
 

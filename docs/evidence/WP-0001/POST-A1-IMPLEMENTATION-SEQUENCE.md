@@ -121,7 +121,9 @@ Deliver:
 - thin presentation/bootstrap adapters;
 - exact temporary identity;
 - EditMode and PlayMode tests;
-- creator/manual-or-MCP-routed build wrapper;
+- creator-operated build wrapper; MCP routing is permitted only after a new
+  protected tool-inventory/boundary revision adds a dedicated narrow native
+  gate and a fresh activation authorizes it;
 - machine-readable launch smoke.
 
 Proof:

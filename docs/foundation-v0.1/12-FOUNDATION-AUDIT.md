@@ -56,11 +56,29 @@ Bootstrap lint can catch internal drift and malformed draft records. It cannot p
 5. The standalone A1 quarantine and creator-operated import/reject boundary have not been physically established or receipt-bound. Unity's ignored project caches require an explicit ephemeral-scratch boundary distinct from reserved packet outputs, while Unity/relay/license/log/connection state outside the repository requires a separately isolated disposable runtime HOME and private temp namespace. The protected checkout and creator HOME must fail real descendant write-open probes; shared temp is default-denied except the exact project-hash/PID Unix socket, which must be a non-symlink socket owned by the isolated UID at mode `0600`. Boot-bound listener and egress probes, exact policy hashes, proof that those policies are attached to the running principal/processes, and the non-Unity live verifier must all pass before the creator receipt.
 6. Three pre-A1 deviations are preserved. One `Unity_ReadConsole` smoke ran before D-0051 and returned zero entries. During the 2026-07-16 A0 preflight, one shell probe invoked the installed Unity executable with `-version`, and a delegated evidence probe launched Unity Hub with a headless editor-list argument. Neither direct probe intentionally opened or changed a project, but absence of mutation is not treated as proven. All three events crossed their applicable no-call/no-direct-invocation boundaries, none authorizes implementation, and none can count toward a clean activation cycle.
 
+### Later A0 findings and the formal authority boundary
+
+The six classes above are exhaustive only for the currently encoded/formal
+schema-v4 machine gate. Later merged A0 evidence adds unresolved advisory
+decisions: the exact allowlist proposal, independent raw-provider selection,
+the code-signing execution-context split, and the proposed schema-v5 successor.
+
+Those proposals do not silently amend `AGENTS.md`, schema v4, receipt claims, or
+ratification state. Conversely, a schema-v4 pass cannot prove the new provider
+independence or verifier-context properties. Before sealing an activation
+receipt, the creator should issue a protected decision that either ratifies the
+successor or rejects it in favor of an exact protected alternative. Until that
+disposition exists, the fail-closed creator runbook keeps WP-0001 at A0 even
+though the formal machine gate remains v4.
+
 The accepted WP-0001 contract hash is `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`. Acceptance authorizes only its bounded creator-operated setup phase; it is not evidence that the engine, route, build, save contracts, performance, or quarantine have passed, and it is not A1 activation.
 
 Across A0 hardening and successor passes, unsealed creator-source receipts advance only their derived live-materialization hashes when append-only decisions change the draft views. Their creator source hashes, claims, decision-event bindings, and unsealed status remain unchanged; Git history retains every prior snapshot.
 
-Until all six blocker classes are resolved and a separate activation receipt is sealed, the project remains A0 and no game implementation starts under this constitution.
+Until all six schema-v4 blocker classes are resolved, the later A0 findings
+receive a protected disposition, and a separate activation receipt is sealed,
+the project remains A0 and no game implementation starts under this
+constitution.
 
 ## Honest blockers before gameplay graybox
 
