@@ -17,15 +17,16 @@
     }
   ],
   "approval_text_sha256": "ac2e4215d9f570db34279009a4c9b961d34d30df3e740e819338fde8b81282ae",
-  "accepted_commit": null,
+  "accepted_commit": "272c52620f5f6e3a2194ba2ae97c160ff71f310c",
   "artifact_sha256": {
-    "github.com/AC-21/sasha-the-land-pirate/pull/2#issuecomment-4988383552": "ac2e4215d9f570db34279009a4c9b961d34d30df3e740e819338fde8b81282ae"
+    "github.com/AC-21/sasha-the-land-pirate/pull/2#issuecomment-4988383552": "ac2e4215d9f570db34279009a4c9b961d34d30df3e740e819338fde8b81282ae",
+    "ledger/decisions.jsonl": "ee7fdb811fd2e3d27ee85153b868a7a7aedd752aa3888518578e0870833052fc"
   },
   "subject_contract_sha256": {},
   "subject_event_sha256": {
     "D-0050": "5d4c8265ff92438a8159bee10ac79de01b0efc8981f21212aed4eb550d4bbd4a"
   },
   "foundation_binding": null,
-  "signature_reference": null,
-  "sealed": false
+  "signature_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/2#issuecomment-4988383552",
+  "sealed": true
 }
