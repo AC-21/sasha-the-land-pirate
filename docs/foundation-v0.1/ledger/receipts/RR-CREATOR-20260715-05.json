@@ -6,9 +6,8 @@
   "receipt_kind": "creator-source-capture",
   "artifact_resolver": {"type":"local-git-tree"},
   "source_reference": "ledger/receipts/RR-CREATOR-20260715-05.source.md",
-  "subject_ids": ["ENGINE-DIRECTION", "GITHUB-OPERATIONS", "UNITY-LOCAL-STATE", "WP-0001-PREPARATION"],
+  "subject_ids": ["GITHUB-OPERATIONS", "UNITY-LOCAL-STATE", "WP-0001-PREPARATION"],
   "subject_claims": [
-    {"subject_id":"ENGINE-DIRECTION","claims":["SELECT-UNITY-FIRST"]},
     {"subject_id":"GITHUB-OPERATIONS","claims":["AUTHORIZE-GITHUB-OPERATIONS"]},
     {"subject_id":"UNITY-LOCAL-STATE","claims":["CONFIRM-UNITY-INSTALLED","CONFIRM-UNITY-LICENSE"]},
     {"subject_id":"WP-0001-PREPARATION","claims":["AUTHORIZE-A0-WP0001-PREPARATION"]}

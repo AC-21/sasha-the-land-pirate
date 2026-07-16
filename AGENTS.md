@@ -26,7 +26,7 @@ This repository is currently **documentation/control-plane work only**.
 - D-0048 is a hard open legal/operating gate: no agent or CI runner may invoke Unity Hub, Editor, or CLI until documented Authorized Agentic Access or a creator-bound human-invoked boundary exists; otherwise use the Godot fallback.
 - No gameplay, production asset, package installation, engine project, or autonomous integration is authorized yet.
 - Repository creation does not advance autonomy.
-- The creator selected Unity-first, authorized GitHub operations, and confirmed a local installation/license in unsealed `RR-CREATOR-20260715-05`. WP-0001 may enter A1 only after protected creator acceptance of the exact packet, D-0048 resolution through a verified Unity AI Gateway/MCP entitlement, value-matched approval/proof of the exact D-0047 tuple, and its physical quarantine receipt. The source capture alone does not satisfy those gates.
+- The creator expressed a Unity-first preference, authorized GitHub operations, and confirmed a local installation/license in unsealed `RR-CREATOR-20260715-05`. WP-0001 may enter A1 only after protected creator acceptance of the exact packet, D-0048 resolution through a verified Unity AI Gateway/MCP entitlement, value-matched approval/proof of the exact D-0047 tuple, and its physical quarantine receipt. The source capture alone does not satisfy those gates.
 - At most one A1 packet may be active. A1 output is manually inspected and imported or rejected by the creator; agents do not merge it.
 
 If requested work exceeds A0, stop and name the missing authorization. Do not “prepare ahead” by creating implementation scaffolding.
