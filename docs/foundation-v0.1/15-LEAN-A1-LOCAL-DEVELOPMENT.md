@@ -145,9 +145,12 @@ and background rollout remain out of scope.
 
 ## Ratification record and remaining activation
 
-The authenticated owner comment on PR #18 is the protected source for two
-separate sealed receipts: `RR-D0052-20260716` ratifies the constitutional
-successor and `RR-WP0003-ACCEPT-20260716` accepts WP-0003. The explicit
-delegation disclosure is preserved in that source. Activation remains pending
-until the compact boundary manifest exists and a third, distinct
-`packet-activation` receipt binds it.
+The authenticated owner comment on PR #18 ratifies the exact proposal and
+packet contract. After its squash merge, the owner confirmation on PR #19 binds
+the byte-identical proposal artifacts to durable protected main commit
+`bf335654e57c9c300060d5e8bdcf5795f0462c62`. That PR #19 comment is the direct
+protected source for two separate sealed receipts: `RR-D0052-20260716`
+ratifies the constitutional successor and `RR-WP0003-ACCEPT-20260716` accepts
+WP-0003. Both comments preserve the explicit delegation disclosure. Activation
+remains pending until the compact boundary manifest exists and a third,
+distinct `packet-activation` receipt binds it.

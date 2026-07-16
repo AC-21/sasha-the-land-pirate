@@ -44,7 +44,8 @@ Filesystem and log inspection now records the actual local state instead of trea
 ## Lean successor status
 
 D-0052 is protected and ratified, and WP-0003 is protected and accepted under
-distinct receipts derived from the owner-authenticated PR #18 comment. They
+distinct receipts derived from the PR #18 owner ratification and PR #19
+protected-main sealing confirmation. They
 preserve WP-0001's sealed history while offering a practical A1 lane based on
 protected `main`, a valid `agent/*` branch, a real checkpoint,
 creator-controlled merge, and conditional first Unity MCP use. The packet

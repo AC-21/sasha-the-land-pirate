@@ -70,7 +70,7 @@ This view is for humans. The JSONL log is the **draft canonical representation**
 | D-0049 | production | Ratified | For WP-0001, select authorized Unity AI Gateway with Unity-bundled Codex; direct agent/CI Unity executable invocation stays prohibited. | Creator-selected route; A1 still awaits seat and quarantine verification |
 | D-0050 | technical | Ratified | Preserve D-0047 as the WP-0001 candidate; the creator may install/open its exact tuple during bounded pre-A1 setup solely to produce activation evidence. | Creator clarification; no engine ratification or agent invocation |
 | D-0051 | production | Ratified | Replace D-0049's Gateway route with `UNITY-MCP-EXTERNAL`: Codex connects through Unity's MCP Bridge and exact Unity-installed relay; direct Unity process invocation remains prohibited. | Owner-protected successor and packet route amendment; clean handshake and A1 evidence remain blocked |
-| D-0052 | constitutional | Ratified | `A1-LOCAL-DEV` for WP-0003: bounded branch/bootstrap work plus conditional creator-approved Unity MCP use under lean Git, target, credential, install, publishing, and rollback limits. | Owner-authenticated PR #18 comment; packet activation remains separate |
+| D-0052 | constitutional | Ratified | `A1-LOCAL-DEV` for WP-0003: bounded branch/bootstrap work plus conditional creator-approved Unity MCP use under lean Git, target, credential, install, publishing, and rollback limits. | PR #18 owner ratification plus PR #19 protected-main sealing; packet activation remains separate |
 
 ## Immediate ratification queue
 
