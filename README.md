@@ -4,7 +4,7 @@ An endearing, real-time, post-apocalyptic city-building and resource-management 
 
 ## Repository status
 
-**A1 — WP-0003 local repository/bootstrap development is active; Unity first-use remains gated.**
+**A1 — WP-0003 local repository/bootstrap development is active from protected `main`; Unity first-use remains gated.**
 
 The approved durable checkout is `/Users/sasha/Documents/Codex/sasha-the-land-pirate`, backed by `https://github.com/AC-21/sasha-the-land-pirate`. Foundation CI was established at commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`; Foundation run `29465142421` completed successfully. `main` now requires pull requests plus strict, up-to-date `validate` and `Cursor Approval Agent: Pull Request Approver` checks, covers administrators, resolves conversations, enforces linear history, and blocks force-pushes/deletion. Squash-only auto-merge is enabled and source branches are deleted after merge; Actions defaults to read-only. The drift-aware [`repository enforcement snapshot`](docs/evidence/REPOSITORY-ENFORCEMENT-20260716.md) records the observed external settings. The repository still contains no game implementation or `Game` project, but protected repository/bootstrap work is now authorized only through active WP-0003.
 

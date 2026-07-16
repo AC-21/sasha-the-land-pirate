@@ -22,6 +22,8 @@ The current thesis, pillars, loop, “storybook salvage” phrase, mechanics, lo
 
 This repository has exactly one active, bounded local-development packet:
 `WP-0003`. All authority outside that packet remains A0 or separately gated.
+Canonical A1 authority is effective only from protected `main` containing the
+sealed activation tree; a pull-request branch cannot activate itself.
 
 - Unity Hub 3.19.5, Rosetta 2, and Unity Editor 6000.5.4f1 ARM64 are present locally, and the creator reports an active Unity license. This is not the creator-approved WP-0001 D-0047 candidate: 6000.3.19f1 ARM64 + Mac Build Support (IL2CPP), Xcode 26.3, URP 17.3, and Test Framework 1.6; full Xcode and the standalone .NET SDK were not detected. The 6000.5 onboarding project is observation evidence, not Sasha's project or a production-version choice.
 - D-0051 supersedes D-0049 and selects `UNITY-MCP-EXTERNAL`: Codex is the external MCP client, and Unity interaction may travel only through the receipt-bound Unity MCP Bridge plus exact Unity-installed relay. This is not the OpenAI API-key Gateway route. No agent or CI runner may directly invoke Unity Hub, Editor, executable, CLI, or batchmode.
@@ -110,7 +112,7 @@ Before editing:
 1. Reproduce the packet baseline; stop if it differs.
 2. Confirm packet status and approval receipt, not merely its filename.
 3. Acquire the required reservation: exact base commit, paths, state domains/content IDs, lease, expiry, heartbeat, and fencing token.
-4. Work only in the packet's standalone disposable clone/sandbox with an independent `.git` directory, or its isolated asset package. Only a fully ratified, accepted, and activated WP-0003 may instead use its exact creator-attested durable-repository `agent/*` branch.
+4. Work only in the packet's standalone disposable clone/sandbox with an independent `.git` directory, or its isolated asset package. Active WP-0003 may instead use fresh durable-repository `agent/*` branches rooted in protected `main`; its manifest binds the activation attestation branch and checkpoint, not a perpetual implementation branch.
 5. Touch only declared paths and interfaces. Ask to amend scope before crossing them.
 
 Generic A1 uses read-only/hash-checked foundation inputs, exact reserved outputs, manifest-bound scratch, and a disposable runtime HOME/private temp with no merge/release credentials. Activated WP-0003 instead uses protected `main`, required checks, creator-controlled merge, its exact local boundary, and conditional first Unity MCP use; it grants no governance, credential, install, publishing, release, or self-merge authority. A folder named `sandbox` is never proof of a boundary.

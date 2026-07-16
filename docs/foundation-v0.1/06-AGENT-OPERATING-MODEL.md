@@ -45,6 +45,12 @@ controls the initial Unity-project/CI merge; agents still cannot accept their
 own evidence, autonomously merge protected changes, weaken governance,
 publish, release, or advance autonomy.
 
+An activation candidate may carry the future `active` state so protected checks
+can validate the complete tree, but it is non-executable until that exact tree
+is contained in protected `main`. The activation manifest's branch is the
+attestation branch/checkpoint; later WP-0003 implementation passes use fresh
+`agent/*` branches rooted in the active protected-main state.
+
 ### A2 — Accepted work packets
 
 Agents may implement creator/integrator-accepted work packets and assemble a release candidate. Independent verification and human merge remain required.

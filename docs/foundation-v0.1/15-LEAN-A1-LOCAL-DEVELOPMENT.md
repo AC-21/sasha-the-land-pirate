@@ -10,6 +10,10 @@ receipt now activates A1 for exact WP-0003 repository/bootstrap work. It still
 does not itself authorize a Unity call, replace WP-0001 completion evidence, or
 expand authority beyond the sealed local boundary.
 
+The active state is effective only when the complete activation tree is
+contained in protected `main`. A pull-request branch may encode that future
+state for validation but remains non-executable before protected merge.
+
 ## Why this exists
 
 The original A1 boundary grew into a certification regime: detached Git
@@ -52,9 +56,11 @@ boundary manifest. The validator proves durable Git facts and exact byte/hash
 bindings; the creator receipt attests transient clean-checkout and visible
 Unity state. Together they establish:
 
-1. a clean, valid `agent/*` branch whose creator-attested head equals the real
-   activation commit and whose real base/checkpoint exists in
-   `origin/main` ancestry;
+1. a clean, valid `agent/*` activation branch whose creator-attested initial
+   head is the durable checkpoint and receipt `accepted_commit`, with that
+   checkpoint in `origin/main` ancestry; the external-protected receipt
+   separately binds the exact manifest bytes, and protected merge materializes
+   the active state;
 2. the exact repository root and exact `Game` project path;
 3. a pre-change Git checkpoint;
 4. Unity `6000.5.4f1` as the authorized development Editor and `Game` as the
@@ -74,6 +80,12 @@ receipt window is required.
 
 This intentionally permits A1 to begin before the Unity project exists, so the
 boundary does not recreate the circular setup blocker it replaces.
+
+The manifest branch is an activation attestation snapshot, not a perpetual
+work branch. After activation enters protected `main`, each implementation pass
+starts from a fresh protected-main checkpoint on a new valid `agent/*` branch
+inside the unchanged reservation. Automatic deletion of the merged activation
+PR branch therefore does not delete or recreate the receipt-bound checkpoint.
 
 ## First Unity MCP use gate
 
