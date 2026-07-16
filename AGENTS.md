@@ -10,7 +10,8 @@ Ratified identity:
 
 - The title is **Sasha the Atomic Land Pirate**; Sasha is the protagonist.
 - Colonies may be human-only, humanoid-utility-robot-only, or mixed.
-- The game includes city building, scavenging, upgradeable travel vehicles, distinct factions, real-time play, no zombies, durable save/load, and strong art direction.
+- The game includes city building, scavenging, manufacturing, physical-goods trading, upgradeable travel vehicles, distinct factions, real-time play, no zombies, durable save/load, and strong art direction. “Stock” never means company shares; after an authored aggregate world-population threshold, caravaners open/administer the physical-goods exchange. Exact market law remains D-0044.
+- The visual north star is **Texas iron × brutalist opera**, with **tungsten over neon**; named references are functional coordinates, never copying authority.
 - It must perform well on the creator's MacBook Pro and eventually support safe background-agent work.
 
 Original robot design and exclusion of Tesla names, marks, silhouettes, surfaces, and trade dress are production/IP safeguards, not inferred lore. Whether the three colony compositions require distinct capabilities and dependencies is the open D-0039 composition-mechanics decision.
@@ -52,6 +53,7 @@ The foundation lives at `docs/foundation-v0.1/`. Start with:
 - `docs/foundation-v0.1/04-TECHNICAL-ARCHITECTURE.md` — runtime, saves, performance, repository shape
 - `docs/foundation-v0.1/05-ART-BIBLE.md` — visual grammar and asset law
 - `docs/foundation-v0.1/06-AGENT-OPERATING-MODEL.md`, `docs/foundation-v0.1/07-QUALITY-GATES.md`, and `docs/foundation-v0.1/11-TRUST-AND-ENFORCEMENT.md` — autonomy and proof
+- `docs/foundation-v0.1/13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md` and `docs/foundation-v0.1/14-CREATIVE-DIRECTION.md` — later economy and creative-direction contracts
 - `docs/foundation-v0.1/governance/ratification-state.json` — current draft entry gates
 - `docs/foundation-v0.1/work-packets/proposed/` — proposals only; `proposed` does not authorize work
 
@@ -141,6 +143,7 @@ Target-Mac spike budgets are provisional gates, not tuning suggestions: native A
 ## Art and generated assets
 
 - Optimize for silhouette → function → history and strategy-camera truth with representative UI visible.
+- Translate Texas iron into working infrastructure, brutalist opera into civic scale/staging, and tungsten-over-neon into a measurable lighting hierarchy; reject cowboy-theme-park, generic cyberpunk, and recognizable franchise motifs.
 - `1 Blender unit = 1 metre`; preserve declared pivots, axes, sockets, materials, LODs, collision, and naming.
 - The accepted `.blend` is the editable canonical source; an interchange file is a derived artifact.
 - Tripo and similar outputs begin as concepts/blockouts, never shipping assets.

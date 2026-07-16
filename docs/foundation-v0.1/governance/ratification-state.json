@@ -71,6 +71,7 @@
       "status": "blocked",
       "decision_requirements": [
         {"decision_id":"D-0016","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-STORYBOOK-SALVAGE","RATIFY-REVISED-ART-DIRECTION"],"receipt_id":null,"mismatch_action":"block-and-revise-art-pipeline"},
+        {"decision_id":"D-0042","accepted_statuses":["ratified"],"allowed_claims":["TEXAS-IRON-BRUTALIST-OPERA+TUNGSTEN-OVER-NEON"],"receipt_id":"RR-CREATOR-20260715-03","mismatch_action":"block-and-repair-creative-direction-binding"},
         {"decision_id":"D-0018","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-CUTS"],"receipt_id":null,"mismatch_action":"block-and-rescope-production"},
         {"decision_id":"D-0019","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-CUTS"],"receipt_id":null,"mismatch_action":"block-and-rescope-production"},
         {"decision_id":"D-0031","accepted_statuses":["ratified"],"allowed_claims":["ACCEPT-PRODUCTION-ENVELOPE"],"receipt_id":null,"mismatch_action":"block-and-rescope-production"}

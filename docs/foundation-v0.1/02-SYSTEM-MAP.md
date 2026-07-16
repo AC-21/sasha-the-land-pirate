@@ -7,8 +7,8 @@ Purpose: define the state seams that let teams and agents improve one system wit
 
 ```mermaid
 flowchart LR
-    H["Home state<br/>humans, robots, stocks, networks"] --> N["Need or opportunity"]
-    N --> P["Build, staff, ration,<br/>trade, promise"]
+    H["Home state<br/>humans, robots, physical stock, networks"] --> N["Need or opportunity"]
+    N --> P["Build, staff, ration,<br/>manufacture, trade, promise"]
     P --> E["Expedition commitment<br/>crew, fuel, modules, route"]
     E --> R["Road traversal<br/>terrain, weather, tools"]
     R --> X["Scavenge or encounter<br/>salvage, people, knowledge, debt"]
@@ -19,6 +19,10 @@ flowchart LR
     T --> F
     C["Weather and civic crises"] --> H
     C --> R
+    H --> M["Manufacture and reserve<br/>physical goods"]
+    M --> B["Caravan exchange<br/>match, move, deliver"]
+    B --> T
+    F --> B
 ```
 
 The mandatory trace for a shipped feature is:
@@ -50,14 +54,15 @@ Data editors, importers, validators, balance tables, encounter definitions, asse
 | Domain | Owns | Consumes | Publishes |
 |---|---|---|---|
 | World | seed, clock, weather fronts, region graph, discovered sites | elapsed ticks, route actions | forecast, hazard state, route availability |
-| Settlement | plots, buildings, roads, networks, storage, policies, construction | resources, labor, weather, faction modifiers | production, demand, failures, civic capacity |
+| Settlement | plots, buildings, roads, networks, storage, policies, construction, manufacturing jobs | resources, labor, weather, faction and exchange modifiers | production, physical lots, demand, failures, civic capacity |
 | Population | human households/cohorts, named specialists, humanoid utility robots, resident composition, needs/maintenance, health/condition, roles, affiliations | housing, food, water, power, parts, safety, policies, events | labor, expertise, morale/cohesion, migration/recruitment, stories |
-| Logistics | stockpiles, requests, route costs, priorities, and the selected delivery abstraction | producer outputs, consumer demands | deliveries, bottlenecks, unmet requests |
+| Logistics | stockpiles, physical lots, reservations, custody, requests, route costs, priorities, and the selected delivery abstraction | producer outputs, consumer and exchange demands | staged goods, shipments, deliveries, bottlenecks, unmet requests |
 | Vehicle | chassis, module sockets, capability tags, condition, fuel, cargo, crew | crafted modules, supplies, damage | range, route verbs, cargo capacity, expedition readiness |
 | Expedition | manifest, route, clock policy, encounter state, return payload | vehicle capability, world hazards, crew, faction state | salvage, injuries, knowledge, obligations, route changes |
-| Faction | doctrine, needs, assets, intent, relationship memories, promises | player actions, trade, time, regional pressure | offers, prices, access, aid, sanctions, movement, conflict |
+| Faction | doctrine, needs, assets, intent, relationship memories, promises, caravaner administration if applicable | player actions, trade, time, regional pressure | offers, access, fees, standards, aid, sanctions, movement, conflict |
 | Crisis | trigger, forecast, severity, affected systems, response options | state thresholds, clock, authored conditions | modifiers, objectives, damage, civic/faction consequences |
-| Progression | known recipes, institutions, road access, civic milestones | discoveries, choices, relationships, construction | new verbs, alternatives, capacities, visual growth |
+| Exchange | physical-goods boards, orders, matches, delivery terms, clearing history | bonded lots/consideration, settlement needs, caravan capacity, policies | matched contracts, explainable prices, fees, delivery obligations |
+| Progression | known recipes, institutions, road access, civic and population milestones | discoveries, population, choices, relationships, construction | new verbs, manufacturing standards, exchange access, alternatives, capacities, visual growth |
 | Audit | command IDs, state hashes, warnings, migrations, build/version | every authoritative transition | debug trace, test evidence, save diagnostics |
 
 ## 4. Identity and reference law
@@ -70,6 +75,10 @@ Every persistent object receives a stable typed ID at creation. Simulation IDs a
 - `world:<world-id>:specialist:<counter>`
 - `world:<world-id>:robot:<counter>`
 - `world:<world-id>:vehicle:<counter>`
+- `world:<world-id>:lot:<counter>`
+- `world:<world-id>:market-order:<counter>`
+- `world:<world-id>:trade-contract:<counter>`
+- `world:<world-id>:shipment:<counter>`
 - `faction:<content-id>`
 - `site:<content-id-or-uuid>`
 - `world:<world-id>:promise:<counter>`
@@ -280,3 +289,73 @@ Before implementation, every feature answers:
 9. How is failure detected and rolled back?
 
 If these answers are missing, the feature is not ready for an implementation agent.
+
+## 15. Manufacturing and caravan exchange contract
+
+D-0040 ratifies eventual manufacturing and physical-goods trading. D-0041 ratifies that caravaners open/administer the exchange after an aggregate world-population milestone. D-0044 keeps the exact metric, threshold, participation, market, and contract laws open; D-0046 keeps the post-slice phase boundary provisional. The full design lives in [`13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md`](13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md).
+
+### Domain boundaries
+
+- **Settlement** owns factories, recipes, queues, civic reserves, export policy, and the decision to manufacture.
+- **Logistics** owns physical lots, location, reservation, custody, staging, shipment, and delivery.
+- **Exchange** owns boards, orders, deterministic matching, contract terms, fees, and price history. It never fabricates inventory.
+- **Progression** owns the versioned population-threshold latch and local access milestones.
+- **Caravaner faction state** owns certification, service rules, schedules, access, sanctions, and doctrine-shaped behavior.
+- **World/vehicle/expedition** own routes, elapsed time, capacity, hazards, damage, and loss events.
+- **Audit/save** own idempotency, transaction phase, causal trace, hashes, and migration.
+
+### Core commands
+
+Proposed command seam:
+
+- `StartManufacturingJob`
+- `CompleteManufacturingBatch`
+- `SplitPhysicalLot`
+- `MergeCompatibleLots`
+- `PostGoodsOrder`
+- `CancelGoodsOrder`
+- `RunExchangeClearing`
+- `StageTradeShipment`
+- `DispatchTradeShipment`
+- `ResolveTradeDelivery`
+- `ResolveTradeDispute`
+
+Every command validates stable IDs, integer quantity, ownership/custody, physical location, reservation uniqueness, storage/capacity, tick/sequence, and content version. UI cannot directly mutate prices, population progress, lots, or shipments.
+
+### Core events
+
+Proposed event path:
+
+```text
+ManufacturingBatchCompleted → PhysicalLotCreated → GoodsOrderOpened
+→ GoodsOrdersMatched → TradeContractCreated → ShipmentStaged
+→ ShipmentDispatched → ShipmentDelivered or ShipmentShortfall
+→ TradeSettled
+```
+
+Population crossing emits one persisted `ExchangeThresholdReached` event. The accepted rule must specify the metric, threshold, cadence, eligibility, robot contribution, one-shot/relock behavior, and player explanation. A visitor, pooled visual actor, duplicated cohort, or caravan in transit cannot silently inflate it.
+
+### Physical conservation
+
+The canonical lot lifecycle is proposed as:
+
+```text
+available → reserved → staged → loaded → in-transit → delivered → settled
+                    ↘ cancelled          ↘ delayed / damaged / lost / disputed
+```
+
+For each item/lineage, the accounting identity must balance: opening live or recoverable stock plus recorded production/import equals closing live or recoverable stock plus recorded consumption/export/destruction/spillage/unrecoverable loss. Every live or recoverable lot has exactly one current custody location; a terminal sink retains lineage, quantity, cause, tick, and responsible event but no fictional warehouse location. Split, merge, match, cancellation, partial fill, dispatch, loss, delivery, retry, save, and migration may change state only through balanced events. Orders are backed by owned physical lots or reserved consideration. No hidden global warehouse, instant teleport, infinite NPC buyer, naked sell, unfunded buy, self-match price manipulation, or retry duplication is allowed.
+
+### Explainable delivered terms
+
+The UI separates:
+
+```text
+physical-goods terms + certification/handling + freight + route/time/risk + tariff/policy
+```
+
+The precise matching and consideration model remains open. Start with regional, deterministic, physically backed offers and finite demand. No equities, dividends, securities, shorting, leverage, synthetic commodities, or financial portfolio layer.
+
+### Acceptance boundary
+
+The full exchange is post-vertical-slice. A dedicated packet must prove threshold idempotency; all-composition access; manufacturing input/output conservation; lot split/merge lineage; deterministic matching; rejection of naked/unfunded/self-matched orders; every shipment fault phase; route-costed arbitrage; faction/route shocks; 30-day stability; and save/load at every custody state. Until then, only direct barter, short production chains, and physical stock foundations may enter the slice.

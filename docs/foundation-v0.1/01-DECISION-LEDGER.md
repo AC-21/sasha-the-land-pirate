@@ -58,6 +58,13 @@ This view is for humans. The JSONL log is the **draft canonical representation**
 | D-0037 | constitutional | Ratified | Sasha can build a human-only, humanoid-utility-robot-only, or mixed colony. | Creator clarification |
 | D-0038 | technical | Open | D-0036 resolves the public title; company name, internal product ID, bundle ID, and save-root migration remain open. | Supersedes D-0032's unresolved bundle |
 | D-0039 | constitutional | Open | Mechanical composition differences vs primarily representational human/robot/mixed colonies. | Recommendation: mechanically distinct but equally viable |
+| D-0040 | constitutional | Ratified | Manufacturing and physical-goods trading belong in the eventual game; stock never means company shares. | Creator clarification |
+| D-0041 | experience | Ratified | A caravaner-administered physical-goods exchange opens after an aggregate world-population milestone. | Creator clarification; exact laws are D-0044 |
+| D-0042 | art | Ratified | Visual north star: **Texas iron × brutalist opera**, with **tungsten over neon**. | Creator clarification |
+| D-0043 | art | Provisional | Use each named reference for its assigned function and translate it into original rules. | Approve styleframes, tone tests, and reference-removal evidence |
+| D-0044 | experience | Open | Exact population metric/threshold, eligibility, prerequisites, consideration, matching, custody/loss, disputes, and caravaner doctrine. | Resolve before accepting the exchange packet |
+| D-0045 | art | Open | Keep storybook salvage as the emotional filter or replace it beneath the new north star. | Recommendation: layered direction |
+| D-0046 | scope | Provisional | Stage the full exchange after the slice, with manufacturing and bilateral trade introduced earlier. | Prove through a dedicated M7E packet |
 
 ## Immediate ratification queue
 
@@ -76,6 +83,8 @@ The first creator review should answer only these high-leverage issues:
 11. Ratify or revise the Last Bearing proof scenario.
 12. Separately ratify or revise its milestone cuts.
 13. Choose whether colony compositions are mechanically distinct or primarily representational.
+14. Define the world-population milestone and caravaner exchange rules before the post-slice economy packet.
+15. Confirm whether storybook salvage remains the emotional filter beneath Texas iron × brutalist opera.
 
 All other open choices can remain deferred until a graybox or profiling spike produces evidence.
 

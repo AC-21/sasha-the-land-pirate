@@ -24,6 +24,19 @@ Material findings were incorporated rather than merely logged. Notable correctio
 - Mac performance scenarios have immutable definitions and SHA-256 registry entries;
 - A1 requires a real disposable quarantine plus manual creator import, while A2 requires an external trusted gatekeeper and hostile-test proof.
 
+## Post-audit creator direction
+
+The creator's later 2026-07-15 direction is captured in unsealed receipt `RR-CREATOR-20260715-03` and materialized without expanding implementation authority:
+
+- D-0040 ratifies eventual manufacturing and physical-goods trading; stock is explicitly not company equity.
+- D-0041 ratifies the population-gated, caravaner-administered physical-goods exchange; D-0044 keeps its exact population, access, market, contract, and save laws open.
+- D-0042 ratifies Texas iron × brutalist opera with tungsten over neon as the visual north star.
+- D-0043 records the named reference-function matrix as provisional translation guidance, never copying authority.
+- D-0045 keeps the storybook-salvage layering open, and D-0046 stages the full exchange after the slice unless a revised evidence-backed packet supersedes that scope.
+- dedicated economy and creative-direction contracts now expose conservation, progression, visual, story, comedy, originality, save, and proof requirements.
+
+“Other than that. Let's go for it” safely authorizes continued A0 design work. It does not name the repository path, accept either exact work packet, approve a Unity installation, answer the open worksheet values, create the quarantine boundary, or promote autonomy.
+
 ## What this audit does not claim
 
 Bootstrap lint can catch internal drift and malformed draft records. It cannot prove game fun, engine suitability, commercial rights, save correctness in an implementation, or that an agent with the same credentials did not rewrite the checker. The foundation intentionally says so.
@@ -69,6 +82,8 @@ Until all four are true, the project remains A0 and no game implementation start
 - final road-control embodiment and travel topology;
 - production time/money/distribution/pivot envelope;
 - golden art targets and asset throughput;
+- exact world-population metric/threshold, robot contribution, caravaner doctrine, market matching/consideration, and exchange milestone;
+- accepted Texas-iron/brutalist-opera styleframes, tungsten/neon calibration, story/comedy voice, and reference-removal proof;
 - measured long-session thermal and memory behavior.
 
 ## Validation command

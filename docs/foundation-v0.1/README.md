@@ -5,7 +5,7 @@ Date: 2026-07-15\
 Title: **Sasha the Atomic Land Pirate**\
 Protagonist: **Sasha**
 
-This is the foundation specification for a future protected control plane for an endearing, real-time, post-apocalyptic city-builder in which Sasha builds a human, humanoid-robot, or mixed colony, launches scavenging expeditions, upgrades road vehicles, and deals with persistent factions. It is not a conventional pitch deck, and it is not yet an enforceable autonomous system. It separates the game's durable identity from replaceable implementations so human and software agents can later work in parallel without slowly changing what game they are building.
+This is the foundation specification for a future protected control plane for an endearing, real-time, post-apocalyptic city-builder in which Sasha builds a human, humanoid-robot, or mixed colony, launches scavenging expeditions, upgrades road vehicles, grows manufacturing and physical-goods trade, and deals with persistent factions. Its visual north star is Texas iron × brutalist opera under tungsten-led light. It is not a conventional pitch deck, and it is not yet an enforceable autonomous system. It separates the game's durable identity from replaceable implementations so human and software agents can later work in parallel without slowly changing what game they are building.
 
 ## Read this first
 
@@ -18,10 +18,12 @@ This is the foundation specification for a future protected control plane for an
 7. [`06-AGENT-OPERATING-MODEL.md`](06-AGENT-OPERATING-MODEL.md) defines what background agents may change and how work is proposed, tested, rolled out, and rolled back.
 8. [`07-QUALITY-GATES.md`](07-QUALITY-GATES.md) defines proof gates for simulation, playability, art, performance, saving, and release.
 9. [`08-BUILD-ROADMAP.md`](08-BUILD-ROADMAP.md) sequences proof, implementation, agent-loop promotion, and eventual production scope.
-10. [`09-RATIFICATION-WORKSHEET.md`](09-RATIFICATION-WORKSHEET.md) reduces the creator review to thirteen explicit decisions before gameplay grayboxing.
+10. [`09-RATIFICATION-WORKSHEET.md`](09-RATIFICATION-WORKSHEET.md) reduces the creator review to explicit decisions before gameplay grayboxing and golden-art production.
 11. [`10-FIRST-WORK-PACKET.md`](10-FIRST-WORK-PACKET.md) points to the separately gated technical spike and ugly gameplay toy.
 12. [`11-TRUST-AND-ENFORCEMENT.md`](11-TRUST-AND-ENFORCEMENT.md) states the hostile-agent threat model and the protected gatekeeper required before autonomous integration.
 13. [`12-FOUNDATION-AUDIT.md`](12-FOUNDATION-AUDIT.md) records what independent design, technical, and governance audits corrected—and what honestly remains blocked.
+14. [`13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md`](13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md) defines the phased physical-stock economy, population milestone hypothesis, caravaner institution, conservation laws, and proof boundary.
+15. [`14-CREATIVE-DIRECTION.md`](14-CREATIVE-DIRECTION.md) translates Texas iron × brutalist opera, tungsten over neon, reference roles, and comedy/story energy into original visual and narrative laws.
 
 Machine-readable schemas, value-sensitive entry gates, proposed work packets, and hash-registered immutable scenarios sit beside these documents. [`schemas/a1-boundary-manifest.schema.json`](schemas/a1-boundary-manifest.schema.json) defines the exact creator-attested quarantine boundary required for any future A1 activation. They are draft control-plane inputs, not evidence that the protected control plane already exists.
 
@@ -60,7 +62,7 @@ At A0, unsealed creator-source captures are evidence of the creator's words but 
 
 For gameplay, this draft should be ratified in three passes:
 
-1. **Identity pass**: begin from the ratified title, protagonist, and human/robot/mixed colony boundary; then decide promise, tone, vehicle embodiment, travel topology, time, severity, faction role, combat role, composition-mechanics depth, product boundary, and city-grammar comparison authorization.
+1. **Identity pass**: begin from the ratified title, protagonist, human/robot/mixed colony boundary, manufacturing/physical-goods boundary, and visual north star; then decide promise, tone layering, vehicle embodiment, travel topology, time, severity, faction role, combat role, composition-mechanics depth, product boundary, and city-grammar comparison authorization.
 2. **Proof pass**: the vertical-slice scenario and hard scope cuts.
 3. **Build pass**: engine, target hardware, repository location, and agent autonomy levels.
 

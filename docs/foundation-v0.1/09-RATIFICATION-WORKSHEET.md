@@ -2,7 +2,7 @@
 
 This is the shortest path from foundation draft to engine spike. Answer in prose or with the compact codes at the bottom.
 
-Already ratified and not being re-asked: the game is **Sasha the Atomic Land Pirate**; Sasha is the protagonist; and the colony may be human-only, humanoid-utility-robot-only, or mixed. The worksheet choices below may shape how those facts play, but cannot erase them. The mechanical differences between compositions are deliberately asked in item 13 rather than inferred from that availability fact.
+Already ratified and not being re-asked: the game is **Sasha the Atomic Land Pirate**; Sasha is the protagonist; the colony may be human-only, humanoid-utility-robot-only, or mixed; eventual manufacturing/trading deals in physical goods rather than company shares; caravaners open/administer that exchange after an aggregate world-population threshold; and the visual north star is **Texas iron × brutalist opera** with **tungsten over neon**. The worksheet choices below may shape how those facts play, but cannot erase them. The mechanical differences between compositions are deliberately asked in item 13 rather than inferred from availability.
 
 ## 1. Vehicle embodiment
 
@@ -112,11 +112,23 @@ Decision: `MECHANICAL COMPOSITIONS` or `REPRESENTATIONAL COMPOSITIONS`.
 
 Packet effect: current WP-0002 requires `MECHANICAL COMPOSITIONS`; the representational choice is valid but branches to a reduced composition-state packet.
 
+## 14. Creative-direction layering
+
+**Recommended: layered direction.** Texas iron supplies working material and infrastructure; brutalist opera supplies inherited civic scale and staging; tungsten-over-neon supplies the lighting hierarchy; storybook salvage remains the emotional filter that keeps repair, affection, humor, and strategy-camera readability alive.
+
+Alternative: retire storybook salvage and define a different emotional filter. The Texas iron × brutalist opera and tungsten-over-neon facts remain unless explicitly superseded.
+
+Decision: `LAYERED DIRECTION`, or rewrite the emotional filter.
+
+## Deferred exchange calibration
+
+No arbitrary number is requested yet. Before the post-slice exchange packet, evidence must settle the aggregate world-population metric/threshold, robot and cohort contribution, contact/route/local-yard prerequisites, fall-below behavior, consideration/currency, matching, fees, loss/dispute rules, and caravaner doctrine. The ratified boundary remains: manufacturing plus physical-goods trade, never company equity, with the population milestone causing caravaners to open/administer the exchange.
+
 ## Compact response
 
 You can respond with:
 
-`DRIVE / ROUTE+ROAD / SLOWED / SCARS / CULTURES / ACCENT / SOLO-OFFLINE / AUTHORIZE CITY COMPARISON / RATIFY THESIS / RATIFY CORE / RATIFY SLICE / RATIFY CUTS / MECHANICAL COMPOSITIONS`
+`DRIVE / ROUTE+ROAD / SLOWED / SCARS / CULTURES / ACCENT / SOLO-OFFLINE / AUTHORIZE CITY COMPARISON / RATIFY THESIS / RATIFY CORE / RATIFY SLICE / RATIFY CUTS / MECHANICAL COMPOSITIONS / LAYERED DIRECTION`
 
 Receipt claims use the same codes in machine form with spaces normalized to hyphens—for example, `RATIFY CORE` becomes `RATIFY-CORE`. No semantic inference is permitted during normalization.
 

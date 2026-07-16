@@ -1,18 +1,20 @@
 # Art Bible and Asset Pipeline
 
 Version: 0.1 draft\
-Working visual phrase: **storybook salvage**\
+Primary visual direction: **Texas iron × brutalist opera**\
+Lighting hierarchy: **tungsten over neon**\
+Emotional filter: **storybook salvage**\
 Installed tool observed: Blender 5.1.2
 
 ## 1. Visual promise
 
-The world should look harsh enough to demand ingenuity and warm enough to deserve saving.
+The world should look harsh enough to demand ingenuity and warm enough to deserve saving. Texas iron gives work its material truth; brutalist opera gives civilization its scale and staging; storybook salvage gives both affection and readability. The full creative charter lives in [`14-CREATIVE-DIRECTION.md`](14-CREATIVE-DIRECTION.md).
 
 The city begins as exposed survival machinery and gradually becomes a lived-in civic place: patched shade, laundry, planted food, painted signs, lamps, water, workshops, music, personal objects, and faction influences. The road remains broad, dangerous, and beautiful. Vehicles look like maintained companions with jobs and histories.
 
 Human-only, robot-only, and mixed colonies must each read as inhabited. Robots are original, endearing humanoid utility machines whose design communicates task, upkeep, adaptation, and individual history at the gameplay camera. Tesla Optimus is a category reference supplied by the creator, not a model sheet, brand license, naming source, or silhouette target.
 
-## 2. Six visual laws
+## 2. Eight visual laws
 
 ### A. Silhouette → function → history
 
@@ -38,17 +40,30 @@ Each faction receives a matrix of shape language, palette, materials, constructi
 
 Assets are approved in the actual game camera with UI visible. A Blender beauty render cannot overrule failed readability, LOD, lighting, collision, or performance.
 
+### G. Working iron inside civic monument
+
+Texas iron is infrastructural rather than costume: cast housings, plate steel, oilfield/rail/water hardware, service vehicles, corrugated shade, cable, canvas, and tools. Brutalist opera belongs chiefly to inherited world bones and civic institutions: spillways, viaducts, monoliths, deep apertures, cantilevers, and machinery staged as public ritual. Player construction remains modular, maintainable, and visibly inhabited.
+
+### H. Tungsten over neon
+
+Warm practical light identifies care, work, gathering, service access, and maintained routes. Colored neon/emissive is rare semantic punctuation for legacy systems, faction claims, precision hazards, or surviving commerce. It never becomes generic nightlife, the only carrier of state, or a substitute for material and silhouette design.
+
 ## 3. Provisional visual grammar
 
-- sun-bleached earth, concrete, faded paint, and warm dust as the environmental base;
+- sun-bleached earth, monumental concrete, mill-scale steel, cast iron, faded enamel, and warm dust as the environmental base;
 - selectively saturated repair panels, cloth, signs, water, plants, and lights;
 - rounded or softened human-touch forms against more severe ruined infrastructure;
 - roofs and top-facing surfaces communicate function because the player sees them often;
 - face-like vehicle silhouettes may create affection, but literal cartoon faces are not assumed;
 - danger uses scale, motion, weather, sound, emptiness, and material contrast more than gore;
 - night preserves function hierarchy with practical lights and restrained emissive color.
+- growth shows modular settlement life colonizing and humanizing inherited monumental infrastructure;
+- precision relics use pale ceramic, polished alloy, and dark glass sparingly enough to remain uncanny;
+- major industry and trade change motion, storage, traffic, light, sound, and civic routine rather than appearing only in UI.
 
 Avoid ubiquitous spikes, skulls, brown sludge, random cyberpunk neon, pristine sci-fi panels, toy-scale clutter, franchise-coded silhouettes, and unreadable photoreal microdetail.
+
+Also avoid cowboy-theme-park shorthand: ubiquitous stars, longhorns, saloons, hats, and generic western decoration. Texas enters through water, rail, oilfield, ranch, reservoir, service-yard, heat, distance, and roadside engineering.
 
 ## 4. Camera contract
 
@@ -118,6 +133,28 @@ Rules:
 - baked normals/AO for rivets, welds, seams, and panel relief;
 - engine-side weather/status overlays; do not bake every state into a unique material;
 - agents cannot create new master shader families without an accepted proposal.
+
+### Direction calibration materials
+
+The first golden library must prove these reusable families before asset fan-out:
+
+- mill-scale plate steel with broad, restrained manufacturing variation;
+- cast iron with heavy section thickness and rounded transitions;
+- board-formed concrete with form ties, aggregate, structural cracking, and causal runoff;
+- chipped enamel showing topcoat, primer, then metal in physical order;
+- galvanized sheet, heavy rubber, canvas, ceramic, oily timber, dusty glass, cable, and hose;
+- rare pale ceramic, polished alloy, and dark glass for precision relics.
+
+Suggested palette anchors for calibration only: iron charcoal `#25292A`, warm concrete `#8E887C`, dust ochre `#B56E3F`, bone enamel `#D8CFB9`, oily asphalt `#3A3834`, hazard vermilion `#D34A32`, civic water teal `#47AEB0`, tungsten amber `#FFB45F`, rare signal cyan `#49C8D2`, and rare signal magenta `#C84F83`. Golden gameplay frames, color-vision checks, and target-Mac captures decide the accepted values.
+
+### Lighting calibration
+
+- inhabited practicals begin in the approximate `2200–3000K` tungsten family;
+- hard bleached daylight, deep useful shade, and warm dust bounce define exterior day;
+- cool environmental fill may frame warm occupied pools at night;
+- colored emissive generally occupies less than five percent of a normal night frame;
+- bloom is restrained and emissive edges remain readable;
+- every night target passes grayscale, no-bloom, and emissive-disabled tests with representative UI.
 
 ### Original humanoid-robot law
 
@@ -237,14 +274,14 @@ Unknown `.blend`/generated files are processed in an OS sandbox with factory set
 Before parallel asset production:
 
 1. Approve one golden building and one golden vehicle.
-2. Publish palette, material, decal, wear, camera, scale, pivot, socket, and budget IDs.
+2. Approve midday, tungsten-night, and emissive-disabled gameplay frames; then publish palette, material, decal, wear, lighting, camera, scale, pivot, socket, and budget IDs.
 3. Give each agent a bounded brief with required silhouettes and reference views.
 4. Require blockout review before detail work.
 5. Compare every submission in the same engine lineup scene and contact sheet.
 6. Reject new master materials or faction rules created inside an asset task.
 7. Preserve every accepted version; never destructively replace the only source.
 
-The art director evaluates silhouette, function read, value structure, wear logic, faction fit, animation purpose, and normal-camera appeal—not only isolated render polish.
+The art director evaluates silhouette, function read, value structure, Texas-iron utility, brutalist staging, tungsten/neon hierarchy, wear logic, faction fit, animation purpose, originality, and normal-camera appeal—not only isolated render polish.
 
 ## 13. First 12 asset packages
 

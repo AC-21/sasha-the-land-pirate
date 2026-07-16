@@ -1,6 +1,6 @@
 # Sasha the Atomic Land Pirate
 
-An endearing, real-time, post-apocalyptic city-building and resource-management game about Sasha, the titular Atomic Land Pirate. Build a human colony, a humanoid-utility-robot colony, or a mixed society; upgrade a beloved wasteland vehicle; scavenge the road; and return home with consequences. The title is ratified; its exact in-world job, ethics, and origin remain deliberately open.
+An endearing, real-time, post-apocalyptic city-building and resource-management game about Sasha, the titular Atomic Land Pirate. Build a human colony, a humanoid-utility-robot colony, or a mixed society; upgrade a beloved wasteland vehicle; scavenge the road; grow workshops into manufacturing and physical-goods trade; and return home with consequences. The title is ratified; its exact in-world job, ethics, and origin remain deliberately open.
 
 ## Repository status
 
@@ -13,7 +13,12 @@ Current creator-ratified facts:
 - title: **Sasha the Atomic Land Pirate**;
 - protagonist: **Sasha**;
 - playable colony composition: human-only, original humanoid-utility-robot-only, or mixed;
-- real-time post-apocalyptic city building, resource management, scavenging, upgradeable travel vehicles, distinct factions, no zombies, durable save/load, ambitious endearing art, Mac playability, and an eventual safe background-agent loop.
+- real-time post-apocalyptic city building, resource management, scavenging, upgradeable travel vehicles, distinct factions, no zombies, durable save/load, ambitious endearing art, Mac playability, and an eventual safe background-agent loop;
+- eventual manufacturing and trading in physical stock/goods, never company shares;
+- a caravaner-administered physical-goods exchange that opens after an authored aggregate world-population threshold;
+- visual north star: **Texas iron × brutalist opera**, with **tungsten over neon**.
+
+The exchange identity is ratified; its exact metric, number, population eligibility, access, matching, consideration, loss/dispute law, and production proof remain open under D-0044. The functional reference matrix and phased production translation remain provisional.
 
 Everything marked provisional or open in the foundation remains so.
 
@@ -30,7 +35,7 @@ Validate the bootstrap foundation from the repository root:
 python3 docs/foundation-v0.1/tools/validate_foundation.py
 ```
 
-Expected current result: the foundation lint passes; both local creator-source receipts remain intentionally unsealed pending protected repository/receipt infrastructure.
+Expected current result: the foundation lint passes; all three local creator-source receipts remain intentionally unsealed pending protected repository/receipt infrastructure.
 
 ## Planned seams
 

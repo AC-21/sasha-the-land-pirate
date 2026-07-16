@@ -33,6 +33,8 @@ Pass when:
 - named random streams and seeds reproduce the scenario;
 - no orphan IDs, negative resources, impossible recipe states, or non-terminating crises appear;
 - long-run economy reports sinks, sources, stalls, and equilibrium/collapse causes;
+- manufacturing inputs, outputs, physical-lot lineage, reservations, custody, shipment, and settlement preserve exact conservation;
+- population milestones and market clearing remain deterministic across insertion order, save/load, and presentation tiers;
 - presentation tier changes do not change authoritative outcomes.
 
 ## Gate 3 — Save integrity
@@ -75,7 +77,10 @@ Pass when:
 - city, road, and garage controls do not fight one another;
 - keyboard/mouse and controller critical paths are complete for the slice;
 - pause, speed, remapping, readable text, color-independent status, and basic motion/volume controls are represented in the design even if polish is staged;
-- the normal camera with representative UI remains readable.
+- the normal camera with representative UI remains readable;
+- manufacturing shows input, work, output, storage, and stoppage in the world;
+- every trade view distinguishes home reserve, available, committed, staged, in-transit, and delivered physical goods;
+- delivered terms separate goods, handling, freight, route/risk, and policy causes; no equity-market vocabulary obscures the physical system.
 
 ## Gate 6 — Art and asset integrity
 
@@ -85,6 +90,9 @@ Pass when:
 - the asset follows scale, pivot, socket, material, LOD, collision, and naming contracts;
 - wear and repair are causally placed;
 - faction language is structural rather than a hue swap;
+- Texas iron reads as working infrastructure rather than costume, and brutalist opera reads through civic scale/staging rather than copied motifs;
+- tungsten practicals dominate inhabited night identity while neon remains rare semantic punctuation;
+- grayscale, no-bloom, emissive-disabled, faction-without-color, and reference-removal reviews pass;
 - the asset fits the golden lineup and performance envelope;
 - source and generated artifacts are reproducible;
 - AI-assisted provenance and commercial-rights review are complete;
@@ -107,6 +115,22 @@ Pass when:
 - return creates an emotional/visual sense of home changed;
 - the 20–30 minute loop completes without external instruction or recovery command;
 - players describe the central fantasy as building/caring for a home, not merely collecting loot.
+
+## Gate 7A — Manufacturing and caravan exchange proof
+
+This post-slice gate does not block The Last Bearing. It passes only when a dedicated accepted packet proves:
+
+- the authored aggregate world-population threshold is transparent, fires exactly once, survives reload, rejects double-counting, and does not hide a mandatory human;
+- human-only, robot-only, and mixed colonies can reach and use the institution under the accepted composition and robot-civic rules;
+- manufacturing consumes inputs once, creates output lots once, and preserves quantity, grade, origin, condition, and lineage through split/merge;
+- every sell is backed by owned physical stock and every buy by accepted reserved consideration and capacity;
+- deterministic matching produces the same fills and prices after insertion shuffle, pause, save/load, and retry;
+- reservation, cancellation, partial fill, loading, transit, delay, damage, loss, delivery, dispute, and settlement preserve exact accounting without duplication; every live/recoverable lot has one custody location and every destroyed/spilled/unrecoverable quantity has one terminal sink event;
+- caravan time, mass/volume, storage, fees, route state, and risk prevent zero-cost teleport arbitrage;
+- NPC demand and supply arise from finite inventories, needs, reserves, production, and means rather than infinite sources or sinks;
+- price movement and caravaner access or sanctions have player-visible causes;
+- a 30-day headless run produces no negative stock, phantom demand, runaway price, orphan order, stuck shipment, or non-terminating dispute;
+- the exchange reads as a physical stockyard/institution in world, obeys tungsten-over-neon, and creates persistent civic, faction, road, and story consequences.
 
 ## Gate 8 — Release and rollback
 
@@ -141,6 +165,8 @@ Pass when:
 | `SCN_ROLLBACK_DRILL` | Deliberately fail a canary and prove recovery |
 
 Each scenario definition and run result are separate immutable records. A run captures runner version, commit, engine/packages/toolchain, build/content hashes, allocator/RNG algorithm and counters, input and starting-save hashes, OS/hardware, locale, quality/backbuffer, fixed-step/physics settings, worker count, canonical-hash version, metrics, logs, and captures. Presentation/raw physics are excluded from exact state hash unless explicitly quantized; physics-derived outcomes use authoritative events or declared tolerances.
+
+Exchange proof scenarios are deliberately not registered in this A0 revision: their exact threshold, population semantics, consideration, matching rule, and work packet do not yet exist. The later accepted packet must register immutable unlock, all-composition access, lot-conservation, custody, clearing, invalid-order, delivery-recovery, route-arbitrage, faction-shock, and 30-day stability fixtures before code claims Gate 7A.
 
 ## Definition of done by change class
 

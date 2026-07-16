@@ -20,4 +20,6 @@ Together they do not install an engine by assumption or generalize a production 
 - Blender calibration asset;
 - clean-clone reproducibility.
 
+Neither packet implements the population-gated caravan exchange. WP-0002 may prove a short production chain, physical inventory, direct barter, and a caravaner/claims-office tease; the manufacturing/market system in `13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md` requires a later post-slice packet after population scale, economy pacing, and the founder loop produce evidence.
+
 WP-0001 is blocked on creator acceptance, repository location, permission to install Unity Hub/Editor, and a physically verified A1 quarantine/manual-import boundary. WP-0002 additionally waits on value-matching identity/core receipts, explicit city-comparison authorization, and its own acceptance in `governance/ratification-state.json`. Separate status histories prevent a reversible tool spike from silently authorizing gameplay assumptions.

@@ -163,6 +163,8 @@ Proposed as not in this slice, pending creator ratification. The first item is D
 - full 4X conquest;
 - a final marketing-scale volume of polished assets.
 
+D-0040 and D-0041 make manufacturing, physical-goods trade, and the population-gated caravaner exchange part of the eventual game, but the full exchange is outside this slice under provisional scope decision D-0046; this sentence does not alter D-0019's exact inventory. The slice may prove one workshop batch, one direct barter/obligation, physical cargo, or a caravaner claims-office tease. It may not add a regional order book, abstract global price, industrial specialization tree, or multi-settlement market simulation.
+
 ## 8. Build stages and stop/go tests
 
 ### VS-0 — Paper/state proof
@@ -179,9 +181,9 @@ Go when the selected city grammar is legible, the selected road-control mode is 
 
 ### VS-2 — First-look proof
 
-One golden vehicle, water building, recycler/workshop kit, human survivor, original humanoid utility robot, road kit, depot, faction dressing, weather, lighting, and audio language.
+One golden vehicle, water building, recycler/workshop kit, human survivor, original humanoid utility robot, road kit, depot, faction dressing, weather, lighting, and audio language. The first-look proof follows the [`C0–C2 slice direction gate`](14-CREATIVE-DIRECTION.md#slice-direction-gate-c0c2): Texas iron working machinery inside brutalist inherited infrastructure, tungsten-led inhabited light, rare semantic neon, and storybook salvage as the humane filter. C3 manufacturing and C4 exchange art remain separately gated and out of slice.
 
-Go when the normal gameplay camera communicates function and tone without beauty-render excuses.
+Go when the normal gameplay camera communicates function and tone without beauty-render excuses; grayscale, no-bloom, emissive-disabled, faction-without-color, and reference-removal reviews pass.
 
 ### VS-3 — Vertical slice
 

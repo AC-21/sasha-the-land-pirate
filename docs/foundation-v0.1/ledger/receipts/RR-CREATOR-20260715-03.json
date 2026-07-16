@@ -1,0 +1,39 @@
+{
+  "receipt_id": "RR-CREATOR-20260715-03",
+  "issued_at": "2026-07-15T18:02:55-07:00",
+  "issued_by": "creator-source-capture",
+  "issuer_role": "creator",
+  "receipt_kind": "creator-source-capture",
+  "artifact_resolver": {"type":"local-git-tree"},
+  "source_reference": "ledger/receipts/RR-CREATOR-20260715-03.source.md",
+  "subject_ids": ["D-0040", "D-0041", "D-0042", "D-0043"],
+  "subject_claims": [
+    {"subject_id":"D-0040","claims":["MANUFACTURING-AND-PHYSICAL-GOODS-TRADING"]},
+    {"subject_id":"D-0041","claims":["POPULATION-GATED-CARAVANER-PHYSICAL-GOODS-EXCHANGE"]},
+    {"subject_id":"D-0042","claims":["TEXAS-IRON-BRUTALIST-OPERA+TUNGSTEN-OVER-NEON"]},
+    {"subject_id":"D-0043","claims":["FUNCTIONAL-REFERENCE-MATRIX"]}
+  ],
+  "approval_text_sha256": "54ae9bd61d2462b72b6e8888c2c883b78afee76e697ab831d0b6736877335bc3",
+  "accepted_commit": null,
+  "artifact_sha256": {
+    "00-GAME-CONSTITUTION.md": "ff6d7938c14a074acf796619868b97551cefd1681147559983a293792c20afb8",
+    "01-DECISION-LEDGER.md": "7b50099f6ca062f702c71b8e990b0d77317e6b3de60ab2e20b71a3b06c778acf",
+    "02-SYSTEM-MAP.md": "ee0ceb2e28d94b894735ddb15d2f32cd4f1403eeaece82e8f03506cf05293c68",
+    "05-ART-BIBLE.md": "b1b3b950c13725651df61682d3b7b9c5374e995bb52a1f998b845cf00cd3483f",
+    "08-BUILD-ROADMAP.md": "ea218e36cb03da52081bb0245d4266ee2c70edfce693fc5a8afb681af143f139",
+    "13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md": "8eee6641c0549d35b5a8e6133837f6a61ec86b460af4e3b2c59620e47954ad93",
+    "14-CREATIVE-DIRECTION.md": "6045c6e3dca0365b3cb0c4b686e1e2d11cce51ab36a8b67329c426a7b0e554d9",
+    "ledger/decisions.jsonl": "c56272560eeed6db4b162dd99f5097c48d8e8ad693af4a707f082c303e46ff16",
+    "ledger/receipts/RR-CREATOR-20260715-03.source.md": "54ae9bd61d2462b72b6e8888c2c883b78afee76e697ab831d0b6736877335bc3"
+  },
+  "subject_contract_sha256": {},
+  "subject_event_sha256": {
+    "D-0040": "081d80666ab6a0abb316615ade865babeaaf59c43e39d9c634edada27bba38fa",
+    "D-0041": "e7ea1973f4fd77c6c2db51456ede30b2683ee79cac6fa4415d8c2072ccf18e7f",
+    "D-0042": "114e0837b2ad345905da0e0de745797a127b98d528117ee59c459dd02dc7dc41",
+    "D-0043": "699b38f3efd6c8b36108f032805d98e3d63fd152f30a974eda41ddb6b12de546"
+  },
+  "foundation_binding": null,
+  "signature_reference": null,
+  "sealed": false
+}

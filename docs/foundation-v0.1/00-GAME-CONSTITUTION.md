@@ -8,7 +8,7 @@ Title: **Sasha the Atomic Land Pirate** (ratified under D-0036)
 
 > **Build a home worth returning to.**
 
-In the provisional synthesis, the player is **Sasha**, the protagonist and titular Atomic Land Pirate. Sasha turns salvage into civic life, builds a settlement of humans, humanoid utility robots, or both that visibly becomes a civilization, prepares and upgrades a beloved utility vehicle, reopens routes through the wasteland, and decides what kind of society home will become through relationships with other factions.
+In the provisional synthesis, the player is **Sasha**, the protagonist and titular Atomic Land Pirate. Sasha turns salvage into civic life, builds a settlement of humans, humanoid utility robots, or both that visibly becomes a civilization, prepares and upgrades a beloved utility vehicle, reopens routes through the wasteland, grows repair into manufacturing and trade, and decides what kind of society home will become through relationships with other factions.
 
 The city and the road are one game. The same fuel, specialists, parts, time, and political trust needed at home are also needed to travel. Every expedition begins with a concrete civic need or opportunity and ends by changing the city.
 
@@ -22,9 +22,11 @@ The following comes directly from the creator's request and is treated as ratifi
 - The game is titled **Sasha the Atomic Land Pirate**, and Sasha is its protagonist.
 - Sasha can build a colony composed of humans, humanoid utility robots, or both.
 - It includes wasteland scavenging, fun upgradeable vehicles used for travel, and different factions with distinct styles.
+- Manufacturing and trading are eventual mechanics. Any stock market trades physical inventory, goods, and manufacturable things—not shares in companies.
 - It is not turn-based.
 - The wasteland does not use zombies as its threat.
 - Its art direction should be endearing and visually ambitious, not a disposable prototype aesthetic.
+- Its visual north star is **Texas iron × brutalist opera**, with **tungsten lighting over neon**.
 - It will be a fully functional game, including durable saving and loading.
 - It must run well on the creator's MacBook Pro one way or another.
 - Blender-built assets and carefully governed AI-assisted prototypes, including Tripo, are allowed.
@@ -32,7 +34,7 @@ The following comes directly from the creator's request and is treated as ratifi
 
 Tesla Optimus is treated only as the creator's reference for the recognizable near-future humanoid utility-robot category. As a production/IP safeguard rather than an inferred lore fact, shipped robots must have original names, silhouettes, surfaces, behavior, and fiction; Tesla branding and trade dress are not authorized.
 
-The depth of production, exact survival pressure, autonomous faction timing, the in-world meaning and ethics of “Atomic Land Pirate,” robot consciousness and needs, and every mechanical interpretation of the named reference games are **provisional synthesis**, not literal prompt authority.
+The exact manufacturing depth, market algorithm, population threshold, caravaner institution, survival pressure, autonomous faction timing, the in-world meaning and ethics of “Atomic Land Pirate,” robot consciousness and needs, and every mechanical interpretation of the named reference games are **provisional synthesis**, not literal prompt authority.
 
 ## 3. Player fantasy
 
@@ -50,7 +52,7 @@ Sasha is not primarily a general, a lone shooter, a loot vacuum, or an omnipoten
 ## 4. The constitutional loop
 
 1. **Read home**: identify a visible civic need, bottleneck, danger, promise, or opportunity.
-2. **Reconfigure**: build, repair, staff, ration, trade, or reprioritize short legible production chains.
+2. **Reconfigure**: build, repair, manufacture, staff, ration, trade, or reprioritize short legible production chains.
 3. **Commit**: choose a crew, vehicle modules, supplies, cargo capacity, and route. Resources committed to the road are unavailable at home.
 4. **Venture**: operate the expedition vehicle through the chosen travel topology; navigate terrain and weather, use vehicle tools, scavenge, and meet people. Whether this means direct driving or tactical convoy command remains D-0007, not a hidden constitutional assumption.
 5. **Return**: bring back finite materials, people, knowledge, obligations, or damage.
@@ -83,7 +85,7 @@ The world is dangerous without becoming visually or emotionally monotonous. Humo
 
 ### P6 — Systems converse
 
-City production changes expeditions. Expeditions change city production. Civic policy changes people and factions. Factions change routes, recipes, labor, prices, and crises. A disconnected minigame is a design failure even if it is individually fun.
+City production changes expeditions. Expeditions change city production. Manufacturing changes what can be repaired, exported, or promised. Caravan trade changes routes, storage, specialization, prices, and faction dependencies. Civic policy changes people and factions. A disconnected minigame is a design failure even if it is individually fun.
 
 Status of the loop and P1–P6: **Provisional bundle under D-0035**, together with design invariants INV-004 through INV-010, INV-015, and INV-016. `RATIFY CORE` must be captured in a creator-controlled receipt bound to this constitution before a gameplay packet may treat that exact bundle as law. Technical/production invariants INV-011 through INV-014 remain outside this claim.
 
@@ -111,6 +113,9 @@ These are proposed as durable rules. Items marked **Ratified** come directly fro
 | INV-016 | The no-zombie boundary is not replaced by an unapproved generic horde-monster premise. | Provisional | D-0023 |
 | INV-017 | A playable colony may be human-only, humanoid-utility-robot-only, or mixed. | Ratified | D-0037 |
 | INV-018 | The three colony compositions should create legible capability, dependency, policy, and relationship differences rather than only changing resident meshes or labels. | Provisional | D-0039 |
+| INV-019 | Long-form progression includes manufacturing and trading; stock means physical goods and inventory, never shares in companies. | Ratified | D-0040 |
+| INV-020 | The visual north star is Texas iron × brutalist opera, with tungsten practical lighting prioritized over neon. | Ratified | D-0042 |
+| INV-021 | A caravaner-administered physical-goods exchange opens as a later civilization milestone after an aggregate world-population threshold. | Ratified | D-0041 |
 
 ## 7. Candidate anti-pillars and milestone exclusions
 
@@ -133,18 +138,25 @@ All major systems should reinforce at least one:
 3. **Prosperity vs identity**: factions offer valuable solutions that carry practices, promises, or dependencies.
 4. **Efficiency vs affection**: specialists, patched vehicles, and neighborhoods make optimal sacrifice emotionally costly.
 5. **Growth vs exposure**: roads and supply lines unlock abundance while creating dependencies and leverage.
+6. **Civic reserve vs export surplus**: every manufactured lot sold to the world is capability, safety, storage, and labor the settlement cannot use at home.
 
 ## 9. Tone and art constitution
 
-Working phrase: **storybook salvage**.
+Primary direction: **Texas iron × brutalist opera**. Lighting hierarchy: **tungsten over neon**. **Storybook salvage** remains the provisional emotional filter: warmth, readability, repair, eccentricity, and affection inside the heavier material world.
 
-- Sun-bleached terrain and strong atmosphere frame bright repaired panels, cloth, painted marks, lamps, crops, water, and civic decoration.
+- Texas iron supplies the working scale: cast housings, plate steel, oilfield and rail hardware, water tanks, corrugated shade, cable, canvas, toolboxes, and field-service vehicles.
+- Brutalist opera supplies the civic scale: monoliths, spillways, viaducts, deep apertures, cantilevers, ceremonial approaches, acoustic chambers, and machinery staged as public ritual.
+- Warm tungsten practicals identify maintained, inhabited, and safe space. Neon is rare semantic punctuation for legacy systems, factions, hazards, or commerce—not a generic cyberpunk wash.
+- Sun-bleached terrain and strong atmosphere frame repaired enamel, cloth, painted marks, lamps, crops, water, and civic decoration.
 - Forms are chunky, functional, slightly exaggerated, and readable at the normal strategy camera.
 - Wear tells a directional story: windward dust, sun fade, soot near exhaust, water streaking, repaired seams. Random uniform grunge is forbidden.
 - Machinery should look maintainable. Braces, patches, hoses, welds, and moving parts explain why it works.
 - The city gains gardens, laundry, murals, lights, shade, sound, and personal objects as it heals.
 - Faction identity begins with shape language, construction logic, material logic, and motion—not a color swap.
 - Threat is credible; presentation remains humane. Cute cannot erase stakes, and bleak cannot erase attachment.
+- Comedy comes from specific people, institutions, incentives, machines, and repairs colliding under pressure. It builds affection and reveals systems; it cannot trivialize genuine loss.
+
+The internal functional reference matrix under D-0043 uses Frostpunk for gameplay/art cohesion, Fallout for the retro-era post-apocalyptic lens, Anno for city/economy mechanics, Atomic Heart for art-direction ambition, and GTA 6 for comedy/story energy. These roles authorize no copied asset, interface, character, exact mechanic, silhouette, story, or trade dress. Production briefs translate them into the original rules in [`14-CREATIVE-DIRECTION.md`](14-CREATIVE-DIRECTION.md).
 
 ## 10. World constitution
 
@@ -154,8 +166,9 @@ Ratified world facts are intentionally minimal:
 - Motor travel and settlement construction remain possible.
 - There are no zombies.
 - Sasha exists as the protagonist, and viable colonies can contain humans, humanoid utility robots, or both.
+- Settlements can eventually manufacture and trade physical goods.
 
-Agriculture, trade, repair economies, and industrial production are strong provisional implications of the reference blend, not yet ratified lore facts. The vertical slice may test them mechanically without making its fiction permanent.
+Agriculture and the exact industrial history remain strong provisional implications rather than ratified lore facts. Manufacturing, physical-goods trading, and the population-gated caravaner exchange are ratified mechanics, but their recipes, technologies, exact population metric/threshold, institutions, currencies, legal meaning, market laws, and campaign depth remain open. The boundary and D-0044 questions are described in [`13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md`](13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md).
 
 Open world facts that must be answered later include the cause and age of collapse, climate range, technological ceiling, geography, supernatural boundary, political history, what “Atomic Land Pirate” means, Sasha's background and civic authority, who built the robots, whether robots are persons or tools or both, and how each colony composition changes society. Lore must justify the systems; it cannot be allowed to pre-empt them during the first playable.
 
@@ -167,6 +180,8 @@ Progression should primarily expand **possibility**, not inflate numbers:
 - New civic capacity lets the city absorb shocks and keep promises.
 - New faction knowledge creates alternate recipes, institutions, and dependencies.
 - New roads/outposts shorten risk, extend reach, and create obligations.
+- New manufacturing standards turn finite salvage into reproducible capability and exportable physical stock.
+- At a later world-population milestone, the caravaner exchange makes regional specialization, delivered prices, physical shipments, and trade policy part of civilization growth.
 - Visual growth records what the settlement chose to value.
 
 The intended arc is refuge → working town → regional hub → chosen model of civilization. Only the first transition belongs in the vertical slice.
@@ -198,6 +213,8 @@ These six experience choices alter the entire project and cannot remain buried i
    Recommendation: competing cultures; war is an outcome, not the default verb.
 6. **Combat share**: core pillar, high-energy accent, or absent from the first production arc?\
    Recommendation: accent beside navigation, hauling, rescue, weather, and negotiation.
+
+The later economic arc also requires a separate accepted definition of world population, the exchange threshold, robot contribution, caravaner access, market matching, consideration/currency, and loss/dispute rules. None should be hidden inside a balance table or UI implementation.
 
 ## 14. Constitutional change protocol
 

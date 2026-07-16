@@ -20,6 +20,7 @@ Deliverables:
 
 - resolve the exact gameplay-graybox entry constraints in `governance/ratification-state.json`;
 - revise and ratify the thesis, constitutional loop, P1–P6 core, travel topology, and product boundary;
+- preserve the ratified Texas iron × brutalist opera / tungsten-over-neon north star and translate the provisional reference matrix into original styleframes and tone tests;
 - authorize—not pre-decide—the city-grammar comparison;
 - ratify or revise the vertical-slice scenario;
 - separately ratify or revise its milestone cuts;
@@ -118,12 +119,13 @@ Agent pilots during M2–M4 add, in order, one bounded correctness fix, one save
 Deliverables:
 
 - approved gameplay cameras and lighting target;
-- golden water building and golden scout vehicle;
+- golden water building, golden scout vehicle, one brutalist world-bone occupation frame, and one tungsten-night target;
 - palette/material/decal/wear libraries;
 - modular settlement kit plus a human/robot calibration resident pair, each approved at the gameplay camera;
 - scripted Blender export, manifest validation, engine lineup scene, and contact-sheet generator;
 - one AI-assisted blockout taken through quarantine to accept/reject decision;
 - provenance ledger and asset work-packet flow.
+- grayscale, no-bloom, emissive-disabled, faction-without-color, and reference-removal evidence.
 
 Exit: VS-2 passes normal-camera art, technical import, and performance gates; parallel asset agents can receive bounded briefs.
 
@@ -166,11 +168,30 @@ Provisional scope:
 - two mechanically conflicting factions, even if the second has a small content footprint;
 - one route/resource decision that affects both factions and proves triangulation rather than isolated reputation;
 - one vehicle chassis with a small meaningful module set;
+- workshop manufacturing with at least one physical batch/lot and one scheduled bilateral caravan trade; no global exchange yet;
 - two crises and multiple recovery paths;
 - complete new game, settings, save slots, load, failure/recovery, and end-of-build state.
 - human-only, robot-only, and mixed colonies each complete the founder-playable loop and preserve their exact composition through saves; no supported composition depends on a hidden human. Mechanical differentiation remains conditional on the creator's D-0039 value.
 
 Exit: the game supports repeat play and real balance observation rather than a single scripted slice.
+
+## M7E — Manufacturing and Caravan Exchange proof
+
+This is a dedicated bounded workstream after the founder loop proves that production, inventory, road ownership, factions, and saves are worth extending. It does not retroactively enlarge The Last Bearing.
+
+Deliverables:
+
+- tune and ratify one transparent aggregate world-population metric and threshold from campaign-scale evidence;
+- define robot/human/cohort eligibility without creating a hidden mandatory-human gate;
+- prove workshop jobs, batches, physical lots, grade/condition, split/merge lineage, civic reserves, and export policy;
+- implement caravaner contact, certification, bonded storage, schedules, fees, access, sanctions, and visible institutional presence;
+- prove one deterministic, physically backed regional matching model and one accepted unit of account or barter contract;
+- stage, dispatch, delay, damage, lose, deliver, dispute, and settle shipments through exact-once custody/save transitions;
+- close naked-order, infinite-buyer, self-match, retry-duplication, quality-laundering, and zero-cost arbitrage exploits;
+- create the first caravan stockyard art/story proof under Texas iron × brutalist opera and tungsten over neon;
+- register and pass the immutable Gate 7A scenario suite.
+
+Exit: the exchange creates meaningful specialization and civic/faction/road consequences, remains physically conserved and explainable, survives saves and long runs, and is fun enough to justify production-scale content.
 
 ## M8 — Production alpha
 
@@ -182,6 +203,7 @@ Only after measured throughput and D-0031's human-time, budget, distribution, an
 - three or four authored regional road environments;
 - roughly 25–35 functional building families with upgrade states;
 - roughly 10–12 core resources/capacities and 20–30 legible recipes;
+- a phased manufacturing and physical-goods trade economy, with the caravan exchange included only if M7E passes;
 - 8–12 systemic crises plus authored encounters;
 - a 12–20 hour first campaign with multiple civic/faction outcomes;
 - continued play or a clear ending, to be ratified later.
