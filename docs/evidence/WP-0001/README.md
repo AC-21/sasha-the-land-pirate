@@ -9,6 +9,9 @@ authorizes a Unity tool call.
   host/toolchain/route snapshot and the preserved deviation ledger.
 - [`UNITY-MCP-STATIC-SECURITY-AUDIT-20260716.md`](UNITY-MCP-STATIC-SECURITY-AUDIT-20260716.md)
   — source-level audit of the installed Unity Assistant direct-MCP path.
+- [`RAW-CAPTURE-PROVIDER-DECISION.md`](RAW-CAPTURE-PROVIDER-DECISION.md) —
+  A0-only proposal separating the unresolved protocol, network, and
+  policy-attachment evidence-provider decisions.
 - [`CREATOR-A1-ACTIVATION-RUNBOOK.md`](CREATOR-A1-ACTIVATION-RUNBOOK.md) —
   creator-operated, fail-closed activation procedure.
 - [`POST-A1-IMPLEMENTATION-SEQUENCE.md`](POST-A1-IMPLEMENTATION-SEQUENCE.md) —
@@ -27,7 +30,11 @@ summary facts or blank command files are insufficient. Those raw captures must
 come from the exact source-hashed protocol, network, and policy-attachment
 collectors authorized by
 `AUTHORIZE-WP0001-RAW-COLLECTORS`. The collectors are deliberately not yet
-implemented, so A1 remains blocked.
+implemented. `RAW-CAPTURE-PROVIDER-DECISION.md` recommends selecting independent
+raw-evidence providers and revising the machine-enforced evidence contract
+before pass-producing collector implementation. That recommendation is not yet
+a protected gate; schema v4 still cannot prove provider independence. A1
+remains blocked.
 
 ## Evidence law
 
