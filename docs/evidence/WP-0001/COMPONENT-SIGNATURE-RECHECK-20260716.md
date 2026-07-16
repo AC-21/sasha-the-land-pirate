@@ -163,6 +163,10 @@ sandbox/policy attachment, filesystem view, and policy hashes. Until then, a
 host-context pass cannot satisfy this blocker. No route is selected merely by
 this A0 observation.
 
+`CODE-IDENTITY-CONTEXT-PROVIDER-PROPOSAL.md` defines the proposed fourth raw
+provider domain and exact machine-enforcement successor. It is also A0-only and
+unratified.
+
 This record does **not** close:
 
 - creator ratification of the exact client, relay, and Editor signing tuples;
