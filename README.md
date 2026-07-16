@@ -8,7 +8,7 @@ An endearing, real-time, post-apocalyptic city-building and resource-management 
 
 The approved durable checkout is `/Users/sasha/Documents/Codex/sasha-the-land-pirate`, backed by `https://github.com/AC-21/sasha-the-land-pirate`. Foundation CI was established at commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`; Foundation run `29465142421` completed successfully. `main` now requires pull requests and the strict `validate` check, covers administrators, resolves conversations, enforces linear history, and blocks force-pushes/deletion; Actions defaults to read-only. This records A0 setup only: the repository still contains no game implementation, Sasha Unity project, installed project dependency, production asset, or authorized autonomous integration.
 
-The creator expressed a Unity-first preference and reports a local license. Inspection found Hub 3.19.5, Rosetta 2, and Editor 6000.5.4f1 ARM64; full Xcode and a standalone .NET SDK were absent. The exact WP-0001 candidate remains Unity 6000.3.19f1 ARM64 with Mac Build Support (IL2CPP), Xcode 26.3, URP 17.3, and Unity Test Framework 1.6. Mono is the iteration backend; IL2CPP ARM64 is the acceptance-build authority. The installed 6000.5 onboarding project is neither Sasha's project nor protected acceptance of a production toolchain. D-0048 still blocks agent/CI Unity invocation until the Unity AI subscription/seat and official Gateway/MCP route are verified and receipt-bound, or another compliant path supersedes it.
+The creator expressed a Unity-first preference and reports a local license. Inspection found Hub 3.19.5, Rosetta 2, and Editor 6000.5.4f1 ARM64; full Xcode and a standalone .NET SDK were absent. The accepted WP-0001 candidate is Unity 6000.3.19f1 ARM64 with Mac Build Support (IL2CPP), Xcode 26.3, URP 17.3, and Unity Test Framework 1.6. Mono is the iteration backend; IL2CPP ARM64 is the acceptance-build authority. D-0049 selects `UNITY-AI-GATEWAY-CODEX`, but direct agent/CI Unity executable invocation remains prohibited and A1 still requires verified seat, linked-project, exact-installation, and quarantine evidence.
 
 Current creator-ratified facts:
 
@@ -37,7 +37,7 @@ Validate the bootstrap foundation from the repository root:
 python3 docs/foundation-v0.1/tools/validate_foundation.py
 ```
 
-Expected current result: the foundation lint passes; all five local creator-source receipts remain intentionally unsealed pending protected receipt infrastructure.
+Expected current result: the foundation lint passes; the five bootstrap creator-source captures remain intentionally unsealed, while the D-0049 and WP-0001 acceptance receipts are sealed.
 
 ## Planned seams
 
@@ -45,4 +45,4 @@ The accepted technical packet may create `Game/`, `SimulationCore/`, `SaveContra
 
 ## Next gate
 
-The creator then expressed a Unity-first preference, authorized GitHub operations, and confirmed a local Unity installation/license; that exact message is preserved in unsealed `RR-CREATOR-20260715-05`. WP-0001 is now frozen as proposal contract `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`: it binds the exact D-0047 LTS candidate, .NET SDK 10.0.301 for headless tests, dual-use `netstandard2.1` simulation/save packages, official `com.unity.ai.assistant` 2.14.0-pre.1 Gateway/MCP access, a native IL2CPP ARM64 smoke/Metal gate, and a standalone disposable clone rather than a shared worktree. It remains blocked on protected creator acceptance, verified Unity AI subscription/seat/project/client access, installation/proof of the exact D-0047 tuple, and the physical A1 quarantine/manual-import boundary. No receipt is sealed, no agent Unity invocation is authorized, and autonomy remains A0.
+Sealed creator receipts now accept WP-0001 contract `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`, its temporary identity, repository location, exact D-0047 installation, and the `UNITY-AI-GATEWAY-CODEX` route. The packet is `accepted`, not `active`: the assigned Unity seat, same-organization project linkage, Gateway/bundled-client profile, installed toolchain, and standalone quarantine/manual-import boundary still require physical evidence and a separate activation receipt. No agent Unity invocation is authorized, and autonomy remains A0.

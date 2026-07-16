@@ -37,7 +37,7 @@ The creator's later 2026-07-15 direction is captured in unsealed receipt `RR-CRE
 
 “Other than that. Let's go for it” safely authorizes continued A0 design work. It does not name the repository path, accept either exact work packet, approve a Unity installation, answer the open worksheet values, create the quarantine boundary, or promote autonomy.
 
-The repository greenlight is preserved in unsealed `RR-CREATOR-20260715-04`. The later Unity/GitHub proceed prompt is separately preserved in unsealed `RR-CREATOR-20260715-05`: it records a Unity-first preference, authorizes GitHub operations, and confirms a local Unity installation/license. Foundation run `29465142421` succeeded for commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`; `main` is now protected by required PRs and the strict `validate` check. Read-only inspection found Hub 3.19.5, Rosetta 2, and Editor 6000.5.4f1, but not the exact D-0047 Editor/IL2CPP/Xcode tuple or standalone .NET SDK. The source capture does not protected-accept WP-0001, prove an eligible Unity AI/MCP seat, resolve D-0048, seal a receipt, establish quarantine, or activate A1.
+The repository and Unity-first source captures remain unsealed historical evidence, while authenticated creator authority now seals D-0049 and WP-0001 acceptance against protected main commit `ed14ae664e7c0efea790d334546538584e85c083`. The selected route is `UNITY-AI-GATEWAY-CODEX`; the exact packet contract, temporary identity, repository location, and D-0047 installation are accepted. Read-only inspection has not yet proved the assigned Unity seat, same-organization project linkage, Gateway/bundled-client profile, exact D-0047 Editor/IL2CPP/Xcode installation, or standalone A1 quarantine.
 
 ## What this audit does not claim
 
@@ -47,17 +47,16 @@ Bootstrap lint can catch internal drift and malformed draft records. It cannot p
 
 ## Honest blockers before A1
 
-1. The creator's proceed prompt is not yet a sealed packet-acceptance receipt bound to the exact WP-0001 contract and temporary identity.
-2. The repository location/CI/GitHub authorization captures remain unsealed and therefore are not protected gate receipts.
-3. D-0048 has not value-matched and protected the official Unity AI Gateway/MCP route for the exact seat, agent, and invocation boundary.
-4. The installed 6000.5.4f1 Editor does not satisfy the proposed D-0047 6000.3.19f1 + Mac IL2CPP + Xcode 26.3 tuple.
-5. The A1 quarantine boundary has not been physically established or receipt-bound.
+1. The assigned Unity AI subscription/seat and same-organization project linkage have not been physically verified.
+2. The selected Gateway, Unity-bundled Codex/version, provider/model metadata, credential presence, scopes/rate limits, initiation identity, and revocation state have not been captured without secrets.
+3. The installed 6000.5.4f1 Editor does not satisfy the accepted D-0047 6000.3.19f1 + Mac IL2CPP + Xcode 26.3 tuple.
+4. The standalone A1 quarantine and creator-operated import/reject boundary have not been physically established or receipt-bound.
 
-The repaired WP-0001 proposal has canonical contract hash `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`. Its exact acceptance domain now includes the official Unity AI package/seat/project/client evidence, locked headless SDK, shared-source Unity/.NET boundary, native ARM64 smoke/Metal proof, and standalone-clone quarantine. This is a reviewable proposal hash, not an acceptance or activation claim.
+The accepted WP-0001 contract hash is `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`. Acceptance authorizes only its bounded creator-operated setup phase; it is not evidence that the engine, route, build, save contracts, performance, or quarantine have passed, and it is not A1 activation.
 
-During this A0 hardening pass, unsealed `RR-CREATOR-20260715-03` advanced only its `08-BUILD-ROADMAP.md` materialization hash from `281941fcdc74786e545090b39d0d679bd7bc138449eb8e6775f9e35953e9df6a` to `fa4135cc1b4429de7d07b3330722049cf8174323a92b8a2ad47db407a7a0458c` so the roadmap no longer authorizes a shared-Git-worktree A1 boundary. Its creator source hash, claims, decision-event bindings, sealed status, and protected authority remain unchanged; Git history retains the prior draft.
+Across the A0 hardening and acceptance passes, unsealed `RR-CREATOR-20260715-03` advanced only derived materialization hashes alongside the audited draft artifacts, including `01-DECISION-LEDGER.md` at `89e132368d99dea2d335031fefd1cd2cd88b3d3980f165e13487e933dc552632` and `08-BUILD-ROADMAP.md` at `e70c7d1894df8dc6aa5b218934b3371943ec05e4c47b1a78a48f9843e9579990`. Its creator source hash, claims, decision-event bindings, and unsealed status remain unchanged; Git history retains every prior draft.
 
-Until all five are true, the project remains A0 and no game implementation starts under this constitution.
+Until all four are true and a separate activation receipt is sealed, the project remains A0 and no game implementation starts under this constitution.
 
 ## Honest blockers before gameplay graybox
 
@@ -83,8 +82,8 @@ Until all five are true, the project remains A0 and no game implementation start
 
 ## Deferred evidence, not hidden assumptions
 
-- approval and installation proof for the proposed D-0047 Unity/tool/package tuple;
-- a protected D-0048 Unity agent-access operating path or superseding Godot packet;
+- installation proof for the accepted D-0047 Unity/tool/package tuple;
+- physical seat/project/Gateway/bundled-client evidence for D-0049's selected route;
 - lowest supported shipping Mac;
 - accepted city manipulation grammar;
 - final road-control embodiment and travel topology;

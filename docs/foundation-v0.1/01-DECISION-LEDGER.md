@@ -89,7 +89,7 @@ The first creator review should answer only these high-leverage issues:
 14. Define the world-population milestone and caravaner exchange rules before the post-slice economy packet.
 15. Confirm whether storybook salvage remains the emotional filter beneath Texas iron × brutalist opera.
 16. Approve or revise the exact D-0047 WP-0001 installation tuple.
-17. Seal D-0049 and WP-0001 acceptance on protected `main`, then verify the assigned Unity seat and standalone A1 quarantine separately.
+17. Verify the assigned Unity seat, selected Gateway profile, exact D-0047 installation, and standalone A1 quarantine before separate activation.
 
 All other open choices can remain deferred until a graybox or profiling spike produces evidence.
 
