@@ -583,10 +583,19 @@ remaining work, not to waive it:
 - the verifier binds a stable executable pathname/vnode and strict signature,
   but kernel-loaded-image identity and in-memory cloud-managed Codex
   requirements are not yet independently attested;
-- the currently installed ChatGPT/Codex component and Unity relay component
-  both fail `/usr/bin/codesign --verify --strict`; displayed signer metadata
-  cannot substitute for a valid strict signature, so clean approved installs
-  or a separately creator-ratified hash-only/quarantine exception are required;
+- `COMPONENT-SIGNATURE-RECHECK-20260716.md` records an unresolved
+  execution-context split: the installed ChatGPT/Codex and Unity relay
+  components, plus a pristine read-only OpenAI reference, fail strict signing
+  checks inside the current Codex workspace sandbox, while the same current
+  components pass strict verification in a user-approved read-only host
+  diagnostic and their app bundles pass Gatekeeper there. Neither result proves
+  the future A1 boundary. The current schema and live validator do not
+  machine-bind the verifier's own executable, PID, UID, parent/process
+  ancestry, sandbox/policy attachment, filesystem view, or policy hashes.
+  Protected authority must select and machine-bind either verification inside
+  the exact A1 boundary or a specific creator-ratified external read-only
+  verifier context. Activation then requires successful raw capture through
+  that selected route and fails closed on any mismatch or recurrence;
 - activation evidence bytes, boundary manifest, live session, and receipt do
   not exist.
 

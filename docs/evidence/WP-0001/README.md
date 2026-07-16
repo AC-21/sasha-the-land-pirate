@@ -15,6 +15,11 @@ authorizes a Unity tool call.
 - [`A1-MCP-ALLOWLIST-PROPOSAL.md`](A1-MCP-ALLOWLIST-PROPOSAL.md) — A0-only,
   source-grounded proposal for the exact observation-only client allowlist and
   its phase-gated expansion rule.
+- [`COMPONENT-SIGNATURE-RECHECK-20260716.md`](COMPONENT-SIGNATURE-RECHECK-20260716.md)
+  — read-only recheck showing that identical current components fail signing
+  checks inside the Codex workspace sandbox but pass in a user-approved
+  read-only host diagnostic, exposing an unbound verifier-context activation
+  gate.
 - [`CREATOR-A1-ACTIVATION-RUNBOOK.md`](CREATOR-A1-ACTIVATION-RUNBOOK.md) —
   creator-operated, fail-closed activation procedure.
 - [`POST-A1-IMPLEMENTATION-SEQUENCE.md`](POST-A1-IMPLEMENTATION-SEQUENCE.md) —
