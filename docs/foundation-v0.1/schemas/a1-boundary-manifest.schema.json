@@ -3,9 +3,83 @@
   "$id": "https://local.invalid/wasteland-game/a1-boundary-manifest.schema.json",
   "title": "Creator-attested A1 quarantine boundary",
   "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
     "absoluteRuntimeRoot": {
       "type": "string",
       "pattern": "^/(?:[^/]+/)*[^/]+$"
+    },
+    "evidenceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "clientEnvironmentGuard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "CODEX_HOME",
+        "XDG_CONFIG_HOME",
+        "XDG_CACHE_HOME",
+        "XDG_DATA_HOME",
+        "GIT_CONFIG_NOSYSTEM",
+        "GIT_CONFIG_GLOBAL",
+        "GIT_TERMINAL_PROMPT",
+        "absent_variables"
+      ],
+      "properties": {
+        "CODEX_HOME": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+        "XDG_CONFIG_HOME": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+        "XDG_CACHE_HOME": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+        "XDG_DATA_HOME": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+        "GIT_CONFIG_NOSYSTEM": { "const": "1" },
+        "GIT_CONFIG_GLOBAL": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+        "GIT_TERMINAL_PROMPT": { "const": "0" },
+        "absent_variables": {
+          "const": [
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "AWS_SESSION_TOKEN",
+            "GH_TOKEN",
+            "GITHUB_TOKEN",
+            "GIT_ASKPASS",
+            "SSH_AUTH_SOCK",
+            "VERCEL_TOKEN"
+          ]
+        }
+      }
+    },
+    "codeIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verification_scope",
+        "identifier",
+        "team_identifier",
+        "cdhash",
+        "designated_requirement_sha256",
+        "authorities_sha256"
+      ],
+      "properties": {
+        "verification_scope": { "const": "codesign-strict-component" },
+        "identifier": { "type": "string", "minLength": 1 },
+        "team_identifier": {
+          "type": "string",
+          "pattern": "^[A-Z0-9]{10}$"
+        },
+        "cdhash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "designated_requirement_sha256": { "$ref": "#/$defs/sha256" },
+        "authorities_sha256": { "$ref": "#/$defs/sha256" }
+      }
     }
   },
   "type": "object",
@@ -30,7 +104,7 @@
     "local_observation_exceptions"
   ],
   "properties": {
-    "schema_version": { "const": 3 },
+    "schema_version": { "const": 4 },
     "manifest_id": { "type": "string", "pattern": "^A1B-WP-[0-9]{4}-[A-Z0-9-]+$" },
     "packet_id": { "type": "string", "pattern": "^WP-[0-9]{4}$" },
     "packet_contract_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
@@ -40,11 +114,35 @@
     "repository": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["resolver_type", "repository_root", "base_commit"],
+      "required": [
+        "resolver_type",
+        "repository_root",
+        "absolute_root",
+        "trusted_root",
+        "trusted_remote_url",
+        "base_commit",
+        "git_directory",
+        "git_common_directory",
+        "detached_head",
+        "remote_count",
+        "alternates_present"
+      ],
       "properties": {
         "resolver_type": { "const": "local-git" },
         "repository_root": { "const": "." },
-        "base_commit": { "type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$" }
+        "absolute_root": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+        "trusted_root": {
+          "const": "/Users/sasha/Documents/Codex/sasha-the-land-pirate"
+        },
+        "trusted_remote_url": {
+          "const": "https://github.com/AC-21/sasha-the-land-pirate"
+        },
+        "base_commit": { "type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$" },
+        "git_directory": { "const": ".git" },
+        "git_common_directory": { "const": ".git" },
+        "detached_head": { "const": true },
+        "remote_count": { "const": 0 },
+        "alternates_present": { "const": false }
       }
     },
     "reservation": {
@@ -108,12 +206,15 @@
         "instance_id",
         "principal_id",
         "principal_uid",
+        "boot_session_sha256",
         "ephemeral_home_root",
         "private_temp_root",
         "environment_bindings",
+        "client_environment_guard",
         "ambient_host_home_root",
         "ambient_shared_temp_roots",
         "denied_ambient_write_roots",
+        "ambient_shared_temp_write_exceptions",
         "ambient_host_home_write_denied",
         "ambient_shared_temp_write_denied",
         "symlink_escape_forbidden",
@@ -131,6 +232,7 @@
         "instance_id": { "type": "string", "minLength": 1 },
         "principal_id": { "type": "string", "minLength": 1 },
         "principal_uid": { "type": "integer", "minimum": 1 },
+        "boot_session_sha256": { "$ref": "#/$defs/sha256" },
         "ephemeral_home_root": { "$ref": "#/$defs/absoluteRuntimeRoot" },
         "private_temp_root": { "$ref": "#/$defs/absoluteRuntimeRoot" },
         "environment_bindings": {
@@ -143,6 +245,9 @@
             "TMP": { "$ref": "#/$defs/absoluteRuntimeRoot" },
             "TEMP": { "$ref": "#/$defs/absoluteRuntimeRoot" }
           }
+        },
+        "client_environment_guard": {
+          "$ref": "#/$defs/clientEnvironmentGuard"
         },
         "ambient_host_home_root": { "$ref": "#/$defs/absoluteRuntimeRoot" },
         "ambient_shared_temp_roots": {
@@ -157,8 +262,17 @@
           "uniqueItems": true,
           "items": { "$ref": "#/$defs/absoluteRuntimeRoot" }
         },
+        "ambient_shared_temp_write_exceptions": {
+          "description": "Exact creator-attested paths under otherwise denied shared-temp roots that the approved toolchain must create. Empty unless a packet-specific validator binds every exception.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/absoluteRuntimeRoot" }
+        },
         "ambient_host_home_write_denied": { "const": true },
-        "ambient_shared_temp_write_denied": { "const": true },
+        "ambient_shared_temp_write_denied": {
+          "description": "Shared-temp writes are default-denied except for exact paths in ambient_shared_temp_write_exceptions.",
+          "const": true
+        },
         "symlink_escape_forbidden": { "const": true },
         "runtime_roots_symlink_free": { "const": true },
         "runtime_roots_importable": { "const": false },
@@ -221,6 +335,799 @@
         "creator_review_required": { "const": true }
       }
     },
+    "project_seed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "project_root",
+        "base_commit",
+        "git_tree_sha256",
+        "evidence",
+        "creator_attested_no_implementation"
+      ],
+      "properties": {
+        "mode": { "const": "creator-created-protected-base" },
+        "project_root": { "const": "Game" },
+        "base_commit": { "type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$" },
+        "git_tree_sha256": { "$ref": "#/$defs/sha256" },
+        "evidence": {
+          "allOf": [
+            { "$ref": "#/$defs/evidenceRef" },
+            {
+              "properties": {
+                "path": { "const": "docs/evidence/WP-0001/a1-activation/project-seed.json" }
+              }
+            }
+          ]
+        },
+        "creator_attested_no_implementation": { "const": true }
+      }
+    },
+    "wp0001_toolchain_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hub_version",
+        "editor_version",
+        "editor_changeset",
+        "editor_architecture",
+        "mac_il2cpp_installed",
+        "mac_il2cpp_editor_version",
+        "xcode_version",
+        "rosetta_installed",
+        "dotnet_sdk_version",
+        "assistant_package_version",
+        "resolved_urp_version",
+        "resolved_test_framework_version",
+        "mono_iteration_authorized",
+        "il2cpp_arm64_acceptance"
+      ],
+      "properties": {
+        "hub_version": { "const": "3.19.5" },
+        "editor_version": { "const": "6000.3.19f1" },
+        "editor_changeset": { "const": "7689f4515d75" },
+        "editor_architecture": { "const": "arm64" },
+        "mac_il2cpp_installed": { "const": true },
+        "mac_il2cpp_editor_version": { "const": "6000.3.19f1" },
+        "xcode_version": { "const": "26.3" },
+        "rosetta_installed": { "const": true },
+        "dotnet_sdk_version": { "const": "10.0.301" },
+        "assistant_package_version": { "const": "2.14.0-pre.1" },
+        "resolved_urp_version": {
+          "type": "string",
+          "pattern": "^17\\.3(?:\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?)?$"
+        },
+        "resolved_test_framework_version": {
+          "type": "string",
+          "pattern": "^1\\.6(?:\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?)?$"
+        },
+        "mono_iteration_authorized": { "const": true },
+        "il2cpp_arm64_acceptance": { "const": true }
+      }
+    },
+    "activation_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifest",
+        "toolchain",
+        "quarantine",
+        "route",
+        "activation_session",
+        "deviations",
+        "sandbox_policy",
+        "network_policy"
+      ],
+      "properties": {
+        "manifest": {
+          "allOf": [
+            { "$ref": "#/$defs/evidenceRef" },
+            {
+              "properties": {
+                "path": { "const": "docs/evidence/WP-0001/a1-activation/evidence-manifest.json" }
+              }
+            }
+          ]
+        },
+        "toolchain": {
+          "allOf": [
+            { "$ref": "#/$defs/evidenceRef" },
+            {
+              "properties": {
+                "path": { "const": "docs/evidence/WP-0001/a1-activation/toolchain.json" }
+              }
+            }
+          ]
+        },
+        "quarantine": {
+          "allOf": [
+            { "$ref": "#/$defs/evidenceRef" },
+            {
+              "properties": {
+                "path": { "const": "docs/evidence/WP-0001/a1-activation/quarantine.json" }
+              }
+            }
+          ]
+        },
+        "route": {
+          "allOf": [
+            { "$ref": "#/$defs/evidenceRef" },
+            {
+              "properties": {
+                "path": { "const": "docs/evidence/WP-0001/a1-activation/mcp-route.json" }
+              }
+            }
+          ]
+        },
+        "activation_session": {
+          "allOf": [
+            { "$ref": "#/$defs/evidenceRef" },
+            {
+              "properties": {
+                "path": { "const": "docs/evidence/WP-0001/a1-activation/activation-session.json" }
+              }
+            }
+          ]
+        },
+        "deviations": {
+          "allOf": [
+            { "$ref": "#/$defs/evidenceRef" },
+            {
+              "properties": {
+                "path": { "const": "docs/evidence/WP-0001/a1-activation/deviations.json" }
+              }
+            }
+          ]
+        },
+        "sandbox_policy": {
+          "allOf": [
+            { "$ref": "#/$defs/evidenceRef" },
+            {
+              "properties": {
+                "path": { "const": "docs/evidence/WP-0001/a1-activation/sandbox.policy" }
+              }
+            }
+          ]
+        },
+        "network_policy": {
+          "allOf": [
+            { "$ref": "#/$defs/evidenceRef" },
+            {
+              "properties": {
+                "path": { "const": "docs/evidence/WP-0001/a1-activation/network.policy" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "raw_capture_collectors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "network",
+        "policy_attachment",
+        "authority_claim"
+      ],
+      "properties": {
+        "protocol": {
+          "allOf": [
+            { "$ref": "#/$defs/evidenceRef" },
+            {
+              "properties": {
+                "path": {
+                  "pattern": "^docs/foundation-v0\\.1/tools/[a-z0-9_]+\\.py$"
+                }
+              }
+            }
+          ]
+        },
+        "network": {
+          "allOf": [
+            { "$ref": "#/$defs/evidenceRef" },
+            {
+              "properties": {
+                "path": {
+                  "pattern": "^docs/foundation-v0\\.1/tools/[a-z0-9_]+\\.py$"
+                }
+              }
+            }
+          ]
+        },
+        "policy_attachment": {
+          "allOf": [
+            { "$ref": "#/$defs/evidenceRef" },
+            {
+              "properties": {
+                "path": {
+                  "const": "docs/foundation-v0.1/tools/capture_wp0001_policy_attachment.py"
+                }
+              }
+            }
+          ]
+        },
+        "authority_claim": {
+          "const": "AUTHORIZE-WP0001-RAW-COLLECTORS"
+        }
+      }
+    },
+    "unity_mcp_route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "route",
+        "code_identity_authority_claim",
+        "client",
+        "relay",
+        "bridge",
+        "entitlement",
+        "project_identity",
+        "codex_policy",
+        "process_observation",
+        "connection",
+        "handshake",
+        "activation_session",
+        "controls"
+      ],
+      "properties": {
+        "route": { "const": "UNITY-MCP-EXTERNAL" },
+        "code_identity_authority_claim": {
+          "const": "AUTHORIZE-WP0001-CODE-IDENTITIES"
+        },
+        "client": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "version",
+            "publisher",
+            "signing_identity",
+            "pid",
+            "started_at",
+            "process_birth_id_sha256",
+            "environment_sha256",
+            "environment_names_sha256",
+            "server_inventory_sha256",
+            "principal_uid",
+            "cwd",
+            "arguments"
+          ],
+          "properties": {
+            "path": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "version": { "type": "string", "minLength": 1 },
+            "publisher": { "type": "string", "minLength": 1 },
+            "signing_identity": { "$ref": "#/$defs/codeIdentity" },
+            "pid": { "type": "integer", "minimum": 1 },
+            "started_at": { "type": "string", "format": "date-time" },
+            "process_birth_id_sha256": { "$ref": "#/$defs/sha256" },
+            "environment_sha256": { "$ref": "#/$defs/sha256" },
+            "environment_names_sha256": { "$ref": "#/$defs/sha256" },
+            "server_inventory_sha256": { "$ref": "#/$defs/sha256" },
+            "principal_uid": { "type": "integer", "minimum": 1 },
+            "cwd": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+            "arguments": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "relay": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "package_copy_path",
+            "package_copy_sha256",
+            "version",
+            "signing_identity",
+            "pid",
+            "started_at",
+            "process_birth_id_sha256",
+            "environment_names_sha256",
+            "parent_pid",
+            "principal_uid",
+            "arguments"
+          ],
+          "properties": {
+            "path": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "package_copy_path": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+            "package_copy_sha256": { "$ref": "#/$defs/sha256" },
+            "version": { "type": "string", "minLength": 1 },
+            "signing_identity": { "$ref": "#/$defs/codeIdentity" },
+            "pid": { "type": "integer", "minimum": 1 },
+            "started_at": { "type": "string", "format": "date-time" },
+            "process_birth_id_sha256": { "$ref": "#/$defs/sha256" },
+            "environment_names_sha256": { "$ref": "#/$defs/sha256" },
+            "parent_pid": { "type": "integer", "minimum": 1 },
+            "principal_uid": { "type": "integer", "minimum": 1 },
+            "arguments": {
+              "type": "array",
+              "minItems": 5,
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "bridge": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "editor_pid",
+            "started_at",
+            "process_birth_id_sha256",
+            "environment_names_sha256",
+            "editor_path",
+            "editor_sha256",
+            "editor_version",
+            "editor_changeset",
+            "signing_identity",
+            "principal_uid",
+            "cwd",
+            "arguments",
+            "project_path",
+            "connection_file",
+            "connection_file_sha256",
+            "protocol_version",
+            "discovery_connection_type",
+            "physical_transport",
+            "endpoint",
+            "endpoint_owner_uid",
+            "endpoint_mode",
+            "shared_temp_exception",
+            "discovery_record"
+          ],
+          "properties": {
+            "editor_pid": { "type": "integer", "minimum": 1 },
+            "started_at": { "type": "string", "format": "date-time" },
+            "process_birth_id_sha256": { "$ref": "#/$defs/sha256" },
+            "environment_names_sha256": { "$ref": "#/$defs/sha256" },
+            "editor_path": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+            "editor_sha256": { "$ref": "#/$defs/sha256" },
+            "editor_version": { "const": "6000.3.19f1" },
+            "editor_changeset": { "const": "7689f4515d75" },
+            "signing_identity": { "$ref": "#/$defs/codeIdentity" },
+            "principal_uid": { "type": "integer", "minimum": 1 },
+            "cwd": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+            "arguments": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string" }
+            },
+            "project_path": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+            "connection_file": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+            "connection_file_sha256": { "$ref": "#/$defs/sha256" },
+            "protocol_version": { "const": "2.0" },
+            "discovery_connection_type": { "const": "named_pipe" },
+            "physical_transport": { "const": "unix_socket" },
+            "endpoint": {
+              "type": "string",
+              "pattern": "^/tmp/unity-mcp-[0-9a-f]{8}-[1-9][0-9]*$"
+            },
+            "endpoint_owner_uid": { "type": "integer", "minimum": 1 },
+            "endpoint_mode": { "const": "0600" },
+            "shared_temp_exception": { "const": true },
+            "discovery_record": {
+              "allOf": [
+                { "$ref": "#/$defs/evidenceRef" },
+                {
+                  "properties": {
+                    "path": { "const": "docs/evidence/WP-0001/a1-activation/bridge-discovery.json" }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "entitlement": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "eligible_assigned_seat_verified",
+            "organization_id_sha256",
+            "cloud_project_id_sha256",
+            "same_organization_project_linkage_verified",
+            "license_secret_material_copied",
+            "evidence"
+          ],
+          "properties": {
+            "eligible_assigned_seat_verified": { "const": true },
+            "organization_id_sha256": { "$ref": "#/$defs/sha256" },
+            "cloud_project_id_sha256": { "$ref": "#/$defs/sha256" },
+            "same_organization_project_linkage_verified": { "const": true },
+            "license_secret_material_copied": { "const": false },
+            "evidence": {
+              "allOf": [
+                { "$ref": "#/$defs/evidenceRef" },
+                {
+                  "properties": {
+                    "path": { "const": "docs/evidence/WP-0001/a1-activation/entitlement-linkage.json" }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "project_identity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "company",
+            "product",
+            "bundle_id",
+            "dev_profile",
+            "test_profile",
+            "temporary_non_shipping",
+            "prior_root_discovery_forbidden",
+            "evidence"
+          ],
+          "properties": {
+            "company": { "const": "LocalFoundationLab" },
+            "product": { "const": "SashaAtomicLandPirate_WP0001" },
+            "bundle_id": { "const": "local.foundation.sashaatomiclandpirate.wp0001" },
+            "dev_profile": { "const": "wp0001-dev-v1" },
+            "test_profile": { "const": "wp0001-test-v1" },
+            "temporary_non_shipping": { "const": true },
+            "prior_root_discovery_forbidden": { "const": true },
+            "evidence": {
+              "allOf": [
+                { "$ref": "#/$defs/evidenceRef" },
+                {
+                  "properties": {
+                    "path": { "const": "docs/evidence/WP-0001/a1-activation/project-identity.json" }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "codex_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "runtime_config_path",
+            "evidence",
+            "server_name",
+            "approval_policy",
+            "default_tools_approval_mode",
+            "required",
+            "enabled_tools",
+            "enabled_tools_sha256",
+            "client_visible_tools",
+            "tool_scope_authority_claim",
+            "exact_command_identity_enforced",
+            "project_config_disabled",
+            "global_unity_mcp_absent",
+            "environment_bindings",
+            "client_environment_guard",
+            "environment_sha256",
+            "effective_server_inventory_sha256"
+          ],
+          "properties": {
+            "runtime_config_path": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+            "evidence": {
+              "allOf": [
+                { "$ref": "#/$defs/evidenceRef" },
+                {
+                  "properties": {
+                    "path": { "const": "docs/evidence/WP-0001/a1-activation/codex-runtime-config.toml" }
+                  }
+                }
+              ]
+            },
+            "server_name": { "const": "unity_mcp_a1_wp0001" },
+            "approval_policy": { "const": "on-request" },
+            "default_tools_approval_mode": { "const": "prompt" },
+            "required": { "const": true },
+            "enabled_tools": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "enabled_tools_sha256": { "$ref": "#/$defs/sha256" },
+            "client_visible_tools": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "tool_scope_authority_claim": {
+              "const": "AUTHORIZE-WP0001-MCP-ALLOWLIST"
+            },
+            "exact_command_identity_enforced": { "const": true },
+            "project_config_disabled": { "const": true },
+            "global_unity_mcp_absent": { "const": true },
+            "environment_bindings": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["HOME", "TMPDIR", "TMP", "TEMP"],
+              "properties": {
+                "HOME": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+                "TMPDIR": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+                "TMP": { "$ref": "#/$defs/absoluteRuntimeRoot" },
+                "TEMP": { "$ref": "#/$defs/absoluteRuntimeRoot" }
+              }
+            },
+            "client_environment_guard": {
+              "$ref": "#/$defs/clientEnvironmentGuard"
+            },
+            "environment_sha256": { "$ref": "#/$defs/sha256" },
+            "effective_server_inventory_sha256": { "$ref": "#/$defs/sha256" }
+          }
+        },
+        "process_observation": {
+          "allOf": [
+            { "$ref": "#/$defs/evidenceRef" },
+            {
+              "properties": {
+                "path": { "const": "docs/evidence/WP-0001/a1-activation/mcp-route.json" }
+              }
+            }
+          ]
+        },
+        "connection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "prior_approval_history_absent",
+            "preflight_approval_revoked",
+            "publisher_fallback_used",
+            "batch_auto_approve",
+            "direct_requires_approval",
+            "gateway_allowed",
+            "first_connection_creator_approved",
+            "final_state"
+          ],
+          "properties": {
+            "prior_approval_history_absent": { "const": true },
+            "preflight_approval_revoked": { "const": true },
+            "publisher_fallback_used": { "const": false },
+            "batch_auto_approve": { "const": false },
+            "direct_requires_approval": { "const": true },
+            "gateway_allowed": { "const": false },
+            "first_connection_creator_approved": { "const": true },
+            "final_state": { "const": "connected" }
+          }
+        },
+        "handshake": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "transcript",
+            "client_pid",
+            "relay_pid",
+            "editor_pid",
+            "client_started_at",
+            "relay_started_at",
+            "editor_started_at",
+            "client_process_birth_id_sha256",
+            "relay_process_birth_id_sha256",
+            "editor_process_birth_id_sha256",
+            "runtime_config_sha256",
+            "enabled_tools_sha256",
+            "environment_sha256",
+            "server_inventory_sha256",
+            "captured_at",
+            "capture_complete",
+            "observed_methods",
+            "model_prompt_count",
+            "unity_tool_call_count",
+            "disconnected",
+            "approval_revoked_after_disconnect"
+          ],
+          "properties": {
+            "transcript": {
+              "allOf": [
+                { "$ref": "#/$defs/evidenceRef" },
+                {
+                  "properties": {
+                    "path": { "const": "docs/evidence/WP-0001/a1-activation/clean-handshake.json" }
+                  }
+                }
+              ]
+            },
+            "client_pid": { "type": "integer", "minimum": 1 },
+            "relay_pid": { "type": "integer", "minimum": 1 },
+            "editor_pid": { "type": "integer", "minimum": 1 },
+            "client_started_at": { "type": "string", "format": "date-time" },
+            "relay_started_at": { "type": "string", "format": "date-time" },
+            "editor_started_at": { "type": "string", "format": "date-time" },
+            "client_process_birth_id_sha256": { "$ref": "#/$defs/sha256" },
+            "relay_process_birth_id_sha256": { "$ref": "#/$defs/sha256" },
+            "editor_process_birth_id_sha256": { "$ref": "#/$defs/sha256" },
+            "runtime_config_sha256": { "$ref": "#/$defs/sha256" },
+            "enabled_tools_sha256": { "$ref": "#/$defs/sha256" },
+            "environment_sha256": { "$ref": "#/$defs/sha256" },
+            "server_inventory_sha256": { "$ref": "#/$defs/sha256" },
+            "captured_at": { "type": "string", "format": "date-time" },
+            "capture_complete": { "const": true },
+            "observed_methods": {
+              "type": "array",
+              "minItems": 2,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "initialize",
+                  "notifications/initialized",
+                  "tools/list",
+                  "ping"
+                ]
+              }
+            },
+            "model_prompt_count": { "const": 0 },
+            "unity_tool_call_count": { "const": 0 },
+            "disconnected": { "const": true },
+            "approval_revoked_after_disconnect": { "const": true }
+          }
+        },
+        "activation_session": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "evidence",
+            "session_id_sha256",
+            "connection_record_sha256",
+            "fd_graph_sha256",
+            "client_pid",
+            "relay_pid",
+            "editor_pid",
+            "client_started_at",
+            "relay_started_at",
+            "editor_started_at",
+            "client_process_birth_id_sha256",
+            "relay_process_birth_id_sha256",
+            "editor_process_birth_id_sha256",
+            "runtime_config_sha256",
+            "enabled_tools_sha256",
+            "environment_sha256",
+            "server_inventory_sha256",
+            "approval_history_absent_before_connection",
+            "creator_approved",
+            "publisher_fallback_used",
+            "connected",
+            "capture_complete",
+            "model_prompt_count",
+            "unity_tool_call_count",
+            "captured_at",
+            "receipt_must_be_reissued_on_drift"
+          ],
+          "properties": {
+            "evidence": {
+              "allOf": [
+                { "$ref": "#/$defs/evidenceRef" },
+                {
+                  "properties": {
+                    "path": { "const": "docs/evidence/WP-0001/a1-activation/activation-session.json" }
+                  }
+                }
+              ]
+            },
+            "session_id_sha256": { "$ref": "#/$defs/sha256" },
+            "connection_record_sha256": { "$ref": "#/$defs/sha256" },
+            "fd_graph_sha256": { "$ref": "#/$defs/sha256" },
+            "client_pid": { "type": "integer", "minimum": 1 },
+            "relay_pid": { "type": "integer", "minimum": 1 },
+            "editor_pid": { "type": "integer", "minimum": 1 },
+            "client_started_at": { "type": "string", "format": "date-time" },
+            "relay_started_at": { "type": "string", "format": "date-time" },
+            "editor_started_at": { "type": "string", "format": "date-time" },
+            "client_process_birth_id_sha256": { "$ref": "#/$defs/sha256" },
+            "relay_process_birth_id_sha256": { "$ref": "#/$defs/sha256" },
+            "editor_process_birth_id_sha256": { "$ref": "#/$defs/sha256" },
+            "runtime_config_sha256": { "$ref": "#/$defs/sha256" },
+            "enabled_tools_sha256": { "$ref": "#/$defs/sha256" },
+            "environment_sha256": { "$ref": "#/$defs/sha256" },
+            "server_inventory_sha256": { "$ref": "#/$defs/sha256" },
+            "approval_history_absent_before_connection": { "const": true },
+            "creator_approved": { "const": true },
+            "publisher_fallback_used": { "const": false },
+            "connected": { "const": true },
+            "capture_complete": { "const": true },
+            "model_prompt_count": { "const": 0 },
+            "unity_tool_call_count": { "const": 0 },
+            "captured_at": { "type": "string", "format": "date-time" },
+            "receipt_must_be_reissued_on_drift": { "const": true }
+          }
+        },
+        "controls": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "pending_execution_gap_acknowledged",
+            "hidden_tool_gap_acknowledged",
+            "os_quarantine_authoritative",
+            "mitigation_mode",
+            "persistent_relay_process_count",
+            "tcp_listener_count",
+            "wildcard_listener_count",
+            "non_loopback_reachable_listener_count",
+            "network_policy_enforced",
+            "network_policy_sha256",
+            "boot_session_sha256",
+            "captured_at",
+            "probe_targets",
+            "probe_targets_sha256",
+            "non_loopback_probe_count",
+            "non_loopback_probe_success_count",
+            "loopback_probe_count",
+            "loopback_probe_success_count",
+            "approved_egress_probe_count",
+            "approved_egress_probe_success_count",
+            "unapproved_egress_probe_count",
+            "unapproved_egress_probe_success_count",
+            "observation"
+          ],
+          "properties": {
+            "pending_execution_gap_acknowledged": { "const": true },
+            "hidden_tool_gap_acknowledged": { "const": true },
+            "os_quarantine_authoritative": { "const": true },
+            "mitigation_mode": {
+              "enum": [
+                "persistent-relay-suppressed",
+                "os-network-denied"
+              ]
+            },
+            "persistent_relay_process_count": { "type": "integer", "minimum": 0 },
+            "tcp_listener_count": { "type": "integer", "minimum": 0 },
+            "wildcard_listener_count": { "type": "integer", "minimum": 0 },
+            "non_loopback_reachable_listener_count": { "const": 0 },
+            "network_policy_enforced": { "const": true },
+            "network_policy_sha256": { "$ref": "#/$defs/sha256" },
+            "boot_session_sha256": { "$ref": "#/$defs/sha256" },
+            "captured_at": { "type": "string", "format": "date-time" },
+            "probe_targets": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "non_loopback_listener",
+                "loopback_control",
+                "approved_egress",
+                "unapproved_egress"
+              ],
+              "properties": {
+                "non_loopback_listener": {
+                  "pattern": "^external-observer://[0-9a-f]{64}$"
+                },
+                "loopback_control": {
+                  "pattern": "^unix:///private/tmp/unity-mcp-[0-9a-f]{8}-[1-9][0-9]*$"
+                },
+                "approved_egress": {
+                  "const": "https://packages.unity.com/"
+                },
+                "unapproved_egress": {
+                  "const": "https://example.com/"
+                }
+              }
+            },
+            "probe_targets_sha256": { "$ref": "#/$defs/sha256" },
+            "non_loopback_probe_count": { "type": "integer", "minimum": 1 },
+            "non_loopback_probe_success_count": { "const": 0 },
+            "loopback_probe_count": { "type": "integer", "minimum": 1 },
+            "loopback_probe_success_count": { "type": "integer", "minimum": 1 },
+            "approved_egress_probe_count": { "type": "integer", "minimum": 1 },
+            "approved_egress_probe_success_count": { "type": "integer", "minimum": 1 },
+            "unapproved_egress_probe_count": { "type": "integer", "minimum": 1 },
+            "unapproved_egress_probe_success_count": { "const": 0 },
+            "observation": {
+              "allOf": [
+                { "$ref": "#/$defs/evidenceRef" },
+                {
+                  "properties": {
+                    "path": { "const": "docs/evidence/WP-0001/a1-activation/network-observation.json" }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
     "local_observation_exceptions": {
       "type": "array",
       "uniqueItems": true,
@@ -236,7 +1143,19 @@
         }
       },
       "then": {
+        "required": [
+          "project_seed",
+          "wp0001_toolchain_profile",
+          "activation_evidence",
+          "raw_capture_collectors",
+          "unity_mcp_route"
+        ],
         "properties": {
+          "credential_boundary": {
+            "properties": {
+              "approved_credential_ids": { "const": [] }
+            }
+          },
           "protection_boundary": {
             "properties": {
               "ephemeral_scratch_paths": {
