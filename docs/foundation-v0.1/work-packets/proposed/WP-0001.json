@@ -9,13 +9,13 @@
   "save_risk": "S1",
   "created_on": "2026-07-15",
   "title": "Unity Mac engine, save, renderer, and pipeline spike",
-  "objective": "Prove or falsify one exact Unity 6.3 LTS patch/toolchain as the Mac-first technical foundation by producing a reproducible native ARM64 build with a non-Unity fixed-tick state core, synthetic exact-ownership recovery, the byte-exact Save Envelope/root/pointer/protected-retention-anchor v1 contracts, batch automation, a representative dynamic-building render test, and one Blender calibration package.",
+  "objective": "Prove or falsify the exact D-0047 Unity 6000.3.19f1 ARM64 toolchain as the Mac-first technical foundation under the proposed official Unity Authorized Agentic Access boundary, which has no authority until a creator-ratified successor to D-0048 and a sealed WP-0001 acceptance receipt bind the exact route, by producing a reproducible native IL2CPP ARM64 build with a dual-use non-Unity fixed-tick state core, synthetic exact-ownership recovery, the byte-exact Save Envelope/root/pointer/protected-retention-anchor v1 contracts, batch automation, a representative dynamic-building render test, and one Blender calibration package.",
   "value": "This is the smallest reversible implementation that can expose engine, saving, automation, renderer, and asset-pipeline risks without authorizing gameplay assumptions.",
   "requested_by": "creator-goal:2026-07-15",
   "required_approver": "creator",
   "approved_by": null,
   "approval_receipt_id": null,
-  "contract_sha256": "d04452275baf476e218c2f2391f08f47fa5e3b7dc8ba018f4143f034f6ee8512",
+  "contract_sha256": "eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3",
   "a1_boundary_manifest": null,
   "implementer": null,
   "verifier": null,
@@ -38,7 +38,9 @@
     "D-0028",
     "D-0033",
     "D-0034",
-    "D-0038"
+    "D-0038",
+    "D-0047",
+    "D-0048"
   ],
   "system_contracts": [
     "02-SYSTEM-MAP.md#cross-mode-ownership-transaction",
@@ -50,47 +52,72 @@
     {
       "id": "BASE-001",
       "type": "workspace-observation",
-      "uri": "local://no-game-engine-project-2026-07-15",
+      "uri": "local-observation://no-game-engine-project-2026-07-15",
       "sha256": null
     },
     {
       "id": "BASE-002",
       "type": "tool-observation",
-      "uri": "local://unity-not-detected-2026-07-15",
+      "uri": "local-observation://unity-hub-3.19.5-editor-6000.5.4f1-d550df8bd089-entitlement-present-no-d0047-il2cpp-or-xcode-2026-07-15",
       "sha256": null
     },
     {
       "id": "BASE-003",
       "type": "tool-observation",
-      "uri": "local://blender-5.1.2-installed",
+      "uri": "local-observation://blender-5.1.2-installed",
       "sha256": null
     },
     {
       "id": "BASE-004",
       "type": "hardware-profile",
-      "uri": "local://m3-max-16cpu-40gpu-48gb-macos-15.7.7",
+      "uri": "local-observation://m3-max-16cpu-40gpu-48gb-macos-15.7.7",
       "sha256": null
     },
     {
       "id": "BASE-005",
       "type": "foundation-lint",
-      "uri": "local://foundation-bootstrap-lint",
+      "uri": "local-observation://foundation-bootstrap-lint",
+      "sha256": null
+    },
+    {
+      "id": "BASE-006",
+      "type": "repository-observation",
+      "uri": "local-observation://github.com/AC-21/sasha-the-land-pirate?checkout=%2FUsers%2Fsasha%2FDocuments%2FCodex%2Fsasha-the-land-pirate&commit=a07411199c5ab4600cfcce60fb8e4e9e4daea9f1",
+      "sha256": null
+    },
+    {
+      "id": "BASE-007",
+      "type": "ci-observation",
+      "uri": "local-observation://github.com/AC-21/sasha-the-land-pirate/actions/runs/29465142421?workflow=Foundation&commit=a07411199c5ab4600cfcce60fb8e4e9e4daea9f1&conclusion=success",
+      "sha256": null
+    },
+    {
+      "id": "BASE-008",
+      "type": "tool-observation",
+      "uri": "local-observation://no-standalone-dotnet-sdk-or-full-xcode-2026-07-15",
       "sha256": null
     }
   ],
   "in_scope": [
-    "Create a pinned Unity 6.3 LTS URP candidate project in a creator-approved repository location.",
-    "Record exact editor patch, packages, Xcode/toolchain, licenses, known issues, retained installer, and rollback tuple.",
-    "Create a non-Unity C# stable-ID fixed-tick core with injected clock, counter/key RNG, storage, and logging.",
+    "Provision the D-0047 candidate toolchain and empty temporary project only after sealed acceptance, inside the bounded creator-operated setup phase: Unity Hub 3.19.5; Unity 6000.3.19f1 changeset 7689f4515d75 ARM64 with Mac Build Support (IL2CPP); Xcode 26.3; Unity-required Rosetta 2; URP 17.3; Unity Test Framework 1.6; Mono iteration; IL2CPP ARM64 acceptance. No packet implementation begins until protected A1 entry.",
+    "Add .NET SDK 10.0.301 only as the pinned headless build/test SDK selected through root global.json with rollForward disabled; restore PackageReferences through committed lockfiles and --locked-mode. Unity-consumed shared projects target netstandard2.1, use C# 9 or lower, and stay inside Unity's supported API/language surface; headless test/runner projects may target net10.0.",
+    "Only after a creator-ratified successor to D-0048 and a sealed packet-acceptance receipt authorize the exact route, use Unity Registry-resolved com.unity.ai.assistant 2.14.0-pre.1 with an eligible Unity subscription, an assigned creator seat, and a project linked to the same Unity organization. The acceptance receipt selects exactly one mutually exclusive route claim: UNITY-AI-GATEWAY-CODEX or UNITY-MCP-EXTERNAL. Stop Unity work on any authorization or version drift.",
+    "For UNITY-AI-GATEWAY-CODEX, use Assistant's AI Gateway with Unity's bundled Codex CLI; Unity controls the bundled version. Bind package/version, subscription/seat, organization/project linkage, Gateway availability, bundled client/version evidence, applicable provider/model and credential-presence metadata without secret values, scopes/rate limits, revocation state, and initiation identity. Gateway connections are auto-approved; do not claim or require an MCP client, relay/server, or first-connection approval for this route.",
+    "For UNITY-MCP-EXTERNAL, require the Unity MCP Bridge to show Running, the exact Unity-installed Apple-Silicon relay under ~/.unity/relay/ with its resolved absolute path and digest/version, --mcp plus explicit project targeting, an exact external MCP client/version, and creator review/approval of the first pending connection. Bind package/version, subscription/seat, organization/project linkage, bridge, relay/server, client, target, connection, scopes/rate limits, revocation state, and initiation identity. Do not claim or require AI Gateway for this route.",
+    "After sealed packet acceptance but before A1 activation, permit only a creator-operated setup phase: install/open the exact Editor and modules, create the temporary project identity, link the approved organization/project, resolve the Assistant package from Unity Registry, and configure the selected route. For UNITY-AI-GATEWAY-CODEX, the creator configures bundled Codex and records the auto-approved route. For UNITY-MCP-EXTERNAL, the creator starts the exact client with no model/agent prompt, permits only the protocol handshake needed to create the pending connection, reviews and allows it in Unity, records zero Unity tool invocations, and disconnects. No model/agent prompt or Unity tool invocation is permitted during setup; its evidence is input to the separate physical-quarantine activation receipt.",
+    "Record exact Editor-generated package resolution and lockfiles with enableLockFile=true and resolutionStrategy=lowest, Xcode/toolchain, accepted terms, D-0048 successor access evidence, known issues, retained installers, and rollback tuple; fail if a clean clone silently rewrites the manifest or lock. The pinned Editor, packages, build profile, external SDK, and native smoke evidence form one reviewed unit.",
+    "Create SimulationCore and SaveContracts as dual-use ordinary .NET projects and local Unity packages that compile the same source files without copying; the core uses stable IDs, fixed ticks, integer/fixed-point policy, and injected clock, counter/key RNG, storage, and logging, with no UnityEngine dependency. SaveContracts may depend on SimulationCore; the reverse dependency is forbidden.",
     "Implement a synthetic two-domain ownership transaction with idempotent retry and crash-phase recovery, without choosing city or road gameplay.",
     "Implement byte-exact Save Envelope v1, root header v1, initial versioned synthetic sections, slot pointer v1, immutable generations, protected retention-anchor receipt v1, crash-safe pruning/anchor advance, fault injection, bounded recovery scan, load, and canonical state comparison.",
     "Pin the random algorithm/version, canonical-state encoding/version, and numeric policy through a cross-runtime golden vector.",
     "Pin a full Draft 2020-12 validator, meta-validate schemas, and commit positive plus adversarial save/pointer/retention-anchor/packet/asset fixtures.",
-    "Create batch test/build/report commands and a native ARM64 application.",
+    "Create batch test/build/report commands and a native IL2CPP ARM64 application; Unity test runs omit -quit, require parsed NUnit XML plus Editor logs, and enforce a timeout. Verify ENABLE_IL2CPP, the application executable, and GameAssembly are arm64, launch the built player directly, require machine-readable success evidence, and run the representative Metal soak on the protected target Mac.",
+    "Create candidate `.github/workflows/wp0001-ci.yml` with read-only permissions and no deploy, merge, release, receipt, or Unity credentials; it runs foundation, pure-.NET, and Unity-static-contract checks only. GitHub Actions never starts a Unity process in WP-0001, and a manual workflow trigger is not authorization. Native Unity evidence is produced by the creator-operated local wrapper, the exact receipt-authorized official Gateway/MCP route, or separately receipt-authorized Unity Build Automation, then imported through the creator boundary.",
     "Create the benchmark harness and capture the provisional slice protocol.",
     "Test a representative dynamic placed-building scene with per-instance faction/condition data, LODs, shadows, probes, and batching compatibility.",
     "Export and import one Blender calibration package with scale, pivot, material, LOD, collider, socket, manifest, and provenance validation.",
     "Document Godot fallback triggers.",
+    "If D-0048 selects fallback, supersede this packet with the same representative benchmark on Godot .NET 4.7.1 commit a13da4feb, Universal macOS ARM64/x86_64, matching .NET export templates, .NET SDK 8+, Forward+ native Metal, official headless CI, and MIT license; do not install or preselect it here.",
     "The same ACCEPT-WP-0001 receipt must bind `AUTHORIZE-TEMP-WP0001-IDENTITY`: Company `LocalFoundationLab`; Product `SashaAtomicLandPirate_WP0001`; Bundle ID `local.foundation.sashaatomiclandpirate.wp0001`; isolated save profiles `wp0001-dev-v1` and `wp0001-test-v1`; temporary/non-shipping with no prior-root discovery or migration.",
     "Emit candidate scenario/control-plane revisions and their hashes only under `BuildArtifacts/WP-0001/candidate-control-plane/`; A1 treats the protected foundation and registries as read-only inputs and cannot rewrite them."
   ],
@@ -102,7 +129,10 @@
     "Production economy balance or campaign content.",
     "Automatic merge, autonomy promotion, or feature rollout.",
     "Any city-grammar, vehicle-control, travel-topology, faction, module, or other creator-owned gameplay decision.",
-    "Ratifying durable D-0038 company, product, bundle, or save-root identity; the exact WP-0001 tuple is temporary, non-shipping, and forbidden for distributed saves."
+    "Ratifying durable D-0038 company, product, bundle, or save-root identity; the exact WP-0001 tuple is temporary, non-shipping, and forbidden for distributed saves.",
+    "Any direct agent or GitHub Actions invocation of Unity Hub, Unity Editor, Unity CLI, the Unity executable, or batchmode, including after activation; agent-originated Unity interaction is permitted only through the exact receipt-authorized official Unity Gateway/MCP route, while human setup/initiation remains creator-controlled and Unity Build Automation requires its own exact runner receipt.",
+    "Any unapproved third-party Unity MCP server, unassigned/shared Unity AI seat, secret committed to Git, or runtime dependency on Unity Cloud services.",
+    "Treating a creator's repository/CI greenlight as a waiver of Unity's terms or as permission for unattended Unity automation."
   ],
   "affected_domains": [
     "world",
@@ -118,6 +148,7 @@
   ],
   "interfaces": [
     "Command -> authoritative state transition -> domain event -> read model",
+    "Shared netstandard2.1 source -> ordinary .NET project and local Unity package without duplication",
     "Persisted stable-ID allocators and counter/key randomness",
     "Cross-mode ownership transaction and idempotency ledger",
     "Save Envelope v1 immutable generation, pointer, and protected retention anchor",
@@ -135,6 +166,10 @@
     "fencing_token": null
   },
   "declared_paths": [
+    "global.json",
+    "Directory.Build.props",
+    "Sasha.WP0001.sln",
+    ".github/workflows/wp0001-ci.yml",
     "Game/Assets/Game/Bootstrap/",
     "Game/Assets/Game/Content/TechnicalSpike/",
     "Game/Assets/Game/Editor/Build/",
@@ -196,7 +231,7 @@
       "id": "T-A1-QUARANTINE",
       "kind": "manual",
       "command": null,
-      "oracle": "A creator-controlled receipt binds the approved base, disposable worktree, non-writable trusted checkout/governance, restricted credentials, and manual diff/import boundary before implementation starts.",
+      "oracle": "A sealed acceptance receipt first binds the exact packet, temporary identity, installation approval, creator-ratified successor to D-0048, and exactly one route claim, authorizing only the bounded creator-operated setup phase. Before any agent implementation or Unity tool invocation, a separate creator-controlled activation receipt binds the approved protected-main base to a standalone disposable clone or sandbox with an independent .git directory, exact declared path/domain reservation, non-writable trusted constitution/ledger/governance/receipts, restricted credentials, one creator-operated diff/import-or-reject boundary, exact D-0047 tuple, and common package/version, subscription/seat, linked organization/project, scopes/rate limits, initiation-identity, and revocation-state evidence. UNITY-AI-GATEWAY-CODEX additionally binds Gateway availability, Unity-bundled Codex/version evidence, applicable provider/model metadata, credential presence without secret values, and automatic-approval status, with no MCP claims. UNITY-MCP-EXTERNAL instead binds Unity MCP Bridge running state, exact Unity-installed relay path/digest/version and --mcp/project target, external MCP client/version, creator-approved first connection, and a pre-activation handshake log proving zero Unity tool invocations, with no Gateway claim. A shared Git worktree is forbidden; authorization/version drift stops work; a Godot choice supersedes this packet and runs the same benchmark.",
       "required": true,
       "scenario_id": null
     },
@@ -212,7 +247,7 @@
       "id": "T-CLEAN-CLONE",
       "kind": "integration",
       "command": "python3 Tools/Build/verify_clean_clone.py --packet docs/foundation-v0.1/work-packets/proposed/WP-0001.json --profile wp0001-test-v1 --report BuildArtifacts/WP-0001/clean-clone.json",
-      "oracle": "A clean clone restores the exact tuple and compiles without undeclared installs.",
+      "oracle": "A standalone clean clone selects the packet-provisioned .NET SDK 10.0.301 through global.json, restores PackageReferences from committed lockfiles with --locked-mode, resolves the exact Editor-generated package graph, and uses the approved build tuple; compilation does not rewrite package files or require undeclared installs.",
       "required": true,
       "scenario_id": null
     },
@@ -220,7 +255,7 @@
       "id": "T-BATCH-BUILD",
       "kind": "integration",
       "command": "python3 Tools/Build/run_wp0001.py --packet docs/foundation-v0.1/work-packets/proposed/WP-0001.json --configuration Release --architecture arm64 --launch-smoke --report BuildArtifacts/WP-0001/batch-build.json",
-      "oracle": "A trusted command runs tests, native ARM64 build, launch smoke, and report without manual Editor interaction.",
+      "oracle": "After the separate activation receipt, the creator initiates the local wrapper manually, or an authorized client requests Unity work only through the selected receipt-authorized route; GitHub Actions never executes this command, and no agent invokes the Unity executable, CLI, or batchmode directly. Common evidence records the route claim, seat, package/version, linked organization/project, scopes/rate limits, revocation state, initiation identity, exact Editor/build profile, parsed test results/logs, native IL2CPP ARM64 build, ENABLE_IL2CPP, lipo checks for the executable and GameAssembly, direct-player launch smoke, report, and bounded timeout. UNITY-AI-GATEWAY-CODEX records only its Gateway, bundled Codex/version, applicable provider/model, credential-presence, and auto-approval fields; UNITY-MCP-EXTERNAL records only its Bridge, relay/server path/digest/version/arguments/target, external client/version, and approved-connection fields. Evidence from the unselected route is forbidden.",
       "required": true,
       "scenario_id": null
     },
@@ -267,7 +302,7 @@
     {
       "id": "T-SCHEMA-VALIDATOR",
       "kind": "integration",
-      "command": "python3 Tools/Validation/validate_all.py --draft 2020-12 --fixtures Tests/Validation --report BuildArtifacts/WP-0001/schema-validation.json",
+      "command": "python3 Tools/Validation/validate_all.py --draft 2020-12 --fixtures Tests/ValidationFixtures --report BuildArtifacts/WP-0001/schema-validation.json",
       "oracle": "A pinned full Draft 2020-12 validator meta-validates every schema and passes positive/adversarial save/pointer/retention-anchor/packet/asset/scenario fixtures, including typed hashed starting-state/content/input artifacts, revisioned scenario paths, exact packet scenario pins, semantic uniqueness, bounds, totals, compatibility order, generation/anchor chains, and section totals.",
       "required": true,
       "scenario_id": null
@@ -542,12 +577,14 @@
       "Any required acceptance test fails after the allowed bounded iteration.",
       "Save generation or ownership transaction can duplicate, lose, or orphan state.",
       "Known Mac/Metal issue lacks a credible mitigation or recovery path.",
-      "The exact engine/toolchain cannot reproduce from a clean clone."
+      "The exact engine/toolchain cannot reproduce from a clean clone.",
+      "Unity terms or access evidence does not support the selected D-0048 successor operating path.",
+      "Any required component of the selected route profile, package version, scope, rate limit, connection, seat, linked project, or revocation state drifts from its protected receipt."
     ],
     "steps": [
       "Freeze the candidate and preserve logs, saves, seeds, metrics, and failing artifacts.",
       "Do not promote D-0013/D-0033 or build production content against the candidate.",
-      "Release the worktree/reservations without rewriting foundation history.",
+      "Revoke the selected route: remove Gateway provider credentials for UNITY-AI-GATEWAY-CODEX, or revoke the approved client and remove its Unity relay configuration for UNITY-MCP-EXTERNAL; then revoke packet credentials, destroy the standalone sandbox/clone, and release reservations without rewriting foundation history.",
       "Run an equivalent bounded Godot spike if a decisive Unity gate failed."
     ],
     "save_recovery": "No user saves exist. Preserve every golden generation and protected retention-anchor receipt, restore the last verified pointer, and never mutate a failing fixture in place.",

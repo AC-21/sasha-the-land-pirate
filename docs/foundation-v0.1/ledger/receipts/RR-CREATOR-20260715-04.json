@@ -1,0 +1,25 @@
+{
+  "receipt_id": "RR-CREATOR-20260715-04",
+  "issued_at": "2026-07-15T19:09:31-07:00",
+  "issued_by": "creator-source-capture",
+  "issuer_role": "creator",
+  "receipt_kind": "creator-source-capture",
+  "artifact_resolver": {"type":"local-git-tree"},
+  "source_reference": "ledger/receipts/RR-CREATOR-20260715-04.source.md",
+  "subject_ids": ["REPOSITORY-LOCATION", "FOUNDATION-CI", "WP-0001-PREPARATION"],
+  "subject_claims": [
+    {"subject_id":"REPOSITORY-LOCATION","claims":["APPROVE-REPOSITORY-LOCATION"]},
+    {"subject_id":"FOUNDATION-CI","claims":["AUTHORIZE-FOUNDATION-CI"]},
+    {"subject_id":"WP-0001-PREPARATION","claims":["AUTHORIZE-A0-WP0001-PREPARATION"]}
+  ],
+  "approval_text_sha256": "aab5dae3787e395cf82f2d6d2be4cda07376b1e02b0034395604a262572d9167",
+  "accepted_commit": null,
+  "artifact_sha256": {
+    "ledger/receipts/RR-CREATOR-20260715-04.source.md": "aab5dae3787e395cf82f2d6d2be4cda07376b1e02b0034395604a262572d9167"
+  },
+  "subject_contract_sha256": {},
+  "subject_event_sha256": {},
+  "foundation_binding": null,
+  "signature_reference": null,
+  "sealed": false
+}

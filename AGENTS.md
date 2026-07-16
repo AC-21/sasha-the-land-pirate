@@ -22,11 +22,11 @@ The current thesis, pillars, loop, “storybook salvage” phrase, mechanics, lo
 
 This repository is currently **documentation/control-plane work only**.
 
-- Unity is not installed, pinned, or approved for this project.
-- Unity 6.3 LTS and URP Forward+ are candidates, not ratified dependencies.
+- Unity Hub 3.19.5, Rosetta 2, and Unity Editor 6000.5.4f1 ARM64 are present locally, and the creator reports an active Unity license. This is not the D-0047 tuple: 6000.3.19f1 ARM64 + Mac Build Support (IL2CPP), Xcode 26.3, URP 17.3, and Test Framework 1.6 remain the proposed WP-0001 candidate; full Xcode and the standalone .NET SDK were not detected. The 6000.5 onboarding project is observation evidence, not Sasha's project or a production-version choice.
+- D-0048 is a hard open legal/operating gate: no agent or CI runner may invoke Unity Hub, Editor, or CLI until documented Authorized Agentic Access or a creator-bound human-invoked boundary exists; otherwise use the Godot fallback.
 - No gameplay, production asset, package installation, engine project, or autonomous integration is authorized yet.
 - Repository creation does not advance autonomy.
-- WP-0001 may enter A1 only after creator approval of the exact packet, repository location, tool installation, and its physical quarantine receipt.
+- The creator expressed a Unity-first preference, authorized GitHub operations, and confirmed a local installation/license in unsealed `RR-CREATOR-20260715-05`. WP-0001 may enter A1 only after protected creator acceptance of the exact packet, D-0048 resolution through a verified Unity AI Gateway/MCP entitlement, value-matched approval/proof of the exact D-0047 tuple, and its physical quarantine receipt. The source capture alone does not satisfy those gates.
 - At most one A1 packet may be active. A1 output is manually inspected and imported or rejected by the creator; agents do not merge it.
 
 If requested work exceeds A0, stop and name the missing authorization. Do not “prepare ahead” by creating implementation scaffolding.
@@ -102,7 +102,7 @@ Before editing:
 1. Reproduce the packet baseline; stop if it differs.
 2. Confirm packet status and approval receipt, not merely its filename.
 3. Acquire the required reservation: exact base commit, paths, state domains/content IDs, lease, expiry, heartbeat, and fencing token.
-4. Work only in the packet's isolated branch/worktree or asset package.
+4. Work only in the packet's standalone disposable clone/sandbox with an independent `.git` directory, or its isolated asset package.
 5. Touch only declared paths and interfaces. Ask to amend scope before crossing them.
 
 At A1, the foundation and trusted state must be read-only/hash-checked inputs, only packet outputs may be writable, and merge/release credentials must be absent. A folder named `sandbox` is not proof of quarantine.

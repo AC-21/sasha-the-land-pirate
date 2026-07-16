@@ -33,7 +33,7 @@ Agents inspect, benchmark, simulate, and propose. They may edit draft documentat
 
 ### A1 — Quarantined experiments
 
-Agents may create isolated branches/worktrees, prototypes, generated assets, and reports only after the A1 quarantine boundary is actually established. Nothing merges at A1; the creator manually inspects and imports or rejects the bounded diff/artifacts.
+Agents may create prototypes, generated assets, and reports only inside a standalone disposable clone/sandbox with an independent `.git` directory after the A1 quarantine boundary is actually established. Shared Git worktrees are forbidden because they can mutate trusted repository state through the common `.git` directory. Nothing merges at A1; the creator manually inspects and imports or rejects the bounded diff/artifacts.
 
 ### A2 — Accepted work packets
 
@@ -127,7 +127,7 @@ A packet is not implementable until it contains:
 1. Read the constitution, active decision records, relevant system contract, and work packet.
 2. Verify the baseline; if it cannot be reproduced, stop and amend the packet rather than inventing a new problem.
 3. Acquire an atomic reservation with base commit, exact paths/domains/content IDs, expiry, heartbeat, and fencing token. Also reserve scarce Unity license/build/GPU-profiler runners when applicable.
-4. Work in an isolated branch/worktree or asset package.
+4. Work in a standalone disposable clone/sandbox with an independent `.git` directory, or an isolated asset package.
 5. Preserve unrelated user changes and avoid broad mechanical rewrites.
 6. Add or update tests with the implementation, including save migration if applicable.
 7. Run fast gates continuously and full relevant gates before handoff.

@@ -22,13 +22,13 @@ Direct creator prompt or clarification facts may be recorded as semantically rat
 Before A2, the production repository needs:
 
 1. protected `main` and protected governance paths;
-2. agents restricted to isolated branches/worktrees and quarantine packages without merge/release credentials;
+2. agents restricted to standalone disposable clones/sandboxes with independent `.git` directories and quarantine packages without merge/release credentials;
 3. a trusted integrator/gatekeeper identity that alone can allocate accepted decision sequence numbers, merge, write release events, and advance rollout state;
 4. creator-controlled approval for constitution, autonomy, high-risk/save migration, art authority, and release exceptions;
 5. pairwise-distinct trusted implementer, verifier, and integrator principals for every accepted A2–A4 packet, regardless of declared risk or change class;
 6. signed or platform-authenticated receipts bound to exact commit and SHA-256 artifact hashes;
 7. server-side/orchestrator-side checks that an agent cannot modify in the same candidate change;
-8. immutable release artifacts and save backups outside the candidate worktree.
+8. immutable release artifacts and save backups outside the candidate sandbox.
 
 Sibling agents under the same parent credential count as one principal unless the orchestration layer proves independent credentials and non-colluding approval.
 
@@ -39,7 +39,7 @@ This table is authoritative wherever another document is ambiguous:
 | Autonomy | Implementation | Verification | Acceptance/integration |
 |---|---|---|---|
 | A0 | analysis plus creator-requested draft documentation/control-plane edits only; no game/tool/asset implementation or installs | advisory review only | creator only; draft edits cannot authorize themselves |
-| A1 | one sandbox principal may implement in an isolated disposable worktree | another agent may provide advisory review, but shared credentials do not make it trusted verification | creator manually inspects the diff/artifacts and imports or rejects them; no agent acceptance or merge |
+| A1 | one sandbox principal may implement in a standalone disposable clone/sandbox with an independent `.git` directory; shared Git worktrees are forbidden | another agent may provide advisory review, but shared credentials do not make it trusted verification | creator manually inspects the diff/artifacts and imports or rejects them; no agent acceptance or merge |
 | A2–A4 | accepted packets only | every accepted packet has a verifier principal distinct from implementer | trusted integrator is distinct from both for every accepted packet; creator remains required where the authority matrix says so |
 
 Governance work is never exempt. Pairwise role fields in a proposed A1 packet describe the future accepted record; they do not turn sibling agents into independent principals.
@@ -121,7 +121,7 @@ Every attack must be rejected by a trusted check outside the candidate's write a
 
 [`governance/ratification-state.json`](governance/ratification-state.json) is the single draft statement of what can start:
 
-- a narrow technical spike can enter A1 only after WP-0001, repository location, tool installation, and WP-0001's packet-specific quarantine are explicitly approved;
+- a narrow technical spike can enter A1 only after WP-0001, D-0048's Unity operating boundary, the exact D-0047 tool installation, and WP-0001's packet-specific quarantine are explicitly approved; an unsealed repository/CI greenlight is evidence, not protected packet acceptance;
 - the ugly gameplay toy requires the listed identity decisions, its own explicit acceptance, and a separate packet-specific WP-0002 quarantine receipt;
 - WP-0002 cannot advance from proposal until WP-0001 is `released` and a sealed creator `packet-completion` receipt binds `ACCEPT-COMPLETION-WP-0001` plus WP-0001's immutable packet-contract hash;
 - the slice kernel additionally requires the city grammar decision;
@@ -129,11 +129,13 @@ Every attack must be rejected by a trusted check outside the candidate's write a
 
 Repository creation alone never promotes autonomy. `packet_entry_gates` in the canonical state maps each executable packet to exactly one gate; WP-0001 maps to `technical_spike` and WP-0002 maps to `ugly_gameplay_toy`. The canonical `a1_max_active_packets` value is `1`, so no second A1 packet may start until the active packet has ended and its status is recorded.
 
+Unity Terms §17.2(ff) is an independent hard stop. Until D-0048 is protected, no agent or CI credential may start Unity Hub, Editor, or CLI. The compliant branches are documented Unity-granted Authorized Agentic Access for the exact identity/runner/use; a human initiating every Unity action while agents only prepare inputs and analyze outputs; or a Godot fallback that supersedes/revises WP-0001. Creator permission to create CI or proceed at A0 cannot waive third-party terms.
+
 ### A1 quarantine minimum
 
 Before any A1 packet command runs, a creator-controlled process must materialize `governance/a1-boundaries/<packet-id>.json` under [`schemas/a1-boundary-manifest.schema.json`](schemas/a1-boundary-manifest.schema.json). The packet stores its safe path and raw SHA-256; the one `packet-activation` receipt must bind that exact hash, the packet contract, and all of the following:
 
-1. a disposable branch/worktree or standalone sandbox pinned to an exact approved base commit;
+1. a standalone disposable clone or sandbox with an independent `.git` directory, pinned to an exact approved base commit; shared Git worktrees are forbidden;
 2. no writable mount or credential capable of changing protected `main`, governance, receipts, or releases;
 3. the foundation mounted read-only or copied as a hash-checked input, never edited as spike output;
 4. only packet-declared output paths writable, with no network or external credentials except explicitly approved installers;

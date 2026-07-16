@@ -1,0 +1,25 @@
+{
+  "receipt_id": "RR-CREATOR-20260715-05",
+  "issued_at": "2026-07-15T21:20:35-07:00",
+  "issued_by": "creator-source-capture",
+  "issuer_role": "creator",
+  "receipt_kind": "creator-source-capture",
+  "artifact_resolver": {"type":"local-git-tree"},
+  "source_reference": "ledger/receipts/RR-CREATOR-20260715-05.source.md",
+  "subject_ids": ["GITHUB-OPERATIONS", "UNITY-LOCAL-STATE", "WP-0001-PREPARATION"],
+  "subject_claims": [
+    {"subject_id":"GITHUB-OPERATIONS","claims":["AUTHORIZE-GITHUB-OPERATIONS"]},
+    {"subject_id":"UNITY-LOCAL-STATE","claims":["CONFIRM-UNITY-INSTALLED","CONFIRM-UNITY-LICENSE"]},
+    {"subject_id":"WP-0001-PREPARATION","claims":["AUTHORIZE-A0-WP0001-PREPARATION"]}
+  ],
+  "approval_text_sha256": "8da85bf086d1847f2474a3bbe21d1680e416078fadb063472613cfbffb8fa998",
+  "accepted_commit": null,
+  "artifact_sha256": {
+    "ledger/receipts/RR-CREATOR-20260715-05.source.md": "8da85bf086d1847f2474a3bbe21d1680e416078fadb063472613cfbffb8fa998"
+  },
+  "subject_contract_sha256": {},
+  "subject_event_sha256": {},
+  "foundation_binding": null,
+  "signature_reference": null,
+  "sealed": false
+}
