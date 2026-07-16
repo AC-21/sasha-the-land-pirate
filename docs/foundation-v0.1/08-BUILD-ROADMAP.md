@@ -8,9 +8,9 @@ Scheduling principle: calendar commitments follow measured engine and asset thro
 Deliverables:
 
 - preserve the creator-approved durable checkout `/Users/sasha/Documents/Codex/sasha-the-land-pirate`, remote `https://github.com/AC-21/sasha-the-land-pirate`, CI commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`, and successful Foundation run `29465142421` as A0 evidence;
-- explicitly accept WP-0001 before any narrowly scoped A1 experiment;
-- resolve D-0048 through documented Authorized Agentic Access, a creator-bound human-invoked Unity boundary, or a superseding Godot fallback;
-- approve the exact D-0047 Unity installation;
+- preserve sealed WP-0001 acceptance before any narrowly scoped A1 experiment;
+- preserve D-0049's selected `UNITY-AI-GATEWAY-CODEX` route and verify its exact seat/project/Gateway/client evidence profile;
+- install and prove the exact creator-approved D-0047 candidate through D-0050's creator-operated setup boundary without treating it as engine ratification;
 - establish the standalone disposable A1 clone/sandbox boundary in Section 8 of the trust document, with an independent `.git` directory, pinned to a creator-approved base, and a manual diff/import-or-reject seam.
 
 Exit: the reversible gameplay-neutral technical spike has explicit creator authorization and an actual quarantine boundary. It may start without silently ratifying the game's design center.

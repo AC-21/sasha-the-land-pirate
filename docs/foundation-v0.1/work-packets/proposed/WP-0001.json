@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "id": "WP-0001",
-  "status": "proposed",
+  "status": "accepted",
   "class": "architecture",
   "declared_risk": "high",
   "derived_risk": "high",
@@ -13,8 +13,8 @@
   "value": "This is the smallest reversible implementation that can expose engine, saving, automation, renderer, and asset-pipeline risks without authorizing gameplay assumptions.",
   "requested_by": "creator-goal:2026-07-15",
   "required_approver": "creator",
-  "approved_by": null,
-  "approval_receipt_id": null,
+  "approved_by": "AC-21",
+  "approval_receipt_id": "RR-WP0001-ACCEPT-20260715",
   "contract_sha256": "eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3",
   "a1_boundary_manifest": null,
   "implementer": null,
@@ -613,6 +613,14 @@
       "actor": "foundation-designer",
       "at": "2026-07-15T00:00:00-07:00",
       "receipt_id": null
+    },
+    {
+      "event_id": "WPE-WP0001-ACCEPTED-20260715",
+      "from": "proposed",
+      "to": "accepted",
+      "actor": "AC-21",
+      "at": "2026-07-15T22:04:24-07:00",
+      "receipt_id": "RR-WP0001-ACCEPT-20260715"
     }
   ],
   "scenario_pins": [

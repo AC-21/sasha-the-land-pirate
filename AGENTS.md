@@ -22,11 +22,11 @@ The current thesis, pillars, loop, “storybook salvage” phrase, mechanics, lo
 
 This repository is currently **documentation/control-plane work only**.
 
-- Unity Hub 3.19.5, Rosetta 2, and Unity Editor 6000.5.4f1 ARM64 are present locally, and the creator reports an active Unity license. This is not the D-0047 tuple: 6000.3.19f1 ARM64 + Mac Build Support (IL2CPP), Xcode 26.3, URP 17.3, and Test Framework 1.6 remain the proposed WP-0001 candidate; full Xcode and the standalone .NET SDK were not detected. The 6000.5 onboarding project is observation evidence, not Sasha's project or a production-version choice.
-- D-0048 is a hard open legal/operating gate: no agent or CI runner may invoke Unity Hub, Editor, or CLI until documented Authorized Agentic Access or a creator-bound human-invoked boundary exists; otherwise use the Godot fallback.
-- No gameplay, production asset, package installation, engine project, or autonomous integration is authorized yet.
+- Unity Hub 3.19.5, Rosetta 2, and Unity Editor 6000.5.4f1 ARM64 are present locally, and the creator reports an active Unity license. This is not the creator-approved WP-0001 D-0047 candidate: 6000.3.19f1 ARM64 + Mac Build Support (IL2CPP), Xcode 26.3, URP 17.3, and Test Framework 1.6; full Xcode and the standalone .NET SDK were not detected. The 6000.5 onboarding project is observation evidence, not Sasha's project or a production-version choice.
+- D-0049 supersedes D-0048 and selects `UNITY-AI-GATEWAY-CODEX`: only Unity AI Gateway with Unity-bundled Codex may carry agent-originated Unity interaction. No agent or CI runner may directly invoke Unity Hub, Editor, executable, CLI, or batchmode.
+- WP-0001 and D-0050 authorize only the creator-operated setup phase, including installation/opening of the exact D-0047 candidate and temporary project identity. No gameplay, production asset, agent-operated installation, direct agent/CI Unity process, AI Unity tool call, or autonomous integration is authorized yet.
 - Repository creation does not advance autonomy.
-- The creator expressed a Unity-first preference, authorized GitHub operations, and confirmed a local installation/license in unsealed `RR-CREATOR-20260715-05`. WP-0001 may enter A1 only after protected creator acceptance of the exact packet, D-0048 resolution through a verified Unity AI Gateway/MCP entitlement, value-matched approval/proof of the exact D-0047 tuple, and its physical quarantine receipt. The source capture alone does not satisfy those gates.
+- Sealed receipts `RR-D0049-20260715` and `RR-WP0001-ACCEPT-20260715` bind the selected Gateway route and exact packet contract. WP-0001 may enter A1 only after the assigned Unity seat, linked organization/project, Gateway/client profile, exact D-0047 installation, and standalone physical quarantine are verified and a separate activation receipt binds them.
 - At most one A1 packet may be active. A1 output is manually inspected and imported or rejected by the creator; agents do not merge it.
 
 If requested work exceeds A0, stop and name the missing authorization. Do not “prepare ahead” by creating implementation scaffolding.
@@ -55,7 +55,7 @@ The foundation lives at `docs/foundation-v0.1/`. Start with:
 - `docs/foundation-v0.1/06-AGENT-OPERATING-MODEL.md`, `docs/foundation-v0.1/07-QUALITY-GATES.md`, and `docs/foundation-v0.1/11-TRUST-AND-ENFORCEMENT.md` — autonomy and proof
 - `docs/foundation-v0.1/13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md` and `docs/foundation-v0.1/14-CREATIVE-DIRECTION.md` — later economy and creative-direction contracts
 - `docs/foundation-v0.1/governance/ratification-state.json` — current draft entry gates
-- `docs/foundation-v0.1/work-packets/proposed/` — proposals only; `proposed` does not authorize work
+- `docs/foundation-v0.1/work-packets/proposed/` — bootstrap packet records; each packet's internal status and sealed receipts control authority, never the legacy directory name
 
 Any mismatch between a creator source/active decision and its constitutional materialization is a hard stop; precedence never licenses silent repair. Conflict, ambiguity, or an open creator-owned decision that the active packet depends on, would resolve, or would encode is a stop condition. Propose a decision; never choose silently in code, content, balance, art, or lore.
 

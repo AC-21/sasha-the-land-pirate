@@ -68,6 +68,7 @@ This view is for humans. The JSONL log is the **draft canonical representation**
 | D-0047 | technical | Provisional | WP-0001 exact candidate: Hub 3.19.5; Unity 6000.3.19f1 ARM64 + Mac Build Support (IL2CPP); Xcode 26.3; Unity-required Rosetta 2; URP 17.3; Test Framework 1.6; Mono iteration; IL2CPP ARM64 acceptance. | Approve/revise only after licensing, compatibility, known-issue, and rollback proof |
 | D-0048 | production | Open | Choose a Unity Terms §17.2(ff) path: Authorized Agentic Access, a legally confirmed human-invoked boundary, or an equivalent benchmark on exact fallback Godot .NET 4.7.1 commit `a13da4feb` (Universal macOS, matching templates, .NET 8+, Forward+ Metal, headless CI, MIT). | Hard gate before Unity install, invocation, or A1 activation |
 | D-0049 | production | Ratified | For WP-0001, select authorized Unity AI Gateway with Unity-bundled Codex; direct agent/CI Unity executable invocation stays prohibited. | Creator-selected route; A1 still awaits seat and quarantine verification |
+| D-0050 | technical | Ratified | Preserve D-0047 as the WP-0001 candidate; the creator may install/open its exact tuple during bounded pre-A1 setup solely to produce activation evidence. | Creator clarification; no engine ratification or agent invocation |
 
 ## Immediate ratification queue
 
@@ -88,8 +89,8 @@ The first creator review should answer only these high-leverage issues:
 13. Choose whether colony compositions are mechanically distinct or primarily representational.
 14. Define the world-population milestone and caravaner exchange rules before the post-slice economy packet.
 15. Confirm whether storybook salvage remains the emotional filter beneath Texas iron × brutalist opera.
-16. Approve or revise the exact D-0047 WP-0001 installation tuple.
-17. Seal D-0049 and WP-0001 acceptance on protected `main`, then verify the assigned Unity seat and standalone A1 quarantine separately.
+16. Install and verify the creator-approved D-0047 candidate only through bounded setup; production engine ratification remains evidence-dependent.
+17. Verify the assigned Unity seat, selected Gateway profile, exact D-0047 installation, and standalone A1 quarantine before separate activation.
 
 All other open choices can remain deferred until a graybox or profiling spike produces evidence.
 

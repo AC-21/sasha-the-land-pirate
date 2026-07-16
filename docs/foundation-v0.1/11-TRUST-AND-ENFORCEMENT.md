@@ -38,7 +38,7 @@ This table is authoritative wherever another document is ambiguous:
 
 | Autonomy | Implementation | Verification | Acceptance/integration |
 |---|---|---|---|
-| A0 | analysis plus creator-requested draft documentation/control-plane edits only; no game/tool/asset implementation or installs | advisory review only | creator only; draft edits cannot authorize themselves |
+| A0 | analysis plus creator-requested documentation/control-plane edits only; no agent game/tool/asset implementation or installs; D-0050's receipt-bound creator-operated setup is outside agent authority | advisory review only | creator only; agent edits cannot authorize themselves |
 | A1 | one sandbox principal may implement in a standalone disposable clone/sandbox with an independent `.git` directory; shared Git worktrees are forbidden | another agent may provide advisory review, but shared credentials do not make it trusted verification | creator manually inspects the diff/artifacts and imports or rejects them; no agent acceptance or merge |
 | A2–A4 | accepted packets only | every accepted packet has a verifier principal distinct from implementer | trusted integrator is distinct from both for every accepted packet; creator remains required where the authority matrix says so |
 
@@ -121,7 +121,7 @@ Every attack must be rejected by a trusted check outside the candidate's write a
 
 [`governance/ratification-state.json`](governance/ratification-state.json) is the single draft statement of what can start:
 
-- a narrow technical spike can enter A1 only after WP-0001, D-0048's Unity operating boundary, the exact D-0047 tool installation, and WP-0001's packet-specific quarantine are explicitly approved; an unsealed repository/CI greenlight is evidence, not protected packet acceptance;
+- WP-0001 is accepted under D-0049's `UNITY-AI-GATEWAY-CODEX` boundary; D-0050 permits only creator-operated candidate setup, and A1 still requires the exact seat/project/Gateway/client profile, installed D-0047 tuple, and packet-specific quarantine to be physically verified and separately activated;
 - the ugly gameplay toy requires the listed identity decisions, its own explicit acceptance, and a separate packet-specific WP-0002 quarantine receipt;
 - WP-0002 cannot advance from proposal until WP-0001 is `released` and a sealed creator `packet-completion` receipt binds `ACCEPT-COMPLETION-WP-0001` plus WP-0001's immutable packet-contract hash;
 - the slice kernel additionally requires the city grammar decision;
@@ -129,7 +129,7 @@ Every attack must be rejected by a trusted check outside the candidate's write a
 
 Repository creation alone never promotes autonomy. `packet_entry_gates` in the canonical state maps each executable packet to exactly one gate; WP-0001 maps to `technical_spike` and WP-0002 maps to `ugly_gameplay_toy`. The canonical `a1_max_active_packets` value is `1`, so no second A1 packet may start until the active packet has ended and its status is recorded.
 
-Unity Terms §17.2(ff) is an independent hard stop. Until D-0048 is protected, no agent or CI credential may start Unity Hub, Editor, or CLI. The compliant branches are documented Unity-granted Authorized Agentic Access for the exact identity/runner/use; a human initiating every Unity action while agents only prepare inputs and analyze outputs; or a Godot fallback that supersedes/revises WP-0001. Creator permission to create CI or proceed at A0 cannot waive third-party terms.
+Unity Terms §17.2(ff) remains an independent hard stop. D-0049 selects documented Authorized Agentic Access through Unity AI Gateway with Unity-bundled Codex; no agent or CI credential may directly start Unity Hub, Editor, executable, CLI, or batchmode. Any different human-invoked, external-MCP, or Godot route requires a superseding creator decision and, where needed, a revised packet. Creator permission to proceed cannot waive third-party terms or substitute for verified entitlement and route evidence.
 
 ### A1 quarantine minimum
 
