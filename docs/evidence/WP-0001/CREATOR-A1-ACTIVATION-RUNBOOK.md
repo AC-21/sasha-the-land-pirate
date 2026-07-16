@@ -549,9 +549,13 @@ remaining work, not to waive it:
 - protected creator project seed is not yet created;
 - exact post-activation allowlist is not ratified;
 - exact client/relay/Editor signing identity tuples are not yet creator-ratified;
-- exact protocol, network, and policy-attachment collector implementations do
-  not yet exist on the protected base and therefore cannot be source-hash
+- exact collectors do not yet exist and therefore cannot be source-hash
   authorized;
+- `RAW-CAPTURE-PROVIDER-DECISION.md` records the advisory finding that the
+  installed relay/Bridge diagnostics do not provide exact raw protocol frames
+  and request IDs. Schema v4 does not yet bind independent providers or retained
+  raw bytes, so a protected successor is required before provider independence
+  can become an activation gate;
 - persistent-relay mitigation is not proven;
 - no fresh live capture yet proves the exact Editor-owner/relay-peer Unix FD
   and reciprocal Codex/relay stdin/stdout pipe graph;
