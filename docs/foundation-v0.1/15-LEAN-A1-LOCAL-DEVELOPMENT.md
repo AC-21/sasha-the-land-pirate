@@ -1,15 +1,15 @@
 # Lean A1 local-development successor
 
-Status: **proposed / inactive / creator ratification, packet acceptance, and separate activation required**
+Status: **creator-ratified / packet accepted / inactive pending separate activation**
 
 Date: 2026-07-16
 
-This proposal creates a practical alternative to the current WP-0001
+This successor creates a practical alternative to the current WP-0001
 activation ceremony for day-to-day local game development. It does not activate
 A1, authorize a Unity call, replace WP-0001 completion evidence, or change
-current authority until a creator-controlled protected receipt ratifies the
-proposal, a separate receipt accepts its work packet, and a third receipt
-activates the exact local boundary.
+current A0 authority until the still-missing third receipt activates the exact
+local boundary. D-0052 ratification and WP-0003 acceptance are already sealed
+under separate receipts.
 
 ## Why this exists
 
@@ -19,10 +19,10 @@ graphs, code-signing context providers, and schema-v5 authority transactions.
 Those controls are disproportionate to a solo, local Unity prototype and delay
 the actual purpose of the repository: building and testing the game.
 
-Historical WP-0001 evidence and deviations remain immutable. This proposal
-creates a new packet instead of rewriting the sealed WP-0001 contract.
+Historical WP-0001 evidence and deviations remain immutable. This successor
+uses a new packet instead of rewriting the sealed WP-0001 contract.
 
-## Proposed authority
+## Ratified authority, inactive until activation
 
 `A1-LOCAL-DEV` means one bounded local-development packet may:
 
@@ -134,7 +134,7 @@ Agents may not:
 - Existing player saves do not exist. Any future save-format change remains
   separately creator-gated.
 
-## Proposed packet
+## Accepted packet
 
 `WP-0003` is the local-development alternative. WP-0001 remains accepted
 historical evidence and WP-0002 continues to depend on WP-0001 completion.
@@ -143,11 +143,11 @@ non-persisting save interfaces, tests, and technical scenes. It does not itself
 unblock the gameplay packet. Production content, release, store, monetization,
 and background rollout remain out of scope.
 
-## Ratification protocol
+## Ratification record and remaining activation
 
-The creator must approve the exact proposal commit through an authenticated
-GitHub comment. One comment may serve as the protected source for two separate
-derived receipts: a `decision-ratification` receipt for the constitutional
-successor and a `packet-acceptance` receipt for WP-0003. A later commit may seal
-both while leaving activation pending until the compact boundary manifest
-exists.
+The authenticated owner comment on PR #18 is the protected source for two
+separate sealed receipts: `RR-D0052-20260716` ratifies the constitutional
+successor and `RR-WP0003-ACCEPT-20260716` accepts WP-0003. The explicit
+delegation disclosure is preserved in that source. Activation remains pending
+until the compact boundary manifest exists and a third, distinct
+`packet-activation` receipt binds it.
