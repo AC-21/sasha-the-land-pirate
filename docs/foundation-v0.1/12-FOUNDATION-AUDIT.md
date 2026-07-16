@@ -37,7 +37,7 @@ The creator's later 2026-07-15 direction is captured in unsealed receipt `RR-CRE
 
 “Other than that. Let's go for it” safely authorizes continued A0 design work. It does not name the repository path, accept either exact work packet, approve a Unity installation, answer the open worksheet values, create the quarantine boundary, or promote autonomy.
 
-The repository and Unity-first source captures remain historical evidence, while authenticated creator authority seals D-0049 and WP-0001 acceptance against protected main commit `ed14ae664e7c0efea790d334546538584e85c083`. D-0051 now supersedes D-0049's route choice with `UNITY-MCP-EXTERNAL` without changing the accepted WP-0001 contract, temporary identity, repository location, or creator-operated D-0047 installation authority. Its current Codex-conversation receipt is intentionally unsealed, so it records the creator's exact successor choice but does not yet satisfy protected decision authority or the immutable packet's separate packet-acceptance route binding. Read-only inspection has not yet proved the assigned Unity seat, same-organization project linkage, exact Bridge/relay/client/project-target/connection profile, exact D-0047 Editor/IL2CPP/Xcode installation, or standalone A1 quarantine.
+The repository and Unity-first source captures remain historical evidence, while authenticated creator authority seals D-0049 and WP-0001 acceptance against protected main commit `ed14ae664e7c0efea790d334546538584e85c083`. Owner comment `https://github.com/AC-21/sasha-the-land-pirate/pull/6#issuecomment-4989428688` now protects D-0051's `UNITY-MCP-EXTERNAL` successor and the packet route amendment against merged commit `08fdb95e4981b4b7062a2c3991d6753611f23ad5`, without changing the accepted WP-0001 contract, temporary identity, repository location, or creator-operated D-0047 installation authority. Read-only inspection has not yet proved the assigned Unity seat, same-organization project linkage, exact Bridge/relay/client/project-target/connection profile, clean zero-tool-call handshake, exact D-0047 Editor/IL2CPP/Xcode installation, or standalone A1 quarantine.
 
 ## What this audit does not claim
 
@@ -48,7 +48,7 @@ Bootstrap lint can catch internal drift and malformed draft records. It cannot p
 ## Honest blockers before A1
 
 1. The assigned Unity AI subscription/seat and same-organization project linkage have not been physically verified.
-2. D-0051 is not externally protected, and no creator-controlled external `packet-acceptance` route-amendment receipt binds `UNITY-MCP-EXTERNAL` to the exact immutable WP-0001 contract; the exact Unity MCP Bridge, relay path/digest/version/arguments, Codex client/version, explicit project target, approved connection, scopes/rate limits, initiation identity, and revocation state also have not been captured without secrets.
+2. The exact Unity MCP Bridge, relay path/digest/version/arguments, Codex client/version, explicit project target, approved connection, scopes/rate limits, initiation identity, and revocation state have not been captured without secrets.
 3. The installed 6000.5.4f1 Editor does not satisfy the creator-approved D-0047 6000.3.19f1 + Mac IL2CPP + Xcode 26.3 candidate.
 4. The standalone A1 quarantine and creator-operated import/reject boundary have not been physically established or receipt-bound.
 5. A read-only `Unity_ReadConsole` smoke ran before D-0051 and A1. It returned zero entries and no known mutation, but it is a recorded setup-boundary deviation and cannot count toward the required zero-tool-call handshake or activation evidence.
@@ -84,7 +84,7 @@ Until all five are true and a separate activation receipt is sealed, the project
 ## Deferred evidence, not hidden assumptions
 
 - installation proof for the creator-approved D-0047 Unity/tool/package candidate;
-- protected D-0051 authority, creator-controlled external packet route amendment, and physical seat/project/Bridge/relay/Codex-client/target/approved-connection evidence for the selected route;
+- physical seat/project/Bridge/relay/Codex-client/target/approved-connection evidence for the protected selected route;
 - lowest supported shipping Mac;
 - accepted city manipulation grammar;
 - final road-control embodiment and travel topology;

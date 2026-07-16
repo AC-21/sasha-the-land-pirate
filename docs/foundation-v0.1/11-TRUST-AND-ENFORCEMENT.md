@@ -121,7 +121,7 @@ Every attack must be rejected by a trusted check outside the candidate's write a
 
 [`governance/ratification-state.json`](governance/ratification-state.json) is the single draft statement of what can start:
 
-- WP-0001 remains accepted at its immutable contract, while D-0051 supersedes D-0049's route choice with `UNITY-MCP-EXTERNAL`; D-0050 permits only creator-operated candidate setup, and A1 still requires both externally protected D-0051 authority and a creator-controlled external `packet-acceptance` route amendment bound to the exact WP contract, plus the exact seat/project/Bridge/relay/client/target/approved-connection profile, installed D-0047 tuple, and packet-specific quarantine to be physically verified and separately activated;
+- WP-0001 remains accepted at its immutable contract, while owner-authenticated D-0051 and packet route-successor receipts protect `UNITY-MCP-EXTERNAL`; D-0050 permits only creator-operated candidate setup, and A1 still requires the exact seat/project/Bridge/relay/client/target/approved-connection profile, installed D-0047 tuple, clean zero-tool-call handshake, and packet-specific quarantine to be physically verified and separately activated;
 - the ugly gameplay toy requires the listed identity decisions, its own explicit acceptance, and a separate packet-specific WP-0002 quarantine receipt;
 - WP-0002 cannot advance from proposal until WP-0001 is `released` and a sealed creator `packet-completion` receipt binds `ACCEPT-COMPLETION-WP-0001` plus WP-0001's immutable packet-contract hash;
 - the slice kernel additionally requires the city grammar decision;
