@@ -37,7 +37,7 @@ The creator's later 2026-07-15 direction is captured in unsealed receipt `RR-CRE
 
 “Other than that. Let's go for it” safely authorizes continued A0 design work. It does not name the repository path, accept either exact work packet, approve a Unity installation, answer the open worksheet values, create the quarantine boundary, or promote autonomy.
 
-The creator's latest greenlight is separately preserved in unsealed `RR-CREATOR-20260715-04`. It approves the durable checkout `/Users/sasha/Documents/Codex/sasha-the-land-pirate`, remote `https://github.com/AC-21/sasha-the-land-pirate`, A0 CI setup, and A0 preparation for the WP-0001 transition. Foundation run `29465142421` succeeded for commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`. It does not protected-accept the amended WP-0001, approve or install Unity, resolve D-0048, seal any receipt, establish quarantine, or activate A1.
+The repository greenlight is preserved in unsealed `RR-CREATOR-20260715-04`. The later Unity/GitHub proceed prompt is separately preserved in unsealed `RR-CREATOR-20260715-05`: it selects Unity-first, authorizes GitHub operations, and confirms a local Unity installation/license. Foundation run `29465142421` succeeded for commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`; `main` is now protected by required PRs and the strict `validate` check. Read-only inspection found Hub 3.19.5, Rosetta 2, and Editor 6000.5.4f1, but not the exact D-0047 Editor/IL2CPP/Xcode tuple or standalone .NET SDK. The source capture does not protected-accept WP-0001, prove an eligible Unity AI/MCP seat, resolve D-0048, seal a receipt, establish quarantine, or activate A1.
 
 ## What this audit does not claim
 
@@ -47,10 +47,10 @@ Bootstrap lint can catch internal drift and malformed draft records. It cannot p
 
 ## Honest blockers before A1
 
-1. The creator has not accepted WP-0001.
-2. The repository location/CI greenlight is unsealed and therefore not a protected gate receipt.
-3. D-0048 has not selected and protected Authorized Agentic Access, a human-invoked Unity boundary, or the Godot fallback.
-4. Unity Hub/Editor installation is not authorized or present.
+1. The creator's proceed prompt is not yet a sealed packet-acceptance receipt bound to the exact WP-0001 contract and temporary identity.
+2. The repository location/CI/GitHub authorization captures remain unsealed and therefore are not protected gate receipts.
+3. D-0048 has not value-matched and protected the official Unity AI Gateway/MCP route for the exact seat, agent, and invocation boundary.
+4. The installed 6000.5.4f1 Editor does not satisfy the proposed D-0047 6000.3.19f1 + Mac IL2CPP + Xcode 26.3 tuple.
 5. The A1 quarantine boundary has not been physically established or receipt-bound.
 
 Until all five are true, the project remains A0 and no game implementation starts under this constitution.

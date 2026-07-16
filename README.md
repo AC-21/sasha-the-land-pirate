@@ -6,9 +6,9 @@ An endearing, real-time, post-apocalyptic city-building and resource-management 
 
 **A0 — foundation and control-plane documentation only.**
 
-The approved durable checkout is `/Users/sasha/Documents/Codex/sasha-the-land-pirate`, backed by `https://github.com/AC-21/sasha-the-land-pirate`. Foundation CI was established at commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`; Foundation run `29465142421` completed successfully. This records A0 setup only: the repository still contains no game implementation, Unity project, installed project dependency, production asset, or authorized autonomous integration.
+The approved durable checkout is `/Users/sasha/Documents/Codex/sasha-the-land-pirate`, backed by `https://github.com/AC-21/sasha-the-land-pirate`. Foundation CI was established at commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`; Foundation run `29465142421` completed successfully. `main` now requires pull requests and the strict `validate` check, covers administrators, resolves conversations, enforces linear history, and blocks force-pushes/deletion; Actions defaults to read-only. This records A0 setup only: the repository still contains no game implementation, Sasha Unity project, installed project dependency, production asset, or authorized autonomous integration.
 
-The exact WP-0001 candidate is Unity Hub 3.19.5; Unity 6000.3.19f1 ARM64 with Mac Build Support (IL2CPP); Xcode 26.3; Unity's required Rosetta 2 support layer; URP 17.3; and Unity Test Framework 1.6. Mono is the iteration backend; IL2CPP ARM64 is the acceptance-build authority. It is proposed, not installed or protected-accepted. D-0048 also blocks every agent/CI Unity invocation until one evidenced path is chosen: documented Authorized Agentic Access, a legally confirmed creator-bound human-invoked Unity boundary, or a superseding Godot fallback.
+The creator selected Unity-first and reports a local license. Inspection found Hub 3.19.5, Rosetta 2, and Editor 6000.5.4f1 ARM64; full Xcode and a standalone .NET SDK were absent. The exact WP-0001 candidate remains Unity 6000.3.19f1 ARM64 with Mac Build Support (IL2CPP), Xcode 26.3, URP 17.3, and Unity Test Framework 1.6. Mono is the iteration backend; IL2CPP ARM64 is the acceptance-build authority. The installed 6000.5 onboarding project is neither Sasha's project nor protected acceptance of a production toolchain. D-0048 still blocks agent/CI Unity invocation until the Unity AI subscription/seat and official Gateway/MCP route are verified and receipt-bound, or another compliant path supersedes it.
 
 Current creator-ratified facts:
 
@@ -37,7 +37,7 @@ Validate the bootstrap foundation from the repository root:
 python3 docs/foundation-v0.1/tools/validate_foundation.py
 ```
 
-Expected current result: the foundation lint passes; all four local creator-source receipts remain intentionally unsealed pending protected receipt infrastructure.
+Expected current result: the foundation lint passes; all five local creator-source receipts remain intentionally unsealed pending protected receipt infrastructure.
 
 ## Planned seams
 
@@ -45,4 +45,4 @@ The accepted technical packet may create `Game/`, `SimulationCore/`, `SaveContra
 
 ## Next gate
 
-The creator greenlit the durable repository, Foundation CI, and A0 preparation for the WP-0001 transition; that exact message is preserved in unsealed `RR-CREATOR-20260715-04` and is not protected acceptance of the amended packet. WP-0001 remains proposed and blocked on protected packet acceptance, D-0048's Unity-access boundary, Unity installation approval, and the physical A1 quarantine/manual-import boundary. No receipt is sealed, no Unity action is authorized, and autonomy remains A0.
+The creator then selected Unity-first, authorized GitHub operations, and confirmed a local Unity installation/license; that exact message is preserved in unsealed `RR-CREATOR-20260715-05`. WP-0001 remains proposed and blocked on protected packet acceptance, verified Unity AI Gateway/MCP access, installation/proof of the exact D-0047 tuple, and the physical A1 quarantine/manual-import boundary. No receipt is sealed, no agent Unity invocation is authorized, and autonomy remains A0.
