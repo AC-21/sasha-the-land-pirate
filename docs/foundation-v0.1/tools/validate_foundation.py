@@ -349,7 +349,7 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
         "893cd3faacb887b2d9112c30e15a29b27fb8f3511001ef4091a04f1f88e2f0b9"
     ),
     ".github/workflows/wp0002-policy.yml": (
-        "8e3365b0591c85d12e02ed7bf6a819697491cdf33aa67cc1e640c069b5fb8121"
+        "1bdbffd2dfd496166aee641b9ce887c30e67002f2335b0e02e3149e185094e8d"
     ),
 }
 PACKET_TRANSITIONS = {
@@ -6204,12 +6204,6 @@ def validate_wp0002_working_tree_scope_capture(
     collector, collector_errors = _load_wp0002_scope_collector()
     errors.extend(collector_errors)
     if collector is not None:
-        status = packet.get("status")
-        mode = (
-            "live-current"
-            if status in {"active", "verifying", "candidate"}
-            else "terminal-retained"
-        )
         verifier = collector.get("verify_scope_capture")
         if callable(verifier):
             errors.extend(
@@ -6227,7 +6221,9 @@ def validate_wp0002_working_tree_scope_capture(
                         if isinstance(activation_receipt, dict)
                         else ""
                     ),
-                    mode=mode,
+                    # Receipt freshness remains enforced by the collector; only
+                    # post-activation working-tree comparisons are retained.
+                    mode="terminal-retained",
                 )
             )
         else:

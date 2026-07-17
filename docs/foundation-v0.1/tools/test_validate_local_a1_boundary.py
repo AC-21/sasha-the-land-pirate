@@ -827,6 +827,8 @@ class LocalA1BoundaryTests(unittest.TestCase):
         packet: dict,
         state: dict,
         receipt: dict,
+        *,
+        observed_scope_modes: list[object] | None = None,
     ) -> list[str]:
         base_bytes = {
             ".codex/config.toml": CONFIG_BASE,
@@ -864,6 +866,8 @@ class LocalA1BoundaryTests(unittest.TestCase):
         def scope_verifier(
             repo_root: Path, relative: str, **kwargs: object
         ) -> list[str]:
+            if observed_scope_modes is not None:
+                observed_scope_modes.append(kwargs.get("mode"))
             document = json.loads((repo_root / relative).read_text(encoding="utf-8"))
             errors: list[str] = []
             if document.get("reservation_paths") != kwargs.get(
@@ -1020,6 +1024,24 @@ class LocalA1BoundaryTests(unittest.TestCase):
             root = Path(temporary)
             packet, state, _, receipt, _, _ = self.wp0002_attested_documents(root)
             self.assertEqual(self.validate_wp0002(root, packet, state, receipt), [])
+
+    def test_active_wp0002_scope_capture_uses_terminal_retained_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            packet, state, _, receipt, _, _ = self.wp0002_attested_documents(root)
+            self.assertEqual(packet["status"], "active")
+            observed_modes: list[object] = []
+            self.assertEqual(
+                self.validate_wp0002(
+                    root,
+                    packet,
+                    state,
+                    receipt,
+                    observed_scope_modes=observed_modes,
+                ),
+                [],
+            )
+            self.assertEqual(observed_modes, ["terminal-retained"])
 
     def test_attested_wp0002_scope_capture_must_exist_and_match_hash(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

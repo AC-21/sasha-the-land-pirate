@@ -35,7 +35,7 @@ jobs:
           OBJECT_STORE="$RUNNER_TEMP/wp0002-policy.git"
           REPORT_ROOT="$RUNNER_TEMP/wp0002-policy-report"
           /usr/bin/git init --bare "$OBJECT_STORE"
-          AUTH_HEADER="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64)"
+          AUTH_HEADER="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w 0)"
           /usr/bin/git -C "$OBJECT_STORE" -c http.extraHeader="AUTHORIZATION: basic $AUTH_HEADER" fetch \
             --no-tags --no-write-fetch-head \
             "https://github.com/AC-21/sasha-the-land-pirate.git" \
