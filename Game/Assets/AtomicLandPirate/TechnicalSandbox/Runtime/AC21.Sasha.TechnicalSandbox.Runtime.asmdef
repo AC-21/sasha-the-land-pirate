@@ -1,0 +1,16 @@
+{
+  "name": "AC21.Sasha.TechnicalSandbox.Runtime",
+  "rootNamespace": "AC21.Sasha.TechnicalSandbox",
+  "references": [
+    "Unity.InputSystem"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
