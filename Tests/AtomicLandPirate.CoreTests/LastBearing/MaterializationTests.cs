@@ -42,10 +42,19 @@ namespace AtomicLandPirate.LastBearingTests
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCityGrammarComparison.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingVehicleView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingSaveAdapter.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelContracts.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelSurface.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelVehicleController.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelChaseCamera.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelLabBootstrap.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelLabController.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/LastBearingAdapterTests.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/RoadFeelMathTests.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/LastBearingPlayModeTests.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/RoadFeelLabPlayModeTests.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Scenes/LastBearing.unity",
+            "Game/Assets/AtomicLandPirate/LastBearing/Scenes/RoadFeelLab.unity",
             "Tests/AtomicLandPirate.CoreTests/LastBearing/AtomicLandPirate.LastBearingTests.csproj",
             "Tools/ScenarioRunner/run.py",
         };
@@ -63,6 +72,7 @@ namespace AtomicLandPirate.LastBearingTests
             VerifyBuildScene(repoRoot);
             VerifyGameMetadata(repoRoot);
             GameSourceContract.Verify(repoRoot);
+            RoadFeelSourceContract.Verify(repoRoot);
         }
 
         private static void VerifyPackageGraph(string repoRoot)
@@ -105,8 +115,13 @@ namespace AtomicLandPirate.LastBearingTests
             int sandbox = text.IndexOf(
                 "path: Assets/AtomicLandPirate/TechnicalSandbox/Scenes/WP0003_TechnicalSandbox.unity",
                 StringComparison.Ordinal);
+            int roadFeel = text.IndexOf(
+                "path: Assets/AtomicLandPirate/LastBearing/Scenes/RoadFeelLab.unity",
+                StringComparison.Ordinal);
             TestHarness.True(lastBearing >= 0, "Last Bearing scene is absent from build settings");
             TestHarness.True(sandbox > lastBearing, "Last Bearing scene is not build index zero");
+            TestHarness.True(roadFeel > lastBearing, "Road Feel Lab scene is absent from build settings");
+            TestHarness.True(roadFeel < sandbox, "Road Feel Lab must precede the technical sandbox");
         }
 
         private static void VerifyGameMetadata(string repoRoot)
