@@ -1,0 +1,14 @@
+{
+  "base_commit": "b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5",
+  "candidate_sha256": {
+    "Game/Packages/manifest.json": "64d60d8e6bb4eff2d5705029ba2cb843bb072ff4d51011526a371065990dd7da",
+    "Game/Packages/packages-lock.json": "8773f28fc4702f1a6001ec48e4233eaec6374bf570c024379deb82250ba9db63",
+    "SaveContracts/package.json": "efd39638ca6cf37fba35564df5c734f7d19b5f233a5920bd80e47d517b35abab",
+    "SimulationCore/package.json": "7f83bcb89a997230faa81350ca1ee690c26b913e1cdf58b7486d5e110b3253bf"
+  },
+  "checker_contract": "wp0002-package-graph-v2",
+  "errors": [],
+  "local_links_required": true,
+  "result": "pass",
+  "schema_version": 1
+}
