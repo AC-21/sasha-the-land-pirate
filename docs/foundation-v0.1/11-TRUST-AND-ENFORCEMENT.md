@@ -1,8 +1,12 @@
 # Trust and Enforcement Boundary
 
 Version: 0.1 draft\
-Current autonomy: **A1 — active WP-0003 local development only**\
+Current autonomy: **A0 — no active A1 packet**\
 Current enforcement status: **specification, not a trusted control plane**
+
+Current lifecycle: **WP-0003 released with its reservation released; WP-0002
+accepted but inactive and unreserved. Implementation and Unity MCP use remain
+closed until the protected Stage C activation transaction.**
 
 ## 1. Threat model
 
@@ -22,7 +26,7 @@ Direct creator prompt or clarification facts may be recorded as semantically rat
 Before A2, the production repository needs:
 
 1. protected `main` and protected governance paths;
-2. agents restricted to standalone disposable clones/sandboxes with independent `.git` directories and quarantine packages without merge/release credentials, except for the separately ratified and activated WP-0003 local-development lane described below;
+2. agents restricted to standalone disposable clones/sandboxes with independent `.git` directories and quarantine packages without merge/release credentials, except for an explicitly ratified and activated protected-PR local-development lane; WP-0003's historical lane is now closed;
 3. a trusted integrator/gatekeeper identity that alone can allocate accepted decision sequence numbers, merge, write release events, and advance rollout state;
 4. creator-controlled approval for constitution, autonomy, high-risk/save migration, art authority, and release exceptions;
 5. pairwise-distinct trusted implementer, verifier, and integrator principals for every accepted A2–A4 packet, regardless of declared risk or change class;
@@ -39,7 +43,7 @@ This table is authoritative wherever another document is ambiguous:
 | Autonomy | Implementation | Verification | Acceptance/integration |
 |---|---|---|---|
 | A0 | analysis plus creator-requested documentation/control-plane edits only; no agent game/tool/asset implementation or installs; D-0050's receipt-bound creator-operated setup is outside agent authority | advisory review only | creator only; agent edits cannot authorize themselves |
-| A1 | one principal may implement inside the exact activated packet boundary: normally a standalone disposable clone/sandbox; WP-0003 alone may use its protected durable-repository `agent/*` branch | another agent may provide advisory review, but shared credentials do not make it trusted verification | creator manually imports/rejects generic A1 output or controls WP-0003's protected merge, including explicit authenticated delegation; no agent self-acceptance or autonomous protected merge |
+| A1 | one principal may implement inside the exact activated packet boundary: normally a standalone disposable clone/sandbox; an explicitly authorized protected-PR local packet may instead use its protected durable-repository `agent/*` branch, as WP-0003 historically did | another agent may provide advisory review, but shared credentials do not make it trusted verification | creator manually imports/rejects generic A1 output or controls an authorized protected-PR merge, including explicit authenticated delegation; no agent self-acceptance or autonomous protected merge |
 | A2–A4 | accepted packets only | every accepted packet has a verifier principal distinct from implementer | trusted integrator is distinct from both for every accepted packet; creator remains required where the authority matrix says so |
 
 Governance work is never exempt. Pairwise role fields in a proposed A1 packet describe the future accepted record; they do not turn sibling agents into independent principals.
@@ -122,23 +126,23 @@ Every attack must be rejected by a trusted check outside the candidate's write a
 [`governance/ratification-state.json`](governance/ratification-state.json) is the single draft statement of what can start:
 
 - WP-0001 remains accepted at its immutable contract, while owner-authenticated D-0051 and packet route-successor receipts protect `UNITY-MCP-EXTERNAL`; D-0050 permits only creator-operated candidate setup, and A1 still requires the protected empty seed, exact seat/project/D-0047 tuple, actual candidate quarantine, direct-MCP process/socket/config/allowlist profile, revoked zero-tool preflight, and distinct fresh live activation session to be physically verified and separately activated;
-- WP-0003 is the sole active A1 packet under protected ratified D-0052, its distinct acceptance receipt, and `RR-WP0003-ACTIVATE-20260716`; its compact local boundary permits only the exact held repository/bootstrap reservation and conditional first Unity MCP use;
-- the ugly gameplay toy requires the listed identity decisions, its own explicit acceptance, and a separate packet-specific WP-0002 protected-PR local activation receipt;
-- WP-0002 cannot advance from proposal until WP-0003 is `released` and a sealed creator `packet-completion` receipt binds `ACCEPT-COMPLETION-WP-0003` plus WP-0003's immutable packet-contract hash;
+- WP-0003 completed its protected D-0052 local-development lane, is `released`, and no longer holds its repository/bootstrap reservation;
+- WP-0002 has its explicit acceptance and the released-WP-0003 dependency is satisfied, but it remains inactive and unreserved at A0;
+- the ugly gameplay toy cannot begin implementation or use Unity MCP until a separate packet-specific WP-0002 protected-PR local activation receipt and reservation land through the protected Stage C transaction;
 - the slice kernel additionally requires the city grammar decision;
 - production content and autonomous integration have later, stricter gates.
 
-Repository creation alone never promotes autonomy. `packet_entry_gates` in the canonical state maps each executable packet to exactly one gate; WP-0001 maps to `technical_spike`, WP-0002 maps to `ugly_gameplay_toy`, and WP-0003 maps to `local_development`. The canonical `a1_max_active_packets` value is `1`, so no second A1 packet may start until the active packet has ended and its status is recorded.
+Repository creation or packet acceptance alone never promotes autonomy. `packet_entry_gates` in the canonical state maps each executable packet to exactly one gate; WP-0001 maps to `technical_spike`, WP-0002 maps to `ugly_gameplay_toy`, and WP-0003 maps to `local_development`. The canonical `a1_max_active_packets` value is `1`. WP-0003 has ended and its release is recorded, but WP-0002 still requires its own protected Stage C activation before any new A1 work starts.
 
-Unity Terms §17.2(ff) remains an independent hard stop. D-0051 selects the documented external-MCP Authorized Agentic Access profile: Codex connects through Unity's MCP Bridge and the exact Unity-installed relay, while no agent or CI credential may directly start Unity Hub, Editor, executable, CLI, or batchmode. Global MCP configuration is outside the approved boundary. Any activated packet must bind an explicit project target through its own schema; WP-0001 uses the standalone quarantine, while active WP-0003 uses its conditional first-use local boundary. Creator permission to proceed cannot waive third-party terms or substitute for the packet's required entitlement, connection, and boundary evidence.
+Unity Terms §17.2(ff) remains an independent hard stop. D-0051 selects the documented external-MCP Authorized Agentic Access profile: Codex connects through Unity's MCP Bridge and the exact Unity-installed relay, while no agent or CI credential may directly start Unity Hub, Editor, executable, CLI, or batchmode. Global MCP configuration is outside the approved boundary. Any activated packet must bind an explicit project target through its own schema; WP-0001 uses the standalone quarantine, while WP-0003 historically used its conditional first-use local boundary. No packet currently has Unity MCP authority. Creator permission to proceed cannot waive third-party terms or substitute for the packet's required entitlement, connection, and boundary evidence.
 
 One read-only `Unity_ReadConsole` smoke call occurred before D-0051 and before A1 activation. It returned no console entries and produced no known project mutation, but it crossed WP-0001's zero-tool-call setup boundary. The event is retained as a control-plane deviation, cannot be treated as the required handshake or activation evidence, and does not authorize another Unity call. A clean creator-operated connection cycle with zero tool invocations is still required before the separate activation receipt.
 
 ### A1 quarantine minimum
 
 The generic quarantine below governs every A1 packet except one explicitly
-eligible protected-PR local packet. WP-0003's active creator-ratified exception
-and WP-0002's unsealed proposed successor are defined by
+eligible protected-PR local packet. WP-0003's historical creator-ratified
+exception and WP-0002's accepted-but-inactive successor are defined by
 [`15-LEAN-A1-LOCAL-DEVELOPMENT.md`](15-LEAN-A1-LOCAL-DEVELOPMENT.md) and
 [`schemas/local-a1-boundary.schema.json`](schemas/local-a1-boundary.schema.json).
 It may use only a valid non-`main` `agent/*` branch whose real checkpoint exists
@@ -149,7 +153,7 @@ closed until the creator-opened exact `Game` project, licensed Editor, running
 Bridge, approved Codex client, exact target, and requested action all satisfy
 the first-use gate. This exception grants no direct Unity invocation,
 installation, credential, account, publishing, release, or self-merge
-authority. The proposed WP-0002 successor additionally requires read-only
+authority. The accepted but inactive WP-0002 successor additionally requires read-only
 foundation/governance/receipt paths, the exact five-tool Unity MCP allowlist,
 fresh protected-main `agent/*` branches, mandatory `validate` and
 `wp0002-core`, and transparent creator-delegated manual release for every pull
@@ -204,7 +208,7 @@ collector binds sandbox/network attachment to each process birth identity.
 The creator receipt must follow that capture within five minutes. Disconnect
 or collector/config/process drift requires a new receipt.
 
-The same packet-specific receipt binds the packet activation claim plus its exact boundary claim: `A1-QUARANTINE-BOUNDARY-VERIFIED` for generic quarantine packets or `A1-LOCAL-BOUNDARY-VERIFIED` for an explicitly eligible protected-PR local packet (active WP-0003 or the still-proposed WP-0002 successor). WP-0001's receipt additionally carries `AUTHORIZE-WP0001-MCP-ALLOWLIST` for the exact digest-bound list in that same boundary. Combining these claims records one approval of one verified packet boundary; it does not invent another independent approval.
+The same packet-specific receipt binds the packet activation claim plus its exact boundary claim: `A1-QUARANTINE-BOUNDARY-VERIFIED` for generic quarantine packets or `A1-LOCAL-BOUNDARY-VERIFIED` for an explicitly eligible protected-PR local packet (historical WP-0003 or accepted-but-inactive WP-0002 after its protected Stage C activation). WP-0001's receipt additionally carries `AUTHORIZE-WP0001-MCP-ALLOWLIST` for the exact digest-bound list in that same boundary. Combining these claims records one approval of one verified packet boundary; it does not invent another independent approval.
 WP-0001 also carries `AUTHORIZE-WP0001-RAW-COLLECTORS` for the exact
 content-addressed protocol, network, and policy-attachment collectors named by
 that boundary.
@@ -214,9 +218,9 @@ without that creator authority is not sufficient.
 
 WP-0001's packet-acceptance receipt also binds `AUTHORIZE-TEMP-WP0001-IDENTITY` to the exact disposable company, product, bundle, and dev/test profile values inside the packet. This authorizes only its non-shipping spike namespace and does not resolve durable D-0038.
 
-Under the generic boundary, if the executing credential can rewrite the trusted checkout or approval records, A1 quarantine has not been established. WP-0003 instead relies on protected `main`, required checks, creator-controlled merge, and distinct protected receipts: the agent may propose branch changes but cannot make them trusted state. Candidate JSON may describe the future active state for validation, but authority takes effect only when the exact activation tree is contained in protected `main`. Its manifest branch/head identify the clean activation attestation checkpoint; later implementation uses fresh `agent/*` branches from the active protected-main state, so deletion of the merged activation PR branch does not revoke the protected receipt. A local folder named “sandbox” is never sufficient evidence.
+Under the generic boundary, if the executing credential can rewrite the trusted checkout or approval records, A1 quarantine has not been established. WP-0003's completed lane instead relied on protected `main`, required checks, creator-controlled merge, and distinct protected receipts: the agent could propose branch changes but could not make them trusted state. Candidate JSON may describe a future active state for validation, but authority takes effect only when the exact activation tree is contained in protected `main`. The historical manifest branch/head identify the clean activation attestation checkpoint; its implementation used fresh `agent/*` branches from the active protected-main state, so deletion of the merged activation PR branch did not revoke the protected receipt. A local folder named “sandbox” is never sufficient evidence.
 
-The draft gate state stores the packet-to-gate mapping, exact one-packet A1 concurrency cap, value-sensitive decision constraints, and unbound packet-specific receipt requirements. Receipt claims are bound per subject, not stored in one ambiguous flat list. A decision gate resolves only when the bound receipt equals the active supersession head's `approval_receipt_id`, binds exactly one allowed value to that head, and satisfies any required kind, role, and resolver. Receipt requirements may additionally constrain receipt kind, issuer role, resolver type, and exact per-subject contract hash. WP-0003 requires pairwise-distinct decision-ratification, packet-acceptance, and packet-activation receipts even when one authenticated owner comment is their common source. A gate cannot become `ready` or `passed` while any required receipt ID is null, while a decision is not ratified, while its authenticated claim is outside `allowed_claims`, or while starting it would exceed `a1_max_active_packets`.
+The draft gate state stores the packet-to-gate mapping, exact one-packet A1 concurrency cap, value-sensitive decision constraints, and unbound packet-specific receipt requirements. Receipt claims are bound per subject, not stored in one ambiguous flat list. A decision gate resolves only when the bound receipt equals the active supersession head's `approval_receipt_id`, binds exactly one allowed value to that head, and satisfies any required kind, role, and resolver. Receipt requirements may additionally constrain receipt kind, issuer role, resolver type, and exact per-subject contract hash. WP-0003 required pairwise-distinct decision-ratification, packet-acceptance, and packet-activation receipts even when one authenticated owner comment was their common source. A gate cannot become `ready` or `passed` while any required receipt ID is null, while a decision is not ratified, while its authenticated claim is outside `allowed_claims`, or while starting it would exceed `a1_max_active_packets`.
 
 Before an A1 packet enters `active`, `verifying`, or `candidate`, its mapped gate must be `passed` and fully sealed/resolved; canonical `active_autonomy` must be `A1`; its reservation must be `held` with exact base commit, lease, fencing token, non-null expiry later than the activation event, paths, and domains; its full event chain must preserve the acceptance and sole activation receipts; and the one-packet cap must still hold. `verifying` and `candidate` additionally require actual paths plus immutable diff, artifact-manifest, and command-log evidence. The future protected event model must derive these fields; editable JSON remains descriptive at A0/A1.
 

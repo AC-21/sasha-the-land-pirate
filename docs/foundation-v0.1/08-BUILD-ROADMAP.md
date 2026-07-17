@@ -5,21 +5,22 @@ Scheduling principle: calendar commitments follow measured engine and asset thro
 
 ## M0L — Accepted lean local bootstrap
 
-Canonical packet: WP-0003.
+Canonical packet: WP-0003 (`released`; reservation released).
 
-This is a parallel alternative to WP-0001, not a shortcut into WP-0002. D-0052
-is protected and ratified, and a distinct receipt accepts the exact WP-0003
-contract. A third distinct receipt now activates the compact local boundary.
-WP-0003 may create the project skeleton, deterministic seams, non-persisting
-save interfaces, tests, and one technical scene on a protected `agent/*`
-branch. Unity MCP remains conditional on its exact first-use gate. The packet
-cannot decide gameplay, invoke Unity directly, install dependencies, publish,
-release, or merge itself.
+This was a parallel alternative to WP-0001, not a shortcut into WP-0002.
+D-0052 was protected and ratified, a distinct receipt accepted the exact
+WP-0003 contract, and a third distinct receipt activated the compact local
+boundary. Inside that now-completed boundary, WP-0003 could create the project
+skeleton, deterministic seams, non-persisting save interfaces, tests, and one
+technical scene on a protected `agent/*` branch. Unity MCP remained conditional
+on its exact first-use gate. The packet could not decide gameplay, invoke Unity
+directly, install dependencies, publish, release, or merge itself.
 
-Exit: the technical sandbox passes all nine packet checks and remains
-reversible. The unsealed first-playable proposal now changes WP-0002's declared
-dependency to creator-accepted WP-0003 release; it has no effect until the
-proposed protected transaction is ratified and materialized.
+Exit: the technical sandbox passed its packet checks and remained reversible;
+WP-0003 was released and its reservation was released. The current Stage B
+handoff is A0 with no active A1 packet. WP-0002 is accepted but inactive and
+unreserved. Its implementation, including any Unity MCP use, waits for the
+separate protected Stage C activation transaction.
 
 ## M0T — Authorize the isolated technical proof
 
@@ -45,7 +46,9 @@ Deliverables:
 - separately ratify or revise its milestone cuts;
 - record a working codename only if useful.
 
-Exit: WP-0002 has value-matching creator receipt claims, and no gameplay/content production begins from a recommendation the creator did not choose.
+Exit: WP-0002 has value-matching creator receipt claims. Its acceptance does not
+activate it: no gameplay/content production begins until the protected Stage C
+transaction establishes its A1 boundary and reservation.
 
 ## M1 — Reversible engine spike and ugly constitutional toy
 
@@ -68,7 +71,9 @@ Exit: D-0013 and D-0033 are ratified or superseded with evidence. The exact Unit
 
 ### M1B — Ugly constitutional toy
 
-Canonical packet: proposed WP-0002, dependent on released WP-0003 and the identity entry gate.
+Canonical packet: accepted WP-0002, currently inactive and unreserved; it
+depends on released WP-0003 and the identity entry gate, and awaits protected
+Stage C activation before implementation.
 
 - compare the D-0030 city-grammar options at slice scale before generalizing a kernel;
 - primitive city placement, one production bottleneck, and visible/aggregate logistics comparison;

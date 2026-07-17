@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "id": "WP-0003",
-  "status": "active",
+  "status": "released",
   "class": "architecture",
   "declared_risk": "high",
   "derived_risk": "high",
@@ -21,9 +21,9 @@
     "path": "governance/a1-boundaries/WP-0003.json",
     "sha256": "f495286de7c1ef4b762de8fb8e4603e59c5eaee7b0cf0c27bb6c73268760722b"
   },
-  "implementer": null,
-  "verifier": null,
-  "integrator": null,
+  "implementer": "Codex",
+  "verifier": "github-actions",
+  "integrator": "AC-21",
   "constitutional_links": [
     "INV-011",
     "INV-012",
@@ -92,7 +92,7 @@
   ],
   "dependencies": [],
   "reservation": {
-    "status": "held",
+    "status": "released",
     "lease_id": "lease-WP0003-20260716-a1-local",
     "base_commit": "0080c1e9d65b77adf3726d9eaa657b3738330da2",
     "paths": [
@@ -132,7 +132,19 @@
     "docs/licenses/",
     "docs/manifests/"
   ],
-  "actual_paths": [],
+  "actual_paths": [
+    "Game/",
+    "SimulationCore/",
+    "SaveContracts/",
+    "Tools/",
+    "Tests/",
+    ".github/workflows/wp0003-ci.yml",
+    "docs/evidence/WP-0003/",
+    "docs/adr/",
+    "docs/known-issues/",
+    "docs/licenses/",
+    "docs/manifests/"
+  ],
   "scenario_pins": [
     {
       "id": "SCN_WP0003_LOCAL",
@@ -286,21 +298,65 @@
       "type": "validation-manifest",
       "uri": "repo://docs/evidence/WP-0003/UNITY-MCP-VALIDATION-20260716.json",
       "sha256": "f51e19679a38d9049b2e67fe4b4eba0641a89cdbb275167fab1b813d9901f0fe"
+    },
+    {
+      "id": "EVID-WP0003-COMPLETION-20260717",
+      "type": "packet-completion-evidence",
+      "uri": "repo://docs/evidence/WP-0003/COMPLETION-20260717.md",
+      "sha256": "2b242b4a18a622d2059bfe658e9bcfcc8ebd86fd01af197bd873cbdfbc4f6eff"
+    },
+    {
+      "id": "EVID-WP0003-CANDIDATE-DIFF",
+      "type": "immutable-git-diff",
+      "uri": "git-diff://AC-21/sasha-the-land-pirate?base=f95626233b2841de9a3144d89170c245d9a1b8ac&head=fe5c0ef04d68a516f24208f1e38aeda0d78031c1&format=raw-z-abbrev40",
+      "sha256": "ee811c23a642a17425a7dc5e94f3b98ada3e6105970b63ddf1a7364f8486298b"
+    },
+    {
+      "id": "EVID-WP0003-CANDIDATE-ARTIFACT-MANIFEST",
+      "type": "artifact-manifest",
+      "uri": "repo://docs/manifests/WP-0003-unity-technical-sandbox-v1.json",
+      "sha256": "68fb887cdc796470c9b76d69c52a63ae5badc2f8a89ac9453a6a0844b09db9e7"
+    },
+    {
+      "id": "EVID-WP0003-CANDIDATE-COMMAND-LOG",
+      "type": "command-and-attempt-log",
+      "uri": "repo://docs/evidence/WP-0003/TECHNICAL-SANDBOX-20260716.md",
+      "sha256": "c381771d45bae630b16ab08c1eb11f63d0c9e563c6b7f77e0d7ea2952d5832ae"
     }
   ],
   "candidate_evidence": {
-    "diff_artifact_id": null,
-    "artifact_manifest_id": null,
-    "command_log_artifact_id": null,
-    "known_limits": []
+    "diff_artifact_id": "EVID-WP0003-CANDIDATE-DIFF",
+    "artifact_manifest_id": "EVID-WP0003-CANDIDATE-ARTIFACT-MANIFEST",
+    "command_log_artifact_id": "EVID-WP0003-CANDIDATE-COMMAND-LOG",
+    "known_limits": [
+      "The retained manual log is an evidence and attempt narrative, not a raw MCP transport transcript.",
+      "Unity compile, EditMode, PlayMode, project-target, and capture results are Codex-produced implementation evidence; GitHub Actions did not execute those manual gates."
+    ]
   },
   "verification": {
-    "status": "not-run",
-    "verifier": null,
-    "gate_results": [],
-    "evidence_ids": []
+    "status": "passed",
+    "verifier": "github-actions",
+    "gate_results": [
+      "T-A1-LOCAL-BOUNDARY:passed:authority=AC-21/RR-WP0003-ACTIVATE-20260716",
+      "T-MCP-PROJECT-TARGET:passed:evidence-producer=Codex",
+      "T-FOUNDATION:passed:verifier=github-actions",
+      "T-GIT-DIFF:passed:verifier=github-actions",
+      "T-UNITY-COMPILE:passed:implementation-evidence-producer=Codex:not-executed-by-github-actions",
+      "T-UNITY-EDITMODE:passed:implementation-evidence-producer=Codex:not-executed-by-github-actions",
+      "T-UNITY-PLAYMODE:passed:implementation-evidence-producer=Codex:not-executed-by-github-actions",
+      "T-DETERMINISTIC-CORE-SMOKE:passed:verifier=github-actions",
+      "T-TECHNICAL-CAPTURE:passed:implementation-evidence-producer=Codex:creator-accepted"
+    ],
+    "evidence_ids": [
+      "EVID-WP0003-TECHNICAL-CAPTURE",
+      "EVID-WP0003-UNITY-MCP-VALIDATION",
+      "EVID-WP0003-COMPLETION-20260717",
+      "EVID-WP0003-CANDIDATE-DIFF",
+      "EVID-WP0003-CANDIDATE-ARTIFACT-MANIFEST",
+      "EVID-WP0003-CANDIDATE-COMMAND-LOG"
+    ]
   },
-  "release_id": null,
+  "release_id": "REL-WP0003-20260717",
   "status_events": [
     {
       "event_id": "WPE-WP0003-PROPOSED",
@@ -325,6 +381,30 @@
       "actor": "creator",
       "at": "2026-07-16T19:41:34Z",
       "receipt_id": "RR-WP0003-ACTIVATE-20260716"
+    },
+    {
+      "event_id": "WPE-WP0003-VERIFYING",
+      "from": "active",
+      "to": "verifying",
+      "actor": "github-actions",
+      "at": "2026-07-17T07:43:45Z",
+      "receipt_id": "RR-WP0003-ACTIVATE-20260716"
+    },
+    {
+      "event_id": "WPE-WP0003-CANDIDATE",
+      "from": "verifying",
+      "to": "candidate",
+      "actor": "github-actions",
+      "at": "2026-07-17T07:43:46Z",
+      "receipt_id": "RR-WP0003-ACTIVATE-20260716"
+    },
+    {
+      "event_id": "WPE-WP0003-RELEASED",
+      "from": "candidate",
+      "to": "released",
+      "actor": "creator",
+      "at": "2026-07-17T07:43:47Z",
+      "receipt_id": "RR-WP0003-COMPLETE-20260717"
     }
   ]
 }

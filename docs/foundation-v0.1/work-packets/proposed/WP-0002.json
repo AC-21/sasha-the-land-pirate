@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "id": "WP-0002",
-  "status": "proposed",
+  "status": "accepted",
   "class": "feature",
   "declared_risk": "high",
   "derived_risk": "high",
@@ -13,8 +13,8 @@
   "value": "This is the earliest evidence that the city, road, and faction systems form one enjoyable game before generalized architecture or production art begins.",
   "requested_by": "creator-goal:2026-07-15",
   "required_approver": "creator",
-  "approved_by": null,
-  "approval_receipt_id": null,
+  "approved_by": "AC-21",
+  "approval_receipt_id": "RR-WP0002-ACCEPT-20260717",
   "contract_sha256": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
   "a1_boundary_manifest": {
     "manifest_id": "A1B-WP-0002-LOCAL-DEV",
@@ -475,6 +475,14 @@
       "actor": "foundation-designer",
       "at": "2026-07-15T00:00:00-07:00",
       "receipt_id": null
+    },
+    {
+      "event_id": "WPE-WP0002-ACCEPTED",
+      "from": "proposed",
+      "to": "accepted",
+      "actor": "creator",
+      "at": "2026-07-17T07:43:44Z",
+      "receipt_id": "RR-WP0002-ACCEPT-20260717"
     }
   ],
   "scenario_pins": [

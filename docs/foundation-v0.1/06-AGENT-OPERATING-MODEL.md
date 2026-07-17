@@ -35,33 +35,36 @@ Agents inspect, benchmark, simulate, and propose. They may edit draft documentat
 
 Agents may create prototypes, generated assets, and reports only inside a standalone disposable clone/sandbox with an independent `.git` directory after the A1 quarantine boundary is actually established. Shared Git worktrees are forbidden because they can mutate trusted repository state through the common `.git` directory. Nothing merges at A1; the creator manually inspects and imports or rejects the bounded diff/artifacts.
 
-The currently active packet-specific exception is `WP-0003` under
+The packet-specific protected-PR exception used by `WP-0003` is defined in
 [`15-LEAN-A1-LOCAL-DEVELOPMENT.md`](15-LEAN-A1-LOCAL-DEVELOPMENT.md). Only after
-D-0052 is protected and ratified, WP-0003 is separately accepted, and a
-distinct activation receipt binds its local boundary may that packet work on a
-valid non-`main` `agent/*` branch in the durable repository and submit protected
-pull requests. Those three authorities now exist for WP-0003. The creator
-controls the initial Unity-project/CI merge; agents still cannot accept their
-own evidence, autonomously merge protected changes, weaken governance,
-publish, release, or advance autonomy.
+D-0052 was protected and ratified, WP-0003 was separately accepted, and a
+distinct activation receipt bound its local boundary could that packet work on
+a valid non-`main` `agent/*` branch in the durable repository and submit
+protected pull requests. Those three authorities enabled WP-0003's completed
+lifecycle; the packet and its reservation are now released. During that
+lifecycle the creator controlled the initial Unity-project/CI merge, and
+agents still could not accept their own evidence, autonomously merge protected
+changes, weaken governance, publish, release, or advance autonomy.
 
 An activation candidate may carry the future `active` state so protected checks
 can validate the complete tree, but it is non-executable until that exact tree
 is contained in protected `main`. The activation manifest's branch is the
-attestation branch/checkpoint; later WP-0003 implementation passes use fresh
-`agent/*` branches rooted in the active protected-main state.
+attestation branch/checkpoint; during WP-0003, later implementation passes used
+fresh `agent/*` branches rooted in the active protected-main state.
 
-That same policy contains an unsealed proposed WP-0002 successor. It is not
-executable unless WP-0003 is creator-accepted as released and distinct creator
-receipts accept and activate the exact WP-0002 contract and local boundary. If
-activated, it retains protected-main `agent/*` branches, required checks,
-creator-delegated manual release for every pull request, read-only governance,
-and the exact five-tool Unity MCP allowlist; it does not revive the generic
-import quarantine. `validate` and `wp0002-core` remain mandatory. The
-base-owned `wp0002-policy` check is a canary until a live Stage-B pull request
-proves that GitHub attaches its candidate-independent result to the latest head;
-Cursor review is optional and non-blocking. Autonomous auto-merge is not
-authorized before that proof and a separate governance upgrade.
+That same policy defines the WP-0002 successor. WP-0003 is creator-accepted as
+released, and the exact WP-0002 contract is creator-accepted, but WP-0002 is
+unreserved and unactivated. It remains non-executable until a distinct creator
+activation receipt binds its exact local boundary and that activation reaches
+protected `main` in Stage C. If activated, it retains protected-main `agent/*`
+branches, required checks, creator-delegated manual release for every pull
+request, read-only governance, and the exact five-tool Unity MCP allowlist; it
+does not revive the generic import quarantine. `validate` and `wp0002-core`
+remain mandatory. The base-owned `wp0002-policy` check is a canary until a live
+Stage-B pull request proves that GitHub attaches its candidate-independent
+result to the latest head; Cursor review is optional and non-blocking.
+Autonomous auto-merge is not authorized before that proof and a separate
+governance upgrade.
 
 ### A2 — Accepted work packets
 
@@ -75,9 +78,12 @@ Low-risk fixes, tests, tooling, and semantic-preserving optimizations may auto-m
 
 Accepted low/medium-risk features may progress from internal flag → canary build → default-on after predetermined evidence and an observation window. High-risk, save-breaking, economy-wide, art-pillar, or constitutional changes remain human-gated.
 
-The project is at **A1 for WP-0003 only**. Repository creation did not promote
-autonomy; the distinct protected activation receipt did. The canonical
-`a1_max_active_packets` value in
+The project is currently at canonical **A0**, with no active A1 packet.
+WP-0003 is released and its reservation is released; WP-0002 is accepted but
+unreserved and unactivated. Unity MCP use and Unity/game implementation remain
+prohibited until the exact WP-0002 Stage-C activation reaches protected
+`main`. Repository creation did not promote autonomy; only a distinct protected
+activation receipt can do so. The canonical `a1_max_active_packets` value in
 [`governance/ratification-state.json`](governance/ratification-state.json)
 permits exactly one active A1 packet. Changing that cap requires a creator
 receipt plus an explicit schema/state revision. Advancement beyond A1 requires
@@ -115,7 +121,7 @@ Missing or inconsistent state keeps the packet proposed/accepted but non-executa
 
 ## 4. Separation of duties
 
-The principal-separation matrix in `11-TRUST-AND-ENFORCEMENT.md` is authoritative. At A1, sibling agents may implement and provide advisory review inside the active packet boundary but cannot independently accept or integrate output; the creator owns either the generic manual import or WP-0003 protected-merge boundary. At A2–A4, every accepted packet—including low/medium work—requires pairwise distinct trusted implementer, verifier, and integrator principals. A single actor cannot implement and verify merely because another actor performs the merge.
+The principal-separation matrix in `11-TRUST-AND-ENFORCEMENT.md` is authoritative. At A1, sibling agents may implement and provide advisory review inside the active packet boundary but cannot independently accept or integrate output; the creator owns either the generic manual import or the packet's explicitly authorized protected-merge boundary. WP-0003 used that protected-merge boundary during its completed lifecycle. At A2–A4, every accepted packet—including low/medium work—requires pairwise distinct trusted implementer, verifier, and integrator principals. A single actor cannot implement and verify merely because another actor performs the merge.
 
 Recommended roles:
 

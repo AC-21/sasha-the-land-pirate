@@ -18,25 +18,24 @@ Original robot design and exclusion of Tesla names, marks, silhouettes, surfaces
 
 The current thesis, pillars, loop, “storybook salvage” phrase, mechanics, lore, and technical choices remain provisional wherever the foundation says so. Do not promote recommendations into facts.
 
-## Current authority: A1 — WP-0003 only
+## Current authority: A0 — no active implementation packet
 
-This repository has exactly one active, bounded local-development packet:
-`WP-0003`. All authority outside that packet remains A0 or separately gated.
-Canonical A1 authority is effective only from protected `main` containing the
-sealed activation tree; a pull-request branch cannot activate itself.
+WP-0003 is released under `RR-WP0003-COMPLETE-20260717`. Its technical
+foundation remains in the repository, but its reservation is released and it
+grants no continuing implementation or Unity authority. WP-0002 is accepted
+under `RR-WP0002-ACCEPT-20260717`, with the bounded city-comparison study
+authorized separately, but it remains unreserved and unactivated.
 
-- Unity Hub 3.19.5, Rosetta 2, and Unity Editor 6000.5.4f1 ARM64 are present locally, and the creator reports an active Unity license. This is not the creator-approved WP-0001 D-0047 candidate: 6000.3.19f1 ARM64 + Mac Build Support (IL2CPP), Xcode 26.3, URP 17.3, and Test Framework 1.6; full Xcode and the standalone .NET SDK were not detected. The 6000.5 onboarding project is observation evidence, not Sasha's project or a production-version choice.
-- D-0051 supersedes D-0049 and selects `UNITY-MCP-EXTERNAL`: Codex is the external MCP client, and Unity interaction may travel only through the receipt-bound Unity MCP Bridge plus exact Unity-installed relay. This is not the OpenAI API-key Gateway route. No agent or CI runner may directly invoke Unity Hub, Editor, executable, CLI, or batchmode.
-- WP-0001 and D-0050 authorize only the creator-operated setup phase, including installation/opening of the exact D-0047 candidate and temporary project identity. No gameplay, production asset, agent-operated installation, direct agent/CI Unity process, further AI Unity tool call, or autonomous integration is authorized yet. The pre-D-0051 read-only console smoke is a recorded deviation, not activation evidence.
-- Repository creation does not advance autonomy.
-- Historical sealed receipts `RR-D0049-20260715` and `RR-WP0001-ACCEPT-20260715` remain immutable. Owner-authenticated receipts `RR-D0051-20260716` and `RR-WP0001-ROUTE-20260716` now protect the direct-MCP successor and bind `UNITY-MCP-EXTERNAL` to unchanged WP-0001 contract `eed333603affe6aa1dd2b16b26ae702d9f561cc653fa319da02abfe008faeda3`. WP-0001 may enter A1 only after schema-v4 evidence binds the creator-created protected empty seed and registry-only package graph, exact D-0047 tuple, assigned seat/linkage, actual detached quarantine, exact client/relay/Editor/socket/config/FD identity, creator-claimed allowlist and code identities, three exact raw collectors, revoked zero-tool preflight, and distinct live activation session. Its fresh external-protected creator receipt must carry every packet-specific activation claim.
-- At most one A1 packet may be active. Generic A1 output is manually inspected and imported or rejected by the creator; WP-0003 instead uses protected pull requests and creator-controlled merge.
-- D-0052 is protected and ratified; WP-0003 is protected, accepted, and active under `RR-WP0003-ACTIVATE-20260716` and `A1B-WP-0003-LOCAL-DEV`. Repository/bootstrap implementation may begin only inside its held reservation. Unity MCP remains closed until every exact first-use precondition in the boundary is freshly true.
+- The canonical Unity project skeleton, deterministic core seams, non-persisting save boundary, tests, and technical sandbox are retained WP-0003 outputs. They are not a playable-game claim.
+- D-0051 still selects `UNITY-MCP-EXTERNAL`: Codex may interact with Unity only through the receipt-bound Unity MCP Bridge and exact installed relay. No agent or CI runner may directly invoke Unity Hub, Editor, executable, CLI, or batchmode.
+- WP-0001 remains accepted but inactive. Its historical receipts and route law do not create an alternative implementation lane.
+- At most one A1 packet may be active. There is currently none.
+- WP-0002 cannot activate itself from a pull-request branch. Its exact scope capture, protected-policy evidence, held reservation, and distinct creator activation receipt must first land through the separate protected Stage C transaction.
+- Until that activation is contained in protected `main`, do not create gameplay code or assets, mutate Unity state, install dependencies, or start another implementation packet.
 
-If requested work exceeds active WP-0003 scope, its reservation, or the current
-Unity first-use gate, stop and name the missing authorization. Do not use this
-A1 lane to prepare gameplay, production content, dependencies, releases, or
-other separately gated work ahead.
+At A0, continue only bounded documentation/control-plane work explicitly
+authorized by the creator. If requested work would implement the game or use
+Unity before WP-0002 activation, stop and name the missing gate.
 
 ## Source of truth
 
@@ -82,8 +81,9 @@ python3 docs/foundation-v0.1/tools/validate_foundation.py
 Then read this file, the relevant foundation sections, the canonical JSON work packet, and any narrower `AGENTS.md`. Inspect the real baseline before planning. The validator is bootstrap lint, not protected approval or a release gate.
 
 No direct Unity Hub, Editor, executable, CLI, or batchmode command is accepted.
-WP-0003 may use only the approved Unity MCP actions after the exact first-use
-gate passes for the creator-opened `Game` project. Never invent a command or
+An activated protected-PR local packet may use only its approved Unity MCP
+actions after the exact first-use gate passes for the creator-opened `Game`
+project. No packet currently has that authority. Never invent a command or
 report a planned interface as operational.
 
 Commands named by a proposed packet are planned interface contracts only. Their presence makes the future gate reproducible; it does not mean the tool exists, has run, or is authorized before the packet is accepted and its A1 quarantine is receipt-bound.
@@ -112,10 +112,10 @@ Before editing:
 1. Reproduce the packet baseline; stop if it differs.
 2. Confirm packet status and approval receipt, not merely its filename.
 3. Acquire the required reservation: exact base commit, paths, state domains/content IDs, lease, expiry, heartbeat, and fencing token.
-4. Work only in the packet's standalone disposable clone/sandbox with an independent `.git` directory, or its isolated asset package. Active WP-0003 may instead use fresh durable-repository `agent/*` branches rooted in protected `main`; its manifest binds the activation attestation branch and checkpoint, not a perpetual implementation branch.
+4. Work only in the packet's standalone disposable clone/sandbox with an independent `.git` directory, or its isolated asset package. An explicitly activated protected-PR local packet may instead use fresh durable-repository `agent/*` branches rooted in protected `main`; WP-0003 used that historical exception, while WP-0002 requires its own protected Stage C activation.
 5. Touch only declared paths and interfaces. Ask to amend scope before crossing them.
 
-Generic A1 uses read-only/hash-checked foundation inputs, exact reserved outputs, manifest-bound scratch, and a disposable runtime HOME/private temp with no merge/release credentials. Activated WP-0003 instead uses protected `main`, required checks, creator-controlled merge, its exact local boundary, and conditional first Unity MCP use; it grants no governance, credential, install, publishing, release, or self-merge authority. A folder named `sandbox` is never proof of a boundary.
+Generic A1 uses read-only/hash-checked foundation inputs, exact reserved outputs, manifest-bound scratch, and a disposable runtime HOME/private temp with no merge/release credentials. An activated protected-PR local packet instead uses protected `main`, required checks, creator-controlled merge, its exact local boundary, and conditional first Unity MCP use; it grants no governance, credential, install, publishing, release, or self-merge authority. WP-0003's instance is released and WP-0002's is not yet active. A folder named `sandbox` is never proof of a boundary.
 
 ## Engineering laws
 
@@ -166,7 +166,7 @@ Target-Mac spike budgets are provisional gates, not tuning suggestions: native A
 - Preserve user work and unrelated changes. Never use destructive reset or discard another agent's diff.
 - Keep diffs surgical and reviewable; every changed line must trace to the packet or explicit request.
 - Do not commit secrets, credentials, generated caches, unlicensed inputs, or sole binary sources.
-- Do not push, merge, release, rewrite history, or create a remote without explicit authority. A0/A1 agents cannot self-integrate; a WP-0003 protected merge remains creator-controlled, including when Codex merely transmits an explicit authenticated delegation.
+- Do not push, merge, release, rewrite history, or create a remote without explicit authority. A0/A1 agents cannot self-integrate; any protected local-packet merge remains creator-controlled, including when Codex merely transmits an explicit authenticated delegation.
 - Use descriptive conventional commits only when an accepted packet or explicit creator-authorized A0 documentation task permits them: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`.
 - Before handoff, inspect `git diff`, rerun every relevant available gate, and state what was not run.
 
