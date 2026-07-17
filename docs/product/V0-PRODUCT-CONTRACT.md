@@ -1,8 +1,8 @@
 # Sasha the Atomic Land Pirate — V0 Product Contract
 
-Status: creator-directed candidate  
-Product milestone: **V0 / The Last Bearing Vertical Slice**  
-Roadmap mapping: **M5 / VS-3**  
+Status: creator-directed candidate
+Product milestone: **V0 / The Last Bearing Vertical Slice**
+Roadmap mapping: **M5 / VS-3**
 Next milestone: **Founder Playable / M7**
 
 ## 1. Purpose
