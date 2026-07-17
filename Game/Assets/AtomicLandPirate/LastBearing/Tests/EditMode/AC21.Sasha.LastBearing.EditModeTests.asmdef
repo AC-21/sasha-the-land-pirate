@@ -1,0 +1,24 @@
+{
+  "name": "AC21.Sasha.LastBearing.EditModeTests",
+  "rootNamespace": "AtomicLandPirate.Presentation.LastBearing.Tests",
+  "references": [
+    "AC21.Sasha.LastBearing.Runtime",
+    "AC21.Sasha.LastBearing.Editor",
+    "AC21.Sasha.SimulationCore",
+    "AC21.Sasha.SaveContracts"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "noEngineReferences": false
+}

@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/AtomicLandPirate/LastBearing/Scenes/LastBearing.unity
+    guid: 014a7a02ed107ef0c3000ef10c432f0a
+  - enabled: 1
     path: Assets/AtomicLandPirate/TechnicalSandbox/Scenes/WP0003_TechnicalSandbox.unity
     guid: b8240c9f3ef94a52a10dff5c46e97f28
   m_configObjects: {}

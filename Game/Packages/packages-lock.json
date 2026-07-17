@@ -1,5 +1,17 @@
 {
   "dependencies": {
+    "com.ac21.sasha.save-contracts": {
+      "version": "file:../../SaveContracts",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
+    "com.ac21.sasha.simulation-core": {
+      "version": "file:../../SimulationCore",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 1,

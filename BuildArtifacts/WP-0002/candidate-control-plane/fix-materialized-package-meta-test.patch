@@ -1,0 +1,21 @@
+diff --git a/docs/foundation-v0.1/tools/test_validate_wp0002_package_meta.py b/docs/foundation-v0.1/tools/test_validate_wp0002_package_meta.py
+--- a/docs/foundation-v0.1/tools/test_validate_wp0002_package_meta.py
++++ b/docs/foundation-v0.1/tools/test_validate_wp0002_package_meta.py
+@@ -59,11 +59,16 @@ class WP0002PackageMetaTests(unittest.TestCase):
+         with tempfile.TemporaryDirectory() as temporary:
+             root = Path(temporary)
+             self.copy_packages(root)
+             future = root / "SimulationCore/Runtime/LastBearing"
++            future_meta = root / "SimulationCore/Runtime/LastBearing.meta"
++            if future.exists():
++                shutil.rmtree(future)
++            if future_meta.exists():
++                future_meta.unlink()
+             future.mkdir()
+-            (root / "SimulationCore/Runtime/LastBearing.meta").write_bytes(
++            future_meta.write_bytes(
+                 foundation.wp0002_expected_unity_meta(
+                     "SimulationCore/Runtime/LastBearing", True
+                 )
+             )
+             source = future / "FirstPlayableState.cs"

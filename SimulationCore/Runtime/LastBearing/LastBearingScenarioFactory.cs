@@ -1,0 +1,107 @@
+#nullable enable
+
+namespace AtomicLandPirate.Simulation.LastBearing
+{
+    public static class LastBearingScenarioFactory
+    {
+        public static LastBearingState CreateInitial(
+            ColonyComposition composition,
+            int worldSeed)
+        {
+            var builder = new LastBearingStateBuilder
+            {
+                SchemaVersion = LastBearingState.CurrentSchemaVersion,
+                BalanceRevision = LastBearingBalanceV1.Revision,
+                WorldSeed = worldSeed,
+                GlobalTick = 0,
+                SettlementTick = 0,
+                FactionTick = 0,
+                CrisisTick = 0,
+                RoadTick = 0,
+                SettlementAccumulatorMilli = 0,
+                FactionAccumulatorMilli = 0,
+                CrisisAccumulatorMilli = 0,
+                RoadAccumulatorMilli = 0,
+                NextCommandSequence = 0,
+                ProtagonistId = LastBearingState.SashaProtagonistId,
+                Roster = ResidentRoster.CreateForComposition(composition),
+                AssignedResidentId = null,
+                PauseCause = PauseCause.None,
+                SliceInfrastructureActive = false,
+
+                WaterMilli = LastBearingBalanceV1.StartingWaterMilli,
+                PartsUnits = LastBearingBalanceV1.StartingPartsUnits,
+                FuelUnits = LastBearingBalanceV1.StartingFuelUnits,
+                TurbineCondition = TurbineCondition.Failing,
+                PreparationChoice = PreparationChoice.Unselected,
+                PreparationPhase = PreparationPhase.Unselected,
+                PlannedModule = VehicleModule.None,
+                PreparationElapsedTicks = 0,
+                PreparationRequiredTicks = 0,
+                PreparationFuelDebitedUnits = 0,
+                WorkshopServiceSlotsReserved = 0,
+                ActiveWaterModifierMilliPerSettlementTick = 0,
+                NextCityDecision = NextCityDecision.None,
+
+                VehicleModule = VehicleModule.None,
+                ModuleInstallationState = ModuleInstallationState.None,
+                RouteKind = RouteKind.None,
+                RouteActionKind = RouteActionKind.None,
+                RouteActionUsed = false,
+                ExpeditionPhase = ExpeditionPhase.AtHome,
+                RouteProgressTicks = 0,
+                RouteTargetTicks = 0,
+                RouteMovementAccumulatorMilli = 0,
+                VehicleLateralMilli = 0,
+                VehicleConditionMilli =
+                    LastBearingBalanceV1.StartingVehicleConditionMilli,
+                ExpeditionFuelManifestUnits = 0,
+                OrdinaryCargoCapacityUnits = 0,
+                OrdinaryCargoUsedUnits = 0,
+                TowSlots = 0,
+                TowSlotsUsed = 0,
+                LiquidCapacityMilli = 0,
+                HeavyCargoKind = HeavyCargoKind.None,
+                HeavyCargoCustody = HeavyCargoCustody.None,
+                LiquidCargoKind = LiquidCargoKind.None,
+                LiquidCargoQuantityMilli = 0,
+                LiquidCargoCustody = LiquidCargoCustody.None,
+                RepairCargoKind = RepairCargoKind.None,
+                RepairCargoCustody = RepairCargoCustody.None,
+                DepotBearingDisposition = DepotBearingDisposition.AtDepot,
+                ReturnPayloadFrozen = false,
+                HasArrivalClaimSnapshot = false,
+                ArrivalFactionClaimProgressMilli = 0,
+                ArrivalFactionClaimState = FactionClaimState.Telegraphed,
+
+                TransactionId = null,
+                TransactionFingerprint = null,
+                TransactionPhase = TransactionPhase.None,
+                DepotResolution = EncounterChoice.Unresolved,
+
+                FactionClaimProgressMilli = 0,
+                FactionClaimState = FactionClaimState.Telegraphed,
+                DepotControl = DepotControl.Unclaimed,
+                FactionAccessPolicy = FactionAccessPolicy.Open,
+                FactionAidPolicy = FactionAidPolicy.CaseByCase,
+                DepotAccessFeePartsUnits = 0,
+                FutureRouteTollFuelUnits = 0,
+                EmergencyAidWaterMilli = 0,
+                FactionMemory = null,
+                FactionTrust = 0,
+                FactionGrievance = 0,
+                PendingFactionOutcome = FactionOutcomeKind.None,
+                FactionOutcomeElapsedTicks = 0,
+                RoutePermitGranted = false,
+                MaintenanceRecipe = MaintenanceRecipe.None,
+                MaintenanceObligationActive = false,
+                MaintenancePartsUnits = 0,
+                NextMaintenanceDueSettlementTick = 0,
+                MaintenanceDue = false,
+                DustFrontProgressTicks = 0,
+            };
+
+            return builder.Build();
+        }
+    }
+}
