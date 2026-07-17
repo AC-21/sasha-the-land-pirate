@@ -17,14 +17,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TESTS = ROOT / "Tests"
 PROJECT = Path("AtomicLandPirate.CoreTests/AtomicLandPirate.CoreTests.csproj")
-LOCAL_ARTIFACTS = ROOT / "BuildArtifacts/WP-0003/local-only/core-tests"
-DOTNET_ARTIFACTS = ROOT / "BuildArtifacts/WP-0003/local-only/dotnet"
+LOCAL_ONLY_ARTIFACTS = ROOT / "BuildArtifacts/WP-0003/local-only"
+LOCAL_ARTIFACTS = LOCAL_ONLY_ARTIFACTS / "core-tests"
+DOTNET_ARTIFACTS = LOCAL_ONLY_ARTIFACTS / "dotnet"
 CROSS_ROOT_ARTIFACTS = LOCAL_ARTIFACTS / "cross-root"
+SYSTEM_GIT = Path("/usr/bin/git")
 UNITY_BASELINE_MANIFEST = (
-    ROOT / "docs/manifests/WP-0003-unity-donor-v1.json"
+    ROOT / "docs/manifests/WP-0003-unity-canonical-v2.json"
 )
 UNITY_BASELINE_MANIFEST_SHA256 = (
-    "556717ee9e1829dce251d73a08aba79cc8b7a4091313103968a3c5218637dc1a"
+    "d7b9d48c1669ed1eb59a1cc435f22f12f1054298c2b33c3ade61517c0bd5a587"
 )
 EXPECTED_DIRECT_PACKAGES = {
     "com.unity.ai.assistant": "2.14.0-pre.1",
@@ -128,6 +130,55 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: source.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def sha256_bytes(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
+
+
+def system_git_executable() -> str:
+    if (
+        SYSTEM_GIT.is_symlink()
+        or not SYSTEM_GIT.is_file()
+        or not os.access(SYSTEM_GIT, os.X_OK)
+    ):
+        raise SystemExit("Pinned system Git executable is missing or unsafe")
+    return str(SYSTEM_GIT)
+
+
+def require_safe_artifact_directory(path: Path) -> None:
+    try:
+        path.relative_to(LOCAL_ONLY_ARTIFACTS)
+        relative_to_root = path.relative_to(ROOT)
+    except ValueError as exception:
+        raise SystemExit(
+            f"Artifact path escapes the WP-0003 local-only root: {path}"
+        ) from exception
+
+    current = ROOT
+    for component in relative_to_root.parts:
+        current /= component
+        if current.is_symlink():
+            raise SystemExit(
+                f"Artifact path contains a symlink: "
+                f"{current.relative_to(ROOT)}"
+            )
+        if current.exists() and not current.is_dir():
+            raise SystemExit(
+                f"Artifact path contains a non-directory: "
+                f"{current.relative_to(ROOT)}"
+            )
+
+    resolved_root = ROOT.resolve(strict=True)
+    resolved_boundary = LOCAL_ONLY_ARTIFACTS.resolve(strict=False)
+    resolved_path = path.resolve(strict=False)
+    if resolved_root not in resolved_boundary.parents or (
+        resolved_path != resolved_boundary
+        and resolved_boundary not in resolved_path.parents
+    ):
+        raise SystemExit(
+            f"Artifact path resolved outside the repository: {path}"
+        )
 
 
 def canonical_json_sha256(value: object) -> str:
@@ -490,6 +541,96 @@ def validate_source_set(
     return actual
 
 
+def pinned_git_capture(arguments: list[str]) -> bytes:
+    git_directory = ROOT / ".git"
+    if git_directory.is_symlink() or not git_directory.is_dir():
+        raise SystemExit("Repository must use a real independent .git directory")
+    environment = {
+        key: value
+        for key, value in os.environ.items()
+        if not key.startswith("GIT_")
+    }
+    environment.update(
+        {
+            "GIT_ATTR_NOSYSTEM": "1",
+            "GIT_CONFIG_GLOBAL": os.devnull,
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_CONFIG_SYSTEM": os.devnull,
+            "GIT_NO_REPLACE_OBJECTS": "1",
+            "GIT_TERMINAL_PROMPT": "0",
+        }
+    )
+    try:
+        result = subprocess.run(
+            [
+                system_git_executable(),
+                f"--git-dir={git_directory}",
+                f"--work-tree={ROOT}",
+                *arguments,
+            ],
+            check=True,
+            env=environment,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=10,
+        )
+    except (
+        OSError,
+        subprocess.CalledProcessError,
+        subprocess.TimeoutExpired,
+    ) as exception:
+        detail = getattr(exception, "stderr", b"")
+        if isinstance(detail, bytes):
+            detail = detail.decode("utf-8", errors="replace").strip()
+        suffix = f": {detail}" if detail else ""
+        raise SystemExit(
+            f"Could not inspect the pinned Git repository{suffix}"
+        ) from exception
+    return result.stdout
+
+
+def git_index_game_files(game_root: Path) -> dict[str, str]:
+    """Read staged Game paths without materializing their blob contents."""
+
+    relative_root = game_root.relative_to(ROOT).as_posix()
+    if pinned_git_capture(
+        ["ls-files", "--unmerged", "-z", "--", relative_root]
+    ):
+        raise SystemExit("Game has an unmerged Git index")
+
+    indexed: dict[str, str] = {}
+    output = pinned_git_capture(
+        ["ls-files", "--stage", "-z", "--", relative_root]
+    )
+    prefix = f"{relative_root}/"
+    for record in output.split(b"\0"):
+        if not record:
+            continue
+        try:
+            header, encoded_path = record.split(b"\t", 1)
+            mode, object_id, stage = header.split()
+        except ValueError as exception:
+            raise SystemExit(
+                "Git returned an invalid Game index record"
+            ) from exception
+        path = os.fsdecode(encoded_path)
+        if stage != b"0" or not path.startswith(prefix):
+            raise SystemExit(f"Git returned an invalid Game index path: {path}")
+        if mode != b"100644":
+            raise SystemExit(
+                f"Game index mode is forbidden: {path} "
+                f"({os.fsdecode(mode)})"
+            )
+        relative = path[len(prefix):]
+        if not relative or relative in indexed:
+            raise SystemExit(f"Git returned a duplicate Game index path: {path}")
+        object_id_text = os.fsdecode(object_id)
+        if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", object_id_text) is None:
+            raise SystemExit(f"Git returned an invalid object ID: {path}")
+        indexed[relative] = object_id_text
+    return indexed
+
+
 def validate_game_baseline() -> None:
     if sha256_file(UNITY_BASELINE_MANIFEST) != (
         UNITY_BASELINE_MANIFEST_SHA256
@@ -505,12 +646,14 @@ def validate_game_baseline() -> None:
         "created_at",
         "creator_approval",
         "direct_packages",
+        "first_import_observation",
         "game_files",
         "import_policy",
         "manifest_id",
         "package_lock",
         "packet_id",
         "project_identity",
+        "preserved_deviations",
         "resolved_package_count",
         "rollback",
         "schema_version",
@@ -521,31 +664,30 @@ def validate_game_baseline() -> None:
         raise SystemExit("Unity baseline manifest top-level shape drifted")
     if document.get("schema_version") != 1:
         raise SystemExit("Unity baseline manifest schema drifted")
-    if document.get("manifest_id") != "WP0003-UNITY-DONOR-20260716":
+    if document.get("manifest_id") != (
+        "WP0003-UNITY-CANONICAL-FIRST-IMPORT-20260716"
+    ):
         raise SystemExit("Unity baseline manifest identity drifted")
     if document.get("packet_id") != "WP-0003":
         raise SystemExit("Unity baseline manifest packet drifted")
     if document.get("base_commit") != (
-        "75514781219ceed101a96409913bf483ff0b38b2"
+        "522c57835214ec621ba1864889d268abd378ccc3"
     ):
         raise SystemExit("Unity baseline manifest base commit drifted")
-    if document.get("created_at") != "2026-07-16T21:58:14Z":
+    if document.get("created_at") != "2026-07-16T23:44:14Z":
         raise SystemExit("Unity baseline manifest creation time drifted")
     if document.get("branch") != (
-        "agent/wp0003-unity-donor-migration-001"
+        "agent/wp0003-first-import-handoff-001"
     ):
         raise SystemExit("Unity baseline manifest branch drifted")
 
     approval = document.get("creator_approval")
     if approval != {
         "captured_on": "2026-07-16",
-        "instruction": (
-            "Use Sashas as the donor project with the curated package set. "
-            "- And yes use the packages we need initially."
-        ),
+        "instruction": "ok we are approved lets keep building",
         "scope": (
-            "candidate filtered donor baseline and initially needed packages; "
-            "exact dependency diff remains creator-review-gated"
+            "canonical first import, bounded handoff hygiene, validation, "
+            "and protected pull request; no gameplay or production content"
         ),
     }:
         raise SystemExit("Unity dependency approval record drifted")
@@ -623,7 +765,7 @@ def validate_game_baseline() -> None:
         "normalizations",
     }:
         raise SystemExit("Unity baseline import policy shape drifted")
-    if import_policy.get("kind") != "filtered donor seed" or any(
+    if import_policy.get("kind") != "canonical first-import baseline" or any(
         not isinstance(import_policy.get(key), list)
         or not import_policy[key]
         or not all(isinstance(value, str) and value for value in import_policy[key])
@@ -676,6 +818,32 @@ def validate_game_baseline() -> None:
     if list(expected_files) != sorted(expected_files):
         raise SystemExit("Unity baseline file closure must be path-sorted")
 
+    indexed_files = git_index_game_files(game_root)
+    if set(indexed_files) != set(expected_files):
+        raise SystemExit(
+            "Game Git index closure drifted: "
+            f"expected {sorted(expected_files)}, "
+            f"received {sorted(indexed_files)}"
+        )
+    for relative, object_id in indexed_files.items():
+        expected_size, expected_digest = expected_files[relative]
+        size_text = pinned_git_capture(
+            ["cat-file", "-s", object_id]
+        ).decode("ascii", errors="strict").strip()
+        try:
+            indexed_size = int(size_text)
+        except ValueError as exception:
+            raise SystemExit(
+                f"Git returned an invalid blob size: {relative}"
+            ) from exception
+        if indexed_size != expected_size:
+            raise SystemExit(f"Game Git index size drifted: {relative}")
+        contents = pinned_git_capture(["cat-file", "blob", object_id])
+        if len(contents) != expected_size:
+            raise SystemExit(f"Game Git index blob length drifted: {relative}")
+        if sha256_bytes(contents) != expected_digest:
+            raise SystemExit(f"Game Git index hash drifted: {relative}")
+
     forbidden_components = {
         ".git",
         ".idea",
@@ -696,21 +864,93 @@ def validate_game_baseline() -> None:
         ".suo",
         ".user",
     )
+    allowed_generated_roots = {
+        "Builds",
+        "builds",
+        "Library",
+        "library",
+        "Logs",
+        "logs",
+        "MemoryCaptures",
+        "memoryCaptures",
+        "Obj",
+        "obj",
+        "Recordings",
+        "recordings",
+        "Temp",
+        "temp",
+        "UserSettings",
+        "Usersettings",
+        "userSettings",
+        "usersettings",
+    }
+    allowed_local_files = {
+        "ProjectSettings/Packages/com.unity.ai.assistant/Settings.json",
+    }
     actual_files: dict[str, Path] = {}
-    for path in game_root.rglob("*"):
-        if path.is_symlink():
-            raise SystemExit(
-                f"{path.relative_to(ROOT)} may not be a symlink"
-            )
-        if not path.is_file():
-            continue
-        relative = path.relative_to(game_root).as_posix()
-        lowered_parts = {part.casefold() for part in relative.split("/")}
-        if lowered_parts & forbidden_components:
-            raise SystemExit(f"Forbidden Unity-generated path: {relative}")
-        if relative.casefold().endswith(forbidden_suffixes):
-            raise SystemExit(f"Forbidden Unity-generated file: {relative}")
-        actual_files[relative] = path
+    if game_root.is_symlink():
+        raise SystemExit("Game may not be a symlink")
+
+    def fail_game_walk(exception: OSError) -> None:
+        raise SystemExit(
+            f"Could not traverse Game: {exception}"
+        ) from exception
+
+    for current_root, directory_names, file_names in os.walk(
+        game_root,
+        topdown=True,
+        onerror=fail_game_walk,
+        followlinks=False,
+    ):
+        current = Path(current_root)
+        retained_directories: list[str] = []
+        for name in directory_names:
+            directory = current / name
+            relative = directory.relative_to(game_root).as_posix()
+            if directory.is_symlink():
+                raise SystemExit(
+                    f"{directory.relative_to(ROOT)} may not be a symlink"
+                )
+            relative_parts = relative.split("/")
+            lowered_parts = {part.casefold() for part in relative_parts}
+            if (
+                len(relative_parts) == 1
+                and relative_parts[0] in allowed_generated_roots
+            ):
+                continue
+            if lowered_parts & forbidden_components:
+                raise SystemExit(
+                    f"Forbidden Unity-generated path: {relative}"
+                )
+            retained_directories.append(name)
+        directory_names[:] = retained_directories
+
+        for name in file_names:
+            path = current / name
+            relative = path.relative_to(game_root).as_posix()
+            if path.is_symlink():
+                raise SystemExit(
+                    f"{path.relative_to(ROOT)} may not be a symlink"
+                )
+            if not path.is_file():
+                raise SystemExit(
+                    f"Game path is not a regular file: "
+                    f"{path.relative_to(ROOT)}"
+                )
+            if relative in allowed_local_files:
+                continue
+            lowered_parts = {
+                part.casefold() for part in relative.split("/")
+            }
+            if lowered_parts & forbidden_components:
+                raise SystemExit(
+                    f"Forbidden Unity-generated path: {relative}"
+                )
+            if relative.casefold().endswith(forbidden_suffixes):
+                raise SystemExit(
+                    f"Forbidden Unity-generated file: {relative}"
+                )
+            actual_files[relative] = path
 
     if set(actual_files) != set(expected_files):
         raise SystemExit(
@@ -830,8 +1070,8 @@ def validate_game_baseline() -> None:
             EXPECTED_DIRECT_PACKAGES_SHA256
         ),
         "provenance": (
-            "shortest reachable closure filtered from the donor lock; "
-            "canonical Editor import is not yet claimed"
+            "shortest reachable closure filtered from the donor lock and "
+            "resolved byte-identically by the canonical Editor first import"
         ),
         "allowed_sources": ["builtin", "https://packages.unity.com"],
         "local_packages_linked": False,
@@ -1132,6 +1372,13 @@ def validate_game_baseline() -> None:
     local_ignore = (game_root / ".gitignore").read_text(encoding="utf-8")
     if "/*.slnx" not in local_ignore:
         raise SystemExit("Game local ignore lacks Unity .slnx coverage")
+    if (
+        "/ProjectSettings/Packages/com.unity.ai.assistant/Settings.json"
+        not in local_ignore
+    ):
+        raise SystemExit(
+            "Game local ignore lacks exact Assistant settings coverage"
+        )
     local_attributes = (
         game_root / ".gitattributes"
     ).read_text(encoding="utf-8")
@@ -1142,21 +1389,129 @@ def validate_game_baseline() -> None:
     ):
         raise SystemExit("Game Unity YAML Git attributes drifted")
 
+    if document.get("first_import_observation") != {
+        "captured_at": "2026-07-16T23:30:07Z",
+        "screenshot": {
+            "path": (
+                "docs/evidence/WP-0003/"
+                "first-import-console-zero-20260716.jpeg"
+            ),
+            "size_bytes": 62969,
+            "sha256": (
+                "7964759028c75dfa25ae606d88ea322cfacf4bece128f0e365e83246161a6d61"
+            ),
+            "console_counters": {
+                "logs": 0,
+                "warnings": 0,
+                "errors": 0,
+            },
+            "observation_window_seconds": 12,
+            "duration_source": (
+                "manual operator observation; screenshot corroborates only "
+                "the final instant"
+            ),
+            "untitled_scene": (
+                "unsaved in-memory Unity default; no scene asset created"
+            ),
+        },
+        "editor_log": {
+            "path": "Game/Logs/Editor.log",
+            "ignored": True,
+            "point_in_time_sha256": (
+                "9005819fe04afc5afa813c0e6a69366e216a7d88f122ff110b1a0441b299f7e5"
+            ),
+            "raw_snapshot_retained": False,
+            "last_csharp_error_line": 21731,
+            "final_tundra_success_line": 22230,
+            "final_assembly_reload_line": 22248,
+        },
+        "bridge": {
+            "receipt_path": (
+                "/Users/sasha/.unity/mcp/connections/"
+                "bridge-81b1b2ca-32476.json"
+            ),
+            "project_path": (
+                "/Users/sasha/Documents/Codex/"
+                "sasha-the-land-pirate/Game"
+            ),
+            "connection_type": "named_pipe",
+            "protocol_version": "2.0",
+            "editor_pid": 32476,
+            "connection_path": "/tmp/unity-mcp-81b1b2ca-32476",
+            "status": "historical-stale-after-host-restart",
+            "reuse_allowed": False,
+        },
+        "package_cache": {
+            "resolved_packages": 34,
+            "canonical_matches_donor": 34,
+            "comparison": "byte-for-byte directory-tree comparison",
+            "candidate_artifact_retained": False,
+        },
+    }:
+        raise SystemExit("Unity first-import observation drifted")
+
+    screenshot = (
+        ROOT
+        / document["first_import_observation"]["screenshot"]["path"]
+    )
+    if screenshot.is_symlink() or not screenshot.is_file():
+        raise SystemExit("Unity first-import screenshot is missing or unsafe")
+    if screenshot.stat().st_size != 62969:
+        raise SystemExit("Unity first-import screenshot size drifted")
+    if sha256_file(screenshot) != (
+        "7964759028c75dfa25ae606d88ea322cfacf4bece128f0e365e83246161a6d61"
+    ):
+        raise SystemExit("Unity first-import screenshot digest drifted")
+
+    if document.get("preserved_deviations") != [
+        {
+            "id": "DEV-WP0003-AGENT-HUB-UI-20260716",
+            "status": "creator-directed-and-preserved",
+            "creator_directions": [
+                (
+                    "close the donor project, open the canonical repository's "
+                    "Game folder, and validate Unity's first import before "
+                    "beginning implementation"
+                ),
+                "ok we are approved lets keep building",
+            ],
+            "action": (
+                "An agent drove the creator-approved Unity Hub UI and "
+                "indirectly caused the Editor to launch the canonical Game "
+                "project."
+            ),
+            "direct_executable_cli_batchmode_or_mcp_call": False,
+            "packet_conflict": (
+                "WP-0003 names a creator-opened project and denies direct "
+                "agent Unity invocation; this indirect UI operation is "
+                "conservatively retained as a deviation and cannot satisfy "
+                "the first-use creator-opened precondition."
+            ),
+            "effect": (
+                "First-use gate remains closed pending a canonical-root Codex "
+                "task, exact target reconfirmation, and fresh creator approval "
+                "of the connection and requested action."
+            ),
+        }
+    ]:
+        raise SystemExit("Unity preserved-deviation record drifted")
+
     if document.get("unity_boundary") != {
-        "hub_invoked_by_agent": False,
-        "editor_invoked_by_agent": False,
+        "hub_invoked_by_agent": True,
+        "editor_invoked_by_agent": True,
         "relay_invoked_by_agent": False,
         "mcp_invoked_by_agent": False,
-        "canonical_project_opened": False,
-        "first_use_gate": "closed",
-        "compile_verified": False,
+        "canonical_project_opened": True,
+        "first_use_gate": "closed-pending-canonical-task-mcp",
+        "compile_observed": True,
+        "compile_acceptance_test_satisfied": False,
         "editmode_verified": False,
         "playmode_verified": False,
     }:
         raise SystemExit("Unity execution boundary attestation drifted")
     if document.get("rollback") != {
         "method": "ordinary Git revert or branch deletion",
-        "target_commit": "75514781219ceed101a96409913bf483ff0b38b2",
+        "target_commit": "522c57835214ec621ba1864889d268abd378ccc3",
         "donor_modified": False,
     }:
         raise SystemExit("Unity baseline rollback attestation drifted")
@@ -1472,6 +1827,7 @@ def validate_source_boundaries() -> None:
 
 
 def reset_dotnet_artifacts() -> None:
+    require_safe_artifact_directory(DOTNET_ARTIFACTS)
     if DOTNET_ARTIFACTS.exists():
         shutil.rmtree(DOTNET_ARTIFACTS)
     DOTNET_ARTIFACTS.mkdir(parents=True, exist_ok=True)
@@ -1482,6 +1838,8 @@ def restore_and_build(
     environment: dict[str, str],
     repo_root: Path = ROOT,
 ) -> None:
+    if repo_root != ROOT:
+        require_safe_artifact_directory(repo_root)
     tests_root = repo_root / "Tests"
     run(
         [
@@ -1552,6 +1910,7 @@ def binary_hashes(
 
 
 def copy_cross_root_source(destination: Path) -> None:
+    require_safe_artifact_directory(destination)
     destination.mkdir(parents=True, exist_ok=True)
     for directory in ("SimulationCore", "SaveContracts", "Tests"):
         shutil.copytree(ROOT / directory, destination / directory)
@@ -1567,7 +1926,12 @@ def initialize_repro_checkout(
     destination: Path,
     environment: dict[str, str],
 ) -> str:
-    git_environment = environment.copy()
+    require_safe_artifact_directory(destination)
+    git_environment = {
+        key: value
+        for key, value in environment.items()
+        if not key.startswith("GIT_")
+    }
     git_environment.update(
         {
             "GIT_AUTHOR_NAME": "WP-0003 Validator",
@@ -1576,27 +1940,55 @@ def initialize_repro_checkout(
             "GIT_COMMITTER_NAME": "WP-0003 Validator",
             "GIT_COMMITTER_EMAIL": "wp0003-validator@example.invalid",
             "GIT_COMMITTER_DATE": "2026-07-16T00:00:00Z",
+            "GIT_CONFIG_GLOBAL": os.devnull,
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_CONFIG_SYSTEM": os.devnull,
+            "GIT_ATTR_NOSYSTEM": "1",
+            "GIT_NO_REPLACE_OBJECTS": "1",
+            "GIT_TERMINAL_PROMPT": "0",
             "TZ": "UTC",
         }
     )
+    git = system_git_executable()
     run(
-        ["git", "init", "--quiet", "--initial-branch=main"],
+        [git, "init", "--quiet", "--initial-branch=main", "--template="],
+        git_environment,
+        cwd=destination,
+    )
+    git_directory = destination / ".git"
+    if git_directory.is_symlink() or not git_directory.is_dir():
+        raise SystemExit("Reproducibility fixture has an unsafe Git directory")
+    disabled_hooks = git_directory / "disabled-hooks"
+    disabled_hooks.mkdir()
+    pinned_git = [
+        git,
+        f"--git-dir={git_directory}",
+        f"--work-tree={destination}",
+    ]
+    run(
+        [*pinned_git, "config", "--local", "core.autocrlf", "false"],
         git_environment,
         cwd=destination,
     )
     run(
-        ["git", "config", "core.autocrlf", "false"],
-        git_environment,
-        cwd=destination,
-    )
-    run(
-        ["git", "config", "commit.gpgsign", "false"],
+        [*pinned_git, "config", "--local", "commit.gpgsign", "false"],
         git_environment,
         cwd=destination,
     )
     run(
         [
-            "git",
+            *pinned_git,
+            "config",
+            "--local",
+            "core.hooksPath",
+            str(disabled_hooks),
+        ],
+        git_environment,
+        cwd=destination,
+    )
+    run(
+        [
+            *pinned_git,
             "remote",
             "add",
             "origin",
@@ -1606,17 +1998,30 @@ def initialize_repro_checkout(
         cwd=destination,
     )
     run(
-        ["git", "add", "SimulationCore", "SaveContracts", "Tests", "Tools"],
+        [
+            *pinned_git,
+            "add",
+            "SimulationCore",
+            "SaveContracts",
+            "Tests",
+            "Tools",
+        ],
         git_environment,
         cwd=destination,
     )
     run(
-        ["git", "commit", "--quiet", "-m", "WP-0003 reproducibility fixture"],
+        [
+            *pinned_git,
+            "commit",
+            "--quiet",
+            "-m",
+            "WP-0003 reproducibility fixture",
+        ],
         git_environment,
         cwd=destination,
     )
     return run(
-        ["git", "rev-parse", "HEAD"],
+        [*pinned_git, "rev-parse", "HEAD"],
         git_environment,
         capture_output=True,
         cwd=destination,
@@ -1627,6 +2032,7 @@ def validate_cross_root_reproducibility(
     dotnet: str,
     environment: dict[str, str],
 ) -> None:
+    require_safe_artifact_directory(CROSS_ROOT_ARTIFACTS)
     if CROSS_ROOT_ARTIFACTS.exists():
         shutil.rmtree(CROSS_ROOT_ARTIFACTS)
     first_root = CROSS_ROOT_ARTIFACTS / "checkout-a"
@@ -1659,8 +2065,18 @@ def main() -> int:
     dotnet = resolve_dotnet(args.dotnet)
     validate_source_boundaries()
 
-    LOCAL_ARTIFACTS.mkdir(parents=True, exist_ok=True)
     temporary_directory = LOCAL_ARTIFACTS / "tmp"
+    artifact_directories = (
+        LOCAL_ARTIFACTS,
+        LOCAL_ARTIFACTS / "dotnet-home",
+        LOCAL_ARTIFACTS / "nuget",
+        temporary_directory,
+        DOTNET_ARTIFACTS,
+        CROSS_ROOT_ARTIFACTS,
+    )
+    for artifact_directory in artifact_directories:
+        require_safe_artifact_directory(artifact_directory)
+    LOCAL_ARTIFACTS.mkdir(parents=True, exist_ok=True)
     temporary_directory.mkdir(parents=True, exist_ok=True)
     environment = os.environ.copy()
     environment.update(
