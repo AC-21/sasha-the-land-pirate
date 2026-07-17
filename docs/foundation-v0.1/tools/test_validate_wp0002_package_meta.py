@@ -60,8 +60,13 @@ class WP0002PackageMetaTests(unittest.TestCase):
             root = Path(temporary)
             self.copy_packages(root)
             future = root / "SimulationCore/Runtime/LastBearing"
+            future_meta = root / "SimulationCore/Runtime/LastBearing.meta"
+            if future.exists():
+                shutil.rmtree(future)
+            if future_meta.exists():
+                future_meta.unlink()
             future.mkdir()
-            (root / "SimulationCore/Runtime/LastBearing.meta").write_bytes(
+            future_meta.write_bytes(
                 foundation.wp0002_expected_unity_meta(
                     "SimulationCore/Runtime/LastBearing", True
                 )
