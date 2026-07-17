@@ -19,10 +19,10 @@
     "WP-0003": [],
     "WP-0002": [
       {
-        "dependency_id": "WP-0001",
+        "dependency_id": "WP-0003",
         "required_status": "released",
         "completion_receipt_id": null,
-        "required_claims": ["ACCEPT-COMPLETION-WP-0001"]
+        "required_claims": ["ACCEPT-COMPLETION-WP-0003"]
       }
     ]
   },
@@ -54,24 +54,23 @@
     "ugly_gameplay_toy": {
       "status": "blocked",
       "decision_requirements": [
-        {"decision_id":"D-0006","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-THESIS"],"receipt_id":null,"mismatch_action":"block-and-revise-constitution-or-packet"},
-        {"decision_id":"D-0007","accepted_statuses":["ratified"],"allowed_claims":["DRIVE","COMMAND"],"receipt_id":null,"mismatch_action":"block-and-revise-packet"},
-        {"decision_id":"D-0008","accepted_statuses":["ratified"],"allowed_claims":["SLOWED","PAUSED","FULL"],"receipt_id":null,"mismatch_action":"block-and-revise-packet"},
-        {"decision_id":"D-0009","accepted_statuses":["ratified"],"allowed_claims":["SCARS"],"receipt_id":null,"mismatch_action":"branch-to-harsh-or-custom-cruelty-proof-packet"},
-        {"decision_id":"D-0010","accepted_statuses":["ratified"],"allowed_claims":["CULTURES"],"receipt_id":null,"mismatch_action":"branch-to-conquest-compatible-packet"},
-        {"decision_id":"D-0011","accepted_statuses":["ratified"],"allowed_claims":["ACCENT","NONE"],"receipt_id":null,"mismatch_action":"branch-to-combat-pillar-packet"},
-        {"decision_id":"D-0012","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-SLICE"],"receipt_id":null,"mismatch_action":"block-and-revise-slice-and-packet"},
-        {"decision_id":"D-0021","accepted_statuses":["ratified"],"allowed_claims":["SOLO-OFFLINE"],"receipt_id":null,"mismatch_action":"branch-to-connected-architecture-packet"},
-        {"decision_id":"D-0029","accepted_statuses":["ratified"],"allowed_claims":["ROUTE+ROAD"],"receipt_id":null,"mismatch_action":"branch-to-selected-topology-packet"},
-        {"decision_id":"D-0035","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-CORE"],"receipt_id":null,"mismatch_action":"block-and-revise-constitution-or-packet"},
-        {"decision_id":"D-0036","accepted_statuses":["ratified"],"allowed_claims":["TITLE-AND-PROTAGONIST-SASHA"],"receipt_id":"RR-CREATOR-20260715-02","mismatch_action":"block-and-repair-title-protagonist-binding"},
-        {"decision_id":"D-0037","accepted_statuses":["ratified"],"allowed_claims":["COLONY-HUMANS-ROBOTS-OR-MIXED"],"receipt_id":"RR-CREATOR-20260715-02","mismatch_action":"block-and-revise-composition-proof"},
-        {"decision_id":"D-0039","accepted_statuses":["ratified"],"allowed_claims":["MECHANICAL-COMPOSITIONS"],"receipt_id":null,"mismatch_action":"branch-to-representational-composition-packet"}
+        {"decision_id":"D-0006","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-THESIS"],"receipt_id":null,"required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"},"mismatch_action":"block-and-revise-constitution-or-packet"},
+        {"decision_id":"D-0007","accepted_statuses":["ratified"],"allowed_claims":["DRIVE","COMMAND"],"receipt_id":null,"required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"},"mismatch_action":"block-and-revise-packet"},
+        {"decision_id":"D-0008","accepted_statuses":["ratified"],"allowed_claims":["SLOWED","PAUSED","FULL"],"receipt_id":null,"required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"},"mismatch_action":"block-and-revise-packet"},
+        {"decision_id":"D-0009","accepted_statuses":["ratified"],"allowed_claims":["SCARS"],"receipt_id":null,"required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"},"mismatch_action":"branch-to-harsh-or-custom-cruelty-proof-packet"},
+        {"decision_id":"D-0010","accepted_statuses":["ratified"],"allowed_claims":["CULTURES"],"receipt_id":null,"required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"},"mismatch_action":"branch-to-conquest-compatible-packet"},
+        {"decision_id":"D-0011","accepted_statuses":["ratified"],"allowed_claims":["ACCENT","NONE"],"receipt_id":null,"required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"},"mismatch_action":"branch-to-combat-pillar-packet"},
+        {"decision_id":"D-0012","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-SLICE"],"receipt_id":null,"required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"},"mismatch_action":"block-and-revise-slice-and-packet"},
+        {"decision_id":"D-0021","accepted_statuses":["ratified"],"allowed_claims":["SOLO-OFFLINE"],"receipt_id":null,"required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"},"mismatch_action":"branch-to-connected-architecture-packet"},
+        {"decision_id":"D-0029","accepted_statuses":["ratified"],"allowed_claims":["ROUTE+ROAD"],"receipt_id":null,"required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"},"mismatch_action":"branch-to-selected-topology-packet"},
+        {"decision_id":"D-0035","accepted_statuses":["ratified"],"allowed_claims":["RATIFY-CORE"],"receipt_id":null,"required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"},"mismatch_action":"block-and-revise-constitution-or-packet"},
+        {"decision_id":"D-0036","accepted_statuses":["ratified"],"allowed_claims":["TITLE-AND-PROTAGONIST-SASHA"],"receipt_id":null,"required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"},"mismatch_action":"block-and-repair-title-protagonist-binding"},
+        {"decision_id":"D-0037","accepted_statuses":["ratified"],"allowed_claims":["COLONY-HUMANS-ROBOTS-OR-MIXED"],"receipt_id":null,"required_receipt_kind":"decision-ratification","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"},"mismatch_action":"block-and-revise-composition-proof"}
       ],
       "receipt_requirements": [
-        {"purpose":"accept-WP-0002","receipt_id":null,"subject_ids":["WP-0002"],"required_claims":["ACCEPT-WP-0002"]},
-        {"purpose":"authorize-city-comparison","receipt_id":null,"subject_ids":["D-0030","WP-0002"],"required_claims":["AUTHORIZE-CITY-COMPARISON"]},
-        {"purpose":"establish-A1-quarantine-WP-0002","receipt_id":null,"subject_ids":["WP-0002"],"required_claims":["A1-QUARANTINE-BOUNDARY-VERIFIED","ACTIVATE-A1-WP-0002"]}
+        {"purpose":"accept-WP-0002","receipt_id":null,"subject_ids":["WP-0002"],"required_claims":["ACCEPT-WP-0002"],"required_receipt_kind":"packet-acceptance","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"}},
+        {"purpose":"authorize-city-comparison","receipt_id":null,"subject_ids":["D-0030","WP-0002"],"required_claims":["AUTHORIZE-CITY-COMPARISON"],"required_receipt_kind":"creator-authorization","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"}},
+        {"purpose":"activate-WP-0002-local-development","receipt_id":null,"subject_ids":["WP-0002"],"required_claims":["A1-LOCAL-BOUNDARY-VERIFIED","ACTIVATE-A1-WP-0002"],"required_receipt_kind":"packet-activation","required_issuer_role":"creator","required_resolver_type":"external-protected","required_subject_contract_sha256":{"WP-0002":"ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"}}
       ]
     },
     "slice_kernel": {

@@ -123,8 +123,8 @@ Every attack must be rejected by a trusted check outside the candidate's write a
 
 - WP-0001 remains accepted at its immutable contract, while owner-authenticated D-0051 and packet route-successor receipts protect `UNITY-MCP-EXTERNAL`; D-0050 permits only creator-operated candidate setup, and A1 still requires the protected empty seed, exact seat/project/D-0047 tuple, actual candidate quarantine, direct-MCP process/socket/config/allowlist profile, revoked zero-tool preflight, and distinct fresh live activation session to be physically verified and separately activated;
 - WP-0003 is the sole active A1 packet under protected ratified D-0052, its distinct acceptance receipt, and `RR-WP0003-ACTIVATE-20260716`; its compact local boundary permits only the exact held repository/bootstrap reservation and conditional first Unity MCP use;
-- the ugly gameplay toy requires the listed identity decisions, its own explicit acceptance, and a separate packet-specific WP-0002 quarantine receipt;
-- WP-0002 cannot advance from proposal until WP-0001 is `released` and a sealed creator `packet-completion` receipt binds `ACCEPT-COMPLETION-WP-0001` plus WP-0001's immutable packet-contract hash;
+- the ugly gameplay toy requires the listed identity decisions, its own explicit acceptance, and a separate packet-specific WP-0002 protected-PR local activation receipt;
+- WP-0002 cannot advance from proposal until WP-0003 is `released` and a sealed creator `packet-completion` receipt binds `ACCEPT-COMPLETION-WP-0003` plus WP-0003's immutable packet-contract hash;
 - the slice kernel additionally requires the city grammar decision;
 - production content and autonomous integration have later, stricter gates.
 
@@ -136,8 +136,9 @@ One read-only `Unity_ReadConsole` smoke call occurred before D-0051 and before A
 
 ### A1 quarantine minimum
 
-The generic quarantine below governs every A1 packet except an activated
-WP-0003. WP-0003's creator-ratified local-development exception is defined by
+The generic quarantine below governs every A1 packet except one explicitly
+eligible protected-PR local packet. WP-0003's active creator-ratified exception
+and WP-0002's unsealed proposed successor are defined by
 [`15-LEAN-A1-LOCAL-DEVELOPMENT.md`](15-LEAN-A1-LOCAL-DEVELOPMENT.md) and
 [`schemas/local-a1-boundary.schema.json`](schemas/local-a1-boundary.schema.json).
 It may use only a valid non-`main` `agent/*` branch whose real checkpoint exists
@@ -148,7 +149,26 @@ closed until the creator-opened exact `Game` project, licensed Editor, running
 Bridge, approved Codex client, exact target, and requested action all satisfy
 the first-use gate. This exception grants no direct Unity invocation,
 installation, credential, account, publishing, release, or self-merge
-authority.
+authority. The proposed WP-0002 successor additionally requires read-only
+foundation/governance/receipt paths, the exact five-tool Unity MCP allowlist,
+fresh protected-main `agent/*` branches, mandatory `validate` and
+`wp0002-core`, and transparent creator-delegated manual release for every pull
+request. Cursor is optional independent AI review and is neither a deterministic
+validator nor a blocking authority. The base-owned `wp0002-policy` workflow is
+only a candidate-independent canary until a live Stage-B pull request proves
+that GitHub attaches its result to the latest head; failure to prove that does
+not waive deterministic tests and instead preserves delegated manual release.
+Its sole package-graph exception is the two exact repository-local
+UPM links `file:../../SimulationCore` and `file:../../SaveContracts`, resolved
+relative to `Game/Packages/manifest.json`; registry,
+network, Git, tarball, embedded-copy, and new external dependencies remain
+denied. `Unity_RunCommand` remains a residual capability able to execute
+arbitrary Editor C# with potential host filesystem, network, process, and
+package reach; the allowlist and denied actions are creator policy, not an OS
+sandbox. Repository-admin credentials likewise make protection bypass
+technically possible for the operator, so bypass is denied creator policy and
+must be live-audited rather than described as cryptographically unavailable.
+It is not executable until separately creator-bound.
 
 For every other A1 packet, before any command runs, a creator-controlled process must materialize `governance/a1-boundaries/<packet-id>.json` under [`schemas/a1-boundary-manifest.schema.json`](schemas/a1-boundary-manifest.schema.json). The packet stores its safe path and raw SHA-256; the one `packet-activation` receipt must bind that exact hash, the packet contract, and all of the following:
 
@@ -184,7 +204,7 @@ collector binds sandbox/network attachment to each process birth identity.
 The creator receipt must follow that capture within five minutes. Disconnect
 or collector/config/process drift requires a new receipt.
 
-The same packet-specific receipt binds the packet activation claim plus its exact boundary claim: `A1-QUARANTINE-BOUNDARY-VERIFIED` for WP-0001/WP-0002 or `A1-LOCAL-BOUNDARY-VERIFIED` for WP-0003. WP-0001's receipt additionally carries `AUTHORIZE-WP0001-MCP-ALLOWLIST` for the exact digest-bound list in that same boundary. Combining these claims records one approval of one verified packet boundary; it does not invent another independent approval.
+The same packet-specific receipt binds the packet activation claim plus its exact boundary claim: `A1-QUARANTINE-BOUNDARY-VERIFIED` for generic quarantine packets or `A1-LOCAL-BOUNDARY-VERIFIED` for an explicitly eligible protected-PR local packet (active WP-0003 or the still-proposed WP-0002 successor). WP-0001's receipt additionally carries `AUTHORIZE-WP0001-MCP-ALLOWLIST` for the exact digest-bound list in that same boundary. Combining these claims records one approval of one verified packet boundary; it does not invent another independent approval.
 WP-0001 also carries `AUTHORIZE-WP0001-RAW-COLLECTORS` for the exact
 content-addressed protocol, network, and policy-attachment collectors named by
 that boundary.

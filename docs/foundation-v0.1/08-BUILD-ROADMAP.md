@@ -17,8 +17,9 @@ cannot decide gameplay, invoke Unity directly, install dependencies, publish,
 release, or merge itself.
 
 Exit: the technical sandbox passes all nine packet checks and remains
-reversible. WP-0002 still waits for WP-0001 completion unless a later protected
-decision explicitly changes that dependency.
+reversible. The unsealed first-playable proposal now changes WP-0002's declared
+dependency to creator-accepted WP-0003 release; it has no effect until the
+proposed protected transaction is ratified and materialized.
 
 ## M0T — Authorize the isolated technical proof
 
@@ -67,7 +68,7 @@ Exit: D-0013 and D-0033 are ratified or superseded with evidence. The exact Unit
 
 ### M1B — Ugly constitutional toy
 
-Canonical packet: WP-0002, dependent on accepted WP-0001 and the identity entry gate.
+Canonical packet: proposed WP-0002, dependent on released WP-0003 and the identity entry gate.
 
 - compare the D-0030 city-grammar options at slice scale before generalizing a kernel;
 - primitive city placement, one production bottleneck, and visible/aggregate logistics comparison;

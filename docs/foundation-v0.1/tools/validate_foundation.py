@@ -67,6 +67,18 @@ SCENARIO_FIXTURE_SCHEMA = ROOT / "schemas" / "scenario-fixture-manifest.schema.j
 SCENARIO_ARTIFACT_SCHEMA = ROOT / "schemas" / "scenario-artifact.schema.json"
 A1_BOUNDARY_SCHEMA = ROOT / "schemas" / "a1-boundary-manifest.schema.json"
 LOCAL_A1_BOUNDARY_SCHEMA = ROOT / "schemas" / "local-a1-boundary.schema.json"
+WP0002_WORKING_TREE_SCOPE_SCHEMA = (
+    ROOT / "schemas" / "wp0002-working-tree-scope-capture.schema.json"
+)
+WP0002_SCOPE_COLLECTOR = (
+    REPO_ROOT / "Tools" / "Validation" / "collect_wp0002_scope_capture.py"
+)
+WP0002_GITHUB_PROTECTION_SCHEMA = (
+    ROOT / "schemas" / "wp0002-github-protection-capture.schema.json"
+)
+WP0002_EXTERNAL_POLICY_CAPTURE_SCHEMA = (
+    ROOT / "schemas" / "wp0002-external-policy-capture.schema.json"
+)
 WP0001_A1_EVIDENCE_SCHEMA = (
     ROOT / "schemas" / "wp0001-a1-activation-evidence.schema.json"
 )
@@ -220,6 +232,125 @@ PACKET_CONTRACT_FIELDS = (
 PACKET_STATUSES = {
     "proposed", "accepted", "active", "verifying", "candidate", "released",
     "rejected", "rolled-back", "superseded",
+}
+WP0002_PACKAGE_GRAPH_BASE = "b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5"
+WP0002_PACKAGE_GRAPH_CHECKER = (
+    REPO_ROOT / "Tools" / "Validation" / "validate_wp0002_package_graph.py"
+)
+WP0002_PACKAGE_GRAPH_CHECKER_SHA256 = (
+    "d9b36dd20099a18de940d833085f81f60a0478f527879633e21c2d28fdae5fd2"
+)
+WP0002_PACKAGE_GRAPH_CHECKER_CONTRACT = "wp0002-package-graph-v2"
+WP0002_PACKAGE_GRAPH_PATHS = (
+    "Game/Packages/manifest.json",
+    "Game/Packages/packages-lock.json",
+    "SimulationCore/package.json",
+    "SaveContracts/package.json",
+)
+WP0002_RUNCOMMAND_RESIDUAL_CAPABILITY = {
+    "acknowledged_capability": (
+        "Unity_RunCommand compiles and executes arbitrary Editor C# with potential "
+        "host filesystem, network, process, and package reach"
+    ),
+    "assistant_permissions_and_five_tool_allowlist_are_a_sandbox": False,
+    "denied_actions_enforcement": "creator-authority-policy-only-not-os-enforcement",
+    "direct_runcommand_prohibited_until_dispatcher_materialized_and_hash_bound": True,
+    "dispatcher": {
+        "contract": "wp0002-gate-dispatcher-v1",
+        "repository_path": (
+            "Game/Assets/AtomicLandPirate/LastBearing/Editor/"
+            "WP0002GateDispatcher.cs"
+        ),
+        "allowed_gate_ids": [
+            "asset-refresh-and-compile",
+            "wp0002-editmode-test-assembly",
+            "wp0002-playmode-test-assembly",
+            "wp0002-technical-capture",
+        ],
+        "content_addressed_source_required_per_call": True,
+        "required_log_fields": [
+            "gate_id",
+            "source_sha256",
+            "command",
+            "result",
+            "started_at",
+            "completed_at",
+        ],
+        "reject_non_enumerated_invocation": True,
+    },
+    "unattended_third_party_rollout_requires_tool": "Unity_WP0002_RunGate",
+}
+WP0002_PACKAGE_META_ROOTS = ("SimulationCore", "SaveContracts")
+WP0002_PACKAGE_META_FUTURE_ROOTS = (
+    "SimulationCore/Runtime/LastBearing",
+    "SaveContracts/Runtime/LastBearing",
+)
+WP0002_REQUIRED_CI_COMMANDS = (
+    "python3 Tools/ScenarioRunner/run.py SCN_COMPOSITION_LOOP_SMOKE",
+    "python3 Tools/ScenarioRunner/run.py SCN_TIME_POLICY",
+    "python3 Tools/ScenarioRunner/run.py SCN_PREPARATION_MODULE_MATRIX",
+    "python3 Tools/ScenarioRunner/run.py SCN_FACTION_WAIT_CLAIM",
+    "python3 Tools/ScenarioRunner/run.py SCN_BEARING_COOPERATE",
+    "dotnet run --project Tests/AtomicLandPirate.CoreTests/LastBearing/AtomicLandPirate.LastBearingTests.csproj --configuration Release -- --test dev-save-atomic",
+    "dotnet run --project Tests/AtomicLandPirate.CoreTests/LastBearing/AtomicLandPirate.LastBearingTests.csproj --configuration Release -- --test dev-save-boundary",
+)
+WP0002_REQUIRED_CI_TEST_IDS = (
+    "T-COMPOSITION-LOOP",
+    "T-TIME-POLICY",
+    "T-PERMUTATIONS",
+    "T-FACTION-AUTONOMY",
+    "T-FACTION-DOCTRINE",
+    "T-DEV-SAVE-ATOMIC",
+    "T-DEV-SAVE-BOUNDARY",
+)
+WP0002_PACKAGE_META_SHA256 = {
+    "SimulationCore/AtomicLandPirate.SimulationCore.csproj.meta": "4c91c53271945d37a3e9fd3d025430597c7ac2fbf00459a550a8de45cbf17f09",
+    "SimulationCore/Directory.Build.props.meta": "57ef9a8dcc16fe597c51f8606d58c7628c26209e078ebdaf4ecb7ffbd27a09ae",
+    "SimulationCore/Directory.Build.targets.meta": "c2107b8e396b6cc3d55bcc72c14372f0daf609d218af1880e9957bf9da7d476c",
+    "SimulationCore/README.md.meta": "4dc53b6f2602bff03af074b5256c49fe8f90cec472ae146e53e8bc7e0ad62d8a",
+    "SimulationCore/Runtime.meta": "a09dc4b6b8a8267d0309d94503a11d61d6f8df7d697869a326073efecaeecd41",
+    "SimulationCore/Runtime/AC21.Sasha.SimulationCore.asmdef.meta": "26b6195c97eb31bb10dbc37546417964043211f1e3e4fb8eb0f497c0e5f41345",
+    "SimulationCore/Runtime/AssemblyInfo.cs.meta": "785240d9a9760f4eeab25cd35008195f18e519a7db86b0d92f5b1cafdf33594b",
+    "SimulationCore/Runtime/CanonicalState.cs.meta": "fba6fcf4ad72036dc2aa6ce04d73480bfbd3906ab5ee86215339bcd59ff81889",
+    "SimulationCore/Runtime/SimulationKernel.cs.meta": "39c90ad25a63869be2313729b87809bf6650f240d0067214a8ffb0494c076a61",
+    "SimulationCore/Runtime/TechnicalCommand.cs.meta": "775230fe850d930e297ac2fd04a02f6b6cadfc4b4c45efe44f59b76590cffe0a",
+    "SimulationCore/Runtime/TechnicalDeltaApplied.cs.meta": "d0a9854e592270dd734387abe1fbda91c2e3d55b05d24408d3bde8d576cd688c",
+    "SimulationCore/Runtime/TechnicalReadModel.cs.meta": "cb91e0bac503dbbb1db23c8d77ea4f4051129853fc1a95ce031af0bdd905f97e",
+    "SimulationCore/Runtime/TechnicalRunResult.cs.meta": "6aa6ab347303168275383f53818f539e0c3aee2532af90ad8d26b3d7cd103e02",
+    "SimulationCore/Runtime/TechnicalState.cs.meta": "889e8cea32bad49932464fee6dbd0bd8b4d2eea0a4ca723ffec6b05e05cef9f2",
+    "SimulationCore/Runtime/TechnicalTransition.cs.meta": "22ca975345dedafe9ecf9384a0f9a71bc240de56da8ec3bad4e303d1ee0d5189",
+    "SimulationCore/package.json.meta": "a812ce6911d0d1c442dc33159d261e3aaa9bc1822be8521341f83ec5e0eda532",
+    "SaveContracts/AtomicLandPirate.SaveContracts.csproj.meta": "1ac3012347dbe5e77a9b8f561a5dded4ff7b78651469dbf6128f0f4e61b054ac",
+    "SaveContracts/Directory.Build.props.meta": "3c90dbeb3a811a1f68b79b42f1d8f282629c7c1fbc5464bb1b54ae69c55d9198",
+    "SaveContracts/Directory.Build.targets.meta": "5e439875d29f3b2e1ea0d04410fd7125a0b8fa1153b42db0f8db8a45e7f05d2f",
+    "SaveContracts/README.md.meta": "7ae0afaeb3218efa8559f79b96618f9efbc05140f09e0034c750902ea0f9ee0f",
+    "SaveContracts/Runtime.meta": "a93a659f6bd355327edec9f66e6d2adfc96c42eac02a8ef9385acddf4da03e0c",
+    "SaveContracts/Runtime/AC21.Sasha.SaveContracts.asmdef.meta": "b567c2d4e91c5e2d1d4b9b1e0b339e065a2dbc8e6838c52c866eb472428fe1df",
+    "SaveContracts/Runtime/ISavePort.cs.meta": "93f628c2355c2e97f666293fbead07b11b9b87ec317d5ca678640e8d0138bc68",
+    "SaveContracts/Runtime/NonPersistingSavePort.cs.meta": "2b68f8b175c8e6c266a2927cefd2386cfdaad800899e6dc41b2fb51f9ab51bb5",
+    "SaveContracts/Runtime/SaveAttemptResult.cs.meta": "482e1b15abdf983d63fbe385c1dac8e5432b0aafaab5df607afa1894be2322bb",
+    "SaveContracts/Runtime/SaveCapability.cs.meta": "6cefc1774346724c0f3b7a5a128a42710b34615daff3f243ede7928a804ac2f3",
+    "SaveContracts/package.json.meta": "0dc20ad4d418e8b83971235e5acdc7cf145a36cdf4d09c9afb2097cc9dc11a9b",
+}
+WP0002_PROTECTED_SELF_VERIFICATION = {
+    "Tools/Validation/validate_wp0002_package_graph.py": (
+        "d9b36dd20099a18de940d833085f81f60a0478f527879633e21c2d28fdae5fd2"
+    ),
+    "Tools/Validation/validate_wp0002_entry_gate.py": (
+        "8bba4fccf7a0ac8cdcc488046fba4ce05fee6ef41903b0f545a028b40a3daeb0"
+    ),
+    "Tools/Validation/validate_wp0002_policy.py": (
+        "69f87d5a0b59cdcb9fe1a8f1cc98359835b5163e2178a2d1529706382690f6c4"
+    ),
+    "Tools/Validation/collect_wp0002_scope_capture.py": (
+        "68da58dc0d026b3ad249959d65a4459f32941d1fc39963fce69f3bdf8bbcda9f"
+    ),
+    ".github/workflows/wp0002-ci.yml": (
+        "893cd3faacb887b2d9112c30e15a29b27fb8f3511001ef4091a04f1f88e2f0b9"
+    ),
+    ".github/workflows/wp0002-policy.yml": (
+        "8e3365b0591c85d12e02ed7bf6a819697491cdf33aa67cc1e640c069b5fb8121"
+    ),
 }
 PACKET_TRANSITIONS = {
     "proposed": {"accepted", "rejected", "superseded"},
@@ -2306,6 +2437,63 @@ def artifact_is_content_addressed(artifact: object) -> bool:
     )
 
 
+def validate_wp0002_baseline_evidence_contract(packet: dict) -> list[str]:
+    """Keep WP-0002 acceptance inputs immutable, resolved, and non-authoritative."""
+    expected = [
+        {
+            "id": "BASE-WP0003",
+            "type": "dependency-completion-evidence",
+            "uri": "git-object://b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5/docs/evidence/WP-0003/TECHNICAL-SANDBOX-20260716.md",
+            "sha256": "c381771d45bae630b16ab08c1eb11f63d0c9e563c6b7f77e0d7ea2952d5832ae",
+        },
+        {
+            "id": "BASE-IDENTITY",
+            "type": "identity-source",
+            "uri": "git-object://b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5/docs/foundation-v0.1/ledger/decisions.jsonl",
+            "sha256": "df5a4840f468676d6e3b428be1eda957310ef12c812241c5be3cdde6bd4601ef",
+        },
+        {
+            "id": "BASE-CORE",
+            "type": "constitutional-source",
+            "uri": "git-object://b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5/docs/foundation-v0.1/00-GAME-CONSTITUTION.md",
+            "sha256": "ff6d7938c14a074acf796619868b97551cefd1681147559983a293792c20afb8",
+        },
+        {
+            "id": "BASE-CITY-COMPARISON",
+            "type": "city-comparison-control",
+            "uri": "git-object://b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5/docs/foundation-v0.1/02-SYSTEM-MAP.md",
+            "sha256": "ee0ceb2e28d94b894735ddb15d2f32cd4f1403eeaece82e8f03506cf05293c68",
+        },
+        {
+            "id": "BASE-CAMERA",
+            "type": "camera-control-source",
+            "uri": "git-object://b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5/docs/foundation-v0.1/05-ART-BIBLE.md",
+            "sha256": "b1b3b950c13725651df61682d3b7b9c5374e995bb52a1f998b845cf00cd3483f",
+        },
+        {
+            "id": "BASE-SLICE",
+            "type": "slice-source",
+            "uri": "git-object://b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5/docs/foundation-v0.1/03-VERTICAL-SLICE.md",
+            "sha256": "ddf77882b81f54dcbb70a1d3d1d7347ba62be5447edfe2aac236941651c70b9b",
+        },
+    ]
+    baseline = packet.get("baseline_evidence")
+    if baseline != expected:
+        return [
+            "WP-0002 baseline evidence must equal the six protected, content-addressed source artifacts"
+        ]
+    if packet.get("status") in {
+        "accepted",
+        "active",
+        "verifying",
+        "candidate",
+        "released",
+        "rolled-back",
+    } and any(not artifact_is_content_addressed(item) for item in baseline):
+        return ["accepted or active WP-0002 baseline evidence cannot remain pending"]
+    return []
+
+
 def validate_status_event_chain(path: Path, packet: dict) -> list[str]:
     errors: list[str] = []
     label = str(path.relative_to(ROOT))
@@ -2365,6 +2553,8 @@ def validate_work_packet_semantics(path: Path) -> list[str]:
             f"{path.relative_to(ROOT)} contract_sha256 does not match canonical packet-contract-v1: "
             f"expected {calculated_contract}"
         )
+    if packet.get("id") == "WP-0002":
+        errors.extend(validate_wp0002_baseline_evidence_contract(packet))
     rank = {"low": 0, "medium": 1, "high": 2, "constitutional": 3}
     declared = packet.get("declared_risk")
     derived = packet.get("derived_risk")
@@ -5972,22 +6162,483 @@ def load_json_bytes(raw: bytes, label: str) -> tuple[object | None, list[str]]:
         return None, [f"{label} is not valid UTF-8 JSON: {exc}"]
 
 
+def validate_wp0002_working_tree_scope_capture(
+    manifest: dict,
+    packet: dict,
+    activation_receipt: dict | None,
+) -> list[str]:
+    """Resolve and verify WP-0002's attested working-tree scope proof."""
+    errors: list[str] = []
+    label = "WP-0002 working-tree scope capture"
+    reference = manifest.get("working_tree_scope_capture")
+    if not isinstance(reference, dict):
+        return [f"{label} reference is missing"]
+    expected_uri = (
+        "repo://docs/evidence/WP-0002/scope-capture/working-tree-scope.json"
+    )
+    if reference.get("uri") != expected_uri:
+        return [f"{label} must use {expected_uri}"]
+    relative = expected_uri.removeprefix("repo://")
+    capture_path, path_error = safe_repo_path(relative, label)
+    if path_error:
+        return errors + [path_error]
+    if capture_path is None or not capture_path.exists():
+        return errors + [f"{label} file does not exist"]
+    try:
+        metadata = capture_path.lstat()
+    except OSError as exc:
+        return errors + [f"{label} cannot be inspected: {exc}"]
+    if not stat.S_ISREG(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+        return errors + [f"{label} must be a regular non-symlink file"]
+
+    actual_hash = sha256_file(capture_path)
+    if reference.get("sha256") != actual_hash:
+        errors.append(f"{label} raw hash mismatch")
+    errors.extend(validate_instance_shape(capture_path, WP0002_WORKING_TREE_SCOPE_SCHEMA))
+    capture = load_json(capture_path)
+
+    reservation = packet.get("reservation", {})
+    protected_paths = manifest.get("permission_boundary", {}).get(
+        "protected_paths_read_only", []
+    )
+    collector, collector_errors = _load_wp0002_scope_collector()
+    errors.extend(collector_errors)
+    if collector is not None:
+        status = packet.get("status")
+        mode = (
+            "live-current"
+            if status in {"active", "verifying", "candidate"}
+            else "terminal-retained"
+        )
+        verifier = collector.get("verify_scope_capture")
+        if callable(verifier):
+            errors.extend(
+                verifier(
+                    REPO_ROOT,
+                    relative,
+                    expected_capture_sha256=actual_hash,
+                    expected_base_commit=reservation.get("base_commit"),
+                    expected_head_commit=reservation.get("base_commit"),
+                    expected_checkpoint_commit=reservation.get("base_commit"),
+                    expected_reservation_paths=reservation.get("paths", []),
+                    expected_protected_paths=protected_paths,
+                    receipt_issued_at=(
+                        activation_receipt.get("issued_at")
+                        if isinstance(activation_receipt, dict)
+                        else ""
+                    ),
+                    mode=mode,
+                )
+            )
+        else:
+            errors.append("WP-0002 scope collector lacks its verifier")
+
+    receipt_hashes = (
+        activation_receipt.get("artifact_sha256", {})
+        if isinstance(activation_receipt, dict)
+        else {}
+    )
+    if receipt_hashes.get(relative) != actual_hash:
+        errors.append(f"WP-0002 activation receipt does not bind scope capture bytes")
+    for artifact in capture.get("artifacts", {}).values():
+        if not isinstance(artifact, dict):
+            continue
+        artifact_path = artifact.get("path")
+        artifact_hash = artifact.get("sha256")
+        if receipt_hashes.get(artifact_path) != artifact_hash:
+            errors.append(
+                f"WP-0002 activation receipt does not bind scope artifact {artifact_path}"
+            )
+    return errors
+
+
+def _load_wp0002_scope_collector() -> tuple[dict[str, object] | None, list[str]]:
+    expected_hash = WP0002_PROTECTED_SELF_VERIFICATION.get(
+        "Tools/Validation/collect_wp0002_scope_capture.py"
+    )
+    try:
+        metadata = WP0002_SCOPE_COLLECTOR.lstat()
+        source = WP0002_SCOPE_COLLECTOR.read_bytes()
+    except OSError as exc:
+        return None, [f"WP-0002 protected scope collector is missing: {exc}"]
+    if not stat.S_ISREG(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+        return None, ["WP-0002 protected scope collector is not a regular file"]
+    actual_hash = hashlib.sha256(source).hexdigest()
+    if not isinstance(expected_hash, str) or actual_hash != expected_hash:
+        return None, ["WP-0002 protected scope collector hash mismatch"]
+    namespace: dict[str, object] = {"__name__": "wp0002_scope_collector_pinned"}
+    try:
+        exec(compile(source, str(WP0002_SCOPE_COLLECTOR), "exec"), namespace)
+    except Exception as exc:
+        return None, [f"WP-0002 protected scope collector cannot load: {exc}"]
+    return namespace, []
+
+
+def _load_wp0002_repo_evidence(
+    reference: object,
+    *,
+    expected_uri: str,
+    schema_path: Path,
+    label: str,
+) -> tuple[dict | None, str | None, str | None, list[str]]:
+    errors: list[str] = []
+    if not isinstance(reference, dict) or reference.get("uri") != expected_uri:
+        return None, None, None, [f"{label} reference is not exact"]
+    relative = expected_uri.removeprefix("repo://")
+    evidence_path, path_error = safe_repo_path(relative, label)
+    if path_error:
+        return None, relative, None, [path_error]
+    if evidence_path is None or not evidence_path.exists():
+        return None, relative, None, [f"{label} file does not exist"]
+    try:
+        metadata = evidence_path.lstat()
+    except OSError as exc:
+        return None, relative, None, [f"{label} cannot be inspected: {exc}"]
+    if not stat.S_ISREG(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+        return None, relative, None, [f"{label} must be a regular non-symlink file"]
+    actual_hash = sha256_file(evidence_path)
+    if reference.get("sha256") != actual_hash:
+        errors.append(f"{label} raw hash mismatch")
+    errors.extend(validate_instance_shape(evidence_path, schema_path))
+    try:
+        evidence = load_json(evidence_path)
+    except (OSError, json.JSONDecodeError) as exc:
+        return None, relative, actual_hash, errors + [f"{label} cannot be parsed: {exc}"]
+    return evidence, relative, actual_hash, errors
+
+
+def _load_wp0002_raw_json_evidence(
+    reference: object,
+    *,
+    expected_uri: str,
+    label: str,
+) -> tuple[object | None, str | None, str | None, list[str]]:
+    if not isinstance(reference, dict) or reference.get("uri") != expected_uri:
+        return None, None, None, [f"{label} reference is not exact"]
+    relative = expected_uri.removeprefix("repo://")
+    path, path_error = safe_repo_path(relative, label)
+    if path_error:
+        return None, relative, None, [path_error]
+    if path is None or not path.exists():
+        return None, relative, None, [f"{label} file does not exist"]
+    try:
+        metadata = path.lstat()
+    except OSError as exc:
+        return None, relative, None, [f"{label} cannot be inspected: {exc}"]
+    if not stat.S_ISREG(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+        return None, relative, None, [f"{label} must be a regular non-symlink file"]
+    actual_hash = sha256_file(path)
+    errors: list[str] = []
+    if reference.get("sha256") != actual_hash:
+        errors.append(f"{label} raw hash mismatch")
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        return None, relative, actual_hash, errors + [f"{label} is not valid JSON: {exc}"]
+    return value, relative, actual_hash, errors
+
+
+def validate_wp0002_external_policy_and_github_capture(
+    manifest: dict,
+    packet: dict,
+    activation_receipt: dict | None,
+) -> list[str]:
+    """Verify external Cursor-App policy evidence and live branch protection."""
+    errors: list[str] = []
+    external = manifest.get("external_cursor_review_control", {})
+    expected_external = {
+        "provider": "Cursor Approval Agent",
+        "check_context": "Cursor Approval Agent: Pull Request Approver",
+        "github_app_id": 1210556,
+        "optional_review": True,
+        "blocking_required_check": False,
+        "classification": "independent-ai-review-not-deterministic-validator",
+        "prompt_injection_residual_acknowledged": True,
+        "deterministic_non_llm_execution_seam": None,
+        "policy_path": "Tools/Validation/validate_wp0002_policy.py",
+        "policy_source_sha": external.get("policy_source_sha"),
+        "same_repository_only": True,
+        "base_ref": "main",
+        "head_ref_prefix": "agent/",
+        "candidate_code_execution": False,
+        "creator_manual_transition_required": True,
+        "manual_gate_transitions": [
+            "proposed-to-accepted",
+            "accepted-to-active",
+            "active-to-verifying",
+            "verifying-to-candidate",
+            "candidate-to-released",
+        ],
+        "configuration_capture": external.get("configuration_capture"),
+    }
+    if external != expected_external:
+        errors.append("WP-0002 external Cursor-App policy boundary is not exact")
+    policy_source_sha = external.get("policy_source_sha")
+    if not isinstance(policy_source_sha, str) or not re.fullmatch(
+        r"[0-9a-f]{40}", policy_source_sha
+    ):
+        errors.append("WP-0002 external policy lacks a protected source SHA")
+
+    config, config_relative, config_hash, config_errors = _load_wp0002_repo_evidence(
+        external.get("configuration_capture"),
+        expected_uri="repo://docs/evidence/WP-0002/cursor-approval-policy.json",
+        schema_path=WP0002_EXTERNAL_POLICY_CAPTURE_SCHEMA,
+        label="WP-0002 external Cursor-App configuration capture",
+    )
+    errors.extend(config_errors)
+    repository = manifest.get("repository", {})
+    if isinstance(config, dict):
+        raw_config, raw_config_relative, raw_config_hash, raw_config_errors = (
+            _load_wp0002_raw_json_evidence(
+                config.get("raw_configuration_artifact"),
+                expected_uri=(
+                    "repo://docs/evidence/WP-0002/cursor-approval-policy.raw-config.json"
+                ),
+                label="WP-0002 raw external Cursor-App configuration",
+            )
+        )
+        errors.extend(raw_config_errors)
+        if config.get("configuration_sha256") != raw_config_hash:
+            errors.append("WP-0002 external policy configuration hash does not bind raw bytes")
+        expected_raw_config = {
+            "revision": config.get("configuration_revision"),
+            "check_context": "Cursor Approval Agent: Pull Request Approver",
+            "github_app_id": 1210556,
+            "classification": "independent-ai-review-not-deterministic-validator",
+            "prompt_injection_residual_acknowledged": True,
+            "deterministic_non_llm_execution_seam": None,
+            "policy_source_sha": policy_source_sha,
+            "candidate_code_execution": False,
+            "creator_manual_transition_required": True,
+        }
+        if raw_config != expected_raw_config:
+            errors.append("WP-0002 normalized Cursor review differs from raw configuration bytes")
+        if config.get("policy_source_sha") != policy_source_sha:
+            errors.append("WP-0002 external policy configuration binds another source SHA")
+        verification = config.get("verification_run", {})
+        if verification.get("base_sha") != repository.get("base_commit"):
+            errors.append("WP-0002 external policy verification binds another base")
+        if verification.get("head_sha") != repository.get("branch_head_commit"):
+            errors.append("WP-0002 external policy verification binds another head")
+        config_time = parse_datetime(config.get("captured_at"))
+        receipt_time = parse_datetime(
+            activation_receipt.get("issued_at")
+            if isinstance(activation_receipt, dict)
+            else None
+        )
+        if (
+            config_time is None
+            or receipt_time is None
+            or config_time > receipt_time
+            or receipt_time - config_time > timedelta(minutes=15)
+        ):
+            errors.append("WP-0002 external policy configuration capture is not fresh")
+
+    policy_hash = WP0002_PROTECTED_SELF_VERIFICATION.get(
+        "Tools/Validation/validate_wp0002_policy.py"
+    )
+    if isinstance(policy_source_sha, str) and isinstance(policy_hash, str):
+        policy_blob = run_foundation_git(
+            [
+                "show",
+                f"{policy_source_sha}:Tools/Validation/validate_wp0002_policy.py",
+            ]
+        )
+        if (
+            policy_blob.returncode != 0
+            or hashlib.sha256(policy_blob.stdout).hexdigest() != policy_hash
+        ):
+            errors.append("WP-0002 external policy source bytes do not match the frozen checker")
+    else:
+        errors.append("WP-0002 frozen external policy hash is not configured")
+
+    protection_ref = manifest.get("github_protection_capture", {})
+    if protection_ref.get("required_schema") != "wp0002-github-protection-v1":
+        errors.append("WP-0002 GitHub protection capture schema declaration is wrong")
+    protection, protection_relative, protection_hash, protection_errors = (
+        _load_wp0002_repo_evidence(
+            protection_ref.get("artifact"),
+            expected_uri="repo://docs/evidence/WP-0002/github-protection.json",
+            schema_path=WP0002_GITHUB_PROTECTION_SCHEMA,
+            label="WP-0002 GitHub protection capture",
+        )
+    )
+    errors.extend(protection_errors)
+    canary_state = manifest.get("git_safety", {}).get("policy_canary_state")
+    expected_checks = [
+        {"context": "validate", "app_id": 15368},
+        {"context": "wp0002-core", "app_id": 15368},
+    ]
+    if canary_state == "proven-candidate-independent":
+        expected_checks.append({"context": "wp0002-policy", "app_id": 15368})
+    if isinstance(protection, dict):
+        exact_fields = {
+            "repository": "AC-21/sasha-the-land-pirate",
+            "protected_branch": "main",
+            "stage_c_base_sha": packet.get("reservation", {}).get("base_commit"),
+            "post_merge_live_monitoring": "required-separate-live-capture",
+            "strict_up_to_date": True,
+            "required_status_checks": expected_checks,
+            "policy_canary_state": canary_state,
+            "enforce_admins": True,
+            "pull_request_required": True,
+            "required_pull_request_reviews": {
+                "dismiss_stale_reviews": False,
+                "require_code_owner_reviews": False,
+                "required_approving_review_count": 0,
+                "require_last_push_approval": False,
+                "bypass_pull_request_allowances": {
+                    "users": [],
+                    "teams": [],
+                    "apps": [],
+                },
+            },
+            "push_restrictions": {"users": [], "teams": [], "apps": []},
+            "conversation_resolution_required": True,
+            "linear_history_required": True,
+            "force_push_disabled": True,
+            "deletion_disabled": True,
+            "merge_methods": {"merge": False, "rebase": False, "squash": True},
+            "auto_merge_enabled": True,
+        }
+        for field, expected in exact_fields.items():
+            if protection.get(field) != expected:
+                errors.append(f"WP-0002 GitHub protection {field} is not exact")
+        expected_policy = {
+            "policy_path": "Tools/Validation/validate_wp0002_policy.py",
+            "policy_source_sha": policy_source_sha,
+            "configuration_capture_uri": (
+                "repo://docs/evidence/WP-0002/cursor-approval-policy.json"
+            ),
+            "configuration_capture_sha256": config_hash,
+            "candidate_code_execution": False,
+            "classification": "independent-ai-review-not-deterministic-validator",
+            "prompt_injection_residual_acknowledged": True,
+            "deterministic_non_llm_execution_seam": None,
+            "creator_manual_transition_required": True,
+        }
+        if protection.get("external_cursor_review") != expected_policy:
+            errors.append("WP-0002 GitHub protection does not bind exact external Cursor review")
+        raw_protection, raw_protection_relative, raw_protection_hash, raw_errors = (
+            _load_wp0002_raw_json_evidence(
+                protection.get("raw_branch_protection_artifact"),
+                expected_uri=(
+                    "repo://docs/evidence/WP-0002/github-protection.raw-api.json"
+                ),
+                label="WP-0002 raw GitHub branch-protection API capture",
+            )
+        )
+        errors.extend(raw_errors)
+        ruleset_inventory = protection.get("ruleset_inventory", {})
+        raw_rulesets, raw_rulesets_relative, raw_rulesets_hash, ruleset_errors = (
+            _load_wp0002_raw_json_evidence(
+                ruleset_inventory.get("raw_artifact"),
+                expected_uri="repo://docs/evidence/WP-0002/github-protection.raw-rulesets.json",
+                label="WP-0002 raw GitHub ruleset inventory",
+            )
+        )
+        errors.extend(ruleset_errors)
+        if raw_rulesets != [] or ruleset_inventory.get("count") != 0 or ruleset_inventory.get("rulesets") != []:
+            errors.append("WP-0002 GitHub ruleset inventory must prove an exact empty response")
+        expected_raw = {
+            "main": {"sha": protection.get("stage_c_base_sha")},
+            "branch_protection": {
+                "required_status_checks": {
+                    "strict": protection.get("strict_up_to_date"),
+                    "checks": protection.get("required_status_checks"),
+                },
+                "enforce_admins": {"enabled": protection.get("enforce_admins")},
+                "required_pull_request_reviews": protection.get(
+                    "required_pull_request_reviews"
+                ),
+                "restrictions": protection.get("push_restrictions"),
+                "required_conversation_resolution": {
+                    "enabled": protection.get("conversation_resolution_required")
+                },
+                "required_linear_history": {
+                    "enabled": protection.get("linear_history_required")
+                },
+                "allow_force_pushes": {
+                    "enabled": not protection.get("force_push_disabled")
+                },
+                "allow_deletions": {
+                    "enabled": not protection.get("deletion_disabled")
+                },
+            },
+            "repository": {
+                "allow_auto_merge": protection.get("auto_merge_enabled"),
+                "allow_squash_merge": protection.get("merge_methods", {}).get(
+                    "squash"
+                ),
+                "allow_merge_commit": protection.get("merge_methods", {}).get(
+                    "merge"
+                ),
+                "allow_rebase_merge": protection.get("merge_methods", {}).get(
+                    "rebase"
+                ),
+            },
+        }
+        if raw_protection != expected_raw:
+            errors.append("WP-0002 normalized protection differs from raw GitHub API bytes")
+        observed_time = parse_datetime(protection.get("observed_at"))
+        receipt_time = parse_datetime(
+            activation_receipt.get("issued_at")
+            if isinstance(activation_receipt, dict)
+            else None
+        )
+        if (
+            observed_time is None
+            or receipt_time is None
+            or observed_time > receipt_time
+            or receipt_time - observed_time > timedelta(minutes=15)
+        ):
+            errors.append("WP-0002 GitHub protection capture is not fresh")
+
+    receipt_hashes = (
+        activation_receipt.get("artifact_sha256", {})
+        if isinstance(activation_receipt, dict)
+        else {}
+    )
+    for relative, actual_hash, label in (
+        (config_relative, config_hash, "external policy configuration"),
+        (protection_relative, protection_hash, "GitHub protection capture"),
+        (
+            locals().get("raw_config_relative"),
+            locals().get("raw_config_hash"),
+            "raw external policy configuration",
+        ),
+        (
+            locals().get("raw_protection_relative"),
+            locals().get("raw_protection_hash"),
+            "raw GitHub branch protection",
+        ),
+        (
+            locals().get("raw_rulesets_relative"),
+            locals().get("raw_rulesets_hash"),
+            "raw GitHub ruleset inventory",
+        ),
+    ):
+        if relative is not None and receipt_hashes.get(relative) != actual_hash:
+            errors.append(f"WP-0002 activation receipt does not bind {label} bytes")
+    return errors
+
+
 def validate_local_a1_boundary_manifest(
     packet: dict,
     state: dict,
     activation_receipt: dict | None,
     receipts_by_id: dict[str, dict],
 ) -> tuple[dict | None, list[str]]:
-    """Validate the compact creator-attested WP-0003 local-development boundary."""
+    """Validate a compact creator-attested protected-PR local-development boundary."""
     errors: list[str] = []
     packet_id = packet.get("id", "unknown-packet")
-    if packet_id != "WP-0003":
+    if packet_id not in {"WP-0002", "WP-0003"}:
         return None, [f"{packet_id} is not eligible for the local A1 boundary"]
 
     reference = packet.get("a1_boundary_manifest")
     if not isinstance(reference, dict):
         return None, [f"{packet_id} lacks a canonical local A1 boundary reference"]
-    expected_path = "governance/a1-boundaries/WP-0003.json"
+    expected_path = f"governance/a1-boundaries/{packet_id}.json"
     if reference.get("path") != expected_path:
         errors.append(f"{packet_id} local boundary must use {expected_path}")
     manifest_path, path_error = safe_foundation_path(
@@ -6010,6 +6661,110 @@ def validate_local_a1_boundary_manifest(
         errors.append(f"{packet_id} local boundary binds another packet")
     if manifest.get("packet_contract_sha256") != packet.get("contract_sha256"):
         errors.append(f"{packet_id} local boundary binds the wrong packet contract")
+    if packet_id == "WP-0002":
+        expected_tools = [
+            "Unity_ReadConsole",
+            "Unity_RunCommand",
+            "Unity_ManageEditor",
+            "Unity_ManageGameObject",
+            "Unity_Camera_Capture",
+        ]
+        expected_local_package_links = {
+            "com.ac21.sasha.simulation-core": "file:../../SimulationCore",
+            "com.ac21.sasha.save-contracts": "file:../../SaveContracts",
+        }
+        expected_local_save_boundary = {
+            "profile_id": "last-bearing-dev-v1",
+            "root_source": "UnityEngine.Application.persistentDataPath",
+            "fixed_child": "last-bearing-dev-v1",
+            "fixed_child_only": True,
+            "write_authority": "unity-runtime-only-via-SaveContracts",
+            "direct_agent_or_host_filesystem_write": False,
+            "sibling_scan": False,
+            "presentation_arbitrary_root_constructor": False,
+            "load_visible_pointers": ["current", "last-good"],
+        }
+        expected_drift = {
+            ".codex/config.toml": "unstaged-modified",
+            "Game/ProjectSettings/ProjectSettings.asset": "unstaged-modified",
+            "Game/ProjectSettings/SceneTemplateSettings.json": "untracked",
+        }
+        if manifest.get("lifecycle_state") != "attested":
+            errors.append(f"{packet_id} local boundary remains proposed")
+        if manifest.get("allowed_mcp_tools") != expected_tools:
+            errors.append(f"{packet_id} local boundary must bind the exact five-tool Unity MCP route")
+        if manifest.get("local_package_links") != expected_local_package_links:
+            errors.append(f"{packet_id} local boundary must bind the exact two repository-local UPM links")
+        if manifest.get("local_save_boundary") != expected_local_save_boundary:
+            errors.append(f"{packet_id} local boundary must bind the exact fixed-child runtime save policy")
+        if (
+            manifest.get("unity_runcommand_residual_capability")
+            != WP0002_RUNCOMMAND_RESIDUAL_CAPABILITY
+        ):
+            errors.append(
+                f"{packet_id} local boundary must acknowledge exact Unity_RunCommand residual capability"
+            )
+        git_safety = manifest.get("git_safety", {})
+        if (
+            git_safety.get("auto_merge_required") is not False
+            or git_safety.get("autonomy_classification")
+            != "creator-delegated-manual-per-pr"
+            or git_safety.get("delegated_release_required_per_pr") is not True
+        ):
+            errors.append(
+                f"{packet_id} local boundary must remain creator-delegated per PR until canary proof"
+            )
+        canary = git_safety.get("policy_canary_state")
+        expected_checks = (
+            ["validate", "wp0002-core", "wp0002-policy"]
+            if canary == "proven-candidate-independent"
+            else ["validate", "wp0002-core"]
+        )
+        if git_safety.get("required_checks") != expected_checks:
+            errors.append(f"{packet_id} required checks do not match policy canary state")
+        expected_manual_authority = {
+            "authority_source": "authenticated-creator-delegation",
+            "transmission_agent": "Codex",
+            "attribution": "creator-delegated-manual-approval-transmitted-by-Codex",
+            "cursor_absence_does_not_block": True,
+            "deterministic_checks_nonwaivable": ["validate", "wp0002-core"],
+            "external_protected_receipt_required": True,
+            "direct_self-merge_authorized": False,
+            "repo_admin_capability_acknowledged": True,
+            "branch_protection_is_credential_isolation": False,
+            "protection_bypass_constraint": (
+                "denied-creator-policy-with-live-audit-and-canary"
+            ),
+        }
+        if manifest.get("creator_delegated_manual_authority") != expected_manual_authority:
+            errors.append(f"{packet_id} creator-delegated manual authority is not exact")
+        if manifest.get("repository", {}).get("clean_at_activation") is not False:
+            errors.append(f"{packet_id} local boundary must honestly retain creator-owned drift")
+        for field in (
+            "index_clean_at_activation",
+            "non_excluded_scope_clean_at_activation",
+            "reserved_scope_clean_at_activation",
+        ):
+            if manifest.get(field) is not True:
+                errors.append(f"{packet_id} local boundary {field} must be true")
+        drift_items = manifest.get("excluded_creator_owned_drift", [])
+        observed_drift = {
+            item.get("path"): item.get("normalized_git_state")
+            for item in drift_items
+            if isinstance(item, dict)
+        }
+        if len(drift_items) != 3 or observed_drift != expected_drift:
+            errors.append(f"{packet_id} local boundary creator-owned drift set is not exact")
+        if not artifact_is_content_addressed(manifest.get("working_tree_scope_capture")):
+            errors.append(f"{packet_id} local boundary lacks a content-addressed working-tree scope capture")
+        protected_paths = manifest.get("permission_boundary", {}).get(
+            "protected_paths_read_only", []
+        )
+        if "docs/foundation-v0.1/" not in protected_paths:
+            errors.append(f"{packet_id} local boundary must keep foundation/governance/receipts read-only")
+        for drift_path in expected_drift:
+            if drift_path not in protected_paths:
+                errors.append(f"{packet_id} local boundary must protect excluded creator path {drift_path}")
 
     reservation = packet.get("reservation", {})
     repository = manifest.get("repository", {})
@@ -6040,22 +6795,42 @@ def validate_local_a1_boundary_manifest(
     }
     if manifest.get("reservation") != expected_reservation:
         errors.append(f"{packet_id} local boundary does not exactly bind its reservation")
+    if packet_id == "WP-0002":
+        protected_paths = manifest.get("permission_boundary", {}).get(
+            "protected_paths_read_only", []
+        )
+        for reserved_path in reservation.get("paths", []):
+            for protected_path in protected_paths:
+                if repo_paths_overlap(reserved_path, protected_path):
+                    errors.append(
+                        f"{packet_id} local boundary reservation overlaps protected path: "
+                        f"{reserved_path} vs {protected_path}"
+                    )
     if manifest.get("git_safety", {}).get("checkpoint_commit") != reservation.get(
         "base_commit"
     ):
         errors.append(f"{packet_id} local boundary checkpoint differs from reserved base")
 
-    expected_foundation = {
+    current_foundation = {
         "constitution_sha256": state.get("constitution_sha256"),
         "decision_ledger_sha256": state.get("decision_ledger_sha256"),
         "last_creator_receipt_id": state.get("last_creator_receipt_id"),
     }
-    if manifest.get("foundation_binding") != expected_foundation:
+    current_authority_status = packet.get("status") in {
+        "active",
+        "verifying",
+        "candidate",
+    }
+    historical_status = not current_authority_status
+    authority_foundation = (
+        manifest.get("foundation_binding") if historical_status else current_foundation
+    )
+    if not historical_status and manifest.get("foundation_binding") != current_foundation:
         errors.append(f"{packet_id} local boundary does not bind current foundation authority")
 
     required_claims = {
         "A1-LOCAL-BOUNDARY-VERIFIED",
-        "ACTIVATE-A1-WP-0003",
+        f"ACTIVATE-A1-{packet_id}",
     }
     if not isinstance(activation_receipt, dict):
         errors.append(f"{packet_id} local boundary has no activation receipt")
@@ -6090,9 +6865,10 @@ def validate_local_a1_boundary_manifest(
             errors.append(
                 f"{packet_id} activation receipt does not bind local boundary bytes"
             )
-        if activation_receipt.get("foundation_binding") != expected_foundation:
+        if activation_receipt.get("foundation_binding") != authority_foundation:
+            qualifier = "retained historical" if historical_status else "current"
             errors.append(
-                f"{packet_id} local activation receipt lacks foundation binding"
+                f"{packet_id} local activation receipt lacks {qualifier} foundation binding"
             )
         if (
             activation_receipt.get("subject_contract_sha256", {}).get(packet_id)
@@ -6120,21 +6896,43 @@ def validate_local_a1_boundary_manifest(
             errors.append(
                 f"{packet_id} local activation receipt commit does not descend from its base"
             )
-        if state.get("last_creator_receipt_id") == activation_receipt.get(
-            "receipt_id"
+        if (
+            isinstance(authority_foundation, dict)
+            and authority_foundation.get("last_creator_receipt_id")
+            == activation_receipt.get("receipt_id")
         ):
             errors.append(
                 f"{packet_id} local activation receipt cannot self-bind as prior creator receipt"
             )
 
-    last_creator_receipt = receipts_by_id.get(state.get("last_creator_receipt_id"))
+    historical_last_receipt_id = (
+        authority_foundation.get("last_creator_receipt_id")
+        if isinstance(authority_foundation, dict)
+        else None
+    )
+    last_creator_receipt = receipts_by_id.get(historical_last_receipt_id)
     if (
         not last_creator_receipt
         or not last_creator_receipt.get("sealed")
         or last_creator_receipt.get("issuer_role") != "creator"
     ):
         errors.append(
-            f"{packet_id} state does not name a sealed prior creator receipt"
+            f"{packet_id} foundation binding does not name a sealed prior creator receipt"
+        )
+    if packet_id == "WP-0002" and manifest.get("lifecycle_state") == "attested":
+        errors.extend(
+            validate_wp0002_working_tree_scope_capture(
+                manifest,
+                packet,
+                activation_receipt,
+            )
+        )
+        errors.extend(
+            validate_wp0002_external_policy_and_github_capture(
+                manifest,
+                packet,
+                activation_receipt,
+            )
         )
     return manifest, errors
 
@@ -6147,7 +6945,7 @@ def validate_a1_boundary_manifest(
 ) -> tuple[dict | None, list[str]]:
     errors: list[str] = []
     packet_id = packet.get("id", "unknown-packet")
-    if packet_id == "WP-0003":
+    if packet_id in {"WP-0002", "WP-0003"}:
         return validate_local_a1_boundary_manifest(
             packet,
             state,
@@ -7124,9 +7922,22 @@ def validate_packet_approval_and_events(
 ) -> list[str]:
     errors: list[str] = []
     packet_id = packet.get("id", "unknown-packet")
-    status = packet.get("status")
-    acceptance_receipt = receipts_by_id.get(packet.get("approval_receipt_id"))
-    if status not in {"proposed", "rejected", "superseded"}:
+    events = [
+        event
+        for event in packet.get("status_events", [])
+        if isinstance(event, dict)
+    ]
+    acceptance_events = [event for event in events if event.get("to") == "accepted"]
+    if acceptance_events:
+        acceptance_receipt = receipts_by_id.get(packet.get("approval_receipt_id"))
+        if (
+            len(acceptance_events) != 1
+            or acceptance_events[0].get("receipt_id")
+            != packet.get("approval_receipt_id")
+        ):
+            errors.append(
+                f"{packet_id} must retain one acceptance event with its approval receipt"
+            )
         if not acceptance_receipt or not acceptance_receipt.get("sealed"):
             errors.append(f"{packet_id} lacks a sealed packet-acceptance receipt")
         else:
@@ -7141,12 +7952,8 @@ def validate_packet_approval_and_events(
             required_claim = f"ACCEPT-{packet_id}"
             if required_claim not in subject_claims(acceptance_receipt).get(packet_id, set()):
                 errors.append(f"{packet_id} acceptance receipt lacks {required_claim}")
-
-    events = packet.get("status_events", [])
-    acceptance_events = [event for event in events if event.get("to") == "accepted"]
-    if status not in {"proposed", "rejected", "superseded"}:
-        if len(acceptance_events) != 1 or acceptance_events[0].get("receipt_id") != packet.get("approval_receipt_id"):
-            errors.append(f"{packet_id} must retain one acceptance event with its approval receipt")
+    elif packet.get("approval_receipt_id") is not None or packet.get("approved_by") is not None:
+        errors.append(f"{packet_id} claims acceptance authority without an acceptance event")
     activation_events = [event for event in events if event.get("to") == "active"]
     if activation_events:
         if len(activation_events) != 1 or activation_events[0].get("receipt_id") != activation_receipt_id:
@@ -7160,7 +7967,7 @@ def validate_packet_approval_and_events(
         if not isinstance(packet.get("a1_boundary_manifest"), dict):
             errors.append(f"{packet_id} dropped its boundary manifest after activation")
     release_events = [event for event in events if event.get("to") == "released"]
-    if packet.get("status") in {"released", "rolled-back"}:
+    if release_events:
         if len(release_events) != 1:
             errors.append(f"{packet_id} must retain exactly one release event")
         else:
@@ -7178,6 +7985,736 @@ def validate_packet_approval_and_events(
                     errors.append(f"{packet_id} completion receipt lacks {required_claim}")
                 if completion_receipt.get("subject_contract_sha256", {}).get(packet_id) != packet.get("contract_sha256"):
                     errors.append(f"{packet_id} completion receipt binds the wrong packet contract")
+    return errors
+
+
+def validate_wp0002_gate_controls(gate: dict, packet_contract_sha256: str) -> list[str]:
+    """Fail closed unless every WP-0002 entry control is explicit and exact."""
+    errors: list[str] = []
+    expected_decisions = {
+        "D-0006": (["ratified"], ["RATIFY-THESIS"], "block-and-revise-constitution-or-packet"),
+        "D-0007": (["ratified"], ["DRIVE", "COMMAND"], "block-and-revise-packet"),
+        "D-0008": (["ratified"], ["SLOWED", "PAUSED", "FULL"], "block-and-revise-packet"),
+        "D-0009": (["ratified"], ["SCARS"], "branch-to-harsh-or-custom-cruelty-proof-packet"),
+        "D-0010": (["ratified"], ["CULTURES"], "branch-to-conquest-compatible-packet"),
+        "D-0011": (["ratified"], ["ACCENT", "NONE"], "branch-to-combat-pillar-packet"),
+        "D-0012": (["ratified"], ["RATIFY-SLICE"], "block-and-revise-slice-and-packet"),
+        "D-0021": (["ratified"], ["SOLO-OFFLINE"], "branch-to-connected-architecture-packet"),
+        "D-0029": (["ratified"], ["ROUTE+ROAD"], "branch-to-selected-topology-packet"),
+        "D-0035": (["ratified"], ["RATIFY-CORE"], "block-and-revise-constitution-or-packet"),
+        "D-0036": (["ratified"], ["TITLE-AND-PROTAGONIST-SASHA"], "block-and-repair-title-protagonist-binding"),
+        "D-0037": (["ratified"], ["COLONY-HUMANS-ROBOTS-OR-MIXED"], "block-and-revise-composition-proof"),
+    }
+    decision_requirements = gate.get("decision_requirements", [])
+    decisions_by_id = {
+        requirement.get("decision_id"): requirement
+        for requirement in decision_requirements
+        if isinstance(requirement, dict)
+    }
+    if (
+        len(decision_requirements) != len(expected_decisions)
+        or set(decisions_by_id) != set(expected_decisions)
+    ):
+        errors.append("WP-0002 gate must contain exactly the twelve pinned decision requirements")
+    for decision_id, (statuses, claims, mismatch_action) in expected_decisions.items():
+        requirement = decisions_by_id.get(decision_id)
+        if requirement is None:
+            continue
+        expected_fields = {
+            "accepted_statuses": statuses,
+            "allowed_claims": claims,
+            "required_receipt_kind": "decision-ratification",
+            "required_issuer_role": "creator",
+            "required_resolver_type": "external-protected",
+            "required_subject_contract_sha256": {
+                "WP-0002": packet_contract_sha256,
+            },
+            "mismatch_action": mismatch_action,
+        }
+        for field, expected in expected_fields.items():
+            if requirement.get(field) != expected:
+                errors.append(
+                    f"WP-0002 decision {decision_id} {field} must equal {expected!r}"
+                )
+    title_receipt_id = decisions_by_id.get("D-0036", {}).get("receipt_id")
+    composition_receipt_id = decisions_by_id.get("D-0037", {}).get("receipt_id")
+    if title_receipt_id is not None or composition_receipt_id is not None:
+        materialized_decision_ids = [
+            requirement.get("receipt_id")
+            for requirement in decision_requirements
+            if isinstance(requirement, dict)
+            and requirement.get("receipt_id") is not None
+        ]
+        if (
+            not isinstance(title_receipt_id, str)
+            or not isinstance(composition_receipt_id, str)
+            or title_receipt_id == composition_receipt_id
+            or materialized_decision_ids.count(title_receipt_id) != 1
+            or materialized_decision_ids.count(composition_receipt_id) != 1
+        ):
+            errors.append(
+                "WP-0002 title and composition decisions must materialize through distinct own receipt IDs"
+            )
+
+    expected_receipts = {
+        "accept-WP-0002": {
+            "subject_ids": ["WP-0002"],
+            "required_claims": ["ACCEPT-WP-0002"],
+            "required_receipt_kind": "packet-acceptance",
+        },
+        "authorize-city-comparison": {
+            "subject_ids": ["D-0030", "WP-0002"],
+            "required_claims": ["AUTHORIZE-CITY-COMPARISON"],
+            "required_receipt_kind": "creator-authorization",
+        },
+        "activate-WP-0002-local-development": {
+            "subject_ids": ["WP-0002"],
+            "required_claims": [
+                "A1-LOCAL-BOUNDARY-VERIFIED",
+                "ACTIVATE-A1-WP-0002",
+            ],
+            "required_receipt_kind": "packet-activation",
+        },
+    }
+    requirements_by_purpose = {
+        requirement.get("purpose"): requirement
+        for requirement in gate.get("receipt_requirements", [])
+        if isinstance(requirement, dict)
+    }
+    if set(requirements_by_purpose) != set(expected_receipts):
+        errors.append("WP-0002 receipt controls must contain exactly the three required purposes")
+        return errors
+    for purpose, receipt_contract in expected_receipts.items():
+        requirement = requirements_by_purpose[purpose]
+        expected_fields = {
+            **receipt_contract,
+            "required_issuer_role": "creator",
+            "required_resolver_type": "external-protected",
+            "required_subject_contract_sha256": {
+                "WP-0002": packet_contract_sha256,
+            },
+        }
+        for field, expected in expected_fields.items():
+            if requirement.get(field) != expected:
+                errors.append(
+                    f"WP-0002 receipt purpose {purpose} {field} must equal {expected!r}"
+                )
+    declared_kinds = {
+        requirement.get("required_receipt_kind")
+        for requirement in requirements_by_purpose.values()
+    }
+    if declared_kinds != {
+        contract["required_receipt_kind"] for contract in expected_receipts.values()
+    }:
+        errors.append("WP-0002 acceptance, authorization, and activation kinds must remain distinct")
+    receipt_ids = [
+        requirement.get("receipt_id")
+        for requirement in requirements_by_purpose.values()
+        if requirement.get("receipt_id") is not None
+    ]
+    if len(receipt_ids) != len(set(receipt_ids)):
+        errors.append(
+            "WP-0002 acceptance, authorization, and activation must use distinct receipt JSONs"
+        )
+    return errors
+
+
+def wp0002_expected_unity_meta(relative_target: str, is_directory: bool) -> bytes:
+    """Return the deterministic Unity metadata bytes for one package target."""
+    guid = hashlib.sha256(
+        f"ac21.sasha.unity-meta.v1:{relative_target}".encode("utf-8")
+    ).hexdigest()[:32]
+    if is_directory:
+        body = (
+            f"fileFormatVersion: 2\nguid: {guid}\nfolderAsset: yes\n"
+            "DefaultImporter:\n  externalObjects: {}\n  userData:\n"
+            "  assetBundleName:\n  assetBundleVariant:\n"
+        )
+    elif relative_target.endswith(".cs"):
+        body = (
+            f"fileFormatVersion: 2\nguid: {guid}\nMonoImporter:\n"
+            "  externalObjects: {}\n  serializedVersion: 2\n"
+            "  defaultReferences: []\n  executionOrder: 0\n"
+            "  icon: {instanceID: 0}\n  userData:\n"
+            "  assetBundleName:\n  assetBundleVariant:\n"
+        )
+    elif relative_target.endswith(".asmdef"):
+        body = (
+            f"fileFormatVersion: 2\nguid: {guid}\nAssemblyDefinitionImporter:\n"
+            "  externalObjects: {}\n  userData:\n"
+            "  assetBundleName:\n  assetBundleVariant:\n"
+        )
+    else:
+        body = (
+            f"fileFormatVersion: 2\nguid: {guid}\nDefaultImporter:\n"
+            "  externalObjects: {}\n  userData:\n"
+            "  assetBundleName:\n  assetBundleVariant:\n"
+        )
+    return body.encode("utf-8")
+
+
+def validate_wp0002_package_meta_inventory(
+    repo_root: Path = REPO_ROOT,
+    expected_hashes: dict[str, str] = WP0002_PACKAGE_META_SHA256,
+) -> list[str]:
+    """Freeze existing package metadata and confine future LastBearing metadata."""
+    errors: list[str] = []
+    expected_meta = set(expected_hashes)
+    expected_targets = {path.removesuffix(".meta") for path in expected_meta}
+    future_roots = set(WP0002_PACKAGE_META_FUTURE_ROOTS)
+    future_root_meta = {f"{path}.meta" for path in future_roots}
+    frozen_targets: set[str] = set()
+    frozen_meta: set[str] = set()
+    future_targets: set[str] = set()
+    future_meta: set[str] = set()
+
+    def is_future(relative: str) -> bool:
+        return relative in future_roots or any(
+            relative.startswith(f"{root}/") for root in future_roots
+        )
+
+    for root_name in WP0002_PACKAGE_META_ROOTS:
+        root = repo_root / root_name
+        try:
+            root_mode = root.lstat().st_mode
+        except OSError as exc:
+            errors.append(f"WP-0002 package metadata root is missing: {root_name}: {exc}")
+            continue
+        if not stat.S_ISDIR(root_mode) or stat.S_ISLNK(root_mode):
+            errors.append(f"WP-0002 package metadata root must be a regular directory: {root_name}")
+            continue
+        for path in root.rglob("*"):
+            relative = path.relative_to(repo_root).as_posix()
+            try:
+                mode = path.lstat().st_mode
+            except OSError as exc:
+                errors.append(f"WP-0002 package metadata cannot inspect {relative}: {exc}")
+                continue
+            if stat.S_ISLNK(mode) or not (stat.S_ISREG(mode) or stat.S_ISDIR(mode)):
+                errors.append(f"WP-0002 package import target must be regular and not a symlink: {relative}")
+            if relative.endswith(".meta"):
+                if relative in future_root_meta or is_future(relative.removesuffix(".meta")):
+                    future_meta.add(relative)
+                else:
+                    frozen_meta.add(relative)
+            elif is_future(relative):
+                future_targets.add(relative)
+            else:
+                frozen_targets.add(relative)
+
+    if frozen_targets != expected_targets:
+        errors.append(
+            "WP-0002 package import target inventory differs: "
+            f"missing={sorted(expected_targets - frozen_targets)}, "
+            f"extra={sorted(frozen_targets - expected_targets)}"
+        )
+    if frozen_meta != expected_meta:
+        errors.append(
+            "WP-0002 package metadata inventory differs: "
+            f"missing={sorted(expected_meta - frozen_meta)}, "
+            f"extra={sorted(frozen_meta - expected_meta)}"
+        )
+
+    seen_guids: dict[str, str] = {}
+    for relative_meta in sorted(frozen_meta & expected_meta):
+        meta_path = repo_root / relative_meta
+        target_relative = relative_meta.removesuffix(".meta")
+        target_path = repo_root / target_relative
+        try:
+            meta_bytes = meta_path.read_bytes()
+            target_mode = target_path.lstat().st_mode
+        except OSError as exc:
+            errors.append(f"WP-0002 package metadata cannot read {relative_meta}: {exc}")
+            continue
+        actual_hash = hashlib.sha256(meta_bytes).hexdigest()
+        if actual_hash != expected_hashes[relative_meta]:
+            errors.append(
+                f"WP-0002 package metadata hash mismatch for {relative_meta}: "
+                f"expected {expected_hashes[relative_meta]}, found {actual_hash}"
+            )
+        expected_bytes = wp0002_expected_unity_meta(
+            target_relative, stat.S_ISDIR(target_mode)
+        )
+        if meta_bytes != expected_bytes:
+            errors.append(f"WP-0002 package metadata bytes are not deterministic for {relative_meta}")
+        match = re.search(rb"^guid: ([0-9a-f]{32})$", meta_bytes, re.MULTILINE)
+        if match:
+            guid = match.group(1).decode("ascii")
+            if guid in seen_guids:
+                errors.append(
+                    f"WP-0002 package metadata GUID {guid} is duplicated by "
+                    f"{seen_guids[guid]} and {relative_meta}"
+                )
+            seen_guids[guid] = relative_meta
+        else:
+            errors.append(f"WP-0002 package metadata lacks one valid GUID: {relative_meta}")
+
+    expected_future_meta = {f"{target}.meta" for target in future_targets}
+    if future_meta != expected_future_meta:
+        errors.append(
+            "WP-0002 LastBearing metadata pairing differs: "
+            f"missing={sorted(expected_future_meta - future_meta)}, "
+            f"extra={sorted(future_meta - expected_future_meta)}"
+        )
+    for relative_meta in sorted(future_meta & expected_future_meta):
+        target_relative = relative_meta.removesuffix(".meta")
+        target_path = repo_root / target_relative
+        meta_path = repo_root / relative_meta
+        try:
+            target_mode = target_path.lstat().st_mode
+            meta_mode = meta_path.lstat().st_mode
+            meta_bytes = meta_path.read_bytes()
+        except OSError as exc:
+            errors.append(f"WP-0002 LastBearing metadata cannot read {relative_meta}: {exc}")
+            continue
+        if not stat.S_ISREG(meta_mode) or stat.S_ISLNK(meta_mode):
+            errors.append(f"WP-0002 LastBearing metadata must be a regular file: {relative_meta}")
+            continue
+        if meta_bytes != wp0002_expected_unity_meta(
+            target_relative, stat.S_ISDIR(target_mode)
+        ):
+            errors.append(f"WP-0002 LastBearing metadata is not deterministic: {relative_meta}")
+    return errors
+
+
+def _load_wp0002_package_graph_checker(
+    checker_path: Path = WP0002_PACKAGE_GRAPH_CHECKER,
+) -> tuple[dict[str, object] | None, list[str]]:
+    """Load only the byte-pinned A0 checker, without creating import caches."""
+    try:
+        metadata = checker_path.lstat()
+        checker_bytes = checker_path.read_bytes()
+    except OSError as exc:
+        return None, [f"WP-0002 protected package-graph checker is missing: {exc}"]
+    if not stat.S_ISREG(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+        return None, ["WP-0002 protected package-graph checker must be a regular file"]
+    actual_hash = hashlib.sha256(checker_bytes).hexdigest()
+    if actual_hash != WP0002_PACKAGE_GRAPH_CHECKER_SHA256:
+        return None, [
+            "WP-0002 protected package-graph checker hash mismatch: "
+            f"expected {WP0002_PACKAGE_GRAPH_CHECKER_SHA256}, found {actual_hash}"
+        ]
+    namespace: dict[str, object] = {
+        "__name__": "_wp0002_package_graph_checker",
+        "__file__": str(checker_path),
+    }
+    try:
+        exec(compile(checker_bytes, str(checker_path), "exec"), namespace)
+    except Exception as exc:  # pragma: no cover - hash pin makes this defensive
+        return None, [f"WP-0002 protected package-graph checker cannot load: {exc}"]
+    expected_contract = {
+        "CHECKER_CONTRACT_VERSION": WP0002_PACKAGE_GRAPH_CHECKER_CONTRACT,
+        "PROTECTED_BASE_COMMIT": WP0002_PACKAGE_GRAPH_BASE,
+        "GRAPH_PATHS": WP0002_PACKAGE_GRAPH_PATHS,
+    }
+    for name, expected in expected_contract.items():
+        if namespace.get(name) != expected:
+            return None, [
+                f"WP-0002 protected package-graph checker {name} differs from trusted contract"
+            ]
+    if not callable(namespace.get("compare_package_graph")):
+        return None, [
+            "WP-0002 protected package-graph checker lacks compare_package_graph"
+        ]
+    return namespace, []
+
+
+def validate_wp0002_package_graph_checker_contract(
+    checker_path: Path = WP0002_PACKAGE_GRAPH_CHECKER,
+) -> list[str]:
+    _, errors = _load_wp0002_package_graph_checker(checker_path)
+    return errors
+
+
+def validate_wp0002_package_graph_documents(
+    base_files: dict[str, bytes],
+    candidate_files: dict[str, bytes],
+    checker_path: Path = WP0002_PACKAGE_GRAPH_CHECKER,
+) -> list[str]:
+    checker, errors = _load_wp0002_package_graph_checker(checker_path)
+    if errors or checker is None:
+        return errors
+    compare = checker["compare_package_graph"]
+    result = compare(base_files, candidate_files)  # type: ignore[operator]
+    if not isinstance(result, list) or not all(isinstance(item, str) for item in result):
+        return ["WP-0002 protected package-graph checker returned an invalid result"]
+    return result
+
+
+def validate_wp0002_package_graph_worktree(
+    base_commit: str = WP0002_PACKAGE_GRAPH_BASE,
+) -> list[str]:
+    """Apply the protected checker whenever any package-graph file differs."""
+    checker, errors = _load_wp0002_package_graph_checker()
+    if errors or checker is None:
+        return errors
+    if base_commit != WP0002_PACKAGE_GRAPH_BASE:
+        return [f"WP-0002 package-graph base must equal {WP0002_PACKAGE_GRAPH_BASE}"]
+    base_files: dict[str, bytes] = {}
+    candidate_files: dict[str, bytes] = {}
+    for path in WP0002_PACKAGE_GRAPH_PATHS:
+        result = run_foundation_git(["show", f"{base_commit}:{path}"])
+        if result.returncode != 0:
+            errors.append(f"WP-0002 package-graph protected base lacks {path}")
+            continue
+        base_files[path] = result.stdout
+        candidate_path, path_error = safe_repo_path(path, "WP-0002 package graph path")
+        if path_error or candidate_path is None:
+            errors.append(path_error or f"WP-0002 package graph path is invalid: {path}")
+            continue
+        try:
+            candidate_files[path] = candidate_path.read_bytes()
+        except OSError as exc:
+            errors.append(f"WP-0002 package graph cannot read {path}: {exc}")
+    if errors:
+        return errors
+    if all(base_files[path] == candidate_files[path] for path in WP0002_PACKAGE_GRAPH_PATHS):
+        return []
+    compare = checker["compare_package_graph"]
+    result = compare(base_files, candidate_files)  # type: ignore[operator]
+    if not isinstance(result, list) or not all(isinstance(item, str) for item in result):
+        return ["WP-0002 protected package-graph checker returned an invalid result"]
+    return result
+
+
+def wp0002_ci_requires_lastbearing_project(
+    packet: dict,
+    materialized_now: bool,
+) -> bool:
+    """Require the project from current-tree materialization or lifecycle state."""
+    if materialized_now:
+        return True
+    status = packet.get("status")
+    if status == "rolled-back":
+        return False
+    destinations = {
+        event.get("to")
+        for event in packet.get("status_events", [])
+        if isinstance(event, dict)
+    }
+    materializing_states = {"verifying", "candidate", "released"}
+    if status in materializing_states or destinations & materializing_states:
+        return True
+    # Rejection after activation is not a governance-only terminal path. The one
+    # pre-materialization active terminal exception is active -> rolled-back.
+    if status == "rejected" and "active" in destinations:
+        return True
+    return False
+
+
+def validate_wp0002_ci_save_contract(
+    path: Path, packet: dict | None = None
+) -> list[str]:
+    """Pin the LastBearing lifecycle and complete executable command matrix in CI."""
+    try:
+        source = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        return [f"WP-0002 CI save contract cannot read {path}: {exc}"]
+
+    errors: list[str] = []
+    required_fragments = (
+        'status="$(python3 -B -c \'import json; print(json.load(open('
+        '"docs/foundation-v0.1/work-packets/proposed/WP-0002.json", '
+        'encoding="utf-8"))["status"])\')"',
+        'project="Tests/AtomicLandPirate.CoreTests/LastBearing/'
+        'AtomicLandPirate.LastBearingTests.csproj"',
+        '"SimulationCore/Runtime/LastBearing"',
+        '"SaveContracts/Runtime/LastBearing"',
+        '"Game/Assets/AtomicLandPirate/LastBearing"',
+        '"Game/Assets/AtomicLandPirate/LastBearing.meta"',
+        '"Tests/AtomicLandPirate.CoreTests/LastBearing"',
+        'if [[ -e "$path" || -L "$path" ]]; then',
+        'foundation.wp0002_ci_requires_lastbearing_project(',
+        'foundation.wp0002_ci_requires_lastbearing_project(packet, sys.argv[1] == "true")',
+        '"$materialized")"',
+        'require_project="$lifecycle_requires_project"',
+        'if [[ ! -f "$project" ]]; then',
+        'dotnet run --project "$project" --configuration Release -- --test dev-save-atomic',
+        'dotnet run --project "$project" --configuration Release -- --test dev-save-boundary',
+        'elif [[ "$status" == "proposed" || "$status" == "accepted" || "$status" == "active" || "$status" == "rejected" || "$status" == "superseded" || "$status" == "rolled-back" ]]; then',
+        'echo "WP-0002 status $status cannot omit the LastBearing test project." >&2',
+    )
+    for fragment in required_fragments:
+        if fragment not in source:
+            errors.append(f"WP-0002 CI save contract lacks exact fragment {fragment!r}")
+    for forbidden_fragment in (
+        "materialized_in_history",
+        'git log --format=%H -- "${last_bearing_paths[@]}"',
+    ):
+        if forbidden_fragment in source:
+            errors.append(
+                "WP-0002 CI save contract may not use historical path presence: "
+                f"{forbidden_fragment!r}"
+            )
+    for command in WP0002_REQUIRED_CI_COMMANDS:
+        workflow_command = command.replace(
+            "Tests/AtomicLandPirate.CoreTests/LastBearing/AtomicLandPirate.LastBearingTests.csproj",
+            '"$project"',
+        )
+        if source.count(workflow_command) != 1:
+            errors.append(
+                f"WP-0002 CI must invoke exact required command once: {workflow_command}"
+            )
+    if "--test all" in source:
+        errors.append("WP-0002 CI must not replace the two pinned save tests with --test all")
+    if packet is not None:
+        required_by_id = {
+            test.get("id"): test
+            for test in packet.get("acceptance_tests", [])
+            if isinstance(test, dict) and test.get("required") is True
+        }
+        packet_commands = tuple(
+            required_by_id.get(test_id, {}).get("command")
+            for test_id in WP0002_REQUIRED_CI_TEST_IDS
+        )
+        if packet_commands != WP0002_REQUIRED_CI_COMMANDS:
+            errors.append(
+                "WP-0002 packet required gameplay/core/save commands differ from the frozen CI matrix"
+            )
+    return errors
+
+
+def validate_wp0002_self_verification_contract(packet: dict) -> list[str]:
+    """Pin the A0-authored entry, package, and CI seams outside A1 scope."""
+    errors: list[str] = []
+    declared_paths = set(packet.get("declared_paths", []))
+    writable_controls = declared_paths & set(WP0002_PROTECTED_SELF_VERIFICATION)
+    if writable_controls:
+        errors.append(
+            f"WP-0002 self-verification controls are writable: {sorted(writable_controls)}"
+        )
+    for relative, expected_hash in WP0002_PROTECTED_SELF_VERIFICATION.items():
+        path, path_error = safe_repo_path(relative, "WP-0002 protected control path")
+        if path_error or path is None or not path.is_file():
+            errors.append(path_error or f"WP-0002 protected control is missing: {relative}")
+            continue
+        actual_hash = sha256_file(path)
+        if actual_hash != expected_hash:
+            errors.append(
+                f"WP-0002 protected control hash mismatch for {relative}: "
+                f"expected {expected_hash}, found {actual_hash}"
+            )
+    errors.extend(
+        validate_wp0002_ci_save_contract(
+            REPO_ROOT / ".github" / "workflows" / "wp0002-ci.yml",
+            packet,
+        )
+    )
+    entry_tests = [
+        test
+        for test in packet.get("acceptance_tests", [])
+        if isinstance(test, dict) and test.get("id") == "T-GATE-IDENTITY"
+    ]
+    expected_entry_command = (
+        "python3 Tools/Validation/validate_wp0002_entry_gate.py "
+        "--packet docs/foundation-v0.1/work-packets/proposed/WP-0002.json "
+        "--ratification-state docs/foundation-v0.1/governance/ratification-state.json "
+        "--require-claim AUTHORIZE-CITY-COMPARISON "
+        "--report BuildArtifacts/WP-0002/entry-gate.json"
+    )
+    if len(entry_tests) != 1 or entry_tests[0].get("command") != expected_entry_command:
+        errors.append("WP-0002 T-GATE-IDENTITY must invoke the protected entry checker exactly")
+    return errors
+
+
+def validate_wp0002_package_graph_contract(packet: dict) -> list[str]:
+    """Keep WP-0002 package writes and the future protected-base check exact."""
+    errors: list[str] = []
+    declared_paths = packet.get("declared_paths", [])
+    required_writable = {
+        "Game/Packages/manifest.json",
+        "Game/Packages/packages-lock.json",
+        "SimulationCore/Runtime/LastBearing.meta",
+        "SaveContracts/Runtime/LastBearing.meta",
+    }
+    forbidden_writable = {
+        "SimulationCore/package.json",
+        "SaveContracts/package.json",
+        "Tools/Validation/validate_wp0002_package_graph.py",
+        "Tools/Validation/validate_wp0002_entry_gate.py",
+        ".github/workflows/wp0002-ci.yml",
+    }
+    missing = required_writable - set(declared_paths)
+    if missing:
+        errors.append(f"WP-0002 package graph contract lacks writable paths {sorted(missing)}")
+    forbidden = forbidden_writable & set(declared_paths)
+    if forbidden:
+        errors.append(
+            f"WP-0002 protected package/control files must remain read-only, found {sorted(forbidden)}"
+        )
+    runtime_sibling_meta = {
+        path
+        for path in declared_paths
+        if isinstance(path, str)
+        and re.fullmatch(r"(?:SimulationCore|SaveContracts)/Runtime/[^/]+\.meta", path)
+    }
+    expected_runtime_sibling_meta = {
+        "SimulationCore/Runtime/LastBearing.meta",
+        "SaveContracts/Runtime/LastBearing.meta",
+    }
+    if runtime_sibling_meta != expected_runtime_sibling_meta:
+        errors.append(
+            "WP-0002 may reserve only the exact two LastBearing runtime sibling metadata paths: "
+            f"found {sorted(runtime_sibling_meta)}"
+        )
+    tests = [
+        test
+        for test in packet.get("acceptance_tests", [])
+        if isinstance(test, dict) and test.get("id") == "T-PACKAGE-GRAPH"
+    ]
+    if len(tests) != 1:
+        return errors + ["WP-0002 must define exactly one T-PACKAGE-GRAPH test"]
+    test = tests[0]
+    expected_command = (
+        "python3 Tools/Validation/validate_wp0002_package_graph.py "
+        "--base b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5 "
+        "--manifest Game/Packages/manifest.json "
+        "--lock Game/Packages/packages-lock.json "
+        "--simulation-package SimulationCore/package.json "
+        "--save-package SaveContracts/package.json "
+        "--report BuildArtifacts/WP-0002/package-graph.json"
+    )
+    expected_oracle = (
+        "Against protected base b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5, "
+        "SimulationCore/package.json and SaveContracts/package.json remain byte-identical; "
+        "every pre-existing Game/Packages/manifest.json dependency and "
+        "Game/Packages/packages-lock.json entry preserves its exact version, source, URL, "
+        "depth, and dependency map; the only manifest additions are "
+        "com.ac21.sasha.simulation-core=file:../../SimulationCore and "
+        "com.ac21.sasha.save-contracts=file:../../SaveContracts; the only lock additions "
+        "have matching file:../../ versions, depth 0, source local, and empty dependencies; "
+        "every other graph, source, or version delta fails closed."
+    )
+    expected_fields = {
+        "kind": "security",
+        "command": expected_command,
+        "oracle": expected_oracle,
+        "required": True,
+        "scenario_id": None,
+    }
+    for field, expected in expected_fields.items():
+        if test.get(field) != expected:
+            errors.append(f"WP-0002 T-PACKAGE-GRAPH {field} must equal {expected!r}")
+    required_tests = [
+        test
+        for test in packet.get("acceptance_tests", [])
+        if isinstance(test, dict) and test.get("required") is True
+    ]
+    required_ids = {test.get("id") for test in required_tests}
+    if len(required_tests) != 14:
+        errors.append("WP-0002 must retain exactly 14 required acceptance tests for SCN_WP0002_GATE r1")
+    if "T-SAVE-PERMUTATIONS" in required_ids:
+        errors.append("WP-0002 must consolidate T-SAVE-PERMUTATIONS into T-DEV-SAVE-ATOMIC")
+    if any(
+        isinstance(test, dict) and test.get("id") == "T-MODULES"
+        for test in packet.get("acceptance_tests", [])
+    ):
+        errors.append("WP-0002 must consolidate T-MODULES into T-PERMUTATIONS")
+    permutation_tests = [
+        test for test in required_tests if test.get("id") == "T-PERMUTATIONS"
+    ]
+    required_permutation_fields = {
+        "kind": "scenario",
+        "command": "python3 Tools/ScenarioRunner/run.py SCN_PREPARATION_MODULE_MATRIX",
+        "oracle": (
+            "Both modules create distinct preparation, route/action, capacity, and return "
+            "consequences; all four preparation/module permutations complete, at least two "
+            "remain viable, and at least two returns change the next city decision."
+        ),
+        "required": True,
+        "scenario_id": "SCN_PREPARATION_MODULE_MATRIX",
+    }
+    if len(permutation_tests) != 1 or any(
+        permutation_tests[0].get(field) != expected
+        for field, expected in required_permutation_fields.items()
+    ):
+        errors.append(
+            "WP-0002 T-PERMUTATIONS must retain the consolidated module and permutation oracle"
+        )
+    atomic_tests = [
+        test for test in required_tests if test.get("id") == "T-DEV-SAVE-ATOMIC"
+    ]
+    required_atomic_command = (
+        "dotnet run --project Tests/AtomicLandPirate.CoreTests/LastBearing/"
+        "AtomicLandPirate.LastBearingTests.csproj --configuration Release "
+        "-- --test dev-save-atomic"
+    )
+    required_atomic_oracle = (
+        "The dedicated LastBearing headless test proves exact canonical round-trip at all four "
+        "preparation/module checkpoints with no duplicate or lost state, atomic current "
+        "publication, recovery through the immediately preceding verified last-good generation "
+        "after injected partial/corrupt writes, and refusal of corrupt, partial, or unknown "
+        "profile versions without migration, reinterpretation, or rewrite."
+    )
+    required_atomic_fields = {
+        "kind": "unit",
+        "command": required_atomic_command,
+        "oracle": required_atomic_oracle,
+        "required": True,
+        "scenario_id": None,
+    }
+    if len(atomic_tests) != 1 or any(
+        atomic_tests[0].get(field) != expected
+        for field, expected in required_atomic_fields.items()
+    ):
+        errors.append(
+            "WP-0002 T-DEV-SAVE-ATOMIC must remain the exact direct LastBearing unit contract"
+        )
+    boundary_tests = [
+        test for test in required_tests if test.get("id") == "T-DEV-SAVE-BOUNDARY"
+    ]
+    required_boundary_fields = {
+        "kind": "security",
+        "command": (
+            "dotnet run --project Tests/AtomicLandPirate.CoreTests/LastBearing/"
+            "AtomicLandPirate.LastBearingTests.csproj --configuration Release "
+            "-- --test dev-save-boundary"
+        ),
+        "oracle": (
+            "The dedicated LastBearing confinement test proves that the Unity runtime adapter "
+            "derives only the fixed last-bearing-dev-v1 child of "
+            "UnityEngine.Application.persistentDataPath, SaveContracts discovers only current "
+            "and last-good within that child, sibling scans and path traversal fail closed, "
+            "presentation exposes no arbitrary root constructor or override, and every "
+            "persistent write travels only through the Unity-runtime SaveContracts seam."
+        ),
+        "required": True,
+        "scenario_id": None,
+    }
+    if len(boundary_tests) != 1 or any(
+        boundary_tests[0].get(field) != expected
+        for field, expected in required_boundary_fields.items()
+    ):
+        errors.append(
+            "WP-0002 T-DEV-SAVE-BOUNDARY must remain the exact executable confinement contract"
+        )
+    save_transition_refs = []
+    if "SCN_SAVE_TRANSITIONS" in packet.get("save_impact", {}).get(
+        "golden_scenarios", []
+    ):
+        save_transition_refs.append("save_impact.golden_scenarios")
+    if any(
+        pin.get("id") == "SCN_SAVE_TRANSITIONS"
+        for pin in packet.get("scenario_pins", [])
+        if isinstance(pin, dict)
+    ):
+        save_transition_refs.append("scenario_pins")
+    if any(
+        metric.get("scenario") == "SCN_SAVE_TRANSITIONS"
+        for metric in packet.get("performance_metrics", [])
+        if isinstance(metric, dict)
+    ):
+        save_transition_refs.append("performance_metrics")
+    if any(
+        metric.get("scenario") == "SCN_SAVE_TRANSITIONS"
+        for metric in packet.get("rollout", {}).get("health_signals", [])
+        if isinstance(metric, dict)
+    ):
+        save_transition_refs.append("rollout.health_signals")
+    if save_transition_refs:
+        errors.append(
+            f"WP-0002 must not repurpose immutable SCN_SAVE_TRANSITIONS: {save_transition_refs}"
+        )
     return errors
 
 
@@ -7363,6 +8900,34 @@ def main() -> int:
     gate_resolutions: dict[str, bool] = {}
     for gate_name, gate in state.get("entry_gates", {}).items():
         gate_resolved = True
+        if gate_name == "ugly_gameplay_toy":
+            wp0002 = next(
+                (packet for packet in packets if packet.get("id") == "WP-0002"),
+                {},
+            )
+            control_errors = validate_wp0002_gate_controls(
+                gate,
+                wp0002.get("contract_sha256", ""),
+            )
+            if control_errors:
+                errors.extend(control_errors)
+                gate_resolved = False
+            package_graph_errors = validate_wp0002_package_graph_contract(wp0002)
+            if package_graph_errors:
+                errors.extend(package_graph_errors)
+                gate_resolved = False
+            package_graph_worktree_errors = validate_wp0002_package_graph_worktree()
+            if package_graph_worktree_errors:
+                errors.extend(package_graph_worktree_errors)
+                gate_resolved = False
+            package_meta_errors = validate_wp0002_package_meta_inventory()
+            if package_meta_errors:
+                errors.extend(package_meta_errors)
+                gate_resolved = False
+            self_verification_errors = validate_wp0002_self_verification_contract(wp0002)
+            if self_verification_errors:
+                errors.extend(self_verification_errors)
+                gate_resolved = False
         decision_ids: list[str] = []
         for requirement in gate.get("decision_requirements", []):
             decision_id = requirement.get("decision_id")
@@ -7430,6 +8995,24 @@ def main() -> int:
                     f"{actual_resolver!r}, expected {required_resolver!r}"
                 )
                 gate_resolved = False
+            required_contracts = requirement.get("required_subject_contract_sha256", {})
+            if not isinstance(required_contracts, dict):
+                errors.append(
+                    f"ratification state {gate_name} decision requirement has malformed contract bindings"
+                )
+                gate_resolved = False
+            else:
+                actual_contracts = receipt.get("subject_contract_sha256")
+                if not isinstance(actual_contracts, dict):
+                    actual_contracts = {}
+                for subject_id, expected_hash in required_contracts.items():
+                    actual_hash = actual_contracts.get(subject_id)
+                    if actual_hash != expected_hash:
+                        errors.append(
+                            f"ratification state {gate_name} decision receipt {receipt_id} binds contract "
+                            f"{actual_hash!r} for {subject_id}, expected {expected_hash!r}"
+                        )
+                        gate_resolved = False
         if len(decision_ids) != len(set(decision_ids)):
             errors.append(f"ratification state {gate_name} repeats a decision requirement")
         receipt_purposes: list[str] = []
@@ -7608,7 +9191,7 @@ def main() -> int:
         activation_claim = f"ACTIVATE-A1-{packet_id}"
         boundary_claim = (
             "A1-LOCAL-BOUNDARY-VERIFIED"
-            if packet_id == "WP-0003"
+            if packet_id in {"WP-0002", "WP-0003"}
             else "A1-QUARANTINE-BOUNDARY-VERIFIED"
         )
         quarantine_claims = {boundary_claim, activation_claim}
@@ -7782,6 +9365,61 @@ def main() -> int:
                 )
             if expires_at <= datetime.now(timezone.utc):
                 errors.append(f"active A1 packet {packet_id} reservation has expired")
+
+    for packet in packets:
+        if packet.get("id") not in {"WP-0002", "WP-0003"}:
+            continue
+        if any(
+            isinstance(event, dict) and event.get("to") == "active"
+            for event in packet.get("status_events", [])
+        ):
+            continue
+        reference = packet.get("a1_boundary_manifest")
+        if not isinstance(reference, dict):
+            continue
+        manifest_path, path_error = safe_foundation_path(
+            reference.get("path"), f"{packet.get('id')} proposed local boundary path"
+        )
+        if path_error:
+            errors.append(path_error)
+            continue
+        if manifest_path is None or not manifest_path.is_file():
+            errors.append(f"{packet.get('id')} proposed local boundary manifest is missing")
+            continue
+        errors.extend(validate_instance_shape(manifest_path, LOCAL_A1_BOUNDARY_SCHEMA))
+        manifest = load_json(manifest_path)
+        actual_hash = sha256_file(manifest_path)
+        if reference.get("sha256") != actual_hash:
+            errors.append(f"{packet.get('id')} proposed local boundary raw hash mismatch")
+        if manifest.get("manifest_id") != reference.get("manifest_id"):
+            errors.append(f"{packet.get('id')} proposed local boundary ID differs from packet reference")
+        if manifest.get("packet_id") != packet.get("id"):
+            errors.append(f"{packet.get('id')} proposed local boundary binds another packet")
+        if manifest.get("packet_contract_sha256") != packet.get("contract_sha256"):
+            errors.append(f"{packet.get('id')} proposed local boundary binds the wrong packet contract")
+        if packet.get("id") == "WP-0002":
+            expected_local_package_links = {
+                "com.ac21.sasha.simulation-core": "file:../../SimulationCore",
+                "com.ac21.sasha.save-contracts": "file:../../SaveContracts",
+            }
+            if manifest.get("local_package_links") != expected_local_package_links:
+                errors.append(
+                    "WP-0002 proposed local boundary must bind the exact two repository-local UPM links"
+                )
+            reservation = packet.get("reservation", {})
+            expected_reservation = {
+                "lease_id": reservation.get("lease_id"),
+                "fencing_token": reservation.get("fencing_token"),
+                "expires_at": reservation.get("expires_at"),
+                "paths": reservation.get("paths"),
+                "domains": reservation.get("domains"),
+            }
+            if manifest.get("reservation") != expected_reservation:
+                errors.append("WP-0002 proposed local boundary does not exactly bind its reservation")
+            if reservation.get("paths") != packet.get("declared_paths"):
+                errors.append("WP-0002 proposed reservation paths do not exactly match declared paths")
+            if reservation.get("domains") != packet.get("affected_domains"):
+                errors.append("WP-0002 proposed reservation domains do not exactly match affected domains")
 
     boundary_references = {
         (ROOT / packet["a1_boundary_manifest"]["path"]).resolve()

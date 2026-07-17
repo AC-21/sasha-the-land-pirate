@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/wp0002-github-protection-capture.schema.json",
+  "title": "WP-0002 live GitHub protection capture",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "repository",
+    "protected_branch",
+    "stage_c_base_sha",
+    "post_merge_live_monitoring",
+    "observed_at",
+    "strict_up_to_date",
+    "required_status_checks",
+    "policy_canary_state",
+    "enforce_admins",
+    "pull_request_required",
+    "required_pull_request_reviews",
+    "push_restrictions",
+    "conversation_resolution_required",
+    "linear_history_required",
+    "force_push_disabled",
+    "deletion_disabled",
+    "merge_methods",
+    "auto_merge_enabled",
+    "external_cursor_review",
+    "source_uri",
+    "raw_branch_protection_artifact",
+    "ruleset_inventory"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "repository": { "const": "AC-21/sasha-the-land-pirate" },
+    "protected_branch": { "const": "main" },
+    "stage_c_base_sha": { "$ref": "#/$defs/git-sha" },
+    "post_merge_live_monitoring": { "const": "required-separate-live-capture" },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "strict_up_to_date": { "const": true },
+    "required_status_checks": {
+      "oneOf": [
+        { "const": [
+          { "context": "validate", "app_id": 15368 },
+          { "context": "wp0002-core", "app_id": 15368 }
+        ] },
+        { "const": [
+          { "context": "validate", "app_id": 15368 },
+          { "context": "wp0002-core", "app_id": 15368 },
+          { "context": "wp0002-policy", "app_id": 15368 }
+        ] }
+      ]
+    },
+    "policy_canary_state": { "enum": ["not-attached-to-latest-head", "proven-candidate-independent"] },
+    "enforce_admins": { "const": true },
+    "pull_request_required": { "const": true },
+    "required_pull_request_reviews": {
+      "const": {
+        "dismiss_stale_reviews": false,
+        "require_code_owner_reviews": false,
+        "required_approving_review_count": 0,
+        "require_last_push_approval": false,
+        "bypass_pull_request_allowances": {
+          "users": [],
+          "teams": [],
+          "apps": []
+        }
+      }
+    },
+    "push_restrictions": {
+      "const": { "users": [], "teams": [], "apps": [] }
+    },
+    "conversation_resolution_required": { "const": true },
+    "linear_history_required": { "const": true },
+    "force_push_disabled": { "const": true },
+    "deletion_disabled": { "const": true },
+    "merge_methods": {
+      "const": { "merge": false, "rebase": false, "squash": true }
+    },
+    "auto_merge_enabled": { "const": true },
+    "external_cursor_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_path",
+        "policy_source_sha",
+        "configuration_capture_uri",
+        "configuration_capture_sha256",
+        "candidate_code_execution",
+        "classification",
+        "prompt_injection_residual_acknowledged",
+        "deterministic_non_llm_execution_seam",
+        "creator_manual_transition_required"
+      ],
+      "properties": {
+        "policy_path": { "const": "Tools/Validation/validate_wp0002_policy.py" },
+        "policy_source_sha": { "$ref": "#/$defs/git-sha" },
+        "configuration_capture_uri": { "const": "repo://docs/evidence/WP-0002/cursor-approval-policy.json" },
+        "configuration_capture_sha256": { "$ref": "#/$defs/sha256" },
+        "candidate_code_execution": { "const": false }
+        ,
+        "classification": { "const": "independent-ai-review-not-deterministic-validator" },
+        "prompt_injection_residual_acknowledged": { "const": true },
+        "deterministic_non_llm_execution_seam": { "const": null },
+        "creator_manual_transition_required": { "const": true }
+      }
+    },
+    "source_uri": { "type": "string", "pattern": "^https://api\\.github\\.com/" },
+    "raw_branch_protection_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "sha256"],
+      "properties": {
+        "uri": { "const": "repo://docs/evidence/WP-0002/github-protection.raw-api.json" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "ruleset_inventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["count", "rulesets", "raw_artifact"],
+      "properties": {
+        "count": { "const": 0 },
+        "rulesets": { "const": [] },
+        "raw_artifact": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["uri", "sha256"],
+          "properties": {
+            "uri": { "const": "repo://docs/evidence/WP-0002/github-protection.raw-rulesets.json" },
+            "sha256": { "$ref": "#/$defs/sha256" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "git-sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+  }
+}

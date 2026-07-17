@@ -4,7 +4,7 @@ The original implementation plan is split across two separately authorized
 packets, with one newer local-development successor proposal:
 
 - [`WP-0001`](work-packets/proposed/WP-0001.json): reversible Unity/Mac engine, Save Envelope, renderer, automation, and Blender-pipeline spike with no gameplay authority.
-- [`WP-0002`](work-packets/proposed/WP-0002.json): ugly Sasha-led city-road-faction toy plus a bounded human/robot/mixed colony-composition proof, dependent on accepted WP-0001 and the remaining creator identity/core gate.
+- [`WP-0002`](work-packets/proposed/WP-0002.json): proposed ugly Sasha-led city-road-faction toy plus a bounded same-golden-path human/robot/mixed colony proof, dependent on creator-accepted WP-0003 release and the remaining creator identity/core gate.
 - [`WP-0003`](work-packets/proposed/WP-0003.json): active lean A1 local Unity bootstrap for the project skeleton, deterministic seams, tests, and a non-gameplay technical interaction sandbox. Its distinct boundary receipt authorizes repository work; Unity remains first-use gated.
 
 Together they do not install an engine by assumption or generalize a production kernel before play. Across their separate gates they attempt to prove the high-risk seams:

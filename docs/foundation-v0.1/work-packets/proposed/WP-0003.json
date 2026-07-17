@@ -274,7 +274,20 @@
     "drill_required": false,
     "drill_evidence": []
   },
-  "evidence_manifest": [],
+  "evidence_manifest": [
+    {
+      "id": "EVID-WP0003-TECHNICAL-CAPTURE",
+      "type": "technical-scene-capture",
+      "uri": "repo://docs/evidence/WP-0003/WP0003-TECHNICAL-CAPTURE-20260716.png",
+      "sha256": "39031855ba22baf47fbbcc464403e808a387f57b3b9892cbca75365259b83878"
+    },
+    {
+      "id": "EVID-WP0003-UNITY-MCP-VALIDATION",
+      "type": "validation-manifest",
+      "uri": "repo://docs/evidence/WP-0003/UNITY-MCP-VALIDATION-20260716.json",
+      "sha256": "f51e19679a38d9049b2e67fe4b4eba0641a89cdbb275167fab1b813d9901f0fe"
+    }
+  ],
   "candidate_evidence": {
     "diff_artifact_id": null,
     "artifact_manifest_id": null,
