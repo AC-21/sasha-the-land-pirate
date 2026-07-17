@@ -1,0 +1,19 @@
+{
+  "name": "AC21.Sasha.LastBearing.Editor",
+  "rootNamespace": "AtomicLandPirate.Presentation.LastBearing.Editor",
+  "references": [
+    "AC21.Sasha.LastBearing.Runtime",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <ArtifactsRoot>$(MSBuildThisFileDirectory)../../../BuildArtifacts/WP-0002/local-only/dotnet/LastBearingTests/</ArtifactsRoot>
+    <BaseOutputPath>$(ArtifactsRoot)bin/</BaseOutputPath>
+    <BaseIntermediateOutputPath>$(ArtifactsRoot)obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+  </PropertyGroup>
+</Project>

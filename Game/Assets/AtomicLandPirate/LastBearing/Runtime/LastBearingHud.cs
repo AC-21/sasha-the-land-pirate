@@ -1,0 +1,519 @@
+#nullable enable
+
+using System.Text;
+using AtomicLandPirate.Simulation.LastBearing;
+using UnityEngine;
+
+namespace AtomicLandPirate.Presentation.LastBearing
+{
+    /// <summary>
+    /// Intentionally temporary IMGUI instrumentation for the constitutional
+    /// toy. It reads the core model and emits semantic player intents only.
+    /// </summary>
+    [DisallowMultipleComponent]
+    public sealed class LastBearingHud : MonoBehaviour
+    {
+        private const float PanelWidth = 430f;
+        private LastBearingGameController? _controller;
+        private GUIStyle? _panelStyle;
+        private GUIStyle? _titleStyle;
+        private GUIStyle? _headingStyle;
+        private GUIStyle? _bodyStyle;
+        private GUIStyle? _mutedStyle;
+        private GUIStyle? _buttonStyle;
+        private Vector2 _scroll;
+
+        public void Configure(LastBearingGameController controller)
+        {
+            _controller = controller;
+        }
+
+        private void OnGUI()
+        {
+            if (_controller == null)
+            {
+                return;
+            }
+
+            EnsureStyles();
+            var panelRect = new Rect(18f, 18f, PanelWidth, Screen.height - 36f);
+            GUI.Box(panelRect, GUIContent.none, _panelStyle!);
+
+            GUILayout.BeginArea(new Rect(
+                panelRect.x + 18f,
+                panelRect.y + 16f,
+                panelRect.width - 36f,
+                panelRect.height - 32f));
+            _scroll = GUILayout.BeginScrollView(_scroll, false, true);
+            DrawHeader();
+            if (_controller.HasActiveGame && _controller.ReadModel != null)
+            {
+                DrawActiveGame(_controller.ReadModel);
+            }
+            else
+            {
+                DrawTitle();
+            }
+
+            GUILayout.EndScrollView();
+            GUILayout.EndArea();
+        }
+
+        private void DrawHeader()
+        {
+            GUILayout.Label("SASHA THE ATOMIC LAND PIRATE", _titleStyle);
+            GUILayout.Label("THE LAST BEARING · DEV PROFILE", _mutedStyle);
+            GUILayout.Space(8f);
+            GUILayout.Label(_controller!.Status, _bodyStyle);
+            GUILayout.Space(10f);
+        }
+
+        private void DrawTitle()
+        {
+            GUILayout.Label("WHO CALLS THIS HOME?", _headingStyle);
+            GUILayout.Label(
+                "Composition changes the represented residents, never the costs, " +
+                "timings, commands, or viability in WP-0002.",
+                _bodyStyle);
+            GUILayout.Space(8f);
+
+            if (GUILayout.Button("HUMAN-ONLY COLONY", _buttonStyle))
+            {
+                _controller!.StartNewGame(ColonyComposition.HumanOnly);
+            }
+
+            if (GUILayout.Button("UTILITY-ROBOT-ONLY COLONY", _buttonStyle))
+            {
+                _controller!.StartNewGame(ColonyComposition.RobotOnly);
+            }
+
+            if (GUILayout.Button("MIXED COLONY", _buttonStyle))
+            {
+                _controller!.StartNewGame(ColonyComposition.Mixed);
+            }
+
+            GUILayout.Space(12f);
+            if (GUILayout.Button("LOAD LAST-BEARING-DEV-V1", _buttonStyle))
+            {
+                _controller!.Load();
+            }
+
+            GUILayout.Label(_controller!.SaveStatus, _mutedStyle);
+        }
+
+        private void DrawActiveGame(LastBearingReadModel model)
+        {
+            GUILayout.Label("CIVIC INSTRUMENTS", _headingStyle);
+            GUILayout.Label(BuildInstrumentText(model), _bodyStyle);
+            GUILayout.Space(10f);
+
+            DrawCityNeedAndGrammar(model);
+            GUILayout.Space(10f);
+
+            GUILayout.Label("CURRENT ACTION", _headingStyle);
+            DrawContextActions(model);
+            GUILayout.Space(10f);
+
+            GUILayout.Label("CONTROLS", _headingStyle);
+            GUILayout.Label(
+                model.ExpeditionPhase == ExpeditionPhase.Outbound ||
+                model.ExpeditionPhase == ExpeditionPhase.Returning
+                    ? "W/S or triggers · throttle\nA/D or stick · steer\nP · pause  F5 · save  F9 · load"
+                    : model.ExpeditionPhase == ExpeditionPhase.AtDepot
+                        ? "Depot view locked · choose encounter and cargo below\nP · pause  F5 · save  F9 · load"
+                    : "WASD · camera pan  Q/E · rotate\nMouse wheel · zoom  RMB · orbit\nP · pause  F5 · save  F9 · load",
+                _mutedStyle);
+
+            GUILayout.BeginHorizontal();
+            if (model.PauseCause == PauseCause.AutoAlert)
+            {
+                GUILayout.Label(
+                    "AUTO-PAUSED · resolve the depot encounter below",
+                    _mutedStyle);
+            }
+            else if (GUILayout.Button("PAUSE / RESUME", _buttonStyle))
+            {
+                _controller!.TogglePause();
+            }
+
+            if (model.ExpeditionPhase == ExpeditionPhase.AtDepot &&
+                model.RepairCargoKind == RepairCargoKind.None &&
+                model.PauseCause == PauseCause.None &&
+                GUILayout.Button("FORECAST ALERT", _buttonStyle))
+            {
+                _controller!.TriggerAutoPauseAlert();
+            }
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("SAVE", _buttonStyle))
+            {
+                _controller!.Save();
+            }
+
+            if (GUILayout.Button("LOAD", _buttonStyle))
+            {
+                _controller!.Load();
+            }
+
+            GUILayout.EndHorizontal();
+            GUILayout.Label(_controller!.SaveStatus, _mutedStyle);
+            GUILayout.Label("STATE " + _controller.CanonicalHash, _mutedStyle);
+
+            if (GUILayout.Button("RETURN TO TITLE", _buttonStyle))
+            {
+                _controller!.ReturnToTitle();
+            }
+        }
+
+        private void DrawContextActions(LastBearingReadModel model)
+        {
+            if (model.AssignedResidentId == null)
+            {
+                GUILayout.Label(
+                    "This valid profile has no expedition lead. Assign the " +
+                    "composition's default lead before continuing.",
+                    _bodyStyle);
+                if (GUILayout.Button("ASSIGN DEFAULT EXPEDITION LEAD", _buttonStyle))
+                {
+                    _controller!.AssignDefaultLeadResident();
+                }
+
+                return;
+            }
+
+            if (!_controller!.CityNeedInspected)
+            {
+                GUILayout.Label(
+                    "Inspect the failing water system before committing labor, " +
+                    "infrastructure, or an expedition plan.",
+                    _bodyStyle);
+                return;
+            }
+
+            if (model.ExpeditionPhase == ExpeditionPhase.AtHome &&
+                model.PreparationChoice == PreparationChoice.Unselected &&
+                model.TurbineCondition == TurbineCondition.Failing)
+            {
+                if (model.NextObjective == "activate-slice-infrastructure")
+                {
+                    if (GUILayout.Button("ACTIVATE RECYCLER + MACHINE SHOP", _buttonStyle))
+                    {
+                        _controller.ActivateInfrastructure();
+                    }
+
+                    return;
+                }
+
+                GUILayout.Label("Choose one complete plan:", _mutedStyle);
+                DrawPlanButton("WORKSHOP PUSH + WINCH", PreparationChoice.WorkshopPush, VehicleModule.WinchAssembly);
+                DrawPlanButton("WORKSHOP PUSH + RANGE TANK", PreparationChoice.WorkshopPush, VehicleModule.SealedRangeTank);
+                DrawPlanButton("CIVIC BUFFER + WINCH", PreparationChoice.CivicBuffer, VehicleModule.WinchAssembly);
+                DrawPlanButton("CIVIC BUFFER + RANGE TANK", PreparationChoice.CivicBuffer, VehicleModule.SealedRangeTank);
+                return;
+            }
+
+            if (model.ExpeditionPhase == ExpeditionPhase.AtHome &&
+                (model.PreparationPhase == PreparationPhase.Ready ||
+                 model.PreparationPhase == PreparationPhase.Committed) &&
+                model.TurbineCondition == TurbineCondition.Failing &&
+                model.RepairCargoKind == RepairCargoKind.None)
+            {
+                if (GUILayout.Button("COMMIT MANIFEST + DEPART", _buttonStyle))
+                {
+                    _controller!.CommitExpedition();
+                }
+
+                return;
+            }
+
+            if (model.ExpeditionPhase == ExpeditionPhase.Outbound ||
+                model.ExpeditionPhase == ExpeditionPhase.Returning)
+            {
+                GUILayout.Label(
+                    "Drive the authored corridor. Route progress comes only from " +
+                    "quantized core commands.",
+                    _bodyStyle);
+                return;
+            }
+
+            if (model.ExpeditionPhase == ExpeditionPhase.AtDepot &&
+                model.RepairCargoKind == RepairCargoKind.None)
+            {
+                if (GUILayout.Button("COOPERATE · FIELD SLEEVE + OBLIGATION", _buttonStyle))
+                {
+                    _controller!.ResolveDepot(cooperate: true);
+                }
+
+                if (GUILayout.Button("TAKE THE CLAIMED BEARING", _buttonStyle))
+                {
+                    _controller!.ResolveDepot(cooperate: false);
+                }
+
+                return;
+            }
+
+            if (model.ExpeditionPhase == ExpeditionPhase.AtDepot)
+            {
+                if (model.VehicleModule == VehicleModule.SealedRangeTank &&
+                    model.LiquidCargoKind == LiquidCargoKind.None)
+                {
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("LOAD WATER", _buttonStyle))
+                    {
+                        _controller!.ChooseLiquidReturn(LiquidCargoKind.Water);
+                    }
+
+                    if (GUILayout.Button("LOAD FUEL", _buttonStyle))
+                    {
+                        _controller!.ChooseLiquidReturn(LiquidCargoKind.Fuel);
+                    }
+
+                    GUILayout.EndHorizontal();
+                }
+
+                bool liquidSelectionRequired =
+                    model.VehicleModule == VehicleModule.SealedRangeTank &&
+                    model.LiquidCargoKind == LiquidCargoKind.None;
+                if (liquidSelectionRequired)
+                {
+                    GUILayout.Label(
+                        "Select one tank cargo before freezing the return payload.",
+                        _mutedStyle);
+                }
+                else if (GUILayout.Button("FREEZE PAYLOAD + RETURN", _buttonStyle))
+                {
+                    _controller!.BeginReturn();
+                }
+
+                return;
+            }
+
+            if (model.ExpeditionPhase == ExpeditionPhase.Returned &&
+                model.TransactionPhase != TransactionPhase.Finalized)
+            {
+                if (GUILayout.Button("CREDIT RETURN TO LAST BEARING", _buttonStyle))
+                {
+                    _controller!.CompleteReturn();
+                }
+
+                return;
+            }
+
+            if (model.TurbineCondition == TurbineCondition.Failing &&
+                model.RepairCargoKind != RepairCargoKind.None)
+            {
+                if (GUILayout.Button("INSTALL TURBINE REPAIR", _buttonStyle))
+                {
+                    _controller!.RepairTurbine();
+                }
+
+                return;
+            }
+
+            if (model.MaintenanceDue)
+            {
+                if (GUILayout.Button("SERVICE FIELD SLEEVE · 2 PARTS", _buttonStyle))
+                {
+                    _controller!.ServiceFieldSleeve();
+                }
+
+                return;
+            }
+
+            GUILayout.Label(model.NextObjective, _bodyStyle);
+        }
+
+        private void DrawCityNeedAndGrammar(LastBearingReadModel model)
+        {
+            GUILayout.Label("CITY NEED + D-0030 COMPARISON", _headingStyle);
+            if (!_controller!.CityNeedInspected)
+            {
+                GUILayout.Label(
+                    "The red turbine stop and falling reserve are visible. " +
+                    "Inspect them before taking action.",
+                    _bodyStyle);
+                if (GUILayout.Button("INSPECT FAILING WATER SYSTEM", _buttonStyle))
+                {
+                    _controller.InspectCityNeed();
+                }
+
+                return;
+            }
+
+            GUILayout.Label(
+                "Observed: the turbine is failing and the reserve trend is " +
+                FormatSigned(model.WaterTrendMilliPerSettlementTick) +
+                " per settlement tick.",
+                _bodyStyle);
+
+            if (model.ExpeditionPhase != ExpeditionPhase.AtHome)
+            {
+                GUILayout.Label(
+                    "The reversible city-grammar comparison is available at home.",
+                    _mutedStyle);
+                return;
+            }
+
+            GUILayout.Label(
+                "Comparison only — neither hypothesis selects or ratifies D-0030. " +
+                "Both use the same locked provisional camera.",
+                _mutedStyle);
+            if (GUILayout.Button(
+                    "HYPOTHESIS A · INDIVIDUAL BUILDINGS ON RESTRAINED SNAP GRID",
+                    _buttonStyle))
+            {
+                _controller.SelectCityGrammarHypothesis(
+                    LastBearingCityGrammarHypothesis.RestrainedSnapGrid);
+            }
+
+            if (GUILayout.Button(
+                    "HYPOTHESIS B · WHOLE CIVIC DISTRICT STAMP",
+                    _buttonStyle))
+            {
+                _controller.SelectCityGrammarHypothesis(
+                    LastBearingCityGrammarHypothesis.DistrictStamp);
+            }
+
+            if (_controller.CityGrammarHypothesis !=
+                LastBearingCityGrammarHypothesis.Unselected)
+            {
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("MOVE / RESTAMP", _buttonStyle))
+                {
+                    _controller.ManipulateCityGrammarPrimary();
+                }
+
+                if (GUILayout.Button("ROTATE 90°", _buttonStyle))
+                {
+                    _controller.RotateCityGrammarPrimary();
+                }
+
+                GUILayout.EndHorizontal();
+                if (GUILayout.Button("CLEAR COMPARISON", _buttonStyle))
+                {
+                    _controller.ResetCityGrammarComparison();
+                }
+            }
+
+            GUILayout.Label(_controller.CityGrammarEvidence, _mutedStyle);
+        }
+
+        private void DrawPlanButton(
+            string label,
+            PreparationChoice preparation,
+            VehicleModule module)
+        {
+            if (GUILayout.Button(label, _buttonStyle))
+            {
+                _controller!.ChoosePlan(preparation, module);
+            }
+        }
+
+        private static string BuildInstrumentText(LastBearingReadModel model)
+        {
+            var text = new StringBuilder(512);
+            text.Append("Phase  ").Append(model.ExpeditionPhase)
+                .Append("  ·  tick ").Append(model.GlobalTick).AppendLine();
+            text.Append("Water  ").Append(model.WaterMilli)
+                .Append("  (").Append(FormatSigned(model.WaterTrendMilliPerSettlementTick))
+                .Append(" / settlement tick)").AppendLine();
+            text.Append("Parts  ").Append(model.PartsUnits)
+                .Append("  ·  Fuel  ").Append(model.FuelUnits).AppendLine();
+            text.Append("Turbine  ").Append(model.TurbineCondition)
+                .Append("  ·  Vehicle  ").Append(model.VehicleConditionMilli)
+                .AppendLine();
+            text.Append("Plan  ").Append(model.PreparationChoice)
+                .Append(" + ").Append(model.PlannedModule)
+                .Append("  ·  module ").Append(model.VehicleModule).AppendLine();
+            text.Append("Route  ").Append(model.RouteKind)
+                .Append("  ").Append(model.RouteProgressTicks)
+                .Append('/').Append(model.RouteTargetTicks)
+                .Append("  ·  lateral ").Append(model.VehicleLateralMilli)
+                .Append("/±")
+                .Append(LastBearingBalanceV1.RoadLateralLimitMilli)
+                .AppendLine();
+            text.Append("Faction  ").Append(model.FactionClaimState)
+                .Append("  ").Append(model.FactionClaimProgressMilli)
+                .Append("  ·  depot ").Append(model.DepotControl).AppendLine();
+            text.Append("Access  ").Append(model.FactionAccessPolicy)
+                .Append("  ·  aid ").Append(model.FactionAidPolicy).AppendLine();
+            text.Append("Roster  ").Append(model.Composition)
+                .Append("  ·  lead ").Append(model.AssignedResidentId ?? "unassigned")
+                .AppendLine();
+            text.Append("Forecast  water ").Append(FormatTicks(model.WaterZeroSettlementTicks))
+                .Append("  ·  claim ").Append(FormatTicks(model.ClaimedFactionTicks))
+                .Append("  ·  dust ").Append(FormatTicks(model.DustFrontCrisisTicks))
+                .AppendLine();
+            text.Append("Next  ").Append(model.NextCityDecision)
+                .Append("  ·  ").Append(model.NextObjective);
+            return text.ToString();
+        }
+
+        private static string FormatSigned(long value)
+        {
+            return value > 0 ? "+" + value : value.ToString();
+        }
+
+        private static string FormatTicks(long? value)
+        {
+            return value.HasValue ? value.Value + " ticks" : "n/a";
+        }
+
+        private void EnsureStyles()
+        {
+            if (_panelStyle != null)
+            {
+                return;
+            }
+
+            _panelStyle = new GUIStyle(GUI.skin.box)
+            {
+                normal = { background = MakeTexture(new Color(0.055f, 0.058f, 0.055f, 0.95f)) },
+                border = new RectOffset(1, 1, 1, 1)
+            };
+            _titleStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 19,
+                fontStyle = FontStyle.Bold,
+                wordWrap = true,
+                normal = { textColor = new Color(1f, 0.77f, 0.42f) }
+            };
+            _headingStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 12,
+                fontStyle = FontStyle.Bold,
+                normal = { textColor = new Color(0.56f, 0.79f, 0.76f) }
+            };
+            _bodyStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 12,
+                wordWrap = true,
+                richText = false,
+                normal = { textColor = new Color(0.88f, 0.84f, 0.75f) }
+            };
+            _mutedStyle = new GUIStyle(_bodyStyle)
+            {
+                fontSize = 10,
+                normal = { textColor = new Color(0.62f, 0.61f, 0.56f) }
+            };
+            _buttonStyle = new GUIStyle(GUI.skin.button)
+            {
+                fontSize = 11,
+                wordWrap = true,
+                fixedHeight = 34f,
+                margin = new RectOffset(0, 0, 3, 3)
+            };
+        }
+
+        private static Texture2D MakeTexture(Color color)
+        {
+            var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            texture.hideFlags = HideFlags.HideAndDontSave;
+            texture.SetPixel(0, 0, color);
+            texture.Apply();
+            return texture;
+        }
+    }
+}

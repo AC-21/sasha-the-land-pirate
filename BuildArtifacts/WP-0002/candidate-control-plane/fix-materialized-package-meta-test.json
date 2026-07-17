@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "artifact_id": "CANDIDATE-WP0002-MATERIALIZED-PACKAGE-META-TEST-FIX",
+  "packet_id": "WP-0002",
+  "base_commit": "6cd2bfc1a744eb434ee47b263127bcd788372675",
+  "target_path": "docs/foundation-v0.1/tools/test_validate_wp0002_package_meta.py",
+  "failure": "test_future_lastbearing_tree_requires_exact_deterministic_pairing raises FileExistsError after the reserved LastBearing package tree is materialized",
+  "proposed_effect": "Reset only the temporary copied SimulationCore LastBearing fixture before reconstructing the deterministic metadata case; protected repository content remains unchanged",
+  "patch_path": "BuildArtifacts/WP-0002/candidate-control-plane/fix-materialized-package-meta-test.patch",
+  "patch_sha256": "eba48862ca7996ffce52410a9219e5f58f5cd552a2ee8235e0c19d3510e65fbd",
+  "authority_state": "candidate-only-not-applied",
+  "requires_separate_protected_transaction": true
+}
