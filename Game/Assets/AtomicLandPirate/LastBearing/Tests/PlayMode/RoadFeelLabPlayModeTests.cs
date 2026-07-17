@@ -187,7 +187,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 vehicle.Telemetry.ForwardSpeedMetresPerSecond,
                 Is.LessThan(drivenSpeed));
 
-            yield return WaitFixedFrames(20);
+            // Reverse arming begins only after the service brake has brought
+            // the moving rig into the low-speed window. Budget both that
+            // stopping phase and the deliberate 0.18-second arm before
+            // requiring observable reverse travel.
+            yield return WaitFixedFrames(32);
             Assert.That(
                 vehicle.Telemetry.ForwardSpeedMetresPerSecond,
                 Is.LessThan(-0.1f));

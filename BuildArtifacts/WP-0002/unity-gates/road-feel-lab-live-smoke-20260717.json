@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-07-17T23:42:46Z",
+  "project_root": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game",
+  "unity_editor": "6000.5.4f1",
+  "scene": "Assets/AtomicLandPirate/LastBearing/Scenes/RoadFeelLab.unity",
+  "play_mode": {
+    "entered": true,
+    "runtime_controller_count": 1,
+    "vehicle_controller_count": 1,
+    "chase_camera_count": 1,
+    "runtime_root": "Road Feel Lab Runtime [Presentation Only]",
+    "vehicle": "Sasha's Planted Utility Rig",
+    "camera": "Road Feel Elastic Chase Camera",
+    "course": "R0 Authored Road Feel Course"
+  },
+  "live_console_errors": 0,
+  "gate_evidence": {
+    "asset_refresh": "asset-refresh-and-compile-d61a0d389fce4531b9c0e8d27c5e943e.json",
+    "edit_mode": "wp0002-editmode-test-assembly-688eb670271d4f2b8da1736f01c76e86.json",
+    "play_mode": "wp0002-playmode-test-assembly-f4ea0b1b012e46868b30eb75d7273933.json"
+  },
+  "capture": {
+    "path": "road-feel-lab-live-20260717T234246Z.jpeg",
+    "sha256": "0beabdc0e0f8a156b95934ef57d57fc4590a5f0948c6d77870350dca197c6dea",
+    "width": 1283,
+    "height": 768
+  },
+  "limitations": [
+    "This is live graybox and hierarchy evidence, not creator art-direction acceptance.",
+    "Input and reverse behavior are accepted here through the passing PlayMode assembly, not through Computer Use key-tap timing."
+  ]
+}
