@@ -949,14 +949,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             out string failure)
         {
             containsExpectedAssembly = false;
-            discovered = root?.Test?.TestCaseCount ?? 0;
+            discovered = 0;
             failure = "invalid-root";
-            if (root == null || root.Test == null || discovered <= 0)
+            if (root == null || root.Test == null)
             {
                 return false;
             }
 
             int leafCount = 0;
+            int assemblyNodeCount = 0;
             var assemblies = new HashSet<string>(StringComparer.Ordinal);
             var pending = new Stack<ITestResult>();
             pending.Push(root);
@@ -965,13 +966,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                 ITestResult current = pending.Pop();
                 if (current.Test is TestAssembly testAssembly)
                 {
-                    string name = testAssembly.Name;
-                    assemblies.Add(
-                        name.EndsWith(
-                            ".dll",
-                            StringComparison.OrdinalIgnoreCase)
-                            ? name.Substring(0, name.Length - 4)
-                            : name);
+                    assemblyNodeCount++;
+                    string name = NormalizeAssemblyName(testAssembly.Name);
+                    assemblies.Add(name);
+                    if (string.Equals(
+                            name,
+                            expectedAssembly,
+                            StringComparison.Ordinal))
+                    {
+                        discovered = testAssembly.TestCaseCount;
+                    }
                 }
 
                 bool hasChildren = false;
@@ -994,13 +998,17 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
 
             containsExpectedAssembly = assemblies.Contains(expectedAssembly);
             int accounted = ResultCount(root);
-            if (assemblies.Count != 1 || !containsExpectedAssembly)
+            if (assemblyNodeCount != 1 ||
+                assemblies.Count != 1 ||
+                !containsExpectedAssembly)
             {
                 failure = "assembly-mismatch";
                 return false;
             }
 
-            if (leafCount != discovered || accounted != discovered)
+            if (discovered <= 0 ||
+                leafCount != discovered ||
+                accounted != discovered)
             {
                 failure = "count-mismatch";
                 return false;
@@ -1008,6 +1016,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
 
             failure = string.Empty;
             return true;
+        }
+
+        private static string NormalizeAssemblyName(string name)
+        {
+            return name.EndsWith(
+                    ".dll",
+                    StringComparison.OrdinalIgnoreCase)
+                ? name.Substring(0, name.Length - 4)
+                : name;
         }
 
         private static int ResultCount(ITestResult result)
