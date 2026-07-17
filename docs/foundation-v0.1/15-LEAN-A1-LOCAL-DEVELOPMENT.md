@@ -1,6 +1,6 @@
 # Lean A1 local-development successor
 
-Status: **creator-ratified / WP-0003 released / WP-0002 accepted but inactive / canonical A0**
+Status: **creator-ratified / WP-0003 released / WP-0002 active / canonical A1**
 
 Date: 2026-07-16
 
@@ -11,7 +11,7 @@ is now released under `RR-WP0003-COMPLETE-20260717`; its reservation is
 released, and that completed lane grants no continuing Unity call or repository
 implementation authority.
 
-Any future active state is effective only when the complete activation tree is
+Any active state is effective only when the complete activation tree is
 contained in protected `main`. A pull-request branch may encode that future
 state for validation but remains non-executable before protected merge.
 
@@ -28,9 +28,8 @@ uses a new packet instead of rewriting the sealed WP-0001 contract.
 
 ## Ratified local-development authority model
 
-No A1 packet is currently active. The rules below describe the authority a
-separately protected local-development activation may grant; they are not
-permission to act at the current A0 state.
+WP-0002 is the sole active A1 packet. The rules below are its exact bounded
+local-development authority; they do not generalize to another packet.
 
 `A1-LOCAL-DEV` means one bounded local-development packet may:
 
@@ -70,8 +69,8 @@ Unity state. Together they establish:
 3. a pre-change Git checkpoint;
 4. Unity `6000.5.4f1` as the authorized development Editor and `Game` as the
    intended project path;
-5. Unity MCP authority is conditional on the first-use gate while the project is
-   bootstrap-pending;
+5. Unity MCP authority is conditional on the first-use gate; WP-0003 was
+   `bootstrap-pending`, while active WP-0002 binds `existing-protected-project`;
 6. the exact first-use preconditions for seat/linkage, Bridge, Codex approval,
    and target matching;
 7. no committed secrets and no requested credential, account, license, purchase,
@@ -83,8 +82,9 @@ No raw protocol bytes, packet captures, process ancestry, FD graph, code-signing
 attestation, disposable OS user, private HOME, schema-v5 provider, or five-minute
 receipt window is required.
 
-This intentionally permits A1 to begin before the Unity project exists, so the
-boundary does not recreate the circular setup blocker it replaces.
+This historically permitted WP-0003 A1 to begin before the Unity project
+existed, avoiding the circular setup blocker. Active WP-0002 instead binds the
+existing protected `Game` project.
 
 The manifest branch is an activation attestation snapshot, not a perpetual
 work branch. After activation enters protected `main`, each implementation pass
@@ -95,9 +95,8 @@ PR branch therefore does not delete or recreate the receipt-bound checkpoint.
 ## First Unity MCP use gate
 
 A protected A1 activation authorizes only its exact repository work. It does
-not itself authorize a Unity tool call. No Unity MCP call is currently allowed.
-After WP-0002's protected Stage C activation, and before the first Unity MCP
-call in a session, the agent must establish from the creator and visible Unity
+not itself authorize a Unity tool call. Before the first Unity MCP call in a
+session, the agent must establish from the creator and visible Unity
 state that:
 
 - the creator has created and opened exactly `Game`;
@@ -152,29 +151,28 @@ Agents may not:
 - Existing player saves do not exist. Any future save-format change remains
   separately creator-gated.
 
-## Released predecessor and accepted successor
+## Released predecessor and active successor
 
 `WP-0003` completed the local-development foundation. WP-0001 remains accepted
 historical evidence. WP-0002 now depends on creator-accepted WP-0003 release
 rather than WP-0001 completion. WP-0003's Unity project skeleton,
 deterministic core, non-persisting save interfaces, tests, and technical scene
-remain protected baseline outputs, not active authority. WP-0002 is accepted
-but unreserved and inactive. Production content, release, store, monetization,
-and background rollout remain out of scope.
+remain protected baseline outputs, not active authority. WP-0002 is active and
+its exact Last Bearing reservation is held. Production content, release, store,
+monetization, and background rollout remain out of scope.
 
-## Accepted WP-0002 protected-PR successor awaiting activation
+## Active WP-0002 protected-PR successor
 
-`A1B-WP-0002-LOCAL-DEV` is the accepted successor boundary, but it is not
-current authority. It may activate only after a separate protected Stage C
-transaction binds fresh scope/protection evidence, the exact WP-0002 contract
-and boundary bytes, a held reservation, and a distinct creator activation
-receipt. It succeeds the proven WP-0003 lane: each
+`A1B-WP-0002-LOCAL-DEV` is current authority under
+`RR-WP0002-ACTIVATE-20260717`. Its protected Stage C transaction binds fresh
+scope/protection evidence, the exact WP-0002 contract and boundary bytes, and
+the held reservation. It succeeds the proven WP-0003 lane: each
 implementation pass starts on a fresh protected-main `agent/*` branch, uses
 protected pull requests, and requires `validate`, `wp0002-core`, plus a
 transparent creator-delegated manual release for every pull request. Cursor is
 optional advisory AI review and is non-blocking. The base-owned
 `wp0002-policy` workflow must pass against the latest head and retain its bound
-report before activation or later implementation release. Autonomous
+report for later implementation release. Autonomous
 auto-merge is not authorized without a separate governance upgrade. Direct or
 agent-selected merge remains denied.
 
@@ -220,4 +218,6 @@ sealed `RR-WP0003-ACTIVATE-20260716` receipt activated WP-0003 as the sole A1
 packet when PR #20 entered protected `main`. The later sealed
 `RR-WP0003-COMPLETE-20260717` receipt accepts its completion and releases that
 authority. `RR-WP0002-ACCEPT-20260717` accepts WP-0002 without activating it;
-canonical autonomy remains A0 until the separate protected Stage C transaction.
+the distinct `RR-WP0002-ACTIVATE-20260717` receipt binds its Stage C evidence,
+boundary, reservation, and activation claims; canonical autonomy is A1 solely
+for WP-0002.

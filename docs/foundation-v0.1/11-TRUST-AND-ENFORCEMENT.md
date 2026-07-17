@@ -1,12 +1,12 @@
 # Trust and Enforcement Boundary
 
 Version: 0.1 draft\
-Current autonomy: **A0 — no active A1 packet**\
+Current autonomy: **A1 — WP-0002 is the sole active packet**\
 Current enforcement status: **specification, not a trusted control plane**
 
-Current lifecycle: **WP-0003 released with its reservation released; WP-0002
-accepted but inactive and unreserved. Implementation and Unity MCP use remain
-closed until the protected Stage C activation transaction.**
+Current lifecycle: **WP-0003 and its reservation are released. WP-0002 is
+active with its exact Last Bearing reservation held. Repository implementation
+is open only inside that boundary; Unity MCP remains session-gated.**
 
 ## 1. Threat model
 
@@ -127,22 +127,22 @@ Every attack must be rejected by a trusted check outside the candidate's write a
 
 - WP-0001 remains accepted at its immutable contract, while owner-authenticated D-0051 and packet route-successor receipts protect `UNITY-MCP-EXTERNAL`; D-0050 permits only creator-operated candidate setup, and A1 still requires the protected empty seed, exact seat/project/D-0047 tuple, actual candidate quarantine, direct-MCP process/socket/config/allowlist profile, revoked zero-tool preflight, and distinct fresh live activation session to be physically verified and separately activated;
 - WP-0003 completed its protected D-0052 local-development lane, is `released`, and no longer holds its repository/bootstrap reservation;
-- WP-0002 has its explicit acceptance and the released-WP-0003 dependency is satisfied, but it remains inactive and unreserved at A0;
-- the ugly gameplay toy cannot begin implementation or use Unity MCP until a separate packet-specific WP-0002 protected-PR local activation receipt and reservation land through the protected Stage C transaction;
+- WP-0002 has explicit acceptance, a satisfied released-WP-0003 dependency, a distinct protected activation receipt, and a held exact reservation;
+- the ugly gameplay toy may be implemented only inside that reservation; Unity MCP additionally requires the exact session first-use gate;
 - the slice kernel additionally requires the city grammar decision;
 - production content and autonomous integration have later, stricter gates.
 
-Repository creation or packet acceptance alone never promotes autonomy. `packet_entry_gates` in the canonical state maps each executable packet to exactly one gate; WP-0001 maps to `technical_spike`, WP-0002 maps to `ugly_gameplay_toy`, and WP-0003 maps to `local_development`. The canonical `a1_max_active_packets` value is `1`. WP-0003 has ended and its release is recorded, but WP-0002 still requires its own protected Stage C activation before any new A1 work starts.
+Repository creation or packet acceptance alone never promotes autonomy. `packet_entry_gates` in the canonical state maps each executable packet to exactly one gate; WP-0001 maps to `technical_spike`, WP-0002 maps to `ugly_gameplay_toy`, and WP-0003 maps to `local_development`. The canonical `a1_max_active_packets` value is `1`; active WP-0002 occupies that slot.
 
-Unity Terms §17.2(ff) remains an independent hard stop. D-0051 selects the documented external-MCP Authorized Agentic Access profile: Codex connects through Unity's MCP Bridge and the exact Unity-installed relay, while no agent or CI credential may directly start Unity Hub, Editor, executable, CLI, or batchmode. Global MCP configuration is outside the approved boundary. Any activated packet must bind an explicit project target through its own schema; WP-0001 uses the standalone quarantine, while WP-0003 historically used its conditional first-use local boundary. No packet currently has Unity MCP authority. Creator permission to proceed cannot waive third-party terms or substitute for the packet's required entitlement, connection, and boundary evidence.
+Unity Terms §17.2(ff) remains an independent hard stop. D-0051 selects the documented external-MCP Authorized Agentic Access profile: Codex connects through Unity's MCP Bridge and the exact Unity-installed relay, while no agent or CI credential may directly start Unity Hub, Editor, executable, CLI, or batchmode. Global MCP configuration is outside the approved boundary. Any activated packet must bind an explicit project target through its own schema; WP-0001 uses the standalone quarantine, while WP-0003 historically used its conditional first-use local boundary. Active WP-0002 holds only conditional five-tool Unity MCP authority after its exact session first-use gate. Creator permission to proceed cannot waive third-party terms or substitute for the packet's required entitlement, connection, and boundary evidence.
 
-One read-only `Unity_ReadConsole` smoke call occurred before D-0051 and before A1 activation. It returned no console entries and produced no known project mutation, but it crossed WP-0001's zero-tool-call setup boundary. The event is retained as a control-plane deviation, cannot be treated as the required handshake or activation evidence, and does not authorize another Unity call. A clean creator-operated connection cycle with zero tool invocations is still required before the separate activation receipt.
+One read-only `Unity_ReadConsole` smoke call occurred before D-0051 and before A1 activation. It returned no console entries and produced no known project mutation, but it crossed WP-0001's zero-tool-call setup boundary. The event is retained as a control-plane deviation, cannot be treated as WP-0001's required handshake or activation evidence, and does not authorize another WP-0001 Unity call. A clean creator-operated connection cycle with zero tool invocations is still required before any WP-0001 activation receipt; it does not constrain WP-0002's separately receipt-bound first-use lane.
 
 ### A1 quarantine minimum
 
 The generic quarantine below governs every A1 packet except one explicitly
 eligible protected-PR local packet. WP-0003's historical creator-ratified
-exception and WP-0002's accepted-but-inactive successor are defined by
+exception and WP-0002's active successor are defined by
 [`15-LEAN-A1-LOCAL-DEVELOPMENT.md`](15-LEAN-A1-LOCAL-DEVELOPMENT.md) and
 [`schemas/local-a1-boundary.schema.json`](schemas/local-a1-boundary.schema.json).
 It may use only a valid non-`main` `agent/*` branch whose real checkpoint exists
@@ -153,15 +153,15 @@ closed until the creator-opened exact `Game` project, licensed Editor, running
 Bridge, approved Codex client, exact target, and requested action all satisfy
 the first-use gate. This exception grants no direct Unity invocation,
 installation, credential, account, publishing, release, or self-merge
-authority. The accepted but inactive WP-0002 successor additionally requires read-only
+authority. The active WP-0002 successor additionally requires read-only
 foundation/governance/receipt paths, the exact five-tool Unity MCP allowlist,
 fresh protected-main `agent/*` branches, mandatory `validate` and
 `wp0002-core`, and transparent creator-delegated manual release for every pull
 request. Cursor is optional independent AI review and is neither a deterministic
-validator nor a blocking authority. The base-owned `wp0002-policy` workflow is
-only a candidate-independent canary until a live Stage-B pull request proves
-that GitHub attaches its result to the latest head; failure to prove that does
-not waive deterministic tests and instead preserves delegated manual release.
+validator nor a blocking authority. The receipt-bound Stage-C evidence proves
+the base-owned `wp0002-policy` workflow attaches a candidate-independent result
+to the latest head, so it is required; failure never waives the
+other deterministic tests or delegated manual release.
 Its sole package-graph exception is the two exact repository-local
 UPM links `file:../../SimulationCore` and `file:../../SaveContracts`, resolved
 relative to `Game/Packages/manifest.json`; registry,
@@ -172,7 +172,8 @@ package reach; the allowlist and denied actions are creator policy, not an OS
 sandbox. Repository-admin credentials likewise make protection bypass
 technically possible for the operator, so bypass is denied creator policy and
 must be live-audited rather than described as cryptographically unavailable.
-It is not executable until separately creator-bound.
+Direct `Unity_RunCommand` is not executable until the enumerated dispatcher is
+materialized, content-addressed, and bound for that call.
 
 For every other A1 packet, before any command runs, a creator-controlled process must materialize `governance/a1-boundaries/<packet-id>.json` under [`schemas/a1-boundary-manifest.schema.json`](schemas/a1-boundary-manifest.schema.json). The packet stores its safe path and raw SHA-256; the one `packet-activation` receipt must bind that exact hash, the packet contract, and all of the following:
 
@@ -208,7 +209,7 @@ collector binds sandbox/network attachment to each process birth identity.
 The creator receipt must follow that capture within five minutes. Disconnect
 or collector/config/process drift requires a new receipt.
 
-The same packet-specific receipt binds the packet activation claim plus its exact boundary claim: `A1-QUARANTINE-BOUNDARY-VERIFIED` for generic quarantine packets or `A1-LOCAL-BOUNDARY-VERIFIED` for an explicitly eligible protected-PR local packet (historical WP-0003 or accepted-but-inactive WP-0002 after its protected Stage C activation). WP-0001's receipt additionally carries `AUTHORIZE-WP0001-MCP-ALLOWLIST` for the exact digest-bound list in that same boundary. Combining these claims records one approval of one verified packet boundary; it does not invent another independent approval.
+The same packet-specific receipt binds the packet activation claim plus its exact boundary claim: `A1-QUARANTINE-BOUNDARY-VERIFIED` for generic quarantine packets or `A1-LOCAL-BOUNDARY-VERIFIED` for an explicitly eligible protected-PR local packet (historical WP-0003 or active WP-0002). WP-0001's receipt additionally carries `AUTHORIZE-WP0001-MCP-ALLOWLIST` for the exact digest-bound list in that same boundary. Combining these claims records one approval of one verified packet boundary; it does not invent another independent approval.
 WP-0001 also carries `AUTHORIZE-WP0001-RAW-COLLECTORS` for the exact
 content-addressed protocol, network, and policy-attachment collectors named by
 that boundary.

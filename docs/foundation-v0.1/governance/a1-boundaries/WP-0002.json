@@ -1,19 +1,19 @@
 {
   "schema_version": 1,
-  "lifecycle_state": "proposed",
+  "lifecycle_state": "attested",
   "manifest_id": "A1B-WP-0002-LOCAL-DEV",
   "boundary_mode": "local-development",
   "packet_id": "WP-0002",
   "packet_contract_sha256": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
   "created_at": "2026-07-17T04:46:30Z",
-  "attested_by": null,
-  "attestation_receipt_id": null,
+  "attested_by": "AC-21",
+  "attestation_receipt_id": "RR-WP0002-ACTIVATE-20260717",
   "repository": {
     "root": "/Users/sasha/Documents/Codex/sasha-the-land-pirate",
     "remote_url": "https://github.com/AC-21/sasha-the-land-pirate",
-    "base_commit": "b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5",
-    "branch": "agent/wp0002-first-playable-governance-001",
-    "branch_head_commit": "b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5",
+    "base_commit": "f83ef8aa4d2bac7d0c8817180feebc24c0c1e835",
+    "branch": "agent/wp0002-activation-20260717t160516z-c92f112705a1",
+    "branch_head_commit": "faa2d8be51e44866e39524fb4de8cb01b9032f73",
     "branch_is_main": false,
     "independent_git_directory": true,
     "shared_worktree": false,
@@ -21,9 +21,9 @@
     "game_project_path": "/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game"
   },
   "reservation": {
-    "lease_id": null,
-    "fencing_token": null,
-    "expires_at": null,
+    "lease_id": "lease-20260717t160516z-c92f112705a1-b8c98c1cf9915678",
+    "fencing_token": "fence-20260717t160516z-c92f112705a1-4bc68814cdbcabe3",
+    "expires_at": "2026-07-19T16:06:11Z",
     "paths": [
       "SimulationCore/Runtime/LastBearing.meta",
       "SimulationCore/Runtime/LastBearing/",
@@ -57,7 +57,7 @@
   },
   "foundation_binding": {
     "constitution_sha256": "ff6d7938c14a074acf796619868b97551cefd1681147559983a293792c20afb8",
-    "decision_ledger_sha256": "df5a4840f468676d6e3b428be1eda957310ef12c812241c5be3cdde6bd4601ef",
+    "decision_ledger_sha256": "880f85269c5c764fa0725d7a499315f6bd802b3697a380f016e0f7af115b1b88",
     "last_creator_receipt_id": "RR-WP0003-ACCEPT-20260716"
   },
   "unity": {
@@ -104,37 +104,43 @@
   "reserved_scope_clean_at_activation": true,
   "excluded_creator_owned_drift": [
     {
+      "base_blob_sha256": "c678b7973d453f83b55ab4fb147fa0a32dab8f31c56ac748df53af239f327555",
+      "normalized_git_state": "unstaged-modified",
+      "observed_sha256": "2dadda9cdf1a6521e2a1a5d58b5d33645679ca8e3672c4e5d5e5923970814eef",
+      "owner": "creator",
       "path": ".codex/config.toml",
-      "normalized_git_state": "unstaged-modified",
-      "base_blob_sha256": null,
-      "observed_sha256": null,
-      "regular_file_no_symlink": null,
-      "owner": "creator",
-      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash"
+      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash",
+      "regular_file_no_symlink": true
     },
     {
+      "base_blob_sha256": "3311963a88f9cc3083785d978dfba05f898150157e210a3db6dd044f2630998a",
+      "normalized_git_state": "unstaged-modified",
+      "observed_sha256": "169d044e0230446ebb69e9380747f0b5d58a89ca098ebdfd1e8ac04583b17ae3",
+      "owner": "creator",
       "path": "Game/ProjectSettings/ProjectSettings.asset",
-      "normalized_git_state": "unstaged-modified",
-      "base_blob_sha256": null,
-      "observed_sha256": null,
-      "regular_file_no_symlink": null,
-      "owner": "creator",
-      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash"
+      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash",
+      "regular_file_no_symlink": true
     },
     {
-      "path": "Game/ProjectSettings/SceneTemplateSettings.json",
-      "normalized_git_state": "untracked",
       "base_blob_sha256": null,
-      "observed_sha256": null,
-      "regular_file_no_symlink": null,
+      "normalized_git_state": "untracked",
+      "observed_sha256": "bb9098b3bfcde78d93e264b96f7b77b5430e64e8c57a7aad7f5a5d9c3945e16a",
       "owner": "creator",
-      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash"
+      "path": "Game/ProjectSettings/SceneTemplateSettings.json",
+      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash",
+      "regular_file_no_symlink": true
     }
   ],
-  "working_tree_scope_capture": null,
+  "working_tree_scope_capture": {
+    "uri": "repo://docs/evidence/WP-0002/scope-capture/working-tree-scope.json",
+    "sha256": "a65d37c6a140eb68158103902b842e1cd049643a4a27c8420ec035af07fd5c30"
+  },
   "github_protection_capture": {
     "required_schema": "wp0002-github-protection-v1",
-    "artifact": null
+    "artifact": {
+      "uri": "repo://docs/evidence/WP-0002/github-protection.json",
+      "sha256": "7a57ee778c2d674139bed91f394e015bbdc96079e6b874cbc7d5a3bca9ec6d4f"
+    }
   },
   "external_cursor_review_control": {
     "provider": "Cursor Approval Agent",
@@ -146,7 +152,7 @@
     "prompt_injection_residual_acknowledged": true,
     "deterministic_non_llm_execution_seam": null,
     "policy_path": "Tools/Validation/validate_wp0002_policy.py",
-    "policy_source_sha": null,
+    "policy_source_sha": "f83ef8aa4d2bac7d0c8817180feebc24c0c1e835",
     "same_repository_only": true,
     "base_ref": "main",
     "head_ref_prefix": "agent/",
@@ -159,7 +165,10 @@
       "verifying-to-candidate",
       "candidate-to-released"
     ],
-    "configuration_capture": null
+    "configuration_capture": {
+      "uri": "repo://docs/evidence/WP-0002/cursor-approval-policy.json",
+      "sha256": "7d947d51e3d484706f95bb81b7c92325fa07899ea6f3a1bf79c40779e09dcfb2"
+    }
   },
   "unity_runcommand_residual_capability": {
     "acknowledged_capability": "Unity_RunCommand compiles and executes arbitrary Editor C# with potential host filesystem, network, process, and package reach",
@@ -204,17 +213,18 @@
     "protection_bypass_constraint": "denied-creator-policy-with-live-audit-and-canary"
   },
   "git_safety": {
-    "checkpoint_commit": "b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5",
+    "checkpoint_commit": "f83ef8aa4d2bac7d0c8817180feebc24c0c1e835",
     "main_protected": true,
     "pull_requests_required": true,
     "required_checks": [
       "validate",
-      "wp0002-core"
+      "wp0002-core",
+      "wp0002-policy"
     ],
     "force_push_disabled": true,
     "auto_merge_required": false,
     "autonomy_classification": "creator-delegated-manual-per-pr",
-    "policy_canary_state": "unproven",
+    "policy_canary_state": "proven-candidate-independent",
     "delegated_release_required_per_pr": true,
     "required_checks_without_canary": [
       "validate",
