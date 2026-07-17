@@ -59,14 +59,20 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     state.WaterMilli,
                     checked(-WaterTrendMilliPerSettlementTick))
                 : (long?)null;
-            ClaimContestedFactionTicks = ThresholdTicks(
-                LastBearingBalanceV1.FactionContestedThresholdMilli,
-                state.FactionClaimProgressMilli,
-                LastBearingBalanceV1.FactionClaimRateMilliPerFactionTick);
-            ClaimedFactionTicks = ThresholdTicks(
-                LastBearingBalanceV1.FactionClaimThresholdMilli,
-                state.FactionClaimProgressMilli,
-                LastBearingBalanceV1.FactionClaimRateMilliPerFactionTick);
+            ClaimContestedFactionTicks = state.DepotResolution
+                == EncounterChoice.Unresolved
+                ? ThresholdTicks(
+                    LastBearingBalanceV1.FactionContestedThresholdMilli,
+                    state.FactionClaimProgressMilli,
+                    LastBearingBalanceV1.FactionClaimRateMilliPerFactionTick)
+                : 0;
+            ClaimedFactionTicks = state.DepotResolution
+                == EncounterChoice.Unresolved
+                ? ThresholdTicks(
+                    LastBearingBalanceV1.FactionClaimThresholdMilli,
+                    state.FactionClaimProgressMilli,
+                    LastBearingBalanceV1.FactionClaimRateMilliPerFactionTick)
+                : 0;
             DustFrontCrisisTicks = Math.Max(
                 0,
                 LastBearingBalanceV1.DustFrontThresholdCrisisTicks

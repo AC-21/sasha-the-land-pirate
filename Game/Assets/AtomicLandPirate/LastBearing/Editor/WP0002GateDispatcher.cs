@@ -1007,10 +1007,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                     return;
                 }
 
-                bool passed =
-                    result.PassCount > 0 &&
-                    result.FailCount == 0 &&
-                    result.InconclusiveCount == 0;
+                bool passed = RequiredTestGatePassed(
+                    result.PassCount,
+                    result.FailCount,
+                    result.InconclusiveCount,
+                    result.SkipCount);
                 string outcome = (passed ? "success:" : "failed:") +
                     "run=" + pending.run_id + ";discovered=" + discovered +
                     ";passed=" + result.PassCount +
@@ -1117,6 +1118,18 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
         {
             return result.PassCount + result.FailCount + result.SkipCount +
                    result.InconclusiveCount;
+        }
+
+        private static bool RequiredTestGatePassed(
+            int passCount,
+            int failCount,
+            int inconclusiveCount,
+            int skipCount)
+        {
+            return passCount > 0 &&
+                   failCount == 0 &&
+                   inconclusiveCount == 0 &&
+                   skipCount == 0;
         }
 
         private static string FinishPendingTestGate(

@@ -146,13 +146,42 @@ namespace AtomicLandPirate.LastBearingTests
                 "failed unpause changed auto-alert state");
 
             long trustBeforeEncounter = driver.View.FactionTrust;
-            driver.Apply(sequence => new ResolveDepotCommand(
-                sequence,
-                EncounterChoice.Cooperate));
+            LastBearingTickResult resolution = driver.Apply(
+                sequence => new ResolveDepotCommand(
+                    sequence,
+                    EncounterChoice.Cooperate));
             TestHarness.Equal(PauseCause.None, driver.View.PauseCause, "encounter clears auto-pause");
+            TestHarness.True(
+                resolution.DomainEvents.Count > 1,
+                "encounter resolution omitted expected domain events");
+            LastBearingDomainEvent resume = resolution.DomainEvents[0];
+            TestHarness.Equal(
+                LastBearingEventKind.PauseChanged,
+                resume.Kind,
+                "encounter outcome preceded auto-pause resume event");
+            TestHarness.Equal(
+                LastBearingEventCause.SystemTransition,
+                resume.Cause,
+                "auto-pause resume event cause");
+            TestHarness.Equal(
+                (long)PauseCause.AutoAlert,
+                resume.BeforeValue,
+                "auto-pause resume event before value");
+            TestHarness.Equal(
+                (long)PauseCause.None,
+                resume.AfterValue,
+                "auto-pause resume event after value");
             TestHarness.True(
                 driver.View.FactionTrust > trustBeforeEncounter,
                 "encounter did not apply the cooperative consequence");
+            TestHarness.Equal(
+                0L,
+                driver.View.ClaimContestedFactionTicks,
+                "resolved depot contested-claim forecast");
+            TestHarness.Equal(
+                0L,
+                driver.View.ClaimedFactionTicks,
+                "resolved depot claimed forecast");
 
             driver.Apply(sequence => new FreezeReturnPayloadCommand(
                 sequence,

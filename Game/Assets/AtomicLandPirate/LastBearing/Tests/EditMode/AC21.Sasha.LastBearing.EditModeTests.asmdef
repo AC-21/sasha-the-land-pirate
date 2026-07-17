@@ -3,6 +3,7 @@
   "rootNamespace": "AtomicLandPirate.Presentation.LastBearing.Tests",
   "references": [
     "AC21.Sasha.LastBearing.Runtime",
+    "AC21.Sasha.LastBearing.Editor",
     "AC21.Sasha.SimulationCore",
     "AC21.Sasha.SaveContracts"
   ],

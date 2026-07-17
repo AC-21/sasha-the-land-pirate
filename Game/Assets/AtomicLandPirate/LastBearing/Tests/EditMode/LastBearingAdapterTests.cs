@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
+using AtomicLandPirate.Presentation.LastBearing.Editor;
 using AtomicLandPirate.Simulation.LastBearing;
 using NUnit.Framework;
 using UnityEngine;
@@ -218,6 +219,33 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(cameraRig.IsComparisonMode, Is.False);
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
             Assert.That(controller.CityGrammarEvidence, Does.Contain("selections=2"));
+        }
+
+        [TestCase(1, 0, 0, 0, true)]
+        [TestCase(1, 0, 0, 1, false)]
+        [TestCase(0, 0, 0, 0, false)]
+        public void RequiredTestGateRejectsSkippedOrEmptyRuns(
+            int passCount,
+            int failCount,
+            int inconclusiveCount,
+            int skipCount,
+            bool expected)
+        {
+            MethodInfo? method = typeof(WP0002GateDispatcher).GetMethod(
+                "RequiredTestGatePassed",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            Assert.That(method, Is.Not.Null);
+
+            object? result = method!.Invoke(
+                null,
+                new object[]
+                {
+                    passCount,
+                    failCount,
+                    inconclusiveCount,
+                    skipCount
+                });
+            Assert.That(result, Is.EqualTo(expected));
         }
 
         private static void InstallControllerState(

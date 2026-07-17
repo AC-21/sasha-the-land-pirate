@@ -604,6 +604,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
             if (builder.PauseCause == PauseCause.AutoAlert)
             {
                 builder.PauseCause = PauseCause.None;
+                Emit(
+                    builder,
+                    events,
+                    LastBearingEventKind.PauseChanged,
+                    LastBearingEventCause.SystemTransition,
+                    builder.GlobalTick,
+                    command.Sequence,
+                    "simulation:last-bearing:auto-pause",
+                    (long)PauseCause.AutoAlert,
+                    (long)PauseCause.None);
             }
 
             builder.DepotResolution = command.Choice;
