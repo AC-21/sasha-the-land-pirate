@@ -71,29 +71,30 @@ This view is for humans. The JSONL log is the **draft canonical representation**
 | D-0050 | technical | Ratified | Preserve D-0047 as the WP-0001 candidate; the creator may install/open its exact tuple during bounded pre-A1 setup solely to produce activation evidence. | Creator clarification; no engine ratification or agent invocation |
 | D-0051 | production | Ratified | Replace D-0049's Gateway route with `UNITY-MCP-EXTERNAL`: Codex connects through Unity's MCP Bridge and exact Unity-installed relay; direct Unity process invocation remains prohibited. | Owner-protected successor and packet route amendment; clean handshake and A1 evidence remain blocked |
 | D-0052 | constitutional | Ratified | `A1-LOCAL-DEV` for WP-0003: bounded branch/bootstrap work plus conditional creator-approved Unity MCP use under lean Git, target, credential, install, publishing, and rollback limits. | PR #18 owner ratification, PR #19 protected-main sealing, and distinct PR #20 packet activation |
+| D-0053 | constitutional | Ratified | Thesis: **Build a home worth returning to.** | Creator-ratified successor to D-0006; PR #26 comment 5000116554 |
+| D-0054 | experience | Ratified | Directly drive Sasha's lead land-pirate vehicle; convoy command is deferred. | Creator-ratified `DRIVE` successor to D-0007 |
+| D-0055 | experience | Ratified | City time continues at a slowed, forecastable rate during road expeditions. | Creator-ratified `SLOWED` successor to D-0008; exact ratio remains tunable |
+| D-0056 | experience | Ratified | Permanent consequences are rare, legible scars rather than frequent arbitrary cruelty. | Creator-ratified `SCARS` successor to D-0009 |
+| D-0057 | constitutional | Ratified | Factions are primarily competing cultures and societies, not a conquest-target ladder. | Creator-ratified `CULTURES` successor to D-0010 |
+| D-0058 | experience | Ratified | Vehicular combat is an accent, not a first-arc pillar. | Creator-ratified `ACCENT` successor to D-0011 |
+| D-0059 | scope | Ratified | The Last Bearing is the first proof: one town, one road corridor, one faction, and one failing water system. | Creator-ratified `RATIFY-SLICE` successor to D-0012 |
+| D-0060 | experience | Ratified | Single-player and offline operation are the first-production launch boundary. | Creator-ratified `SOLO-OFFLINE` successor to D-0021 |
+| D-0061 | experience | Ratified | Regional travel uses a route graph plus compact authored road spaces. | Creator-ratified `ROUTE+ROAD` successor to D-0029 |
+| D-0062 | constitutional | Ratified | The constitutional loop, P1-P6, and WP-0002-linked invariants are the core contract. | Creator-ratified `RATIFY-CORE` successor to D-0035 |
+| D-0063 | constitutional | Ratified | The title is **Sasha the Atomic Land Pirate**, and Sasha is the protagonist. | Protected, distinct-receipt successor to D-0036 |
+| D-0064 | constitutional | Ratified | Sasha can build a human-only, humanoid-utility-robot-only, or mixed colony. | Protected, distinct-receipt successor to D-0037; D-0039 remains open |
 
 ## Immediate ratification queue
 
-The first creator review should answer only these high-leverage issues:
+The next creator review should answer only the remaining high-leverage issues:
 
-1. Ratify or rewrite the thesis.
-2. Direct driving or indirect convoy command?
-3. Route graph plus authored road spaces, or another travel topology?
-4. Does the city keep running during road trips?
-5. How cruel can irreversible consequences be?
-6. Are factions mainly societies or opponents to conquer?
-7. Is car combat a pillar, an accent, or absent from the first production arc?
-8. Is single-player/offline the first production boundary?
-9. Authorize the bounded city-grammar comparison rather than preselecting its result.
-10. Ratify or revise the constitutional loop and pillars as one bound core.
-11. Ratify or revise the Last Bearing proof scenario.
-12. Separately ratify or revise its milestone cuts.
-13. Choose whether colony compositions are mechanically distinct or primarily representational.
-14. Define the world-population milestone and caravaner exchange rules before the post-slice economy packet.
-15. Confirm whether storybook salvage remains the emotional filter beneath Texas iron × brutalist opera.
-16. Install and verify the creator-approved D-0047 candidate only through bounded setup; production engine ratification remains evidence-dependent.
-17. Verify the assigned Unity seat/project, exact relay/client/project target and approved connection, exact D-0047 installation, and standalone A1 quarantine before separate activation. Repeat a clean zero-tool-call setup handshake because the earlier console smoke is deviation evidence only.
-18. Preserve active WP-0003's exact local boundary, protected checkpoint, `agent/*` branch, held reservation, separate activation receipt, and conditional first Unity-use gate.
+1. Separately ratify or revise The Last Bearing milestone cuts after the bounded proof produces evidence.
+2. Choose whether colony compositions are mechanically distinct or primarily representational; D-0039 remains open and WP-0002 cannot infer an answer.
+3. Select a city grammar from the authorized bounded comparison; D-0030 remains open until evidence supports a successor.
+4. Define the world-population milestone and caravaner exchange rules before the post-slice economy packet.
+5. Confirm whether storybook salvage remains the emotional filter beneath Texas iron × brutalist opera.
+6. Ratify the durable Mac/product/bundle/save-root identity before durable player saves or native distribution.
+7. Resolve the production envelope before setting 1.0 content volume.
 
 All other open choices can remain deferred until a graybox or profiling spike produces evidence.
 

@@ -30,13 +30,15 @@ Machine-readable schemas, value-sensitive entry gates, proposed work packets, an
 
 WP-0001's A0 activation preparation uses the creator-approved durable checkout `/Users/sasha/Documents/Codex/sasha-the-land-pirate` and remote `https://github.com/AC-21/sasha-the-land-pirate`. The original sealed receipts still accept the exact packet contract, temporary identity, repository, and creator-operated installation of the D-0047 candidate. Owner-authenticated `RR-D0051-20260716` and `RR-WP0001-ROUTE-20260716` protect D-0051's `UNITY-MCP-EXTERNAL` successor—Codex as external client through Unity's MCP Bridge and exact Unity-installed relay, not the API-key Gateway path—and bind it to the unchanged packet contract.
 
-The machine-readable snapshot at `docs/evidence/WP-0001/pre-a1-readiness-20260716.json` records WP-0001 as **blocked** without secrets. The installed Editor/tool/package tuple is not D-0047; the observed project is not the packet project; an eligible Unity AI seat is unverified; the inherited client approval, 54-tool handshakes, non-loopback relay listener, earlier console call, and later direct Editor/Hub probes cannot satisfy the required clean connection cycle; and no standalone physical quarantine exists. The snapshot is A0 observation evidence only. WP-0001 remains accepted but inactive; canonical autonomy is A1 solely for WP-0003.
+The machine-readable snapshot at `docs/evidence/WP-0001/pre-a1-readiness-20260716.json` records WP-0001 as **blocked** without secrets. The installed Editor/tool/package tuple is not D-0047; the observed project is not the packet project; an eligible Unity AI seat is unverified; the inherited client approval, 54-tool handshakes, non-loopback relay listener, earlier console call, and later direct Editor/Hub probes cannot satisfy the required clean connection cycle; and no standalone physical quarantine exists. The snapshot is A0 observation evidence only. WP-0001 remains accepted but inactive.
 
-`WP-0003` is protected, accepted, and active under ratified D-0052,
-`RR-WP0003-ACTIVATE-20260716`, and the hash-bound
-`A1B-WP-0003-LOCAL-DEV` manifest. Repository/bootstrap implementation may
-begin inside its exact reservation. Unity MCP remains closed until the six
-conditional first-use checks pass for the exact creator-opened `Game` project.
+The protected Stage-B state is canonical **A0**, with no active A1 packet.
+`WP-0003` completed its ratified D-0052/
+`RR-WP0003-ACTIVATE-20260716` lifecycle and is released; its reservation is
+released as well. `WP-0002` is creator-accepted, but it is unreserved and
+unactivated. Until an exact WP-0002 activation is accepted into protected
+`main` in Stage C, Unity MCP use and Unity/game implementation are not
+authorized.
 
 ## Source-of-truth order
 

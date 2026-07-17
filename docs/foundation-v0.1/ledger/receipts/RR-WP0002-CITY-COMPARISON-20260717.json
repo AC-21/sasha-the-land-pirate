@@ -1,0 +1,33 @@
+{
+  "receipt_id": "RR-WP0002-CITY-COMPARISON-20260717",
+  "issued_at": "2026-07-17T07:23:29Z",
+  "issued_by": "AC-21",
+  "issuer_role": "creator",
+  "receipt_kind": "creator-authorization",
+  "artifact_resolver": {
+    "type": "external-protected",
+    "resolver_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/26#issuecomment-5000116554"
+  },
+  "source_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/26#issuecomment-5000116554",
+  "subject_ids": ["D-0030", "WP-0002"],
+  "subject_claims": [
+    {"subject_id": "D-0030", "claims": ["AUTHORIZE-CITY-COMPARISON"]},
+    {"subject_id": "WP-0002", "claims": ["AUTHORIZE-CITY-COMPARISON"]}
+  ],
+  "approval_text_sha256": "7cfa388b315b1215ec6d98e03c28d97459d6250da8ed240887a5e21904475646",
+  "accepted_commit": "a0d240367d7b80f7cd2cae296a63b46d9b773a8b",
+  "artifact_sha256": {
+    "github.com/AC-21/sasha-the-land-pirate/pull/26#issuecomment-5000116554": "7cfa388b315b1215ec6d98e03c28d97459d6250da8ed240887a5e21904475646",
+    "governance/WP-0002-FIRST-PLAYABLE-RATIFICATION-PROPOSAL.md": "ae43be20e0ca1de9edac8ba5eb11f2f420c5ba6593d733d2c2e76b4ac6334058",
+    "governance/a1-boundaries/WP-0002.json": "6ac9201dc461f81fed237be22754e55eb28af2cabb19b9aab7f7b0725efe9842"
+  },
+  "subject_contract_sha256": {
+    "WP-0002": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"
+  },
+  "subject_event_sha256": {
+    "D-0030": "5db6df8986ad5526e55c56d7e1a18bd6856d7a3f9ebc289a5af9c413b083d105"
+  },
+  "foundation_binding": null,
+  "signature_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/26#issuecomment-5000116554",
+  "sealed": true
+}

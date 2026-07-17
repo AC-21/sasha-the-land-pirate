@@ -1,16 +1,17 @@
 # Lean A1 local-development successor
 
-Status: **creator-ratified / packet accepted / A1 active under separate protected activation**
+Status: **creator-ratified / WP-0003 released / WP-0002 accepted but inactive / canonical A0**
 
 Date: 2026-07-16
 
-This successor creates a practical alternative to the current WP-0001
-activation ceremony for day-to-day local game development. Its third distinct
-receipt now activates A1 for exact WP-0003 repository/bootstrap work. It still
-does not itself authorize a Unity call, replace WP-0001 completion evidence, or
-expand authority beyond the sealed local boundary.
+This successor created a practical alternative to the WP-0001 activation
+ceremony for bounded local game development. Its third distinct receipt
+historically activated A1 for exact WP-0003 repository/bootstrap work. WP-0003
+is now released under `RR-WP0003-COMPLETE-20260717`; its reservation is
+released, and that completed lane grants no continuing Unity call or repository
+implementation authority.
 
-The active state is effective only when the complete activation tree is
+Any future active state is effective only when the complete activation tree is
 contained in protected `main`. A pull-request branch may encode that future
 state for validation but remains non-executable before protected merge.
 
@@ -25,7 +26,11 @@ the actual purpose of the repository: building and testing the game.
 Historical WP-0001 evidence and deviations remain immutable. This successor
 uses a new packet instead of rewriting the sealed WP-0001 contract.
 
-## Active ratified authority
+## Ratified local-development authority model
+
+No A1 packet is currently active. The rules below describe the authority a
+separately protected local-development activation may grant; they are not
+permission to act at the current A0 state.
 
 `A1-LOCAL-DEV` means one bounded local-development packet may:
 
@@ -38,16 +43,16 @@ uses a new packet instead of rewriting the sealed WP-0001 contract.
   screenshots, and create or modify project objects through Unity MCP;
 - create branches, checkpoints, commits, pushes, and protected pull requests.
 
-The initial Unity project/CI change remains creator-merged. Status-gated
-auto-merge may be enabled for later implementation only after WP-0003 CI exists
-and its required check is added to branch protection.
+The initial Unity project/CI change was creator-merged. Autonomous auto-merge
+remains unauthorized; later implementation requires the packet's protected
+checks and creator-controlled integration policy.
 
-Under exact WP-0003 activation, Unity `6000.5.4f1` is the authorized initial
-local-development Editor because it is already installed. This is not
-production-engine ratification and does not waive later native-build, Mac
-performance, package-compatibility, or rollback gates. IL2CPP, full Xcode, and
-the standalone .NET SDK are later proof requirements rather than A1 entry
-conditions.
+During exact WP-0003 activation, Unity `6000.5.4f1` was the authorized initial
+local-development Editor because it was already installed. That historical
+authorization is not current Unity-call permission, production-engine
+ratification, or a waiver of later native-build, Mac performance,
+package-compatibility, or rollback gates. IL2CPP, full Xcode, and the standalone
+.NET SDK remain later proof requirements rather than A1 entry conditions.
 
 ## Activation minimum
 
@@ -89,9 +94,11 @@ PR branch therefore does not delete or recreate the receipt-bound checkpoint.
 
 ## First Unity MCP use gate
 
-A1 activation authorizes repository/bootstrap work. It does not itself
-authorize a Unity tool call. Before the first Unity MCP call in a session, the
-agent must establish from the creator and visible Unity state that:
+A protected A1 activation authorizes only its exact repository work. It does
+not itself authorize a Unity tool call. No Unity MCP call is currently allowed.
+After WP-0002's protected Stage C activation, and before the first Unity MCP
+call in a session, the agent must establish from the creator and visible Unity
+state that:
 
 - the creator has created and opened exactly `Game`;
 - the creator confirms the licensed Editor is operating;
@@ -145,31 +152,31 @@ Agents may not:
 - Existing player saves do not exist. Any future save-format change remains
   separately creator-gated.
 
-## Accepted packet
+## Released predecessor and accepted successor
 
-`WP-0003` is the local-development alternative. WP-0001 remains accepted
-historical evidence. The proposed first-playable transaction makes WP-0002
-depend on creator-accepted WP-0003 release rather than WP-0001 completion.
-WP-0003 initially covers the Unity project skeleton, deterministic core and
-non-persisting save interfaces, tests, and technical scenes. It does not itself
-unblock the gameplay packet. Production content, release, store, monetization,
+`WP-0003` completed the local-development foundation. WP-0001 remains accepted
+historical evidence. WP-0002 now depends on creator-accepted WP-0003 release
+rather than WP-0001 completion. WP-0003's Unity project skeleton,
+deterministic core, non-persisting save interfaces, tests, and technical scene
+remain protected baseline outputs, not active authority. WP-0002 is accepted
+but unreserved and inactive. Production content, release, store, monetization,
 and background rollout remain out of scope.
 
-## Proposed WP-0002 protected-PR successor
+## Accepted WP-0002 protected-PR successor awaiting activation
 
-`A1B-WP-0002-LOCAL-DEV` is an unsealed A0 proposal, not current authority. It
-may activate only after WP-0003 is released under a sealed creator completion
-receipt and separate creator acceptance and activation receipts bind the exact
-WP-0002 contract and boundary bytes. It succeeds the proven WP-0003 lane: each
+`A1B-WP-0002-LOCAL-DEV` is the accepted successor boundary, but it is not
+current authority. It may activate only after a separate protected Stage C
+transaction binds fresh scope/protection evidence, the exact WP-0002 contract
+and boundary bytes, a held reservation, and a distinct creator activation
+receipt. It succeeds the proven WP-0003 lane: each
 implementation pass starts on a fresh protected-main `agent/*` branch, uses
 protected pull requests, and requires `validate`, `wp0002-core`, plus a
 transparent creator-delegated manual release for every pull request. Cursor is
-optional independent AI review and is non-blocking. The base-owned
-`wp0002-policy` workflow is a candidate-independent canary only until a live
-Stage-B pull request proves that GitHub attaches its result to the latest head;
-if it does not, its retained report is evidence and delegated manual release
-continues. Autonomous auto-merge is not authorized before that proof and a
-separate governance upgrade. Direct or agent-selected merge remains denied.
+optional advisory AI review and is non-blocking. The base-owned
+`wp0002-policy` workflow must pass against the latest head and retain its bound
+report before activation or later implementation release. Autonomous
+auto-merge is not authorized without a separate governance upgrade. Direct or
+agent-selected merge remains denied.
 
 During implementation, `AGENTS.md` and the entire foundation/governance/receipt
 tree are read-only. Unity access is limited to `Unity_ReadConsole`,
@@ -209,5 +216,8 @@ WP-0003. Both comments preserve the explicit delegation disclosure. The owner
 activation comment on PR #20 binds the compact manifest, reservation,
 foundation state, protected checkpoint, conditional Unity first-use gate, and
 claims `A1-LOCAL-BOUNDARY-VERIFIED` plus `ACTIVATE-A1-WP-0003`. The distinct
-sealed `RR-WP0003-ACTIVATE-20260716` receipt activates WP-0003 as the sole A1
-packet when PR #20 enters protected `main`.
+sealed `RR-WP0003-ACTIVATE-20260716` receipt activated WP-0003 as the sole A1
+packet when PR #20 entered protected `main`. The later sealed
+`RR-WP0003-COMPLETE-20260717` receipt accepts its completion and releases that
+authority. `RR-WP0002-ACCEPT-20260717` accepts WP-0002 without activating it;
+canonical autonomy remains A0 until the separate protected Stage C transaction.

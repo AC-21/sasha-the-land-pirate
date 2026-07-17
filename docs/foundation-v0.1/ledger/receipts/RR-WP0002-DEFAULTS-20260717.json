@@ -1,0 +1,61 @@
+{
+  "receipt_id": "RR-WP0002-DEFAULTS-20260717",
+  "issued_at": "2026-07-17T07:23:29Z",
+  "issued_by": "AC-21",
+  "issuer_role": "creator",
+  "receipt_kind": "decision-ratification",
+  "artifact_resolver": {
+    "type": "external-protected",
+    "resolver_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/26#issuecomment-5000116554"
+  },
+  "source_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/26#issuecomment-5000116554",
+  "subject_ids": [
+    "D-0053",
+    "D-0054",
+    "D-0055",
+    "D-0056",
+    "D-0057",
+    "D-0058",
+    "D-0059",
+    "D-0060",
+    "D-0061",
+    "D-0062"
+  ],
+  "subject_claims": [
+    {"subject_id": "D-0053", "claims": ["RATIFY-THESIS"]},
+    {"subject_id": "D-0054", "claims": ["DRIVE"]},
+    {"subject_id": "D-0055", "claims": ["SLOWED"]},
+    {"subject_id": "D-0056", "claims": ["SCARS"]},
+    {"subject_id": "D-0057", "claims": ["CULTURES"]},
+    {"subject_id": "D-0058", "claims": ["ACCENT"]},
+    {"subject_id": "D-0059", "claims": ["RATIFY-SLICE"]},
+    {"subject_id": "D-0060", "claims": ["SOLO-OFFLINE"]},
+    {"subject_id": "D-0061", "claims": ["ROUTE+ROAD"]},
+    {"subject_id": "D-0062", "claims": ["RATIFY-CORE"]}
+  ],
+  "approval_text_sha256": "7cfa388b315b1215ec6d98e03c28d97459d6250da8ed240887a5e21904475646",
+  "accepted_commit": "a0d240367d7b80f7cd2cae296a63b46d9b773a8b",
+  "artifact_sha256": {
+    "github.com/AC-21/sasha-the-land-pirate/pull/26#issuecomment-5000116554": "7cfa388b315b1215ec6d98e03c28d97459d6250da8ed240887a5e21904475646",
+    "governance/WP-0002-FIRST-PLAYABLE-RATIFICATION-PROPOSAL.md": "ae43be20e0ca1de9edac8ba5eb11f2f420c5ba6593d733d2c2e76b4ac6334058",
+    "ledger/decisions.jsonl": "df5a4840f468676d6e3b428be1eda957310ef12c812241c5be3cdde6bd4601ef"
+  },
+  "subject_contract_sha256": {
+    "WP-0002": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"
+  },
+  "subject_event_sha256": {
+    "D-0053": "35cde8178e1b3b46b371edb8c4ce0939dbed475a7ed371f043c841e4ba7899fe",
+    "D-0054": "aa31eaa78c378a00f28e9716b933d2934dabe739b493c33bd310cbc81541ff4f",
+    "D-0055": "23533edff387e4699ff2963b6f4fbc28f31e0f11ee6cc7e03f1659bdb15ea995",
+    "D-0056": "3b5420de787c3bec6ca44f83a4eface7a11712f616a490811e45cf622ee65fc0",
+    "D-0057": "1422cf398527cb5baea4498c9c029a28352e5f76b7116ba38ddc1f3d077f3271",
+    "D-0058": "1939c210588d84c83db4ef57c39b313a20113b04b1e4cead099e989c5f78f6a1",
+    "D-0059": "d4bd106cca7fb51438494540b574dc9d38166f0e565253eedbf0bfe116b1afe9",
+    "D-0060": "90657855809877a58369266023790169c9ccdb621b5d807410850429ad442ce5",
+    "D-0061": "749cf1e1432fde163c01391d5cf56b09098d30637ba8bee18e892b82d7f226ea",
+    "D-0062": "e7868c81398bff7661851436610fda4cfaa858805fe8c948e73ab58f0c7f9b9e"
+  },
+  "foundation_binding": null,
+  "signature_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/26#issuecomment-5000116554",
+  "sealed": true
+}

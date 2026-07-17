@@ -2,7 +2,7 @@
 
 Version: 0.1 draft\
 Audit date: 2026-07-16\
-Verdict: **coherent bootstrap specification with protected route authority; WP-0001 remains A0-blocked, while WP-0003 is the sole active A1 local-development packet**
+Verdict: **coherent bootstrap specification at A0; WP-0003 is released, and WP-0002 is accepted but unreserved and inactive pending protected activation**
 
 ## Audit coverage
 
@@ -43,15 +43,15 @@ Filesystem and log inspection now records the actual local state instead of trea
 
 ## Lean successor status
 
-D-0052 is protected and ratified, and WP-0003 is protected, accepted, and
-active under three distinct receipts derived from the PR #18 ratification, PR
-#19 protected-main sealing, and PR #20 activation attestation. They preserve
-WP-0001's sealed history while establishing a practical A1 lane based on
-protected `main`, a valid `agent/*` branch, a real checkpoint,
-creator-controlled merge, and conditional first Unity MCP use. WP-0003 does
-not retroactively satisfy the historical WP-0001 completion dependency. The
-new unsealed first-playable A0 proposal would instead make WP-0002 depend on a
-creator-accepted WP-0003 release; it remains non-executable until ratified.
+D-0052 remains protected and ratified. WP-0003 completed its protected A1
+lane, is released under `RR-WP0003-COMPLETE-20260717`, and has released its
+reservation. Its project skeleton, deterministic seams, tests, and technical
+sandbox remain protected outputs, but grant no continuing implementation or
+Unity MCP authority. WP-0002 now depends on that completed release and is
+creator-accepted under `RR-WP0002-ACCEPT-20260717`; it remains unreserved and
+inactive at A0 until a separate protected activation transaction binds its
+exact current scope, evidence, held reservation, and creator activation
+receipt.
 
 ## What this audit does not claim
 
@@ -91,18 +91,21 @@ ledger views, so a later append cannot make an older dated receipt appear to
 attest bytes that did not yet exist. Git history retains every prior draft.
 
 Until all six schema-v4 blocker classes are resolved and its activation receipt
-is sealed, WP-0001 remains at A0. The project is A1 only through active
-WP-0003; that authority covers repository/bootstrap work, not gameplay or
-WP-0001 execution, and Unity remains conditional on the first-use gate.
+is sealed, WP-0001 remains at A0. Canonical autonomy is now A0 with no active
+A1 packet. WP-0003's completed authority is historical and grants no gameplay,
+WP-0001 execution, or Unity MCP permission.
 
 ## Honest blockers before gameplay graybox
 
-- value-matching creator receipt claims for the identity choices;
-- protected sealing of the already captured D-0036 title/protagonist and D-0037 colony-composition receipt;
-- a value-matching D-0039 colony-composition mechanics decision for the current differentiated WP-0002 branch;
-- `RATIFY THESIS`, `RATIFY CORE`, and `RATIFY SLICE` bound to accepted artifact hashes;
-- `AUTHORIZE CITY COMPARISON` without preselecting the result;
-- explicit acceptance of WP-0002.
+- the protected WP-0002 Stage C activation transaction must bind a fresh exact
+  scope capture, current protection/canary evidence, the accepted packet and
+  boundary bytes, a held reservation, and a distinct creator activation
+  receipt;
+- protected `main` must materialize A1 with WP-0002 as the sole active packet
+  before any game code, asset, Unity state, or Unity MCP call begins;
+- D-0039 remains open, so differentiated human/robot/mixed mechanics stay
+  conditional; all three compositions may use only the accepted shared golden
+  path until a later value-matching receipt exists.
 
 `RATIFY CUTS` is separate and becomes mandatory before production-content scale; it is not silently implied by accepting the scenario.
 

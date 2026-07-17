@@ -1,13 +1,13 @@
 # First Work Packets
 
-The original implementation plan is split across two separately authorized
-packets, with one newer local-development successor proposal:
+The original implementation plan is split across three separately governed
+packets:
 
 - [`WP-0001`](work-packets/proposed/WP-0001.json): reversible Unity/Mac engine, Save Envelope, renderer, automation, and Blender-pipeline spike with no gameplay authority.
-- [`WP-0002`](work-packets/proposed/WP-0002.json): proposed ugly Sasha-led city-road-faction toy plus a bounded same-golden-path human/robot/mixed colony proof, dependent on creator-accepted WP-0003 release and the remaining creator identity/core gate.
-- [`WP-0003`](work-packets/proposed/WP-0003.json): active lean A1 local Unity bootstrap for the project skeleton, deterministic seams, tests, and a non-gameplay technical interaction sandbox. Its distinct boundary receipt authorizes repository work; Unity remains first-use gated.
+- [`WP-0002`](work-packets/proposed/WP-0002.json): creator-accepted ugly Sasha-led city-road-faction toy plus a bounded same-golden-path human/robot/mixed colony proof. It is currently unreserved, unactivated, and non-executable pending protected Stage-C activation.
+- [`WP-0003`](work-packets/proposed/WP-0003.json): released lean A1 local Unity bootstrap for the project skeleton, deterministic seams, tests, and a non-gameplay technical interaction sandbox. Its distinct boundary receipt authorized its completed repository-work lifecycle, and its reservation is released.
 
-Together they do not install an engine by assumption or generalize a production kernel before play. Across their separate gates they attempt to prove the high-risk seams:
+These packets did not authorize engine installation by assumption or generalize a production kernel before play. Across their separate gates they attempt to prove the high-risk seams:
 
 - native Apple Silicon build;
 - fixed-tick authoritative city state;
@@ -22,7 +22,7 @@ Together they do not install an engine by assumption or generalize a production 
 - Blender calibration asset;
 - clean-clone reproducibility.
 
-Neither packet implements the population-gated caravan exchange. WP-0002 may prove a short production chain, physical inventory, direct barter, and a caravaner/claims-office tease; the manufacturing/market system in `13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md` requires a later post-slice packet after population scale, economy pacing, and the founder loop produce evidence.
+None of these packets implements the population-gated caravan exchange. WP-0002 may prove a short production chain, physical inventory, direct barter, and a caravaner/claims-office tease; the manufacturing/market system in `13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md` requires a later post-slice packet after population scale, economy pacing, and the founder loop produce evidence.
 
 The durable repository, foundation-only CI, and protected `main` are creator-greenlit; unsealed `RR-CREATOR-20260715-05` also preserves the creator's Unity-first preference and latest proceed prompt. Foundation run `29465142421` passed at commit `a07411199c5ab4600cfcce60fb8e4e9e4daea9f1`. Local inspection found Hub 3.19.5, Rosetta 2, licensed Editor 6000.5.4f1, no full Xcode, and no standalone .NET SDK.
 
@@ -38,7 +38,8 @@ creator runbook keeps activation fail-closed until those findings receive a
 protected disposition. The read-only console smoke that occurred before D-0051
 is a preserved setup deviation and is forbidden as activation evidence; the
 packet still requires a new clean zero-tool-call connection handshake. WP-0002
-additionally waits on value-matching identity/core receipts, explicit
-city-comparison authorization, and its own acceptance in
-`governance/ratification-state.json`. Separate status histories prevent
-accepted setup authority from silently authorizing implementation.
+is separately creator-accepted, but remains unreserved and unactivated at
+canonical A0. WP-0003 is released and its reservation is released. Unity MCP
+use and Unity/game implementation remain prohibited until the exact WP-0002
+activation reaches protected `main` in Stage C. Separate status histories
+prevent accepted setup authority from silently authorizing implementation.
