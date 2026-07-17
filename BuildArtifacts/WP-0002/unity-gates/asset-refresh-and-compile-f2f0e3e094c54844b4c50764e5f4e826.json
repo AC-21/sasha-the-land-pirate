@@ -1,0 +1,12 @@
+{
+    "schema_version": 1,
+    "invocation_id": "f2f0e3e094c54844b4c50764e5f4e826",
+    "gate_id": "asset-refresh-and-compile",
+    "source_sha256": "1551a39e04703c70df8d2472ad879726d2ae57cfef8b4652f51ff1d8de22071b",
+    "command": "AssetDatabase.Refresh(ForceSynchronousImport|ForceUpdate)",
+    "result": "success:assets-refreshed-editor-idle-no-known-compilation-failure",
+    "started_at": "2026-07-17T23:24:35.5023950Z",
+    "completed_at": "2026-07-17T23:24:35.5604550Z",
+    "project_root": "Game",
+    "runtime_assembly": "AC21.Sasha.LastBearing.Runtime"
+}
