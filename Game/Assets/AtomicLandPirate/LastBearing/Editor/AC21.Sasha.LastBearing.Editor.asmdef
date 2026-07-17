@@ -3,7 +3,8 @@
   "rootNamespace": "AtomicLandPirate.Presentation.LastBearing.Editor",
   "references": [
     "AC21.Sasha.LastBearing.Runtime",
-    "UnityEditor.TestRunner"
+    "UnityEditor.TestRunner",
+    "UnityEngine.TestRunner"
   ],
   "includePlatforms": [
     "Editor"

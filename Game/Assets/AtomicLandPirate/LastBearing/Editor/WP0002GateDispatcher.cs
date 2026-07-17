@@ -8,10 +8,16 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using AtomicLandPirate.Presentation.LastBearing;
+using NUnit.Framework.Interfaces;
+using NUnit.Framework.Internal;
 using UnityEditor;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.TestRunner;
+
+[assembly: TestRunCallback(
+    typeof(AtomicLandPirate.Presentation.LastBearing.Editor.WP0002TestRunCallback))]
 
 namespace AtomicLandPirate.Presentation.LastBearing.Editor
 {
@@ -20,6 +26,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
     /// this file's bytes and one of four enumerated gate IDs; no free-form
     /// editor operation, path, test filter, or capture target is accepted.
     /// </summary>
+    [InitializeOnLoad]
     public static class WP0002GateDispatcher
     {
         public const string AssetRefreshGate = "asset-refresh-and-compile";
@@ -34,6 +41,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             "Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs";
         private const string BoundaryRelativePath =
             "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json";
+        private const string StartingPhase = "starting";
+        private const string RunningPhase = "running";
+        private const string CompletingPhase = "completing";
+        private const int TestGateTimeoutMinutes = 10;
 
         private static readonly HashSet<string> AllowedGateIds =
             new HashSet<string>(StringComparer.Ordinal)
@@ -44,8 +55,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                 TechnicalCaptureGate
             };
 
-        private static readonly List<TestGateCallbacks> ActiveTestCallbacks =
-            new List<TestGateCallbacks>();
+        private static TransientTestErrorCallbacks? _activeTransientCallback;
+        private static double _nextWatchdogAt;
+
+        static WP0002GateDispatcher()
+        {
+            RestoreTransientCallback();
+            EditorApplication.update += WatchPendingTestGate;
+        }
 
         public static string Dispatch(string gateId, string expectedSourceSha256)
         {
@@ -150,14 +167,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             TestMode mode,
             string assemblyName)
         {
-            if (ActiveTestCallbacks.Count != 0)
+            string? pendingRejection = ResolvePendingTestGate(boundary);
+            if (pendingRejection != null)
             {
                 return CompleteGate(
                     boundary,
                     gateId,
                     sourceSha256,
                     "TestRunnerApi:" + assemblyName,
-                    "rejected:test-gate-already-active",
+                    pendingRejection,
                     startedAt);
             }
 
@@ -167,19 +185,77 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                 assemblyNames = new[] { assemblyName }
             };
             var settings = new ExecutionSettings(filter);
-            var api = ScriptableObject.CreateInstance<TestRunnerApi>();
-            var callbacks = new TestGateCallbacks(
-                api,
-                boundary,
-                gateId,
-                sourceSha256,
-                startedAt,
-                assemblyName);
-            ActiveTestCallbacks.Add(callbacks);
-            api.RegisterCallbacks(callbacks);
-            string runId = api.Execute(settings);
-            callbacks.BindRun(runId);
-            return "WP0002_GATE_ASYNC " + gateId + " " + sourceSha256;
+            var pending = new PendingTestGate
+            {
+                schema_version = 1,
+                invocation_id = Guid.NewGuid().ToString("N"),
+                gate_id = gateId,
+                source_sha256 = sourceSha256,
+                started_at = startedAt,
+                deadline_at = DateTime.UtcNow
+                    .AddMinutes(TestGateTimeoutMinutes)
+                    .ToString("O", CultureInfo.InvariantCulture),
+                assembly_name = assemblyName,
+                phase = StartingPhase,
+                editor_process_id = CurrentEditorProcessId(),
+                editor_process_started_at = CurrentEditorProcessStartedAt()
+            };
+            TestRunnerApi? api = null;
+            string runId = string.Empty;
+            try
+            {
+                WritePendingTestGate(boundary, pending);
+                RegisterTransient(pending.invocation_id);
+                api = ScriptableObject.CreateInstance<TestRunnerApi>();
+                runId = api.Execute(settings);
+                if (!Guid.TryParse(runId, out _))
+                {
+                    throw new InvalidOperationException(
+                        "WP0002_TEST_RUN_ID_INVALID");
+                }
+
+                pending.run_id = runId;
+                pending.phase = RunningPhase;
+                ReplacePendingTestGate(boundary, pending);
+                return "WP0002_GATE_ASYNC " + gateId + " " + sourceSha256;
+            }
+            catch (Exception exception)
+            {
+                ReleaseTransient(pending.invocation_id);
+
+                if (Guid.TryParse(runId, out _))
+                {
+                    try
+                    {
+                        TestRunnerApi.CancelTestRun(runId);
+                    }
+                    catch (Exception cancelException)
+                    {
+                        Debug.LogError(
+                            "WP0002_TEST_RUN_CANCEL_FAILED " +
+                            NormalizeMessage(cancelException.Message));
+                    }
+                }
+
+                string outcome = "failed:test-run-start=" +
+                                 NormalizeMessage(exception.Message);
+                return File.Exists(boundary.PendingTestGatePath)
+                    ? FinishPendingTestGate(boundary, pending, outcome)
+                    : CompleteGate(
+                        boundary,
+                        gateId,
+                        sourceSha256,
+                        "TestRunnerApi:" + assemblyName,
+                        outcome,
+                        startedAt);
+            }
+            finally
+            {
+                if (api != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(api);
+                }
+            }
         }
 
         private static bool LastScriptCompilationFailed()
@@ -290,7 +366,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                     repositoryRoot,
                     "BuildArtifacts",
                     "WP-0002",
-                    "unity-gates"));
+                    "unity-gates"),
+                Path.Combine(
+                    projectRoot,
+                    "Library",
+                    "AC21.Sasha.LastBearing",
+                    "wp0002-pending-test-gate.json"));
         }
 
         private static string CompleteGate(
@@ -301,7 +382,27 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             string result,
             string startedAt)
         {
-            string completedAt = DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture);
+            return CompleteGate(
+                boundary,
+                gateId,
+                sourceSha256,
+                command,
+                result,
+                startedAt,
+                Guid.NewGuid().ToString("N"),
+                DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture));
+        }
+
+        private static string CompleteGate(
+            ProjectBoundary boundary,
+            string gateId,
+            string sourceSha256,
+            string command,
+            string result,
+            string startedAt,
+            string invocationId,
+            string completedAt)
+        {
             WriteEvidence(
                 boundary,
                 gateId,
@@ -309,7 +410,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                 command,
                 result,
                 startedAt,
-                completedAt);
+                completedAt,
+                invocationId);
             string line =
                 "WP0002_GATE_COMPLETED " + gateId + " " + sourceSha256 + " " + result;
             Debug.Log(line);
@@ -323,12 +425,20 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             string command,
             string result,
             string startedAt,
-            string completedAt)
+            string completedAt,
+            string invocationId)
         {
+            if (!Guid.TryParseExact(invocationId, "N", out _))
+            {
+                throw new InvalidOperationException(
+                    "WP0002_EVIDENCE_INVOCATION_ID_INVALID");
+            }
+
             Directory.CreateDirectory(boundary.EvidenceDirectory);
             var record = new GateEvidence
             {
                 schema_version = 1,
+                invocation_id = invocationId,
                 gate_id = gateId,
                 source_sha256 = sourceSha256,
                 command = command,
@@ -338,18 +448,73 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                 project_root = "Game",
                 runtime_assembly = RuntimeAssembly
             };
-            string fileName =
-                completedAt.Replace(":", string.Empty).Replace(".", string.Empty) +
-                "-" + gateId + "-" + Guid.NewGuid().ToString("N") + ".json";
-            string path = Path.Combine(boundary.EvidenceDirectory, fileName);
-            using var stream = new FileStream(
-                path,
-                FileMode.CreateNew,
-                FileAccess.Write,
-                FileShare.Read);
-            using var writer = new StreamWriter(stream, new UTF8Encoding(false));
-            writer.Write(JsonUtility.ToJson(record, true));
-            writer.Write('\n');
+            byte[] payload = Encoding.UTF8.GetBytes(
+                JsonUtility.ToJson(record, true) + "\n");
+            string path = Path.Combine(
+                boundary.EvidenceDirectory,
+                gateId + "-" + invocationId + ".json");
+            WriteImmutableFile(path, payload);
+        }
+
+        private static void WriteImmutableFile(string path, byte[] payload)
+        {
+            if (File.Exists(path))
+            {
+                VerifyExactFile(path, payload);
+                return;
+            }
+
+            string temporaryPath = path + "." + Guid.NewGuid().ToString("N") +
+                                   ".tmp";
+            try
+            {
+                using (var stream = new FileStream(
+                           temporaryPath,
+                           FileMode.CreateNew,
+                           FileAccess.Write,
+                           FileShare.None))
+                {
+                    stream.Write(payload, 0, payload.Length);
+                    stream.Flush(true);
+                }
+
+                try
+                {
+                    File.Move(temporaryPath, path);
+                }
+                catch (IOException) when (File.Exists(path))
+                {
+                    VerifyExactFile(path, payload);
+                }
+
+                VerifyExactFile(path, payload);
+            }
+            finally
+            {
+                if (File.Exists(temporaryPath))
+                {
+                    File.Delete(temporaryPath);
+                }
+            }
+        }
+
+        private static void VerifyExactFile(string path, byte[] expected)
+        {
+            byte[] actual = File.ReadAllBytes(path);
+            if (actual.Length != expected.Length)
+            {
+                throw new InvalidOperationException(
+                    "WP0002_EVIDENCE_RECORD_CONFLICT");
+            }
+
+            for (int index = 0; index < actual.Length; index++)
+            {
+                if (actual[index] != expected[index])
+                {
+                    throw new InvalidOperationException(
+                        "WP0002_EVIDENCE_RECORD_CONFLICT");
+                }
+            }
         }
 
         private static string ComputeSha256(string path)
@@ -388,79 +553,762 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             }
         }
 
-        private sealed class TestGateCallbacks : IErrorCallbacks
+        private static string? ResolvePendingTestGate(ProjectBoundary boundary)
         {
-            private readonly TestRunnerApi _api;
-            private readonly ProjectBoundary _boundary;
-            private readonly string _gateId;
-            private readonly string _sourceSha256;
-            private readonly string _startedAt;
-            private readonly string _assemblyName;
-            private string _runId = string.Empty;
-            private int _discoveredTestCases;
-            private bool _completed;
-
-            internal TestGateCallbacks(
-                TestRunnerApi api,
-                ProjectBoundary boundary,
-                string gateId,
-                string sourceSha256,
-                string startedAt,
-                string assemblyName)
+            if (!File.Exists(boundary.PendingTestGatePath))
             {
-                _api = api;
-                _boundary = boundary;
-                _gateId = gateId;
-                _sourceSha256 = sourceSha256;
-                _startedAt = startedAt;
-                _assemblyName = assemblyName;
+                return null;
             }
 
-            internal void BindRun(string runId)
+            PendingTestGate pending;
+            try
             {
-                if (string.IsNullOrEmpty(runId))
+                pending = ReadPendingTestGate(boundary);
+            }
+            catch (Exception exception)
+            {
+                return "rejected:pending-test-gate-invalid=" +
+                       NormalizeMessage(exception.Message);
+            }
+
+            if (OwnsCurrentEditorProcess(pending))
+            {
+                if (string.Equals(
+                        pending.phase,
+                        CompletingPhase,
+                        StringComparison.Ordinal))
                 {
-                    Finish("failed:test-run-id-missing");
+                    FinishPendingTestGate(
+                        boundary,
+                        pending,
+                        pending.result);
+                    return null;
+                }
+
+                return "rejected:test-gate-already-active";
+            }
+
+            FinishPendingTestGate(
+                boundary,
+                pending,
+                "failed:editor-session-ended-before-test-completion");
+            return null;
+        }
+
+        private static void WritePendingTestGate(
+            ProjectBoundary boundary,
+            PendingTestGate pending)
+        {
+            string? directory = Path.GetDirectoryName(
+                boundary.PendingTestGatePath);
+            if (string.IsNullOrEmpty(directory))
+            {
+                throw new InvalidOperationException(
+                    "WP0002_PENDING_TEST_GATE_PATH_INVALID");
+            }
+
+            Directory.CreateDirectory(directory);
+            string temporaryPath = boundary.PendingTestGatePath + "." +
+                                   pending.invocation_id + ".tmp";
+            byte[] payload = SerializePendingTestGate(pending);
+            try
+            {
+                using (var stream = new FileStream(
+                           temporaryPath,
+                           FileMode.CreateNew,
+                           FileAccess.Write,
+                           FileShare.None))
+                {
+                    stream.Write(payload, 0, payload.Length);
+                    stream.Flush(true);
+                }
+
+                File.Move(temporaryPath, boundary.PendingTestGatePath);
+                VerifyExactFile(boundary.PendingTestGatePath, payload);
+            }
+            finally
+            {
+                if (File.Exists(temporaryPath))
+                {
+                    File.Delete(temporaryPath);
+                }
+            }
+        }
+
+        private static void ReplacePendingTestGate(
+            ProjectBoundary boundary,
+            PendingTestGate pending)
+        {
+            PendingTestGate current = ReadPendingTestGate(boundary);
+            if (!SamePendingInvocation(current, pending) ||
+                !ValidPendingPhaseTransition(current, pending))
+            {
+                throw new InvalidOperationException(
+                    "WP0002_PENDING_TEST_GATE_TRANSITION_REJECTED");
+            }
+
+            byte[] payload = SerializePendingTestGate(pending);
+            string temporaryPath = boundary.PendingTestGatePath + "." +
+                                   pending.invocation_id + ".replace.tmp";
+            try
+            {
+                using (var stream = new FileStream(
+                           temporaryPath,
+                           FileMode.CreateNew,
+                           FileAccess.Write,
+                           FileShare.None))
+                {
+                    stream.Write(payload, 0, payload.Length);
+                    stream.Flush(true);
+                }
+
+                File.Replace(
+                    temporaryPath,
+                    boundary.PendingTestGatePath,
+                    null);
+                VerifyExactFile(boundary.PendingTestGatePath, payload);
+            }
+            finally
+            {
+                if (File.Exists(temporaryPath))
+                {
+                    File.Delete(temporaryPath);
+                }
+            }
+        }
+
+        private static byte[] SerializePendingTestGate(PendingTestGate pending)
+        {
+            return Encoding.UTF8.GetBytes(
+                JsonUtility.ToJson(pending, true) + "\n");
+        }
+
+        private static bool SamePendingInvocation(
+            PendingTestGate left,
+            PendingTestGate right)
+        {
+            return left.schema_version == right.schema_version &&
+                   left.editor_process_id == right.editor_process_id &&
+                   string.Equals(
+                       left.invocation_id,
+                       right.invocation_id,
+                       StringComparison.Ordinal) &&
+                   string.Equals(
+                       left.gate_id,
+                       right.gate_id,
+                       StringComparison.Ordinal) &&
+                   string.Equals(
+                       left.source_sha256,
+                       right.source_sha256,
+                       StringComparison.Ordinal) &&
+                   string.Equals(
+                       left.started_at,
+                       right.started_at,
+                       StringComparison.Ordinal) &&
+                   string.Equals(
+                       left.deadline_at,
+                       right.deadline_at,
+                       StringComparison.Ordinal) &&
+                   string.Equals(
+                       left.assembly_name,
+                       right.assembly_name,
+                       StringComparison.Ordinal) &&
+                   string.Equals(
+                       left.editor_process_started_at,
+                       right.editor_process_started_at,
+                       StringComparison.Ordinal);
+        }
+
+        private static bool ValidPendingPhaseTransition(
+            PendingTestGate current,
+            PendingTestGate next)
+        {
+            if (string.Equals(
+                    current.phase,
+                    StartingPhase,
+                    StringComparison.Ordinal) &&
+                string.Equals(
+                    next.phase,
+                    RunningPhase,
+                    StringComparison.Ordinal))
+            {
+                return string.IsNullOrEmpty(current.run_id) &&
+                       Guid.TryParse(next.run_id, out _);
+            }
+
+            return (string.Equals(
+                        current.phase,
+                        StartingPhase,
+                        StringComparison.Ordinal) ||
+                    string.Equals(
+                        current.phase,
+                        RunningPhase,
+                        StringComparison.Ordinal)) &&
+                   string.Equals(
+                       next.phase,
+                       CompletingPhase,
+                       StringComparison.Ordinal) &&
+                   string.Equals(
+                       current.run_id,
+                       next.run_id,
+                       StringComparison.Ordinal) &&
+                   !string.IsNullOrEmpty(next.result) &&
+                   !string.IsNullOrEmpty(next.completed_at);
+        }
+
+        private static PendingTestGate ReadPendingTestGate(
+            ProjectBoundary boundary)
+        {
+            string serialized = File.ReadAllText(
+                boundary.PendingTestGatePath,
+                Encoding.UTF8);
+            PendingTestGate? pending =
+                JsonUtility.FromJson<PendingTestGate>(serialized);
+            bool validPhase = pending != null &&
+                              (string.Equals(
+                                   pending.phase,
+                                   StartingPhase,
+                                   StringComparison.Ordinal) ||
+                               string.Equals(
+                                   pending.phase,
+                                   RunningPhase,
+                                   StringComparison.Ordinal) ||
+                               string.Equals(
+                                   pending.phase,
+                                   CompletingPhase,
+                                   StringComparison.Ordinal));
+            bool validRunId = pending != null &&
+                              (string.Equals(
+                                   pending.phase,
+                                   StartingPhase,
+                                   StringComparison.Ordinal)
+                                  ? string.IsNullOrEmpty(pending.run_id)
+                                  : string.Equals(
+                                        pending.phase,
+                                        RunningPhase,
+                                        StringComparison.Ordinal)
+                                      ? Guid.TryParse(pending.run_id, out _)
+                                      : string.IsNullOrEmpty(pending.run_id) ||
+                                        Guid.TryParse(pending.run_id, out _));
+            bool validCompletion = pending != null &&
+                                   (string.Equals(
+                                        pending.phase,
+                                        CompletingPhase,
+                                        StringComparison.Ordinal)
+                                       ? !string.IsNullOrEmpty(pending.result) &&
+                                         DateTime.TryParse(
+                                             pending.completed_at,
+                                             CultureInfo.InvariantCulture,
+                                             DateTimeStyles.RoundtripKind,
+                                             out _)
+                                       : string.IsNullOrEmpty(pending.result) &&
+                                         string.IsNullOrEmpty(
+                                             pending.completed_at));
+            if (pending == null ||
+                pending.schema_version != 1 ||
+                !Guid.TryParseExact(pending.invocation_id, "N", out _) ||
+                !validPhase ||
+                !validRunId ||
+                !validCompletion ||
+                pending.editor_process_id <= 0 ||
+                !DateTime.TryParse(
+                    pending.started_at,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind,
+                    out _) ||
+                !DateTime.TryParse(
+                    pending.deadline_at,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind,
+                    out _) ||
+                !DateTime.TryParse(
+                    pending.editor_process_started_at,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind,
+                    out _))
+            {
+                throw new InvalidOperationException(
+                    "WP0002_PENDING_TEST_GATE_INVALID");
+            }
+
+            ValidateSha256(pending.source_sha256);
+            if (!string.Equals(
+                    ExpectedAssemblyForGate(pending.gate_id),
+                    pending.assembly_name,
+                    StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "WP0002_PENDING_TEST_GATE_ASSEMBLY_REJECTED");
+            }
+
+            return pending;
+        }
+
+        internal static void HandleTestRunFinished(ITestResult result)
+        {
+            try
+            {
+                ProjectBoundary boundary = VerifyProjectBoundary();
+                if (!File.Exists(boundary.PendingTestGatePath))
+                {
                     return;
                 }
 
-                _runId = runId;
+                PendingTestGate pending = ReadPendingTestGate(boundary);
+                if (!OwnsCurrentEditorProcess(pending))
+                {
+                    return;
+                }
+
+                if (string.Equals(
+                        pending.phase,
+                        CompletingPhase,
+                        StringComparison.Ordinal))
+                {
+                    FinishPendingTestGate(
+                        boundary,
+                        pending,
+                        pending.result);
+                    return;
+                }
+
+                if (!string.Equals(
+                        pending.phase,
+                        RunningPhase,
+                        StringComparison.Ordinal))
+                {
+                    FinishPendingTestGate(
+                        boundary,
+                        pending,
+                        "failed:test-result-before-run-bind");
+                    return;
+                }
+
+                bool containsExpectedAssembly;
+                string treeFailure;
+                int discovered;
+                bool exactTree = ValidateResultTree(
+                    result,
+                    pending.assembly_name,
+                    out containsExpectedAssembly,
+                    out discovered,
+                    out treeFailure);
+                if (!containsExpectedAssembly)
+                {
+                    return;
+                }
+
+                string actualSourceSha256 = ComputeSha256(
+                    boundary.DispatcherSourcePath);
+                if (!string.Equals(
+                        pending.source_sha256,
+                        actualSourceSha256,
+                        StringComparison.Ordinal))
+                {
+                    FinishPendingTestGate(
+                        boundary,
+                        pending,
+                        "failed:dispatcher-source-changed-before-test-completion");
+                    return;
+                }
+
+                if (!exactTree)
+                {
+                    FinishPendingTestGate(
+                        boundary,
+                        pending,
+                        "failed:test-result-tree=" + treeFailure);
+                    return;
+                }
+
+                bool passed =
+                    result.PassCount > 0 &&
+                    result.FailCount == 0 &&
+                    result.InconclusiveCount == 0;
+                string outcome = (passed ? "success:" : "failed:") +
+                    "run=" + pending.run_id + ";discovered=" + discovered +
+                    ";passed=" + result.PassCount +
+                    ";failed=" + result.FailCount +
+                    ";inconclusive=" + result.InconclusiveCount +
+                    ";skipped=" + result.SkipCount;
+                FinishPendingTestGate(boundary, pending, outcome);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(
+                    "WP0002_TEST_RUN_CALLBACK_FAILED " +
+                    NormalizeMessage(exception.Message));
+            }
+        }
+
+        private static bool ValidateResultTree(
+            ITestResult root,
+            string expectedAssembly,
+            out bool containsExpectedAssembly,
+            out int discovered,
+            out string failure)
+        {
+            containsExpectedAssembly = false;
+            discovered = root?.Test?.TestCaseCount ?? 0;
+            failure = "invalid-root";
+            if (root == null || root.Test == null || discovered <= 0)
+            {
+                return false;
+            }
+
+            int leafCount = 0;
+            var assemblies = new HashSet<string>(StringComparer.Ordinal);
+            var pending = new Stack<ITestResult>();
+            pending.Push(root);
+            while (pending.Count != 0)
+            {
+                ITestResult current = pending.Pop();
+                if (current.Test is TestAssembly testAssembly)
+                {
+                    string name = testAssembly.Name;
+                    assemblies.Add(
+                        name.EndsWith(
+                            ".dll",
+                            StringComparison.OrdinalIgnoreCase)
+                            ? name.Substring(0, name.Length - 4)
+                            : name);
+                }
+
+                bool hasChildren = false;
+                if (current.Children != null)
+                {
+                    foreach (ITestResult child in current.Children)
+                    {
+                        hasChildren = true;
+                        pending.Push(child);
+                    }
+                }
+
+                if (hasChildren)
+                {
+                    continue;
+                }
+
+                leafCount++;
+            }
+
+            containsExpectedAssembly = assemblies.Contains(expectedAssembly);
+            int accounted = ResultCount(root);
+            if (assemblies.Count != 1 || !containsExpectedAssembly)
+            {
+                failure = "assembly-mismatch";
+                return false;
+            }
+
+            if (leafCount != discovered || accounted != discovered)
+            {
+                failure = "count-mismatch";
+                return false;
+            }
+
+            failure = string.Empty;
+            return true;
+        }
+
+        private static int ResultCount(ITestResult result)
+        {
+            return result.PassCount + result.FailCount + result.SkipCount +
+                   result.InconclusiveCount;
+        }
+
+        private static string FinishPendingTestGate(
+            ProjectBoundary boundary,
+            PendingTestGate pending,
+            string outcome)
+        {
+            PendingTestGate current = ReadPendingTestGate(boundary);
+            if (!SamePendingInvocation(current, pending))
+            {
+                throw new InvalidOperationException(
+                    "WP0002_PENDING_TEST_GATE_INVOCATION_MISMATCH");
+            }
+
+            if (!string.Equals(
+                    current.phase,
+                    CompletingPhase,
+                    StringComparison.Ordinal))
+            {
+                current.phase = CompletingPhase;
+                current.result = outcome;
+                current.completed_at = DateTime.UtcNow.ToString(
+                    "O",
+                    CultureInfo.InvariantCulture);
+                ReplacePendingTestGate(boundary, current);
+            }
+
+            string line = CompleteGate(
+                boundary,
+                current.gate_id,
+                current.source_sha256,
+                "TestRunnerApi:" + current.assembly_name,
+                current.result,
+                current.started_at,
+                current.invocation_id,
+                current.completed_at);
+            ReleaseTransient(current.invocation_id);
+            File.Delete(boundary.PendingTestGatePath);
+            return line;
+        }
+
+        private static void WatchPendingTestGate()
+        {
+            if (EditorApplication.timeSinceStartup < _nextWatchdogAt)
+            {
+                return;
+            }
+
+            _nextWatchdogAt = EditorApplication.timeSinceStartup + 1.0;
+            try
+            {
+                ProjectBoundary boundary = VerifyProjectBoundary();
+                if (!File.Exists(boundary.PendingTestGatePath))
+                {
+                    return;
+                }
+
+                PendingTestGate pending = ReadPendingTestGate(boundary);
+                if (!OwnsCurrentEditorProcess(pending))
+                {
+                    return;
+                }
+
+                if (string.Equals(
+                        pending.phase,
+                        CompletingPhase,
+                        StringComparison.Ordinal))
+                {
+                    FinishPendingTestGate(
+                        boundary,
+                        pending,
+                        pending.result);
+                    return;
+                }
+
+                DateTime deadline = DateTime.Parse(
+                    pending.deadline_at,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind);
+                if (DateTime.UtcNow >= deadline.ToUniversalTime())
+                {
+                    CancelPendingRun(pending);
+                    FinishPendingTestGate(
+                        boundary,
+                        pending,
+                        "failed:test-run-deadline-exceeded;phase=" +
+                        pending.phase);
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(
+                    "WP0002_TEST_GATE_WATCHDOG_FAILED " +
+                    NormalizeMessage(exception.Message));
+            }
+        }
+
+        internal static void HandleTransientTestError(
+            string invocationId,
+            string message)
+        {
+            try
+            {
+                ProjectBoundary boundary = VerifyProjectBoundary();
+                if (!File.Exists(boundary.PendingTestGatePath))
+                {
+                    return;
+                }
+
+                PendingTestGate pending = ReadPendingTestGate(boundary);
+                if (!OwnsCurrentEditorProcess(pending) ||
+                    !string.Equals(
+                        pending.invocation_id,
+                        invocationId,
+                        StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                CancelPendingRun(pending);
+                FinishPendingTestGate(
+                    boundary,
+                    pending,
+                    "failed:test-run-error=" + NormalizeMessage(message));
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(
+                    "WP0002_TRANSIENT_TEST_ERROR_CALLBACK_FAILED " +
+                    NormalizeMessage(exception.Message));
+            }
+        }
+
+        private static void CancelPendingRun(PendingTestGate pending)
+        {
+            if (!Guid.TryParse(pending.run_id, out _))
+            {
+                return;
+            }
+
+            try
+            {
+                TestRunnerApi.CancelTestRun(pending.run_id);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(
+                    "WP0002_TEST_RUN_CANCEL_FAILED " +
+                    NormalizeMessage(exception.Message));
+            }
+        }
+
+        private static void RestoreTransientCallback()
+        {
+            try
+            {
+                ProjectBoundary boundary = VerifyProjectBoundary();
+                if (!File.Exists(boundary.PendingTestGatePath))
+                {
+                    return;
+                }
+
+                PendingTestGate pending = ReadPendingTestGate(boundary);
+                if (OwnsCurrentEditorProcess(pending) &&
+                    !string.Equals(
+                        pending.phase,
+                        CompletingPhase,
+                        StringComparison.Ordinal))
+                {
+                    RegisterTransient(pending.invocation_id);
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(
+                    "WP0002_TRANSIENT_CALLBACK_RESTORE_FAILED " +
+                    NormalizeMessage(exception.Message));
+            }
+        }
+
+        private static void RegisterTransient(string invocationId)
+        {
+            if (_activeTransientCallback != null &&
+                string.Equals(
+                    _activeTransientCallback.InvocationId,
+                    invocationId,
+                    StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            if (_activeTransientCallback != null)
+            {
+                ReleaseTransient(_activeTransientCallback.InvocationId);
+            }
+
+            var callbacks = new TransientTestErrorCallbacks(invocationId);
+            TestRunnerApi.RegisterTestCallback(callbacks);
+            _activeTransientCallback = callbacks;
+        }
+
+        private static void ReleaseTransient(string invocationId)
+        {
+            TransientTestErrorCallbacks? callbacks = _activeTransientCallback;
+            if (callbacks == null ||
+                !string.Equals(
+                    callbacks.InvocationId,
+                    invocationId,
+                    StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            _activeTransientCallback = null;
+            try
+            {
+                TestRunnerApi.UnregisterTestCallback(callbacks);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(
+                    "WP0002_TRANSIENT_CALLBACK_RELEASE_FAILED " +
+                    NormalizeMessage(exception.Message));
+            }
+        }
+
+        private static string ExpectedAssemblyForGate(string gateId)
+        {
+            if (string.Equals(gateId, EditModeGate, StringComparison.Ordinal))
+            {
+                return EditModeAssembly;
+            }
+
+            if (string.Equals(gateId, PlayModeGate, StringComparison.Ordinal))
+            {
+                return PlayModeAssembly;
+            }
+
+            throw new InvalidOperationException(
+                "WP0002_PENDING_TEST_GATE_ID_REJECTED");
+        }
+
+        private static bool OwnsCurrentEditorProcess(PendingTestGate pending)
+        {
+            return pending.editor_process_id == CurrentEditorProcessId() &&
+                   string.Equals(
+                       pending.editor_process_started_at,
+                       CurrentEditorProcessStartedAt(),
+                       StringComparison.Ordinal);
+        }
+
+        private static int CurrentEditorProcessId()
+        {
+            using var process = System.Diagnostics.Process.GetCurrentProcess();
+            return process.Id;
+        }
+
+        private static string CurrentEditorProcessStartedAt()
+        {
+            using var process = System.Diagnostics.Process.GetCurrentProcess();
+            return process.StartTime.ToUniversalTime().ToString(
+                "O",
+                CultureInfo.InvariantCulture);
+        }
+
+        private static string NormalizeMessage(string? message)
+        {
+            string normalized = (message ?? string.Empty)
+                .Replace('\r', ' ')
+                .Replace('\n', ' ');
+            return normalized.Length <= 512
+                ? normalized
+                : normalized.Substring(0, 512);
+        }
+
+        private sealed class TransientTestErrorCallbacks : IErrorCallbacks
+        {
+            internal TransientTestErrorCallbacks(string invocationId)
+            {
+                InvocationId = invocationId;
+            }
+
+            internal string InvocationId { get; }
+
+            public void OnError(string message)
+            {
+                HandleTransientTestError(InvocationId, message);
             }
 
             public void RunStarted(ITestAdaptor testsToRun)
             {
-                _discoveredTestCases = testsToRun.TestCaseCount;
             }
 
             public void RunFinished(ITestResultAdaptor result)
             {
-                bool passed =
-                    _discoveredTestCases > 0 &&
-                    result.PassCount > 0 &&
-                    result.FailCount == 0 &&
-                    result.InconclusiveCount == 0;
-                string outcome = passed
-                    ? "success:run=" + _runId + ";discovered=" +
-                      _discoveredTestCases + ";passed=" + result.PassCount +
-                      ";skipped=" + result.SkipCount
-                    : "failed:run=" + _runId + ";discovered=" +
-                      _discoveredTestCases + ";passed=" + result.PassCount +
-                      ";failed=" + result.FailCount + ";inconclusive=" +
-                      result.InconclusiveCount + ";skipped=" + result.SkipCount;
-                Finish(outcome);
-            }
-
-            public void OnError(string message)
-            {
-                string normalized = (message ?? string.Empty)
-                    .Replace('\r', ' ')
-                    .Replace('\n', ' ');
-                if (normalized.Length > 512)
-                {
-                    normalized = normalized.Substring(0, 512);
-                }
-
-                Finish("failed:test-run-error=" + normalized);
             }
 
             public void TestStarted(ITestAdaptor test)
@@ -470,32 +1318,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             public void TestFinished(ITestResultAdaptor result)
             {
             }
-
-            private void Finish(string outcome)
-            {
-                if (_completed)
-                {
-                    return;
-                }
-
-                _completed = true;
-                try
-                {
-                    CompleteGate(
-                        _boundary,
-                        _gateId,
-                        _sourceSha256,
-                        "TestRunnerApi:" + _assemblyName,
-                        outcome,
-                        _startedAt);
-                }
-                finally
-                {
-                    _api.UnregisterCallbacks(this);
-                    ActiveTestCallbacks.Remove(this);
-                    UnityEngine.Object.DestroyImmediate(_api);
-                }
-            }
         }
 
         private readonly struct ProjectBoundary
@@ -503,22 +1325,44 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             internal ProjectBoundary(
                 string repositoryRoot,
                 string dispatcherSourcePath,
-                string evidenceDirectory)
+                string evidenceDirectory,
+                string pendingTestGatePath)
             {
                 RepositoryRoot = repositoryRoot;
                 DispatcherSourcePath = dispatcherSourcePath;
                 EvidenceDirectory = evidenceDirectory;
+                PendingTestGatePath = pendingTestGatePath;
             }
 
             internal string RepositoryRoot { get; }
             internal string DispatcherSourcePath { get; }
             internal string EvidenceDirectory { get; }
+            internal string PendingTestGatePath { get; }
+        }
+
+        [Serializable]
+        private sealed class PendingTestGate
+        {
+            public int schema_version;
+            public string invocation_id = string.Empty;
+            public string gate_id = string.Empty;
+            public string source_sha256 = string.Empty;
+            public string started_at = string.Empty;
+            public string deadline_at = string.Empty;
+            public string assembly_name = string.Empty;
+            public string phase = string.Empty;
+            public string run_id = string.Empty;
+            public string result = string.Empty;
+            public string completed_at = string.Empty;
+            public int editor_process_id;
+            public string editor_process_started_at = string.Empty;
         }
 
         [Serializable]
         private sealed class GateEvidence
         {
             public int schema_version;
+            public string invocation_id = string.Empty;
             public string gate_id = string.Empty;
             public string source_sha256 = string.Empty;
             public string command = string.Empty;
@@ -527,6 +1371,26 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             public string completed_at = string.Empty;
             public string project_root = string.Empty;
             public string runtime_assembly = string.Empty;
+        }
+    }
+
+    public sealed class WP0002TestRunCallback : ITestRunCallback
+    {
+        public void RunStarted(ITest testsToRun)
+        {
+        }
+
+        public void RunFinished(ITestResult testResults)
+        {
+            WP0002GateDispatcher.HandleTestRunFinished(testResults);
+        }
+
+        public void TestStarted(ITest test)
+        {
+        }
+
+        public void TestFinished(ITestResult result)
+        {
         }
     }
 }
