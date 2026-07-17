@@ -340,7 +340,7 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
         "8bba4fccf7a0ac8cdcc488046fba4ce05fee6ef41903b0f545a028b40a3daeb0"
     ),
     "Tools/Validation/validate_wp0002_policy.py": (
-        "69f87d5a0b59cdcb9fe1a8f1cc98359835b5163e2178a2d1529706382690f6c4"
+        "5292757e6ba0177b7ff2dd3a5be13d699a2c9df1ca2bf3d6e3839b6052179f31"
     ),
     "Tools/Validation/collect_wp0002_scope_capture.py": (
         "68da58dc0d026b3ad249959d65a4459f32941d1fc39963fce69f3bdf8bbcda9f"
@@ -2608,18 +2608,30 @@ def validate_work_packet_semantics(path: Path) -> list[str]:
     }
     if len(evidence_by_id) != len(evidence):
         errors.append(f"{path.relative_to(ROOT)} evidence manifest IDs must be unique")
-    if packet.get("status") in {"verifying", "candidate"}:
+    status_events = packet.get("status_events", [])
+    candidate_evidence_materialized = packet.get("status") in {
+        "verifying",
+        "candidate",
+        "released",
+    } or any(
+        isinstance(event, dict)
+        and event.get("to") in {"verifying", "candidate", "released"}
+        for event in status_events
+    )
+    if candidate_evidence_materialized:
         if not actual_paths:
-            errors.append(f"{path.relative_to(ROOT)} verifying/candidate packet has no actual paths")
+            errors.append(
+                f"{path.relative_to(ROOT)} packet with candidate history has no retained actual paths"
+            )
         candidate = packet.get("candidate_evidence", {})
         reference_fields = (
             "diff_artifact_id", "artifact_manifest_id", "command_log_artifact_id"
         )
         references = [candidate.get(field) for field in reference_fields]
         if any(not isinstance(item, str) or not item for item in references):
-            errors.append(
-                f"{path.relative_to(ROOT)} verifying/candidate packet lacks complete diff/artifact/command evidence references"
-            )
+                errors.append(
+                    f"{path.relative_to(ROOT)} packet with candidate history lacks complete diff/artifact/command evidence references"
+                )
         elif len(references) != len(set(references)):
             errors.append(f"{path.relative_to(ROOT)} candidate evidence references must be distinct")
         for evidence_id in references:

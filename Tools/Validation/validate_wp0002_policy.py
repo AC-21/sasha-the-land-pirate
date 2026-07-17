@@ -48,6 +48,7 @@ FROZEN_SELF_VERIFICATION = {
 
 STATUS_DOCUMENT_RULES = {
     "AGENTS.md": {"M"},
+    "README.md": {"M"},
     "docs/foundation-v0.1/README.md": {"M"},
     "docs/foundation-v0.1/06-AGENT-OPERATING-MODEL.md": {"M"},
     "docs/foundation-v0.1/08-BUILD-ROADMAP.md": {"M"},
@@ -56,8 +57,31 @@ STATUS_DOCUMENT_RULES = {
     "docs/foundation-v0.1/12-FOUNDATION-AUDIT.md": {"M"},
     "docs/foundation-v0.1/15-LEAN-A1-LOCAL-DEVELOPMENT.md": {"M"},
 }
+STAGE_B_REQUIRED_STATUS_DOCUMENTS = frozenset(
+    {
+        *STATUS_DOCUMENT_RULES,
+        "docs/foundation-v0.1/04-TECHNICAL-ARCHITECTURE.md",
+    }
+)
+STAGE_C_REQUIRED_STATUS_DOCUMENTS = frozenset(
+    {
+        "AGENTS.md",
+        "README.md",
+        "docs/foundation-v0.1/README.md",
+    }
+)
+AUTHORITY_ENDING_PHASES = frozenset(
+    {
+        "candidate-to-released",
+        "rollback-transition",
+        "rejected-transition",
+        "superseded-transition",
+        "early-cancellation",
+    }
+)
 STAGE_B_RULES = {
     **STATUS_DOCUMENT_RULES,
+    "docs/foundation-v0.1/04-TECHNICAL-ARCHITECTURE.md": {"M"},
     "docs/foundation-v0.1/01-DECISION-LEDGER.md": {"M"},
     "docs/foundation-v0.1/ledger/decisions.jsonl": {"M"},
     "docs/foundation-v0.1/governance/ratification-state.json": {"M"},
@@ -91,6 +115,11 @@ RECEIPT_PREFIX = "docs/foundation-v0.1/ledger/receipts/"
 WP0002_EVIDENCE_PREFIX = "docs/evidence/WP-0002/"
 WP0003_EVIDENCE_PREFIX = "docs/evidence/WP-0003/"
 REGULAR_MODES = {"100644", "100755"}
+CANDIDATE_EVIDENCE_REFERENCE_FIELDS = (
+    "diff_artifact_id",
+    "artifact_manifest_id",
+    "command_log_artifact_id",
+)
 PACKET_TRANSITIONS = {
     "proposed": {"accepted", "rejected", "superseded"},
     "accepted": {"active", "rejected", "superseded"},
@@ -341,6 +370,163 @@ def _json_object(data: bytes, path: str) -> dict:
     if not isinstance(value, dict):
         raise ValueError(f"{path} must be a JSON object")
     return value
+
+
+def _candidate_evidence_reference_values(packet: dict) -> tuple[object, ...]:
+    candidate = packet.get("candidate_evidence")
+    if not isinstance(candidate, dict):
+        candidate = {}
+    return tuple(
+        candidate.get(field) for field in CANDIDATE_EVIDENCE_REFERENCE_FIELDS
+    )
+
+
+def _has_candidate_history(packet: dict) -> bool:
+    return packet.get("status") in {"candidate", "released"} or any(
+        isinstance(event, dict) and event.get("to") in {"candidate", "released"}
+        for event in packet.get("status_events", [])
+    )
+
+
+def _phase_with_candidate_history(
+    base_packet: dict,
+    transition: tuple[object, object],
+    phase: str,
+) -> str:
+    if (
+        _has_candidate_history(base_packet)
+        and transition[0] in {"active", "verifying", "candidate"}
+    ):
+        if transition[0] == transition[1]:
+            return "candidate-retained-unrelated"
+        if phase in {"active-to-verifying", "verifying-to-candidate"}:
+            return "candidate-history-transition"
+    return phase
+
+
+def _complete_candidate_evidence_references(
+    values: tuple[object, ...],
+) -> tuple[str, ...] | None:
+    if not all(isinstance(value, str) and value for value in values):
+        return None
+    references = tuple(values)
+    if len(set(references)) != len(references):
+        return None
+    return references
+
+
+def _validate_candidate_evidence_retention(
+    base_packet: dict,
+    head_packet: dict,
+    *,
+    packet_id: str,
+    repo: Path | None = None,
+    base_commit: str | None = None,
+    head_commit: str | None = None,
+) -> list[str]:
+    """Keep accepted candidate references immutable across release.
+
+    Candidate evidence IDs, their manifest rows, and any repository-backed
+    artifact bytes are immutable once the packet reaches candidate.
+    """
+    base_values = _candidate_evidence_reference_values(base_packet)
+    head_values = _candidate_evidence_reference_values(head_packet)
+    base_references = _complete_candidate_evidence_references(base_values)
+    head_references = _complete_candidate_evidence_references(head_values)
+    if head_references is None:
+        return [f"{packet_id} release lacks complete candidate evidence references"]
+    if base_references is not None:
+        if head_references != base_references:
+            return [f"{packet_id} release replaces accepted candidate evidence references"]
+        errors: list[str] = []
+        base_manifest = base_packet.get("evidence_manifest")
+        head_manifest = head_packet.get("evidence_manifest")
+        if not isinstance(base_manifest, list) or not isinstance(head_manifest, list):
+            return [f"{packet_id} release lacks comparable evidence manifests"]
+        base_by_id = {
+            entry.get("id"): entry
+            for entry in base_manifest
+            if isinstance(entry, dict) and isinstance(entry.get("id"), str)
+        }
+        head_by_id = {
+            entry.get("id"): entry
+            for entry in head_manifest
+            if isinstance(entry, dict) and isinstance(entry.get("id"), str)
+        }
+        if len(base_by_id) != len(base_manifest) or len(head_by_id) != len(head_manifest):
+            errors.append(f"{packet_id} release evidence manifests have ambiguous IDs")
+        for evidence_id, base_entry in base_by_id.items():
+            head_entry = head_by_id.get(evidence_id)
+            if head_entry != base_entry:
+                errors.append(
+                    f"{packet_id} release replaces candidate evidence manifest row {evidence_id}"
+                )
+                continue
+            uri = base_entry.get("uri")
+            digest = base_entry.get("sha256")
+            if (
+                repo is None
+                or base_commit is None
+                or head_commit is None
+                or not isinstance(uri, str)
+                or not uri.startswith("repo://")
+            ):
+                continue
+            artifact_path = _safe_relative(uri.removeprefix("repo://"))
+            if artifact_path is None:
+                errors.append(
+                    f"{packet_id} candidate evidence row {evidence_id} has an unsafe repo URI"
+                )
+                continue
+            try:
+                base_artifact = _git_path_bytes(repo, base_commit, artifact_path)
+                head_artifact = _git_path_bytes(repo, head_commit, artifact_path)
+            except ValueError:
+                errors.append(
+                    f"{packet_id} candidate evidence artifact {artifact_path} is not retained"
+                )
+                continue
+            if base_artifact != head_artifact:
+                errors.append(
+                    f"{packet_id} release mutates candidate evidence artifact {artifact_path}"
+                )
+            if (
+                not isinstance(digest, str)
+                or hashlib.sha256(base_artifact).hexdigest() != digest
+            ):
+                errors.append(
+                    f"{packet_id} candidate evidence artifact {artifact_path} is not content-addressed"
+                )
+        for reference in base_references:
+            if reference not in base_by_id:
+                errors.append(
+                    f"{packet_id} candidate evidence reference {reference} lacks a manifest row"
+                )
+        base_candidate = base_packet.get("candidate_evidence")
+        head_candidate = head_packet.get("candidate_evidence")
+        base_limits = (
+            base_candidate.get("known_limits")
+            if isinstance(base_candidate, dict)
+            else None
+        )
+        head_limits = (
+            head_candidate.get("known_limits")
+            if isinstance(head_candidate, dict)
+            else None
+        )
+        if (
+            not isinstance(base_limits, list)
+            or not isinstance(head_limits, list)
+            or head_limits[: len(base_limits)] != base_limits
+        ):
+            errors.append(f"{packet_id} release erases or rewrites candidate known limits")
+        for field in ("actual_paths", "verification", "implementer", "verifier"):
+            if head_packet.get(field) != base_packet.get(field):
+                errors.append(
+                    f"{packet_id} release rewrites candidate provenance field {field}"
+                )
+        return errors
+    return [f"{packet_id} candidate base lacks an immutable complete evidence reference set"]
 
 
 def _content_address_report(
@@ -632,6 +818,7 @@ def validate_delta(
         "rejected-transition",
         "rollback-transition",
         "superseded-transition",
+        "candidate-history-transition",
     }
     for entry in entries:
         paths = [path for path in (entry.old_path, entry.new_path) if path is not None]
@@ -651,6 +838,12 @@ def validate_delta(
             any(_covers(scope, path) for scope in normalized_declared if scope)
             for path in paths
         )
+        if phase == "candidate-retained-unrelated":
+            errors.append(
+                f"candidate-history WP-0002 freezes every diff until an explicit lifecycle transition: "
+                f"{entry.status} {paths}"
+            )
+            continue
         if phase == "post-terminal-unrelated":
             wp0002_related = any(
                 any(_overlaps(path, scope) for scope in normalized_declared if scope)
@@ -712,6 +905,7 @@ def validate_delta(
     }
     if phase == "stage-b":
         required = {
+            *(("M", path) for path in STAGE_B_REQUIRED_STATUS_DOCUMENTS),
             ("M", "docs/foundation-v0.1/01-DECISION-LEDGER.md"),
             ("M", "docs/foundation-v0.1/ledger/decisions.jsonl"),
             ("M", "docs/foundation-v0.1/governance/ratification-state.json"),
@@ -733,6 +927,7 @@ def validate_delta(
             errors.append("stage-b lacks new sealed receipt materialization")
     if phase == "stage-c":
         required = {
+            *(("M", path) for path in STAGE_C_REQUIRED_STATUS_DOCUMENTS),
             ("M", "docs/foundation-v0.1/governance/ratification-state.json"),
             ("M", PACKET_PATH),
             ("M", "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json"),
@@ -755,6 +950,14 @@ def validate_delta(
             for status, path in changed
         ):
             errors.append(f"{phase} lacks exact WP-0002 lifecycle evidence")
+        if phase in AUTHORITY_ENDING_PHASES:
+            missing = {
+                ("M", path) for path in STAGE_C_REQUIRED_STATUS_DOCUMENTS
+            } - changed
+            if missing:
+                errors.append(
+                    f"{phase} lacks exact authority-ending status paths: {sorted(missing)}"
+                )
     return errors
 
 
@@ -876,6 +1079,20 @@ def validate_repository_policy(
     phase = _phase_for_transition(*transition)
     if phase is None:
         return {}, [f"unsupported WP-0002 policy transition: {transition!r}"]
+
+    base_has_candidate_history = _has_candidate_history(base_packet)
+    phase = _phase_with_candidate_history(base_packet, transition, phase)
+    if base_has_candidate_history:
+        errors.extend(
+            _validate_candidate_evidence_retention(
+                base_packet,
+                head_packet,
+                packet_id="WP-0002",
+                repo=repo,
+                base_commit=base,
+                head_commit=head,
+            )
+        )
 
     if transition[0] != transition[1]:
         errors.extend(

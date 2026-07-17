@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -152,6 +153,81 @@ class PacketRetainedAuthorityHistoryTests(unittest.TestCase):
         candidate["approved_by"] = "AC-21"
         errors = self.validate(candidate)
         self.assertTrue(any("without an acceptance event" in item for item in errors))
+
+    def test_released_packet_retains_candidate_evidence(self) -> None:
+        source = foundation.load_json(
+            foundation.ROOT / "work-packets/proposed/WP-0003.json"
+        )
+        source["status"] = "released"
+        source["candidate_evidence"] = {
+            "diff_artifact_id": None,
+            "artifact_manifest_id": None,
+            "command_log_artifact_id": None,
+            "known_limits": [],
+        }
+        with tempfile.TemporaryDirectory(dir=foundation.ROOT) as temporary:
+            path = Path(temporary) / "WP-TEST.json"
+            path.write_text(json.dumps(source), encoding="utf-8")
+            errors = foundation.validate_work_packet_semantics(path)
+        self.assertTrue(
+            any(
+                "packet with candidate history lacks complete"
+                in item
+                for item in errors
+            ),
+            errors,
+        )
+
+    def test_terminal_packet_retains_materialized_candidate_evidence(self) -> None:
+        source = foundation.load_json(
+            foundation.ROOT / "work-packets/proposed/WP-0003.json"
+        )
+        transitions = {
+            "rolled-back": [
+                ("active", "verifying"),
+                ("verifying", "candidate"),
+                ("candidate", "rolled-back"),
+            ],
+            "superseded": [
+                ("active", "verifying"),
+                ("verifying", "candidate"),
+                ("candidate", "released"),
+                ("released", "superseded"),
+            ],
+        }
+        for terminal, edges in transitions.items():
+            with self.subTest(terminal=terminal):
+                candidate = json.loads(json.dumps(source))
+                candidate["status"] = terminal
+                candidate["actual_paths"] = []
+                candidate["candidate_evidence"] = {
+                    "diff_artifact_id": None,
+                    "artifact_manifest_id": None,
+                    "command_log_artifact_id": None,
+                    "known_limits": [],
+                }
+                for index, (from_status, to_status) in enumerate(edges, start=1):
+                    candidate["status_events"].append(
+                        {
+                            "event_id": f"WPE-RETAIN-{terminal}-{index}",
+                            "from": from_status,
+                            "to": to_status,
+                            "actor": "test",
+                            "at": f"2026-07-16T19:4{index + 1}:34Z",
+                            "receipt_id": "RR-TEST",
+                        }
+                    )
+                with tempfile.TemporaryDirectory(dir=foundation.ROOT) as temporary:
+                    path = Path(temporary) / f"WP-{terminal}.json"
+                    path.write_text(json.dumps(candidate), encoding="utf-8")
+                    errors = foundation.validate_work_packet_semantics(path)
+                self.assertTrue(
+                    any(
+                        "packet with candidate history lacks complete" in item
+                        for item in errors
+                    ),
+                    errors,
+                )
 
 
 class WP0002LastBearingLifecycleTests(unittest.TestCase):

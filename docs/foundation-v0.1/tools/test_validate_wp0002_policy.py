@@ -241,6 +241,10 @@ class WP0002PolicyTests(unittest.TestCase):
     def test_stage_b_and_stage_c_are_explicit_and_complete(self) -> None:
         receipt_path = f"{policy.RECEIPT_PREFIX}RR-WP0002-TRANSITION.json"
         stage_b = [
+            *(
+                entry("M", path, path)
+                for path in sorted(policy.STAGE_B_REQUIRED_STATUS_DOCUMENTS)
+            ),
             entry("M", "docs/foundation-v0.1/01-DECISION-LEDGER.md", "docs/foundation-v0.1/01-DECISION-LEDGER.md"),
             entry("M", "docs/foundation-v0.1/ledger/decisions.jsonl", "docs/foundation-v0.1/ledger/decisions.jsonl"),
             entry("M", "docs/foundation-v0.1/governance/ratification-state.json", "docs/foundation-v0.1/governance/ratification-state.json"),
@@ -259,8 +263,35 @@ class WP0002PolicyTests(unittest.TestCase):
             ),
             [],
         )
+        for required_front_door in policy.STAGE_B_REQUIRED_STATUS_DOCUMENTS:
+            with self.subTest(required_front_door=required_front_door):
+                incomplete_stage_b = [
+                    item
+                    for item in stage_b
+                    if required_front_door
+                    not in {item.old_path, item.new_path}
+                ]
+                errors = policy.validate_delta(
+                    incomplete_stage_b,
+                    phase="stage-b",
+                    declared_paths=DECLARED,
+                    reservation_paths=DECLARED,
+                    candidate_blobs={receipt_path: self.receipt(receipt_path)},
+                )
+                self.assertTrue(
+                    any(
+                        "stage-b lacks exact authority materialization paths"
+                        in error
+                        for error in errors
+                    ),
+                    errors,
+                )
         scope_blobs, scope_paths = self.scope_capture_fixture()
         stage_c = [
+            *(
+                entry("M", path, path)
+                for path in sorted(policy.STAGE_C_REQUIRED_STATUS_DOCUMENTS)
+            ),
             entry("M", "docs/foundation-v0.1/governance/ratification-state.json", "docs/foundation-v0.1/governance/ratification-state.json"),
             entry("M", policy.PACKET_PATH, policy.PACKET_PATH),
             entry("M", "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json", "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json"),
@@ -279,6 +310,28 @@ class WP0002PolicyTests(unittest.TestCase):
             ),
             [],
         )
+        for required_front_door in policy.STAGE_C_REQUIRED_STATUS_DOCUMENTS:
+            with self.subTest(stage_c_front_door=required_front_door):
+                incomplete_stage_c = [
+                    item
+                    for item in stage_c
+                    if required_front_door
+                    not in {item.old_path, item.new_path}
+                ]
+                errors = policy.validate_delta(
+                    incomplete_stage_c,
+                    phase="stage-c",
+                    declared_paths=DECLARED,
+                    reservation_paths=DECLARED,
+                    candidate_blobs=stage_c_blobs,
+                )
+                self.assertTrue(
+                    any(
+                        "stage-c lacks exact activation/capture paths" in error
+                        for error in errors
+                    ),
+                    errors,
+                )
         incomplete = stage_c[:-2] + [stage_c[-1]]
         self.assertTrue(
             policy.validate_delta(
@@ -325,6 +378,104 @@ class WP0002PolicyTests(unittest.TestCase):
         )
         self.assertTrue(any("not enumerated" in error for error in errors), errors)
 
+    @staticmethod
+    def candidate_packet(
+        references: tuple[object, object, object],
+        *,
+        known_limits: list[str] | None = None,
+    ) -> dict:
+        fields = policy.CANDIDATE_EVIDENCE_REFERENCE_FIELDS
+        manifest = [
+            {
+                "id": reference,
+                "type": f"type-{index}",
+                "uri": f"external://artifact-{index}",
+                "sha256": str(index) * 64,
+            }
+            for index, reference in enumerate(references, start=1)
+            if isinstance(reference, str) and reference
+        ]
+        return {
+            "candidate_evidence": {
+                **dict(zip(fields, references, strict=True)),
+                "known_limits": known_limits or [],
+            },
+            "evidence_manifest": manifest,
+        }
+
+    def test_candidate_release_retains_exact_evidence_identity(self) -> None:
+        references = ("DIFF", "MANIFEST", "COMMAND")
+        base = self.candidate_packet(references, known_limits=["base limit"])
+        head = self.candidate_packet(
+            references,
+            known_limits=["base limit", "release note"],
+        )
+        self.assertEqual(
+            policy._validate_candidate_evidence_retention(
+                base,
+                head,
+                packet_id="WP-0002",
+            ),
+            [],
+        )
+        for index in range(3):
+            with self.subTest(mutated_reference=index):
+                changed = list(references)
+                changed[index] = f"CHANGED-{index}"
+                errors = policy._validate_candidate_evidence_retention(
+                    base,
+                    self.candidate_packet(tuple(changed)),
+                    packet_id="WP-0002",
+                )
+                self.assertTrue(any("replaces accepted" in item for item in errors), errors)
+
+    def test_candidate_release_rejects_malformed_or_remapped_evidence(self) -> None:
+        references = ("DIFF", "MANIFEST", "COMMAND")
+        base = self.candidate_packet(references)
+        malformed_sets = (
+            (None, "MANIFEST", "COMMAND"),
+            ("DIFF", "DIFF", "COMMAND"),
+        )
+        for malformed in malformed_sets:
+            with self.subTest(malformed=malformed):
+                self.assertTrue(
+                    policy._validate_candidate_evidence_retention(
+                        base,
+                        self.candidate_packet(malformed),
+                        packet_id="WP-0002",
+                    )
+                )
+                self.assertTrue(
+                    policy._validate_candidate_evidence_retention(
+                        self.candidate_packet(malformed),
+                        self.candidate_packet(references),
+                        packet_id="WP-0002",
+                    )
+                )
+        remapped = self.candidate_packet(references)
+        remapped["evidence_manifest"][0]["sha256"] = "f" * 64
+        errors = policy._validate_candidate_evidence_retention(
+            base,
+            remapped,
+            packet_id="WP-0002",
+        )
+        self.assertTrue(any("manifest row" in item for item in errors), errors)
+        erased_limit = self.candidate_packet(references, known_limits=["base limit"])
+        errors = policy._validate_candidate_evidence_retention(
+            erased_limit,
+            self.candidate_packet(references, known_limits=[]),
+            packet_id="WP-0002",
+        )
+        self.assertTrue(any("known limits" in item for item in errors), errors)
+        rewritten_provenance = self.candidate_packet(references)
+        rewritten_provenance["actual_paths"] = ["different/"]
+        errors = policy._validate_candidate_evidence_retention(
+            base,
+            rewritten_provenance,
+            packet_id="WP-0002",
+        )
+        self.assertTrue(any("actual_paths" in item for item in errors), errors)
+
     def test_lifecycle_matrix_and_terminal_lock_are_exact(self) -> None:
         implementation = entry(
             "A",
@@ -336,6 +487,10 @@ class WP0002PolicyTests(unittest.TestCase):
         evidence = entry(
             "A", None, "docs/evidence/WP-0002/run.json", old_mode="000000"
         )
+        authority_status = [
+            entry("M", path, path)
+            for path in sorted(policy.STAGE_C_REQUIRED_STATUS_DOCUMENTS)
+        ]
         for phase in ("active-to-verifying", "verifying-to-candidate"):
             with self.subTest(phase=phase):
                 self.assertEqual(
@@ -350,8 +505,25 @@ class WP0002PolicyTests(unittest.TestCase):
             "superseded-transition",
         ):
             with self.subTest(phase=phase):
-                self.assertEqual(self.validate(packet, evidence, phase=phase), [])
-                self.assertTrue(self.validate(implementation, packet, evidence, phase=phase))
+                phase_entries = [packet, evidence]
+                if phase in policy.AUTHORITY_ENDING_PHASES:
+                    phase_entries.extend(authority_status)
+                self.assertEqual(self.validate(*phase_entries, phase=phase), [])
+                self.assertTrue(
+                    self.validate(implementation, *phase_entries, phase=phase)
+                )
+                if phase in policy.AUTHORITY_ENDING_PHASES:
+                    for required_path in policy.STAGE_C_REQUIRED_STATUS_DOCUMENTS:
+                        incomplete = [
+                            item
+                            for item in phase_entries
+                            if required_path not in {item.old_path, item.new_path}
+                        ]
+                        errors = self.validate(*incomplete, phase=phase)
+                        self.assertTrue(
+                            any("authority-ending status paths" in item for item in errors),
+                            errors,
+                        )
         rollback_delete = entry(
             "D",
             "SimulationCore/Runtime/LastBearing/Old.cs",
@@ -359,7 +531,13 @@ class WP0002PolicyTests(unittest.TestCase):
             new_mode="000000",
         )
         self.assertEqual(
-            self.validate(rollback_delete, packet, evidence, phase="rollback-transition"),
+            self.validate(
+                rollback_delete,
+                packet,
+                evidence,
+                *authority_status,
+                phase="rollback-transition",
+            ),
             [],
         )
         self.assertEqual(self.validate(rollback_delete, phase="implementation"), [])
@@ -369,6 +547,24 @@ class WP0002PolicyTests(unittest.TestCase):
         )
         self.assertTrue(
             self.validate(implementation, phase="post-terminal-unrelated")
+        )
+        self.assertTrue(
+            self.validate(unrelated, phase="candidate-retained-unrelated")
+        )
+        self.assertTrue(
+            self.validate(implementation, phase="candidate-retained-unrelated")
+        )
+        self.assertEqual(
+            self.validate(packet, evidence, phase="candidate-history-transition"),
+            [],
+        )
+        self.assertTrue(
+            self.validate(
+                implementation,
+                packet,
+                evidence,
+                phase="candidate-history-transition",
+            )
         )
 
     def test_transition_phase_detection_and_receipt_binding_are_complete(self) -> None:
@@ -416,6 +612,42 @@ class WP0002PolicyTests(unittest.TestCase):
             },
         )
         self.assertIsNone(policy._phase_for_transition("proposed", "active"))
+        candidate_history = {
+            "status_events": [{"to": "candidate"}],
+        }
+        for status in ("active", "verifying", "candidate"):
+            with self.subTest(retained_candidate_status=status):
+                self.assertEqual(
+                    policy._phase_with_candidate_history(
+                        candidate_history,
+                        (status, status),
+                        "implementation",
+                    ),
+                    "candidate-retained-unrelated",
+                )
+        for status in ("released", "rolled-back", "superseded"):
+            with self.subTest(terminal_candidate_status=status):
+                self.assertEqual(
+                    policy._phase_with_candidate_history(
+                        candidate_history,
+                        (status, status),
+                        "post-terminal-unrelated",
+                    ),
+                    "post-terminal-unrelated",
+                )
+        for transition, original_phase in (
+            (("active", "verifying"), "active-to-verifying"),
+            (("verifying", "candidate"), "verifying-to-candidate"),
+        ):
+            with self.subTest(candidate_history_transition=transition):
+                self.assertEqual(
+                    policy._phase_with_candidate_history(
+                        candidate_history,
+                        transition,
+                        original_phase,
+                    ),
+                    "candidate-history-transition",
+                )
         packet = {
             "status_events": [
                 {
@@ -600,6 +832,154 @@ class WP0002PolicyGitAndReportTests(unittest.TestCase):
                 ]
             )
         self.assertIn("invalid choice", stderr.getvalue())
+
+    def test_candidate_release_policy_rejects_evidence_identity_rewrite(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            work = root / "work"
+            bare = root / "candidate.git"
+            self.assertEqual(self.git("init", str(work)).returncode, 0)
+            self.assertEqual(
+                self.git("-C", str(work), "config", "user.name", "Policy Test").returncode,
+                0,
+            )
+            self.assertEqual(
+                self.git(
+                    "-C",
+                    str(work),
+                    "config",
+                    "user.email",
+                    "policy@example.invalid",
+                ).returncode,
+                0,
+            )
+            policy_target = work / policy.POLICY_PATH
+            policy_target.parent.mkdir(parents=True)
+            shutil.copy2(POLICY_PATH, policy_target)
+            packet_target = work / policy.PACKET_PATH
+            packet_target.parent.mkdir(parents=True)
+            references = ("DIFF", "MANIFEST", "COMMAND")
+            base_packet = {
+                "status": "candidate",
+                "declared_paths": ["Allowed/"],
+                "reservation": {"paths": ["Allowed/"]},
+                "actual_paths": ["Allowed/value.txt"],
+                "implementer": "Implementer",
+                "verifier": "Verifier",
+                "verification": {"status": "passed", "evidence_ids": list(references)},
+                "candidate_evidence": {
+                    **dict(
+                        zip(
+                            policy.CANDIDATE_EVIDENCE_REFERENCE_FIELDS,
+                            references,
+                            strict=True,
+                        )
+                    ),
+                    "known_limits": ["retained"],
+                },
+                "evidence_manifest": [
+                    {
+                        "id": reference,
+                        "type": f"type-{index}",
+                        "uri": f"external://artifact-{index}",
+                        "sha256": str(index) * 64,
+                    }
+                    for index, reference in enumerate(references, start=1)
+                ],
+                "status_events": [],
+            }
+            packet_target.write_text(
+                json.dumps(base_packet, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            allowed = work / "Allowed/value.txt"
+            allowed.parent.mkdir()
+            allowed.write_text("candidate\n", encoding="utf-8")
+            for status_path in policy.STAGE_C_REQUIRED_STATUS_DOCUMENTS:
+                status_target = work / status_path
+                status_target.parent.mkdir(parents=True, exist_ok=True)
+                status_target.write_text("candidate authority\n", encoding="utf-8")
+            self.assertEqual(self.git("-C", str(work), "add", ".").returncode, 0)
+            self.assertEqual(
+                self.git("-C", str(work), "commit", "-m", "base candidate").returncode,
+                0,
+            )
+            base = self.git("-C", str(work), "rev-parse", "HEAD").stdout.strip().decode("ascii")
+
+            receipt_path = f"{policy.RECEIPT_PREFIX}RR-RELEASE.json"
+            evidence_path = "docs/evidence/WP-0002/release.json"
+
+            def commit_release(branch: str, *, rewrite_reference: bool) -> str:
+                self.assertEqual(
+                    self.git("-C", str(work), "checkout", "-B", branch, base).returncode,
+                    0,
+                )
+                released = json.loads(json.dumps(base_packet))
+                released["status"] = "released"
+                released["status_events"] = [
+                    {
+                        "from": "candidate",
+                        "to": "released",
+                        "receipt_id": "RR-RELEASE",
+                    }
+                ]
+                if rewrite_reference:
+                    released["candidate_evidence"]["diff_artifact_id"] = "DIFF-REWRITTEN"
+                    released["evidence_manifest"][0]["id"] = "DIFF-REWRITTEN"
+                packet_target.write_text(
+                    json.dumps(released, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+                for status_path in policy.STAGE_C_REQUIRED_STATUS_DOCUMENTS:
+                    (work / status_path).write_text(
+                        "released authority\n",
+                        encoding="utf-8",
+                    )
+                receipt_target = work / receipt_path
+                receipt_target.parent.mkdir(parents=True, exist_ok=True)
+                receipt_target.write_bytes(WP0002PolicyTests.receipt(receipt_path))
+                evidence_target = work / evidence_path
+                evidence_target.parent.mkdir(parents=True, exist_ok=True)
+                evidence_target.write_text("{}\n", encoding="utf-8")
+                self.assertEqual(self.git("-C", str(work), "add", ".").returncode, 0)
+                self.assertEqual(
+                    self.git("-C", str(work), "commit", "-m", branch).returncode,
+                    0,
+                )
+                return self.git("-C", str(work), "rev-parse", "HEAD").stdout.strip().decode("ascii")
+
+            valid_head = commit_release("valid-release", rewrite_reference=False)
+            invalid_head = commit_release("invalid-release", rewrite_reference=True)
+            self.assertEqual(
+                self.git("clone", "--bare", str(work), str(bare)).returncode,
+                0,
+            )
+            common = {
+                "repo": bare,
+                "base": base,
+                "base_ref": "main",
+                "base_repository": "AC-21/sasha",
+                "head_repository": "AC-21/sasha",
+                "policy_source_sha": base,
+                "fetch_head": False,
+            }
+            valid_report, valid_errors = policy.validate_repository_policy(
+                head=valid_head,
+                head_ref="agent/valid-release",
+                **common,
+            )
+            self.assertEqual(valid_errors, [])
+            self.assertEqual(valid_report["result"], "pass")
+            invalid_report, invalid_errors = policy.validate_repository_policy(
+                head=invalid_head,
+                head_ref="agent/invalid-release",
+                **common,
+            )
+            self.assertTrue(
+                any("replaces accepted" in item for item in invalid_errors),
+                invalid_errors,
+            )
+            self.assertEqual(invalid_report["result"], "fail")
 
     def test_end_to_end_bare_repo_cli_writes_bound_report(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
