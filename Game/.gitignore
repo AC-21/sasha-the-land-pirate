@@ -4,6 +4,7 @@
 /[Oo]bj/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
+/ProjectSettings/Packages/com.unity.ai.assistant/Settings.json
 /[Mm]emoryCaptures/
 /[Rr]ecordings/
 /[Bb]uilds/
