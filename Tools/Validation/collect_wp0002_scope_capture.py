@@ -67,6 +67,31 @@ def _require_real_root(repo_root: Path) -> Path:
     return lexical
 
 
+def _captured_repository_root(value: object) -> tuple[str | None, list[str]]:
+    """Validate a collection-time root without requiring it to exist locally."""
+    if (
+        not isinstance(value, str)
+        or not value
+        or "\x00" in value
+        or "\\" in value
+        or value == "/"
+        or value.startswith("//")
+    ):
+        return None, [
+            "scope capture repository_root is not a canonical absolute POSIX path"
+        ]
+    path = PurePosixPath(value)
+    if (
+        not path.is_absolute()
+        or path.as_posix() != value
+        or any(part in {".", ".."} for part in path.parts)
+    ):
+        return None, [
+            "scope capture repository_root is not a canonical absolute POSIX path"
+        ]
+    return value, []
+
+
 def _artifact_relative(value: str) -> str:
     relative = _safe_relative(value)
     retained_artifact = re.fullmatch(
@@ -697,12 +722,25 @@ def verify_scope_capture(
     if not isinstance(capture, dict):
         return errors + ["scope capture must be an object"]
 
+    current_repository_root = str(_require_real_root(repo_root))
+    captured_repository_root, repository_root_errors = _captured_repository_root(
+        capture.get("repository_root")
+    )
+    errors.extend(repository_root_errors)
+    # A live proof is about this checkout. A terminal proof is about immutable,
+    # receipt-bound collection-time facts and may be verified in another clone.
+    expected_repository_root = (
+        current_repository_root
+        if mode == "live-current"
+        else captured_repository_root
+    )
+
     exact_fields = {
         "schema_version": 2,
         "capture_contract": CAPTURE_CONTRACT,
         "packet_id": PACKET_ID,
         "boundary_manifest_id": BOUNDARY_MANIFEST_ID,
-        "repository_root": str(_require_real_root(repo_root)),
+        "repository_root": expected_repository_root,
         "base_commit": expected_base_commit,
         "head_commit": expected_head_commit,
         "checkpoint_commit": expected_checkpoint_commit,
@@ -732,7 +770,7 @@ def verify_scope_capture(
         "-c",
         "core.hooksPath=/dev/null",
         "-C",
-        str(_require_real_root(repo_root)),
+        expected_repository_root,
         *STATUS_ARGUMENTS,
     ]
     expected_collector_fields = {
