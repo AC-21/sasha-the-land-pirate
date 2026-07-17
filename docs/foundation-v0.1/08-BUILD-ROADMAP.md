@@ -17,10 +17,9 @@ on its exact first-use gate. The packet could not decide gameplay, invoke Unity
 directly, install dependencies, publish, release, or merge itself.
 
 Exit: the technical sandbox passed its packet checks and remained reversible;
-WP-0003 was released and its reservation was released. The current Stage B
-handoff is A0 with no active A1 packet. WP-0002 is accepted but inactive and
-unreserved. Its implementation, including any Unity MCP use, waits for the
-separate protected Stage C activation transaction.
+WP-0003 and its reservation were released. Stage C then activated WP-0002 as
+the sole A1 packet with an exact held Last Bearing reservation. Implementation
+now proceeds through fresh protected-main `agent/*` branches.
 
 ## M0T — Authorize the isolated technical proof
 
@@ -46,9 +45,9 @@ Deliverables:
 - separately ratify or revise its milestone cuts;
 - record a working codename only if useful.
 
-Exit: WP-0002 has value-matching creator receipt claims. Its acceptance does not
-activate it: no gameplay/content production begins until the protected Stage C
-transaction establishes its A1 boundary and reservation.
+Exit: WP-0002 has value-matching creator receipt claims and its protected Stage
+C transaction establishes the A1 boundary and reservation. Gameplay-graybox
+work may begin; production-content scale remains separately gated.
 
 ## M1 — Reversible engine spike and ugly constitutional toy
 
@@ -71,9 +70,9 @@ Exit: D-0013 and D-0033 are ratified or superseded with evidence. The exact Unit
 
 ### M1B — Ugly constitutional toy
 
-Canonical packet: accepted WP-0002, currently inactive and unreserved; it
-depends on released WP-0003 and the identity entry gate, and awaits protected
-Stage C activation before implementation.
+Canonical packet: active WP-0002, with a held reservation rooted at its
+protected Stage C base. It depends on released WP-0003 and the resolved identity
+entry gate.
 
 - compare the D-0030 city-grammar options at slice scale before generalizing a kernel;
 - primitive city placement, one production bottleneck, and visible/aggregate logistics comparison;

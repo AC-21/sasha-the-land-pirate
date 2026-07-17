@@ -1,0 +1,52 @@
+{
+  "receipt_id": "RR-WP0002-ACTIVATE-20260717",
+  "issued_at": "2026-07-17T16:02:39Z",
+  "issued_by": "AC-21",
+  "issuer_role": "creator",
+  "receipt_kind": "packet-activation",
+  "artifact_resolver": {
+    "type": "external-protected",
+    "resolver_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/34#issuecomment-5005107075"
+  },
+  "source_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/34#issuecomment-5005107075",
+  "subject_ids": [
+    "WP-0002"
+  ],
+  "subject_claims": [
+    {
+      "subject_id": "WP-0002",
+      "claims": [
+        "A1-LOCAL-BOUNDARY-VERIFIED",
+        "ACTIVATE-A1-WP-0002"
+      ]
+    }
+  ],
+  "approval_text_sha256": "29a902e2eb5cc7aa9e05cf720dd1a79e81944e9234fcd93ec5b99c47fd9530b4",
+  "accepted_commit": "a6c9a7e0c072e1931dd117c5b19556c31c2bf894",
+  "artifact_sha256": {
+    "github.com/AC-21/sasha-the-land-pirate/pull/34#issuecomment-5005107075": "29a902e2eb5cc7aa9e05cf720dd1a79e81944e9234fcd93ec5b99c47fd9530b4",
+    "api.github.com/repos/AC-21/sasha-the-land-pirate/issues/comments/5005107075": "2e670fa8e8f28d9e9e6154a0b04a1a2e8bfaf452d032a2c9e9965092b7a7a763",
+    "governance/a1-boundaries/WP-0002.json": "efa98fa4f555c5b5584fc54cb955d02612329295b194cf9e45fe574dd7418d01",
+    "governance/ratification-state.json": "4d8f81731ee5942e4c623892628c4074031c3ec1477d0acf6f427407793e8ed8",
+    "work-packets/proposed/WP-0002.json": "01d6c4a13251645bab4faa011a8bca3eb21331023d2821099edebfc25977504c",
+    "docs/evidence/WP-0002/scope-capture/working-tree-scope.json": "c8d7e63ca1110a35bc1d94175f9294fd8003bb2071c912189eb8c28347f58f41",
+    "docs/evidence/WP-0002/github-protection.json": "c241b17b88b803905e7ed3ea47ca155e7aa5fc709c3a370578340a6367a13003",
+    "docs/evidence/WP-0002/github-protection.raw-api.json": "7cbec002e3aa72fece01f50235a67eced22d1ba6bf9be5881942cdde75a5f063",
+    "docs/evidence/WP-0002/github-protection.raw-rulesets.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "docs/evidence/WP-0002/cursor-approval-policy.json": "42a7083e10a7f84fff3df26d46811c5fbc4a2f6ad0221ec5a46b19caad0e5da3",
+    "docs/evidence/WP-0002/cursor-approval-policy.raw-config.json": "fd71c0f403cdcfb8ea7445a0e608b0521554e67506dbca99b601be007f9f10fe",
+    "docs/evidence/WP-0002/scope-capture/working-tree-scope.observations.1791369a7496460b11dc28fdf1dd88f1825865a21cb37757ffcdde4b3073de50.json": "1791369a7496460b11dc28fdf1dd88f1825865a21cb37757ffcdde4b3073de50",
+    "docs/evidence/WP-0002/scope-capture/working-tree-scope.status.994607803d4e1fb41134cc6439330d72403503e61d09789981ee0fd227996c08.bin": "994607803d4e1fb41134cc6439330d72403503e61d09789981ee0fd227996c08"
+  },
+  "subject_contract_sha256": {
+    "WP-0002": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"
+  },
+  "subject_event_sha256": {},
+  "foundation_binding": {
+    "constitution_sha256": "ff6d7938c14a074acf796619868b97551cefd1681147559983a293792c20afb8",
+    "decision_ledger_sha256": "880f85269c5c764fa0725d7a499315f6bd802b3697a380f016e0f7af115b1b88",
+    "last_creator_receipt_id": "RR-WP0003-ACCEPT-20260716"
+  },
+  "signature_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/34#issuecomment-5005107075",
+  "sealed": true
+}

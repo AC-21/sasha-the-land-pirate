@@ -1,0 +1,61 @@
+{
+  "main": {
+    "sha": "f83ef8aa4d2bac7d0c8817180feebc24c0c1e835"
+  },
+  "branch_protection": {
+    "required_status_checks": {
+      "strict": true,
+      "checks": [
+        {
+          "context": "validate",
+          "app_id": 15368
+        },
+        {
+          "context": "wp0002-core",
+          "app_id": 15368
+        },
+        {
+          "context": "wp0002-policy",
+          "app_id": 15368
+        }
+      ]
+    },
+    "enforce_admins": {
+      "enabled": true
+    },
+    "required_pull_request_reviews": {
+      "dismiss_stale_reviews": false,
+      "require_code_owner_reviews": false,
+      "required_approving_review_count": 0,
+      "require_last_push_approval": false,
+      "bypass_pull_request_allowances": {
+        "users": [],
+        "teams": [],
+        "apps": []
+      }
+    },
+    "restrictions": {
+      "users": [],
+      "teams": [],
+      "apps": []
+    },
+    "required_conversation_resolution": {
+      "enabled": true
+    },
+    "required_linear_history": {
+      "enabled": true
+    },
+    "allow_force_pushes": {
+      "enabled": false
+    },
+    "allow_deletions": {
+      "enabled": false
+    }
+  },
+  "repository": {
+    "allow_auto_merge": true,
+    "allow_squash_merge": true,
+    "allow_merge_commit": false,
+    "allow_rebase_merge": false
+  }
+}

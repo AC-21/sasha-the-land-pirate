@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "id": "WP-0002",
-  "status": "accepted",
+  "status": "active",
   "class": "feature",
   "declared_risk": "high",
   "derived_risk": "high",
@@ -19,7 +19,7 @@
   "a1_boundary_manifest": {
     "manifest_id": "A1B-WP-0002-LOCAL-DEV",
     "path": "governance/a1-boundaries/WP-0002.json",
-    "sha256": "6ac9201dc461f81fed237be22754e55eb28af2cabb19b9aab7f7b0725efe9842"
+    "sha256": "efa98fa4f555c5b5584fc54cb955d02612329295b194cf9e45fe574dd7418d01"
   },
   "implementer": null,
   "verifier": null,
@@ -154,9 +154,9 @@
     "WP-0003"
   ],
   "reservation": {
-    "status": "unreserved",
-    "lease_id": null,
-    "base_commit": null,
+    "status": "held",
+    "lease_id": "lease-20260717t160144z-0af72b7b07c9-c98c70543cbefbe3",
+    "base_commit": "f83ef8aa4d2bac7d0c8817180feebc24c0c1e835",
     "paths": [
       "SimulationCore/Runtime/LastBearing.meta",
       "SimulationCore/Runtime/LastBearing/",
@@ -187,8 +187,8 @@
       "presentation",
       "save"
     ],
-    "expires_at": null,
-    "fencing_token": null
+    "expires_at": "2026-07-19T16:02:38Z",
+    "fencing_token": "fence-20260717t160144z-0af72b7b07c9-550b89a5f262d833"
   },
   "declared_paths": [
     "SimulationCore/Runtime/LastBearing.meta",
@@ -483,6 +483,14 @@
       "actor": "creator",
       "at": "2026-07-17T07:43:44Z",
       "receipt_id": "RR-WP0002-ACCEPT-20260717"
+    },
+    {
+      "event_id": "WPE-WP0002-ACTIVE",
+      "from": "accepted",
+      "to": "active",
+      "actor": "creator",
+      "at": "2026-07-17T16:02:39Z",
+      "receipt_id": "RR-WP0002-ACTIVATE-20260717"
     }
   ],
   "scenario_pins": [
