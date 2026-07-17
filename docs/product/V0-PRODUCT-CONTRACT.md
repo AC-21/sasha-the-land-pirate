@@ -3,7 +3,8 @@
 Status: creator-directed candidate
 Product milestone: **V0 / The Last Bearing Vertical Slice**
 Roadmap mapping: **M5 / VS-3**
-Next milestone: **Founder Playable / M7**
+Next product milestone: **Founder Playable / M7**
+Intervening production gate: **M6 / Agent-loop pilot**
 
 ## 1. Purpose
 
@@ -41,9 +42,11 @@ V0 has two primary embodied modes:
 
 ### City mode
 
-- elevated three-quarter/isometric view of the encampment and inherited civic
-  infrastructure;
-- 35–45° starting pitch, readable rotation, smooth pan, and semantic zoom;
+- the creator-directed mode is an elevated three-quarter/isometric view of the
+  encampment and inherited civic infrastructure;
+- exact projection, pitch, rotation, pan, and zoom remain D-0022 comparison
+  choices until protected creator acceptance; a 35–45° pitch, readable
+  rotation, smooth pan, and semantic zoom are the starting comparison candidate;
 - a restrained tilt-shift/miniature character may support warmth and scale, but
   depth of field must never blur the active build area, warnings, routes,
   residents, or UI;
@@ -66,7 +69,8 @@ V0 has two primary embodied modes:
 
 ### Building interiors
 
-V0 does not add free-roaming on-foot interiors. Selecting a building enters a
+The creator has left the interior mode open. The recommended V0 comparison does
+not add free-roaming on-foot interiors; selecting a building instead enters a
 focused dollhouse/cutaway inspection state within the city-control language:
 
 - roof and obstructing walls peel, fade, or section away;
@@ -102,9 +106,11 @@ V0 contains:
 
 New scope must displace an item above or move to Founder Playable.
 
-## 4. Explicit V0 cuts
+## 4. Provisional V0 cuts
 
-V0 excludes:
+The following are the D-0018/D-0019-aligned candidate cuts. They control no
+implementation scope until a protected creator decision ratifies or supersedes
+them. V0 planning must preserve that decision as an entry gate.
 
 - procedural open world or seamless regional traversal;
 - on-foot/FPS play;
@@ -138,7 +144,8 @@ V0 passes only when all are true:
 - human-only, robot-only, and mixed colonies can complete the loop without a
   hidden mandatory human;
 - save/load round-trips all authoritative V0 state without loss or duplication;
-- three first-time observers can complete the experience with bounded help;
+- three first-time observers can complete the experience without external
+  instruction or a recovery command;
 - at least three observers describe the fantasy as caring for and improving a
   home rather than merely collecting loot;
 - the creator accepts the loop as a game worth continuing.
@@ -181,7 +188,10 @@ readability.
 - whole-frame p95 at or below 16.7 ms and p99 at or below 25 ms on the creator
   Mac under the accepted V0 scenario;
 - simulation tick p95 below 4 ms;
-- bounded memory and no material warm-run degradation;
+- after a five-minute warm-up and 30 measured minutes: process RSS remains
+  below 6 GB, tracked Metal allocation remains below 3.5 GB, managed allocation
+  p95 is 0 B/frame and average is below 1,024 B/frame, whole-frame degradation
+  remains below 10%, and retained-memory growth remains below 5%;
 - clean-clone reproduction and rollback evidence.
 
 ## 8. Design decisions to close before production fan-out
@@ -192,6 +202,7 @@ The creator must accept or supersede:
   settlement scale;
 - normal strategy camera and close-inspection behavior;
 - exact driving and scavenging interaction language;
+- the D-0018/D-0019 V0 milestone cuts;
 - whether colony compositions remain representational in V0 or gain bounded
   mechanical differentiation;
 - whether “storybook salvage” remains the emotional filter;
@@ -264,6 +275,9 @@ Mac build, satisfies the experience, visual/audio, save, and performance gates,
 has three or more observed first-time playtests, and receives explicit creator
 acceptance.
 
-The next milestone is Founder Playable / M7: 60–90 minutes of repeatable play,
-two civic stages, two road spaces, two factions, two crises, bounded workshop
-manufacturing, bilateral caravan trade, and the complete replay shell.
+M6 / Agent-loop pilot remains the mandatory intervening production gate: it
+audits six bounded implementation, verification, asset, failure, and rollback
+packets before any autonomy promotion. The next product milestone is Founder
+Playable / M7: 60–90 minutes of repeatable play, two civic stages, two road
+spaces, two factions, two crises, bounded workshop manufacturing, bilateral
+caravan trade, and the complete replay shell.
