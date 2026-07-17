@@ -1,0 +1,138 @@
+{
+  "artifacts": {
+    "observations": {
+      "byte_size": 2849,
+      "path": "docs/evidence/WP-0002/scope-capture/working-tree-scope.observations.1f59689d2c476fa237c7b515415ff2a79d14fb6c0259c0bdbc4ce5891c2a40e8.json",
+      "sha256": "1f59689d2c476fa237c7b515415ff2a79d14fb6c0259c0bdbc4ce5891c2a40e8"
+    },
+    "raw_status": {
+      "byte_size": 338,
+      "path": "docs/evidence/WP-0002/scope-capture/working-tree-scope.status.994607803d4e1fb41134cc6439330d72403503e61d09789981ee0fd227996c08.bin",
+      "sha256": "994607803d4e1fb41134cc6439330d72403503e61d09789981ee0fd227996c08"
+    }
+  },
+  "base_commit": "f83ef8aa4d2bac7d0c8817180feebc24c0c1e835",
+  "boundary_manifest_id": "A1B-WP-0002-LOCAL-DEV",
+  "capture_contract": "wp0002-working-tree-scope-capture-v2",
+  "captured_at": "2026-07-17T16:05:26.191792Z",
+  "checkpoint_commit": "f83ef8aa4d2bac7d0c8817180feebc24c0c1e835",
+  "collector": {
+    "git_version": "git version 2.39.5 (Apple Git-154)",
+    "head_command": [
+      "git",
+      "rev-parse",
+      "--verify",
+      "HEAD"
+    ],
+    "head_tree_command": [
+      "git",
+      "rev-parse",
+      "HEAD^{tree}"
+    ],
+    "index_tree_command": [
+      "git",
+      "write-tree"
+    ],
+    "status_command": [
+      "/usr/bin/git",
+      "-c",
+      "core.hooksPath=/dev/null",
+      "-C",
+      "/Users/sasha/Documents/Codex/sasha-the-land-pirate",
+      "status",
+      "--porcelain=v2",
+      "-z"
+    ],
+    "submodule_command": [
+      "git",
+      "ls-files",
+      "-s",
+      "-z"
+    ]
+  },
+  "complete_dirty_set": true,
+  "conflict_paths": [],
+  "dirty_path_count": 3,
+  "dirty_paths": [
+    {
+      "base_blob_sha256": "c678b7973d453f83b55ab4fb147fa0a32dab8f31c56ac748df53af239f327555",
+      "normalized_git_state": "unstaged-modified",
+      "observed_sha256": "2dadda9cdf1a6521e2a1a5d58b5d33645679ca8e3672c4e5d5e5923970814eef",
+      "owner": "creator",
+      "path": ".codex/config.toml",
+      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash",
+      "regular_file_no_symlink": true
+    },
+    {
+      "base_blob_sha256": "3311963a88f9cc3083785d978dfba05f898150157e210a3db6dd044f2630998a",
+      "normalized_git_state": "unstaged-modified",
+      "observed_sha256": "169d044e0230446ebb69e9380747f0b5d58a89ca098ebdfd1e8ac04583b17ae3",
+      "owner": "creator",
+      "path": "Game/ProjectSettings/ProjectSettings.asset",
+      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash",
+      "regular_file_no_symlink": true
+    },
+    {
+      "base_blob_sha256": null,
+      "normalized_git_state": "untracked",
+      "observed_sha256": "bb9098b3bfcde78d93e264b96f7b77b5430e64e8c57a7aad7f5a5d9c3945e16a",
+      "owner": "creator",
+      "path": "Game/ProjectSettings/SceneTemplateSettings.json",
+      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash",
+      "regular_file_no_symlink": true
+    }
+  ],
+  "head_commit": "f83ef8aa4d2bac7d0c8817180feebc24c0c1e835",
+  "head_tree": "e167fc6752d217c942e932da3fd70525fcf26af1",
+  "index_clean": true,
+  "index_tree": "e167fc6752d217c942e932da3fd70525fcf26af1",
+  "non_excluded_scope_clean": true,
+  "packet_id": "WP-0002",
+  "privacy": {
+    "creator_file_content_retained": false,
+    "secret_scan_method": "assert-no-creator-file-byte-sequence-in-artifacts-min-16-bytes",
+    "secret_scan_result": "pass"
+  },
+  "protected_paths_read_only": [
+    "AGENTS.md",
+    ".codex/config.toml",
+    "Game/ProjectSettings/ProjectSettings.asset",
+    "Game/ProjectSettings/SceneTemplateSettings.json",
+    "docs/foundation-v0.1/",
+    "docs/foundation-v0.1/governance/",
+    "docs/foundation-v0.1/ledger/receipts/",
+    "Tools/Validation/validate_wp0002_package_graph.py",
+    "Tools/Validation/validate_wp0002_entry_gate.py",
+    "Tools/Validation/validate_wp0002_policy.py",
+    "Tools/Validation/collect_wp0002_scope_capture.py",
+    ".github/workflows/wp0002-ci.yml",
+    ".github/workflows/wp0002-policy.yml",
+    "SimulationCore/README.md",
+    "SaveContracts/README.md",
+    "SimulationCore/package.json",
+    "SaveContracts/package.json"
+  ],
+  "repository_root": "/Users/sasha/Documents/Codex/sasha-the-land-pirate",
+  "reservation_paths": [
+    "SimulationCore/Runtime/LastBearing.meta",
+    "SimulationCore/Runtime/LastBearing/",
+    "Tests/AtomicLandPirate.CoreTests/LastBearing/",
+    "SaveContracts/Runtime/LastBearing.meta",
+    "SaveContracts/Runtime/LastBearing/",
+    "Game/Packages/manifest.json",
+    "Game/Packages/packages-lock.json",
+    "Game/ProjectSettings/EditorBuildSettings.asset",
+    "Game/Assets/AtomicLandPirate/LastBearing.meta",
+    "Game/Assets/AtomicLandPirate/LastBearing/",
+    "Tools/ScenarioRunner/",
+    "BuildArtifacts/WP-0002/",
+    "BuildArtifacts/WP-0002/candidate-control-plane/",
+    "docs/evidence/WP-0002/",
+    "docs/playtests/WP-0002/"
+  ],
+  "reserved_protected_overlaps": [],
+  "reserved_scope_clean": true,
+  "schema_version": 2,
+  "status_format": "git-status-porcelain-v2-z-raw",
+  "submodule_paths": []
+}

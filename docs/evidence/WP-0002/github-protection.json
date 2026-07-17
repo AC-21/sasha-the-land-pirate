@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "repository": "AC-21/sasha-the-land-pirate",
+  "protected_branch": "main",
+  "stage_c_base_sha": "f83ef8aa4d2bac7d0c8817180feebc24c0c1e835",
+  "post_merge_live_monitoring": "required-separate-live-capture",
+  "observed_at": "2026-07-17T16:06:11Z",
+  "strict_up_to_date": true,
+  "required_status_checks": [
+    {
+      "context": "validate",
+      "app_id": 15368
+    },
+    {
+      "context": "wp0002-core",
+      "app_id": 15368
+    },
+    {
+      "context": "wp0002-policy",
+      "app_id": 15368
+    }
+  ],
+  "policy_canary_state": "proven-candidate-independent",
+  "enforce_admins": true,
+  "pull_request_required": true,
+  "required_pull_request_reviews": {
+    "dismiss_stale_reviews": false,
+    "require_code_owner_reviews": false,
+    "required_approving_review_count": 0,
+    "require_last_push_approval": false,
+    "bypass_pull_request_allowances": {
+      "users": [],
+      "teams": [],
+      "apps": []
+    }
+  },
+  "push_restrictions": {
+    "users": [],
+    "teams": [],
+    "apps": []
+  },
+  "conversation_resolution_required": true,
+  "linear_history_required": true,
+  "force_push_disabled": true,
+  "deletion_disabled": true,
+  "merge_methods": {
+    "merge": false,
+    "rebase": false,
+    "squash": true
+  },
+  "auto_merge_enabled": true,
+  "external_cursor_review": {
+    "policy_path": "Tools/Validation/validate_wp0002_policy.py",
+    "policy_source_sha": "f83ef8aa4d2bac7d0c8817180feebc24c0c1e835",
+    "configuration_capture_uri": "repo://docs/evidence/WP-0002/cursor-approval-policy.json",
+    "configuration_capture_sha256": "7d947d51e3d484706f95bb81b7c92325fa07899ea6f3a1bf79c40779e09dcfb2",
+    "candidate_code_execution": false,
+    "classification": "independent-ai-review-not-deterministic-validator",
+    "prompt_injection_residual_acknowledged": true,
+    "deterministic_non_llm_execution_seam": null,
+    "creator_manual_transition_required": true
+  },
+  "source_uri": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/branches/main/protection",
+  "raw_branch_protection_artifact": {
+    "uri": "repo://docs/evidence/WP-0002/github-protection.raw-api.json",
+    "sha256": "7cbec002e3aa72fece01f50235a67eced22d1ba6bf9be5881942cdde75a5f063"
+  },
+  "ruleset_inventory": {
+    "count": 0,
+    "rulesets": [],
+    "raw_artifact": {
+      "uri": "repo://docs/evidence/WP-0002/github-protection.raw-rulesets.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    }
+  }
+}

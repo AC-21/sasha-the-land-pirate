@@ -33,7 +33,7 @@ Agents inspect, benchmark, simulate, and propose. They may edit draft documentat
 
 ### A1 — Quarantined experiments
 
-Agents may create prototypes, generated assets, and reports only inside a standalone disposable clone/sandbox with an independent `.git` directory after the A1 quarantine boundary is actually established. Shared Git worktrees are forbidden because they can mutate trusted repository state through the common `.git` directory. Nothing merges at A1; the creator manually inspects and imports or rejects the bounded diff/artifacts.
+Under generic A1 quarantine, agents may create prototypes, generated assets, and reports only inside a standalone disposable clone/sandbox with an independent `.git` directory after the boundary is established. Shared Git worktrees are forbidden because they can mutate trusted repository state through the common `.git` directory. Agents never self-merge at A1: generic output is creator-imported or rejected, while the exact protected-PR exception below uses creator-controlled integration.
 
 The packet-specific protected-PR exception used by `WP-0003` is defined in
 [`15-LEAN-A1-LOCAL-DEVELOPMENT.md`](15-LEAN-A1-LOCAL-DEVELOPMENT.md). Only after
@@ -52,18 +52,15 @@ is contained in protected `main`. The activation manifest's branch is the
 attestation branch/checkpoint; during WP-0003, later implementation passes used
 fresh `agent/*` branches rooted in the active protected-main state.
 
-That same policy defines the WP-0002 successor. WP-0003 is creator-accepted as
-released, and the exact WP-0002 contract is creator-accepted, but WP-0002 is
-unreserved and unactivated. It remains non-executable until a distinct creator
-activation receipt binds its exact local boundary and that activation reaches
-protected `main` in Stage C. If activated, it retains protected-main `agent/*`
-branches, required checks, creator-delegated manual release for every pull
-request, read-only governance, and the exact five-tool Unity MCP allowlist; it
-does not revive the generic import quarantine. `validate` and `wp0002-core`
-remain mandatory. The base-owned `wp0002-policy` check is a canary until a live
-Stage-B pull request proves that GitHub attaches its candidate-independent
-result to the latest head; Cursor review is optional and non-blocking.
-Autonomous auto-merge is not authorized before that proof and a separate
+That same policy defines the active WP-0002 successor. WP-0003 is released,
+and `RR-WP0002-ACTIVATE-20260717` binds WP-0002's exact local boundary and held
+reservation. It uses fresh protected-main `agent/*` branches, required checks,
+creator-delegated manual release for every pull request, read-only governance,
+and the exact five-tool Unity MCP allowlist; it does not revive the generic
+import quarantine. Its Stage-C evidence proves that the base-owned
+`wp0002-policy` check attaches to the latest head; `validate`, `wp0002-core`,
+and `wp0002-policy` remain mandatory. Cursor review is optional and
+non-blocking. Autonomous auto-merge remains unauthorized without a separate
 governance upgrade.
 
 ### A2 — Accepted work packets
@@ -78,15 +75,14 @@ Low-risk fixes, tests, tooling, and semantic-preserving optimizations may auto-m
 
 Accepted low/medium-risk features may progress from internal flag → canary build → default-on after predetermined evidence and an observation window. High-risk, save-breaking, economy-wide, art-pillar, or constitutional changes remain human-gated.
 
-The project is currently at canonical **A0**, with no active A1 packet.
-WP-0003 is released and its reservation is released; WP-0002 is accepted but
-unreserved and unactivated. Unity MCP use and Unity/game implementation remain
-prohibited until the exact WP-0002 Stage-C activation reaches protected
-`main`. Repository creation did not promote autonomy; only a distinct protected
-activation receipt can do so. The canonical `a1_max_active_packets` value in
+The project is currently at canonical **A1**, with WP-0002 as the sole active
+packet. WP-0003 and its reservation are released. Repository creation did not
+promote autonomy; the distinct protected WP-0002 activation receipt did. The
+canonical `a1_max_active_packets` value in
 [`governance/ratification-state.json`](governance/ratification-state.json)
-permits exactly one active A1 packet. Changing that cap requires a creator
-receipt plus an explicit schema/state revision. Advancement beyond A1 requires
+permits exactly one active A1 packet, and WP-0002 occupies it. Changing that
+cap requires a creator receipt plus an explicit schema/state revision.
+Advancement beyond A1 requires
 the trusted gatekeeper in
 [`11-TRUST-AND-ENFORCEMENT.md`](11-TRUST-AND-ENFORCEMENT.md), the required
 packet mix, every failed/aborted attempt in the audit denominator, no

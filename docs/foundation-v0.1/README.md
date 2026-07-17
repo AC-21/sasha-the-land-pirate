@@ -10,7 +10,7 @@ This is the foundation specification for a future protected control plane for an
 ## Read this first
 
 1. [`00-GAME-CONSTITUTION.md`](00-GAME-CONSTITUTION.md) defines the player promise, core loop, product pillars, invariants, and non-goals.
-2. [`01-DECISION-LEDGER.md`](01-DECISION-LEDGER.md) is the human-readable decision register. The append-only-by-policy draft representation lives in [`ledger/decisions.jsonl`](ledger/decisions.jsonl); protected canonical authority does not exist yet.
+2. [`01-DECISION-LEDGER.md`](01-DECISION-LEDGER.md) is the human-readable decision register. The append-only-by-policy draft representation lives in [`ledger/decisions.jsonl`](ledger/decisions.jsonl); protected canonical A1 authority exists only where a sealed receipt binds the exact protected tree, while the trusted A2 gatekeeper/event store does not yet exist.
 3. [`02-SYSTEM-MAP.md`](02-SYSTEM-MAP.md) defines how city, road, vehicle, faction, people, crisis, and progression systems exchange state.
 4. [`03-VERTICAL-SLICE.md`](03-VERTICAL-SLICE.md) defines the first proof, its hard cuts, and its acceptance tests.
 5. [`04-TECHNICAL-ARCHITECTURE.md`](04-TECHNICAL-ARCHITECTURE.md) defines the replaceable technical architecture, save contract, data boundaries, and performance envelope.
@@ -32,13 +32,14 @@ WP-0001's A0 activation preparation uses the creator-approved durable checkout `
 
 The machine-readable snapshot at `docs/evidence/WP-0001/pre-a1-readiness-20260716.json` records WP-0001 as **blocked** without secrets. The installed Editor/tool/package tuple is not D-0047; the observed project is not the packet project; an eligible Unity AI seat is unverified; the inherited client approval, 54-tool handshakes, non-loopback relay listener, earlier console call, and later direct Editor/Hub probes cannot satisfy the required clean connection cycle; and no standalone physical quarantine exists. The snapshot is A0 observation evidence only. WP-0001 remains accepted but inactive.
 
-The protected Stage-B state is canonical **A0**, with no active A1 packet.
+The protected Stage-C state is canonical **A1**, with WP-0002 as the sole active packet.
 `WP-0003` completed its ratified D-0052/
 `RR-WP0003-ACTIVATE-20260716` lifecycle and is released; its reservation is
-released as well. `WP-0002` is creator-accepted, but it is unreserved and
-unactivated. Until an exact WP-0002 activation is accepted into protected
-`main` in Stage C, Unity MCP use and Unity/game implementation are not
-authorized.
+released as well. `WP-0002` is creator-accepted and activated under
+`RR-WP0002-ACTIVATE-20260717`; its exact Last Bearing reservation is held.
+Implementation is authorized only within that reservation through protected
+`agent/*` pull requests. Governance, production content, dependency expansion,
+publishing, direct Unity invocation, and autonomy beyond A1 remain closed.
 
 ## Source-of-truth order
 
@@ -52,7 +53,7 @@ When two artifacts conflict, the higher item wins:
 6. Implementation
 7. Generated documentation or summaries
 
-At A0, unsealed creator-source captures are evidence of the creator's words but are not yet protected authority. Any mismatch between a creator source/active decision and its constitutional materialization is a hard stop; precedence never authorizes an agent to silently rewrite either artifact. The agent opens a change proposal instead of choosing whichever source is convenient.
+At A1, the sealed activation receipt and exact packet/boundary hashes in the same protected tree control executable scope; status prose alone never does. Unsealed creator-source captures remain evidence of words, not protected authority. Any mismatch between a creator source/active decision and its constitutional materialization is a hard stop; precedence never authorizes an agent to silently rewrite either artifact.
 
 ## Status language
 

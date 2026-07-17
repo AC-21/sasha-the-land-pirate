@@ -1,0 +1,11 @@
+{
+  "revision": "cursor-check-run-87863416114",
+  "check_context": "Cursor Approval Agent: Pull Request Approver",
+  "github_app_id": 1210556,
+  "classification": "independent-ai-review-not-deterministic-validator",
+  "prompt_injection_residual_acknowledged": true,
+  "deterministic_non_llm_execution_seam": null,
+  "policy_source_sha": "f83ef8aa4d2bac7d0c8817180feebc24c0c1e835",
+  "candidate_code_execution": false,
+  "creator_manual_transition_required": true
+}

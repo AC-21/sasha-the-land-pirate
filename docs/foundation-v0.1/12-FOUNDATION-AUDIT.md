@@ -1,8 +1,8 @@
 # Foundation Audit and Residual Blockers
 
 Version: 0.1 draft\
-Audit date: 2026-07-16\
-Verdict: **coherent bootstrap specification at A0; WP-0003 is released, and WP-0002 is accepted but unreserved and inactive pending protected activation**
+Last status update: 2026-07-17\
+Verdict: **coherent bootstrap specification at A1; WP-0003 is released, and WP-0002 is active with an exact held Last Bearing reservation**
 
 ## Audit coverage
 
@@ -48,10 +48,11 @@ lane, is released under `RR-WP0003-COMPLETE-20260717`, and has released its
 reservation. Its project skeleton, deterministic seams, tests, and technical
 sandbox remain protected outputs, but grant no continuing implementation or
 Unity MCP authority. WP-0002 now depends on that completed release and is
-creator-accepted under `RR-WP0002-ACCEPT-20260717`; it remains unreserved and
-inactive at A0 until a separate protected activation transaction binds its
-exact current scope, evidence, held reservation, and creator activation
-receipt.
+creator-accepted under `RR-WP0002-ACCEPT-20260717` and activated under
+`RR-WP0002-ACTIVATE-20260717`. Its exact scope, protection evidence, boundary,
+and held reservation now authorize only the bounded Last Bearing A1 work. This
+status is executable only as one receipt-bound protected tree; status prose
+alone never activates it.
 
 ## What this audit does not claim
 
@@ -91,18 +92,16 @@ ledger views, so a later append cannot make an older dated receipt appear to
 attest bytes that did not yet exist. Git history retains every prior draft.
 
 Until all six schema-v4 blocker classes are resolved and its activation receipt
-is sealed, WP-0001 remains at A0. Canonical autonomy is now A0 with no active
-A1 packet. WP-0003's completed authority is historical and grants no gameplay,
+is sealed, WP-0001 remains inactive. Canonical autonomy is A1 solely for
+WP-0002. WP-0003's completed authority is historical and grants no gameplay,
 WP-0001 execution, or Unity MCP permission.
 
-## Honest blockers before gameplay graybox
+## Active gameplay-graybox constraints
 
-- the protected WP-0002 Stage C activation transaction must bind a fresh exact
-  scope capture, current protection/canary evidence, the accepted packet and
-  boundary bytes, a held reservation, and a distinct creator activation
-  receipt;
-- protected `main` must materialize A1 with WP-0002 as the sole active packet
-  before any game code, asset, Unity state, or Unity MCP call begins;
+- work must remain inside WP-0002's exact reserved paths/domains and use fresh
+  protected-main `agent/*` pull requests with all deterministic checks;
+- Unity MCP is allowed only through the exact five-tool route after the
+  creator-opened project/session first-use gate; direct Unity invocation stays denied;
 - D-0039 remains open, so differentiated human/robot/mixed mechanics stay
   conditional; all three compositions may use only the accepted shared golden
   path until a later value-matching receipt exists.

@@ -18,24 +18,26 @@ Original robot design and exclusion of Tesla names, marks, silhouettes, surfaces
 
 The current thesis, pillars, loop, “storybook salvage” phrase, mechanics, lore, and technical choices remain provisional wherever the foundation says so. Do not promote recommendations into facts.
 
-## Current authority: A0 — no active implementation packet
+## Current authority: A1 — WP-0002 Last Bearing only
 
-WP-0003 is released under `RR-WP0003-COMPLETE-20260717`. Its technical
-foundation remains in the repository, but its reservation is released and it
-grants no continuing implementation or Unity authority. WP-0002 is accepted
-under `RR-WP0002-ACCEPT-20260717`, with the bounded city-comparison study
-authorized separately, but it remains unreserved and unactivated.
+WP-0003 is released under `RR-WP0003-COMPLETE-20260717`; its reservation is
+released and grants no continuing authority. WP-0002 is active under
+`RR-WP0002-ACTIVATE-20260717` with exactly the held Last Bearing reservation
+recorded in its packet and local boundary. This is the sole active A1 packet.
 
 - The canonical Unity project skeleton, deterministic core seams, non-persisting save boundary, tests, and technical sandbox are retained WP-0003 outputs. They are not a playable-game claim.
 - D-0051 still selects `UNITY-MCP-EXTERNAL`: Codex may interact with Unity only through the receipt-bound Unity MCP Bridge and exact installed relay. No agent or CI runner may directly invoke Unity Hub, Editor, executable, CLI, or batchmode.
 - WP-0001 remains accepted but inactive. Its historical receipts and route law do not create an alternative implementation lane.
-- At most one A1 packet may be active. There is currently none.
-- WP-0002 cannot activate itself from a pull-request branch. Its exact scope capture, protected-policy evidence, held reservation, and distinct creator activation receipt must first land through the separate protected Stage C transaction.
-- Until that activation is contained in protected `main`, do not create gameplay code or assets, mutate Unity state, install dependencies, or start another implementation packet.
+- At most one A1 packet may be active. WP-0002 occupies that slot; do not start or activate another packet.
+- Work only from fresh `agent/*` branches rooted in protected `main`, inside WP-0002's exact reserved paths/domains. Governance, receipts, validators, workflows, creator-owned drift, and all unreserved paths remain read-only.
+- Human-only, robot-only, and mixed colonies must use explicit typed resident sets and the same golden-path mechanics. D-0039 is still open, so do not add differentiated human needs, robot maintenance, staffing advantages, or mixed-composition bonuses.
+- Unity access remains conditional: the exact five Unity MCP names are a transport allowlist, not blanket action authority. After the packet's first-use checks, `Unity_RunCommand` remains denied except through the materialized, hash-bound enumerated dispatcher. Never invoke Unity directly.
 
-At A0, continue only bounded documentation/control-plane work explicitly
-authorized by the creator. If requested work would implement the game or use
-Unity before WP-0002 activation, stop and name the missing gate.
+At A1, implement and verify only WP-0002. Every pull request still requires
+the deterministic checks and creator-delegated manual release; Cursor is
+optional and advisory. A1 does not authorize publishing, production content,
+dependency expansion, arbitrary filesystem writes, direct merge, or autonomy
+promotion.
 
 ## Source of truth
 
@@ -63,9 +65,9 @@ The foundation lives at `docs/foundation-v0.1/`. Start with:
 - `docs/foundation-v0.1/governance/ratification-state.json` — current draft entry gates
 - `docs/foundation-v0.1/work-packets/proposed/` — bootstrap packet records; each packet's internal status and sealed receipts control authority, never the legacy directory name
 
-Any mismatch between a creator source/active decision and its constitutional materialization is a hard stop; precedence never licenses silent repair. Conflict, ambiguity, or an open creator-owned decision that the active packet depends on, would resolve, or would encode is a stop condition. Propose a decision; never choose silently in code, content, balance, art, or lore.
+Any mismatch between a creator source/active decision and its constitutional materialization is a hard stop; precedence never licenses silent repair. Activation prose is non-executable unless the same protected tree contains the receipt-bound packet, boundary, state, and evidence. Conflict, ambiguity, or an open creator-owned decision that the active packet depends on, would resolve, or would encode is a stop condition. Propose a decision; never choose silently in code, content, balance, art, or lore.
 
-At A0, an explicit current creator request may authorize a bounded draft documentation/control-plane edit. Capture it as unsealed evidence; do not mislabel it protected authority or use it to begin game/tool/asset implementation.
+The active packet does not authorize governance edits. Any new documentation/control-plane change requires its own explicit authority and protected transaction; never use implementation work to rewrite its gate.
 
 ## Orient before editing
 
@@ -81,20 +83,20 @@ python3 docs/foundation-v0.1/tools/validate_foundation.py
 Then read this file, the relevant foundation sections, the canonical JSON work packet, and any narrower `AGENTS.md`. Inspect the real baseline before planning. The validator is bootstrap lint, not protected approval or a release gate.
 
 No direct Unity Hub, Editor, executable, CLI, or batchmode command is accepted.
-An activated protected-PR local packet may use only its approved Unity MCP
-actions after the exact first-use gate passes for the creator-opened `Game`
-project. No packet currently has that authority. Never invent a command or
+WP-0002 may use only its approved Unity MCP actions after the exact first-use
+gate passes for the creator-opened `Game` project. Never invent a command or
 report a planned interface as operational.
 
 Commands named by a proposed packet are planned interface contracts only. Their presence makes the future gate reproducible; it does not mean the tool exists, has run, or is authorized before the packet is accepted and its A1 quarantine is receipt-bound.
 
-## Planned repository seams
+## Repository seams
 
-Create or edit these only when an accepted packet declares the exact path:
+WP-0003 established these roots. Preserve their protected baseline and create or
+edit only the exact subpaths reserved by an active packet:
 
-- `Game/` — future Unity presentation/authoring project; never canonical game state
-- `SimulationCore/` — future engine-independent deterministic C# rules
-- `SaveContracts/` — versioned envelopes, sections, migrations, and compatibility
+- `Game/` — existing Unity presentation/authoring project; never canonical game state
+- `SimulationCore/` — existing engine-independent deterministic C# rules
+- `SaveContracts/` — existing save interfaces plus packet-gated envelopes, sections, migrations, and compatibility
 - `ContentSource/Blender/` — canonical modeled sources
 - `ContentSource/Incoming/<packet-id>/` — quarantined generated or external assets
 - `Tools/` — pinned build, validation, scenario, and asset tools
@@ -112,10 +114,10 @@ Before editing:
 1. Reproduce the packet baseline; stop if it differs.
 2. Confirm packet status and approval receipt, not merely its filename.
 3. Acquire the required reservation: exact base commit, paths, state domains/content IDs, lease, expiry, heartbeat, and fencing token.
-4. Work only in the packet's standalone disposable clone/sandbox with an independent `.git` directory, or its isolated asset package. An explicitly activated protected-PR local packet may instead use fresh durable-repository `agent/*` branches rooted in protected `main`; WP-0003 used that historical exception, while WP-0002 requires its own protected Stage C activation.
+4. Work only in the packet's standalone disposable clone/sandbox with an independent `.git` directory, or its isolated asset package. An explicitly activated protected-PR local packet may instead use fresh durable-repository `agent/*` branches rooted in protected `main`; WP-0003 used that historical exception, and active WP-0002 is its sole current exact instance.
 5. Touch only declared paths and interfaces. Ask to amend scope before crossing them.
 
-Generic A1 uses read-only/hash-checked foundation inputs, exact reserved outputs, manifest-bound scratch, and a disposable runtime HOME/private temp with no merge/release credentials. An activated protected-PR local packet instead uses protected `main`, required checks, creator-controlled merge, its exact local boundary, and conditional first Unity MCP use; it grants no governance, credential, install, publishing, release, or self-merge authority. WP-0003's instance is released and WP-0002's is not yet active. A folder named `sandbox` is never proof of a boundary.
+Generic A1 uses read-only/hash-checked foundation inputs, exact reserved outputs, manifest-bound scratch, and a disposable runtime HOME/private temp with no merge/release credentials. An activated protected-PR local packet instead uses protected `main`, required checks, creator-controlled merge, its exact local boundary, and conditional first Unity MCP use; it grants no governance, credential, install, publishing, release, or self-merge authority. WP-0003's instance is released; WP-0002's exact instance is active and occupies the sole A1 slot. A folder named `sandbox` is never proof of a boundary.
 
 ## Engineering laws
 

@@ -1,0 +1,92 @@
+{
+  "capture_contract": "wp0002-working-tree-scope-capture-v2",
+  "captured_at": "2026-07-17T16:05:26.191792Z",
+  "content_policy": "metadata-only-no-creator-file-bytes",
+  "observations": [
+    {
+      "base_blob": {
+        "byte_size": 458,
+        "exists": true,
+        "sha256": "c678b7973d453f83b55ab4fb147fa0a32dab8f31c56ac748df53af239f327555"
+      },
+      "file_bytes": {
+        "byte_size": 946,
+        "content_retained": false,
+        "read_method": "openat-O_NOFOLLOW-fstat-before-after",
+        "sha256": "2dadda9cdf1a6521e2a1a5d58b5d33645679ca8e3672c4e5d5e5923970814eef"
+      },
+      "lstat": {
+        "device": 16777232,
+        "gid": 20,
+        "inode": 128824462,
+        "mode": "100600",
+        "mtime_ns": 1784260133072626098,
+        "regular_file": true,
+        "size": 946,
+        "symlink": false,
+        "uid": 501
+      },
+      "normalized_git_state": "unstaged-modified",
+      "owner": "creator",
+      "path": ".codex/config.toml",
+      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash"
+    },
+    {
+      "base_blob": {
+        "byte_size": 25273,
+        "exists": true,
+        "sha256": "3311963a88f9cc3083785d978dfba05f898150157e210a3db6dd044f2630998a"
+      },
+      "file_bytes": {
+        "byte_size": 25382,
+        "content_retained": false,
+        "read_method": "openat-O_NOFOLLOW-fstat-before-after",
+        "sha256": "169d044e0230446ebb69e9380747f0b5d58a89ca098ebdfd1e8ac04583b17ae3"
+      },
+      "lstat": {
+        "device": 16777232,
+        "gid": 20,
+        "inode": 128928846,
+        "mode": "100644",
+        "mtime_ns": 1784260684926347378,
+        "regular_file": true,
+        "size": 25382,
+        "symlink": false,
+        "uid": 501
+      },
+      "normalized_git_state": "unstaged-modified",
+      "owner": "creator",
+      "path": "Game/ProjectSettings/ProjectSettings.asset",
+      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash"
+    },
+    {
+      "base_blob": {
+        "byte_size": null,
+        "exists": false,
+        "sha256": null
+      },
+      "file_bytes": {
+        "byte_size": 3535,
+        "content_retained": false,
+        "read_method": "openat-O_NOFOLLOW-fstat-before-after",
+        "sha256": "bb9098b3bfcde78d93e264b96f7b77b5430e64e8c57a7aad7f5a5d9c3945e16a"
+      },
+      "lstat": {
+        "device": 16777232,
+        "gid": 20,
+        "inode": 128924562,
+        "mode": "100644",
+        "mtime_ns": 1784260428797460403,
+        "regular_file": true,
+        "size": 3535,
+        "symlink": false,
+        "uid": 501
+      },
+      "normalized_git_state": "untracked",
+      "owner": "creator",
+      "path": "Game/ProjectSettings/SceneTemplateSettings.json",
+      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash"
+    }
+  ],
+  "schema_version": 1
+}
