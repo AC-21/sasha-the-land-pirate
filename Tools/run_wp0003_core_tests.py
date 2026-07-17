@@ -38,7 +38,7 @@ UNITY_TECHNICAL_SANDBOX_MANIFEST = (
     ROOT / "docs/manifests/WP-0003-unity-technical-sandbox-v1.json"
 )
 UNITY_TECHNICAL_SANDBOX_MANIFEST_SHA256 = (
-    "52ed698c1117273c7488ec8cd31486611f849d748a6af620d59403bb6be25d3e"
+    "68fb887cdc796470c9b76d69c52a63ae5badc2f8a89ac9453a6a0844b09db9e7"
 )
 TECHNICAL_SANDBOX_ROOT = (
     "Assets/AtomicLandPirate/TechnicalSandbox"

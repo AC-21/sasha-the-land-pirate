@@ -3,6 +3,7 @@
   "rootNamespace": "AC21.Sasha.TechnicalSandbox.Tests",
   "references": [
     "AC21.Sasha.TechnicalSandbox.Runtime",
+    "Unity.InputSystem",
     "Unity.InputSystem.TestFramework"
   ],
   "includePlatforms": [],

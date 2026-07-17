@@ -1,6 +1,6 @@
 # WP-0003 technical sandbox candidate
 
-Status: **implementation candidate; Unity validation not yet claimed**
+Status: **Unity compile, exact tests, live scene behavior, and technical capture passed**
 
 Creator direction in the current authenticated task:
 
@@ -39,7 +39,7 @@ ratified tungsten-over-neon hierarchy but is not production art.
 - The immutable canonical manifest remains SHA-256
   `d7b9d48c1669ed1eb59a1cc435f22f12f1054298c2b33c3ade61517c0bd5a587`.
   The technical-sandbox overlay is pinned at SHA-256
-  `52ed698c1117273c7488ec8cd31486611f849d748a6af620d59403bb6be25d3e`.
+  `68fb887cdc796470c9b76d69c52a63ae5badc2f8a89ac9453a6a0844b09db9e7`.
 - Traversal, case-collision, boolean-size, closure-mismatch, tree-identity,
   and hostile ambient-`GIT_*` probes all failed closed.
 - Foundation validation, staged and unstaged diff checks, assembly-definition
@@ -64,15 +64,75 @@ ratified tungsten-over-neon hierarchy but is not production art.
   covered Unity's first scene. The frozen candidate instead installs an
   idempotent `SceneManager.sceneLoaded` handler before scene loading.
 
-## Planned verification
+## Unity MCP validation
 
-1. Read the Unity Console through the approved direct MCP connection.
-2. Run the WP-0003 EditMode and PlayMode tests through Unity MCP.
-3. Enter the technical scene in Play Mode and exercise select, reset, camera,
-   and persistence-gate controls.
-4. Capture one technical screenshot and record all outcomes, including any
-   failed or interrupted attempt.
+- The project-scoped client exposed exactly `Unity_ReadConsole`,
+  `Unity_RunCommand`, `Unity_ManageEditor`, `Unity_ManageGameObject`, and
+  `Unity_Camera_Capture`. `Unity_ReadConsole` was the first Unity call.
+- The live target resolved to
+  `/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game`; the Editor
+  reported version `6000.5.4f1`, was not in Play Mode, and was idle before the
+  first refresh.
+- Before refresh, the repaired PlayMode source was newer than its stale test
+  DLL. The first refresh command was rejected before execution because its
+  transient script did not fully qualify `CompilationPipeline`; the corrected
+  command requested compilation and `AssetDatabase.Refresh` through MCP.
+- After the final `AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate)`, the
+  repaired source mtime was `2026-07-16 20:56:33 -0700` and the compiled
+  `AC21.Sasha.TechnicalSandbox.PlayModeTests.dll` mtime was
+  `2026-07-16 20:57:38 -0700`. The subsequent Error/Warning console read
+  returned zero entries.
+- `AC21.Sasha.TechnicalSandbox.EditModeTests` ran alone through
+  `TestRunnerApi`: 4 passed, 0 failed, 0 skipped, and 0 inconclusive. The four
+  passing tests were `ActivationIsBoundedAndInspectable`,
+  `NewStateIsNeutralAndNonPersisting`,
+  `PersistenceProbeFailsClosedAndWritesZeroBytes`, and
+  `ResetClearsPresentationState`.
+- The first exact `AC21.Sasha.TechnicalSandbox.PlayModeTests` run failed 0/1
+  because the test queried newly transformed primitive colliders before an
+  explicit physics synchronization. The native NUnit receipt was
+  `/Users/sasha/Library/Application Support/AC-21/Sasha the Atomic Land Pirate/TestResults.xml`,
+  SHA-256
+  `2d14a02e623c7f3439500038b0529bdc647c765af6dc057d078fc063c6e449ad`;
+  it identified `TechnicalSandboxPlayModeTests.cs:70`.
+- The minimal repair adds `Physics.SyncTransforms()` before the helper
+  raycast. The repaired source is SHA-256
+  `bd6efd5997f0733cc4061d14b8c1970c611ce2bad77a5baf6b1a6110c1a96b1c`,
+  and the updated overlay manifest is SHA-256
+  `68fb887cdc796470c9b76d69c52a63ae5badc2f8a89ac9453a6a0844b09db9e7`.
+- The rerun of that exact PlayMode assembly passed 1/1 with 0 failed,
+  skipped, or inconclusive. Its regenerated native NUnit receipt ended at
+  `2026-07-17T03:58:16Z`, has SHA-256
+  `c7dd9b32c8564421e3762303676285d0591b247acda489b6cc0f2a8007b50d77`,
+  and names only
+  `SceneBootsAndRespondsToInputSystemControls` in
+  `AC21.Sasha.TechnicalSandbox.PlayModeTests.dll`.
+- The registered `WP0003_TechnicalSandbox` scene opened from its exact asset
+  path, entered Play Mode, and exposed one runtime controller and technical
+  camera. The bounded live exercise selected probe 2 with one interaction,
+  moved the camera focus, returned
+  `WP0003_PERSISTENCE_DISABLED` with 0 bytes written, reset the selected index
+  to -1 and interactions to 0, then exited Play Mode cleanly.
 
-Until those steps pass, this file is candidate evidence only and does not
-satisfy T-UNITY-COMPILE, T-UNITY-EDITMODE, T-UNITY-PLAYMODE, or
-T-TECHNICAL-CAPTURE.
+## Capture result and tool limitation
+
+- `Unity_Camera_Capture` successfully returned a 1920 x 1080 PNG Scene View
+  preview of the live technical scene after the bounded debug exercise and
+  reset (`213099` bytes), satisfying the packet's technical-scene screenshot
+  oracle and proving the approved capture transport. This is not a runtime
+  camera or debug-HUD coverage claim.
+- The accepted runtime Camera GameObject handle `-7886` and Camera component
+  handle `-7890` were each resolved from the live controller. The installed
+  capture implementation rejected both with `No GameObject found with
+  Instance ID`, even though the component was live and the valid component
+  handle was supplied. The first legacy-handle lookup also failed before
+  execution because Unity 6000.5 treats direct `GetInstanceID()` use as an
+  obsolete-API compile error; the bounded reflection lookup then succeeded.
+- Per creator direction, no further capture loop or persistent callback was
+  added. The Scene View image is retained as transport evidence only; the
+  runtime-camera rejections are an installed-tool limitation, not hidden as a
+  successful runtime-camera capture.
+
+`T-UNITY-COMPILE`, `T-UNITY-EDITMODE`, `T-UNITY-PLAYMODE`, and
+`T-TECHNICAL-CAPTURE` are satisfied by the evidence above. This remains
+implementation evidence, not creator or independent acceptance.

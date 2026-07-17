@@ -29,8 +29,7 @@ namespace AC21.Sasha.TechnicalSandbox.Tests
             else
             {
                 foreach (var controller in Object.FindObjectsByType<
-                             TechnicalSandboxController>(
-                             FindObjectsSortMode.None))
+                             TechnicalSandboxController>())
                 {
                     Object.Destroy(controller.gameObject);
                 }
@@ -41,8 +40,7 @@ namespace AC21.Sasha.TechnicalSandbox.Tests
             yield return null;
 
             Assert.That(
-                Object.FindObjectsByType<TechnicalSandboxController>(
-                    FindObjectsSortMode.None),
+                Object.FindObjectsByType<TechnicalSandboxController>(),
                 Is.Empty);
         }
 
@@ -58,7 +56,7 @@ namespace AC21.Sasha.TechnicalSandbox.Tests
             yield return null;
 
             var controllers = Object.FindObjectsByType<
-                TechnicalSandboxController>(FindObjectsSortMode.None);
+                TechnicalSandboxController>();
             Assert.That(controllers, Has.Length.EqualTo(1));
             var controller = controllers[0];
 
@@ -68,6 +66,7 @@ namespace AC21.Sasha.TechnicalSandbox.Tests
             Assert.That(controller.SandboxCamera, Is.Not.Null);
 
             var camera = controller.SandboxCamera!;
+            Physics.SyncTransforms();
             var visibleMarker = FindVisibleMarkerOutsideHud(camera);
             Assert.That(visibleMarker, Is.Not.Null);
 
@@ -111,7 +110,7 @@ namespace AC21.Sasha.TechnicalSandbox.Tests
             Camera camera)
         {
             foreach (var marker in Object.FindObjectsByType<
-                         TechnicalProbeMarker>(FindObjectsSortMode.None))
+                         TechnicalProbeMarker>())
             {
                 var screenPoint = camera.WorldToScreenPoint(
                     marker.transform.position);
