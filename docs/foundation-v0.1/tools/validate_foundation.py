@@ -238,9 +238,9 @@ WP0002_PACKAGE_GRAPH_CHECKER = (
     REPO_ROOT / "Tools" / "Validation" / "validate_wp0002_package_graph.py"
 )
 WP0002_PACKAGE_GRAPH_CHECKER_SHA256 = (
-    "7ca81dfa606667800a42f92097718c871e92ab01f043432b0b874aa571449383"
+    "d9b36dd20099a18de940d833085f81f60a0478f527879633e21c2d28fdae5fd2"
 )
-WP0002_PACKAGE_GRAPH_CHECKER_CONTRACT = "wp0002-package-graph-v1"
+WP0002_PACKAGE_GRAPH_CHECKER_CONTRACT = "wp0002-package-graph-v2"
 WP0002_PACKAGE_GRAPH_PATHS = (
     "Game/Packages/manifest.json",
     "Game/Packages/packages-lock.json",
@@ -334,7 +334,7 @@ WP0002_PACKAGE_META_SHA256 = {
 }
 WP0002_PROTECTED_SELF_VERIFICATION = {
     "Tools/Validation/validate_wp0002_package_graph.py": (
-        "7ca81dfa606667800a42f92097718c871e92ab01f043432b0b874aa571449383"
+        "d9b36dd20099a18de940d833085f81f60a0478f527879633e21c2d28fdae5fd2"
     ),
     "Tools/Validation/validate_wp0002_entry_gate.py": (
         "8bba4fccf7a0ac8cdcc488046fba4ce05fee6ef41903b0f545a028b40a3daeb0"
@@ -346,7 +346,7 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
         "68da58dc0d026b3ad249959d65a4459f32941d1fc39963fce69f3bdf8bbcda9f"
     ),
     ".github/workflows/wp0002-ci.yml": (
-        "892dd9afb5c7d5fa22660c95d1b83c5e41298320c8374945a061c7a4ee94fa0e"
+        "893cd3faacb887b2d9112c30e15a29b27fb8f3511001ef4091a04f1f88e2f0b9"
     ),
     ".github/workflows/wp0002-policy.yml": (
         "8e3365b0591c85d12e02ed7bf6a819697491cdf33aa67cc1e640c069b5fb8121"
@@ -8380,12 +8380,13 @@ def validate_wp0002_package_graph_worktree(
 def wp0002_ci_requires_lastbearing_project(
     packet: dict,
     materialized_now: bool,
-    materialized_in_history: bool,
 ) -> bool:
-    """Fail closed once WP-0002 history or Git objects show LastBearing materialization."""
-    if materialized_now or materialized_in_history:
+    """Require the project from current-tree materialization or lifecycle state."""
+    if materialized_now:
         return True
     status = packet.get("status")
+    if status == "rolled-back":
+        return False
     destinations = {
         event.get("to")
         for event in packet.get("status_events", [])
@@ -8423,10 +8424,9 @@ def validate_wp0002_ci_save_contract(
         '"Game/Assets/AtomicLandPirate/LastBearing.meta"',
         '"Tests/AtomicLandPirate.CoreTests/LastBearing"',
         'if [[ -e "$path" || -L "$path" ]]; then',
-        'materialized_in_history=false',
-        'git log --format=%H -- "${last_bearing_paths[@]}"',
         'foundation.wp0002_ci_requires_lastbearing_project(',
-        '"$materialized" "$materialized_in_history")"',
+        'foundation.wp0002_ci_requires_lastbearing_project(packet, sys.argv[1] == "true")',
+        '"$materialized")"',
         'require_project="$lifecycle_requires_project"',
         'if [[ ! -f "$project" ]]; then',
         'dotnet run --project "$project" --configuration Release -- --test dev-save-atomic',
@@ -8437,6 +8437,15 @@ def validate_wp0002_ci_save_contract(
     for fragment in required_fragments:
         if fragment not in source:
             errors.append(f"WP-0002 CI save contract lacks exact fragment {fragment!r}")
+    for forbidden_fragment in (
+        "materialized_in_history",
+        'git log --format=%H -- "${last_bearing_paths[@]}"',
+    ):
+        if forbidden_fragment in source:
+            errors.append(
+                "WP-0002 CI save contract may not use historical path presence: "
+                f"{forbidden_fragment!r}"
+            )
     for command in WP0002_REQUIRED_CI_COMMANDS:
         workflow_command = command.replace(
             "Tests/AtomicLandPirate.CoreTests/LastBearing/AtomicLandPirate.LastBearingTests.csproj",

@@ -177,6 +177,26 @@ class WP0002PackageGraphTypeTests(unittest.TestCase):
         base, candidate = self.documents()
         self.assertEqual(PACKAGE_GRAPH.compare_package_graph(base, candidate), [])
 
+    def test_materialized_last_bearing_rejects_unchanged_graph(self) -> None:
+        base, _ = self.documents()
+        unchanged = copy.deepcopy(base)
+        self.assertEqual(PACKAGE_GRAPH.compare_package_graph(base, unchanged), [])
+        errors = PACKAGE_GRAPH.compare_package_graph(
+            base,
+            unchanged,
+            require_links=True,
+        )
+        self.assertTrue(any("requires both exact" in error for error in errors), errors)
+
+    def test_current_tree_materialization_includes_symlinks(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self.assertFalse(PACKAGE_GRAPH._last_bearing_materialized(root))
+            path = root / PACKAGE_GRAPH.LAST_BEARING_PATHS[0]
+            path.parent.mkdir(parents=True)
+            path.symlink_to(root / "missing-target", target_is_directory=True)
+            self.assertTrue(PACKAGE_GRAPH._last_bearing_materialized(root))
+
     def test_new_local_depth_bool_or_float_is_rejected(self) -> None:
         for wrong_depth in (False, 0.0):
             with self.subTest(wrong_depth=repr(wrong_depth)):

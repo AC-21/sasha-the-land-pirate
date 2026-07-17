@@ -4,7 +4,7 @@
   "manifest_id": "A1B-WP-0002-LOCAL-DEV",
   "boundary_mode": "local-development",
   "packet_id": "WP-0002",
-  "packet_contract_sha256": "50565d914f463c39e502600dc370142a7449c695fb558c5da03cfd3e1abb13a3",
+  "packet_contract_sha256": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
   "created_at": "2026-07-17T04:46:30Z",
   "attested_by": null,
   "attestation_receipt_id": null,

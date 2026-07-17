@@ -164,38 +164,37 @@ class WP0002LastBearingLifecycleTests(unittest.TestCase):
 
     def test_transition_matrix(self) -> None:
         cases = (
-            ("proposed", ["proposed"], False, False, False),
-            ("accepted", ["proposed", "accepted"], False, False, False),
-            ("active", ["proposed", "accepted", "active"], False, False, False),
-            ("rejected", ["proposed", "rejected"], False, False, False),
-            ("rejected", ["proposed", "accepted", "rejected"], False, False, False),
-            ("superseded", ["proposed", "superseded"], False, False, False),
-            ("superseded", ["proposed", "accepted", "superseded"], False, False, False),
-            ("rolled-back", ["proposed", "accepted", "active", "rolled-back"], False, False, False),
-            ("verifying", ["proposed", "accepted", "active", "verifying"], False, False, True),
-            ("candidate", ["proposed", "accepted", "active", "verifying", "candidate"], False, False, True),
-            ("released", ["proposed", "accepted", "active", "verifying", "candidate", "released"], False, False, True),
-            ("rejected", ["proposed", "accepted", "active", "rejected"], False, False, True),
-            ("rolled-back", ["proposed", "accepted", "active", "verifying", "rolled-back"], False, False, True),
-            ("superseded", ["proposed", "accepted", "active", "verifying", "candidate", "released", "superseded"], False, False, True),
-            ("proposed", ["proposed"], True, False, True),
-            ("accepted", ["proposed", "accepted"], False, True, True),
+            ("proposed", ["proposed"], False, False),
+            ("accepted", ["proposed", "accepted"], False, False),
+            ("active", ["proposed", "accepted", "active"], False, False),
+            ("rejected", ["proposed", "rejected"], False, False),
+            ("rejected", ["proposed", "accepted", "rejected"], False, False),
+            ("superseded", ["proposed", "superseded"], False, False),
+            ("superseded", ["proposed", "accepted", "superseded"], False, False),
+            ("rolled-back", ["proposed", "accepted", "active", "rolled-back"], False, False),
+            ("verifying", ["proposed", "accepted", "active", "verifying"], False, True),
+            ("candidate", ["proposed", "accepted", "active", "verifying", "candidate"], False, True),
+            ("released", ["proposed", "accepted", "active", "verifying", "candidate", "released"], False, True),
+            ("rejected", ["proposed", "accepted", "active", "rejected"], False, True),
+            ("rolled-back", ["proposed", "accepted", "active", "verifying", "rolled-back"], False, False),
+            ("superseded", ["proposed", "accepted", "active", "verifying", "candidate", "released", "superseded"], False, True),
+            ("proposed", ["proposed"], True, True),
+            ("rolled-back", ["proposed", "accepted", "active", "verifying", "rolled-back"], True, True),
         )
-        for status, destinations, now, history, expected in cases:
+        for status, destinations, now, expected in cases:
             with self.subTest(
                 status=status,
                 destinations=destinations,
                 materialized_now=now,
-                materialized_in_history=history,
             ):
                 self.assertEqual(
                     foundation.wp0002_ci_requires_lastbearing_project(
-                        self.lifecycle_packet(status, destinations), now, history
+                        self.lifecycle_packet(status, destinations), now
                     ),
                     expected,
                 )
 
-    def test_ci_contract_pins_history_and_lifecycle_checks(self) -> None:
+    def test_ci_contract_pins_current_tree_and_lifecycle_checks(self) -> None:
         source = (foundation.REPO_ROOT / ".github/workflows/wp0002-ci.yml").read_text(
             encoding="utf-8"
         )
@@ -204,10 +203,6 @@ class WP0002LastBearingLifecycleTests(unittest.TestCase):
             workflow.write_text(source, encoding="utf-8")
             self.assertEqual(foundation.validate_wp0002_ci_save_contract(workflow), [])
             mutations = (
-                source.replace(
-                    'git log --format=%H -- "${last_bearing_paths[@]}"',
-                    'echo "history ignored"',
-                ),
                 source.replace(
                     "foundation.wp0002_ci_requires_lastbearing_project(",
                     "foundation.untrusted_lastbearing_policy(",

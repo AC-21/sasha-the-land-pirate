@@ -14,13 +14,20 @@ import sys
 from pathlib import Path
 
 
-CHECKER_CONTRACT_VERSION = "wp0002-package-graph-v1"
+CHECKER_CONTRACT_VERSION = "wp0002-package-graph-v2"
 PROTECTED_BASE_COMMIT = "b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5"
 GRAPH_PATHS = (
     "Game/Packages/manifest.json",
     "Game/Packages/packages-lock.json",
     "SimulationCore/package.json",
     "SaveContracts/package.json",
+)
+LAST_BEARING_PATHS = (
+    "SimulationCore/Runtime/LastBearing",
+    "SaveContracts/Runtime/LastBearing",
+    "Game/Assets/AtomicLandPirate/LastBearing",
+    "Game/Assets/AtomicLandPirate/LastBearing.meta",
+    "Tests/AtomicLandPirate.CoreTests/LastBearing",
 )
 LOCAL_PACKAGE_LINKS = {
     "com.ac21.sasha.simulation-core": "file:../../SimulationCore",
@@ -128,9 +135,12 @@ def _compare_dependency_document(
 
 
 def compare_package_graph(
-    base_files: dict[str, bytes], candidate_files: dict[str, bytes]
+    base_files: dict[str, bytes],
+    candidate_files: dict[str, bytes],
+    *,
+    require_links: bool = False,
 ) -> list[str]:
-    """Return exact package-graph violations; an unchanged graph is valid."""
+    """Return exact package-graph violations for pre- or post-materialization state."""
     errors: list[str] = []
     if set(base_files) != set(GRAPH_PATHS):
         errors.append("protected package-graph input paths are incomplete or excessive")
@@ -139,6 +149,11 @@ def compare_package_graph(
     if errors:
         return errors
     if all(base_files[path] == candidate_files[path] for path in GRAPH_PATHS):
+        if require_links:
+            return [
+                "LastBearing materialization requires both exact repository-local "
+                "UPM links and lock entries"
+            ]
         return []
     for path in ("SimulationCore/package.json", "SaveContracts/package.json"):
         if candidate_files[path] != base_files[path]:
@@ -160,6 +175,11 @@ def compare_package_graph(
         )
     )
     return errors
+
+
+def _last_bearing_materialized(repo_root: Path) -> bool:
+    """Treat any current-tree LastBearing path, including a symlink, as materialized."""
+    return any(os.path.lexists(repo_root / path) for path in LAST_BEARING_PATHS)
 
 
 def _git_blob(repo_root: Path, commit: str, path: str) -> bytes:
@@ -329,6 +349,7 @@ def main() -> int:
     if supplied_paths != GRAPH_PATHS:
         errors.append(f"package graph paths must equal {list(GRAPH_PATHS)!r}")
     repo_root = Path(__file__).resolve().parents[2]
+    local_links_required = _last_bearing_materialized(repo_root)
     base_files: dict[str, bytes] = {}
     candidate_files: dict[str, bytes] = {}
     if not errors:
@@ -339,11 +360,18 @@ def main() -> int:
         except (OSError, RuntimeError) as exc:
             errors.append(str(exc))
     if not errors:
-        errors.extend(compare_package_graph(base_files, candidate_files))
+        errors.extend(
+            compare_package_graph(
+                base_files,
+                candidate_files,
+                require_links=local_links_required,
+            )
+        )
     report = {
         "schema_version": 1,
         "checker_contract": CHECKER_CONTRACT_VERSION,
         "base_commit": args.base,
+        "local_links_required": local_links_required,
         "result": "pass" if not errors else "fail",
         "errors": errors,
         "candidate_sha256": {

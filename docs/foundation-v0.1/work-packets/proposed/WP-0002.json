@@ -15,11 +15,11 @@
   "required_approver": "creator",
   "approved_by": null,
   "approval_receipt_id": null,
-  "contract_sha256": "50565d914f463c39e502600dc370142a7449c695fb558c5da03cfd3e1abb13a3",
+  "contract_sha256": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
   "a1_boundary_manifest": {
     "manifest_id": "A1B-WP-0002-LOCAL-DEV",
     "path": "governance/a1-boundaries/WP-0002.json",
-    "sha256": "ce6375756cf1a5589fbbcd67ed201b74ba6b4afdf0f6512894ae1eb991bd9a27"
+    "sha256": "6ac9201dc461f81fed237be22754e55eb28af2cabb19b9aab7f7b0725efe9842"
   },
   "implementer": null,
   "verifier": null,
@@ -125,7 +125,7 @@
     "Generalized economy/faction frameworks beyond the slice state.",
     "Any registry, network, Git, tarball, embedded-copy, or external package dependency; package-graph authority is limited to the two exact repository-local UPM links declared in scope.",
     "Final Sasha character model, voice, backstory, pronouns, moral alignment, or final meaning of Atomic Land Pirate; final robot personhood, origin, or society lore.",
-    "Direct or agent-selected merge, protected-check bypass, rollout, publishing, release, or autonomy promotion; only repository-configured auto-merge after every required protected check is permitted."
+    "Direct or agent-selected merge, protected-check bypass, rollout, publishing, release, or autonomy promotion; only transparent creator-delegated manual release after every required protected check is permitted, and repository-configured auto-merge remains unauthorized until separately ratified after a live latest-head canary."
   ],
   "affected_domains": [
     "world",
@@ -248,7 +248,7 @@
       "id": "T-A1-LOCAL-BOUNDARY",
       "kind": "manual",
       "command": null,
-      "oracle": "Before any WP-0002 command runs, WP-0003 is released under creator completion evidence and a distinct creator receipt binds A1B-WP-0002-LOCAL-DEV with a held exact reservation. Implementation uses fresh protected-main agent/* branches; foundation/governance/receipt paths remain read-only; only Unity_ReadConsole, Unity_RunCommand, Unity_ManageEditor, Unity_ManageGameObject, and Unity_Camera_Capture may reach the creator-opened Editor; installs, credentials, publishing, direct Unity process access, protection bypass, and direct merge remain denied; repository-configured auto-merge may complete only after all required protected checks pass.",
+      "oracle": "Before any WP-0002 command runs, WP-0003 is released under creator completion evidence and a distinct creator receipt binds A1B-WP-0002-LOCAL-DEV with a held exact reservation. Implementation uses fresh protected-main agent/* branches; foundation/governance/receipt paths remain read-only; only Unity_ReadConsole, Unity_RunCommand, Unity_ManageEditor, Unity_ManageGameObject, and Unity_Camera_Capture may reach the creator-opened Editor; installs, credentials, publishing, direct Unity process access, protection bypass, and direct merge remain denied; only transparent creator-delegated manual release may complete after all required protected checks pass, while repository-configured auto-merge remains unauthorized pending separate ratification after a live latest-head canary.",
       "required": true,
       "scenario_id": null
     },
