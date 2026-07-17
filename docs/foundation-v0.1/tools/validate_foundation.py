@@ -349,7 +349,7 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
         "893cd3faacb887b2d9112c30e15a29b27fb8f3511001ef4091a04f1f88e2f0b9"
     ),
     ".github/workflows/wp0002-policy.yml": (
-        "1bdbffd2dfd496166aee641b9ce887c30e67002f2335b0e02e3149e185094e8d"
+        "723f6f03c6014a3d588ead6bb133dfbd0e1c06084563b8703a7d6e010aeceadb"
     ),
 }
 PACKET_TRANSITIONS = {
