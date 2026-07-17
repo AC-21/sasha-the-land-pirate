@@ -302,15 +302,101 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                 controllers[0].World!.MainCamera != null &&
                 cameras.Length >= 1;
 
+            string result = "failed:runtime-capture-contract";
+            if (valid)
+            {
+                try
+                {
+                    string artifact = WriteTechnicalCapture(
+                        boundary,
+                        controllers[0].World!.MainCamera!,
+                        sourceSha256);
+                    result = "success:capture-ready;artifact=" + artifact;
+                }
+                catch (Exception exception)
+                {
+                    result = "failed:technical-capture-write=" +
+                             NormalizeMessage(exception.Message);
+                }
+            }
+
             return CompleteGate(
                 boundary,
                 TechnicalCaptureGate,
                 sourceSha256,
                 "validate-runtime-root-camera-controller",
-                valid
-                    ? "success:capture-ready"
-                    : "failed:runtime-capture-contract",
+                result,
                 startedAt);
+        }
+
+        private static string WriteTechnicalCapture(
+            ProjectBoundary boundary,
+            Camera camera,
+            string sourceSha256)
+        {
+            const int width = 1920;
+            const int height = 1080;
+            string fileName = "last-bearing-" + sourceSha256.Substring(0, 12) +
+                              "-" + Guid.NewGuid().ToString("N") + ".png";
+            string relativePath = Path.Combine(
+                    "BuildArtifacts",
+                    "WP-0002",
+                    "technical-captures",
+                    fileName)
+                .Replace(Path.DirectorySeparatorChar, '/');
+            string absolutePath = Path.Combine(
+                boundary.RepositoryRoot,
+                relativePath);
+            string? directory = Path.GetDirectoryName(absolutePath);
+            if (string.IsNullOrEmpty(directory))
+            {
+                throw new InvalidOperationException(
+                    "WP0002_TECHNICAL_CAPTURE_PATH_INVALID");
+            }
+
+            Directory.CreateDirectory(directory);
+            RenderTexture? previousTarget = camera.targetTexture;
+            RenderTexture? previousActive = RenderTexture.active;
+            var target = new RenderTexture(
+                width,
+                height,
+                24,
+                RenderTextureFormat.ARGB32);
+            var texture = new Texture2D(
+                width,
+                height,
+                TextureFormat.RGB24,
+                false);
+            try
+            {
+                target.Create();
+                camera.targetTexture = target;
+                camera.Render();
+                RenderTexture.active = target;
+                texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                texture.Apply(false, false);
+                byte[] payload = ImageConversion.EncodeToPNG(texture);
+                if (payload == null || payload.Length == 0)
+                {
+                    throw new InvalidOperationException(
+                        "WP0002_TECHNICAL_CAPTURE_EMPTY");
+                }
+
+                WriteImmutableFile(absolutePath, payload);
+                return relativePath;
+            }
+            finally
+            {
+                camera.targetTexture = previousTarget;
+                RenderTexture.active = previousActive;
+                if (target.IsCreated())
+                {
+                    target.Release();
+                }
+
+                UnityEngine.Object.DestroyImmediate(texture);
+                UnityEngine.Object.DestroyImmediate(target);
+            }
         }
 
         private static ProjectBoundary VerifyProjectBoundary()
