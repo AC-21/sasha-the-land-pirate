@@ -34,6 +34,7 @@ jobs:
           [[ "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]
           OBJECT_STORE="$RUNNER_TEMP/wp0002-policy.git"
           REPORT_ROOT="$RUNNER_TEMP/wp0002-policy-report"
+          mkdir -p "$REPORT_ROOT"
           /usr/bin/git init --bare "$OBJECT_STORE"
           AUTH_HEADER="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w 0)"
           /usr/bin/git -C "$OBJECT_STORE" -c http.extraHeader="AUTHORIZATION: basic $AUTH_HEADER" fetch \
