@@ -28,7 +28,7 @@
     "issued_at": { "type": "string", "format": "date-time" },
     "issued_by": { "type": "string", "minLength": 1 },
     "issuer_role": { "enum": ["creator", "trusted-integrator", "trusted-gatekeeper", "external-authority"] },
-    "receipt_kind": { "enum": ["creator-source-capture", "decision-ratification", "packet-acceptance", "packet-activation", "packet-completion", "release-approval", "external-protected"] },
+    "receipt_kind": { "enum": ["creator-source-capture", "creator-authorization", "decision-ratification", "packet-acceptance", "packet-activation", "packet-completion", "release-approval", "external-protected"] },
     "artifact_resolver": {
       "oneOf": [
         {

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/wasteland-game/wp0002-working-tree-scope-capture.schema.json",
+  "title": "WP-0002 working-tree scope capture v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "capture_contract", "packet_id", "boundary_manifest_id",
+    "captured_at", "repository_root", "base_commit", "head_commit", "head_tree",
+    "checkpoint_commit", "index_tree", "status_format", "collector", "artifacts",
+    "index_clean", "conflict_paths", "submodule_paths", "complete_dirty_set",
+    "dirty_path_count", "dirty_paths", "non_excluded_scope_clean",
+    "reserved_scope_clean", "reservation_paths", "protected_paths_read_only",
+    "reserved_protected_overlaps", "privacy"
+  ],
+  "properties": {
+    "schema_version": { "const": 2 },
+    "capture_contract": { "const": "wp0002-working-tree-scope-capture-v2" },
+    "packet_id": { "const": "WP-0002" },
+    "boundary_manifest_id": { "const": "A1B-WP-0002-LOCAL-DEV" },
+    "captured_at": { "type": "string", "format": "date-time" },
+    "repository_root": { "const": "/Users/sasha/Documents/Codex/sasha-the-land-pirate" },
+    "base_commit": { "$ref": "#/$defs/git-sha" },
+    "head_commit": { "$ref": "#/$defs/git-sha" },
+    "head_tree": { "$ref": "#/$defs/git-sha" },
+    "checkpoint_commit": { "$ref": "#/$defs/git-sha" },
+    "index_tree": { "$ref": "#/$defs/git-sha" },
+    "status_format": { "const": "git-status-porcelain-v2-z-raw" },
+    "collector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["git_version", "status_command", "head_command", "head_tree_command", "index_tree_command", "submodule_command"],
+      "properties": {
+        "git_version": { "type": "string", "pattern": "^git version " },
+        "status_command": {
+          "const": ["/usr/bin/git", "-c", "core.hooksPath=/dev/null", "-C", "/Users/sasha/Documents/Codex/sasha-the-land-pirate", "status", "--porcelain=v2", "-z"]
+        },
+        "head_command": { "const": ["git", "rev-parse", "--verify", "HEAD"] },
+        "head_tree_command": { "const": ["git", "rev-parse", "HEAD^{tree}"] },
+        "index_tree_command": { "const": ["git", "write-tree"] },
+        "submodule_command": { "const": ["git", "ls-files", "-s", "-z"] }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw_status", "observations"],
+      "properties": {
+        "raw_status": { "$ref": "#/$defs/raw-status-ref" },
+        "observations": { "$ref": "#/$defs/observations-ref" }
+      }
+    },
+    "index_clean": { "const": true },
+    "conflict_paths": { "const": [] },
+    "submodule_paths": { "const": [] },
+    "complete_dirty_set": { "const": true },
+    "dirty_path_count": { "const": 3 },
+    "dirty_paths": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "items": { "$ref": "#/$defs/drift" }
+    },
+    "non_excluded_scope_clean": { "const": true },
+    "reserved_scope_clean": { "const": true },
+    "reservation_paths": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "protected_paths_read_only": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "reserved_protected_overlaps": { "const": [] },
+    "privacy": {
+      "const": {
+        "creator_file_content_retained": false,
+        "secret_scan_method": "assert-no-creator-file-byte-sequence-in-artifacts-min-16-bytes",
+        "secret_scan_result": "pass"
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "git-sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "raw-status-ref": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "sha256", "byte_size"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^docs/evidence/WP-0002/scope-capture/working-tree-scope\\.status\\.[0-9a-f]{64}\\.bin$" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "byte_size": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "observations-ref": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "sha256", "byte_size"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^docs/evidence/WP-0002/scope-capture/working-tree-scope\\.observations\\.[0-9a-f]{64}\\.json$" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "byte_size": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "drift": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "normalized_git_state", "base_blob_sha256", "observed_sha256", "regular_file_no_symlink", "owner", "policy"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "normalized_git_state": { "enum": ["unstaged-modified", "untracked"] },
+        "base_blob_sha256": { "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+        "observed_sha256": { "$ref": "#/$defs/sha256" },
+        "regular_file_no_symlink": { "const": true },
+        "owner": { "const": "creator" },
+        "policy": { "const": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash" }
+      }
+    }
+  }
+}

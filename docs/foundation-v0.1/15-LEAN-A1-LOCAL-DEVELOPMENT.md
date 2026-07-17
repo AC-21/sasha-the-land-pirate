@@ -148,11 +148,54 @@ Agents may not:
 ## Accepted packet
 
 `WP-0003` is the local-development alternative. WP-0001 remains accepted
-historical evidence and WP-0002 continues to depend on WP-0001 completion.
+historical evidence. The proposed first-playable transaction makes WP-0002
+depend on creator-accepted WP-0003 release rather than WP-0001 completion.
 WP-0003 initially covers the Unity project skeleton, deterministic core and
 non-persisting save interfaces, tests, and technical scenes. It does not itself
 unblock the gameplay packet. Production content, release, store, monetization,
 and background rollout remain out of scope.
+
+## Proposed WP-0002 protected-PR successor
+
+`A1B-WP-0002-LOCAL-DEV` is an unsealed A0 proposal, not current authority. It
+may activate only after WP-0003 is released under a sealed creator completion
+receipt and separate creator acceptance and activation receipts bind the exact
+WP-0002 contract and boundary bytes. It succeeds the proven WP-0003 lane: each
+implementation pass starts on a fresh protected-main `agent/*` branch, uses
+protected pull requests, and requires `validate`, `wp0002-core`, plus a
+transparent creator-delegated manual release for every pull request. Cursor is
+optional independent AI review and is non-blocking. The base-owned
+`wp0002-policy` workflow is a candidate-independent canary only until a live
+Stage-B pull request proves that GitHub attaches its result to the latest head;
+if it does not, its retained report is evidence and delegated manual release
+continues. Autonomous auto-merge is not authorized before that proof and a
+separate governance upgrade. Direct or agent-selected merge remains denied.
+
+During implementation, `AGENTS.md` and the entire foundation/governance/receipt
+tree are read-only. Unity access is limited to `Unity_ReadConsole`,
+`Unity_RunCommand`, `Unity_ManageEditor`, `Unity_ManageGameObject`, and
+`Unity_Camera_Capture` through the already-approved direct MCP route. Direct
+Unity/Hub/CLI/batchmode invocation, installs, registry/network/external
+dependencies, credentials, publishing, protection bypass, and release authority
+remain denied. The only package-graph exception is the two exact repository-local
+UPM links `file:../../SimulationCore` and `file:../../SaveContracts`, resolved
+relative to `Game/Packages/manifest.json`. Only `Game/Packages/manifest.json`
+and `Game/Packages/packages-lock.json` are writable inside the reservation;
+`SimulationCore/package.json` and `SaveContracts/package.json` remain protected
+and byte-identical to the protected base. Its only
+persistent data is the disposable `last-bearing-dev-v1` local profile with
+atomic generation publication and preserved last-good; it has no compatibility
+promise. All colony compositions run the same golden path, while differentiated
+mechanics remain conditional on a later D-0039 receipt.
+
+These are authority constraints, not technical containment. In particular,
+`Unity_RunCommand` compiles and executes arbitrary Editor C# and may reach the
+host filesystem, network, processes, or package graph; it stays prohibited until
+the enumerated content-addressed WP-0002 gate dispatcher is materialized and
+hash-bound, and each later call must match and log that dispatcher exactly. The
+signed-in operator also retains repository-admin capability, so protection
+bypass is denied creator policy with live audit/canary evidence, not credential
+isolation or a cryptographically unavailable action.
 
 ## Ratification and activation record
 

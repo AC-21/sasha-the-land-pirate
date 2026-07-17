@@ -1,0 +1,108 @@
+name: WP-0002 Core
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    name: wp0002-core
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout full protected history
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate protected foundation and package graph
+        run: python3 -B docs/foundation-v0.1/tools/validate_foundation.py
+
+      - name: Run protected WP-0002 entry and package checks when active
+        shell: bash
+        run: |
+          status="$(python3 -c 'import json; print(json.load(open("docs/foundation-v0.1/work-packets/proposed/WP-0002.json", encoding="utf-8"))["status"])')"
+          if [[ "$status" == "active" || "$status" == "verifying" || "$status" == "candidate" ]]; then
+            python3 Tools/Validation/validate_wp0002_entry_gate.py \
+              --packet docs/foundation-v0.1/work-packets/proposed/WP-0002.json \
+              --ratification-state docs/foundation-v0.1/governance/ratification-state.json \
+              --require-claim AUTHORIZE-CITY-COMPARISON \
+              --report BuildArtifacts/WP-0002/entry-gate.json
+            python3 Tools/Validation/validate_wp0002_package_graph.py \
+              --base b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5 \
+              --manifest Game/Packages/manifest.json \
+              --lock Game/Packages/packages-lock.json \
+              --simulation-package SimulationCore/package.json \
+              --save-package SaveContracts/package.json \
+              --report BuildArtifacts/WP-0002/package-graph.json
+          fi
+
+      - name: Run required WP-0002 gameplay core and save matrix once materialized
+        shell: bash
+        run: |
+          status="$(python3 -B -c 'import json; print(json.load(open("docs/foundation-v0.1/work-packets/proposed/WP-0002.json", encoding="utf-8"))["status"])')"
+          project="Tests/AtomicLandPirate.CoreTests/LastBearing/AtomicLandPirate.LastBearingTests.csproj"
+          last_bearing_paths=(
+            "SimulationCore/Runtime/LastBearing"
+            "SaveContracts/Runtime/LastBearing"
+            "Game/Assets/AtomicLandPirate/LastBearing"
+            "Game/Assets/AtomicLandPirate/LastBearing.meta"
+            "Tests/AtomicLandPirate.CoreTests/LastBearing"
+          )
+          materialized=false
+          for path in "${last_bearing_paths[@]}"; do
+            if [[ -e "$path" || -L "$path" ]]; then
+              materialized=true
+              break
+            fi
+          done
+
+          materialized_in_history=false
+          if [[ -n "$(git log --format=%H -- "${last_bearing_paths[@]}")" ]]; then
+            materialized_in_history=true
+          fi
+          lifecycle_requires_project="$(python3 -B -c 'import json,sys; sys.path.insert(0, "docs/foundation-v0.1/tools"); import validate_foundation as foundation; packet=json.load(open("docs/foundation-v0.1/work-packets/proposed/WP-0002.json", encoding="utf-8")); print("true" if foundation.wp0002_ci_requires_lastbearing_project(packet, sys.argv[1] == "true", sys.argv[2] == "true") else "false")' "$materialized" "$materialized_in_history")"
+          require_project="$lifecycle_requires_project"
+
+          if [[ "$require_project" == "true" ]]; then
+            if [[ ! -f "$project" ]]; then
+              echo "LastBearing materialization or lifecycle status $status requires $project." >&2
+              exit 1
+            fi
+            python3 Tools/ScenarioRunner/run.py SCN_COMPOSITION_LOOP_SMOKE
+            python3 Tools/ScenarioRunner/run.py SCN_TIME_POLICY
+            python3 Tools/ScenarioRunner/run.py SCN_PREPARATION_MODULE_MATRIX
+            python3 Tools/ScenarioRunner/run.py SCN_FACTION_WAIT_CLAIM
+            python3 Tools/ScenarioRunner/run.py SCN_BEARING_COOPERATE
+            dotnet run --project "$project" --configuration Release -- --test dev-save-atomic
+            dotnet run --project "$project" --configuration Release -- --test dev-save-boundary
+          elif [[ "$status" == "proposed" || "$status" == "accepted" || "$status" == "active" || "$status" == "rejected" || "$status" == "superseded" || "$status" == "rolled-back" ]]; then
+            echo "LastBearing is absent from the current tree and Git history, and lifecycle history permits the explicit $status pre-materialization skip."
+          else
+            echo "WP-0002 status $status cannot omit the LastBearing test project." >&2
+            exit 1
+          fi
+
+      - name: Run control-plane regressions
+        run: python3 -B -m unittest discover -s docs/foundation-v0.1/tools -p 'test_*.py'
+
+      - name: Reject candidate whitespace errors
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git diff --check "${{ github.event.pull_request.base.sha }}...HEAD"
+          else
+            git show --check --format= --no-ext-diff HEAD
+          fi

@@ -24,13 +24,14 @@
   ],
   "properties": {
     "schema_version": { "const": 1 },
-    "manifest_id": { "const": "A1B-WP-0003-LOCAL-DEV" },
+    "lifecycle_state": { "enum": ["proposed", "attested"] },
+    "manifest_id": { "enum": ["A1B-WP-0002-LOCAL-DEV", "A1B-WP-0003-LOCAL-DEV"] },
     "boundary_mode": { "const": "local-development" },
-    "packet_id": { "const": "WP-0003" },
+    "packet_id": { "enum": ["WP-0002", "WP-0003"] },
     "packet_contract_sha256": { "$ref": "#/$defs/sha256" },
     "created_at": { "type": "string", "format": "date-time" },
-    "attested_by": { "type": "string", "minLength": 1 },
-    "attestation_receipt_id": { "type": "string", "pattern": "^RR-[A-Z0-9-]+$" },
+    "attested_by": { "type": ["string", "null"], "minLength": 1 },
+    "attestation_receipt_id": { "type": ["string", "null"], "pattern": "^RR-[A-Z0-9-]+$" },
     "repository": {
       "type": "object",
       "additionalProperties": false,
@@ -59,7 +60,7 @@
         "branch_is_main": { "const": false },
         "independent_git_directory": { "const": true },
         "shared_worktree": { "const": false },
-        "clean_at_activation": { "const": true },
+        "clean_at_activation": { "type": "boolean" },
         "game_project_path": { "const": "/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game" }
       }
     },
@@ -68,9 +69,9 @@
       "additionalProperties": false,
       "required": ["lease_id", "fencing_token", "expires_at", "paths", "domains"],
       "properties": {
-        "lease_id": { "type": "string", "minLength": 1 },
-        "fencing_token": { "type": "string", "minLength": 1 },
-        "expires_at": { "type": "string", "format": "date-time" },
+        "lease_id": { "type": ["string", "null"], "minLength": 1 },
+        "fencing_token": { "type": ["string", "null"], "minLength": 1 },
+        "expires_at": { "type": ["string", "null"], "format": "date-time" },
         "paths": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
         "domains": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
       }
@@ -98,7 +99,7 @@
       "properties": {
         "editor_version": { "const": "6000.5.4f1" },
         "project_path": { "const": "/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game" },
-        "project_state": { "const": "bootstrap-pending" },
+        "project_state": { "enum": ["bootstrap-pending", "existing-protected-project"] },
         "mcp_authorization_mode": { "const": "conditional-first-use" },
         "first_use_preconditions": {
           "const": [
@@ -127,12 +128,189 @@
         "main_protected": { "const": true },
         "pull_requests_required": { "const": true },
         "required_checks": {
-          "const": [
-            "Cursor Approval Agent: Pull Request Approver",
-            "validate"
+          "oneOf": [
+            { "const": ["Cursor Approval Agent: Pull Request Approver", "validate"] },
+            { "const": ["validate", "wp0002-core"] },
+            { "const": ["validate", "wp0002-core", "wp0002-policy"] }
           ]
         },
-        "force_push_disabled": { "const": true }
+        "force_push_disabled": { "const": true },
+        "auto_merge_required": { "type": "boolean" },
+        "autonomy_classification": { "const": "creator-delegated-manual-per-pr" },
+        "policy_canary_state": { "enum": ["unproven", "not-attached-to-latest-head", "proven-candidate-independent"] },
+        "delegated_release_required_per_pr": { "const": true },
+        "required_checks_without_canary": { "const": ["validate", "wp0002-core"] },
+        "required_checks_with_canary": { "const": ["validate", "wp0002-core", "wp0002-policy"] }
+      }
+    },
+    "allowed_mcp_tools": {
+      "const": [
+        "Unity_ReadConsole",
+        "Unity_RunCommand",
+        "Unity_ManageEditor",
+        "Unity_ManageGameObject",
+        "Unity_Camera_Capture"
+      ]
+    },
+    "local_package_links": {
+      "const": {
+        "com.ac21.sasha.simulation-core": "file:../../SimulationCore",
+        "com.ac21.sasha.save-contracts": "file:../../SaveContracts"
+      }
+    },
+    "local_save_boundary": {
+      "const": {
+        "profile_id": "last-bearing-dev-v1",
+        "root_source": "UnityEngine.Application.persistentDataPath",
+        "fixed_child": "last-bearing-dev-v1",
+        "fixed_child_only": true,
+        "write_authority": "unity-runtime-only-via-SaveContracts",
+        "direct_agent_or_host_filesystem_write": false,
+        "sibling_scan": false,
+        "presentation_arbitrary_root_constructor": false,
+        "load_visible_pointers": ["current", "last-good"]
+      }
+    },
+    "index_clean_at_activation": { "type": "boolean" },
+    "non_excluded_scope_clean_at_activation": { "type": "boolean" },
+    "reserved_scope_clean_at_activation": { "type": "boolean" },
+    "excluded_creator_owned_drift": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "working_tree_scope_capture": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["uri", "sha256"],
+          "properties": {
+            "uri": { "const": "repo://docs/evidence/WP-0002/scope-capture/working-tree-scope.json" },
+            "sha256": { "$ref": "#/$defs/sha256" }
+          }
+        }
+      ]
+    },
+    "github_protection_capture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_schema", "artifact"],
+      "properties": {
+        "required_schema": { "const": "wp0002-github-protection-v1" },
+        "artifact": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["uri", "sha256"],
+              "properties": {
+                "uri": { "const": "repo://docs/evidence/WP-0002/github-protection.json" },
+                "sha256": { "$ref": "#/$defs/sha256" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "external_cursor_review_control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "check_context",
+        "github_app_id",
+        "optional_review",
+        "blocking_required_check",
+        "classification",
+        "prompt_injection_residual_acknowledged",
+        "deterministic_non_llm_execution_seam",
+        "policy_path",
+        "policy_source_sha",
+        "same_repository_only",
+        "base_ref",
+        "head_ref_prefix",
+        "candidate_code_execution",
+        "creator_manual_transition_required",
+        "manual_gate_transitions",
+        "configuration_capture"
+      ],
+      "properties": {
+        "provider": { "const": "Cursor Approval Agent" },
+        "check_context": { "const": "Cursor Approval Agent: Pull Request Approver" },
+        "github_app_id": { "const": 1210556 },
+        "optional_review": { "const": true },
+        "blocking_required_check": { "const": false },
+        "classification": { "const": "independent-ai-review-not-deterministic-validator" },
+        "prompt_injection_residual_acknowledged": { "const": true },
+        "deterministic_non_llm_execution_seam": { "const": null },
+        "policy_path": { "const": "Tools/Validation/validate_wp0002_policy.py" },
+        "policy_source_sha": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+          ]
+        },
+        "same_repository_only": { "const": true },
+        "base_ref": { "const": "main" },
+        "head_ref_prefix": { "const": "agent/" },
+        "candidate_code_execution": { "const": false },
+        "creator_manual_transition_required": { "const": true },
+        "manual_gate_transitions": {
+          "const": ["proposed-to-accepted", "accepted-to-active", "active-to-verifying", "verifying-to-candidate", "candidate-to-released"]
+        },
+        "configuration_capture": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["uri", "sha256"],
+              "properties": {
+                "uri": { "const": "repo://docs/evidence/WP-0002/cursor-approval-policy.json" },
+                "sha256": { "$ref": "#/$defs/sha256" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "unity_runcommand_residual_capability": {
+      "const": {
+        "acknowledged_capability": "Unity_RunCommand compiles and executes arbitrary Editor C# with potential host filesystem, network, process, and package reach",
+        "assistant_permissions_and_five_tool_allowlist_are_a_sandbox": false,
+        "denied_actions_enforcement": "creator-authority-policy-only-not-os-enforcement",
+        "direct_runcommand_prohibited_until_dispatcher_materialized_and_hash_bound": true,
+        "dispatcher": {
+          "contract": "wp0002-gate-dispatcher-v1",
+          "repository_path": "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
+          "allowed_gate_ids": [
+            "asset-refresh-and-compile",
+            "wp0002-editmode-test-assembly",
+            "wp0002-playmode-test-assembly",
+            "wp0002-technical-capture"
+          ],
+          "content_addressed_source_required_per_call": true,
+          "required_log_fields": ["gate_id", "source_sha256", "command", "result", "started_at", "completed_at"],
+          "reject_non_enumerated_invocation": true
+        },
+        "unattended_third_party_rollout_requires_tool": "Unity_WP0002_RunGate"
+      }
+    },
+    "creator_delegated_manual_authority": {
+      "const": {
+        "authority_source": "authenticated-creator-delegation",
+        "transmission_agent": "Codex",
+        "attribution": "creator-delegated-manual-approval-transmitted-by-Codex",
+        "cursor_absence_does_not_block": true,
+        "deterministic_checks_nonwaivable": ["validate", "wp0002-core"],
+        "external_protected_receipt_required": true,
+        "direct_self-merge_authorized": false,
+        "repo_admin_capability_acknowledged": true,
+        "branch_protection_is_credential_isolation": false,
+        "protection_bypass_constraint": "denied-creator-policy-with-live-audit-and-canary"
       }
     },
     "permission_boundary": {
@@ -141,28 +319,36 @@
       "required": ["allowed_actions", "denied_actions"],
       "properties": {
         "allowed_actions": {
-          "const": [
-            "edit-declared-repository-paths",
-            "unity-mcp-project-and-object-edits",
-            "unity-mcp-play-mode",
-            "unity-mcp-project-tests",
-            "unity-mcp-console-read",
-            "unity-mcp-screen-capture",
-            "local-nondestructive-validation",
-            "git-commit-push-protected-pr"
-          ]
+          "type": "array",
+          "minItems": 8,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
         },
         "denied_actions": {
+          "type": "array",
+          "minItems": 9,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "protected_paths_read_only": {
           "const": [
-            "direct-unity-process-invocation",
-            "dependency-or-tool-install-without-creator",
-            "account-seat-license-billing-purchase-change",
-            "credential-or-secret-access",
-            "publish-release-deploy-monetize",
-            "external-third-party-contact",
-            "git-history-rewrite-or-protection-bypass",
-            "direct-agent-write-outside-repository",
-            "constitutional-governance-credential-dependency-save-release-auto-merge"
+            "AGENTS.md",
+            ".codex/config.toml",
+            "Game/ProjectSettings/ProjectSettings.asset",
+            "Game/ProjectSettings/SceneTemplateSettings.json",
+            "docs/foundation-v0.1/",
+            "docs/foundation-v0.1/governance/",
+            "docs/foundation-v0.1/ledger/receipts/",
+            "Tools/Validation/validate_wp0002_package_graph.py",
+            "Tools/Validation/validate_wp0002_entry_gate.py",
+            "Tools/Validation/validate_wp0002_policy.py",
+            "Tools/Validation/collect_wp0002_scope_capture.py",
+            ".github/workflows/wp0002-ci.yml",
+            ".github/workflows/wp0002-policy.yml",
+            "SimulationCore/README.md",
+            "SaveContracts/README.md",
+            "SimulationCore/package.json",
+            "SaveContracts/package.json"
           ]
         }
       }
@@ -179,13 +365,365 @@
       }
     },
     "local_observation_exceptions": {
-      "const": [
-        "BASE-WP0003-MAC",
-        "BASE-WP0003-REPOSITORY",
-        "BASE-WP0003-UNITY"
+      "oneOf": [
+        { "const": [] },
+        { "const": ["BASE-WP0003-MAC", "BASE-WP0003-REPOSITORY", "BASE-WP0003-UNITY"] }
       ]
     }
   },
+  "allOf": [
+    {
+      "if": { "properties": { "packet_id": { "const": "WP-0002" } }, "required": ["packet_id"] },
+      "then": {
+        "required": [
+          "lifecycle_state",
+          "allowed_mcp_tools",
+          "local_package_links",
+          "local_save_boundary",
+          "index_clean_at_activation",
+          "non_excluded_scope_clean_at_activation",
+          "reserved_scope_clean_at_activation",
+          "excluded_creator_owned_drift",
+          "working_tree_scope_capture",
+          "github_protection_capture",
+          "external_cursor_review_control",
+          "unity_runcommand_residual_capability",
+          "creator_delegated_manual_authority"
+        ],
+        "properties": {
+          "manifest_id": { "const": "A1B-WP-0002-LOCAL-DEV" },
+          "index_clean_at_activation": { "const": true },
+          "non_excluded_scope_clean_at_activation": { "const": true },
+          "reserved_scope_clean_at_activation": { "const": true },
+          "unity": {
+            "properties": {
+              "project_state": { "const": "existing-protected-project" }
+            }
+          },
+          "git_safety": {
+            "required": [
+              "auto_merge_required",
+              "autonomy_classification",
+              "policy_canary_state",
+              "delegated_release_required_per_pr",
+              "required_checks_without_canary",
+              "required_checks_with_canary"
+            ],
+            "properties": {
+              "required_checks": {
+                "oneOf": [
+                  { "const": ["validate", "wp0002-core"] },
+                  { "const": ["validate", "wp0002-core", "wp0002-policy"] }
+                ]
+              },
+              "auto_merge_required": { "const": false }
+            }
+          },
+          "permission_boundary": {
+            "required": ["protected_paths_read_only"],
+            "properties": {
+              "allowed_actions": {
+                "const": [
+                  "edit-declared-repository-paths",
+                  "unity-mcp-project-and-object-edits",
+                  "unity-mcp-play-mode",
+                  "unity-mcp-project-tests",
+                  "unity-mcp-console-read",
+                  "unity-mcp-screen-capture",
+                  "local-nondestructive-validation",
+                  "git-commit-push-protected-pr",
+                  "creator-delegated-manual-release-after-required-checks",
+                  "link-exact-repository-local-upm-simulation-core-and-save-contracts",
+                  "unity-runtime-savecontracts-write-fixed-last-bearing-dev-v1-child"
+                ]
+              },
+              "denied_actions": {
+                "const": [
+                  "direct-unity-process-invocation",
+                  "tool-install-or-package-change-except-two-exact-repository-local-upm-links",
+                  "account-seat-license-billing-purchase-change",
+                  "credential-or-secret-access",
+                  "publish-release-deploy-monetize",
+                  "external-third-party-contact",
+                  "git-history-rewrite-or-protection-bypass",
+                  "direct-agent-write-outside-repository",
+                  "foundation-governance-receipt-write-during-implementation",
+                  "package-graph-change-except-two-exact-repository-local-upm-links",
+                  "registry-network-git-tarball-or-external-dependency-change",
+                  "agent-or-manual-direct-merge"
+                ]
+              }
+            }
+          },
+          "local_observation_exceptions": { "const": [] }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "packet_id": { "const": "WP-0002" },
+          "lifecycle_state": { "const": "proposed" }
+        },
+        "required": ["packet_id", "lifecycle_state"]
+      },
+      "then": {
+        "properties": {
+          "attested_by": { "const": null },
+          "attestation_receipt_id": { "const": null },
+          "repository": {
+            "properties": {
+              "clean_at_activation": { "const": false }
+            }
+          },
+          "reservation": {
+            "properties": {
+              "lease_id": { "const": null },
+              "fencing_token": { "const": null },
+              "expires_at": { "const": null }
+            }
+          },
+          "excluded_creator_owned_drift": {
+            "const": [
+              {
+                "path": ".codex/config.toml",
+                "normalized_git_state": "unstaged-modified",
+                "base_blob_sha256": null,
+                "observed_sha256": null,
+                "regular_file_no_symlink": null,
+                "owner": "creator",
+                "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash"
+              },
+              {
+                "path": "Game/ProjectSettings/ProjectSettings.asset",
+                "normalized_git_state": "unstaged-modified",
+                "base_blob_sha256": null,
+                "observed_sha256": null,
+                "regular_file_no_symlink": null,
+                "owner": "creator",
+                "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash"
+              },
+              {
+                "path": "Game/ProjectSettings/SceneTemplateSettings.json",
+                "normalized_git_state": "untracked",
+                "base_blob_sha256": null,
+                "observed_sha256": null,
+                "regular_file_no_symlink": null,
+                "owner": "creator",
+                "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash"
+              }
+            ]
+          },
+          "working_tree_scope_capture": { "const": null }
+          ,
+          "github_protection_capture": {
+            "const": {
+              "required_schema": "wp0002-github-protection-v1",
+              "artifact": null
+            }
+          },
+          "external_cursor_review_control": {
+            "const": {
+              "provider": "Cursor Approval Agent",
+              "check_context": "Cursor Approval Agent: Pull Request Approver",
+              "github_app_id": 1210556,
+              "optional_review": true,
+              "blocking_required_check": false,
+              "classification": "independent-ai-review-not-deterministic-validator",
+              "prompt_injection_residual_acknowledged": true,
+              "deterministic_non_llm_execution_seam": null,
+              "policy_path": "Tools/Validation/validate_wp0002_policy.py",
+              "policy_source_sha": null,
+              "same_repository_only": true,
+              "base_ref": "main",
+              "head_ref_prefix": "agent/",
+              "candidate_code_execution": false,
+              "creator_manual_transition_required": true,
+              "manual_gate_transitions": ["proposed-to-accepted", "accepted-to-active", "active-to-verifying", "verifying-to-candidate", "candidate-to-released"],
+              "configuration_capture": null
+            }
+          }
+          ,
+          "git_safety": {
+            "properties": {
+              "policy_canary_state": { "const": "unproven" },
+              "required_checks": { "const": ["validate", "wp0002-core"] }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "packet_id": { "const": "WP-0002" },
+          "lifecycle_state": { "const": "attested" }
+        },
+        "required": ["packet_id", "lifecycle_state"]
+      },
+      "then": {
+        "properties": {
+          "attested_by": { "type": "string", "minLength": 1 },
+          "attestation_receipt_id": { "type": "string", "pattern": "^RR-[A-Z0-9-]+$" },
+          "repository": {
+            "properties": {
+              "clean_at_activation": { "const": false }
+            }
+          },
+          "reservation": {
+            "properties": {
+              "lease_id": { "type": "string", "minLength": 1 },
+              "fencing_token": { "type": "string", "minLength": 1 },
+              "expires_at": { "type": "string", "format": "date-time" }
+            }
+          },
+          "excluded_creator_owned_drift": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["path", "normalized_git_state", "base_blob_sha256", "observed_sha256", "regular_file_no_symlink", "owner", "policy"],
+                "properties": {
+                  "path": { "const": ".codex/config.toml" },
+                  "normalized_git_state": { "const": "unstaged-modified" },
+                  "base_blob_sha256": { "$ref": "#/$defs/sha256" },
+                  "observed_sha256": { "$ref": "#/$defs/sha256" },
+                  "regular_file_no_symlink": { "const": true },
+                  "owner": { "const": "creator" },
+                  "policy": { "const": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash" }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["path", "normalized_git_state", "base_blob_sha256", "observed_sha256", "regular_file_no_symlink", "owner", "policy"],
+                "properties": {
+                  "path": { "const": "Game/ProjectSettings/ProjectSettings.asset" },
+                  "normalized_git_state": { "const": "unstaged-modified" },
+                  "base_blob_sha256": { "$ref": "#/$defs/sha256" },
+                  "observed_sha256": { "$ref": "#/$defs/sha256" },
+                  "regular_file_no_symlink": { "const": true },
+                  "owner": { "const": "creator" },
+                  "policy": { "const": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash" }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["path", "normalized_git_state", "base_blob_sha256", "observed_sha256", "regular_file_no_symlink", "owner", "policy"],
+                "properties": {
+                  "path": { "const": "Game/ProjectSettings/SceneTemplateSettings.json" },
+                  "normalized_git_state": { "const": "untracked" },
+                  "base_blob_sha256": { "const": null },
+                  "observed_sha256": { "$ref": "#/$defs/sha256" },
+                  "regular_file_no_symlink": { "const": true },
+                  "owner": { "const": "creator" },
+                  "policy": { "const": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash" }
+                }
+              }
+            ],
+            "items": false
+          },
+          "working_tree_scope_capture": {
+            "type": "object"
+          },
+          "github_protection_capture": {
+            "properties": {
+              "artifact": { "type": "object" }
+            }
+          },
+          "external_cursor_review_control": {
+            "properties": {
+              "policy_source_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+              "configuration_capture": { "type": "object" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "packet_id": { "const": "WP-0003" } }, "required": ["packet_id"] },
+      "then": {
+        "properties": {
+          "lifecycle_state": false,
+          "allowed_mcp_tools": false,
+          "local_package_links": false,
+          "local_save_boundary": false,
+          "index_clean_at_activation": false,
+          "non_excluded_scope_clean_at_activation": false,
+          "reserved_scope_clean_at_activation": false,
+          "excluded_creator_owned_drift": false,
+          "working_tree_scope_capture": false,
+          "github_protection_capture": false,
+          "external_cursor_review_control": false,
+          "unity_runcommand_residual_capability": false,
+          "creator_delegated_manual_authority": false,
+          "manifest_id": { "const": "A1B-WP-0003-LOCAL-DEV" },
+          "attested_by": { "type": "string", "minLength": 1 },
+          "attestation_receipt_id": { "type": "string", "pattern": "^RR-[A-Z0-9-]+$" },
+          "repository": {
+            "properties": {
+              "clean_at_activation": { "const": true }
+            }
+          },
+          "reservation": {
+            "properties": {
+              "lease_id": { "type": "string", "minLength": 1 },
+              "fencing_token": { "type": "string", "minLength": 1 },
+              "expires_at": { "type": "string", "format": "date-time" }
+            }
+          },
+          "unity": {
+            "properties": {
+              "project_state": { "const": "bootstrap-pending" }
+            }
+          },
+          "git_safety": {
+            "properties": {
+              "required_checks": {
+                "const": ["Cursor Approval Agent: Pull Request Approver", "validate"]
+              },
+              "auto_merge_required": false
+            }
+          },
+          "permission_boundary": {
+            "properties": {
+              "allowed_actions": {
+                "const": [
+                  "edit-declared-repository-paths",
+                  "unity-mcp-project-and-object-edits",
+                  "unity-mcp-play-mode",
+                  "unity-mcp-project-tests",
+                  "unity-mcp-console-read",
+                  "unity-mcp-screen-capture",
+                  "local-nondestructive-validation",
+                  "git-commit-push-protected-pr"
+                ]
+              },
+              "denied_actions": {
+                "const": [
+                  "direct-unity-process-invocation",
+                  "dependency-or-tool-install-without-creator",
+                  "account-seat-license-billing-purchase-change",
+                  "credential-or-secret-access",
+                  "publish-release-deploy-monetize",
+                  "external-third-party-contact",
+                  "git-history-rewrite-or-protection-bypass",
+                  "direct-agent-write-outside-repository",
+                  "constitutional-governance-credential-dependency-save-release-auto-merge"
+                ]
+              },
+              "protected_paths_read_only": false
+            }
+          },
+          "local_observation_exceptions": {
+            "const": ["BASE-WP0003-MAC", "BASE-WP0003-REPOSITORY", "BASE-WP0003-UNITY"]
+          }
+        }
+      }
+    }
+  ],
   "$defs": {
     "sha256": {
       "type": "string",

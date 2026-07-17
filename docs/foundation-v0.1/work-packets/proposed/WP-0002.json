@@ -9,14 +9,18 @@
   "save_risk": "S1",
   "created_on": "2026-07-15",
   "title": "Ugly constitutional city-road-faction toy",
-  "objective": "Use the creator-ratified Sasha identity, human/robot/mixed colony boundary, remaining core decisions, explicit city-comparison authorization, and WP-0001's accepted technical foundation to build an ugly, slice-scale Last Bearing toy that compares the city grammar, proves the selected road-control embodiment in 30 seconds, runs one autonomous faction intent, exercises both module verbs and four preparation permutations, proves all three composition loops and, only under D-0039 / MECHANICAL-COMPOSITIONS, their bounded differentiated staffing mechanics, and persists exact cross-mode consequences.",
+  "objective": "Succeed released WP-0003 with the creator-ratified Sasha identity, human/robot/mixed colony boundary, remaining core decisions, explicit city-comparison authorization, and the proven protected-PR local lane to build an ugly, slice-scale Last Bearing toy that compares the city grammar, proves the selected road-control embodiment in 30 seconds, runs one autonomous faction intent, exercises both module verbs and four preparation permutations, proves the same golden path for all three colony compositions and, only under D-0039 / MECHANICAL-COMPOSITIONS, their bounded differentiated staffing mechanics, and persists exact cross-mode consequences in the disposable last-bearing-dev-v1 local profile.",
   "value": "This is the earliest evidence that the city, road, and faction systems form one enjoyable game before generalized architecture or production art begins.",
   "requested_by": "creator-goal:2026-07-15",
   "required_approver": "creator",
   "approved_by": null,
   "approval_receipt_id": null,
-  "contract_sha256": "7b2e6f4392b8f3ac5fede97d7f9b053a6c987174d149150efc8e9fea2845b2ab",
-  "a1_boundary_manifest": null,
+  "contract_sha256": "50565d914f463c39e502600dc370142a7449c695fb558c5da03cfd3e1abb13a3",
+  "a1_boundary_manifest": {
+    "manifest_id": "A1B-WP-0002-LOCAL-DEV",
+    "path": "governance/a1-boundaries/WP-0002.json",
+    "sha256": "ce6375756cf1a5589fbbcd67ed201b74ba6b4afdf0f6512894ae1eb991bd9a27"
+  },
   "implementer": null,
   "verifier": null,
   "integrator": null,
@@ -63,40 +67,40 @@
   ],
   "baseline_evidence": [
     {
-      "id": "BASE-WP0001",
-      "type": "dependency-release",
-      "uri": "pending://WP-0001-accepted-evidence",
-      "sha256": null
+      "id": "BASE-WP0003",
+      "type": "dependency-completion-evidence",
+      "uri": "git-object://b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5/docs/evidence/WP-0003/TECHNICAL-SANDBOX-20260716.md",
+      "sha256": "c381771d45bae630b16ab08c1eb11f63d0c9e563c6b7f77e0d7ea2952d5832ae"
     },
     {
       "id": "BASE-IDENTITY",
-      "type": "creator-ratification",
-      "uri": "pending://creator-identity-ratification",
-      "sha256": null
+      "type": "identity-source",
+      "uri": "git-object://b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5/docs/foundation-v0.1/ledger/decisions.jsonl",
+      "sha256": "df5a4840f468676d6e3b428be1eda957310ef12c812241c5be3cdde6bd4601ef"
     },
     {
       "id": "BASE-CORE",
-      "type": "creator-ratification",
-      "uri": "pending://creator-core-ratification",
-      "sha256": null
+      "type": "constitutional-source",
+      "uri": "git-object://b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5/docs/foundation-v0.1/00-GAME-CONSTITUTION.md",
+      "sha256": "ff6d7938c14a074acf796619868b97551cefd1681147559983a293792c20afb8"
     },
     {
       "id": "BASE-CITY-COMPARISON",
-      "type": "creator-authorization",
-      "uri": "pending://authorize-city-comparison",
-      "sha256": null
+      "type": "city-comparison-control",
+      "uri": "git-object://b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5/docs/foundation-v0.1/02-SYSTEM-MAP.md",
+      "sha256": "ee0ceb2e28d94b894735ddb15d2f32cd4f1403eeaece82e8f03506cf05293c68"
     },
     {
       "id": "BASE-CAMERA",
-      "type": "comparison-control",
-      "uri": "pending://d0022-provisional-camera-config",
-      "sha256": null
+      "type": "camera-control-source",
+      "uri": "git-object://b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5/docs/foundation-v0.1/05-ART-BIBLE.md",
+      "sha256": "b1b3b950c13725651df61682d3b7b9c5374e995bb52a1f998b845cf00cd3483f"
     },
     {
       "id": "BASE-SLICE",
-      "type": "creator-ratification",
-      "uri": "pending://last-bearing-ratification",
-      "sha256": null
+      "type": "slice-source",
+      "uri": "git-object://b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5/docs/foundation-v0.1/03-VERTICAL-SLICE.md",
+      "sha256": "ddf77882b81f54dcbb70a1d3d1d7347ba62be5447edfe2aac236941651c70b9b"
     }
   ],
   "in_scope": [
@@ -107,8 +111,10 @@
     "Implement Winch Assembly and Sealed Range Tank with distinct preparation, traversal/command, and return effects.",
     "Run one faction need -> telegraphed intent -> autonomous depot claim -> city/economic consequence loop.",
     "Exercise all four preparation/module permutations with at least two viable strategies.",
-    "Under the required RATIFY-SLICE claim, test the provisional slice role bundle by representing Sasha as the persistent player-facing protagonist, colony decision-maker, expedition leader, save addressee, and consequence addressee; prove one human-only, robot-only, and mixed end-to-end loop smoke without crossing the 2x2 matrix; run the differentiated staffing/needs matrix only after D-0039 / MECHANICAL-COMPOSITIONS is creator-bound.",
-    "Use WP-0001's ownership transaction and Save Envelope v1 at all supported city/road checkpoints.",
+    "Under the required RATIFY-SLICE claim, test the provisional slice role bundle by representing Sasha as the persistent player-facing protagonist, colony decision-maker, expedition leader, save addressee, and consequence addressee; prove human-only, robot-only, and mixed colonies on the same end-to-end golden path without crossing the 2x2 matrix; run the differentiated staffing/needs matrix only after D-0039 / MECHANICAL-COMPOSITIONS is separately creator-bound.",
+    "Persist only the versioned local development profile `last-bearing-dev-v1` beneath the fixed `UnityEngine.Application.persistentDataPath/last-bearing-dev-v1` child: Unity runtime may write only through SaveContracts, loads may inspect only current and last-good pointers in that child, direct agent/host filesystem writes, sibling scans, and arbitrary presentation constructor roots remain denied; write a new generation atomically, preserve the immediately preceding valid generation as last-good, fail closed on partial/corrupt writes, and make no compatibility promise across commits, builds, or later save contracts.",
+    "Link Unity to the two existing sibling packages only through repository-local UPM entries `com.ac21.sasha.simulation-core: file:../../SimulationCore` and `com.ac21.sasha.save-contracts: file:../../SaveContracts`, resolved relative to `Game/Packages/manifest.json` and recorded in the exact lockfile; no registry, network, Git, tarball, or new external dependency is authorized.",
+    "Use the proposed A1B-WP-0002-LOCAL-DEV boundary only after released WP-0003, distinct creator acceptance/activation, a held exact reservation, and protected-main materialization; implementation keeps foundation, governance, and receipt paths read-only, uses only the five named direct Unity MCP tools, and travels through fresh agent/* branches with mandatory validate and wp0002-core plus transparent creator-delegated manual release per pull request; wp0002-policy remains contingent on a live latest-head canary, Cursor review remains optional, and autonomous auto-merge is not authorized.",
     "Conduct creator play plus at least two additional observed play sessions.",
     "Emit any candidate scenario/control-plane revision and hashes only under `BuildArtifacts/WP-0002/candidate-control-plane/`; A1 cannot edit the protected foundation, registry, or accepted scenario pins."
   ],
@@ -117,8 +123,9 @@
     "Production-scale population, city, faction, or road capacity.",
     "Third module, convoy escorts, deep combat, procedural open world, or second faction.",
     "Generalized economy/faction frameworks beyond the slice state.",
+    "Any registry, network, Git, tarball, embedded-copy, or external package dependency; package-graph authority is limited to the two exact repository-local UPM links declared in scope.",
     "Final Sasha character model, voice, backstory, pronouns, moral alignment, or final meaning of Atomic Land Pirate; final robot personhood, origin, or society lore.",
-    "Automatic merge, rollout, or autonomy promotion."
+    "Direct or agent-selected merge, protected-check bypass, rollout, publishing, release, or autonomy promotion; only repository-configured auto-merge after every required protected check is permitted."
   ],
   "affected_domains": [
     "world",
@@ -140,56 +147,80 @@
     "Preparation state -> expedition timing and city opportunity cost",
     "Vehicle capability tags -> route/tool/return outcomes",
     "Faction autonomous intent -> depot claim and doctrine-shaped city consequence",
-    "Ownership transaction -> Save Envelope v1 -> canonical outcome comparison"
+    "Unity UPM -> exact repository-local SimulationCore and SaveContracts package links -> one lockfile resolution",
+    "Ownership transaction -> last-bearing-dev-v1 atomic generation + preserved last-good -> canonical outcome comparison"
   ],
   "dependencies": [
-    "WP-0001"
+    "WP-0003"
   ],
   "reservation": {
     "status": "unreserved",
     "lease_id": null,
     "base_commit": null,
-    "paths": [],
-    "domains": [],
+    "paths": [
+      "SimulationCore/Runtime/LastBearing.meta",
+      "SimulationCore/Runtime/LastBearing/",
+      "Tests/AtomicLandPirate.CoreTests/LastBearing/",
+      "SaveContracts/Runtime/LastBearing.meta",
+      "SaveContracts/Runtime/LastBearing/",
+      "Game/Packages/manifest.json",
+      "Game/Packages/packages-lock.json",
+      "Game/ProjectSettings/EditorBuildSettings.asset",
+      "Game/Assets/AtomicLandPirate/LastBearing.meta",
+      "Game/Assets/AtomicLandPirate/LastBearing/",
+      "Tools/ScenarioRunner/",
+      "BuildArtifacts/WP-0002/",
+      "BuildArtifacts/WP-0002/candidate-control-plane/",
+      "docs/evidence/WP-0002/",
+      "docs/playtests/WP-0002/"
+    ],
+    "domains": [
+      "world",
+      "settlement",
+      "population",
+      "logistics",
+      "vehicle",
+      "expedition",
+      "faction",
+      "crisis",
+      "audit",
+      "presentation",
+      "save"
+    ],
     "expires_at": null,
     "fencing_token": null
   },
   "declared_paths": [
-    "SimulationCore/LastBearing/",
-    "Tests/SimulationCore/LastBearing/",
-    "Game/Assets/Game/LastBearing.meta",
-    "Game/Assets/Game/LastBearing/Adapters/",
-    "Game/Assets/Game/LastBearing/Adapters.meta",
-    "Game/Assets/Game/LastBearing/Presentation/",
-    "Game/Assets/Game/LastBearing/Presentation.meta",
-    "Game/Assets/Game/LastBearing/UI/",
-    "Game/Assets/Game/LastBearing/UI.meta",
-    "Game/Assets/Game/LastBearing/Content/",
-    "Game/Assets/Game/LastBearing/Content.meta",
-    "Game/Assets/Game/LastBearing/Tests/",
-    "Game/Assets/Game/LastBearing/Tests.meta",
-    "Tests/Scenarios/",
-    "Tests/GoldenSaves/",
-    "SaveContracts/Sections/LastBearing/",
+    "SimulationCore/Runtime/LastBearing.meta",
+    "SimulationCore/Runtime/LastBearing/",
+    "Tests/AtomicLandPirate.CoreTests/LastBearing/",
+    "SaveContracts/Runtime/LastBearing.meta",
+    "SaveContracts/Runtime/LastBearing/",
+    "Game/Packages/manifest.json",
+    "Game/Packages/packages-lock.json",
+    "Game/ProjectSettings/EditorBuildSettings.asset",
+    "Game/Assets/AtomicLandPirate/LastBearing.meta",
+    "Game/Assets/AtomicLandPirate/LastBearing/",
+    "Tools/ScenarioRunner/",
     "BuildArtifacts/WP-0002/",
     "BuildArtifacts/WP-0002/candidate-control-plane/",
     "docs/evidence/WP-0002/",
-    "docs/playtests/"
+    "docs/playtests/WP-0002/"
   ],
   "actual_paths": [],
   "save_impact": {
-    "summary": "S1 additive: add Sasha identity, typed human/robot resident membership and derived composition, plus slice-specific city, module, faction-intent, crisis, and outcome state without redefining WP-0001's accepted envelope/root/pointer contracts.",
+    "summary": "S1 first-use local development state: create only the disposable versioned `last-bearing-dev-v1` profile for the WP-0002 toy; it is not a production Save Envelope or a compatibility commitment.",
     "schema_changes": [
-      "Add new named protagonist, resident/composition, and slice sections with manifest-declared absence defaults; any touched accepted section must bump its own version and carry a migration."
+      "Define one local `last-bearing-dev-v1` generation containing the named protagonist, exact typed resident set and derived composition, city, module, faction-intent, crisis, and outcome state.",
+      "Write to a new temporary generation, durably close it, atomically replace the current pointer, and retain the immediately preceding verified generation as last-good; never mutate the only good generation."
     ],
     "migration_ids": [],
-    "compatibility": "WP-0001 golden technical fixtures must remain readable and canonically stable. An old writer cannot rewrite unknown authoritative sections. No distributed player save exists, but fixture compatibility is still a release gate.",
+    "compatibility": "No compatibility is promised across commits, builds, profile versions, or the future production save contract. The loader accepts exactly `last-bearing-dev-v1`, fails closed on unknown/corrupt versions, never migrates or rewrites another profile, and may require deleting this disposable profile.",
     "golden_scenarios": [
       "SCN_BEARING_COOPERATE",
       "SCN_BEARING_TAKE",
       "SCN_COLONY_COMPOSITION_MATRIX",
       "SCN_RETURN_LATE_DAMAGED",
-      "SCN_SAVE_TRANSITIONS",
       "SCN_COMPOSITION_LOOP_SMOKE",
       "SCN_PREPARATION_MODULE_MATRIX",
       "SCN_FACTION_WAIT_CLAIM",
@@ -206,10 +237,18 @@
       "scenario_id": null
     },
     {
-      "id": "T-A1-QUARANTINE",
+      "id": "T-PACKAGE-GRAPH",
+      "kind": "security",
+      "command": "python3 Tools/Validation/validate_wp0002_package_graph.py --base b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5 --manifest Game/Packages/manifest.json --lock Game/Packages/packages-lock.json --simulation-package SimulationCore/package.json --save-package SaveContracts/package.json --report BuildArtifacts/WP-0002/package-graph.json",
+      "oracle": "Against protected base b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5, SimulationCore/package.json and SaveContracts/package.json remain byte-identical; every pre-existing Game/Packages/manifest.json dependency and Game/Packages/packages-lock.json entry preserves its exact version, source, URL, depth, and dependency map; the only manifest additions are com.ac21.sasha.simulation-core=file:../../SimulationCore and com.ac21.sasha.save-contracts=file:../../SaveContracts; the only lock additions have matching file:../../ versions, depth 0, source local, and empty dependencies; every other graph, source, or version delta fails closed.",
+      "required": true,
+      "scenario_id": null
+    },
+    {
+      "id": "T-A1-LOCAL-BOUNDARY",
       "kind": "manual",
       "command": null,
-      "oracle": "Before any WP-0002 command runs, the creator verifies and receipt-binds a disposable exact-base quarantine with protected foundation/governance/receipt/release state non-writable, only packet-declared outputs writable, no merge or release credentials, a complete command/diff/artifact record, and a creator-operated import-or-reject boundary; no other A1 packet is active.",
+      "oracle": "Before any WP-0002 command runs, WP-0003 is released under creator completion evidence and a distinct creator receipt binds A1B-WP-0002-LOCAL-DEV with a held exact reservation. Implementation uses fresh protected-main agent/* branches; foundation/governance/receipt paths remain read-only; only Unity_ReadConsole, Unity_RunCommand, Unity_ManageEditor, Unity_ManageGameObject, and Unity_Camera_Capture may reach the creator-opened Editor; installs, credentials, publishing, direct Unity process access, protection bypass, and direct merge remain denied; repository-configured auto-merge may complete only after all required protected checks pass.",
       "required": true,
       "scenario_id": null
     },
@@ -218,7 +257,7 @@
       "kind": "scenario",
       "command": "python3 Tools/ScenarioRunner/run.py SCN_COLONY_COMPOSITION_MATRIX",
       "oracle": "After a creator-bound D-0039 / MECHANICAL-COMPOSITIONS claim, the exact one-cohort/one-unit cases prove human food/water/rest dependency and repair capability, robot power/maintenance dependency and tool capability, and a mixed complementary assignment/shared-power choice; all exact resident sets survive save/load with no substitution.",
-      "required": true,
+      "required": false,
       "scenario_id": "SCN_COLONY_COMPOSITION_MATRIX"
     },
     {
@@ -262,18 +301,10 @@
       "scenario_id": null
     },
     {
-      "id": "T-MODULES",
-      "kind": "scenario",
-      "command": "python3 Tools/ScenarioRunner/run.py SCN_PREPARATION_MODULE_MATRIX",
-      "oracle": "Both modules create distinct preparation, route/action, capacity, and return consequences.",
-      "required": true,
-      "scenario_id": "SCN_PREPARATION_MODULE_MATRIX"
-    },
-    {
       "id": "T-PERMUTATIONS",
       "kind": "scenario",
       "command": "python3 Tools/ScenarioRunner/run.py SCN_PREPARATION_MODULE_MATRIX",
-      "oracle": "All four preparation/module permutations complete, at least two remain viable, and at least two returns change the next city decision.",
+      "oracle": "Both modules create distinct preparation, route/action, capacity, and return consequences; all four preparation/module permutations complete, at least two remain viable, and at least two returns change the next city decision.",
       "required": true,
       "scenario_id": "SCN_PREPARATION_MODULE_MATRIX"
     },
@@ -294,12 +325,20 @@
       "scenario_id": "SCN_BEARING_COOPERATE"
     },
     {
-      "id": "T-SAVE-PERMUTATIONS",
-      "kind": "save",
-      "command": "python3 Tools/ScenarioRunner/run.py SCN_SAVE_TRANSITIONS",
-      "oracle": "Every supported checkpoint in every permutation reloads to the canonical outcome with no duplicate/lost state.",
+      "id": "T-DEV-SAVE-ATOMIC",
+      "kind": "unit",
+      "command": "dotnet run --project Tests/AtomicLandPirate.CoreTests/LastBearing/AtomicLandPirate.LastBearingTests.csproj --configuration Release -- --test dev-save-atomic",
+      "oracle": "The dedicated LastBearing headless test proves exact canonical round-trip at all four preparation/module checkpoints with no duplicate or lost state, atomic current publication, recovery through the immediately preceding verified last-good generation after injected partial/corrupt writes, and refusal of corrupt, partial, or unknown profile versions without migration, reinterpretation, or rewrite.",
       "required": true,
-      "scenario_id": "SCN_SAVE_TRANSITIONS"
+      "scenario_id": null
+    },
+    {
+      "id": "T-DEV-SAVE-BOUNDARY",
+      "kind": "security",
+      "command": "dotnet run --project Tests/AtomicLandPirate.CoreTests/LastBearing/AtomicLandPirate.LastBearingTests.csproj --configuration Release -- --test dev-save-boundary",
+      "oracle": "The dedicated LastBearing confinement test proves that the Unity runtime adapter derives only the fixed last-bearing-dev-v1 child of UnityEngine.Application.persistentDataPath, SaveContracts discovers only current and last-good within that child, sibling scans and path traversal fail closed, presentation exposes no arbitrary root constructor or override, and every persistent write travels only through the Unity-runtime SaveContracts seam.",
+      "required": true,
+      "scenario_id": null
     },
     {
       "id": "T-PLAY-THESIS",
@@ -336,15 +375,6 @@
       "baseline": null,
       "target": 4.0,
       "regression_ceiling": 4.0,
-      "comparator": "less-or-equal"
-    },
-    {
-      "name": "save-snapshot-pause-p95",
-      "scenario": "SCN_SAVE_TRANSITIONS",
-      "unit": "ms",
-      "baseline": null,
-      "target": 50.0,
-      "regression_ceiling": 50.0,
       "comparator": "less-or-equal"
     }
   ],
@@ -392,7 +422,7 @@
       },
       {
         "name": "ownership-invariant-violations",
-        "scenario": "SCN_SAVE_TRANSITIONS",
+        "scenario": "SCN_UGLY_TOY",
         "unit": "count",
         "baseline": null,
         "target": 0.0,
@@ -416,10 +446,10 @@
     "steps": [
       "Freeze and preserve toy build, playtest notes, seeds, saves, videos, and failing scenarios.",
       "Return the failed decision to provisional/open with evidence instead of generalizing the kernel.",
-      "Revert the toy feature branch while retaining the accepted WP-0001 technical foundation.",
+      "Revert the toy feature branch while retaining the released WP-0003 technical foundation.",
       "Open one narrower comparison packet for the failed city, road, faction, or coupling seam."
     ],
-    "save_recovery": "No distributed player saves exist. Discard the disposable toy profile, or inspect an older good generation read-only and continue only at generation 1 in a distinct slot_id/save_id lineage with completed rollback-fork provenance and rejected descendants quarantined outside recovery scan. Never repoint a writable old slot to an ancestor.",
+    "save_recovery": "No distributed player saves exist. Restore the immediately preceding verified generation retained as last-good after an interrupted write; otherwise delete the entire disposable `last-bearing-dev-v1` profile and restart. Never reinterpret, migrate, or promise compatibility for it.",
     "drill_required": true,
     "drill_evidence": []
   },
@@ -503,14 +533,6 @@
       "sha256": "792698b60fcbebc6644b222774932b7f01cacf69557c678376371f638e246c32",
       "fixture_manifest_path": "scenarios/fixtures/SCN_RETURN_LATE_DAMAGED/r1.fixture.json",
       "fixture_manifest_sha256": "2817489351af6658fe597f5d7313b89ea31523ac98d950719e1b3de07a2b4cf0"
-    },
-    {
-      "id": "SCN_SAVE_TRANSITIONS",
-      "revision": 1,
-      "path": "scenarios/definitions/SCN_SAVE_TRANSITIONS/r1.json",
-      "sha256": "66bc9b4a35b6fe28f9231bb64a29a148af852e5428025a4e49952bacc648090b",
-      "fixture_manifest_path": "scenarios/fixtures/SCN_SAVE_TRANSITIONS/r1.fixture.json",
-      "fixture_manifest_sha256": "405d1282e16dde2c5adbd6f18921be34405450b3534f4293f1c29e3f2f0a4fc0"
     },
     {
       "id": "SCN_TIME_POLICY",

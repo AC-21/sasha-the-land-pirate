@@ -1,0 +1,284 @@
+{
+  "schema_version": 1,
+  "lifecycle_state": "proposed",
+  "manifest_id": "A1B-WP-0002-LOCAL-DEV",
+  "boundary_mode": "local-development",
+  "packet_id": "WP-0002",
+  "packet_contract_sha256": "50565d914f463c39e502600dc370142a7449c695fb558c5da03cfd3e1abb13a3",
+  "created_at": "2026-07-17T04:46:30Z",
+  "attested_by": null,
+  "attestation_receipt_id": null,
+  "repository": {
+    "root": "/Users/sasha/Documents/Codex/sasha-the-land-pirate",
+    "remote_url": "https://github.com/AC-21/sasha-the-land-pirate",
+    "base_commit": "b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5",
+    "branch": "agent/wp0002-first-playable-governance-001",
+    "branch_head_commit": "b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5",
+    "branch_is_main": false,
+    "independent_git_directory": true,
+    "shared_worktree": false,
+    "clean_at_activation": false,
+    "game_project_path": "/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game"
+  },
+  "reservation": {
+    "lease_id": null,
+    "fencing_token": null,
+    "expires_at": null,
+    "paths": [
+      "SimulationCore/Runtime/LastBearing.meta",
+      "SimulationCore/Runtime/LastBearing/",
+      "Tests/AtomicLandPirate.CoreTests/LastBearing/",
+      "SaveContracts/Runtime/LastBearing.meta",
+      "SaveContracts/Runtime/LastBearing/",
+      "Game/Packages/manifest.json",
+      "Game/Packages/packages-lock.json",
+      "Game/ProjectSettings/EditorBuildSettings.asset",
+      "Game/Assets/AtomicLandPirate/LastBearing.meta",
+      "Game/Assets/AtomicLandPirate/LastBearing/",
+      "Tools/ScenarioRunner/",
+      "BuildArtifacts/WP-0002/",
+      "BuildArtifacts/WP-0002/candidate-control-plane/",
+      "docs/evidence/WP-0002/",
+      "docs/playtests/WP-0002/"
+    ],
+    "domains": [
+      "world",
+      "settlement",
+      "population",
+      "logistics",
+      "vehicle",
+      "expedition",
+      "faction",
+      "crisis",
+      "audit",
+      "presentation",
+      "save"
+    ]
+  },
+  "foundation_binding": {
+    "constitution_sha256": "ff6d7938c14a074acf796619868b97551cefd1681147559983a293792c20afb8",
+    "decision_ledger_sha256": "df5a4840f468676d6e3b428be1eda957310ef12c812241c5be3cdde6bd4601ef",
+    "last_creator_receipt_id": "RR-WP0003-ACCEPT-20260716"
+  },
+  "unity": {
+    "editor_version": "6000.5.4f1",
+    "project_path": "/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game",
+    "project_state": "existing-protected-project",
+    "mcp_authorization_mode": "conditional-first-use",
+    "first_use_preconditions": [
+      "creator-opened-exact-game-project",
+      "creator-confirmed-licensed-editor",
+      "bridge-running",
+      "codex-selected-and-approved",
+      "target-matches-game",
+      "requested-call-within-allowed-actions"
+    ]
+  },
+  "allowed_mcp_tools": [
+    "Unity_ReadConsole",
+    "Unity_RunCommand",
+    "Unity_ManageEditor",
+    "Unity_ManageGameObject",
+    "Unity_Camera_Capture"
+  ],
+  "local_package_links": {
+    "com.ac21.sasha.simulation-core": "file:../../SimulationCore",
+    "com.ac21.sasha.save-contracts": "file:../../SaveContracts"
+  },
+  "local_save_boundary": {
+    "profile_id": "last-bearing-dev-v1",
+    "root_source": "UnityEngine.Application.persistentDataPath",
+    "fixed_child": "last-bearing-dev-v1",
+    "fixed_child_only": true,
+    "write_authority": "unity-runtime-only-via-SaveContracts",
+    "direct_agent_or_host_filesystem_write": false,
+    "sibling_scan": false,
+    "presentation_arbitrary_root_constructor": false,
+    "load_visible_pointers": [
+      "current",
+      "last-good"
+    ]
+  },
+  "index_clean_at_activation": true,
+  "non_excluded_scope_clean_at_activation": true,
+  "reserved_scope_clean_at_activation": true,
+  "excluded_creator_owned_drift": [
+    {
+      "path": ".codex/config.toml",
+      "normalized_git_state": "unstaged-modified",
+      "base_blob_sha256": null,
+      "observed_sha256": null,
+      "regular_file_no_symlink": null,
+      "owner": "creator",
+      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash"
+    },
+    {
+      "path": "Game/ProjectSettings/ProjectSettings.asset",
+      "normalized_git_state": "unstaged-modified",
+      "base_blob_sha256": null,
+      "observed_sha256": null,
+      "regular_file_no_symlink": null,
+      "owner": "creator",
+      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash"
+    },
+    {
+      "path": "Game/ProjectSettings/SceneTemplateSettings.json",
+      "normalized_git_state": "untracked",
+      "base_blob_sha256": null,
+      "observed_sha256": null,
+      "regular_file_no_symlink": null,
+      "owner": "creator",
+      "policy": "preserve-exclude-no-agent-modify-stage-commit-delete-revert-stash"
+    }
+  ],
+  "working_tree_scope_capture": null,
+  "github_protection_capture": {
+    "required_schema": "wp0002-github-protection-v1",
+    "artifact": null
+  },
+  "external_cursor_review_control": {
+    "provider": "Cursor Approval Agent",
+    "check_context": "Cursor Approval Agent: Pull Request Approver",
+    "github_app_id": 1210556,
+    "optional_review": true,
+    "blocking_required_check": false,
+    "classification": "independent-ai-review-not-deterministic-validator",
+    "prompt_injection_residual_acknowledged": true,
+    "deterministic_non_llm_execution_seam": null,
+    "policy_path": "Tools/Validation/validate_wp0002_policy.py",
+    "policy_source_sha": null,
+    "same_repository_only": true,
+    "base_ref": "main",
+    "head_ref_prefix": "agent/",
+    "candidate_code_execution": false,
+    "creator_manual_transition_required": true,
+    "manual_gate_transitions": [
+      "proposed-to-accepted",
+      "accepted-to-active",
+      "active-to-verifying",
+      "verifying-to-candidate",
+      "candidate-to-released"
+    ],
+    "configuration_capture": null
+  },
+  "unity_runcommand_residual_capability": {
+    "acknowledged_capability": "Unity_RunCommand compiles and executes arbitrary Editor C# with potential host filesystem, network, process, and package reach",
+    "assistant_permissions_and_five_tool_allowlist_are_a_sandbox": false,
+    "denied_actions_enforcement": "creator-authority-policy-only-not-os-enforcement",
+    "direct_runcommand_prohibited_until_dispatcher_materialized_and_hash_bound": true,
+    "dispatcher": {
+      "contract": "wp0002-gate-dispatcher-v1",
+      "repository_path": "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
+      "allowed_gate_ids": [
+        "asset-refresh-and-compile",
+        "wp0002-editmode-test-assembly",
+        "wp0002-playmode-test-assembly",
+        "wp0002-technical-capture"
+      ],
+      "content_addressed_source_required_per_call": true,
+      "required_log_fields": [
+        "gate_id",
+        "source_sha256",
+        "command",
+        "result",
+        "started_at",
+        "completed_at"
+      ],
+      "reject_non_enumerated_invocation": true
+    },
+    "unattended_third_party_rollout_requires_tool": "Unity_WP0002_RunGate"
+  },
+  "creator_delegated_manual_authority": {
+    "authority_source": "authenticated-creator-delegation",
+    "transmission_agent": "Codex",
+    "attribution": "creator-delegated-manual-approval-transmitted-by-Codex",
+    "cursor_absence_does_not_block": true,
+    "deterministic_checks_nonwaivable": [
+      "validate",
+      "wp0002-core"
+    ],
+    "external_protected_receipt_required": true,
+    "direct_self-merge_authorized": false,
+    "repo_admin_capability_acknowledged": true,
+    "branch_protection_is_credential_isolation": false,
+    "protection_bypass_constraint": "denied-creator-policy-with-live-audit-and-canary"
+  },
+  "git_safety": {
+    "checkpoint_commit": "b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5",
+    "main_protected": true,
+    "pull_requests_required": true,
+    "required_checks": [
+      "validate",
+      "wp0002-core"
+    ],
+    "force_push_disabled": true,
+    "auto_merge_required": false,
+    "autonomy_classification": "creator-delegated-manual-per-pr",
+    "policy_canary_state": "unproven",
+    "delegated_release_required_per_pr": true,
+    "required_checks_without_canary": [
+      "validate",
+      "wp0002-core"
+    ],
+    "required_checks_with_canary": [
+      "validate",
+      "wp0002-core",
+      "wp0002-policy"
+    ]
+  },
+  "permission_boundary": {
+    "allowed_actions": [
+      "edit-declared-repository-paths",
+      "unity-mcp-project-and-object-edits",
+      "unity-mcp-play-mode",
+      "unity-mcp-project-tests",
+      "unity-mcp-console-read",
+      "unity-mcp-screen-capture",
+      "local-nondestructive-validation",
+      "git-commit-push-protected-pr",
+      "creator-delegated-manual-release-after-required-checks",
+      "link-exact-repository-local-upm-simulation-core-and-save-contracts",
+      "unity-runtime-savecontracts-write-fixed-last-bearing-dev-v1-child"
+    ],
+    "denied_actions": [
+      "direct-unity-process-invocation",
+      "tool-install-or-package-change-except-two-exact-repository-local-upm-links",
+      "account-seat-license-billing-purchase-change",
+      "credential-or-secret-access",
+      "publish-release-deploy-monetize",
+      "external-third-party-contact",
+      "git-history-rewrite-or-protection-bypass",
+      "direct-agent-write-outside-repository",
+      "foundation-governance-receipt-write-during-implementation",
+      "package-graph-change-except-two-exact-repository-local-upm-links",
+      "registry-network-git-tarball-or-external-dependency-change",
+      "agent-or-manual-direct-merge"
+    ],
+    "protected_paths_read_only": [
+      "AGENTS.md",
+      ".codex/config.toml",
+      "Game/ProjectSettings/ProjectSettings.asset",
+      "Game/ProjectSettings/SceneTemplateSettings.json",
+      "docs/foundation-v0.1/",
+      "docs/foundation-v0.1/governance/",
+      "docs/foundation-v0.1/ledger/receipts/",
+      "Tools/Validation/validate_wp0002_package_graph.py",
+      "Tools/Validation/validate_wp0002_entry_gate.py",
+      "Tools/Validation/validate_wp0002_policy.py",
+      "Tools/Validation/collect_wp0002_scope_capture.py",
+      ".github/workflows/wp0002-ci.yml",
+      ".github/workflows/wp0002-policy.yml",
+      "SimulationCore/README.md",
+      "SaveContracts/README.md",
+      "SimulationCore/package.json",
+      "SaveContracts/package.json"
+    ]
+  },
+  "credential_boundary": {
+    "secrets_committed": false,
+    "opaque_git_transport_authorized": true,
+    "credential_material_access_authorized": false,
+    "release_credentials_available": false
+  },
+  "local_observation_exceptions": []
+}

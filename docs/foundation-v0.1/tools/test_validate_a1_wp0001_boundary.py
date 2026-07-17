@@ -396,7 +396,7 @@ class Wp0001A1BoundaryTests(unittest.TestCase):
                     "resolutionStrategy": "lowest",
                     "dependencies": {
                         "com.unity.ai.assistant": "2.14.0-pre.1",
-                        "com.unity.render-pipelines.universal": "file:../bad",
+                        "com.unity.render-pipelines.universal": "file:../../../bad",
                         "com.unity.test-framework": "1.6.0",
                     },
                 }

@@ -49,7 +49,9 @@ active under three distinct receipts derived from the PR #18 ratification, PR
 WP-0001's sealed history while establishing a practical A1 lane based on
 protected `main`, a valid `agent/*` branch, a real checkpoint,
 creator-controlled merge, and conditional first Unity MCP use. WP-0003 does
-not satisfy or replace WP-0001's completion dependency for WP-0002.
+not retroactively satisfy the historical WP-0001 completion dependency. The
+new unsealed first-playable A0 proposal would instead make WP-0002 depend on a
+creator-accepted WP-0003 release; it remains non-executable until ratified.
 
 ## What this audit does not claim
 

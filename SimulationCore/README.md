@@ -15,6 +15,17 @@ Current scope is deliberately technical and non-gameplay:
 - no `UnityEngine`, rendering, filesystem, network, clock, or randomness
   dependency.
 
-Gameplay domains enter only through later accepted packets and decisions.
-The folder is also a local Unity package shell, but it is not linked into
-`Game` until the creator approves that offline project dependency.
+WP-0002 proposes a bounded `Runtime/LastBearing/` extension for the first
+playable. If separately accepted and activated, that extension may define the
+engine-independent LastBearing commands, deterministic transitions, canonical
+checkpoint state, and read models needed by the four preparation/module cases.
+It remains free of `UnityEngine`, presentation, filesystem, and persistent-path
+dependencies. The proposal does not activate gameplay or authorize work in this
+package today.
+
+The folder is a local Unity package shell. WP-0002 proposes linking it from
+`Game/Packages/manifest.json` only as `file:../../SimulationCore`; the package
+manifest itself remains protected and byte-identical. Every current importable
+file and folder has deterministic, hash-frozen Unity metadata. Future scope may
+add only the exact `Runtime/LastBearing.meta` sibling and paired deterministic
+metadata inside `Runtime/LastBearing/`; other sibling metadata remains denied.
