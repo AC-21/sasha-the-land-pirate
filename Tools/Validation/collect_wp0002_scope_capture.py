@@ -24,6 +24,7 @@ from pathlib import Path, PurePosixPath
 CAPTURE_CONTRACT = "wp0002-working-tree-scope-capture-v2"
 PACKET_ID = "WP-0002"
 BOUNDARY_MANIFEST_ID = "A1B-WP-0002-LOCAL-DEV"
+CANONICAL_COLLECTION_ROOT = "/Users/sasha/Documents/Codex/sasha-the-land-pirate"
 LOCAL_OUTPUT_ROOT = "BuildArtifacts/WP-0002/local-only/scope-capture"
 RETAINED_OUTPUT_ROOT = "docs/evidence/WP-0002/scope-capture"
 RETAINED_CAPTURE = f"{RETAINED_OUTPUT_ROOT}/working-tree-scope.json"
@@ -65,6 +66,31 @@ def _require_real_root(repo_root: Path) -> Path:
     if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISDIR(metadata.st_mode):
         raise ValueError("repository root must be a real directory, not a symlink")
     return lexical
+
+
+def _captured_repository_root(value: object) -> tuple[str | None, list[str]]:
+    """Validate a collection-time root without requiring it to exist locally."""
+    if (
+        not isinstance(value, str)
+        or not value
+        or "\x00" in value
+        or "\\" in value
+        or value == "/"
+        or value.startswith("//")
+    ):
+        return None, [
+            "scope capture repository_root is not a canonical absolute POSIX path"
+        ]
+    path = PurePosixPath(value)
+    if (
+        not path.is_absolute()
+        or path.as_posix() != value
+        or any(part in {".", ".."} for part in path.parts)
+    ):
+        return None, [
+            "scope capture repository_root is not a canonical absolute POSIX path"
+        ]
+    return value, []
 
 
 def _artifact_relative(value: str) -> str:
@@ -463,8 +489,19 @@ def collect_scope_capture(
     captured_at: datetime | None = None,
 ) -> dict:
     """Collect the exact metadata-only WP-0002 activation-scope proof."""
-    repo_root = _require_real_root(repo_root)
     output_relative = _artifact_relative(output_relative)
+    retained = output_relative == RETAINED_CAPTURE
+    if output_relative.startswith(f"{RETAINED_OUTPUT_ROOT}/") and not retained:
+        raise ValueError(
+            f"retained scope capture must use exact path {RETAINED_CAPTURE}"
+        )
+    lexical_repo_root = Path(os.path.abspath(os.fspath(repo_root)))
+    if retained and str(lexical_repo_root) != CANONICAL_COLLECTION_ROOT:
+        raise ValueError(
+            "retained scope capture requires canonical collection root "
+            f"{CANONICAL_COLLECTION_ROOT}"
+        )
+    repo_root = _require_real_root(lexical_repo_root)
     if not COMMIT_RE.fullmatch(base_commit) or not COMMIT_RE.fullmatch(
         checkpoint_commit
     ):
@@ -511,11 +548,6 @@ def collect_scope_capture(
     stem = PurePosixPath(output_relative).stem
     parent = PurePosixPath(output_relative).parent.as_posix()
     raw_hash = hashlib.sha256(raw_status).hexdigest()
-    retained = output_relative == RETAINED_CAPTURE
-    if output_relative.startswith(f"{RETAINED_OUTPUT_ROOT}/") and not retained:
-        raise ValueError(
-            f"retained scope capture must use exact path {RETAINED_CAPTURE}"
-        )
     raw_relative = f"{parent}/{stem}.status.{raw_hash}.bin"
     observations_document = {
         "schema_version": 1,
@@ -697,12 +729,37 @@ def verify_scope_capture(
     if not isinstance(capture, dict):
         return errors + ["scope capture must be an object"]
 
+    current_repository_root = str(_require_real_root(repo_root))
+    retained = capture_relative == RETAINED_CAPTURE
+    if (
+        retained
+        and mode == "live-current"
+        and current_repository_root != CANONICAL_COLLECTION_ROOT
+    ):
+        return errors + [
+            "retained live-current verification requires canonical collection root "
+            f"{CANONICAL_COLLECTION_ROOT}"
+        ]
+    captured_repository_root, repository_root_errors = _captured_repository_root(
+        capture.get("repository_root")
+    )
+    errors.extend(repository_root_errors)
+    # Retained evidence is schema-pinned to the protected collection root and
+    # may be verified terminally from another clone. Local-only evidence keeps
+    # arbitrary-root collection for tests and pre-retention inspection.
+    if retained:
+        expected_repository_root = CANONICAL_COLLECTION_ROOT
+    elif mode == "live-current":
+        expected_repository_root = current_repository_root
+    else:
+        expected_repository_root = captured_repository_root
+
     exact_fields = {
         "schema_version": 2,
         "capture_contract": CAPTURE_CONTRACT,
         "packet_id": PACKET_ID,
         "boundary_manifest_id": BOUNDARY_MANIFEST_ID,
-        "repository_root": str(_require_real_root(repo_root)),
+        "repository_root": expected_repository_root,
         "base_commit": expected_base_commit,
         "head_commit": expected_head_commit,
         "checkpoint_commit": expected_checkpoint_commit,
@@ -732,7 +789,7 @@ def verify_scope_capture(
         "-c",
         "core.hooksPath=/dev/null",
         "-C",
-        str(_require_real_root(repo_root)),
+        expected_repository_root,
         *STATUS_ARGUMENTS,
     ]
     expected_collector_fields = {

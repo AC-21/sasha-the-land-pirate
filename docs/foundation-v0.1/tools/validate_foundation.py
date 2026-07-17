@@ -343,7 +343,7 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
         "5292757e6ba0177b7ff2dd3a5be13d699a2c9df1ca2bf3d6e3839b6052179f31"
     ),
     "Tools/Validation/collect_wp0002_scope_capture.py": (
-        "68da58dc0d026b3ad249959d65a4459f32941d1fc39963fce69f3bdf8bbcda9f"
+        "3e897481668e97810e3214920f3cebc8e0a576f6e06c1aab874bc8879989f51b"
     ),
     ".github/workflows/wp0002-ci.yml": (
         "893cd3faacb887b2d9112c30e15a29b27fb8f3511001ef4091a04f1f88e2f0b9"

@@ -4,11 +4,13 @@ import hashlib
 import importlib.util
 import json
 import os
+import shutil
 import subprocess
 import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -92,6 +94,13 @@ class WP0002ScopeCaptureTests(unittest.TestCase):
     def artifact_path(self, name: str) -> Path:
         return self.repo / self.capture()["artifacts"][name]["path"]
 
+    def retained_root(self):
+        return mock.patch.object(
+            capture_tool,
+            "CANONICAL_COLLECTION_ROOT",
+            str(self.repo),
+        )
+
     def rewrite_artifact(self, name: str, data: bytes) -> None:
         capture = self.capture()
         path = self.repo / capture["artifacts"][name]["path"]
@@ -145,27 +154,28 @@ class WP0002ScopeCaptureTests(unittest.TestCase):
 
     def test_pre_stage_c_collector_can_materialize_retained_terminal_artifacts(self) -> None:
         retained_output = capture_tool.RETAINED_CAPTURE
-        retained = capture_tool.collect_scope_capture(
-            self.repo,
-            base_commit=self.base,
-            checkpoint_commit=self.base,
-            reservation_paths=RESERVATION,
-            protected_paths_read_only=PROTECTED,
-            output_relative=retained_output,
-            captured_at=CAPTURE_TIME,
-        )
-        errors = capture_tool.verify_scope_capture(
-            self.repo,
-            retained["path"],
-            expected_capture_sha256=retained["sha256"],
-            expected_base_commit=self.base,
-            expected_head_commit=self.base,
-            expected_checkpoint_commit=self.base,
-            expected_reservation_paths=RESERVATION,
-            expected_protected_paths=PROTECTED,
-            receipt_issued_at=RECEIPT_TIME,
-            mode="terminal-retained",
-        )
+        with self.retained_root():
+            retained = capture_tool.collect_scope_capture(
+                self.repo,
+                base_commit=self.base,
+                checkpoint_commit=self.base,
+                reservation_paths=RESERVATION,
+                protected_paths_read_only=PROTECTED,
+                output_relative=retained_output,
+                captured_at=CAPTURE_TIME,
+            )
+            errors = capture_tool.verify_scope_capture(
+                self.repo,
+                retained["path"],
+                expected_capture_sha256=retained["sha256"],
+                expected_base_commit=self.base,
+                expected_head_commit=self.base,
+                expected_checkpoint_commit=self.base,
+                expected_reservation_paths=RESERVATION,
+                expected_protected_paths=PROTECTED,
+                receipt_issued_at=RECEIPT_TIME,
+                mode="terminal-retained",
+            )
         self.assertEqual(errors, [])
         capture = json.loads(
             (self.repo / retained["path"]).read_text(encoding="utf-8")
@@ -186,45 +196,46 @@ class WP0002ScopeCaptureTests(unittest.TestCase):
         )
 
     def test_retained_artifact_alias_is_rejected(self) -> None:
-        retained = capture_tool.collect_scope_capture(
-            self.repo,
-            base_commit=self.base,
-            checkpoint_commit=self.base,
-            reservation_paths=RESERVATION,
-            protected_paths_read_only=PROTECTED,
-            output_relative=capture_tool.RETAINED_CAPTURE,
-            captured_at=CAPTURE_TIME,
-        )
-        capture_path = self.repo / retained["path"]
-        original = json.loads(capture_path.read_text(encoding="utf-8"))
-        aliases = {
-            "raw_status": f"{capture_tool.RETAINED_OUTPUT_ROOT}/raw-status-alias.bin",
-            "observations": f"{capture_tool.RETAINED_OUTPUT_ROOT}/observations-alias.json",
-        }
-        for name, alias in aliases.items():
-            with self.subTest(name=name):
-                canonical_artifact = self.repo / original["artifacts"][name]["path"]
-                (self.repo / alias).write_bytes(canonical_artifact.read_bytes())
-                capture = json.loads(json.dumps(original))
-                capture["artifacts"][name]["path"] = alias
-                capture_data = capture_tool._json_bytes(capture)
-                capture_path.write_bytes(capture_data)
-                errors = capture_tool.verify_scope_capture(
-                    self.repo,
-                    retained["path"],
-                    expected_capture_sha256=hashlib.sha256(capture_data).hexdigest(),
-                    expected_base_commit=self.base,
-                    expected_head_commit=self.base,
-                    expected_checkpoint_commit=self.base,
-                    expected_reservation_paths=RESERVATION,
-                    expected_protected_paths=PROTECTED,
-                    receipt_issued_at=RECEIPT_TIME,
-                    mode="terminal-retained",
-                )
-                self.assertTrue(
-                    any("must use exact path" in error for error in errors),
-                    errors,
-                )
+        with self.retained_root():
+            retained = capture_tool.collect_scope_capture(
+                self.repo,
+                base_commit=self.base,
+                checkpoint_commit=self.base,
+                reservation_paths=RESERVATION,
+                protected_paths_read_only=PROTECTED,
+                output_relative=capture_tool.RETAINED_CAPTURE,
+                captured_at=CAPTURE_TIME,
+            )
+            capture_path = self.repo / retained["path"]
+            original = json.loads(capture_path.read_text(encoding="utf-8"))
+            aliases = {
+                "raw_status": f"{capture_tool.RETAINED_OUTPUT_ROOT}/raw-status-alias.bin",
+                "observations": f"{capture_tool.RETAINED_OUTPUT_ROOT}/observations-alias.json",
+            }
+            for name, alias in aliases.items():
+                with self.subTest(name=name):
+                    canonical_artifact = self.repo / original["artifacts"][name]["path"]
+                    (self.repo / alias).write_bytes(canonical_artifact.read_bytes())
+                    capture = json.loads(json.dumps(original))
+                    capture["artifacts"][name]["path"] = alias
+                    capture_data = capture_tool._json_bytes(capture)
+                    capture_path.write_bytes(capture_data)
+                    errors = capture_tool.verify_scope_capture(
+                        self.repo,
+                        retained["path"],
+                        expected_capture_sha256=hashlib.sha256(capture_data).hexdigest(),
+                        expected_base_commit=self.base,
+                        expected_head_commit=self.base,
+                        expected_checkpoint_commit=self.base,
+                        expected_reservation_paths=RESERVATION,
+                        expected_protected_paths=PROTECTED,
+                        receipt_issued_at=RECEIPT_TIME,
+                        mode="terminal-retained",
+                    )
+                    self.assertTrue(
+                        any("must use exact path" in error for error in errors),
+                        errors,
+                    )
 
     def test_retained_derived_capture_alias_is_rejected(self) -> None:
         alias = f"{capture_tool.RETAINED_OUTPUT_ROOT}/capture-alias.json"
@@ -302,6 +313,165 @@ class WP0002ScopeCaptureTests(unittest.TestCase):
             ),
             live_errors,
         )
+
+    def test_terminal_retained_capture_is_portable_to_another_clone(self) -> None:
+        with self.retained_root():
+            retained = capture_tool.collect_scope_capture(
+                self.repo,
+                base_commit=self.base,
+                checkpoint_commit=self.base,
+                reservation_paths=RESERVATION,
+                protected_paths_read_only=PROTECTED,
+                output_relative=capture_tool.RETAINED_CAPTURE,
+                captured_at=CAPTURE_TIME,
+            )
+            verifier_repo = Path(self.temporary.name) / "verification-clone"
+            clone = subprocess.run(
+                [
+                    "/usr/bin/git",
+                    "clone",
+                    "--quiet",
+                    str(self.repo),
+                    str(verifier_repo),
+                ],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+            self.assertEqual(
+                clone.returncode,
+                0,
+                clone.stderr.decode("utf-8", "replace"),
+            )
+            capture = json.loads(
+                (self.repo / retained["path"]).read_text(encoding="utf-8")
+            )
+            evidence_paths = [
+                retained["path"],
+                *(reference["path"] for reference in capture["artifacts"].values()),
+            ]
+            for relative in evidence_paths:
+                destination = verifier_repo / relative
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(self.repo / relative, destination)
+
+            terminal_errors = capture_tool.verify_scope_capture(
+                verifier_repo,
+                retained["path"],
+                expected_capture_sha256=retained["sha256"],
+                expected_base_commit=self.base,
+                expected_head_commit=self.base,
+                expected_checkpoint_commit=self.base,
+                expected_reservation_paths=RESERVATION,
+                expected_protected_paths=PROTECTED,
+                receipt_issued_at=RECEIPT_TIME,
+                mode="terminal-retained",
+            )
+            self.assertEqual(terminal_errors, [])
+
+            live_errors = capture_tool.verify_scope_capture(
+                verifier_repo,
+                retained["path"],
+                expected_capture_sha256=retained["sha256"],
+                expected_base_commit=self.base,
+                expected_head_commit=self.base,
+                expected_checkpoint_commit=self.base,
+                expected_reservation_paths=RESERVATION,
+                expected_protected_paths=PROTECTED,
+                receipt_issued_at=RECEIPT_TIME,
+                mode="live-current",
+                now=CAPTURE_TIME + timedelta(seconds=60),
+            )
+            self.assertTrue(
+                any(
+                    "retained live-current verification requires canonical collection root"
+                    in error
+                    for error in live_errors
+                ),
+                live_errors,
+            )
+
+    def test_retained_collection_rejects_noncanonical_root_before_git(self) -> None:
+        with mock.patch.object(capture_tool, "_git_output") as git_output:
+            with self.assertRaisesRegex(ValueError, "canonical collection root"):
+                capture_tool.collect_scope_capture(
+                    self.repo,
+                    base_commit=self.base,
+                    checkpoint_commit=self.base,
+                    reservation_paths=RESERVATION,
+                    protected_paths_read_only=PROTECTED,
+                    output_relative=capture_tool.RETAINED_CAPTURE,
+                    captured_at=CAPTURE_TIME,
+                )
+        git_output.assert_not_called()
+
+    def test_retained_terminal_rejects_valid_absolute_root_rebinding(self) -> None:
+        with self.retained_root():
+            retained = capture_tool.collect_scope_capture(
+                self.repo,
+                base_commit=self.base,
+                checkpoint_commit=self.base,
+                reservation_paths=RESERVATION,
+                protected_paths_read_only=PROTECTED,
+                output_relative=capture_tool.RETAINED_CAPTURE,
+                captured_at=CAPTURE_TIME,
+            )
+            capture_path = self.repo / retained["path"]
+            capture = json.loads(capture_path.read_text(encoding="utf-8"))
+            capture["repository_root"] = "/different/repository"
+            capture["collector"]["status_command"][4] = "/different/repository"
+            capture_data = capture_tool._json_bytes(capture)
+            capture_path.write_bytes(capture_data)
+            errors = capture_tool.verify_scope_capture(
+                self.repo,
+                retained["path"],
+                expected_capture_sha256=hashlib.sha256(capture_data).hexdigest(),
+                expected_base_commit=self.base,
+                expected_head_commit=self.base,
+                expected_checkpoint_commit=self.base,
+                expected_reservation_paths=RESERVATION,
+                expected_protected_paths=PROTECTED,
+                receipt_issued_at=RECEIPT_TIME,
+                mode="terminal-retained",
+            )
+        self.assertIn(
+            "scope capture repository_root differs from the exact boundary",
+            errors,
+        )
+
+    def test_schema_and_collector_bind_same_canonical_root(self) -> None:
+        schema = json.loads(
+            (ROOT / "schemas/wp0002-working-tree-scope-capture.schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        expected = capture_tool.CANONICAL_COLLECTION_ROOT
+        self.assertEqual(schema["properties"]["repository_root"]["const"], expected)
+        self.assertEqual(
+            schema["properties"]["collector"]["properties"]["status_command"][
+                "const"
+            ][4],
+            expected,
+        )
+
+    def test_terminal_retained_capture_rejects_invalid_collection_root(self) -> None:
+        capture = self.capture()
+        capture["repository_root"] = "relative/repository"
+        capture["collector"]["status_command"][4] = "relative/repository"
+        self.rewrite_capture(capture)
+        errors = self.verify(mode="terminal-retained")
+        self.assertIn(
+            "scope capture repository_root is not a canonical absolute POSIX path",
+            errors,
+        )
+
+    def test_terminal_retained_capture_binds_command_to_collection_root(self) -> None:
+        capture = self.capture()
+        capture["collector"]["status_command"][4] = "/different/repository"
+        self.rewrite_capture(capture)
+        errors = self.verify(mode="terminal-retained")
+        self.assertIn("scope capture collector status_command differs", errors)
 
     def test_confined_writer_rejects_symlink_escape_and_non_regular_destination(self) -> None:
         other = Path(self.temporary.name) / "outside"
