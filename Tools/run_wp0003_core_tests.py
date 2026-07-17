@@ -28,6 +28,35 @@ UNITY_BASELINE_MANIFEST = (
 UNITY_BASELINE_MANIFEST_SHA256 = (
     "d7b9d48c1669ed1eb59a1cc435f22f12f1054298c2b33c3ade61517c0bd5a587"
 )
+UNITY_BASELINE_COMMIT = (
+    "0031133d476789f0c83d5791180c606f9d1af6f9"
+)
+UNITY_BASELINE_GAME_TREE_OID = (
+    "1ddad4d837466476b9b704a5eba461400937336b"
+)
+UNITY_TECHNICAL_SANDBOX_MANIFEST = (
+    ROOT / "docs/manifests/WP-0003-unity-technical-sandbox-v1.json"
+)
+UNITY_TECHNICAL_SANDBOX_MANIFEST_SHA256 = (
+    "68fb887cdc796470c9b76d69c52a63ae5badc2f8a89ac9453a6a0844b09db9e7"
+)
+TECHNICAL_SANDBOX_ROOT = (
+    "Assets/AtomicLandPirate/TechnicalSandbox"
+)
+TECHNICAL_SANDBOX_PREFIX = f"{TECHNICAL_SANDBOX_ROOT}/"
+TECHNICAL_SANDBOX_STRUCTURAL_METAS = {
+    "Assets/AtomicLandPirate.meta",
+    "Assets/AtomicLandPirate/TechnicalSandbox.meta",
+}
+TECHNICAL_SANDBOX_ALLOWED_SUFFIXES = (
+    ".asmdef",
+    ".cs",
+    ".meta",
+    ".unity",
+)
+EDITOR_BUILD_SETTINGS_PATH = (
+    "ProjectSettings/EditorBuildSettings.asset"
+)
 EXPECTED_DIRECT_PACKAGES = {
     "com.unity.ai.assistant": "2.14.0-pre.1",
     "com.unity.ai.navigation": "2.0.13",
@@ -631,6 +660,390 @@ def git_index_game_files(game_root: Path) -> dict[str, str]:
     return indexed
 
 
+def git_tree_game_files(
+    game_root: Path,
+    commit: str,
+    expected_tree_oid: str,
+) -> dict[str, str]:
+    """Read an immutable historical Game closure through pinned Git."""
+
+    if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit) is None:
+        raise SystemExit("Unity baseline commit identity is malformed")
+    resolved_commit = pinned_git_capture(
+        ["rev-parse", "--verify", f"{commit}^{{commit}}"]
+    ).decode("ascii", errors="strict").strip()
+    if resolved_commit != commit:
+        raise SystemExit("Unity baseline commit identity drifted")
+
+    relative_root = game_root.relative_to(ROOT).as_posix()
+    resolved_tree = pinned_git_capture(
+        ["rev-parse", "--verify", f"{commit}:{relative_root}"]
+    ).decode("ascii", errors="strict").strip()
+    if resolved_tree != expected_tree_oid:
+        raise SystemExit("Unity baseline Game tree identity drifted")
+
+    historical: dict[str, str] = {}
+    output = pinned_git_capture(
+        [
+            "ls-tree",
+            "-r",
+            "-z",
+            "--full-tree",
+            commit,
+            "--",
+            relative_root,
+        ]
+    )
+    prefix = f"{relative_root}/"
+    for record in output.split(b"\0"):
+        if not record:
+            continue
+        try:
+            header, encoded_path = record.split(b"\t", 1)
+            mode, object_type, object_id = header.split()
+        except ValueError as exception:
+            raise SystemExit(
+                "Git returned an invalid historical Game tree record"
+            ) from exception
+        path = os.fsdecode(encoded_path)
+        if (
+            mode != b"100644"
+            or object_type != b"blob"
+            or not path.startswith(prefix)
+        ):
+            raise SystemExit(
+                f"Git returned a forbidden historical Game path: {path}"
+            )
+        relative = path[len(prefix):]
+        if not relative or relative in historical:
+            raise SystemExit(
+                f"Git returned a duplicate historical Game path: {path}"
+            )
+        object_id_text = os.fsdecode(object_id)
+        if re.fullmatch(
+            r"[0-9a-f]{40}|[0-9a-f]{64}",
+            object_id_text,
+        ) is None:
+            raise SystemExit(
+                f"Git returned an invalid historical object ID: {path}"
+            )
+        historical[relative] = object_id_text
+    return historical
+
+
+def parse_manifest_file_entries(
+    entries: object,
+    label: str,
+) -> dict[str, tuple[int, str]]:
+    if not isinstance(entries, list) or not entries:
+        raise SystemExit(f"{label} has no file closure")
+
+    expected_files: dict[str, tuple[int, str]] = {}
+    casefolded_paths: set[str] = set()
+    for entry in entries:
+        if not isinstance(entry, dict) or set(entry) != {
+            "path",
+            "size",
+            "sha256",
+        }:
+            raise SystemExit(f"{label} file entry shape drifted")
+        relative = entry["path"]
+        size = entry["size"]
+        digest = entry["sha256"]
+        if (
+            not isinstance(relative, str)
+            or not relative
+            or relative.startswith("/")
+            or "\\" in relative
+            or any(ord(character) < 32 for character in relative)
+            or any(
+                part in ("", ".", "..")
+                for part in relative.split("/")
+            )
+        ):
+            raise SystemExit(f"Unsafe {label} path: {relative!r}")
+        if (
+            not isinstance(size, int)
+            or isinstance(size, bool)
+            or size < 0
+            or not isinstance(digest, str)
+            or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+        ):
+            raise SystemExit(f"{label} file metadata drifted: {relative}")
+        folded = relative.casefold()
+        if relative in expected_files or folded in casefolded_paths:
+            raise SystemExit(
+                f"Duplicate or case-colliding {label} path: {relative}"
+            )
+        expected_files[relative] = (size, digest)
+        casefolded_paths.add(folded)
+
+    if list(expected_files) != sorted(expected_files):
+        raise SystemExit(f"{label} file closure must be path-sorted")
+    return expected_files
+
+
+def validate_git_blob_closure(
+    indexed_files: dict[str, str],
+    expected_files: dict[str, tuple[int, str]],
+    label: str,
+) -> None:
+    if set(indexed_files) != set(expected_files):
+        raise SystemExit(
+            f"{label} closure drifted: expected {sorted(expected_files)}, "
+            f"received {sorted(indexed_files)}"
+        )
+    for relative, object_id in indexed_files.items():
+        expected_size, expected_digest = expected_files[relative]
+        size_text = pinned_git_capture(
+            ["cat-file", "-s", object_id]
+        ).decode("ascii", errors="strict").strip()
+        try:
+            indexed_size = int(size_text)
+        except ValueError as exception:
+            raise SystemExit(
+                f"Git returned an invalid blob size: {relative}"
+            ) from exception
+        if indexed_size != expected_size:
+            raise SystemExit(f"{label} size drifted: {relative}")
+        contents = pinned_git_capture(["cat-file", "blob", object_id])
+        if len(contents) != expected_size:
+            raise SystemExit(f"{label} blob length drifted: {relative}")
+        if sha256_bytes(contents) != expected_digest:
+            raise SystemExit(f"{label} hash drifted: {relative}")
+
+
+def validate_technical_sandbox_overlay(
+    baseline_document: dict[str, object],
+    baseline_files: dict[str, tuple[int, str]],
+) -> tuple[
+    dict[str, tuple[int, str]],
+    dict[str, str],
+    dict[str, object],
+]:
+    if sha256_file(UNITY_TECHNICAL_SANDBOX_MANIFEST) != (
+        UNITY_TECHNICAL_SANDBOX_MANIFEST_SHA256
+    ):
+        raise SystemExit("Unity technical-sandbox manifest digest drifted")
+    overlay = json.loads(
+        UNITY_TECHNICAL_SANDBOX_MANIFEST.read_text(encoding="utf-8")
+    )
+    if not isinstance(overlay, dict) or set(overlay) != {
+        "added_files",
+        "asset_guids",
+        "base_commit",
+        "baseline_binding",
+        "branch",
+        "build_scene",
+        "constraints",
+        "created_at",
+        "creator_approval",
+        "manifest_id",
+        "packet_id",
+        "replaced_files",
+        "schema_version",
+        "source_root",
+        "structural_meta_paths",
+    }:
+        raise SystemExit("Unity technical-sandbox manifest shape drifted")
+    if overlay.get("schema_version") != 1:
+        raise SystemExit("Unity technical-sandbox manifest schema drifted")
+    if overlay.get("manifest_id") != (
+        "WP0003-UNITY-TECHNICAL-SANDBOX-20260716"
+    ):
+        raise SystemExit("Unity technical-sandbox manifest identity drifted")
+    if overlay.get("packet_id") != "WP-0003":
+        raise SystemExit("Unity technical-sandbox packet drifted")
+    if overlay.get("created_at") != "2026-07-17T02:24:31Z":
+        raise SystemExit("Unity technical-sandbox creation time drifted")
+    if overlay.get("base_commit") != (
+        "f95626233b2841de9a3144d89170c245d9a1b8ac"
+    ):
+        raise SystemExit("Unity technical-sandbox base commit drifted")
+    if overlay.get("branch") != "agent/wp0003-technical-sandbox-001":
+        raise SystemExit("Unity technical-sandbox branch drifted")
+    if overlay.get("creator_approval") != {
+        "captured_on": "2026-07-16",
+        "instructions": [
+            "Are you sure you can't access it? Just opened the game",
+            (
+                "You can start building the game, there has been a lot of "
+                "setup. Can we get this moving now?"
+            ),
+        ],
+        "scope": (
+            "one non-gameplay technical sandbox and its exact build-scene "
+            "registration"
+        ),
+    }:
+        raise SystemExit("Unity technical-sandbox approval record drifted")
+    if overlay.get("baseline_binding") != {
+        "manifest_path": (
+            "docs/manifests/WP-0003-unity-canonical-v2.json"
+        ),
+        "manifest_sha256": UNITY_BASELINE_MANIFEST_SHA256,
+        "commit": UNITY_BASELINE_COMMIT,
+        "game_tree_oid": UNITY_BASELINE_GAME_TREE_OID,
+    }:
+        raise SystemExit("Unity technical-sandbox baseline binding drifted")
+    if overlay.get("source_root") != TECHNICAL_SANDBOX_ROOT:
+        raise SystemExit("Unity technical-sandbox source root drifted")
+    structural_meta_paths = overlay.get("structural_meta_paths")
+    if (
+        not isinstance(structural_meta_paths, list)
+        or structural_meta_paths != sorted(TECHNICAL_SANDBOX_STRUCTURAL_METAS)
+    ):
+        raise SystemExit("Unity technical-sandbox structural metas drifted")
+    if overlay.get("constraints") != {
+        "kind": "non-gameplay-technical-sandbox",
+        "production_content": False,
+        "package_changes": False,
+        "save_bytes_written": False,
+        "cloud_services_enabled": False,
+    }:
+        raise SystemExit("Unity technical-sandbox constraints drifted")
+
+    added_files = parse_manifest_file_entries(
+        overlay.get("added_files"),
+        "Unity technical-sandbox",
+    )
+    if not TECHNICAL_SANDBOX_STRUCTURAL_METAS.issubset(added_files):
+        raise SystemExit("Unity technical-sandbox structural metas are missing")
+    for relative in added_files:
+        if relative not in TECHNICAL_SANDBOX_STRUCTURAL_METAS and (
+            not relative.startswith(TECHNICAL_SANDBOX_PREFIX)
+        ):
+            raise SystemExit(
+                f"Unity technical-sandbox path escapes source root: {relative}"
+            )
+        if not relative.endswith(TECHNICAL_SANDBOX_ALLOWED_SUFFIXES):
+            raise SystemExit(
+                f"Unity technical-sandbox file type is forbidden: {relative}"
+            )
+
+    baseline_casefolded = {
+        relative.casefold(): relative
+        for relative in baseline_files
+    }
+    for relative in added_files:
+        collision = baseline_casefolded.get(relative.casefold())
+        if collision is not None:
+            raise SystemExit(
+                "Unity technical-sandbox addition collides with baseline: "
+                f"{relative} and {collision}"
+            )
+
+    replacements = overlay.get("replaced_files")
+    if (
+        not isinstance(replacements, list)
+        or len(replacements) != 1
+        or not isinstance(replacements[0], dict)
+        or set(replacements[0]) != {
+            "baseline_sha256",
+            "baseline_size",
+            "path",
+            "sha256",
+            "size",
+        }
+    ):
+        raise SystemExit("Unity technical-sandbox replacement shape drifted")
+    replacement = replacements[0]
+    if replacement.get("path") != EDITOR_BUILD_SETTINGS_PATH:
+        raise SystemExit("Unity technical-sandbox replacement path drifted")
+    baseline_entry = baseline_files.get(EDITOR_BUILD_SETTINGS_PATH)
+    if baseline_entry is None or baseline_entry != (
+        replacement.get("baseline_size"),
+        replacement.get("baseline_sha256"),
+    ):
+        raise SystemExit(
+            "Unity technical-sandbox replacement baseline drifted"
+        )
+    replacement_size = replacement.get("size")
+    replacement_digest = replacement.get("sha256")
+    if (
+        not isinstance(replacement_size, int)
+        or isinstance(replacement_size, bool)
+        or replacement_size < 0
+        or not isinstance(replacement_digest, str)
+        or re.fullmatch(r"[0-9a-f]{64}", replacement_digest) is None
+    ):
+        raise SystemExit(
+            "Unity technical-sandbox replacement metadata drifted"
+        )
+
+    overlay_guids = overlay.get("asset_guids")
+    expected_meta_paths = {
+        relative for relative in added_files if relative.endswith(".meta")
+    }
+    if (
+        not isinstance(overlay_guids, dict)
+        or list(overlay_guids) != sorted(overlay_guids)
+        or set(overlay_guids) != expected_meta_paths
+    ):
+        raise SystemExit("Unity technical-sandbox GUID inventory drifted")
+    baseline_guids = baseline_document.get("asset_guids")
+    if not isinstance(baseline_guids, dict):
+        raise SystemExit("Unity baseline GUID inventory shape drifted")
+    seen_guids = set(baseline_guids.values())
+    for relative, guid in overlay_guids.items():
+        if (
+            not isinstance(relative, str)
+            or not isinstance(guid, str)
+            or re.fullmatch(r"[0-9a-f]{32}", guid) is None
+            or guid in seen_guids
+        ):
+            raise SystemExit(
+                f"Invalid or duplicate technical-sandbox GUID: {relative}"
+            )
+        seen_guids.add(guid)
+
+    build_scene = overlay.get("build_scene")
+    expected_scene_path = (
+        "Assets/AtomicLandPirate/TechnicalSandbox/Scenes/"
+        "WP0003_TechnicalSandbox.unity"
+    )
+    if (
+        not isinstance(build_scene, dict)
+        or set(build_scene) != {"enabled", "guid", "path"}
+        or build_scene.get("enabled") is not True
+        or build_scene.get("path") != expected_scene_path
+        or build_scene.get("path") not in added_files
+        or build_scene.get("guid") != overlay_guids.get(
+            f"{expected_scene_path}.meta"
+        )
+    ):
+        raise SystemExit("Unity technical-sandbox build scene drifted")
+
+    current_files = dict(baseline_files)
+    current_files[EDITOR_BUILD_SETTINGS_PATH] = (
+        replacement_size,
+        replacement_digest,
+    )
+    current_files.update(added_files)
+    return current_files, overlay_guids, build_scene
+
+
+def validate_editor_build_settings(
+    text: str,
+    build_scene: dict[str, object],
+) -> None:
+    expected = (
+        "%YAML 1.1\n"
+        "%TAG !u! tag:unity3d.com,2011:\n"
+        "--- !u!1045 &1\n"
+        "EditorBuildSettings:\n"
+        "  m_ObjectHideFlags: 0\n"
+        "  serializedVersion: 2\n"
+        "  m_Scenes:\n"
+        "  - enabled: 1\n"
+        f"    path: {build_scene['path']}\n"
+        f"    guid: {build_scene['guid']}\n"
+        "  m_configObjects: {}\n"
+    )
+    if text != expected:
+        raise SystemExit("Game technical-sandbox build settings drifted")
+
+
 def validate_game_baseline() -> None:
     if sha256_file(UNITY_BASELINE_MANIFEST) != (
         UNITY_BASELINE_MANIFEST_SHA256
@@ -774,75 +1187,29 @@ def validate_game_baseline() -> None:
         raise SystemExit("Unity baseline import policy drifted")
 
     game_root = ROOT / "Game"
-    entries = document.get("game_files")
-    if not isinstance(entries, list) or not entries:
-        raise SystemExit("Unity baseline manifest has no Game file closure")
-
-    expected_files: dict[str, tuple[int, str]] = {}
-    casefolded_paths: set[str] = set()
-    for entry in entries:
-        if not isinstance(entry, dict) or set(entry) != {
-            "path",
-            "size",
-            "sha256",
-        }:
-            raise SystemExit("Unity baseline file entry shape drifted")
-        relative = entry["path"]
-        size = entry["size"]
-        digest = entry["sha256"]
-        if (
-            not isinstance(relative, str)
-            or not relative
-            or relative.startswith("/")
-            or "\\" in relative
-            or any(part in ("", ".", "..") for part in relative.split("/"))
-        ):
-            raise SystemExit(f"Unsafe Unity baseline path: {relative!r}")
-        if (
-            not isinstance(size, int)
-            or size < 0
-            or not isinstance(digest, str)
-            or re.fullmatch(r"[0-9a-f]{64}", digest) is None
-        ):
-            raise SystemExit(
-                f"Unity baseline file metadata drifted: {relative}"
-            )
-        folded = relative.casefold()
-        if relative in expected_files or folded in casefolded_paths:
-            raise SystemExit(
-                f"Duplicate or case-colliding Unity path: {relative}"
-            )
-        expected_files[relative] = (size, digest)
-        casefolded_paths.add(folded)
-
-    if list(expected_files) != sorted(expected_files):
-        raise SystemExit("Unity baseline file closure must be path-sorted")
-
+    baseline_files = parse_manifest_file_entries(
+        document.get("game_files"),
+        "Unity baseline",
+    )
+    historical_files = git_tree_game_files(
+        game_root,
+        UNITY_BASELINE_COMMIT,
+        UNITY_BASELINE_GAME_TREE_OID,
+    )
+    validate_git_blob_closure(
+        historical_files,
+        baseline_files,
+        "Historical Unity baseline Git tree",
+    )
+    expected_files, overlay_guids, build_scene = (
+        validate_technical_sandbox_overlay(document, baseline_files)
+    )
     indexed_files = git_index_game_files(game_root)
-    if set(indexed_files) != set(expected_files):
-        raise SystemExit(
-            "Game Git index closure drifted: "
-            f"expected {sorted(expected_files)}, "
-            f"received {sorted(indexed_files)}"
-        )
-    for relative, object_id in indexed_files.items():
-        expected_size, expected_digest = expected_files[relative]
-        size_text = pinned_git_capture(
-            ["cat-file", "-s", object_id]
-        ).decode("ascii", errors="strict").strip()
-        try:
-            indexed_size = int(size_text)
-        except ValueError as exception:
-            raise SystemExit(
-                f"Git returned an invalid blob size: {relative}"
-            ) from exception
-        if indexed_size != expected_size:
-            raise SystemExit(f"Game Git index size drifted: {relative}")
-        contents = pinned_git_capture(["cat-file", "blob", object_id])
-        if len(contents) != expected_size:
-            raise SystemExit(f"Game Git index blob length drifted: {relative}")
-        if sha256_bytes(contents) != expected_digest:
-            raise SystemExit(f"Game Git index hash drifted: {relative}")
+    validate_git_blob_closure(
+        indexed_files,
+        expected_files,
+        "Game Git index",
+    )
 
     forbidden_components = {
         ".git",
@@ -970,6 +1337,11 @@ def validate_game_baseline() -> None:
     seen_guids: set[str] = set()
     for path in assets.rglob("*.meta"):
         relative = path.relative_to(game_root).as_posix()
+        paired_asset = path.with_suffix("")
+        if not paired_asset.exists():
+            raise SystemExit(
+                f"Unity meta lacks an asset pair: {path.relative_to(ROOT)}"
+            )
         match = re.search(
             r"(?m)^guid: ([0-9a-f]{32})$",
             path.read_text(encoding="utf-8"),
@@ -978,7 +1350,11 @@ def validate_game_baseline() -> None:
             raise SystemExit(f"Invalid or duplicate Unity meta GUID: {relative}")
         meta_guids[relative] = match.group(1)
         seen_guids.add(match.group(1))
-    if meta_guids != document.get("asset_guids"):
+    baseline_guids = document.get("asset_guids")
+    if not isinstance(baseline_guids, dict):
+        raise SystemExit("Unity baseline GUID inventory shape drifted")
+    expected_guids = {**baseline_guids, **overlay_guids}
+    if meta_guids != expected_guids:
         raise SystemExit("Unity asset GUID inventory drifted")
 
     for path in assets.rglob("*"):
@@ -1315,13 +1691,7 @@ def validate_game_baseline() -> None:
     build_settings = (
         game_root / "ProjectSettings/EditorBuildSettings.asset"
     ).read_text(encoding="utf-8")
-    if require_unique_yaml_scalar(
-        build_settings,
-        "m_Scenes",
-        2,
-        "Unity Editor build settings",
-    ) != "[]":
-        raise SystemExit("Game baseline unexpectedly contains a scene")
+    validate_editor_build_settings(build_settings, build_scene)
 
     required_references = {
         "Assets/Settings/PC_RPAsset.asset": (

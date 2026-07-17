@@ -1,0 +1,21 @@
+{
+  "name": "AC21.Sasha.TechnicalSandbox.EditModeTests",
+  "rootNamespace": "AC21.Sasha.TechnicalSandbox.Tests",
+  "references": [
+    "AC21.Sasha.TechnicalSandbox.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "noEngineReferences": false
+}

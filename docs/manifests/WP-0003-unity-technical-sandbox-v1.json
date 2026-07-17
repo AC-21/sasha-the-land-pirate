@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "manifest_id": "WP0003-UNITY-TECHNICAL-SANDBOX-20260716",
+  "packet_id": "WP-0003",
+  "created_at": "2026-07-17T02:24:31Z",
+  "base_commit": "f95626233b2841de9a3144d89170c245d9a1b8ac",
+  "branch": "agent/wp0003-technical-sandbox-001",
+  "creator_approval": {
+    "captured_on": "2026-07-16",
+    "instructions": [
+      "Are you sure you can't access it? Just opened the game",
+      "You can start building the game, there has been a lot of setup. Can we get this moving now?"
+    ],
+    "scope": "one non-gameplay technical sandbox and its exact build-scene registration"
+  },
+  "baseline_binding": {
+    "manifest_path": "docs/manifests/WP-0003-unity-canonical-v2.json",
+    "manifest_sha256": "d7b9d48c1669ed1eb59a1cc435f22f12f1054298c2b33c3ade61517c0bd5a587",
+    "commit": "0031133d476789f0c83d5791180c606f9d1af6f9",
+    "game_tree_oid": "1ddad4d837466476b9b704a5eba461400937336b"
+  },
+  "source_root": "Assets/AtomicLandPirate/TechnicalSandbox",
+  "structural_meta_paths": [
+    "Assets/AtomicLandPirate.meta",
+    "Assets/AtomicLandPirate/TechnicalSandbox.meta"
+  ],
+  "added_files": [
+    {
+      "path": "Assets/AtomicLandPirate.meta",
+      "size": 169,
+      "sha256": "ac03c37e3b6dbee20e8ddd96d268c1a3fc51a6ba017480fc85ccdff3494d37c5"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox.meta",
+      "size": 169,
+      "sha256": "4b89ed01eddfb2bb78e793eadde987b86843b91fb676fb66d4e87bdc0945b0db"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Runtime.meta",
+      "size": 169,
+      "sha256": "bc4d96542538a609339605ff399a58cdc4496dfee58b2e11cf2f016574a57932"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/AC21.Sasha.TechnicalSandbox.Runtime.asmdef",
+      "size": 399,
+      "sha256": "a0ce38cf4cbe3898d0b1ab47e00ac546aa183070f3d40d841ee0a04fe5cf600d"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/AC21.Sasha.TechnicalSandbox.Runtime.asmdef.meta",
+      "size": 163,
+      "sha256": "bebd260dab14c897473be495c62854e757af551f0cc92a7de81ee9d73d17ba85"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/TechnicalProbeState.cs",
+      "size": 2611,
+      "sha256": "8d836b2d75af4a23732248d5eb698d63c4a728b96d049143ca7c2aeb6f05724d"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/TechnicalProbeState.cs.meta",
+      "size": 240,
+      "sha256": "7076e4764b89bf2f0785012645efef732344adf56c8cb01a1b4c04c600ef21c9"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/TechnicalSandboxBootstrap.cs",
+      "size": 1265,
+      "sha256": "e16185b09f01f09b52dd6e26d23c8b0c384e57d8e3b64d24a3508adee7866fed"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/TechnicalSandboxBootstrap.cs.meta",
+      "size": 240,
+      "sha256": "ad364f323e0d2b5a3567e568e6c98f4abc59eb8c2fd0ab02d16dd8b5cf053422"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/TechnicalSandboxCameraRig.cs",
+      "size": 4042,
+      "sha256": "aae17ee4fb24f568be5e9ea098a28b8c609d07e3df605ab4a4543e18663b47e5"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/TechnicalSandboxCameraRig.cs.meta",
+      "size": 240,
+      "sha256": "fc9e03c6f9de282ee9deadd7c1deef409ebb82ed176ff07c3be293dedea34af3"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/TechnicalSandboxController.cs",
+      "size": 14922,
+      "sha256": "fbff8d1d72b93fd5c56acdd9c711714f899f42c60b646975e35604f617c09aad"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/TechnicalSandboxController.cs.meta",
+      "size": 240,
+      "sha256": "05dc750f79435ee28e219ab23c5a63606aa826099a627b3ec45ad584aa7722a4"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Scenes.meta",
+      "size": 169,
+      "sha256": "ad19e2b17a940e3a831f579fde40eb484ff5271ba3e0ffe4a8d78e053f090c60"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Scenes/WP0003_TechnicalSandbox.unity",
+      "size": 3216,
+      "sha256": "bae1cc596e4e3b8bfd60f3a6cbcd67af3cf120d5675a18c615d2b28f24ea979e"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Scenes/WP0003_TechnicalSandbox.unity.meta",
+      "size": 152,
+      "sha256": "aae3e2c7cd5cc04a5cd3cca84aaf8c11141f89a9a4516eb930eab9d86d765b66"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Tests.meta",
+      "size": 169,
+      "sha256": "4bd6a3e3f97ac6069506951eb887f595e3222f868b414347101280ff64b5c301"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Tests/EditMode.meta",
+      "size": 169,
+      "sha256": "55347b7f71cb1c7f6960d61d2890bd34d341c7589dd3586d5163ec9131c198b8"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Tests/EditMode/AC21.Sasha.TechnicalSandbox.EditModeTests.asmdef",
+      "size": 503,
+      "sha256": "b48769439903722e3dbf206a463499adab56e1cdc1e7d74c97eab04aba9a8720"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Tests/EditMode/AC21.Sasha.TechnicalSandbox.EditModeTests.asmdef.meta",
+      "size": 163,
+      "sha256": "78dd0e4db5e2150d5d12688849e56f2760aaa07fe1fc59d12bf6acb273985406"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Tests/EditMode/TechnicalProbeStateTests.cs",
+      "size": 1904,
+      "sha256": "46da112c0faaee00c7563264d44579e5780e2557e62d3fdda3d31a35db97ba8d"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Tests/EditMode/TechnicalProbeStateTests.cs.meta",
+      "size": 240,
+      "sha256": "0eb1a7b50da8b2608a3c30c01940aac09525b6bfb1be1b95a509c8a4c83d1096"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Tests/PlayMode.meta",
+      "size": 169,
+      "sha256": "4d943a349fbad43ba6bc14c779aa6ee27f90bfb94131e74bb7c5da15e32ddb2a"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Tests/PlayMode/AC21.Sasha.TechnicalSandbox.PlayModeTests.asmdef",
+      "size": 551,
+      "sha256": "4d530f8b00a1d966e1e9532402a7eb0f7b4589ac601dc0f8e8d019f0907ada1f"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Tests/PlayMode/AC21.Sasha.TechnicalSandbox.PlayModeTests.asmdef.meta",
+      "size": 163,
+      "sha256": "a1befb6a26f1444e85e1a6a5566df259a793b72549c3e508057f70bc3475561f"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Tests/PlayMode/TechnicalSandboxPlayModeTests.cs",
+      "size": 4899,
+      "sha256": "bd6efd5997f0733cc4061d14b8c1970c611ce2bad77a5baf6b1a6110c1a96b1c"
+    },
+    {
+      "path": "Assets/AtomicLandPirate/TechnicalSandbox/Tests/PlayMode/TechnicalSandboxPlayModeTests.cs.meta",
+      "size": 240,
+      "sha256": "1bf26a0f268a34bb9fbc3c35055e2f3d63afceda650f9fc7dd1ff2af5910866d"
+    }
+  ],
+  "replaced_files": [
+    {
+      "path": "ProjectSettings/EditorBuildSettings.asset",
+      "baseline_size": 160,
+      "baseline_sha256": "1942c088ddfeeef348fdf12390e2a2d6da51056e197458d67969d44e7b2cbbd3",
+      "size": 303,
+      "sha256": "63e3eaf7b9b847380acf66cbb6f13e9badca1188480346443096293f5766f5d1"
+    }
+  ],
+  "asset_guids": {
+    "Assets/AtomicLandPirate.meta": "7cf24652ff9d45b99fa44f19b37bf5b6",
+    "Assets/AtomicLandPirate/TechnicalSandbox.meta": "16ca014f1c5c4c79adcf0a5956d0ce2a",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Runtime.meta": "70874d069a8245d5aa2f56e3bc347e6b",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/AC21.Sasha.TechnicalSandbox.Runtime.asmdef.meta": "4ae904bb3947427995dfb66bc98c4af4",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/TechnicalProbeState.cs.meta": "ba677566bc1a4429b93f47e52753b108",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/TechnicalSandboxBootstrap.cs.meta": "5610e3d684764332a1fc79ee364fd2c4",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/TechnicalSandboxCameraRig.cs.meta": "08378d147ff949f8ad431b61af9c4939",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Runtime/TechnicalSandboxController.cs.meta": "0a31fd270bcb45a7aa70cd7e96f7a2eb",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Scenes.meta": "26a3a5a9513049f889abfbd30681dc67",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Scenes/WP0003_TechnicalSandbox.unity.meta": "b8240c9f3ef94a52a10dff5c46e97f28",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Tests.meta": "996a42da7bfb4d6fb51ef2bf73202a17",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Tests/EditMode.meta": "9e31f52ce4c94d47923167a8102794e8",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Tests/EditMode/AC21.Sasha.TechnicalSandbox.EditModeTests.asmdef.meta": "1db327bf141544578137fe96555385c1",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Tests/EditMode/TechnicalProbeStateTests.cs.meta": "a2b8396fc52f4898826e7d5e1004b76c",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Tests/PlayMode.meta": "64bec2f7411e4173973329cd7666e51f",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Tests/PlayMode/AC21.Sasha.TechnicalSandbox.PlayModeTests.asmdef.meta": "30a6eb43e1154649a7d45db54de40a52",
+    "Assets/AtomicLandPirate/TechnicalSandbox/Tests/PlayMode/TechnicalSandboxPlayModeTests.cs.meta": "766d27359e97478cb777284445ef05d9"
+  },
+  "build_scene": {
+    "enabled": true,
+    "path": "Assets/AtomicLandPirate/TechnicalSandbox/Scenes/WP0003_TechnicalSandbox.unity",
+    "guid": "b8240c9f3ef94a52a10dff5c46e97f28"
+  },
+  "constraints": {
+    "kind": "non-gameplay-technical-sandbox",
+    "production_content": false,
+    "package_changes": false,
+    "save_bytes_written": false,
+    "cloud_services_enabled": false
+  }
+}
