@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "packet_id": "WP-0003",
-  "recorded_at": "2026-07-17T04:02:19Z",
+  "recorded_at": "2026-07-17T04:26:58Z",
   "branch": "agent/wp0003-technical-sandbox-001",
   "project_root": "/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game",
   "editor_version": "6000.5.4f1",
@@ -76,13 +76,29 @@
     "runtime_camera_game_object_handle": -7886,
     "runtime_camera_component_handle": -7890,
     "runtime_camera_capture_success": false,
-    "runtime_camera_failure": "Installed tool reported No GameObject found for both live handles"
+    "runtime_camera_failure": "Installed tool reported No GameObject found for both live handles",
+    "reviewable_technical_scene": {
+      "path": "docs/evidence/WP-0003/WP0003-TECHNICAL-CAPTURE-20260716.png",
+      "size_bytes": 704963,
+      "width": 2560,
+      "height": 1440,
+      "format": "png",
+      "sha256": "39031855ba22baf47fbbcc464403e808a387f57b3b9892cbca75365259b83878",
+      "capture_method": "Unity_RunCommand invoked UnityEngine.ScreenCapture.CaptureScreenshot at end of frame in Play Mode with supersize 1; the host polled the exact reserved path until the PNG was nonzero before Play Mode stopped",
+      "capture_call": "ScreenCapture.CaptureScreenshot(\"/Users/sasha/Documents/Codex/sasha-the-land-pirate/docs/evidence/WP-0003/WP0003-TECHNICAL-CAPTURE-20260716.png\", 1)",
+      "selected_probe": 2,
+      "interaction_count": 1,
+      "status": "PROBE ACTIVE - presentation state only",
+      "persistence_status": "DISABLED / 0 bytes",
+      "inspected": true,
+      "inspected_at": "2026-07-17T04:26:58Z"
+    }
   },
   "acceptance": {
     "T-UNITY-COMPILE": "passed",
     "T-UNITY-EDITMODE": "passed",
     "T-UNITY-PLAYMODE": "passed",
-    "T-TECHNICAL-CAPTURE": "passed-scene-view-transport-only"
+    "T-TECHNICAL-CAPTURE": "passed-reviewable-play-mode-hud-capture"
   },
   "overlay_manifest_sha256": "68fb887cdc796470c9b76d69c52a63ae5badc2f8a89ac9453a6a0844b09db9e7"
 }

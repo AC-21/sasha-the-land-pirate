@@ -118,9 +118,10 @@ ratified tungsten-over-neon hierarchy but is not production art.
 
 - `Unity_Camera_Capture` successfully returned a 1920 x 1080 PNG Scene View
   preview of the live technical scene after the bounded debug exercise and
-  reset (`213099` bytes), satisfying the packet's technical-scene screenshot
-  oracle and proving the approved capture transport. This is not a runtime
-  camera or debug-HUD coverage claim.
+  reset (`213099` bytes), proving the approved capture transport. That image
+  is not retained as the reviewable packet screenshot and does not by itself
+  satisfy the runtime debug-HUD coverage required by
+  `T-TECHNICAL-CAPTURE`.
 - The accepted runtime Camera GameObject handle `-7886` and Camera component
   handle `-7890` were each resolved from the live controller. The installed
   capture implementation rejected both with `No GameObject found with
@@ -132,7 +133,28 @@ ratified tungsten-over-neon hierarchy but is not production art.
   added. The Scene View image is retained as transport evidence only; the
   runtime-camera rejections are an installed-tool limitation, not hidden as a
   successful runtime-camera capture.
+- The qualifying reviewable screenshot is retained at
+  `docs/evidence/WP-0003/WP0003-TECHNICAL-CAPTURE-20260716.png`. It is a
+  `2560 x 1440` PNG of `704963` bytes with SHA-256
+  `39031855ba22baf47fbbcc464403e808a387f57b3b9892cbca75365259b83878`.
+- Capture method: while the registered scene was live in Play Mode, one
+  bounded `Unity_RunCommand` found `TechnicalSandboxController`, activated
+  probe 2, verified selected probe `2` and interaction count `1`, then invoked
+  `UnityEngine.ScreenCapture.CaptureScreenshot` with supersize `1` and the
+  absolute reserved evidence path. Unity scheduled the screenshot for the end
+  of the frame; the host polled that exact path until the PNG was nonzero
+  before Play Mode stopped.
+- Visual inspection of the retained PNG confirms the live technical scene,
+  highlighted active probe, and debug HUD/state: `Selected probe: 02`,
+  `Presentation interactions: 1`, `Persistence: DISABLED / 0 bytes`, and
+  `PROBE ACTIVE - presentation state only`. This is technical proof only, not
+  production art or gameplay acceptance.
+- After capture, the Editor exited Play Mode, a bounded forced asset refresh
+  completed with the Editor idle, and the fresh Error/Warning console read
+  returned zero entries.
 
 `T-UNITY-COMPILE`, `T-UNITY-EDITMODE`, `T-UNITY-PLAYMODE`, and
-`T-TECHNICAL-CAPTURE` are satisfied by the evidence above. This remains
-implementation evidence, not creator or independent acceptance.
+`T-TECHNICAL-CAPTURE` are satisfied by the evidence above. The technical
+capture gate is satisfied by the retained Play Mode PNG with visible HUD/state,
+not by re-labeling the Scene View transport image. This remains implementation
+evidence, not creator or independent acceptance.
