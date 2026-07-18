@@ -189,6 +189,32 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public EncounterChoice Choice { get; }
     }
 
+    public sealed class OperateWreckLineModuleCommand : LastBearingCommand
+    {
+        public OperateWreckLineModuleCommand(
+            long sequence,
+            RouteActionKind action)
+            : base(sequence)
+        {
+            if (action == RouteActionKind.None)
+            {
+                throw new ArgumentOutOfRangeException(nameof(action));
+            }
+
+            Action = action;
+        }
+
+        public RouteActionKind Action { get; }
+    }
+
+    public sealed class OperateDepotRecoveryPointCommand : LastBearingCommand
+    {
+        public OperateDepotRecoveryPointCommand(long sequence)
+            : base(sequence)
+        {
+        }
+    }
+
     public sealed class ChooseLiquidReturnCommand : LastBearingCommand
     {
         public ChooseLiquidReturnCommand(long sequence, LiquidCargoKind kind)
@@ -271,6 +297,32 @@ namespace AtomicLandPirate.Simulation.LastBearing
             : base(sequence)
         {
         }
+    }
+
+    public sealed class InstallCityImprovementCommand : LastBearingCommand
+    {
+        public InstallCityImprovementCommand(
+            long sequence,
+            NextCityDecision decision,
+            string socketId,
+            int orientationQuarterTurns)
+            : base(sequence)
+        {
+            if (decision == NextCityDecision.None)
+            {
+                throw new ArgumentOutOfRangeException(nameof(decision));
+            }
+
+            Decision = decision;
+            SocketId = RequireToken(socketId, nameof(socketId));
+            OrientationQuarterTurns = orientationQuarterTurns;
+        }
+
+        public NextCityDecision Decision { get; }
+
+        public string SocketId { get; }
+
+        public int OrientationQuarterTurns { get; }
     }
 
     public sealed class ServiceFieldSleeveCommand : LastBearingCommand

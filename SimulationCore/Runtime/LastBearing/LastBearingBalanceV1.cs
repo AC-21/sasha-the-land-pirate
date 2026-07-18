@@ -71,6 +71,39 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const long MinimumPostReturnPartsUnits = 2;
         public const long MinimumReturnVehicleConditionMilli = 500;
 
+        // VGR-04 deliberately aliases already-authorized prototype values. These
+        // names document the improvement semantics without introducing new tune.
+        public const long AuxiliaryPumpInstallationPartsUnits =
+            MinimumPostReturnPartsUnits;
+        public const long AuxiliaryPumpWaterModifierMilliPerSettlementTick =
+            CivicBufferWaterModifierMilliPerSettlementTick;
+
+        internal static long CityImprovementPartsCost(
+            CityImprovementKind improvement)
+        {
+            switch (improvement)
+            {
+                case CityImprovementKind.RefurbishedAuxiliaryPump:
+                    return AuxiliaryPumpInstallationPartsUnits;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(improvement));
+            }
+        }
+
+        internal static long CityImprovementWaterModifier(
+            CityImprovementKind improvement)
+        {
+            switch (improvement)
+            {
+                case CityImprovementKind.None:
+                    return 0;
+                case CityImprovementKind.RefurbishedAuxiliaryPump:
+                    return AuxiliaryPumpWaterModifierMilliPerSettlementTick;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(improvement));
+            }
+        }
+
         internal static long PreparationFuelCost(PreparationChoice choice)
         {
             switch (choice)
@@ -196,6 +229,18 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 default:
                     throw new ArgumentOutOfRangeException(nameof(module));
             }
+        }
+
+        public static long WreckLineGateTicks(VehicleModule module)
+        {
+            var oneWayTicks = RouteOneWayTicks(module);
+            if (oneWayTicks < 2)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_WRECK_LINE_ROUTE_TOO_SHORT");
+            }
+
+            return oneWayTicks / 2;
         }
 
         private static long PreparationBaseTicks(PreparationChoice choice)

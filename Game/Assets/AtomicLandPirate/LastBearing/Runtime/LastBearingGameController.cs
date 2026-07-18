@@ -83,12 +83,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _modeCoordinator = gameObject.AddComponent<LastBearingModeCoordinator>();
             _modeCoordinator.Initialize();
             _world = gameObject.AddComponent<LastBearingWorldBuilder>();
-            _world.Build(_modeCoordinator.GetModeRoot(
-                LastBearingPresentationMode.Driving));
+            _world.Build(
+                _modeCoordinator.GetModeRoot(
+                    LastBearingPresentationMode.Driving),
+                _modeCoordinator.GetModeRoot(
+                    LastBearingPresentationMode.BuildingCutaway),
+                _modeCoordinator.GetModeRoot(
+                    LastBearingPresentationMode.GarageBay));
             _modeCoordinator.ConfigurePresentationOwners(
                 _world.CameraRig!,
                 _world.VehicleView!,
-                _world.RoadFeelRig!.Root.transform);
+                _world.RoadFeelRig!.Root.transform,
+                _world.GarageBayView!.CameraAnchor!,
+                _world.GarageBayView.FocusAnchor!,
+                _world.PumpHallCutawayView!.CameraAnchor!,
+                _world.PumpHallCutawayView.FocusAnchor!);
             _modeCoordinator.AttachRoadModeAdapter(
                 _world.RoadFeelRig.Adapter);
             _hud = gameObject.AddComponent<LastBearingHud>();
@@ -169,8 +178,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 civicBuffer: false,
                 factionClaimed: false,
                 turbineRepaired: false,
+                auxiliaryPumpInstalled: false,
                 humanVisible: true,
                 robotVisible: true));
+            _world?.ApplyDepotApproachRecovery(
+                available: false,
+                unlocked: false);
+            _world?.ApplyRouteModulePoint(
+                available: false,
+                RouteActionKind.None,
+                operated: false);
+            _world?.ApplyRoadCargoPresentation(
+                HeavyCargoKind.PumpRotor,
+                HeavyCargoCustody.Depot);
+            _world?.ApplyCityImprovement(
+                HeavyCargoCustody.Depot,
+                CityImprovementKind.None,
+                humanVisible: true,
+                robotVisible: true);
         }
 
         public void ActivateInfrastructure()
@@ -279,7 +304,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             TryShowCityMode(
                 LastBearingPresentationMode.GarageBay,
-                "Garage bay routing scaffold active; the vehicle state is unchanged.");
+                "Sasha Scout service-bay cutaway active; the vehicle state is unchanged.");
         }
 
         public void AttachRoadModeAdapter(ILastBearingRoadModeAdapter adapter)
@@ -310,6 +335,40 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _status = cooperate
                 ? "The bearing stays claimed; a field sleeve and obligation come home."
                 : "Sasha takes the claimed bearing. The faction will remember the custody change.";
+        }
+
+        public void OperateDepotApproachRecoveryPoint()
+        {
+            if (_readModel == null ||
+                !_readModel.IsDepotApproachRecoveryAvailable)
+            {
+                _status =
+                    "The depot recovery point is not canonically available yet.";
+                return;
+            }
+
+            Queue(sequence =>
+                new OperateDepotRecoveryPointCommand(sequence));
+            _status =
+                "Recovery bridle seated. The depot encounter can now begin.";
+        }
+
+        public void OperateWreckLineModulePoint()
+        {
+            if (_readModel == null ||
+                !_readModel.IsWreckLineModulePointAvailable)
+            {
+                _status = "The Wreck Line module point is not canonically available yet.";
+                return;
+            }
+
+            RouteActionKind action = _readModel.RouteActionKind;
+            Queue(sequence => new OperateWreckLineModuleCommand(
+                sequence,
+                action));
+            _status = action == RouteActionKind.DeployWinch
+                ? "Winch seated. The existing pump rotor is coming into vehicle custody."
+                : "Seals checked. Cross the Wreck Line dust exposure without heavy cargo.";
         }
 
         public void ChooseLiquidReturn(LiquidCargoKind kind)
@@ -361,6 +420,25 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             Queue(sequence => new InstallTurbineRepairCommand(sequence));
             _status = "The civic organ is turning again.";
+        }
+
+        public void InstallCityImprovement()
+        {
+            if (_readModel == null
+                || !_readModel.IsCityImprovementInstallationAvailable)
+            {
+                _status =
+                    "The fixed pump-hall civic socket is not canonically ready.";
+                return;
+            }
+
+            Queue(sequence => new InstallCityImprovementCommand(
+                sequence,
+                NextCityDecision.RefurbishAuxiliaryPump,
+                LastBearingState.AuxiliaryPumpSocketId,
+                LastBearingState.AuxiliaryPumpOrientationQuarterTurns));
+            _status =
+                "The returned rotor is committed to the auxiliary pump hall.";
         }
 
         public void ServiceFieldSleeve()
@@ -487,24 +565,36 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private void HandleGlobalShortcuts()
         {
             var keyboard = Keyboard.current;
-            if (keyboard == null)
-            {
-                return;
-            }
+            var gamepad = Gamepad.current;
 
-            if (keyboard.pKey.wasPressedThisFrame)
+            if (keyboard != null && keyboard.pKey.wasPressedThisFrame)
             {
                 TogglePause();
             }
 
-            if (keyboard.f5Key.wasPressedThisFrame)
+            if (keyboard != null && keyboard.f5Key.wasPressedThisFrame)
             {
                 Save();
             }
 
-            if (keyboard.f9Key.wasPressedThisFrame)
+            if (keyboard != null && keyboard.f9Key.wasPressedThisFrame)
             {
                 Load();
+            }
+
+            if (_readModel != null &&
+                _readModel.IsWreckLineModulePointAvailable &&
+                ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
+                 (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
+            {
+                OperateWreckLineModulePoint();
+            }
+            else if (_readModel != null &&
+                _readModel.IsDepotApproachRecoveryAvailable &&
+                ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
+                 (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
+            {
+                OperateDepotApproachRecoveryPoint();
             }
         }
 
@@ -524,6 +614,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 LastBearingTickResult result = _kernel.Step(_state, commands);
                 _state = result.State;
                 _readModel = result.ReadModel;
+                TryAutosave(result.DomainEvents);
                 ApplyPresentation();
             }
             catch (Exception exception)
@@ -538,6 +629,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_pendingCommands.Count != 0 ||
                 _readModel == null ||
                 _readModel.PauseCause != PauseCause.None ||
+                _readModel.IsWreckLineModulePointAvailable ||
+                _readModel.IsDepotApproachRecoveryAvailable ||
                 (_readModel.ExpeditionPhase != ExpeditionPhase.Outbound &&
                  _readModel.ExpeditionPhase != ExpeditionPhase.Returning))
             {
@@ -545,7 +638,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             float throttle = 0f;
+            float brake = 0f;
             float steering = 0f;
+            float handbrake = 0f;
             var keyboard = Keyboard.current;
             if (keyboard != null)
             {
@@ -556,7 +651,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
                 if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed)
                 {
-                    throttle = 0f;
+                    brake = 1f;
                 }
 
                 if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed)
@@ -568,24 +663,39 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 {
                     steering += 1f;
                 }
+
+                if (keyboard.spaceKey.isPressed)
+                {
+                    handbrake = 1f;
+                }
             }
 
             var gamepad = Gamepad.current;
             if (gamepad != null)
             {
                 throttle += gamepad.rightTrigger.ReadValue();
-                throttle = Mathf.Max(
-                    0f,
-                    throttle - gamepad.leftTrigger.ReadValue());
+                brake = Mathf.Max(
+                    brake,
+                    gamepad.leftTrigger.ReadValue());
                 steering += gamepad.leftStick.x.ReadValue();
+                if (gamepad.leftShoulder.isPressed)
+                {
+                    handbrake = 1f;
+                }
             }
 
             float clampedSteering = Mathf.Clamp(steering, -1f, 1f);
             int throttleMilli = Mathf.RoundToInt(Mathf.Clamp01(throttle) * 1000f);
+            int brakeMilli = Mathf.RoundToInt(Mathf.Clamp01(brake) * 1000f);
             int steeringMilli = Mathf.RoundToInt(clampedSteering * 1000f);
+            int handbrakeMilli = Mathf.RoundToInt(
+                Mathf.Clamp01(handbrake) * 1000f);
             _modeCoordinator?.ApplyQuantizedRoadCommandShadow(
                 throttleMilli,
                 steeringMilli);
+            _modeCoordinator?.ApplyPresentationOnlyRoadControls(
+                brakeMilli,
+                handbrakeMilli);
             if (throttleMilli == 0 && steeringMilli == 0)
             {
                 return;
@@ -687,9 +797,48 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _readModel.PreparationChoice == PreparationChoice.CivicBuffer,
                 factionClaimed,
                 repaired,
+                _readModel.InstalledCityImprovement
+                    == CityImprovementKind.RefurbishedAuxiliaryPump,
                 humanVisible,
                 robotVisible));
+            _world.ApplyDepotApproachRecovery(
+                _readModel.IsDepotApproachRecoveryAvailable,
+                _readModel.ExpeditionPhase == ExpeditionPhase.AtDepot);
+            _world.ApplyRouteModulePoint(
+                _readModel.IsWreckLineModulePointAvailable,
+                _readModel.RouteActionKind,
+                _readModel.RouteActionUsed);
+            _world.ApplyRoadCargoPresentation(
+                _readModel.HeavyCargoKind,
+                _readModel.HeavyCargoCustody);
+            _world.ApplyCityImprovement(
+                _readModel.HeavyCargoCustody,
+                _readModel.InstalledCityImprovement,
+                humanVisible,
+                robotVisible);
             _modeCoordinator?.ApplyCanonical(_readModel);
+        }
+
+        private void TryAutosave(
+            IReadOnlyList<LastBearingDomainEvent> domainEvents)
+        {
+            for (var index = 0; index < domainEvents.Count; index++)
+            {
+                LastBearingEventKind kind = domainEvents[index].Kind;
+                if (kind == LastBearingEventKind.ExpeditionDeparted
+                    || kind == LastBearingEventKind.RouteActionUsed
+                    || kind == LastBearingEventKind.DepotRecoveryPointOperated
+                    || kind == LastBearingEventKind.DepotResolved
+                    || kind == LastBearingEventKind.ReturnPayloadFrozen
+                    || kind == LastBearingEventKind.VehicleReturned
+                    || kind == LastBearingEventKind.CityReturnCredited
+                    || kind == LastBearingEventKind.TurbineRepaired
+                    || kind == LastBearingEventKind.CityImprovementInstalled)
+                {
+                    Save();
+                    return;
+                }
+            }
         }
 
         private void Queue(params Func<long, LastBearingCommand>[] factories)

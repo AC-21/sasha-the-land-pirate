@@ -74,19 +74,19 @@ namespace AtomicLandPirate.Simulation.LastBearing
             builder.RepairCargoCustody = nextCustody;
         }
 
-        internal static void CreateHeavyCargo(LastBearingStateBuilder builder)
+        internal static void RecoverHeavyCargoToVehicle(
+            LastBearingStateBuilder builder)
         {
-            if (builder.HeavyCargoKind != HeavyCargoKind.None
-                || builder.HeavyCargoCustody != HeavyCargoCustody.None
+            if (builder.HeavyCargoKind != HeavyCargoKind.PumpRotor
+                || builder.HeavyCargoCustody != HeavyCargoCustody.Depot
                 || builder.VehicleModule != VehicleModule.WinchAssembly
                 || builder.TowSlotsUsed != 0
                 || builder.TowSlots < 1)
             {
                 throw new InvalidOperationException(
-                    "LAST_BEARING_HEAVY_CARGO_CREATE_INVALID");
+                    "LAST_BEARING_HEAVY_CARGO_RECOVERY_INVALID");
             }
 
-            builder.HeavyCargoKind = HeavyCargoKind.PumpRotor;
             builder.HeavyCargoCustody = HeavyCargoCustody.Vehicle;
             builder.TowSlotsUsed = 1;
         }
@@ -94,7 +94,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         internal static void TransferHeavyCargoToSettlement(
             LastBearingStateBuilder builder)
         {
-            if (builder.HeavyCargoKind == HeavyCargoKind.None)
+            if (builder.HeavyCargoKind == HeavyCargoKind.PumpRotor
+                && builder.HeavyCargoCustody == HeavyCargoCustody.Depot)
             {
                 return;
             }
@@ -107,6 +108,22 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             builder.HeavyCargoCustody = HeavyCargoCustody.Settlement;
+        }
+
+        internal static void InstallHeavyCargoAtAuxiliaryPump(
+            LastBearingStateBuilder builder)
+        {
+            if (builder.HeavyCargoKind != HeavyCargoKind.PumpRotor
+                || builder.HeavyCargoCustody != HeavyCargoCustody.Settlement
+                || builder.TowSlotsUsed != 1)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_AUXILIARY_PUMP_CARGO_INVALID");
+            }
+
+            builder.HeavyCargoCustody =
+                HeavyCargoCustody.InstalledAtAuxiliaryPump;
+            builder.TowSlotsUsed = 0;
         }
 
         internal static void CreateLiquidCargo(

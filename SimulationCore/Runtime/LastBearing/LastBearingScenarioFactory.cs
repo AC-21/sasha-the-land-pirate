@@ -42,6 +42,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 WorkshopServiceSlotsReserved = 0,
                 ActiveWaterModifierMilliPerSettlementTick = 0,
                 NextCityDecision = NextCityDecision.None,
+                InstalledCityImprovement = CityImprovementKind.None,
 
                 VehicleModule = VehicleModule.None,
                 ModuleInstallationState = ModuleInstallationState.None,
@@ -61,8 +62,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 TowSlots = 0,
                 TowSlotsUsed = 0,
                 LiquidCapacityMilli = 0,
-                HeavyCargoKind = HeavyCargoKind.None,
-                HeavyCargoCustody = HeavyCargoCustody.None,
+                HeavyCargoKind = HeavyCargoKind.PumpRotor,
+                HeavyCargoCustody = HeavyCargoCustody.Depot,
                 LiquidCargoKind = LiquidCargoKind.None,
                 LiquidCargoQuantityMilli = 0,
                 LiquidCargoCustody = LiquidCargoCustody.None,

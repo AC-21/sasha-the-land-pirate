@@ -34,7 +34,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const string DecodeUnknownVersionCode =
             "LB_CORE_DECODE_UNKNOWN_VERSION";
 
-        private const ushort CodecVersion = 1;
+        private const ushort CodecVersion = 2;
         private const int MaximumCanonicalBytes = 1_048_576;
         private static readonly byte[] Magic =
             Encoding.ASCII.GetBytes("ALPLBC01");
@@ -123,6 +123,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 builder.ActiveWaterModifierMilliPerSettlementTick =
                     reader.ReadInt64();
                 builder.NextCityDecision = reader.ReadEnum<NextCityDecision>();
+                builder.InstalledCityImprovement =
+                    reader.ReadEnum<CityImprovementKind>();
 
                 builder.VehicleModule = reader.ReadEnum<VehicleModule>();
                 builder.ModuleInstallationState =
@@ -290,6 +292,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             writer.WriteInt32(state.WorkshopServiceSlotsReserved);
             writer.WriteInt64(state.ActiveWaterModifierMilliPerSettlementTick);
             writer.WriteEnum(state.NextCityDecision);
+            writer.WriteEnum(state.InstalledCityImprovement);
 
             writer.WriteEnum(state.VehicleModule);
             writer.WriteEnum(state.ModuleInstallationState);

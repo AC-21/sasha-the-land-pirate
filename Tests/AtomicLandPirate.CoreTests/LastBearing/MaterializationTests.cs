@@ -41,6 +41,9 @@ namespace AtomicLandPirate.LastBearingTests
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingHud.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCameraRig.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCityGrammarComparison.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingDepotApproachRecoveryView.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingRouteModulePointView.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingPumpHallCutawayView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingVehicleView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingSaveAdapter.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelContracts.cs",
@@ -51,9 +54,14 @@ namespace AtomicLandPirate.LastBearingTests
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelLabController.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelRigFactory.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/LastBearingRoadFeelModeAdapter.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/Vehicle/SashaScoutSemanticContract.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/Vehicle/SashaScoutVisual.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/Vehicle/SashaScoutBlockoutFactory.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/Vehicle/LastBearingGarageBayView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/LastBearingAdapterTests.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/RoadFeelMathTests.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/SashaScoutPresentationTests.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/LastBearingPlayModeTests.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/RoadFeelLabPlayModeTests.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Scenes/LastBearing.unity",
@@ -76,6 +84,7 @@ namespace AtomicLandPirate.LastBearingTests
             VerifyGameMetadata(repoRoot);
             GameSourceContract.Verify(repoRoot);
             RoadFeelSourceContract.Verify(repoRoot);
+            SashaScoutSourceContract.Verify(repoRoot);
         }
 
         private static void VerifyPackageGraph(string repoRoot)

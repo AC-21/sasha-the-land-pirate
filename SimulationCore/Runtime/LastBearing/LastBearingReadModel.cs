@@ -30,8 +30,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
             ExpeditionPhase = state.ExpeditionPhase;
             TransactionPhase = state.TransactionPhase;
             RouteKind = state.RouteKind;
+            RouteActionKind = state.RouteActionKind;
+            RouteActionUsed = state.RouteActionUsed;
             RouteProgressTicks = state.RouteProgressTicks;
             RouteTargetTicks = state.RouteTargetTicks;
+            WreckLineGateTicks = state.VehicleModule == VehicleModule.None
+                ? 0
+                : LastBearingBalanceV1.WreckLineGateTicks(
+                    state.VehicleModule);
             VehicleLateralMilli = state.VehicleLateralMilli;
             VehicleConditionMilli = state.VehicleConditionMilli;
             RepairCargoKind = state.RepairCargoKind;
@@ -52,7 +58,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
             MaintenanceObligationActive = state.MaintenanceObligationActive;
             MaintenanceDue = state.MaintenanceDue;
             NextCityDecision = state.NextCityDecision;
+            InstalledCityImprovement = state.InstalledCityImprovement;
+            IsCityImprovementInstallationAvailable =
+                ComputeCityImprovementInstallationAvailable(state);
             PauseCause = state.PauseCause;
+            IsDepotApproachRecoveryAvailable =
+                ComputeDepotApproachRecoveryAvailable(state);
+            IsWreckLineModulePointAvailable =
+                ComputeWreckLineModulePointAvailable(state);
 
             WaterZeroSettlementTicks = WaterTrendMilliPerSettlementTick < 0
                 ? DivideCeiling(
@@ -113,8 +126,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public ExpeditionPhase ExpeditionPhase { get; }
         public TransactionPhase TransactionPhase { get; }
         public RouteKind RouteKind { get; }
+        public RouteActionKind RouteActionKind { get; }
+        public bool RouteActionUsed { get; }
         public long RouteProgressTicks { get; }
         public long RouteTargetTicks { get; }
+        public long WreckLineGateTicks { get; }
         public int VehicleLateralMilli { get; }
         public long VehicleConditionMilli { get; }
         public RepairCargoKind RepairCargoKind { get; }
@@ -135,7 +151,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public bool MaintenanceObligationActive { get; }
         public bool MaintenanceDue { get; }
         public NextCityDecision NextCityDecision { get; }
+        public CityImprovementKind InstalledCityImprovement { get; }
+        public bool IsCityImprovementInstallationAvailable { get; }
         public PauseCause PauseCause { get; }
+        public bool IsDepotApproachRecoveryAvailable { get; }
+        public bool IsWreckLineModulePointAvailable { get; }
         public long? WaterZeroSettlementTicks { get; }
         public long ClaimContestedFactionTicks { get; }
         public long ClaimedFactionTicks { get; }
@@ -178,7 +198,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             return checked(
-                baseRate + state.ActiveWaterModifierMilliPerSettlementTick);
+                baseRate
+                + state.ActiveWaterModifierMilliPerSettlementTick
+                + LastBearingBalanceV1.CityImprovementWaterModifier(
+                    state.InstalledCityImprovement));
         }
 
         private static long ThresholdTicks(
@@ -243,7 +266,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             if (state.ExpeditionPhase == ExpeditionPhase.Outbound)
             {
-                return "drive-to-depot";
+                if (ComputeWreckLineModulePointAvailable(state))
+                {
+                    return state.RouteActionKind == RouteActionKind.DeployWinch
+                        ? "deploy-winch-at-wreck-line"
+                        : "cross-wreck-line-dust-exposure";
+                }
+
+                return ComputeDepotApproachRecoveryAvailable(state)
+                    ? "operate-depot-recovery-point"
+                    : "drive-to-depot";
             }
 
             if (state.ExpeditionPhase == ExpeditionPhase.AtDepot
@@ -278,7 +310,61 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return "install-turbine-repair";
             }
 
+            if (ComputeCityImprovementInstallationAvailable(state))
+            {
+                return "install-refurbished-auxiliary-pump";
+            }
+
+            if (state.NextCityDecision != NextCityDecision.None)
+            {
+                return "await-next-city-decision-authority";
+            }
+
             return "observe-recovering-waterworks";
+        }
+
+        private static bool ComputeCityImprovementInstallationAvailable(
+            LastBearingState state)
+        {
+            long requiredParts = checked(
+                LastBearingBalanceV1.AuxiliaryPumpInstallationPartsUnits
+                + LastBearingBalanceV1.MinimumPostReturnPartsUnits);
+            return state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.Finalized
+                && state.TurbineCondition != TurbineCondition.Failing
+                && state.NextCityDecision
+                    == NextCityDecision.RefurbishAuxiliaryPump
+                && state.InstalledCityImprovement == CityImprovementKind.None
+                && state.PreparationChoice == PreparationChoice.WorkshopPush
+                && state.VehicleModule == VehicleModule.WinchAssembly
+                && state.RouteActionUsed
+                && state.HeavyCargoKind == HeavyCargoKind.PumpRotor
+                && state.HeavyCargoCustody == HeavyCargoCustody.Settlement
+                && state.TowSlotsUsed == 1
+                && state.PartsUnits >= requiredParts;
+        }
+
+        private static bool ComputeDepotApproachRecoveryAvailable(
+            LastBearingState state)
+        {
+            return state.ExpeditionPhase == ExpeditionPhase.Outbound
+                && state.TransactionPhase == TransactionPhase.RoadOwned
+                && state.RouteActionUsed
+                && state.RouteTargetTicks > 0
+                && state.RouteProgressTicks == state.RouteTargetTicks
+                && state.HasArrivalClaimSnapshot;
+        }
+
+        private static bool ComputeWreckLineModulePointAvailable(
+            LastBearingState state)
+        {
+            return state.ExpeditionPhase == ExpeditionPhase.Outbound
+                && state.TransactionPhase == TransactionPhase.RoadOwned
+                && state.VehicleModule != VehicleModule.None
+                && !state.RouteActionUsed
+                && state.RouteProgressTicks ==
+                    LastBearingBalanceV1.WreckLineGateTicks(
+                        state.VehicleModule);
         }
     }
 }

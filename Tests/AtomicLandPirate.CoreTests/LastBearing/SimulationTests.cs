@@ -16,6 +16,9 @@ namespace AtomicLandPirate.LastBearingTests
             harness.Run("drive input is bounded and quantized", InputBounds);
             harness.Run("duplicate drive commands fail before tick mutation", DuplicateDriveCommandsFailAtomically);
             harness.Run("preparation completes autonomously", PreparationCompletes);
+            WreckLineTests.Run(harness);
+            DepotApproachRecoveryTests.Run(harness);
+            CityImprovementTests.Run(harness);
             CompositionTests.Run(harness);
             OwnershipTests.Run(harness);
         }

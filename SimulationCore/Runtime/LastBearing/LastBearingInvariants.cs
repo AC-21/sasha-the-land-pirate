@@ -62,11 +62,15 @@ namespace AtomicLandPirate.Simulation.LastBearing
             RequireRange(state.VehicleConditionMilli, 0, 1000, "VEHICLE_CONDITION");
             RequireEnum(state.TurbineCondition, "TURBINE_CONDITION");
             RequireEnum(state.NextCityDecision, "NEXT_CITY_DECISION");
+            RequireEnum(
+                state.InstalledCityImprovement,
+                "INSTALLED_CITY_IMPROVEMENT");
 
             ValidatePreparation(state);
             ValidateVehicleAndTransaction(state);
             ValidateCargo(state);
             ValidateFaction(state);
+            ValidateCityImprovement(state);
         }
 
         private static void ValidatePreparation(LastBearingState state)
@@ -226,6 +230,32 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 state.RouteProgressTicks <= state.RouteTargetTicks,
                 "LAST_BEARING_ROUTE_PROGRESS_EXCEEDS_TARGET");
 
+            if (state.VehicleModule != VehicleModule.None)
+            {
+                var wreckLineGate = LastBearingBalanceV1.WreckLineGateTicks(
+                    state.VehicleModule);
+                Require(
+                    state.ExpeditionPhase != ExpeditionPhase.Outbound
+                    || state.RouteActionUsed
+                    || state.RouteProgressTicks <= wreckLineGate,
+                    "LAST_BEARING_WRECK_LINE_BYPASSED");
+                Require(
+                    state.ExpeditionPhase != ExpeditionPhase.Outbound
+                    || !state.RouteActionUsed
+                    || state.RouteProgressTicks >= wreckLineGate,
+                    "LAST_BEARING_WRECK_LINE_ACTION_BEFORE_GATE");
+                Require(
+                    !state.RouteActionUsed
+                    || state.TransactionPhase >= TransactionPhase.RoadOwned,
+                    "LAST_BEARING_ROUTE_ACTION_PHASE_INVALID");
+            }
+            else
+            {
+                Require(
+                    !state.RouteActionUsed,
+                    "LAST_BEARING_EMPTY_VEHICLE_ROUTE_ACTION_INVALID");
+            }
+
             var hasTransaction = state.TransactionPhase != TransactionPhase.None;
             Require(
                 hasTransaction
@@ -279,8 +309,33 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 || state.TransactionPhase >= TransactionPhase.CityCredited,
                 "LAST_BEARING_DEPOT_RESOLUTION_PHASE_INVALID");
 
+            if (state.ExpeditionPhase == ExpeditionPhase.Outbound)
+            {
+                Require(
+                    state.RouteProgressTicks != state.RouteTargetTicks
+                    || state.HasArrivalClaimSnapshot,
+                    "LAST_BEARING_ROUTE_ARRIVAL_SNAPSHOT_REQUIRED");
+                Require(
+                    !state.HasArrivalClaimSnapshot
+                    || (state.RouteTargetTicks > 0
+                        && state.RouteProgressTicks == state.RouteTargetTicks),
+                    "LAST_BEARING_OUTBOUND_ARRIVAL_SNAPSHOT_INVALID");
+            }
+
+            if (state.ExpeditionPhase == ExpeditionPhase.AtDepot
+                || state.ExpeditionPhase == ExpeditionPhase.Returning
+                || state.ExpeditionPhase == ExpeditionPhase.Returned)
+            {
+                Require(
+                    state.HasArrivalClaimSnapshot,
+                    "LAST_BEARING_POST_ARRIVAL_SNAPSHOT_REQUIRED");
+            }
+
             if (state.HasArrivalClaimSnapshot)
             {
+                Require(
+                    state.RouteActionUsed,
+                    "LAST_BEARING_ARRIVAL_REQUIRES_ROUTE_ACTION");
                 RequireRange(
                     state.ArrivalFactionClaimProgressMilli,
                     0,
@@ -339,21 +394,57 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     "LAST_BEARING_UNAPPLIED_REPAIR_CARGO_INVALID");
             }
 
-            if (state.HeavyCargoKind == HeavyCargoKind.None)
+            Require(
+                state.HeavyCargoKind == HeavyCargoKind.PumpRotor,
+                "LAST_BEARING_PUMP_ROTOR_REQUIRED");
+            Require(
+                state.HeavyCargoCustody == HeavyCargoCustody.Depot
+                || state.HeavyCargoCustody == HeavyCargoCustody.Vehicle
+                || state.HeavyCargoCustody == HeavyCargoCustody.Settlement
+                || state.HeavyCargoCustody
+                    == HeavyCargoCustody.InstalledAtAuxiliaryPump,
+                "LAST_BEARING_HEAVY_CUSTODY_INVALID");
+            Require(
+                state.HeavyCargoCustody != HeavyCargoCustody.Settlement
+                || state.TransactionPhase >= TransactionPhase.CityCredited,
+                "LAST_BEARING_ROTOR_SETTLEMENT_PHASE_INVALID");
+            if (state.VehicleModule == VehicleModule.WinchAssembly
+                && state.RouteActionUsed)
+            {
+                HeavyCargoCustody expectedCustody =
+                    state.InstalledCityImprovement
+                        == CityImprovementKind.RefurbishedAuxiliaryPump
+                        ? HeavyCargoCustody.InstalledAtAuxiliaryPump
+                        : state.TransactionPhase >= TransactionPhase.CityCredited
+                            ? HeavyCargoCustody.Settlement
+                            : HeavyCargoCustody.Vehicle;
+                Require(
+                    state.HeavyCargoCustody == expectedCustody,
+                    "LAST_BEARING_WINCH_ACTION_ROTOR_CUSTODY_INVALID");
+            }
+
+            if (state.HeavyCargoCustody == HeavyCargoCustody.Depot)
             {
                 Require(
-                    state.HeavyCargoCustody == HeavyCargoCustody.None,
-                    "LAST_BEARING_EMPTY_HEAVY_CUSTODY_INVALID");
+                    state.TowSlotsUsed == 0,
+                    "LAST_BEARING_DEPOT_ROTOR_TOW_SLOT_INVALID");
+            }
+            else if (state.HeavyCargoCustody
+                != HeavyCargoCustody.InstalledAtAuxiliaryPump)
+            {
+                Require(
+                    state.VehicleModule == VehicleModule.WinchAssembly
+                    && state.RouteActionUsed
+                    && state.TowSlotsUsed == 1,
+                    "LAST_BEARING_RECOVERED_ROTOR_STATE_INVALID");
             }
             else
             {
                 Require(
-                    state.HeavyCargoCustody == HeavyCargoCustody.Vehicle
-                    || state.HeavyCargoCustody == HeavyCargoCustody.Settlement,
-                    "LAST_BEARING_HEAVY_CUSTODY_INVALID");
-                Require(
-                    state.VehicleModule == VehicleModule.WinchAssembly,
-                    "LAST_BEARING_HEAVY_CARGO_REQUIRES_WINCH");
+                    state.VehicleModule == VehicleModule.WinchAssembly
+                    && state.RouteActionUsed
+                    && state.TowSlotsUsed == 0,
+                    "LAST_BEARING_INSTALLED_ROTOR_STATE_INVALID");
             }
 
             if (state.LiquidCargoKind == LiquidCargoKind.None)
@@ -445,6 +536,34 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         && state.NextMaintenanceDueSettlementTick == 0
                         && !state.MaintenanceDue,
                 "LAST_BEARING_MAINTENANCE_STATE_INVALID");
+        }
+
+        private static void ValidateCityImprovement(LastBearingState state)
+        {
+            bool rotorInstalled = state.HeavyCargoCustody
+                == HeavyCargoCustody.InstalledAtAuxiliaryPump;
+            Require(
+                (state.InstalledCityImprovement
+                    == CityImprovementKind.RefurbishedAuxiliaryPump)
+                    == rotorInstalled,
+                "LAST_BEARING_CITY_IMPROVEMENT_CUSTODY_INVALID");
+            if (state.InstalledCityImprovement == CityImprovementKind.None)
+            {
+                return;
+            }
+
+            Require(
+                state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.Finalized
+                && state.TurbineCondition != TurbineCondition.Failing
+                && state.NextCityDecision == NextCityDecision.None
+                && state.PreparationChoice == PreparationChoice.WorkshopPush
+                && state.VehicleModule == VehicleModule.WinchAssembly
+                && state.RouteActionUsed
+                && state.TowSlotsUsed == 0
+                && state.PartsUnits
+                    >= LastBearingBalanceV1.MinimumPostReturnPartsUnits,
+                "LAST_BEARING_CITY_IMPROVEMENT_STATE_INVALID");
         }
 
         private static void Require(bool condition, string code)

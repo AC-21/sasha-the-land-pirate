@@ -123,6 +123,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         Depot = 1,
         Vehicle = 2,
         Settlement = 3,
+        InstalledAtAuxiliaryPump = 4,
     }
 
     public enum LiquidCargoKind
@@ -213,6 +214,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
         RestoreDepotAccess = 4,
     }
 
+    public enum CityImprovementKind
+    {
+        None = 0,
+        RefurbishedAuxiliaryPump = 1,
+    }
+
     public enum LastBearingEventKind
     {
         ResidentAssigned = 1,
@@ -251,6 +258,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
         MaintenanceServiced = 34,
         IdempotentReplayAccepted = 35,
         VehicleSteered = 36,
+        DepotRecoveryPointOperated = 37,
+        CityResourcesCommitted = 38,
+        CityImprovementInstalled = 39,
     }
 
     public enum LastBearingEventCause

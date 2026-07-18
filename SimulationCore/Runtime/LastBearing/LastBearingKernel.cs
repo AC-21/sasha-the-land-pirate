@@ -129,6 +129,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 ApplyDrive(builder, drive, events);
             }
+            else if (command is OperateWreckLineModuleCommand operateModule)
+            {
+                ApplyOperateWreckLineModule(builder, operateModule, events);
+            }
+            else if (command is OperateDepotRecoveryPointCommand operateRecovery)
+            {
+                ApplyOperateDepotRecoveryPoint(
+                    builder,
+                    operateRecovery,
+                    events);
+            }
             else if (command is ResolveDepotCommand resolve)
             {
                 ApplyResolveDepot(builder, resolve, events);
@@ -156,6 +167,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
             else if (command is InstallTurbineRepairCommand installRepair)
             {
                 ApplyInstallRepair(builder, installRepair, events);
+            }
+            else if (command is InstallCityImprovementCommand installImprovement)
+            {
+                ApplyInstallCityImprovement(
+                    builder,
+                    installImprovement,
+                    events);
             }
             else if (command is ServiceFieldSleeveCommand service)
             {
@@ -466,6 +484,18 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     "LAST_BEARING_DRIVE_PHASE_INVALID");
             }
 
+            if (IsWreckLineModulePointAvailable(builder))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_WRECK_LINE_MODULE_ACTION_REQUIRED");
+            }
+
+            if (IsDepotApproachRecoveryAvailable(builder))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_DEPOT_RECOVERY_REQUIRED");
+            }
+
             var before = builder.RouteProgressTicks;
             var previousLateral = builder.VehicleLateralMilli;
             var steeringDelta =
@@ -496,8 +526,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 accumulator % LastBearingBalanceV1.FullClockScaleMilli;
             if (progress > 0)
             {
+                var progressLimit = builder.ExpeditionPhase ==
+                        ExpeditionPhase.Outbound &&
+                    !builder.RouteActionUsed
+                    ? LastBearingBalanceV1.WreckLineGateTicks(
+                        builder.VehicleModule)
+                    : builder.RouteTargetTicks;
                 builder.RouteProgressTicks = Math.Min(
-                    builder.RouteTargetTicks,
+                    progressLimit,
                     checked(builder.RouteProgressTicks + progress));
                 if (Math.Abs(builder.VehicleLateralMilli)
                     > LastBearingBalanceV1.RoadSafeHalfWidthMilli)
@@ -521,21 +557,6 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         previousCondition,
                         builder.VehicleConditionMilli);
                 }
-                if (!builder.RouteActionUsed)
-                {
-                    builder.RouteActionUsed = true;
-                    Emit(
-                        builder,
-                        events,
-                        LastBearingEventKind.RouteActionUsed,
-                        LastBearingEventCause.PlayerCommand,
-                        builder.RoadTick,
-                        command.Sequence,
-                        "vehicle:sasha:route-action",
-                        0,
-                        (long)builder.RouteActionKind);
-                }
-
                 Emit(
                     builder,
                     events,
@@ -552,7 +573,6 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 if (builder.ExpeditionPhase == ExpeditionPhase.Outbound)
                 {
-                    builder.ExpeditionPhase = ExpeditionPhase.AtDepot;
                     builder.HasArrivalClaimSnapshot = true;
                     builder.ArrivalFactionClaimProgressMilli =
                         builder.FactionClaimProgressMilli;
@@ -575,6 +595,119 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
                 builder.RouteMovementAccumulatorMilli = 0;
             }
+        }
+
+        private static void ApplyOperateWreckLineModule(
+            LastBearingStateBuilder builder,
+            OperateWreckLineModuleCommand command,
+            List<LastBearingDomainEvent> events)
+        {
+            if (command.Action != builder.RouteActionKind)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_WRECK_LINE_MODULE_ACTION_MISMATCH");
+            }
+
+            if (builder.RouteActionUsed)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (!IsWreckLineModulePointAvailable(builder))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_WRECK_LINE_MODULE_POINT_NOT_READY");
+            }
+
+            if (builder.VehicleModule == VehicleModule.WinchAssembly)
+            {
+                LastBearingOwnershipTransaction.RecoverHeavyCargoToVehicle(
+                    builder);
+                Emit(
+                    builder,
+                    events,
+                    LastBearingEventKind.HeavyCargoTransferred,
+                    LastBearingEventCause.PlayerCommand,
+                    builder.RoadTick,
+                    command.Sequence,
+                    "cargo:last-bearing:pump-rotor",
+                    (long)HeavyCargoCustody.Depot,
+                    (long)HeavyCargoCustody.Vehicle);
+            }
+            else if (builder.VehicleModule != VehicleModule.SealedRangeTank)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_WRECK_LINE_MODULE_INVALID");
+            }
+
+            builder.RouteMovementAccumulatorMilli = 0;
+            builder.RouteActionUsed = true;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.RouteActionUsed,
+                LastBearingEventCause.PlayerCommand,
+                builder.RoadTick,
+                command.Sequence,
+                "world:last-bearing:wreck-line",
+                0,
+                (long)command.Action);
+        }
+
+        private static bool IsWreckLineModulePointAvailable(
+            LastBearingStateBuilder builder)
+        {
+            return builder.ExpeditionPhase == ExpeditionPhase.Outbound
+                && builder.TransactionPhase == TransactionPhase.RoadOwned
+                && builder.VehicleModule != VehicleModule.None
+                && !builder.RouteActionUsed
+                && builder.RouteProgressTicks ==
+                    LastBearingBalanceV1.WreckLineGateTicks(
+                        builder.VehicleModule);
+        }
+
+        private static void ApplyOperateDepotRecoveryPoint(
+            LastBearingStateBuilder builder,
+            OperateDepotRecoveryPointCommand command,
+            List<LastBearingDomainEvent> events)
+        {
+            if (builder.HasArrivalClaimSnapshot
+                && builder.ExpeditionPhase != ExpeditionPhase.Outbound)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (!IsDepotApproachRecoveryAvailable(builder))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_DEPOT_RECOVERY_NOT_READY");
+            }
+
+            builder.RouteMovementAccumulatorMilli = 0;
+            builder.ExpeditionPhase = ExpeditionPhase.AtDepot;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.DepotRecoveryPointOperated,
+                LastBearingEventCause.PlayerCommand,
+                builder.RoadTick,
+                command.Sequence,
+                "world:last-bearing:depot-approach-recovery",
+                (long)ExpeditionPhase.Outbound,
+                (long)ExpeditionPhase.AtDepot);
+        }
+
+        private static bool IsDepotApproachRecoveryAvailable(
+            LastBearingStateBuilder builder)
+        {
+            return builder.ExpeditionPhase == ExpeditionPhase.Outbound
+                && builder.TransactionPhase == TransactionPhase.RoadOwned
+                && builder.RouteActionUsed
+                && builder.RouteTargetTicks > 0
+                && builder.RouteProgressTicks == builder.RouteTargetTicks
+                && builder.HasArrivalClaimSnapshot;
         }
 
         private static void ApplyResolveDepot(
@@ -715,7 +848,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             if (builder.TransactionPhase != TransactionPhase.RoadOwned
                 || builder.ExpeditionPhase != ExpeditionPhase.AtDepot
-                || builder.DepotResolution == EncounterChoice.Unresolved)
+                || builder.DepotResolution == EncounterChoice.Unresolved
+                || !builder.RouteActionUsed)
             {
                 throw new InvalidOperationException(
                     "LAST_BEARING_RETURN_FREEZE_PHASE_INVALID");
@@ -723,7 +857,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             if (builder.VehicleModule == VehicleModule.WinchAssembly)
             {
-                LastBearingOwnershipTransaction.CreateHeavyCargo(builder);
+                if (builder.HeavyCargoKind != HeavyCargoKind.PumpRotor
+                    || builder.HeavyCargoCustody
+                        != HeavyCargoCustody.Vehicle
+                    || builder.TowSlotsUsed != 1)
+                {
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_WINCH_ROTOR_NOT_RECOVERED");
+                }
             }
             else if (builder.LiquidCargoKind == LiquidCargoKind.None)
             {
@@ -738,7 +879,6 @@ namespace AtomicLandPirate.Simulation.LastBearing
             builder.RouteProgressTicks = 0;
             builder.RouteMovementAccumulatorMilli = 0;
             builder.VehicleLateralMilli = 0;
-            builder.RouteActionUsed = false;
             Emit(
                 builder,
                 events,
@@ -927,6 +1067,129 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 "settlement:last-bearing:turbine",
                 previousTrend,
                 ComputeWaterTrend(builder));
+        }
+
+        private static void ApplyInstallCityImprovement(
+            LastBearingStateBuilder builder,
+            InstallCityImprovementCommand command,
+            List<LastBearingDomainEvent> events)
+        {
+            bool exactAuxiliaryPumpRequest =
+                command.Decision == NextCityDecision.RefurbishAuxiliaryPump
+                && string.Equals(
+                    command.SocketId,
+                    LastBearingState.AuxiliaryPumpSocketId,
+                    StringComparison.Ordinal)
+                && command.OrientationQuarterTurns
+                    == LastBearingState.AuxiliaryPumpOrientationQuarterTurns;
+            if (builder.InstalledCityImprovement != CityImprovementKind.None)
+            {
+                if (builder.InstalledCityImprovement
+                        == CityImprovementKind.RefurbishedAuxiliaryPump
+                    && exactAuxiliaryPumpRequest)
+                {
+                    EmitReplay(builder, command.Sequence, events);
+                    return;
+                }
+
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_ALREADY_INSTALLED");
+            }
+
+            if (command.Decision != builder.NextCityDecision)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_DECISION_MISMATCH");
+            }
+
+            if (command.Decision != NextCityDecision.RefurbishAuxiliaryPump)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_UNSUPPORTED");
+            }
+
+            if (!string.Equals(
+                    command.SocketId,
+                    LastBearingState.AuxiliaryPumpSocketId,
+                    StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_SOCKET_INVALID");
+            }
+
+            if (command.OrientationQuarterTurns
+                != LastBearingState.AuxiliaryPumpOrientationQuarterTurns)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_ORIENTATION_INVALID");
+            }
+
+            if (builder.ExpeditionPhase != ExpeditionPhase.AtHome
+                || builder.TransactionPhase != TransactionPhase.Finalized
+                || builder.TurbineCondition == TurbineCondition.Failing)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_PHASE_INVALID");
+            }
+
+            if (builder.PreparationChoice != PreparationChoice.WorkshopPush
+                || builder.VehicleModule != VehicleModule.WinchAssembly
+                || !builder.RouteActionUsed
+                || builder.HeavyCargoKind != HeavyCargoKind.PumpRotor
+                || builder.HeavyCargoCustody != HeavyCargoCustody.Settlement
+                || builder.TowSlotsUsed != 1)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_CARGO_INVALID");
+            }
+
+            long partsCost = LastBearingBalanceV1.CityImprovementPartsCost(
+                CityImprovementKind.RefurbishedAuxiliaryPump);
+            long requiredParts = checked(
+                partsCost + LastBearingBalanceV1.MinimumPostReturnPartsUnits);
+            if (builder.PartsUnits < requiredParts)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_PARTS_INSUFFICIENT");
+            }
+
+            long previousParts = builder.PartsUnits;
+            builder.PartsUnits = checked(builder.PartsUnits - partsCost);
+            LastBearingOwnershipTransaction.InstallHeavyCargoAtAuxiliaryPump(
+                builder);
+            builder.InstalledCityImprovement =
+                CityImprovementKind.RefurbishedAuxiliaryPump;
+            builder.NextCityDecision = NextCityDecision.None;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityResourcesCommitted,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                "settlement:last-bearing:parts",
+                previousParts,
+                builder.PartsUnits);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.HeavyCargoTransferred,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                "cargo:last-bearing:pump-rotor",
+                (long)HeavyCargoCustody.Settlement,
+                (long)HeavyCargoCustody.InstalledAtAuxiliaryPump);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityImprovementInstalled,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.AuxiliaryPumpSocketId,
+                (long)CityImprovementKind.None,
+                (long)builder.InstalledCityImprovement);
         }
 
         private static void ApplyServiceSleeve(
@@ -1674,7 +1937,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             return checked(
-                baseRate + builder.ActiveWaterModifierMilliPerSettlementTick);
+                baseRate
+                + builder.ActiveWaterModifierMilliPerSettlementTick
+                + LastBearingBalanceV1.CityImprovementWaterModifier(
+                    builder.InstalledCityImprovement));
         }
 
         private static void EnsureTransactionIdentity(

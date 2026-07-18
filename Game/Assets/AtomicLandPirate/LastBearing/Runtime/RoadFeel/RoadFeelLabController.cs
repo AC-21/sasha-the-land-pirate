@@ -526,6 +526,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
                     iron,
                     oxide,
                     bone,
+                    iron,
                     tungsten,
                     _damageLampMaterial!));
             _vehicle = rig.Vehicle;

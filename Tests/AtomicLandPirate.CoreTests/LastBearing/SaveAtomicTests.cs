@@ -15,6 +15,8 @@ namespace AtomicLandPirate.LastBearingTests
             harness.Run("frozen generation and pointer vector", FrozenVector);
             harness.Run("four preparation and module checkpoints round trip", () =>
                 PreparationModuleCheckpointsRoundTrip(repoRoot));
+            harness.Run("installed auxiliary pump checkpoint round trips", () =>
+                InstalledAuxiliaryPumpCheckpointRoundTrips(repoRoot));
             harness.Run("atomic current and immediately preceding last-good", () =>
                 CurrentAndLastGood(repoRoot));
             harness.Run("corrupt current recovers only verified last-good", () =>
@@ -133,6 +135,50 @@ namespace AtomicLandPirate.LastBearingTests
             LastBearingLoadResult loaded = store.TryLoad(_ => true);
             TestHarness.True(loaded.Succeeded && !loaded.FromLastGood, "current load failed");
             TestHarness.True(third.SequenceEqual(loaded.CanonicalPayload!), "current payload differs");
+        }
+
+        private static void InstalledAuxiliaryPumpCheckpointRoundTrips(
+            string repoRoot)
+        {
+            LastBearingState installed =
+                CityImprovementTests.CreateInstalledStateForSaveTests();
+            byte[] canonical = LastBearingCanonicalCodec.Encode(installed);
+            string profile = FreshProfile(
+                repoRoot,
+                "checkpoint-installed-auxiliary-pump");
+            LastBearingProfileStore store =
+                LastBearingProfileStore.OpenFixedProfileDirectory(profile);
+
+            LastBearingPersistResult persisted = store.TryPersist(canonical);
+            TestHarness.True(
+                persisted.Succeeded,
+                "installed auxiliary pump checkpoint persist failed");
+            LastBearingLoadResult loaded = store.TryLoad(payload =>
+                LastBearingCanonicalCodec.TryDecode(payload).Succeeded);
+            TestHarness.True(
+                loaded.Succeeded && loaded.CanonicalPayload != null,
+                "installed auxiliary pump checkpoint load failed");
+            TestHarness.True(
+                canonical.SequenceEqual(loaded.CanonicalPayload!),
+                "installed auxiliary pump canonical bytes changed");
+            LastBearingDecodeResult decoded =
+                LastBearingCanonicalCodec.TryDecode(loaded.CanonicalPayload!);
+            TestHarness.True(
+                decoded.Succeeded && decoded.State != null,
+                "installed auxiliary pump canonical decode failed");
+            TestHarness.Equal(
+                CityImprovementKind.RefurbishedAuxiliaryPump,
+                decoded.State!.InstalledCityImprovement,
+                "restored city improvement");
+            TestHarness.Equal(
+                HeavyCargoCustody.InstalledAtAuxiliaryPump,
+                decoded.State.HeavyCargoCustody,
+                "restored installed rotor custody");
+            TestHarness.Equal(0, decoded.State.TowSlotsUsed, "restored tow slot");
+            TestHarness.Equal(
+                LastBearingCanonicalCodec.ComputeMechanicalSha256(installed),
+                LastBearingCanonicalCodec.ComputeMechanicalSha256(decoded.State),
+                "restored installation mechanics");
         }
 
         private static void CorruptCurrentRecovery(string repoRoot)

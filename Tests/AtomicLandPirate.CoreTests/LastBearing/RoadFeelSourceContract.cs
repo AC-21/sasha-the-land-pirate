@@ -71,7 +71,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(factory, "new RoadFeelRigInstance");
             Require(factory, "RoadFeelVehicleController");
             Require(factory, "LastBearingRoadFeelModeAdapter");
-            Require(factory, "CreateHeadlight");
+            Require(factory, "SashaScoutBlockoutFactory.Create");
+            Require(factory, "CopyContactStations");
+            Require(factory, "ScoutVisual");
             Require(factory, "cargoVisuals");
             Require(factory, "contactStations");
             foreach (string token in new[]
@@ -91,6 +93,15 @@ namespace AtomicLandPirate.LastBearingTests
 
             Require(modeAdapter, "ILastBearingRoadModeAdapter");
             Require(modeAdapter, "ApplyQuantizedCommandShadow");
+            Require(modeAdapter, "ApplyPresentationOnlyControls");
+            Require(modeAdapter, "ApplyDerivedPresentationLoad");
+            Require(modeAdapter, "LastDamageBand");
+            Require(modeAdapter, "ToRoadFeelDamageBand");
+            Require(modeAdapter, "RoadFeelDamageBand.Worn");
+            Require(modeAdapter, "RoadFeelDamageBand.Critical");
+            Require(modeAdapter, "LastBrakeMilli");
+            Require(modeAdapter, "LastHandbrakeMilli");
+            Require(modeAdapter, "LastCargoMassKilograms");
             Require(modeAdapter, "SetControlInput");
             Require(modeAdapter, "SynchronizePresentationPose");
             Require(modeAdapter, "CommandReceiptCount");

@@ -24,10 +24,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private Vector3 _cityFocus = ComparisonFocus;
         private Transform? _roadTarget;
+        private Transform? _inspectionCameraAnchor;
+        private Transform? _inspectionFocusAnchor;
         private float _cityYaw = ComparisonYaw;
         private float _cityDistance = ComparisonDistance;
         private bool _roadMode;
         private bool _comparisonMode;
+        private bool _inspectionMode;
 
         public static Vector3 ComparisonFocus => new Vector3(2f, 0f, -1.5f);
 
@@ -35,7 +38,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool IsComparisonMode => _comparisonMode;
 
+        public bool IsInspectionMode => _inspectionMode;
+
         public Transform? RoadTarget => _roadTarget;
+
+        public Transform? InspectionCameraAnchor => _inspectionCameraAnchor;
+
+        public Transform? InspectionFocusAnchor => _inspectionFocusAnchor;
 
         public float CityDistance => _cityDistance;
 
@@ -75,9 +84,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ApplyPose(immediate: !Application.isPlaying);
         }
 
+        public void SetInspectionPose(
+            Transform cameraAnchor,
+            Transform focusAnchor,
+            bool active)
+        {
+            _inspectionCameraAnchor = cameraAnchor != null
+                ? cameraAnchor
+                : throw new System.ArgumentNullException(nameof(cameraAnchor));
+            _inspectionFocusAnchor = focusAnchor != null
+                ? focusAnchor
+                : throw new System.ArgumentNullException(nameof(focusAnchor));
+            _inspectionMode = active;
+            ApplyPose(immediate: !Application.isPlaying);
+        }
+
         private void Update()
         {
-            if (_roadMode || _comparisonMode)
+            if (_roadMode || _comparisonMode || _inspectionMode)
             {
                 return;
             }
@@ -178,7 +202,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Vector3 targetPosition;
             Quaternion targetRotation;
 
-            if (_roadMode && _roadTarget != null)
+            if (_inspectionMode &&
+                _inspectionCameraAnchor != null &&
+                _inspectionFocusAnchor != null)
+            {
+                targetPosition = _inspectionCameraAnchor.position;
+                Vector3 focusDirection =
+                    _inspectionFocusAnchor.position - targetPosition;
+                targetRotation = focusDirection.sqrMagnitude > 0.001f
+                    ? Quaternion.LookRotation(focusDirection, Vector3.up)
+                    : _inspectionCameraAnchor.rotation;
+            }
+            else if (_roadMode && _roadTarget != null)
             {
                 var vehicleForward = _roadTarget.forward;
                 vehicleForward.y = 0f;

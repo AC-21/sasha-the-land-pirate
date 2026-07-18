@@ -15,6 +15,12 @@ namespace AtomicLandPirate.LastBearingTests
             View = LastBearingReadModel.FromState(State);
         }
 
+        public CoreTestDriver(LastBearingState state)
+        {
+            State = state ?? throw new ArgumentNullException(nameof(state));
+            View = LastBearingReadModel.FromState(State);
+        }
+
         public LastBearingState State { get; private set; }
 
         public LastBearingReadModel View { get; private set; }
@@ -56,6 +62,19 @@ namespace AtomicLandPirate.LastBearingTests
             Apply(sequence => new ActivateSliceInfrastructureCommand(sequence));
             Apply(sequence => new SelectPreparationCommand(sequence, choice, module));
             Apply(sequence => new InstallVehicleModuleCommand(sequence, module));
+        }
+
+        public void OperateWreckLineIfAvailable()
+        {
+            if (!View.IsWreckLineModulePointAvailable)
+            {
+                return;
+            }
+
+            RouteActionKind action = View.RouteActionKind;
+            Apply(sequence => new OperateWreckLineModuleCommand(
+                sequence,
+                action));
         }
     }
 }
