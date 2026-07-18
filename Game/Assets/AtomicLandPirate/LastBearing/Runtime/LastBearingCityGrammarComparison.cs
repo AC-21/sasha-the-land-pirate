@@ -535,6 +535,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ResetTrialLayout();
             SelectedHypothesis = LastBearingCityGrammarHypothesis.Unselected;
             LastCompletedHypothesis = LastBearingCityGrammarHypothesis.Unselected;
+            _completedObservationCount = 0;
             ApplyPresentation();
         }
 

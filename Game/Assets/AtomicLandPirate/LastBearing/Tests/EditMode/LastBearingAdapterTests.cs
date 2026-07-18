@@ -567,6 +567,38 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
+        public void ClearingBothCityGrammarTrialsClearsObservationEvidence()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.Mixed);
+            controller.InspectCityNeed();
+            string canonicalBefore = controller.CanonicalHash;
+            LastBearingCityGrammarComparison comparison =
+                controller.World!.CityGrammarComparison!;
+
+            CompleteSnapGridObservation(controller, clear: true);
+            CompleteDistrictObservation(controller, clear: false);
+            Assert.That(comparison.CompletedObservationCount, Is.EqualTo(2));
+
+            controller.ResetCityGrammarComparison();
+
+            Assert.That(comparison.HasCompletedObservation, Is.False);
+            Assert.That(comparison.CompletedObservationCount, Is.EqualTo(0));
+            Assert.That(
+                comparison.LastCompletedHypothesis,
+                Is.EqualTo(LastBearingCityGrammarHypothesis.Unselected));
+            Assert.That(
+                comparison.SelectedHypothesis,
+                Is.EqualTo(LastBearingCityGrammarHypothesis.Unselected));
+            Assert.That(controller.CityGrammarEvidence, Does.Contain("observations=0"));
+            Assert.That(controller.CityGrammarEvidence, Does.Contain("path=Unrecorded"));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+        }
+
+        [Test]
         public void CityInspectionModesAreCoreIsolatedAndExactlyOneIsActive()
         {
             _root = new GameObject(LastBearingGameController.RuntimeRootName);
