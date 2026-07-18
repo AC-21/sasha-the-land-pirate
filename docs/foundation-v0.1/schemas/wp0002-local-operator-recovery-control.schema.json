@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ac-21.github.io/sasha-the-land-pirate/schemas/wp0002-local-operator-recovery-control.schema.json",
+  "title": "WP-0002 local-operator mixed-reader recovery control",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "transaction_id",
+    "predecessor_transaction_id",
+    "predecessor_disposition",
+    "authorization_receipt_id",
+    "governance_record",
+    "failed_closure_pr",
+    "reader_assignment",
+    "control_constraints",
+    "evidence_reissue"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "transaction_id": { "const": "WP0002-LOCAL-OPERATOR-CLOSURE-RECOVERY-20260718" },
+    "predecessor_transaction_id": { "const": "WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718" },
+    "predecessor_disposition": { "const": "control-merged-closure-unmerged-never-effective" },
+    "authorization_receipt_id": { "const": "RR-WP0002-LOCAL-OPERATOR-RECOVERY-20260718" },
+    "governance_record": { "const": "governance/WP-0002-LOCAL-OPERATOR-MIXED-READER-RECOVERY.md" },
+    "failed_closure_pr": {
+      "const": {
+        "number": 64,
+        "head_sha": "c3cb37fe954f1327031e176bcf84f982611736f8",
+        "immutable": true,
+        "merge_authorized": false
+      }
+    },
+    "reader_assignment": {
+      "const": {
+        "ordinary": [
+          "branch-identity",
+          "repository-owner-identity",
+          "pull-request",
+          "comments",
+          "check-runs",
+          "git-fetch"
+        ],
+        "administration_read": [
+          "classic-branch-protection",
+          "repository-merge-settings",
+          "repository-rulesets"
+        ],
+        "candidate_receives_administration_credential": false,
+        "mismatch_diagnostics": "sorted-normalized-field-names-only"
+      }
+    },
+    "control_constraints": {
+      "const": {
+        "required_checks_before_after": ["validate", "wp0002-core", "wp0002-policy"],
+        "retained_required_checks_during": ["validate", "wp0002-core"],
+        "required_check_app_id": 15368,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "branch_protection_change_authorized": "temporarily-make-only-wp0002-policy-nonrequired-for-exact-receipt-head-then-immediately-restore",
+        "base_policy_expected_result": "reject-recovery-control-diff",
+        "retained_protections_unchanged": true,
+        "restore_immediately_after_squash": true,
+        "authority_expansion": false,
+        "squash_only": true
+      }
+    },
+    "evidence_reissue": {
+      "const": {
+        "fresh_pull_request_required": true,
+        "modify_failed_pr_64": false,
+        "report_contract": "WP0002-LOCAL-OPERATOR-CLOSURE-RECOVERY-20260718",
+        "paths": [
+          "docs/evidence/WP-0002/local-operator-recovery/authority.json",
+          "docs/evidence/WP-0002/local-operator-recovery/pre-merge.json",
+          "docs/evidence/WP-0002/local-operator-recovery/complete.json"
+        ],
+        "delta_policy": "exact-three-regular-added-report-files-and-no-other-delta",
+        "authority_condition": "protected-v3-validated-closure-squash-only"
+      }
+    }
+  }
+}

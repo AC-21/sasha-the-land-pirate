@@ -14,6 +14,9 @@ import validate_foundation as foundation
 
 
 CONTRACT_SHA256 = "ab" * 32
+WP0002_CONTRACT_SHA256 = (
+    "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"
+)
 CONSTITUTION_SHA256 = "cd" * 32
 LEDGER_SHA256 = "ef" * 32
 BASE_COMMIT = "1" * 40
@@ -217,6 +220,9 @@ class LocalA1BoundaryTests(unittest.TestCase):
         )
         manifest["local_operator_transaction_evidence_contract"] = copy.deepcopy(
             foundation.WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT
+        )
+        manifest["local_operator_recovery_control"] = copy.deepcopy(
+            foundation.WP0002_LOCAL_OPERATOR_RECOVERY_CONTROL
         )
         manifest["allowed_mcp_tools"] = [
             "Unity_ReadConsole",
@@ -462,6 +468,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
             "not-attached-to-latest-head"
         )
         packet["id"] = "WP-0002"
+        packet["contract_sha256"] = WP0002_CONTRACT_SHA256
         packet["status"] = "active"
         packet["reservation"]["paths"] = [
             "Game/Assets/AtomicLandPirate/LastBearing/",
@@ -473,6 +480,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
             "sha256": "",
         }
         manifest["reservation"]["paths"] = packet["reservation"]["paths"]
+        manifest["packet_contract_sha256"] = WP0002_CONTRACT_SHA256
         manifest["attestation_receipt_id"] = "RR-WP0002-ACTIVATE"
         manifest["excluded_creator_owned_drift"][0]["base_blob_sha256"] = (
             hashlib.sha256(CONFIG_BASE).hexdigest()
@@ -768,7 +776,9 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 ],
             }
         ]
-        receipt["subject_contract_sha256"] = {"WP-0002": CONTRACT_SHA256}
+        receipt["subject_contract_sha256"] = {
+            "WP-0002": WP0002_CONTRACT_SHA256
+        }
         receipt["artifact_sha256"] = {
             packet["a1_boundary_manifest"]["path"]: (
                 foundation.WP0002_PREVIOUS_BOUNDARY_SHA256
@@ -881,8 +891,19 @@ class LocalA1BoundaryTests(unittest.TestCase):
             predecessor_receipt_mutator(predecessor_receipt)
         if corrupt_predecessor_receipt_file:
             predecessor_receipt_path.write_bytes(predecessor_receipt_bytes + b" ")
+
+        successor_receipt_source = (
+            repository_root / foundation.WP0002_V2_LOCAL_OPERATOR_RECEIPT_REPO_PATH
+        )
+        successor_receipt_bytes = successor_receipt_source.read_bytes()
+        successor_receipt_path = (
+            root / foundation.WP0002_V2_LOCAL_OPERATOR_RECEIPT_PATH
+        )
+        successor_receipt_path.parent.mkdir(parents=True, exist_ok=True)
+        successor_receipt_path.write_bytes(successor_receipt_bytes)
+        successor_receipt = json.loads(successor_receipt_bytes.decode("utf-8"))
         operator_receipt = {
-            "receipt_id": foundation.WP0002_LOCAL_OPERATOR_RECEIPT_ID,
+            "receipt_id": foundation.WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_ID,
             "issued_at": "2026-07-17T23:59:00Z",
             "issued_by": "AC-21",
             "issuer_role": "creator",
@@ -899,19 +920,19 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 "pull/99#issuecomment-123"
             ),
             "subject_ids": [
-                foundation.WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID,
+                foundation.WP0002_LOCAL_OPERATOR_AMENDMENT_ID,
                 "WP-0002",
             ],
             "subject_claims": [
                 {
-                    "subject_id": foundation.WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID,
+                    "subject_id": foundation.WP0002_LOCAL_OPERATOR_AMENDMENT_ID,
                     "claims": [
-                        foundation.WP0002_LOCAL_OPERATOR_SUPERSESSION_CLAIM
+                        foundation.WP0002_LOCAL_OPERATOR_RECOVERY_SUPERSESSION_CLAIM
                     ],
                 },
                 {
                     "subject_id": "WP-0002",
-                    "claims": [foundation.WP0002_LOCAL_OPERATOR_CLAIM],
+                    "claims": [foundation.WP0002_LOCAL_OPERATOR_RECOVERY_CLAIM],
                 }
             ],
             "approval_text_sha256": "91" * 32,
@@ -925,15 +946,15 @@ class LocalA1BoundaryTests(unittest.TestCase):
                     governance_path.read_bytes()
                 ).hexdigest(),
                 packet_relative: hashlib.sha256(packet_path.read_bytes()).hexdigest(),
-                foundation.WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH: (
-                    foundation.WP0002_V1_LOCAL_OPERATOR_RECEIPT_SHA256
+                foundation.WP0002_V2_LOCAL_OPERATOR_RECEIPT_REPO_PATH: (
+                    foundation.WP0002_V2_LOCAL_OPERATOR_RECEIPT_SHA256
                 ),
             },
             "subject_contract_sha256": {
-                foundation.WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID: (
-                    foundation.WP0002_V1_AMENDED_BOUNDARY_SHA256
+                foundation.WP0002_LOCAL_OPERATOR_AMENDMENT_ID: (
+                    foundation.WP0002_V2_AMENDED_BOUNDARY_SHA256
                 ),
-                "WP-0002": CONTRACT_SHA256,
+                "WP-0002": packet["contract_sha256"],
             },
             "subject_event_sha256": {},
             "foundation_binding": None,
@@ -1027,6 +1048,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
             receipts[foundation.WP0002_V1_LOCAL_OPERATOR_RECEIPT_ID] = (
                 predecessor_receipt
             )
+        receipts[foundation.WP0002_LOCAL_OPERATOR_RECEIPT_ID] = successor_receipt
         if include_operator_receipt:
             receipts[operator_receipt["receipt_id"]] = operator_receipt
         schemas = Path(__file__).resolve().parents[1] / "schemas"
@@ -1255,7 +1277,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
             calls.append((repository, receipt))
 
         receipt = {
-            "receipt_id": foundation.WP0002_LOCAL_OPERATOR_RECEIPT_ID,
+            "receipt_id": foundation.WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_ID,
         }
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -1316,101 +1338,36 @@ class LocalA1BoundaryTests(unittest.TestCase):
         )
         self.assertEqual(calls, ["authority", "pre-merge", "complete"])
 
-    def test_pending_successor_requires_exact_fresh_protection_before(self) -> None:
-        relative = foundation.WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT[
-            "stage1_protection_before_path"
-        ]
-        capture = {"capture": "exact-three"}
-        raw = json_bytes(capture)
-        digest = hashlib.sha256(raw).hexdigest()
-        receipt = {
-            "issued_at": "2026-07-18T00:04:00Z",
-            "artifact_sha256": {relative: digest},
-        }
-        manifest = {
-            "local_operator_successor_scope_capture": {
-                "base_commit": SUCCESSOR_BASE_COMMIT,
-            }
-        }
-        observed_at = "2026-07-18T00:00:00Z"
-
-        def validator(
-            value: object,
-            *,
-            base_sha: str,
-            authorization_comment: object,
-        ) -> tuple[dict[str, object], bytes]:
-            self.assertEqual(value, capture)
-            self.assertEqual(base_sha, SUCCESSOR_BASE_COMMIT)
-            self.assertIsNone(authorization_comment)
-            return {"observed_at": observed_at}, b"raw-protection"
-
-        verifier = {
-            "PROTECTION_BEFORE_PATH": relative,
-            "MAX_BEFORE_TO_AUTHORITY_SECONDS": 300,
-            "validate_protection_before_capture": validator,
-        }
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            path = root / relative
-            path.parent.mkdir(parents=True)
-            path.write_bytes(raw)
-            with (
-                mock.patch.object(foundation, "REPO_ROOT", root),
-                mock.patch.object(
-                    foundation,
-                    "_load_wp0002_transaction_verifier",
-                    return_value=(verifier, []),
+    def test_recovery_stage1_requires_no_committed_protection_before(self) -> None:
+        contract = foundation.WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT
+        self.assertIsNone(contract["stage1_protection_before_path"])
+        self.assertEqual(
+            contract["stage1_protection_before_policy"],
+            "v3-live-before-exact-three-during-exact-validate-and-wp0002-core-after-exact-three",
+        )
+        self.assertEqual(
+            contract["maximum_authenticated_completion_comment_delay_seconds"],
+            600,
+        )
+        verifier_loader = mock.Mock(return_value=({}, []))
+        with mock.patch.object(
+            foundation,
+            "_load_wp0002_transaction_verifier",
+            verifier_loader,
+        ):
+            self.assertEqual(
+                foundation.validate_wp0002_pending_protection_before(
+                    {
+                        "receipt_id": (
+                            foundation.WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_ID
+                        ),
+                        "artifact_sha256": {},
+                    },
+                    {},
                 ),
-            ):
-                self.assertEqual(
-                    foundation.validate_wp0002_pending_protection_before(
-                        receipt,
-                        manifest,
-                    ),
-                    [],
-                )
-                wrong_receipt = copy.deepcopy(receipt)
-                wrong_receipt["artifact_sha256"][relative] = "0" * 64
-                self.assertTrue(
-                    any(
-                        "does not bind protection-before" in error
-                        for error in foundation.validate_wp0002_pending_protection_before(
-                            wrong_receipt,
-                            manifest,
-                        )
-                    )
-                )
-                observed_at = "2026-07-17T23:58:59Z"
-                self.assertTrue(
-                    any(
-                        "at most 300 seconds" in error
-                        for error in foundation.validate_wp0002_pending_protection_before(
-                            receipt,
-                            manifest,
-                        )
-                    )
-                )
-                observed_at = "2026-07-18T00:05:00Z"
-                self.assertTrue(
-                    any(
-                        "at most 300 seconds" in error
-                        for error in foundation.validate_wp0002_pending_protection_before(
-                            receipt,
-                            manifest,
-                        )
-                    )
-                )
-                path.unlink()
-                self.assertTrue(
-                    any(
-                        "cannot be read" in error
-                        for error in foundation.validate_wp0002_pending_protection_before(
-                            receipt,
-                            manifest,
-                        )
-                    )
-                )
+                [],
+            )
+        verifier_loader.assert_called_once_with()
 
     def test_local_operator_amendment_requires_exact_scope_reference(self) -> None:
         self.assertEqual(
@@ -1697,18 +1654,71 @@ class LocalA1BoundaryTests(unittest.TestCase):
             "Tools/Validation/verify_wp0002_local_operator_transaction.py",
             *activation[11:],
         ]
-        successor = [
+        v2_successor = [
             *activation[:11],
             "Tools/Validation/collect_wp0002_scope_capture_successor.py",
             "Tools/Validation/verify_wp0002_local_operator_transaction.py",
             "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py",
             *activation[11:],
         ]
+        successor = [
+            *v2_successor[:14],
+            "Tools/Validation/verify_wp0002_local_operator_transaction_v3.py",
+            *v2_successor[14:],
+        ]
         self.assertEqual(foundation.WP0002_ACTIVATION_PROTECTED_PATHS, activation)
         self.assertEqual(foundation.WP0002_V1_AMENDMENT_PROTECTED_PATHS, retained_v1)
+        self.assertEqual(
+            foundation.WP0002_V2_SUCCESSOR_PROTECTED_PATHS,
+            v2_successor,
+        )
         self.assertEqual(foundation.WP0002_SUCCESSOR_PROTECTED_PATHS, successor)
-        self.assertEqual((len(activation), len(retained_v1), len(successor)), (17, 18, 20))
+        self.assertEqual(
+            (len(activation), len(retained_v1), len(v2_successor), len(successor)),
+            (17, 18, 20, 21),
+        )
         self.assertNotEqual(retained_v1, successor)
+
+    def test_wp0002_recovery_control_schema_rejects_drift(self) -> None:
+        constraints = foundation.WP0002_LOCAL_OPERATOR_RECOVERY_CONTROL[
+            "control_constraints"
+        ]
+        self.assertEqual(
+            constraints["required_checks_before_after"],
+            ["validate", "wp0002-core", "wp0002-policy"],
+        )
+        self.assertEqual(
+            constraints["retained_required_checks_during"],
+            ["validate", "wp0002-core"],
+        )
+        self.assertEqual(
+            constraints["temporary_nonrequired_check"],
+            "wp0002-policy",
+        )
+        self.assertEqual(
+            constraints["base_policy_expected_result"],
+            "reject-recovery-control-diff",
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            _, _, source, _ = self.base_documents(Path(temporary))
+            manifest = self.wp0002_manifest(source, "attested")
+            self.assertEqual(self.schema_errors(manifest), [])
+            mutations = [
+                lambda item: item["local_operator_recovery_control"][
+                    "reader_assignment"
+                ]["administration_read"].remove("repository-merge-settings"),
+                lambda item: item["local_operator_recovery_control"][
+                    "control_constraints"
+                ].__setitem__("branch_protection_change_authorized", True),
+                lambda item: item["local_operator_recovery_control"][
+                    "failed_closure_pr"
+                ].__setitem__("merge_authorized", True),
+            ]
+            for mutate in mutations:
+                with self.subTest(mutation=mutate):
+                    candidate = copy.deepcopy(manifest)
+                    mutate(candidate)
+                    self.assertTrue(self.schema_errors(candidate))
 
     def test_wp0002_amendment_root_is_identical_across_collector_schema_and_validator(self) -> None:
         namespace, errors = foundation._load_wp0002_scope_collector()
@@ -1742,7 +1752,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
             self.assertEqual(
                 [error for error in errors if "Stage-1" in error],
                 [
-                    "WP-0002 successor Stage-1 is pending its exact receipt-only "
+                    "WP-0002 recovery Stage-1 is pending its exact receipt-only "
                     "child and is nonmergeable"
                 ],
             )
@@ -1772,7 +1782,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 "subject_ids", list(reversed(item["subject_ids"]))
             ),
             lambda item: item["artifact_sha256"].pop(
-                foundation.WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH
+                foundation.WP0002_V2_LOCAL_OPERATOR_RECEIPT_REPO_PATH
             ),
             lambda item: item.__setitem__(
                 "subject_contract_sha256", {"WP-0002": "00" * 32}

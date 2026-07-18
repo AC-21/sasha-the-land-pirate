@@ -92,7 +92,12 @@ WP0002_LOCAL_OPERATOR_ONLINE_VERIFIER = (
     REPO_ROOT
     / "Tools"
     / "Validation"
-    / "verify_wp0002_local_operator_transaction_v2.py"
+    / "verify_wp0002_local_operator_transaction_v3.py"
+)
+WP0002_LOCAL_OPERATOR_RECOVERY_CONTROL_SCHEMA = (
+    ROOT
+    / "schemas"
+    / "wp0002-local-operator-recovery-control.schema.json"
 )
 WP0002_GITHUB_PROTECTION_SCHEMA = (
     ROOT / "schemas" / "wp0002-github-protection-capture.schema.json"
@@ -103,7 +108,7 @@ WP0002_EXTERNAL_POLICY_CAPTURE_SCHEMA = (
 WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_SCHEMA = (
     ROOT
     / "schemas"
-    / "wp0002-local-operator-successor-transaction-evidence.schema.json"
+    / "wp0002-local-operator-recovery-transaction-evidence.schema.json"
 )
 WP0001_A1_EVIDENCE_SCHEMA = (
     ROOT / "schemas" / "wp0001-a1-activation-evidence.schema.json"
@@ -337,6 +342,44 @@ WP0002_V1_LOCAL_OPERATOR_EVIDENCE_PATHS = [
     "docs/evidence/WP-0002/local-operator-amendment/pre-merge.json",
     "docs/evidence/WP-0002/local-operator-amendment/complete.json",
 ]
+WP0002_V2_AMENDED_BOUNDARY_SHA256 = (
+    "1f9bbce5906b720ba6aff92143584b9c668731c8c11f71fe6d967cff26e358a2"
+)
+WP0002_V2_LOCAL_OPERATOR_RECEIPT_SHA256 = (
+    "b82fc75e9f359f23a976ed3e073fddcf92a1b6d632b5d9e1d5115e70e43904ce"
+)
+WP0002_LOCAL_OPERATOR_RECOVERY_AMENDMENT_ID = (
+    "A1B-WP-0002-LOCAL-OPERATOR-RECOVERY-20260718"
+)
+WP0002_LOCAL_OPERATOR_RECOVERY_TRANSACTION_ID = (
+    "WP0002-LOCAL-OPERATOR-CLOSURE-RECOVERY-20260718"
+)
+WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_ID = (
+    "RR-WP0002-LOCAL-OPERATOR-RECOVERY-20260718"
+)
+WP0002_LOCAL_OPERATOR_RECOVERY_SUPERSESSION_CLAIM = (
+    "SUPERSEDE-WP0002-LOCAL-OPERATOR-SUCCESSOR-CLOSURE-VERIFIER-V2-UNEXECUTED"
+)
+WP0002_LOCAL_OPERATOR_RECOVERY_CLAIM = (
+    "AUTHORIZE-WP0002-LOCAL-OPERATOR-MIXED-READER-RECOVERY"
+)
+WP0002_LOCAL_OPERATOR_RECOVERY_GOVERNANCE_PATH = (
+    "governance/WP-0002-LOCAL-OPERATOR-MIXED-READER-RECOVERY.md"
+)
+WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_PATH = (
+    "ledger/receipts/RR-WP0002-LOCAL-OPERATOR-RECOVERY-20260718.json"
+)
+WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_REPO_PATH = (
+    "docs/foundation-v0.1/"
+    f"{WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_PATH}"
+)
+WP0002_V2_LOCAL_OPERATOR_RECEIPT_PATH = (
+    "ledger/receipts/RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718.json"
+)
+WP0002_V2_LOCAL_OPERATOR_RECEIPT_REPO_PATH = (
+    "docs/foundation-v0.1/"
+    f"{WP0002_V2_LOCAL_OPERATOR_RECEIPT_PATH}"
+)
 WP0002_LOCAL_OPERATOR_AMENDMENT_ID = (
     "A1B-WP-0002-LOCAL-OPERATOR-SUCCESSOR-20260718"
 )
@@ -416,27 +459,32 @@ WP0002_V1_AMENDMENT_PROTECTED_PATHS = [
     "Tools/Validation/verify_wp0002_local_operator_transaction.py",
     *WP0002_ACTIVATION_PROTECTED_PATHS[11:],
 ]
-WP0002_SUCCESSOR_PROTECTED_PATHS = [
+WP0002_V2_SUCCESSOR_PROTECTED_PATHS = [
     *WP0002_ACTIVATION_PROTECTED_PATHS[:11],
     "Tools/Validation/collect_wp0002_scope_capture_successor.py",
     "Tools/Validation/verify_wp0002_local_operator_transaction.py",
     "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py",
     *WP0002_ACTIVATION_PROTECTED_PATHS[11:],
 ]
+WP0002_SUCCESSOR_PROTECTED_PATHS = [
+    *WP0002_V2_SUCCESSOR_PROTECTED_PATHS[:14],
+    "Tools/Validation/verify_wp0002_local_operator_transaction_v3.py",
+    *WP0002_V2_SUCCESSOR_PROTECTED_PATHS[14:],
+]
 WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT = {
     "schema_path": (
         "docs/foundation-v0.1/schemas/"
-        "wp0002-local-operator-successor-transaction-evidence.schema.json"
+        "wp0002-local-operator-recovery-transaction-evidence.schema.json"
     ),
     "online_verifier_path": (
-        "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py"
+        "Tools/Validation/verify_wp0002_local_operator_transaction_v3.py"
     ),
-    "transaction_id": WP0002_LOCAL_OPERATOR_TRANSACTION_ID,
+    "transaction_id": WP0002_LOCAL_OPERATOR_RECOVERY_TRANSACTION_ID,
     "predecessor_transaction_id": (
-        WP0002_LOCAL_OPERATOR_PREDECESSOR_TRANSACTION_ID
+        WP0002_LOCAL_OPERATOR_TRANSACTION_ID
     ),
     "predecessor_disposition": (
-        WP0002_LOCAL_OPERATOR_PREDECESSOR_DISPOSITION
+        "control-merged-closure-unmerged-never-effective"
     ),
     "online_authentication_required": True,
     "offline_validation_scope": (
@@ -450,24 +498,22 @@ WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT = {
     "raw_github_responses_hash_bound": True,
     "receipt_artifact_key_policy": (
         "exact-stage1-changed-file-set-plus-authenticated-authority-comment-"
-        "and-retained-v1-receipt"
+        "and-retained-v2-receipt"
     ),
     "receipt_delta_policy": "exactly-one-added-regular-receipt-file",
     "protection_evidence_phases": ["before", "during", "after"],
-    "stage1_protection_before_path": (
-        "docs/evidence/WP-0002/local-operator-successor/control/"
-        "protection-before.json"
-    ),
+    "stage1_protection_before_path": None,
     "stage1_protection_before_policy": (
-        "v2-capture-protection-exact-three-before-stage1-bound-by-owner-"
-        "comment-tree-and-manifest"
+        "v3-live-before-exact-three-during-exact-validate-and-wp0002-core-"
+        "after-exact-three"
     ),
-    "maximum_protection_before_to_authority_seconds": 300,
+    "maximum_protection_before_to_authority_seconds": None,
     "repository_ruleset_policy": (
         "exact-empty-inventory-before-during-after"
     ),
     "pending_without_repository_evidence": (
-        "valid-control-materialization-but-successor-non-executable"
+        "valid-recovery-control-materialization-but-delegated-operator-"
+        "non-executable"
     ),
     "post_squash_pre_closure_main_state": (
         "deliberate-red-fail-closed-quarantine-no-authority"
@@ -499,13 +545,36 @@ WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT = {
     ),
     "closure_protection_authentication": (
         "base-owned-workflow-single-repository-short-expiry-administration-read-"
-        "secret-never-candidate-code"
+        "secret-for-protection-repository-merge-settings-and-rulesets-never-"
+        "candidate-code"
+    ),
+    "closure_reader_assignment": {
+        "ordinary": [
+            "branch-identity",
+            "repository-owner-identity",
+            "pull-request",
+            "comments",
+            "check-runs",
+            "git-fetch",
+        ],
+        "administration_read": [
+            "classic-branch-protection",
+            "repository-merge-settings",
+            "repository-rulesets",
+        ],
+    },
+    "mismatch_diagnostic_policy": (
+        "sorted-normalized-field-names-only-no-values"
     ),
     "maximum_restoration_delay_seconds": (
         WP0002_LOCAL_OPERATOR_MAX_RESTORE_DELAY_SECONDS
     ),
+    "maximum_authenticated_completion_comment_delay_seconds": (
+        WP0002_LOCAL_OPERATOR_MAX_RESTORE_DELAY_SECONDS
+    ),
     "successor_authority_condition": (
-        "all-three-reports-validated-and-evidence-closure-merged-to-protected-main"
+        "all-three-recovery-reports-validated-and-evidence-closure-merged-to-"
+        "protected-main"
     ),
     "completion_required_before_successor_authority": True,
     "protected_transaction_paths": [
@@ -513,20 +582,90 @@ WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT = {
         "Tools/Validation/collect_wp0002_scope_capture_successor.py",
         "Tools/Validation/verify_wp0002_local_operator_transaction.py",
         "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py",
+        "Tools/Validation/verify_wp0002_local_operator_transaction_v3.py",
     ],
-    "forbidden_predecessor_evidence_paths": (
-        WP0002_V1_LOCAL_OPERATOR_EVIDENCE_PATHS
-    ),
+    "forbidden_predecessor_evidence_paths": [
+        *WP0002_V1_LOCAL_OPERATOR_EVIDENCE_PATHS,
+        "docs/evidence/WP-0002/local-operator-successor/authority.json",
+        "docs/evidence/WP-0002/local-operator-successor/pre-merge.json",
+        "docs/evidence/WP-0002/local-operator-successor/complete.json",
+    ],
     "repository_evidence_paths": {
         "authority": (
-            "docs/evidence/WP-0002/local-operator-successor/authority.json"
+            "docs/evidence/WP-0002/local-operator-recovery/authority.json"
         ),
         "pre-merge": (
-            "docs/evidence/WP-0002/local-operator-successor/pre-merge.json"
+            "docs/evidence/WP-0002/local-operator-recovery/pre-merge.json"
         ),
         "complete": (
-            "docs/evidence/WP-0002/local-operator-successor/complete.json"
+            "docs/evidence/WP-0002/local-operator-recovery/complete.json"
         ),
+    },
+}
+WP0002_LOCAL_OPERATOR_RECOVERY_CONTROL = {
+    "schema_version": 1,
+    "transaction_id": WP0002_LOCAL_OPERATOR_RECOVERY_TRANSACTION_ID,
+    "predecessor_transaction_id": WP0002_LOCAL_OPERATOR_TRANSACTION_ID,
+    "predecessor_disposition": (
+        "control-merged-closure-unmerged-never-effective"
+    ),
+    "authorization_receipt_id": WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_ID,
+    "governance_record": WP0002_LOCAL_OPERATOR_RECOVERY_GOVERNANCE_PATH,
+    "failed_closure_pr": {
+        "number": 64,
+        "head_sha": "c3cb37fe954f1327031e176bcf84f982611736f8",
+        "immutable": True,
+        "merge_authorized": False,
+    },
+    "reader_assignment": {
+        "ordinary": [
+            "branch-identity",
+            "repository-owner-identity",
+            "pull-request",
+            "comments",
+            "check-runs",
+            "git-fetch",
+        ],
+        "administration_read": [
+            "classic-branch-protection",
+            "repository-merge-settings",
+            "repository-rulesets",
+        ],
+        "candidate_receives_administration_credential": False,
+        "mismatch_diagnostics": "sorted-normalized-field-names-only",
+    },
+    "control_constraints": {
+        "required_checks_before_after": [
+            "validate",
+            "wp0002-core",
+            "wp0002-policy",
+        ],
+        "retained_required_checks_during": ["validate", "wp0002-core"],
+        "required_check_app_id": 15368,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "branch_protection_change_authorized": (
+            "temporarily-make-only-wp0002-policy-nonrequired-for-exact-"
+            "receipt-head-then-immediately-restore"
+        ),
+        "base_policy_expected_result": "reject-recovery-control-diff",
+        "retained_protections_unchanged": True,
+        "restore_immediately_after_squash": True,
+        "authority_expansion": False,
+        "squash_only": True,
+    },
+    "evidence_reissue": {
+        "fresh_pull_request_required": True,
+        "modify_failed_pr_64": False,
+        "report_contract": WP0002_LOCAL_OPERATOR_RECOVERY_TRANSACTION_ID,
+        "paths": [
+            "docs/evidence/WP-0002/local-operator-recovery/authority.json",
+            "docs/evidence/WP-0002/local-operator-recovery/pre-merge.json",
+            "docs/evidence/WP-0002/local-operator-recovery/complete.json",
+        ],
+        "delta_policy": (
+            "exact-three-regular-added-report-files-and-no-other-delta"
+        ),
+        "authority_condition": "protected-v3-validated-closure-squash-only",
     },
 }
 WP0002_BOUNDARY_AMENDMENTS = [
@@ -611,6 +750,62 @@ WP0002_BOUNDARY_AMENDMENTS = [
                 "successor-evidence-closure-and-first-post-restoration-"
                 "implementation-pr"
             ),
+            "general_protection_bypass_authorized": False,
+        },
+    },
+    {
+        "amendment_id": WP0002_LOCAL_OPERATOR_RECOVERY_AMENDMENT_ID,
+        "amendment_kind": (
+            "append-only-local-operator-closure-verifier-recovery"
+        ),
+        "supersedes_transaction_id": WP0002_LOCAL_OPERATOR_TRANSACTION_ID,
+        "predecessor_disposition": (
+            "control-merged-closure-unmerged-never-effective"
+        ),
+        "previous_boundary_sha256": WP0002_V2_AMENDED_BOUNDARY_SHA256,
+        "retained_predecessor_receipt": {
+            "receipt_id": WP0002_LOCAL_OPERATOR_RECEIPT_ID,
+            "path": WP0002_V2_LOCAL_OPERATOR_RECEIPT_PATH,
+            "sha256": WP0002_V2_LOCAL_OPERATOR_RECEIPT_SHA256,
+        },
+        "authorization_receipt_id": (
+            WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_ID
+        ),
+        "required_claims": [
+            WP0002_LOCAL_OPERATOR_RECOVERY_SUPERSESSION_CLAIM,
+            WP0002_LOCAL_OPERATOR_RECOVERY_CLAIM,
+        ],
+        "governance_record": WP0002_LOCAL_OPERATOR_RECOVERY_GOVERNANCE_PATH,
+        "packet_contract_changed": False,
+        "authority_expansion": False,
+        "materialization_control": {
+            "classification": (
+                "creator-controlled-closure-verifier-correction-not-a1-"
+                "implementation-authority"
+            ),
+            "temporary_nonrequired_check": "wp0002-policy",
+            "exact_stage1_head_tree_patch_and_manifest_binding_required": True,
+            "retained_required_checks": ["validate", "wp0002-core"],
+            "retained_protections": [
+                "strict-up-to-date",
+                "pull-request-required",
+                "enforce-admins",
+                "conversation-resolution-required",
+                "linear-history-required",
+                "no-bypass-allowances",
+                "no-push-restrictions",
+                "force-push-disabled",
+                "deletion-disabled",
+                "squash-only",
+            ],
+            "branch_protection_change_authorized": (
+                "temporarily-make-only-wp0002-policy-nonrequired-for-exact-"
+                "receipt-head-then-immediately-restore"
+            ),
+            "creator_delegated_squash_merge_only": True,
+            "restore_wp0002_policy_immediately_after_merge": True,
+            "fresh_closure_pr_required": True,
+            "modify_failed_pr_64": False,
             "general_protection_bypass_authorized": False,
         },
     },
@@ -839,6 +1034,12 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
     "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py": (
         "15ea81750bce5b5d3cee5a5711b8287f55238eb44343386c1d0f5ca88f484a19"
     ),
+    "Tools/Validation/verify_wp0002_local_operator_transaction_v3.py": (
+        "2d8cd873f0a8ee357848d18e2cb57f440f6fd28fb5817e7454f816d07dc8e52d"
+    ),
+    "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json": (
+        "ec95d5da2d9b216f9bbda23b94bb3c4b6214db65a46c627f1efa31c3b2d8468e"
+    ),
     "docs/foundation-v0.1/schemas/"
     "wp0002-local-operator-successor-scope-capture.schema.json": (
         "afabbccaa61731c70daf94399d518ef448c68c78d6d2cf5715cc56a713fa2247"
@@ -846,6 +1047,14 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
     "docs/foundation-v0.1/schemas/"
     "wp0002-local-operator-successor-transaction-evidence.schema.json": (
         "96380cf51d29088f2356b37b5d96a564bf04d8fe098f5b109781fc8710f59f16"
+    ),
+    "docs/foundation-v0.1/schemas/"
+    "wp0002-local-operator-recovery-control.schema.json": (
+        "42cd5b114e75742938ea92b2d651f08442dcf2f0ca58ac9cf030838d9fb0acae"
+    ),
+    "docs/foundation-v0.1/schemas/"
+    "wp0002-local-operator-recovery-transaction-evidence.schema.json": (
+        "82864ede50cc30062c06099f3e6a29856ce033b7355846cb5dff700b39bb1c1e"
     ),
     "docs/foundation-v0.1/tools/"
     "test_collect_wp0002_scope_capture_successor.py": (
@@ -855,11 +1064,18 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
     "test_verify_wp0002_local_operator_transaction_v2.py": (
         "c77d2d2534972d1d510b54b0a75834d9f6fd7340beef773f710eb107a7d6bdff"
     ),
+    "docs/foundation-v0.1/tools/test_validate_local_a1_boundary.py": (
+        "8541569ddc179c48d8592236d27758da849dc9180669c7774edad07472962043"
+    ),
+    "docs/foundation-v0.1/tools/"
+    "test_verify_wp0002_local_operator_transaction_v3.py": (
+        "940b6253f6abfe4e4c6e656eafcffec504acf0985c6920764d34d09ed5ebe7a7"
+    ),
     ".github/workflows/wp0002-ci.yml": (
         "893cd3faacb887b2d9112c30e15a29b27fb8f3511001ef4091a04f1f88e2f0b9"
     ),
     ".github/workflows/wp0002-policy.yml": (
-        "13ea299f704e9e25a121933b1dfe3c4eb716c2a5bdb982242e4d520a07060670"
+        "540719548b44d1b6a21e5c930cdf84eb44cf732218092a40d6d5c021435abbfe"
     ),
 }
 PACKET_TRANSITIONS = {
@@ -6827,14 +7043,14 @@ def _load_wp0002_v1_scope_collector() -> tuple[dict[str, object] | None, list[st
 
 
 def _load_wp0002_transaction_verifier() -> tuple[dict[str, object] | None, list[str]]:
-    """Load hash-pinned successor report validators for offline closure checks."""
+    """Load hash-pinned recovery report validators for offline closure checks."""
     return _load_wp0002_pinned_module(
         relative_path=(
-            "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py"
+            "Tools/Validation/verify_wp0002_local_operator_transaction_v3.py"
         ),
         path=WP0002_LOCAL_OPERATOR_ONLINE_VERIFIER,
-        label="successor transaction verifier",
-        module_name="_foundation_wp0002_successor_transaction_verifier_pinned",
+        label="recovery transaction verifier",
+        module_name="_foundation_wp0002_recovery_transaction_verifier_pinned",
     )
 
 
@@ -7067,7 +7283,7 @@ def validate_wp0002_local_operator_successor_scope_capture(
         schema_path=WP0002_LOCAL_OPERATOR_SCOPE_SCHEMA,
         scope_label="successor",
         collector_loader=_load_wp0002_scope_collector,
-        expected_protected_paths=WP0002_SUCCESSOR_PROTECTED_PATHS,
+        expected_protected_paths=WP0002_V2_SUCCESSOR_PROTECTED_PATHS,
     )
 
 
@@ -7085,7 +7301,7 @@ def validate_wp0002_local_operator_successor_scope_capture_unreceipted(
         schema_path=WP0002_LOCAL_OPERATOR_SCOPE_SCHEMA,
         scope_label="successor",
         collector_loader=_load_wp0002_scope_collector,
-        expected_protected_paths=WP0002_SUCCESSOR_PROTECTED_PATHS,
+        expected_protected_paths=WP0002_V2_SUCCESSOR_PROTECTED_PATHS,
         require_receipt_binding=False,
     )
 
@@ -7445,6 +7661,15 @@ def wp0002_offline_successor_stage1_paths(
     """Return fixed controls and the exact capture-referenced three-path set."""
     errors: list[str] = []
     control_value = verifier.get("STAGE1_CONTROL_PATHS")
+    if verifier.get("TRANSACTION_ID") == WP0002_LOCAL_OPERATOR_RECOVERY_TRANSACTION_ID:
+        if (
+            not isinstance(control_value, (set, frozenset))
+            or not all(isinstance(item, str) for item in control_value)
+        ):
+            return set(), set(), [
+                "WP-0002 protected recovery verifier control path contract is not exact"
+            ]
+        return set(control_value), set(), []
     capture_path = verifier.get("STAGE1_SCOPE_CAPTURE_PATH")
     patterns = verifier.get("STAGE1_SCOPE_CAPTURE_ARTIFACT_PATTERNS")
     if (
@@ -7503,6 +7728,8 @@ def validate_wp0002_offline_protection_before(
     relative = WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT[
         "stage1_protection_before_path"
     ]
+    if relative is None:
+        return []
     if (
         verifier.get("PROTECTION_BEFORE_PATH") != relative
         or verifier.get("MAX_BEFORE_TO_AUTHORITY_SECONDS")
@@ -7576,6 +7803,8 @@ def validate_wp0002_pending_protection_before(
     relative = WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT[
         "stage1_protection_before_path"
     ]
+    if relative is None:
+        return errors
     if (
         verifier.get("PROTECTION_BEFORE_PATH") != relative
         or verifier.get("MAX_BEFORE_TO_AUTHORITY_SECONDS") != 300
@@ -7643,7 +7872,9 @@ def validate_wp0002_local_operator_transaction_evidence(
     reports: dict[str, dict] = {}
     report_hashes: dict[str, str] = {}
     forbidden_present: list[str] = []
-    for relative in WP0002_V1_LOCAL_OPERATOR_EVIDENCE_PATHS:
+    for relative in WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT[
+        "forbidden_predecessor_evidence_paths"
+    ]:
         path, path_error = safe_repo_path(
             relative,
             "WP-0002 forbidden predecessor evidence",
@@ -7679,7 +7910,10 @@ def validate_wp0002_local_operator_transaction_evidence(
         # after Stage-1 and after merge.  All-absent is therefore a valid but
         # explicitly non-executable pending-evidence state; the separate
         # protected closure PR must add all three together.
-        if amendment_receipt.get("receipt_id") == WP0002_LOCAL_OPERATOR_RECEIPT_ID:
+        if (
+            amendment_receipt.get("receipt_id")
+            == WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_ID
+        ):
             verifier, verifier_errors = _load_wp0002_transaction_verifier()
             errors.extend(verifier_errors)
             if verifier is not None:
@@ -7830,29 +8064,24 @@ def validate_wp0002_local_operator_transaction_evidence(
         != stage1.get("changed_files_manifest_sha256")
     ):
         errors.append("WP-0002 authority report does not bind exact Stage-1 Git facts")
-    if parsed.get("claim") != WP0002_LOCAL_OPERATOR_CLAIM:
+    if parsed.get("claim") != WP0002_LOCAL_OPERATOR_RECOVERY_CLAIM:
         errors.append("WP-0002 authority report binds another creator claim")
+    if parsed.get("temporary_nonrequired_check") != "wp0002-policy":
+        errors.append(
+            "WP-0002 authority report does not bind the exact temporary policy exception"
+        )
     if amendment_receipt.get("accepted_commit") != stage1.get("commit_sha"):
         errors.append(
             "WP-0002 local operator receipt does not accept the exact Stage-1 commit"
         )
-    if isinstance(manifest, dict):
-        scope_reference = manifest.get("local_operator_successor_scope_capture")
-        if (
-            not isinstance(scope_reference, dict)
-            or scope_reference.get("base_commit") != stage1.get("base_sha")
-            or scope_reference.get("head_commit") != stage1.get("base_sha")
-            or scope_reference.get("checkpoint_commit") != stage1.get("base_sha")
-        ):
-            errors.append(
-                "WP-0002 transaction Stage-1 base is not the captured protected main"
-            )
+    if stage1.get("base_sha") != "166d53698d013c605c7bee749368193dc2834644":
+        errors.append("WP-0002 recovery Stage-1 base is not the exact v2 control squash")
 
     final_pull = pre_merge.get("final_pull_request", {})
     receipt_materialization = pre_merge.get("receipt_materialization", {})
     expected_receipt_path = (
         "docs/foundation-v0.1/ledger/receipts/"
-        f"{WP0002_LOCAL_OPERATOR_RECEIPT_ID}.json"
+        f"{WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_ID}.json"
     )
     delta = (
         receipt_materialization.get("delta", [])
@@ -7883,7 +8112,7 @@ def validate_wp0002_local_operator_transaction_evidence(
             "WP-0002 final head is not the exact one-file receipt materialization"
         )
     receipt_path = ROOT / "ledger" / "receipts" / (
-        f"{WP0002_LOCAL_OPERATOR_RECEIPT_ID}.json"
+        f"{WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_ID}.json"
     )
     if receipt_path.is_file():
         receipt_hash = sha256_file(receipt_path)
@@ -7941,25 +8170,13 @@ def validate_wp0002_local_operator_transaction_evidence(
             )
     required_stage1_paths = {
         "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json",
-        f"docs/foundation-v0.1/{WP0002_LOCAL_OPERATOR_GOVERNANCE_PATH}",
-        "docs/foundation-v0.1/work-packets/proposed/WP-0002.json",
-        WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT[
-            "stage1_protection_before_path"
-        ],
+        f"docs/foundation-v0.1/{WP0002_LOCAL_OPERATOR_RECOVERY_GOVERNANCE_PATH}",
+        "Tools/Validation/verify_wp0002_local_operator_transaction_v3.py",
+        "docs/foundation-v0.1/schemas/wp0002-local-operator-recovery-transaction-evidence.schema.json",
     }
     if not required_stage1_paths.issubset(expected_artifacts):
         errors.append(
             "WP-0002 Stage-1 evidence omits a required amendment control file"
-        )
-    if verifier is not None:
-        errors.extend(
-            validate_wp0002_offline_protection_before(
-                verifier,
-                authority,
-                pre_merge,
-                amendment_receipt,
-                expected_artifacts,
-            )
         )
     external_source_key = (
         source_reference.removeprefix("https://")
@@ -7971,20 +8188,20 @@ def validate_wp0002_local_operator_transaction_evidence(
     expected_artifacts[external_source_key] = amendment_receipt.get(
         "approval_text_sha256"
     )
-    if WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH in {
+    if WP0002_V2_LOCAL_OPERATOR_RECEIPT_REPO_PATH in {
         item.get("path")
         for item in changed_files
         if isinstance(item, dict)
     }:
         duplicate_paths = True
-        errors.append("WP-0002 Stage-1 modifies the retained v1 receipt")
-    expected_artifacts[WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH] = (
-        WP0002_V1_LOCAL_OPERATOR_RECEIPT_SHA256
+        errors.append("WP-0002 recovery Stage-1 modifies the retained v2 receipt")
+    expected_artifacts[WP0002_V2_LOCAL_OPERATOR_RECEIPT_REPO_PATH] = (
+        WP0002_V2_LOCAL_OPERATOR_RECEIPT_SHA256
     )
     if duplicate_paths or amendment_receipt.get("artifact_sha256") != expected_artifacts:
         errors.append(
             "WP-0002 local operator receipt artifact keys are not the exact Stage-1 "
-            "set plus authority comment and retained v1 receipt"
+            "set plus authority comment and retained v2 receipt"
         )
 
     check_runs = pre_merge.get("required_check_runs", [])
@@ -8012,7 +8229,10 @@ def validate_wp0002_local_operator_transaction_evidence(
         ("wp0002-core", 15368),
         ("wp0002-policy", 15368),
     }
-    required_during = {("validate", 15368), ("wp0002-core", 15368)}
+    required_during = {
+        ("validate", 15368),
+        ("wp0002-core", 15368),
+    }
 
     def protection_checks(value: object) -> set[tuple[object, object]]:
         if not isinstance(value, dict):
@@ -8066,8 +8286,8 @@ def validate_wp0002_local_operator_transaction_evidence(
         else {}
     )
     expected_completion_binding = {
-        "claim": WP0002_LOCAL_OPERATOR_COMPLETION_CLAIM,
-        "transaction_id": WP0002_LOCAL_OPERATOR_TRANSACTION_ID,
+        "claim": "COMPLETE-WP0002-LOCAL-OPERATOR-RECOVERY-CONTROL-TRANSACTION",
+        "transaction_id": WP0002_LOCAL_OPERATOR_RECOVERY_TRANSACTION_ID,
         "authority_evidence_sha256": pre_merge.get(
             "authority_evidence_sha256"
         ),
@@ -8123,6 +8343,18 @@ def validate_wp0002_local_operator_transaction_evidence(
         errors.append(
             "WP-0002 policy restoration was not captured within 600 seconds"
         )
+    if (
+        merged_time is None
+        or completion_time is None
+        or completion_time < merged_time
+        or (
+            completion_time - merged_time
+        ).total_seconds() > WP0002_LOCAL_OPERATOR_MAX_RESTORE_DELAY_SECONDS
+    ):
+        errors.append(
+            "WP-0002 authenticated completion comment was not created within "
+            "600 seconds of merge"
+        )
     return errors
 
 
@@ -8176,10 +8408,22 @@ def validate_wp0002_local_operator_amendment(
             "WP-0002 local operator online transaction evidence contract is not exact"
         )
 
-    amendment_receipt = receipts_by_id.get(WP0002_LOCAL_OPERATOR_RECEIPT_ID)
-    has_successor_receipt = isinstance(amendment_receipt, dict)
+    recovery_control = manifest.get("local_operator_recovery_control")
+    if recovery_control != WP0002_LOCAL_OPERATOR_RECOVERY_CONTROL:
+        errors.append("WP-0002 local operator recovery control is not exact")
+    errors.extend(
+        validate_schema_subset(
+            recovery_control,
+            load_json(WP0002_LOCAL_OPERATOR_RECOVERY_CONTROL_SCHEMA),
+            load_json(WP0002_LOCAL_OPERATOR_RECOVERY_CONTROL_SCHEMA),
+            "WP-0002 local operator recovery control",
+        )
+    )
+
+    successor_receipt = receipts_by_id.get(WP0002_LOCAL_OPERATOR_RECEIPT_ID)
+    has_successor_receipt = isinstance(successor_receipt, dict)
     if not has_successor_receipt:
-        amendment_receipt = {}
+        successor_receipt = {}
 
     predecessor_receipt = receipts_by_id.get(
         WP0002_V1_LOCAL_OPERATOR_RECEIPT_ID
@@ -8206,88 +8450,62 @@ def validate_wp0002_local_operator_amendment(
         errors.append("WP-0002 retained v1 receipt identity or bytes differ")
 
     if not has_successor_receipt:
-        errors.extend(
-            validate_wp0002_local_operator_amendment_scope_capture(
-                manifest,
-                packet,
-                predecessor_receipt,
-            )
-        )
-        errors.extend(
-            validate_wp0002_local_operator_successor_scope_capture_unreceipted(
-                manifest,
-                packet,
-            )
-        )
-        errors.extend(validate_wp0002_pending_protection_before(None, manifest))
-        errors.extend(
-            validate_wp0002_local_operator_transaction_evidence({}, manifest)
-        )
-        activation_receipt = receipts_by_id.get(
-            manifest.get("attestation_receipt_id")
-        )
+        errors.append("WP-0002 recovery lacks the retained sealed v2 receipt")
+    else:
+        successor_receipt_path = ROOT / WP0002_V2_LOCAL_OPERATOR_RECEIPT_PATH
         if (
-            not isinstance(activation_receipt, dict)
-            or activation_receipt.get("artifact_sha256", {}).get(
-                "governance/a1-boundaries/WP-0002.json"
-            )
-            != WP0002_PREVIOUS_BOUNDARY_SHA256
+            not successor_receipt_path.is_file()
+            or sha256_file(successor_receipt_path)
+            != WP0002_V2_LOCAL_OPERATOR_RECEIPT_SHA256
+            or load_json(successor_receipt_path) != successor_receipt
+        ):
+            errors.append("WP-0002 retained v2 receipt identity or bytes differ")
+        resolver = successor_receipt.get("artifact_resolver")
+        claims_by_subject = subject_claims(successor_receipt)
+        claims = claims_by_subject.get("WP-0002", set())
+        supersession_claims = claims_by_subject.get(
+            WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID,
+            set(),
+        )
+        source_reference = successor_receipt.get("source_reference")
+        signature_reference = successor_receipt.get("signature_reference")
+        if (
+            successor_receipt.get("receipt_kind") != "creator-authorization"
+            or successor_receipt.get("issued_by") != "AC-21"
+            or successor_receipt.get("issuer_role") != "creator"
+            or successor_receipt.get("sealed") is not True
+            or not isinstance(resolver, dict)
+            or resolver.get("type") != "external-protected"
+            or not isinstance(resolver.get("resolver_reference"), str)
+            or not resolver.get("resolver_reference")
+            or not isinstance(source_reference, str)
+            or WP0002_LOCAL_OPERATOR_SOURCE_PATTERN.fullmatch(source_reference)
+            is None
+            or source_reference != resolver.get("resolver_reference")
+            or signature_reference != resolver.get("resolver_reference")
+            or successor_receipt.get("subject_ids")
+            != [WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID, "WP-0002"]
+            or claims != {WP0002_LOCAL_OPERATOR_CLAIM}
+            or supersession_claims
+            != {WP0002_LOCAL_OPERATOR_SUPERSESSION_CLAIM}
         ):
             errors.append(
-                "WP-0002 local operator amendment does not retain the activated prior boundary hash"
+                "WP-0002 retained v2 receipt lacks exact protected creator authority"
             )
-        errors.append(
-            "WP-0002 successor Stage-1 is pending its exact receipt-only child and is nonmergeable"
-        )
-        return errors
+        if successor_receipt.get("subject_contract_sha256") != {
+            WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID: (
+                WP0002_V1_AMENDED_BOUNDARY_SHA256
+            ),
+            "WP-0002": packet.get("contract_sha256"),
+        }:
+            errors.append("WP-0002 retained v2 receipt misbinds the contract")
+        if successor_receipt.get("subject_event_sha256") != {}:
+            errors.append("WP-0002 retained v2 receipt invents an event binding")
+        if successor_receipt.get("artifact_sha256", {}).get(
+            WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH
+        ) != WP0002_V1_LOCAL_OPERATOR_RECEIPT_SHA256:
+            errors.append("WP-0002 retained v2 receipt does not bind the v1 receipt")
 
-    resolver = amendment_receipt.get("artifact_resolver")
-    claims_by_subject = subject_claims(amendment_receipt)
-    claims = claims_by_subject.get("WP-0002", set())
-    supersession_claims = claims_by_subject.get(
-        WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID,
-        set(),
-    )
-    source_reference = amendment_receipt.get("source_reference")
-    signature_reference = amendment_receipt.get("signature_reference")
-    if (
-        amendment_receipt.get("receipt_kind") != "creator-authorization"
-        or amendment_receipt.get("issued_by") != "AC-21"
-        or amendment_receipt.get("issuer_role") != "creator"
-        or amendment_receipt.get("sealed") is not True
-        or not isinstance(resolver, dict)
-        or resolver.get("type") != "external-protected"
-        or not isinstance(resolver.get("resolver_reference"), str)
-        or not resolver.get("resolver_reference")
-        or not isinstance(source_reference, str)
-        or WP0002_LOCAL_OPERATOR_SOURCE_PATTERN.fullmatch(source_reference) is None
-        or source_reference != resolver.get("resolver_reference")
-        or signature_reference != resolver.get("resolver_reference")
-        or amendment_receipt.get("subject_ids")
-        != [WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID, "WP-0002"]
-        or claims != {WP0002_LOCAL_OPERATOR_CLAIM}
-        or supersession_claims
-        != {WP0002_LOCAL_OPERATOR_SUPERSESSION_CLAIM}
-    ):
-        errors.append(
-            "WP-0002 local operator amendment lacks exact protected creator authority"
-        )
-    if amendment_receipt.get("subject_contract_sha256") != {
-        WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID: (
-            WP0002_V1_AMENDED_BOUNDARY_SHA256
-        ),
-        "WP-0002": packet.get("contract_sha256"),
-    }:
-        errors.append("WP-0002 local operator receipt changes or misbinds the contract")
-    if amendment_receipt.get("subject_event_sha256") != {}:
-        errors.append("WP-0002 local operator receipt invents a decision event binding")
-    if amendment_receipt.get("artifact_sha256", {}).get(
-        WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH
-    ) != WP0002_V1_LOCAL_OPERATOR_RECEIPT_SHA256:
-        errors.append("WP-0002 successor receipt does not bind the retained v1 receipt")
-    errors.extend(
-        validate_wp0002_pending_protection_before(amendment_receipt, manifest)
-    )
     errors.extend(
         validate_wp0002_local_operator_amendment_scope_capture(
             manifest,
@@ -8295,19 +8513,85 @@ def validate_wp0002_local_operator_amendment(
             predecessor_receipt,
         )
     )
-    errors.extend(
-        validate_wp0002_local_operator_successor_scope_capture(
-            manifest,
-            packet,
-            amendment_receipt,
+    if has_successor_receipt:
+        errors.extend(
+            validate_wp0002_local_operator_successor_scope_capture(
+                manifest,
+                packet,
+                successor_receipt,
+            )
         )
-    )
-    errors.extend(
-        validate_wp0002_local_operator_transaction_evidence(
-            amendment_receipt,
-            manifest,
+    else:
+        errors.extend(
+            validate_wp0002_local_operator_successor_scope_capture_unreceipted(
+                manifest,
+                packet,
+            )
         )
+
+    recovery_receipt = receipts_by_id.get(
+        WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_ID
     )
+    if not isinstance(recovery_receipt, dict):
+        errors.extend(
+            validate_wp0002_local_operator_transaction_evidence({}, manifest)
+        )
+        errors.append(
+            "WP-0002 recovery Stage-1 is pending its exact receipt-only child "
+            "and is nonmergeable"
+        )
+    else:
+        resolver = recovery_receipt.get("artifact_resolver")
+        claims_by_subject = subject_claims(recovery_receipt)
+        claims = claims_by_subject.get("WP-0002", set())
+        supersession_claims = claims_by_subject.get(
+            WP0002_LOCAL_OPERATOR_AMENDMENT_ID,
+            set(),
+        )
+        source_reference = recovery_receipt.get("source_reference")
+        signature_reference = recovery_receipt.get("signature_reference")
+        if (
+            recovery_receipt.get("receipt_kind") != "creator-authorization"
+            or recovery_receipt.get("issued_by") != "AC-21"
+            or recovery_receipt.get("issuer_role") != "creator"
+            or recovery_receipt.get("sealed") is not True
+            or not isinstance(resolver, dict)
+            or resolver.get("type") != "external-protected"
+            or not isinstance(resolver.get("resolver_reference"), str)
+            or not resolver.get("resolver_reference")
+            or not isinstance(source_reference, str)
+            or WP0002_LOCAL_OPERATOR_SOURCE_PATTERN.fullmatch(source_reference)
+            is None
+            or source_reference != resolver.get("resolver_reference")
+            or signature_reference != resolver.get("resolver_reference")
+            or recovery_receipt.get("subject_ids")
+            != [WP0002_LOCAL_OPERATOR_AMENDMENT_ID, "WP-0002"]
+            or claims != {WP0002_LOCAL_OPERATOR_RECOVERY_CLAIM}
+            or supersession_claims
+            != {WP0002_LOCAL_OPERATOR_RECOVERY_SUPERSESSION_CLAIM}
+        ):
+            errors.append(
+                "WP-0002 recovery receipt lacks exact protected creator authority"
+            )
+        if recovery_receipt.get("subject_contract_sha256") != {
+            WP0002_LOCAL_OPERATOR_AMENDMENT_ID: (
+                WP0002_V2_AMENDED_BOUNDARY_SHA256
+            ),
+            "WP-0002": packet.get("contract_sha256"),
+        }:
+            errors.append("WP-0002 recovery receipt changes or misbinds the contract")
+        if recovery_receipt.get("subject_event_sha256") != {}:
+            errors.append("WP-0002 recovery receipt invents an event binding")
+        if recovery_receipt.get("artifact_sha256", {}).get(
+            WP0002_V2_LOCAL_OPERATOR_RECEIPT_REPO_PATH
+        ) != WP0002_V2_LOCAL_OPERATOR_RECEIPT_SHA256:
+            errors.append("WP-0002 recovery receipt does not bind the retained v2 receipt")
+        errors.extend(
+            validate_wp0002_local_operator_transaction_evidence(
+                recovery_receipt,
+                manifest,
+            )
+        )
 
     activation_receipt = receipts_by_id.get(manifest.get("attestation_receipt_id"))
     if (

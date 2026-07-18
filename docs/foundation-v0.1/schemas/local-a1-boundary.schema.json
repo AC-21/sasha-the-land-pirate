@@ -253,6 +253,50 @@
             "fresh_canary_pr": "successor-evidence-closure-and-first-post-restoration-implementation-pr",
             "general_protection_bypass_authorized": false
           }
+        },
+        {
+          "amendment_id": "A1B-WP-0002-LOCAL-OPERATOR-RECOVERY-20260718",
+          "amendment_kind": "append-only-local-operator-closure-verifier-recovery",
+          "supersedes_transaction_id": "WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718",
+          "predecessor_disposition": "control-merged-closure-unmerged-never-effective",
+          "previous_boundary_sha256": "1f9bbce5906b720ba6aff92143584b9c668731c8c11f71fe6d967cff26e358a2",
+          "retained_predecessor_receipt": {
+            "receipt_id": "RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718",
+            "path": "ledger/receipts/RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718.json",
+            "sha256": "b82fc75e9f359f23a976ed3e073fddcf92a1b6d632b5d9e1d5115e70e43904ce"
+          },
+          "authorization_receipt_id": "RR-WP0002-LOCAL-OPERATOR-RECOVERY-20260718",
+          "required_claims": [
+            "SUPERSEDE-WP0002-LOCAL-OPERATOR-SUCCESSOR-CLOSURE-VERIFIER-V2-UNEXECUTED",
+            "AUTHORIZE-WP0002-LOCAL-OPERATOR-MIXED-READER-RECOVERY"
+          ],
+          "governance_record": "governance/WP-0002-LOCAL-OPERATOR-MIXED-READER-RECOVERY.md",
+          "packet_contract_changed": false,
+          "authority_expansion": false,
+          "materialization_control": {
+            "classification": "creator-controlled-closure-verifier-correction-not-a1-implementation-authority",
+            "temporary_nonrequired_check": "wp0002-policy",
+            "exact_stage1_head_tree_patch_and_manifest_binding_required": true,
+            "retained_required_checks": ["validate", "wp0002-core"],
+            "retained_protections": [
+              "strict-up-to-date",
+              "pull-request-required",
+              "enforce-admins",
+              "conversation-resolution-required",
+              "linear-history-required",
+              "no-bypass-allowances",
+              "no-push-restrictions",
+              "force-push-disabled",
+              "deletion-disabled",
+              "squash-only"
+            ],
+            "branch_protection_change_authorized": "temporarily-make-only-wp0002-policy-nonrequired-for-exact-receipt-head-then-immediately-restore",
+            "creator_delegated_squash_merge_only": true,
+            "restore_wp0002_policy_immediately_after_merge": true,
+            "fresh_closure_pr_required": true,
+            "modify_failed_pr_64": false,
+            "general_protection_bypass_authorized": false
+          }
         }
       ]
     },
@@ -334,27 +378,73 @@
         "shell-cli-batchmode-or-headless-unity-authorized": false
       }
     },
+    "local_operator_recovery_control": {
+      "const": {
+        "schema_version": 1,
+        "transaction_id": "WP0002-LOCAL-OPERATOR-CLOSURE-RECOVERY-20260718",
+        "predecessor_transaction_id": "WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718",
+        "predecessor_disposition": "control-merged-closure-unmerged-never-effective",
+        "authorization_receipt_id": "RR-WP0002-LOCAL-OPERATOR-RECOVERY-20260718",
+        "governance_record": "governance/WP-0002-LOCAL-OPERATOR-MIXED-READER-RECOVERY.md",
+        "failed_closure_pr": {
+          "number": 64,
+          "head_sha": "c3cb37fe954f1327031e176bcf84f982611736f8",
+          "immutable": true,
+          "merge_authorized": false
+        },
+        "reader_assignment": {
+          "ordinary": ["branch-identity", "repository-owner-identity", "pull-request", "comments", "check-runs", "git-fetch"],
+          "administration_read": ["classic-branch-protection", "repository-merge-settings", "repository-rulesets"],
+          "candidate_receives_administration_credential": false,
+          "mismatch_diagnostics": "sorted-normalized-field-names-only"
+        },
+        "control_constraints": {
+          "required_checks_before_after": ["validate", "wp0002-core", "wp0002-policy"],
+          "retained_required_checks_during": ["validate", "wp0002-core"],
+          "required_check_app_id": 15368,
+          "temporary_nonrequired_check": "wp0002-policy",
+          "branch_protection_change_authorized": "temporarily-make-only-wp0002-policy-nonrequired-for-exact-receipt-head-then-immediately-restore",
+          "base_policy_expected_result": "reject-recovery-control-diff",
+          "retained_protections_unchanged": true,
+          "restore_immediately_after_squash": true,
+          "authority_expansion": false,
+          "squash_only": true
+        },
+        "evidence_reissue": {
+          "fresh_pull_request_required": true,
+          "modify_failed_pr_64": false,
+          "report_contract": "WP0002-LOCAL-OPERATOR-CLOSURE-RECOVERY-20260718",
+          "paths": [
+            "docs/evidence/WP-0002/local-operator-recovery/authority.json",
+            "docs/evidence/WP-0002/local-operator-recovery/pre-merge.json",
+            "docs/evidence/WP-0002/local-operator-recovery/complete.json"
+          ],
+          "delta_policy": "exact-three-regular-added-report-files-and-no-other-delta",
+          "authority_condition": "protected-v3-validated-closure-squash-only"
+        }
+      }
+    },
     "local_operator_transaction_evidence_contract": {
       "const": {
-        "schema_path": "docs/foundation-v0.1/schemas/wp0002-local-operator-successor-transaction-evidence.schema.json",
-        "online_verifier_path": "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py",
-        "transaction_id": "WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718",
-        "predecessor_transaction_id": "WP0002-LOCAL-OPERATOR-20260717",
-        "predecessor_disposition": "superseded-unclosed-never-effective",
+        "schema_path": "docs/foundation-v0.1/schemas/wp0002-local-operator-recovery-transaction-evidence.schema.json",
+        "online_verifier_path": "Tools/Validation/verify_wp0002_local_operator_transaction_v3.py",
+        "transaction_id": "WP0002-LOCAL-OPERATOR-CLOSURE-RECOVERY-20260718",
+        "predecessor_transaction_id": "WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718",
+        "predecessor_disposition": "control-merged-closure-unmerged-never-effective",
         "online_authentication_required": true,
         "offline_validation_scope": "structural-and-content-consistency-only-not-live-github-authentication",
         "phases": ["authority", "pre-merge", "complete"],
         "authority_comment_policy": "refetch-and-reject-id-actor-association-updated-at-or-body-hash-drift",
         "normalized_extra_or_missing_keys_rejected": true,
         "raw_github_responses_hash_bound": true,
-        "receipt_artifact_key_policy": "exact-stage1-changed-file-set-plus-authenticated-authority-comment-and-retained-v1-receipt",
+        "receipt_artifact_key_policy": "exact-stage1-changed-file-set-plus-authenticated-authority-comment-and-retained-v2-receipt",
         "receipt_delta_policy": "exactly-one-added-regular-receipt-file",
         "protection_evidence_phases": ["before", "during", "after"],
-        "stage1_protection_before_path": "docs/evidence/WP-0002/local-operator-successor/control/protection-before.json",
-        "stage1_protection_before_policy": "v2-capture-protection-exact-three-before-stage1-bound-by-owner-comment-tree-and-manifest",
-        "maximum_protection_before_to_authority_seconds": 300,
+        "stage1_protection_before_path": null,
+        "stage1_protection_before_policy": "v3-live-before-exact-three-during-exact-validate-and-wp0002-core-after-exact-three",
+        "maximum_protection_before_to_authority_seconds": null,
         "repository_ruleset_policy": "exact-empty-inventory-before-during-after",
-        "pending_without_repository_evidence": "valid-control-materialization-but-successor-non-executable",
+        "pending_without_repository_evidence": "valid-recovery-control-materialization-but-delegated-operator-non-executable",
         "post_squash_pre_closure_main_state": "deliberate-red-fail-closed-quarantine-no-authority",
         "post_squash_closure_execution_policy": "continuous-controller-execution-restore-exact-three-then-merge-exact-three-report-closure-only",
         "post_squash_unrelated_merge_policy": "forbidden",
@@ -364,25 +454,35 @@
         "evidence_closure_required_checks": ["validate", "wp0002-core", "wp0002-policy"],
         "evidence_closure_online_reverification": "base-owned-wp0002-policy-refetches-owner-comments-control-pr-main-checks-and-restored-protection",
         "closure_verifier_execution": "protected-base-verifier-sha256-checked-before-execution-no-candidate-code",
-        "closure_protection_authentication": "base-owned-workflow-single-repository-short-expiry-administration-read-secret-never-candidate-code",
+        "closure_protection_authentication": "base-owned-workflow-single-repository-short-expiry-administration-read-secret-for-protection-repository-merge-settings-and-rulesets-never-candidate-code",
+        "closure_reader_assignment": {
+          "ordinary": ["branch-identity", "repository-owner-identity", "pull-request", "comments", "check-runs", "git-fetch"],
+          "administration_read": ["classic-branch-protection", "repository-merge-settings", "repository-rulesets"]
+        },
+        "mismatch_diagnostic_policy": "sorted-normalized-field-names-only-no-values",
         "maximum_restoration_delay_seconds": 600,
-        "successor_authority_condition": "all-three-reports-validated-and-evidence-closure-merged-to-protected-main",
+        "maximum_authenticated_completion_comment_delay_seconds": 600,
+        "successor_authority_condition": "all-three-recovery-reports-validated-and-evidence-closure-merged-to-protected-main",
         "completion_required_before_successor_authority": true,
         "protected_transaction_paths": [
           "Tools/Validation/collect_wp0002_scope_capture.py",
           "Tools/Validation/collect_wp0002_scope_capture_successor.py",
           "Tools/Validation/verify_wp0002_local_operator_transaction.py",
-          "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py"
+          "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py",
+          "Tools/Validation/verify_wp0002_local_operator_transaction_v3.py"
         ],
         "forbidden_predecessor_evidence_paths": [
           "docs/evidence/WP-0002/local-operator-amendment/authority.json",
           "docs/evidence/WP-0002/local-operator-amendment/pre-merge.json",
-          "docs/evidence/WP-0002/local-operator-amendment/complete.json"
+          "docs/evidence/WP-0002/local-operator-amendment/complete.json",
+          "docs/evidence/WP-0002/local-operator-successor/authority.json",
+          "docs/evidence/WP-0002/local-operator-successor/pre-merge.json",
+          "docs/evidence/WP-0002/local-operator-successor/complete.json"
         ],
         "repository_evidence_paths": {
-          "authority": "docs/evidence/WP-0002/local-operator-successor/authority.json",
-          "pre-merge": "docs/evidence/WP-0002/local-operator-successor/pre-merge.json",
-          "complete": "docs/evidence/WP-0002/local-operator-successor/complete.json"
+          "authority": "docs/evidence/WP-0002/local-operator-recovery/authority.json",
+          "pre-merge": "docs/evidence/WP-0002/local-operator-recovery/pre-merge.json",
+          "complete": "docs/evidence/WP-0002/local-operator-recovery/complete.json"
         }
       }
     },
@@ -626,6 +726,7 @@
             "Tools/Validation/collect_wp0002_scope_capture_successor.py",
             "Tools/Validation/verify_wp0002_local_operator_transaction.py",
             "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py",
+            "Tools/Validation/verify_wp0002_local_operator_transaction_v3.py",
             ".github/workflows/wp0002-ci.yml",
             ".github/workflows/wp0002-policy.yml",
             "SimulationCore/README.md",
@@ -670,6 +771,7 @@
           "working_tree_scope_capture",
           "local_operator_amendment_scope_capture",
           "local_operator_successor_scope_capture",
+          "local_operator_recovery_control",
           "local_operator_transaction_evidence_contract",
           "github_protection_capture",
           "external_cursor_review_control",
@@ -964,6 +1066,7 @@
           "working_tree_scope_capture": false,
           "local_operator_amendment_scope_capture": false,
           "local_operator_successor_scope_capture": false,
+          "local_operator_recovery_control": false,
           "github_protection_capture": false,
           "external_cursor_review_control": false,
           "unity_runcommand_residual_capability": false,
