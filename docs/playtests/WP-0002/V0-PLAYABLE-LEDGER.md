@@ -2,7 +2,7 @@
 
 Status: **provisional execution ledger**
 
-Baseline: `ab5da82ea51718227db775d99dacbac9cdf60256`
+Baseline: `cf135abe0d1acae414d18ec08d8b63f593d1aa37`
 
 Purpose: keep the next playable work vertically integrated, testable, and honest.
 
@@ -356,8 +356,9 @@ Objective: move the existing preparation/module commitment into Sasha's fixed
 garage cutaway so the expedition begins around the physical rig rather than a
 global four-button plan panel.
 
-Status: current implementation candidate; not released until independent,
-Unity, protected, and creator-delegated release gates pass.
+Status: released on protected `main` in `cf135abe` after independent review,
+exact Unity dispatcher gates, protected checks, and transparent
+creator-delegated manual release.
 
 Scope:
 
@@ -386,6 +387,46 @@ crafting, on-foot interaction, production assets, or physics-authored state.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-09-RIG-THE-SCOUT-CONTRACT.md`.
+
+## VGR-10 — Work the Depot
+
+Objective: make the repair-cargo outcome a physical, player-controlled custody
+handoff from its truthful depot source to Sasha's scout.
+
+Status: current implementation candidate; not released until independent,
+Unity, protected, and creator-delegated release gates pass.
+
+Scope:
+
+- Resolve cooperation to Field Sleeve/Faction custody and taking the bearing to
+  Ceramic Bearing at its truthful pre-resolution Depot or Faction custody.
+- Commit trust, grievance, and memory at resolution; commit taken-bearing
+  disposition and depleted control only when the bearing is physically loaded.
+- Load the exact staged cargo into Vehicle custody with one narrow contextual
+  command before return freeze.
+- Show mutually exclusive physical source and scout-socket markers through the
+  sole shared depot camera.
+- Autosave both the resolved source-custody checkpoint and accepted load;
+  preserve old already-loaded development saves.
+- Keep all three colony compositions mechanically identical.
+
+Acceptance:
+
+- source custody is canonical, byte-stable, visible, and required before load,
+  including faction-held and unclaimed sources for the ceramic bearing;
+- only the exact source-to-vehicle action unlocks the existing return flow;
+- replay is harmless and invalid or mistimed loads fail closed;
+- save/load restores exact custody and interaction availability;
+- no generalized inventory, trade, exchange, on-foot, dependency, asset,
+  scene, package, project-setting, balance, or open-decision change exists;
+- deterministic, Unity, visual, save, and protected gates remain green.
+
+Exclude: arbitrary pickup/drop, cargo selection, weight/slot systems, theft,
+barter, caravan exchange, manufacturing stock, production assets, or physics-
+authored state.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-10-WORK-THE-DEPOT-CONTRACT.md`.
 
 ## Visual constitution
 

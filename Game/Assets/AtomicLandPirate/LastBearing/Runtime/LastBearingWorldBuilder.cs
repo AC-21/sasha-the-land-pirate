@@ -82,6 +82,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             private set;
         }
 
+        public LastBearingDepotCargoLoadingView? DepotCargoLoadingView
+        {
+            get;
+            private set;
+        }
+
         public LastBearingRouteModulePointView? RouteModulePointView
         {
             get;
@@ -201,6 +207,27 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     cargo.SetActive(false);
                 }
             }
+
+            Transform? canonicalCargoSocket =
+                VehicleView?.ScoutVisual?.FindSocket(
+                    SashaScoutSemanticContract.CargoSocket01Name);
+            if (canonicalCargoSocket == null)
+            {
+                throw new MissingReferenceException(
+                    "Canonical scout cargo socket is required for depot cargo custody.");
+            }
+
+            Transform? roadCargoSocket = RoadFeelRig?.ScoutVisual.FindSocket(
+                SashaScoutSemanticContract.CargoSocket01Name);
+            if (roadCargoSocket == null)
+            {
+                throw new MissingReferenceException(
+                    "Road Feel scout cargo socket is required for depot cargo custody.");
+            }
+
+            DepotCargoLoadingView?.BindVehicleCargoSockets(
+                canonicalCargoSocket,
+                roadCargoSocket);
 
             BuildCamera();
 
@@ -344,6 +371,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 RoadFeelRig.CargoVisuals[index].SetActive(
                     rotorInVehicle && index == 1);
             }
+        }
+
+        public void ApplyRepairCargoPresentation(
+            RepairCargoKind kind,
+            RepairCargoCustody custody)
+        {
+            DepotCargoLoadingView?.Apply(kind, custody);
         }
 
         public void ApplyCityImprovement(
@@ -767,6 +801,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
             CreateBlock("Depot Roof", depot, new Vector3(0f, 6.4f, 0f), new Vector3(11f, 1.1f, 8f), darkConcrete);
             CreateBlock("Ledger Table", depot, new Vector3(0f, 0.9f, -1f), new Vector3(4f, 0.25f, 2f), bone);
             CreateCylinder("Bearing Cradle", depot, new Vector3(0f, 1.35f, 1.4f), new Vector3(0.9f, 0.35f, 0.9f), bone);
+
+            var cargoLoading = new GameObject(
+                LastBearingDepotCargoLoadingView.RootName);
+            cargoLoading.transform.SetParent(depot, false);
+            DepotCargoLoadingView =
+                cargoLoading.AddComponent<LastBearingDepotCargoLoadingView>();
+            DepotCargoLoadingView.Build(
+                iron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
 
             var recovery = new GameObject(
                 LastBearingDepotApproachRecoveryView.RootName);

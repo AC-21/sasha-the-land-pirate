@@ -406,9 +406,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             LastBearingState resolved = Apply(kernel, atDepot, sequence =>
                 new ResolveDepotCommand(sequence, EncounterChoice.Cooperate));
+            LastBearingState loaded = Apply(kernel, resolved, sequence =>
+                new LoadDepotRepairCargoCommand(sequence));
             string transactionId = resolved.TransactionId!;
             string fingerprint = resolved.TransactionFingerprint!;
-            LastBearingState returning = Apply(kernel, resolved, sequence =>
+            LastBearingState returning = Apply(kernel, loaded, sequence =>
                 new FreezeReturnPayloadCommand(
                     sequence,
                     transactionId,
@@ -586,6 +588,172 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(RoadFeelDamageBand.Healthy));
             Assert.That(roadRig.CargoVisuals[0].activeSelf, Is.False);
             Assert.That(roadRig.CargoVisuals[1].activeSelf, Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator DepotRepairCargoLoadsThroughCanonicalGateAndAutosaveRestoresExactCustody()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingDepotCargoLoadingView cargoView =
+                world.DepotCargoLoadingView!;
+
+            LastBearingState sleeveSource = CreateResolvedDepotState(
+                EncounterChoice.Cooperate);
+            InstallControllerState(controller, sleeveSource);
+            yield return null;
+
+            Assert.That(controller.ReadModel!.IsRepairCargoLoadAvailable, Is.True);
+            Assert.That(
+                controller.ReadModel.RepairCargoKind,
+                Is.EqualTo(RepairCargoKind.FieldSleeve));
+            Assert.That(
+                controller.ReadModel.RepairCargoCustody,
+                Is.EqualTo(RepairCargoCustody.Faction));
+            Assert.That(cargoView.IsLoadAvailable, Is.True);
+            Assert.That(cargoView.IsCanonicalVehicleCargoVisible, Is.False);
+            Assert.That(cargoView.IsRoadVehicleCargoVisible, Is.False);
+            Transform sleeveAtFaction = RequireNamed(
+                cargoView.transform,
+                "Faction Field Sleeve At Service Stand");
+            AssertRenderedRootInsideViewport(world.MainCamera!, sleeveAtFaction);
+
+            string sourceHash = controller.CanonicalHash;
+            controller.BeginReturn();
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(sourceHash));
+            Assert.That(controller.Status, Does.Contain("Load the repair cargo"));
+
+            controller.LoadDepotRepairCargo();
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.RepairCargoCustody,
+                Is.EqualTo(RepairCargoCustody.Vehicle));
+            Assert.That(cargoView.IsCanonicalFieldSleeveVisible, Is.True);
+            Transform canonicalSleeve = RequireNamed(
+                world.VehicleView!.transform,
+                "Canonical Scout Field Sleeve Load");
+            AssertRenderedRootInsideViewport(world.MainCamera, canonicalSleeve);
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"));
+
+            LastBearingState depotSource = CreateResolvedDepotState(
+                EncounterChoice.TakeBearing,
+                waitForFactionClaim: false);
+            InstallControllerState(controller, depotSource);
+            yield return null;
+            Assert.That(
+                controller.ReadModel!.RepairCargoCustody,
+                Is.EqualTo(RepairCargoCustody.Depot));
+            Assert.That(cargoView.IsCeramicBearingAtDepotVisible, Is.True);
+            Transform unclaimedBearing = RequireNamed(
+                cargoView.transform,
+                "Unclaimed Ceramic Bearing At Depot Cradle");
+            AssertRenderedRootInsideViewport(world.MainCamera, unclaimedBearing);
+
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Press(keyboard.eKey);
+            yield return null;
+            InvokeGlobalShortcuts(controller);
+            Release(keyboard.eKey);
+            yield return null;
+
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            InvokeSimulationTick(controller);
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(
+                controller.ReadModel.RepairCargoCustody,
+                Is.EqualTo(RepairCargoCustody.Vehicle));
+            Assert.That(controller.ReadModel.IsRepairCargoLoadAvailable, Is.False);
+            Assert.That(cargoView.IsLoadAvailable, Is.False);
+            Assert.That(cargoView.IsCanonicalCeramicBearingVisible, Is.True);
+            Assert.That(cargoView.IsRoadCeramicBearingVisible, Is.True);
+            Assert.That(cargoView.IsCanonicalFieldSleeveVisible, Is.False);
+            Assert.That(cargoView.IsRoadFieldSleeveVisible, Is.False);
+            Transform canonicalBearing = RequireNamed(
+                world.VehicleView!.transform,
+                "Canonical Scout Ceramic Bearing Load");
+            AssertRenderedRootInsideViewport(world.MainCamera!, canonicalBearing);
+
+            string loadedHash = controller.CanonicalHash;
+            controller.LoadDepotRepairCargo();
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(loadedHash));
+
+            string savedHash = controller.CanonicalHash;
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"),
+                "accepted cargo load must trigger the critical-event autosave");
+            Assert.That(Directory.Exists(profileDirectory), Is.True);
+
+            controller.ReturnToTitle();
+            Assert.That(cargoView.State, Is.EqualTo(
+                DepotCargoLoadingPresentationState.Dormant));
+            controller.Load();
+            yield return null;
+
+            Assert.That(controller.CanonicalHash, Is.EqualTo(savedHash));
+            Assert.That(
+                controller.ReadModel!.RepairCargoCustody,
+                Is.EqualTo(RepairCargoCustody.Vehicle));
+            Assert.That(cargoView.IsCanonicalCeramicBearingVisible, Is.True);
+            Assert.That(cargoView.IsRoadCeramicBearingVisible, Is.True);
+
+            controller.BeginReturn();
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.Returning));
+            Transform roadBearing = RequireNamed(
+                world.RoadFeelRig!.Root.transform,
+                "Road Scout Ceramic Bearing Load");
+            Assert.That(canonicalBearing.gameObject.activeInHierarchy, Is.False);
+            Assert.That(roadBearing.gameObject.activeInHierarchy, Is.True);
+            AssertCameraOwnership(controller, chaseActive: true);
+
+            LastBearingState factionSource = CreateResolvedDepotState(
+                EncounterChoice.TakeBearing,
+                waitForFactionClaim: true);
+            InstallControllerState(controller, factionSource);
+            yield return null;
+            Assert.That(
+                controller.ReadModel!.RepairCargoCustody,
+                Is.EqualTo(RepairCargoCustody.Faction));
+            Assert.That(cargoView.IsCeramicBearingAtFactionVisible, Is.True);
+            Transform factionBearing = RequireNamed(
+                cargoView.transform,
+                "Faction-Held Ceramic Bearing At Service Stand");
+            AssertRenderedRootInsideViewport(world.MainCamera, factionBearing);
+
+            Gamepad gamepad = InputSystem.AddDevice<Gamepad>();
+            Press(gamepad.buttonSouth);
+            yield return null;
+            InvokeGlobalShortcuts(controller);
+            Release(gamepad.buttonSouth);
+            yield return null;
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel!.RepairCargoCustody,
+                Is.EqualTo(RepairCargoCustody.Vehicle));
+            Assert.That(cargoView.IsCanonicalCeramicBearingVisible, Is.True);
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"));
         }
 
         [UnityTest]
@@ -1606,12 +1774,27 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 SashaScoutModulePresentation.SealedRangeTank);
         }
 
-        private static LastBearingState CreateOutboundState()
+        private static LastBearingState CreateOutboundState(
+            bool waitForFactionClaim = false)
         {
             var kernel = new LastBearingKernel();
             LastBearingState state = LastBearingScenarioFactory.CreateInitial(
                 ColonyComposition.HumanOnly,
                 2011);
+            if (waitForFactionClaim)
+            {
+                for (var tick = 0; tick < 9000; tick++)
+                {
+                    state = kernel.Step(
+                        state,
+                        Array.Empty<LastBearingCommand>()).State;
+                }
+
+                Assert.That(
+                    state.FactionClaimState,
+                    Is.EqualTo(FactionClaimState.Claimed));
+            }
+
             state = Apply(kernel, state, sequence =>
                 new AssignResidentCommand(sequence, ResidentRoster.HumanResidentId));
             state = Apply(kernel, state, sequence =>
@@ -1633,8 +1816,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             }
 
             Assert.That(state.PreparationPhase, Is.EqualTo(PreparationPhase.Ready));
-            const string transactionId = "tx:unity-steering-test";
-            const string fingerprint = "fp:unity-steering-test";
+            const string transactionId =
+                "transaction:last-bearing:unity:0001";
+            const string fingerprint =
+                "fingerprint:last-bearing:unity:0001";
             state = Apply(kernel, state, sequence =>
                 new PrepareExpeditionTransactionCommand(
                     sequence,
@@ -1647,6 +1832,19 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     fingerprint));
             Assert.That(state.ExpeditionPhase, Is.EqualTo(ExpeditionPhase.Outbound));
             return state;
+        }
+
+        private static LastBearingState CreateResolvedDepotState(
+            EncounterChoice encounter,
+            bool waitForFactionClaim = false)
+        {
+            var kernel = new LastBearingKernel();
+            LastBearingState state = DriveUntilDepotRecoveryAvailable(
+                CreateOutboundState(waitForFactionClaim));
+            state = Apply(kernel, state, sequence =>
+                new OperateDepotRecoveryPointCommand(sequence));
+            return Apply(kernel, state, sequence =>
+                new ResolveDepotCommand(sequence, encounter));
         }
 
         private static LastBearingState CreateLoadedWornOutboundState()
@@ -1719,6 +1917,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 new OperateDepotRecoveryPointCommand(sequence));
             state = Apply(kernel, state, sequence =>
                 new ResolveDepotCommand(sequence, EncounterChoice.TakeBearing));
+            state = Apply(kernel, state, sequence =>
+                new LoadDepotRepairCargoCommand(sequence));
             string transactionId = state.TransactionId!;
             string fingerprint = state.TransactionFingerprint!;
             state = Apply(kernel, state, sequence =>
@@ -2190,6 +2390,61 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.SaveStatus, Is.EqualTo(saveStatusBefore));
             Assert.That(PendingCommandCount(controller), Is.EqualTo(pendingBefore));
             Assert.That(controller.State, Is.SameAs(stateBefore));
+        }
+
+        private static Transform RequireNamed(Transform root, string name)
+        {
+            foreach (Transform candidate in
+                     root.GetComponentsInChildren<Transform>(true))
+            {
+                if (candidate.name == name)
+                {
+                    return candidate;
+                }
+            }
+
+            throw new AssertionException("Missing authored transform: " + name);
+        }
+
+        private static void AssertRenderedRootInsideViewport(
+            Camera camera,
+            Transform renderedRoot)
+        {
+            Renderer[] renderers =
+                renderedRoot.GetComponentsInChildren<Renderer>(false);
+            Assert.That(renderers, Is.Not.Empty, renderedRoot.name);
+
+            Bounds bounds = renderers[0].bounds;
+            for (var index = 1; index < renderers.Length; index++)
+            {
+                bounds.Encapsulate(renderers[index].bounds);
+            }
+
+            Vector3 center = bounds.center;
+            Vector3 extents = bounds.extents;
+            for (var x = -1; x <= 1; x += 2)
+            {
+                for (var y = -1; y <= 1; y += 2)
+                {
+                    for (var z = -1; z <= 1; z += 2)
+                    {
+                        Vector3 viewport = camera.WorldToViewportPoint(
+                            center + new Vector3(
+                                extents.x * x,
+                                extents.y * y,
+                                extents.z * z));
+                        Assert.That(viewport.z, Is.GreaterThan(0f));
+                        Assert.That(
+                            viewport.x,
+                            Is.InRange(0f, 1f),
+                            renderedRoot.name + " leaves the horizontal viewport");
+                        Assert.That(
+                            viewport.y,
+                            Is.InRange(0f, 1f),
+                            renderedRoot.name + " leaves the vertical viewport");
+                    }
+                }
+            }
         }
 
         private static Dictionary<string, string> SnapshotSaveFiles(

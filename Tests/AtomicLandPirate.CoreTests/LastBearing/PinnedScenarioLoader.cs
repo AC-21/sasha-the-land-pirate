@@ -79,6 +79,14 @@ namespace AtomicLandPirate.LastBearingTests
                     "b8906031e29ee2433a6882eda55cc0aa2529908fbb4ec90d4975fed9662db26c",
                     "7cc63ab6d5fa76bc098f3e4ae3e9da2c3af22e4481ce9b213dcb06a21f80092a",
                     "be3cf848317d7915a66daaef373c1d68ef4cba0da953d180789f98b1ead7b77a"),
+                ["SCN_BEARING_TAKE"] = new ScenarioPin(
+                    "SCN_BEARING_TAKE",
+                    "9be20e321a86395bfb32e8224c8a758974fe201f241db92004be659f9b018cef",
+                    "35d022dc33c07a7db0296791e91ad5e525b284b0474c09e2dca9f5a5dc56364f",
+                    "999f39658b1e29525073002831879ad840e9eb3d98e86a92d1d884ffd02d1233",
+                    "d697ea07d5e6acda89f8c6f681f9536bd4503bb24f4cc1b82d1682fd3495f19c",
+                    "c929806461b948d33426cd57dff51045aac9662cb519fd840d78ad89f7237b11",
+                    "4004f4975af68d1d6fadfcce6fd8cbda9a0296a9e1e97f7da1b9bfd1d3598b72"),
             };
 
         public static ScenarioPin Get(string id)

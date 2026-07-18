@@ -369,22 +369,131 @@ namespace AtomicLandPirate.Simulation.LastBearing
             if (state.RepairCargoKind == RepairCargoKind.None)
             {
                 Require(
-                    state.RepairCargoCustody == RepairCargoCustody.None,
+                    state.RepairCargoCustody == RepairCargoCustody.None
+                    && state.DepotResolution == EncounterChoice.Unresolved
+                    && state.OrdinaryCargoUsedUnits == 0,
                     "LAST_BEARING_EMPTY_REPAIR_CUSTODY_INVALID");
             }
             else if (state.RepairCargoKind == RepairCargoKind.CeramicBearing)
             {
                 Require(
-                    state.RepairCargoCustody == RepairCargoCustody.Vehicle
-                    || state.RepairCargoCustody == RepairCargoCustody.Turbine,
+                    state.DepotResolution == EncounterChoice.TakeBearing
+                    && (state.RepairCargoCustody
+                            == RepairCargoCustody.Depot
+                        || state.RepairCargoCustody
+                            == RepairCargoCustody.Faction
+                        || state.RepairCargoCustody
+                            == RepairCargoCustody.Vehicle
+                        || state.RepairCargoCustody
+                            == RepairCargoCustody.Turbine),
                     "LAST_BEARING_BEARING_CUSTODY_INVALID");
             }
             else
             {
                 Require(
-                    state.RepairCargoCustody == RepairCargoCustody.Vehicle
-                    || state.RepairCargoCustody == RepairCargoCustody.Consumed,
+                    state.DepotResolution == EncounterChoice.Cooperate
+                    && (state.RepairCargoCustody
+                            == RepairCargoCustody.Faction
+                        || state.RepairCargoCustody
+                            == RepairCargoCustody.Vehicle
+                        || state.RepairCargoCustody
+                            == RepairCargoCustody.Consumed),
                     "LAST_BEARING_SLEEVE_CUSTODY_INVALID");
+            }
+
+            if (state.RepairCargoCustody == RepairCargoCustody.Depot
+                || state.RepairCargoCustody == RepairCargoCustody.Faction)
+            {
+                Require(
+                    state.ExpeditionPhase == ExpeditionPhase.AtDepot
+                    && state.TransactionPhase == TransactionPhase.RoadOwned
+                    && !state.ReturnPayloadFrozen
+                    && state.OrdinaryCargoUsedUnits == 0,
+                    "LAST_BEARING_REPAIR_CARGO_SOURCE_PHASE_INVALID");
+
+                bool exactDepotLineage =
+                    (state.DepotControl == DepotControl.Unclaimed
+                        && state.FactionClaimProgressMilli
+                            < LastBearingBalanceV1
+                                .FactionContestedThresholdMilli)
+                    || (state.DepotControl == DepotControl.Contested
+                        && state.FactionClaimProgressMilli
+                            >= LastBearingBalanceV1
+                                .FactionContestedThresholdMilli
+                        && state.FactionClaimProgressMilli
+                            < LastBearingBalanceV1.FactionClaimThresholdMilli);
+                bool exactFactionLineage =
+                    state.DepotControl == DepotControl.FactionClaimed
+                    && state.FactionClaimProgressMilli
+                        == LastBearingBalanceV1.FactionClaimThresholdMilli;
+
+                bool exactCooperativeSource =
+                    state.RepairCargoKind == RepairCargoKind.FieldSleeve
+                    && state.RepairCargoCustody
+                        == RepairCargoCustody.Faction
+                    && state.DepotResolution == EncounterChoice.Cooperate
+                    && state.DepotBearingDisposition
+                        == DepotBearingDisposition.FactionHeld
+                    && state.DepotControl == DepotControl.SharedAccess
+                    && state.FactionClaimState
+                        == FactionClaimState.Cooperating;
+                bool exactDepotBearingSource =
+                    state.RepairCargoKind == RepairCargoKind.CeramicBearing
+                    && state.RepairCargoCustody == RepairCargoCustody.Depot
+                    && state.DepotResolution == EncounterChoice.TakeBearing
+                    && state.DepotBearingDisposition
+                        == DepotBearingDisposition.AtDepot
+                    && exactDepotLineage
+                    && state.FactionClaimState == FactionClaimState.Aggrieved;
+                bool exactFactionBearingSource =
+                    state.RepairCargoKind == RepairCargoKind.CeramicBearing
+                    && state.RepairCargoCustody
+                        == RepairCargoCustody.Faction
+                    && state.DepotResolution == EncounterChoice.TakeBearing
+                    && state.DepotBearingDisposition
+                        == DepotBearingDisposition.FactionHeld
+                    && exactFactionLineage
+                    && state.FactionClaimState == FactionClaimState.Aggrieved;
+                Require(
+                    exactCooperativeSource
+                    || exactDepotBearingSource
+                    || exactFactionBearingSource,
+                    "LAST_BEARING_REPAIR_CARGO_SOURCE_INVALID");
+            }
+            else if (state.RepairCargoCustody == RepairCargoCustody.Vehicle)
+            {
+                bool exactOutcome =
+                    state.DepotResolution == EncounterChoice.Cooperate
+                        ? state.RepairCargoKind == RepairCargoKind.FieldSleeve
+                            && state.DepotBearingDisposition
+                                == DepotBearingDisposition.FactionHeld
+                            && state.DepotControl
+                                == DepotControl.SharedAccess
+                        : state.DepotResolution
+                                == EncounterChoice.TakeBearing
+                            && state.RepairCargoKind
+                                == RepairCargoKind.CeramicBearing
+                            && state.DepotBearingDisposition
+                                == DepotBearingDisposition.TakenBySasha
+                            && state.DepotControl == DepotControl.Depleted;
+                Require(
+                    exactOutcome,
+                    "LAST_BEARING_VEHICLE_REPAIR_CARGO_OUTCOME_INVALID");
+                Require(
+                    state.OrdinaryCargoUsedUnits == 1
+                    || (state.OrdinaryCargoUsedUnits == 0
+                        && state.ExpeditionPhase == ExpeditionPhase.AtDepot
+                        && state.TransactionPhase
+                            == TransactionPhase.RoadOwned
+                        && !state.ReturnPayloadFrozen),
+                    "LAST_BEARING_VEHICLE_REPAIR_CARGO_OCCUPANCY_INVALID");
+            }
+            else if (state.RepairCargoCustody == RepairCargoCustody.Turbine
+                || state.RepairCargoCustody == RepairCargoCustody.Consumed)
+            {
+                Require(
+                    state.OrdinaryCargoUsedUnits == 1,
+                    "LAST_BEARING_APPLIED_REPAIR_CARGO_OCCUPANCY_INVALID");
             }
 
             if (state.TurbineCondition == TurbineCondition.Failing)

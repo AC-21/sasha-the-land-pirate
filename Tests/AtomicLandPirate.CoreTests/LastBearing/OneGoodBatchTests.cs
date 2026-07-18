@@ -587,6 +587,8 @@ namespace AtomicLandPirate.LastBearingTests
             driver.Apply(sequence => new ResolveDepotCommand(
                 sequence,
                 EncounterChoice.TakeBearing));
+            driver.Apply(sequence =>
+                new LoadDepotRepairCargoCommand(sequence));
             driver.Apply(sequence => new FreezeReturnPayloadCommand(
                 sequence,
                 transactionId,

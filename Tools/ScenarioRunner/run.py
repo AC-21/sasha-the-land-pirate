@@ -18,6 +18,7 @@ SCENARIOS = frozenset(
         "SCN_PREPARATION_MODULE_MATRIX",
         "SCN_FACTION_WAIT_CLAIM",
         "SCN_BEARING_COOPERATE",
+        "SCN_BEARING_TAKE",
     }
 )
 

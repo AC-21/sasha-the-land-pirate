@@ -236,6 +236,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ApplyRoadCargoPresentation(
                 HeavyCargoKind.PumpRotor,
                 HeavyCargoCustody.Depot);
+            _world?.ApplyRepairCargoPresentation(
+                RepairCargoKind.None,
+                RepairCargoCustody.None);
             _world?.ApplyCityImprovement(
                 HeavyCargoCustody.Depot,
                 CityImprovementKind.None,
@@ -614,8 +617,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 sequence,
                 cooperate ? EncounterChoice.Cooperate : EncounterChoice.TakeBearing));
             _status = cooperate
-                ? "The bearing stays claimed; a field sleeve and obligation come home."
-                : "Sasha takes the claimed bearing. The faction will remember the custody change.";
+                ? "The bearing stays claimed; a field sleeve and obligation wait at the faction stand."
+                : "Sasha declares the take. The bearing stays at its canonical source until you load it.";
+        }
+
+        public void LoadDepotRepairCargo()
+        {
+            if (_readModel == null ||
+                !_readModel.IsRepairCargoLoadAvailable)
+            {
+                _status = "No depot repair cargo is canonically available to load.";
+                return;
+            }
+
+            RepairCargoKind cargoKind = _readModel.RepairCargoKind;
+            Queue(sequence => new LoadDepotRepairCargoCommand(sequence));
+            _status = cargoKind == RepairCargoKind.FieldSleeve
+                ? "Field sleeve secured at Sasha's cargo socket. The maintenance promise rides home too."
+                : "Ceramic bearing secured at Sasha's cargo socket. The depot grievance rides home too.";
         }
 
         public void OperateDepotApproachRecoveryPoint()
@@ -666,6 +685,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _readModel.ExpeditionPhase != ExpeditionPhase.AtDepot)
             {
                 _status = "The return payload can only be frozen at the depot.";
+                return;
+            }
+
+            if (_readModel.RepairCargoCustody != RepairCargoCustody.Vehicle)
+            {
+                _status = "Load the repair cargo into Sasha's scout before freezing the return payload.";
                 return;
             }
 
@@ -920,6 +945,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 OperateDepotApproachRecoveryPoint();
             }
+            else if (_readModel != null &&
+                _readModel.IsRepairCargoLoadAvailable &&
+                ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
+                 (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
+            {
+                LoadDepotRepairCargo();
+            }
         }
 
         private void SimulateOneTick()
@@ -1150,6 +1182,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ApplyRoadCargoPresentation(
                 _readModel.HeavyCargoKind,
                 _readModel.HeavyCargoCustody);
+            _world.ApplyRepairCargoPresentation(
+                _readModel.RepairCargoKind,
+                _readModel.RepairCargoCustody);
             _world.ApplyCityImprovement(
                 _readModel.HeavyCargoCustody,
                 _readModel.InstalledCityImprovement,
@@ -1184,6 +1219,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     || kind == LastBearingEventKind.RouteActionUsed
                     || kind == LastBearingEventKind.DepotRecoveryPointOperated
                     || kind == LastBearingEventKind.DepotResolved
+                    || kind == LastBearingEventKind.RepairCargoTransferred
                     || kind == LastBearingEventKind.ReturnPayloadFrozen
                     || kind == LastBearingEventKind.VehicleReturned
                     || kind == LastBearingEventKind.CityReturnCredited

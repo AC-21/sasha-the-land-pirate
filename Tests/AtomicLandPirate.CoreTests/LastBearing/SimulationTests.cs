@@ -19,6 +19,7 @@ namespace AtomicLandPirate.LastBearingTests
             harness.Run("preparation completes autonomously", PreparationCompletes);
             WreckLineTests.Run(harness);
             DepotApproachRecoveryTests.Run(harness);
+            DepotRepairCargoLoadingTests.Run(harness);
             CityImprovementTests.Run(harness);
             OneGoodBatchTests.Run(harness);
             CompositionTests.Run(harness);

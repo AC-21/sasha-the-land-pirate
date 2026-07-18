@@ -42,6 +42,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(
                     runtimeRoot,
                     "LastBearingRouteModulePointView.cs"));
+            string depotCargoLoading = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "LastBearingDepotCargoLoadingView.cs"));
             string pumpHall = File.ReadAllText(
                 Path.Combine(
                     runtimeRoot,
@@ -166,6 +170,49 @@ namespace AtomicLandPirate.LastBearingTests
                     "depot recovery controller operation reads presentation authority " +
                     forbidden);
             }
+            string depotCargoLoadOperation = Segment(
+                controller,
+                "public void LoadDepotRepairCargo()",
+                "public void OperateDepotApproachRecoveryPoint()");
+            Require(
+                depotCargoLoadOperation,
+                "_readModel.IsRepairCargoLoadAvailable");
+            Require(
+                depotCargoLoadOperation,
+                "new LoadDepotRepairCargoCommand(sequence)");
+            foreach (string forbidden in new[]
+            {
+                "Rigidbody",
+                "RoadFeelTelemetry",
+                "Collider",
+                "Physics",
+                ".position",
+                ".transform",
+            })
+            {
+                TestHarness.True(
+                    depotCargoLoadOperation.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "depot cargo load operation reads presentation authority " +
+                    forbidden);
+            }
+            string beginReturn = Segment(
+                controller,
+                "public void BeginReturn()",
+                "public void CompleteReturn()");
+            Require(
+                beginReturn,
+                "_readModel.RepairCargoCustody != RepairCargoCustody.Vehicle");
+            Require(beginReturn, "new FreezeReturnPayloadCommand(");
+            TestHarness.True(
+                beginReturn.IndexOf(
+                    "_readModel.RepairCargoCustody",
+                    StringComparison.Ordinal) <
+                beginReturn.IndexOf(
+                    "_readModel.LiquidCargoKind",
+                    StringComparison.Ordinal),
+                "repair cargo custody must gate return before optional tank cargo");
             string globalShortcuts = Segment(
                 controller,
                 "private void HandleGlobalShortcuts()",
@@ -176,6 +223,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 globalShortcuts,
                 "_readModel.IsDepotApproachRecoveryAvailable");
+            Require(
+                globalShortcuts,
+                "_readModel.IsRepairCargoLoadAvailable");
+            Require(globalShortcuts, "LoadDepotRepairCargo();");
             Require(globalShortcuts, "keyboard.eKey.wasPressedThisFrame");
             Require(globalShortcuts, "gamepad.buttonSouth.wasPressedThisFrame");
             Require(globalShortcuts, "keyboard.rKey.wasPressedThisFrame");
@@ -198,10 +249,18 @@ namespace AtomicLandPirate.LastBearingTests
                 "keyboard.eKey.wasPressedThisFrame",
                 depotGate,
                 StringComparison.Ordinal);
+            int cargoGate = globalShortcuts.IndexOf(
+                "_readModel.IsRepairCargoLoadAvailable",
+                StringComparison.Ordinal);
+            int cargoHotkey = globalShortcuts.IndexOf(
+                "keyboard.eKey.wasPressedThisFrame",
+                cargoGate,
+                StringComparison.Ordinal);
             TestHarness.True(
                 recoveryHotkey >= 0 && recoveryHotkey < wreckGate &&
                 wreckGate >= 0 && wreckHotkey > wreckGate &&
-                depotGate > wreckHotkey && depotHotkey > depotGate,
+                depotGate > wreckHotkey && depotHotkey > depotGate &&
+                cargoGate > depotHotkey && cargoHotkey > cargoGate,
                 "manual recovery must precede context-gated road interactions");
             TestHarness.Equal(
                 1,
@@ -237,6 +296,7 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "_world.ApplyDepotApproachRecovery(");
             Require(controller, "_world.ApplyRouteModulePoint(");
             Require(controller, "_world.ApplyRoadCargoPresentation(");
+            Require(controller, "_world.ApplyRepairCargoPresentation(");
             Require(controller, "_world.ApplyCityImprovement(");
             Require(controller, "_world.ApplyGaragePreparationProgress(");
             Require(controller, "_readModel.PreparationElapsedTicks");
@@ -282,6 +342,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "RouteActionUsed",
                 "DepotRecoveryPointOperated",
                 "DepotResolved",
+                "RepairCargoTransferred",
                 "ReturnPayloadFrozen",
                 "VehicleReturned",
                 "CityReturnCredited",
@@ -373,6 +434,15 @@ namespace AtomicLandPirate.LastBearingTests
                 "the canonical world must build exactly one strategy writer");
             Require(world, "LastBearingDepotApproachRecoveryView");
             Require(world, "DepotApproachRecoveryView.Build(");
+            Require(world, "LastBearingDepotCargoLoadingView");
+            Require(world, "DepotCargoLoadingView.Build(");
+            Require(world, "ApplyRepairCargoPresentation(");
+            Require(world, "BindVehicleCargoSockets(");
+            Require(world, "SashaScoutSemanticContract.CargoSocket01Name");
+            Require(world, "if (roadCargoSocket == null)");
+            Require(
+                world,
+                "Road Feel scout cargo socket is required for depot cargo custody.");
             Require(world, "LastBearingRouteModulePointView");
             Require(world, "RouteModulePointView.Build(");
             string pumpHallBuild = Segment(
@@ -752,6 +822,11 @@ namespace AtomicLandPirate.LastBearingTests
             Require(hud, "OperateWreckLineModulePoint");
             Require(hud, "DEPLOY WINCH · RECOVER PUMP ROTOR");
             Require(hud, "CROSS SEALED DUST EXPOSURE");
+            Require(hud, "model.IsRepairCargoLoadAvailable");
+            Require(hud, "_controller!.LoadDepotRepairCargo();");
+            Require(hud, "LOAD FIELD SLEEVE · E / GAMEPAD SOUTH");
+            Require(hud, "LOAD CERAMIC BEARING · E / GAMEPAD SOUTH");
+            Require(hud, ".Append(model.RepairCargoCustody)");
             Require(hud, "IsCityImprovementInstallationAvailable");
             Require(hud, "INSTALL REFURBISHED AUXILIARY PUMP");
             Require(hud, "LastBearingPermitJobPresenter.Present(");
@@ -780,6 +855,12 @@ namespace AtomicLandPirate.LastBearingTests
             Require(permitJobPresenter, "public static LastBearingPermitJobPresentation Present(");
             Require(permitJobPresenter, "IsPermitJobFinale");
             Require(permitJobPresenter, "PresentAlternateConclusion");
+            Require(
+                permitJobPresenter,
+                "model.IsRepairCargoLoadAvailable");
+            Require(
+                permitJobPresenter,
+                "Load the repair cargo with E or gamepad south.");
             foreach (string forbidden in new[]
             {
                 "using UnityEngine",
@@ -859,6 +940,54 @@ namespace AtomicLandPirate.LastBearingTests
                 TestHarness.True(
                     wreckLine.IndexOf(forbidden, StringComparison.Ordinal) < 0,
                     "Wreck Line view contains forbidden authority " +
+                    forbidden);
+            }
+
+            Require(depotCargoLoading, "C0-VGR-10");
+            Require(depotCargoLoading, "Revision = \"R1\"");
+            Require(
+                depotCargoLoading,
+                "poi_depot_repair_cargo_load_a");
+            Require(
+                depotCargoLoading,
+                "ANCHOR_DEPOT_REPAIR_CARGO_LOAD");
+            Require(
+                depotCargoLoading,
+                "RepairCargoCustody.Depot");
+            Require(
+                depotCargoLoading,
+                "RepairCargoCustody.Faction");
+            Require(
+                depotCargoLoading,
+                "RepairCargoCustody.Vehicle");
+            Require(
+                depotCargoLoading,
+                "BindVehicleCargoSockets(");
+            Require(depotCargoLoading, "collider.enabled = false");
+            foreach (string forbidden in new[]
+            {
+                "LastBearingState",
+                "LastBearingReadModel",
+                "LastBearingKernel",
+                "LastBearingCommand",
+                "SaveContracts",
+                "System.IO",
+                "Application.persistentDataPath",
+                "Rigidbody",
+                "Physics.",
+                "OnTrigger",
+                "OnCollision",
+                "Keyboard.current",
+                "Gamepad.current",
+                "AddComponent<Camera>",
+                "CharacterController",
+            })
+            {
+                TestHarness.True(
+                    depotCargoLoading.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "depot cargo-loading view contains forbidden authority " +
                     forbidden);
             }
 

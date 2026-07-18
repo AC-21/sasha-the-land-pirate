@@ -15,6 +15,8 @@ namespace AtomicLandPirate.LastBearingTests
             harness.Run("frozen generation and pointer vector", FrozenVector);
             harness.Run("four preparation and module checkpoints round trip", () =>
                 PreparationModuleCheckpointsRoundTrip(repoRoot));
+            harness.Run("repair source and loaded save checkpoints round trip", () =>
+                RepairCargoCheckpointsRoundTrip(repoRoot));
             harness.Run("installed auxiliary pump checkpoint round trips", () =>
                 InstalledAuxiliaryPumpCheckpointRoundTrips(repoRoot));
             harness.Run("atomic current and immediately preceding last-good", () =>
@@ -129,6 +131,154 @@ namespace AtomicLandPirate.LastBearingTests
                     TestHarness.Equal(module, restored.VehicleModule, "restored module");
                 }
             }
+        }
+
+        private static void RepairCargoCheckpointsRoundTrip(string repoRoot)
+        {
+            RoundTripRepairCargoPath(
+                repoRoot,
+                "sleeve-faction",
+                EncounterChoice.Cooperate,
+                waitForFactionClaim: false,
+                worldSeed: 2004,
+                RepairCargoCustody.Faction);
+            RoundTripRepairCargoPath(
+                repoRoot,
+                "bearing-depot",
+                EncounterChoice.TakeBearing,
+                waitForFactionClaim: false,
+                worldSeed: 2005,
+                RepairCargoCustody.Depot);
+            RoundTripRepairCargoPath(
+                repoRoot,
+                "bearing-faction",
+                EncounterChoice.TakeBearing,
+                waitForFactionClaim: true,
+                worldSeed: 2003,
+                RepairCargoCustody.Faction);
+        }
+
+        private static void RoundTripRepairCargoPath(
+            string repoRoot,
+            string caseName,
+            EncounterChoice choice,
+            bool waitForFactionClaim,
+            int worldSeed,
+            RepairCargoCustody expectedSource)
+        {
+            var driver = new CoreTestDriver(
+                ColonyComposition.HumanOnly,
+                worldSeed);
+            if (waitForFactionClaim)
+            {
+                driver.Advance(9000);
+                TestHarness.Equal(
+                    FactionClaimState.Claimed,
+                    driver.View.FactionClaimState,
+                    caseName + " faction claim setup");
+            }
+
+            driver.StartPreparation(
+                ResidentRoster.HumanResidentId,
+                PreparationChoice.CivicBuffer,
+                VehicleModule.WinchAssembly);
+            while (driver.View.PreparationPhase != PreparationPhase.Ready)
+            {
+                driver.Advance(1);
+            }
+
+            string transactionId = "tx:repair-save:" + worldSeed;
+            string fingerprint = "fp:repair-save:" + worldSeed;
+            driver.Apply(sequence => new PrepareExpeditionTransactionCommand(
+                sequence,
+                transactionId,
+                fingerprint));
+            driver.Apply(sequence => new DebitCityManifestCommand(
+                sequence,
+                transactionId,
+                fingerprint));
+            while (!driver.View.IsDepotApproachRecoveryAvailable)
+            {
+                driver.OperateWreckLineIfAvailable();
+                driver.Apply(sequence =>
+                    new DriveVehicleCommand(sequence, 1000, 0));
+            }
+
+            driver.Apply(sequence =>
+                new OperateDepotRecoveryPointCommand(sequence));
+            driver.Apply(sequence => new ResolveDepotCommand(
+                sequence,
+                choice));
+            LastBearingState source = RoundTripRepairCargoCheckpoint(
+                repoRoot,
+                "repair-source-" + caseName,
+                driver.State,
+                expectedSource,
+                interactionAvailable: true);
+
+            driver = new CoreTestDriver(source);
+            driver.Apply(sequence =>
+                new LoadDepotRepairCargoCommand(sequence));
+            RoundTripRepairCargoCheckpoint(
+                repoRoot,
+                "repair-loaded-" + caseName,
+                driver.State,
+                RepairCargoCustody.Vehicle,
+                interactionAvailable: false);
+        }
+
+        private static LastBearingState RoundTripRepairCargoCheckpoint(
+            string repoRoot,
+            string caseName,
+            LastBearingState expected,
+            RepairCargoCustody expectedCustody,
+            bool interactionAvailable)
+        {
+            byte[] canonical = LastBearingCanonicalCodec.Encode(expected);
+            string profile = FreshProfile(repoRoot, caseName);
+            LastBearingProfileStore store =
+                LastBearingProfileStore.OpenFixedProfileDirectory(profile);
+            LastBearingPersistResult persisted = store.TryPersist(canonical);
+            TestHarness.True(
+                persisted.Succeeded,
+                caseName + " persist failed: " + persisted.Code);
+            LastBearingLoadResult loaded = store.TryLoad(payload =>
+                LastBearingCanonicalCodec.TryDecode(payload).Succeeded);
+            TestHarness.True(
+                loaded.Succeeded && loaded.CanonicalPayload != null,
+                caseName + " load failed: " + loaded.Code);
+            TestHarness.True(
+                canonical.SequenceEqual(loaded.CanonicalPayload!),
+                caseName + " canonical bytes changed");
+            LastBearingDecodeResult decoded =
+                LastBearingCanonicalCodec.TryDecode(
+                    loaded.CanonicalPayload!);
+            TestHarness.True(
+                decoded.Succeeded && decoded.State != null,
+                caseName + " decode failed: " + decoded.Code);
+            LastBearingReadModel restored =
+                LastBearingReadModel.FromState(decoded.State!);
+            TestHarness.Equal(
+                expectedCustody,
+                restored.RepairCargoCustody,
+                caseName + " custody");
+            TestHarness.Equal(
+                interactionAvailable,
+                restored.IsRepairCargoLoadAvailable,
+                caseName + " interaction availability");
+            TestHarness.Equal(
+                expected.TransactionId,
+                decoded.State!.TransactionId,
+                caseName + " transaction identity");
+            TestHarness.Equal(
+                expected.FactionGrievance,
+                restored.FactionGrievance,
+                caseName + " faction consequence");
+            TestHarness.Equal(
+                expected.GlobalTick,
+                restored.GlobalTick,
+                caseName + " global clock");
+            return decoded.State!;
         }
 
         private static void CurrentAndLastGood(string repoRoot)
@@ -483,6 +633,8 @@ namespace AtomicLandPirate.LastBearingTests
             driver.Apply(sequence => new ResolveDepotCommand(
                 sequence,
                 EncounterChoice.TakeBearing));
+            driver.Apply(sequence =>
+                new LoadDepotRepairCargoCommand(sequence));
             driver.Apply(sequence => new FreezeReturnPayloadCommand(
                 sequence,
                 transactionId,
