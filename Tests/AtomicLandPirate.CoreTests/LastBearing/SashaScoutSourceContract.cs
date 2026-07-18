@@ -82,6 +82,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(garage, "ANCHOR_VEHICLE_DOCK");
             Require(garage, "MODULE_STAND_WINCH");
             Require(garage, "MODULE_STAND_RANGE_TANK");
+            Require(garage, "ASSEMBLY_PROGRESS_GAUGE");
+            Require(garage, "ApplyPreparationProgress");
+            Require(garage, "PreparationGaugeLitSegments");
             TestHarness.True(
                 garage.IndexOf("AddComponent<Camera>", StringComparison.Ordinal) < 0,
                 "garage cutaway must reuse the one Last Bearing camera");
@@ -98,6 +101,7 @@ namespace AtomicLandPirate.LastBearingTests
             Require(world, "GarageBayView");
             Require(world, "RoadFeelRig?.ScoutVisual.ApplyModule(snapshot.Module)");
             Require(world, "GarageBayView?.ApplyModule(snapshot.Module)");
+            Require(world, "GarageBayView?.ApplyPreparationProgress(");
             Require(coordinator, "garageInspectionSelected");
             Require(coordinator, "SetInspectionPose");
             Require(camera, "IsInspectionMode");

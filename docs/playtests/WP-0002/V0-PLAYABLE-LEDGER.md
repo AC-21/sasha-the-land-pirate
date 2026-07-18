@@ -2,7 +2,7 @@
 
 Status: **provisional execution ledger**
 
-Baseline: `75a1abbd498498c0fb8c3ef91dd9543931ddf0ea`
+Baseline: `bea6dacaee95879f3f329d8faf478e8d0036fea2`
 
 Purpose: keep the next playable work vertically integrated, testable, and honest.
 
@@ -47,14 +47,14 @@ The current experience is still a constitutional toy:
 
 | Area | Current state | V0 gap |
 |---|---|---|
-| City | Water need, camera, and reversible D-0030 comparison | No authoritative placement, logistics path, or player-built improvement |
-| Driving | Real local physics shadowing deterministic progress/lateral commands | Module verb fires automatically; brake/reverse are not connected to the integrated loop; road interaction is thin |
+| City | Water need, camera, reversible D-0030 comparison, and one fixed-socket auxiliary-pump improvement | No authoritative placement or logistics path |
+| Driving | Real local physics shadowing deterministic progress/lateral commands, with explicit Wreck Line and depot-recovery verbs | Brake/reverse remain presentation-only; one corridor and two interactions are still thin |
 | Garage | Stable C0 scout sockets and fixed dollhouse bay | Inspection only; module work is still a global HUD action |
 | Depot/scavenging | Recovery gate, faction choice, heavy/liquid cargo fields and exact custody | Cargo appears through buttons; no operated salvage/load staging |
 | Colony | Exact typed rosters and visible human/robot primitives | No lived work feedback; mechanical differentiation remains forbidden while D-0039 is open |
-| Manufacturing/trade | Abstract module fabrication and one cooperative obligation | No physical batch/lot or settled bilateral barter |
-| Save | Exact disposable development profile and fault-tested atomic store | One manual dev slot; no critical-transition autosave policy or production compatibility |
-| Presentation | Temporary IMGUI and procedural primitives | No onboarding-quality retained HUD, sound language, accepted meshes, textures, LODs, or audio |
+| Manufacturing/trade | One conserved spare-bearing batch, physical lot, one-off caravaner barter, and persistent corridor permit | No broader exchange by design; D-0044 remains open |
+| Save | Exact disposable profile, fault-tested atomic store, and critical-transition autosaves | One dev slot; no production compatibility promise |
+| Presentation | Temporary IMGUI, procedural primitives, and fixed cutaways | The released baseline still lacks a readable job arc, retained HUD, sound language, accepted meshes, textures, LODs, or audio |
 | Mac proof | Lightweight URP project on the selected Editor | No clean native build or target-Mac thermal/frame/memory soak evidence |
 
 ## View and interaction constitution
@@ -94,6 +94,8 @@ The current experience is still a constitutional toy:
 
 Objective: make the first 60–90 seconds of road play pleasurable and turn each
 installed module into an explicit verb.
+
+Status: released on protected `main`.
 
 Scope:
 
@@ -145,6 +147,8 @@ physics-authored outcomes, and production assets.
 Objective: close the emotional city-road loop with visible cargo, a satisfying
 homecoming, one real city improvement, building cutaways, and recoverable saves.
 
+Status: released on protected `main`.
+
 Scope:
 
 - Show canonical cargo on the road scout and let its load affect presentation
@@ -194,9 +198,9 @@ and production save slots or compatibility promises.
 Objective: prove manufacturing and physical-goods trade with one conserved lot,
 without implying that the population-gated caravan exchange is open.
 
-Gate: this slice needs a narrow accepted amendment or successor packet because
-it adds a saved economy concept. The exact barter consideration must be creator
-bound before implementation.
+Status: released on protected `main` at
+`bea6dacaee95879f3f329d8faf478e8d0036fea2` under the exact bounded contract
+`docs/playtests/WP-0002/VGR-05-ONE-GOOD-BATCH-CONTRACT.md`.
 
 Scope:
 
@@ -206,8 +210,9 @@ Scope:
   requires an explicit demonstrated use.
 - Debit inputs exactly once at batch start; complete autonomously; show physical
   inputs, active machinery, and output in the workshop cutaway.
-- Proposed one-off barter for decision: one spare-bearing lot for restored depot
-  access/route permit. This is not ratified by this ledger.
+- Perform the accepted one-off barter: one spare-bearing lot for the fixed
+  depot-corridor route permit while preserving the aggrieved history and
+  two-fuel future toll.
 - Transfer lot custody and consideration atomically, record faction memory, and
   show one caravaner claims counter/ledger with the physical lot and route board.
 - Preserve identical recipe, timing, cost, and viability for all compositions.
@@ -227,6 +232,42 @@ Acceptance:
 
 Exclude: recipe frameworks, factory trees, industrial specialization, multiple
 lots, dynamic pricing, a regional market, or the global caravan exchange.
+
+## VGR-06 — The Permit Job
+
+Objective: make the released city-road-manufacturing loop readable and
+finishable before adding another system.
+
+Status: current implementation candidate; not released until the applicable
+protected and Unity gates pass.
+
+Scope:
+
+- Derive one presentation-only nine-step objective rail from the existing read
+  model and city-inspection flag.
+- Mark `Civic Buffer + Winch` and `Take the claimed bearing` as an optional
+  first-run path to the longest implemented continuation.
+- Expose exact preparation, route, and batch progress without adding authority.
+- Replace the normal raw-objective fallback with authored player language.
+- End the permit path with a concise consequence recap and close all other
+  material outcomes as honest alternate endings.
+- Preserve the current temporary IMGUI and shared-camera implementation so this
+  slice stays removable when retained UI is separately authorized.
+
+Acceptance:
+
+- the golden path is understandable without reading internal identifiers;
+- every alternate branch remains mechanically valid and never claims a permit;
+- the presenter cannot mutate canonical state, issue commands, or touch saves;
+- canonical bytes, codec version, balance, composition parity, and eligibility
+  are unchanged;
+- deterministic, Unity, visual, save, and protected gates remain green.
+
+Exclude: a quest framework, retained UI package, new route, market, building
+kernel, city placement, composition mechanics, production art, or save change.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-06-THE-PERMIT-JOB-CONTRACT.md`.
 
 ## Visual constitution
 

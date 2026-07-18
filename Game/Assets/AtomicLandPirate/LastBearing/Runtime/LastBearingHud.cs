@@ -103,6 +103,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void DrawActiveGame(LastBearingReadModel model)
         {
+            LastBearingPermitJobPresentation permitJob =
+                LastBearingPermitJobPresenter.Present(
+                    model,
+                    _controller!.CityNeedInspected);
+            DrawPermitJob(permitJob);
+            GUILayout.Space(12f);
+
             GUILayout.Label("CIVIC INSTRUMENTS", _headingStyle);
             GUILayout.Label(BuildInstrumentText(model), _bodyStyle);
             GUILayout.Space(10f);
@@ -117,7 +124,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             GUILayout.Space(10f);
 
             GUILayout.Label("CURRENT ACTION", _headingStyle);
-            DrawContextActions(model);
+            DrawContextActions(model, permitJob);
             GUILayout.Space(10f);
 
             GUILayout.Label("CONTROLS", _headingStyle);
@@ -179,7 +186,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
         }
 
-        private void DrawContextActions(LastBearingReadModel model)
+        private void DrawContextActions(
+            LastBearingReadModel model,
+            LastBearingPermitJobPresentation permitJob)
         {
             if (model.AssignedResidentId == null)
             {
@@ -218,11 +227,25 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     return;
                 }
 
-                GUILayout.Label("Choose one complete plan:", _mutedStyle);
-                DrawPlanButton("WORKSHOP PUSH + WINCH", PreparationChoice.WorkshopPush, VehicleModule.WinchAssembly);
-                DrawPlanButton("WORKSHOP PUSH + RANGE TANK", PreparationChoice.WorkshopPush, VehicleModule.SealedRangeTank);
-                DrawPlanButton("CIVIC BUFFER + WINCH", PreparationChoice.CivicBuffer, VehicleModule.WinchAssembly);
-                DrawPlanButton("CIVIC BUFFER + RANGE TANK", PreparationChoice.CivicBuffer, VehicleModule.SealedRangeTank);
+                GUILayout.Label(
+                    "All four plans are valid. The marked first run reaches the complete Permit Job continuation.",
+                    _mutedStyle);
+                DrawPlanButton(
+                    "WORKSHOP PUSH + WINCH\nAUXILIARY-PUMP BRANCH",
+                    PreparationChoice.WorkshopPush,
+                    VehicleModule.WinchAssembly);
+                DrawPlanButton(
+                    "WORKSHOP PUSH + RANGE TANK\nCISTERN BRANCH",
+                    PreparationChoice.WorkshopPush,
+                    VehicleModule.SealedRangeTank);
+                DrawPlanButton(
+                    "RECOMMENDED FIRST RUN · CIVIC BUFFER + WINCH\nONE GOOD BATCH + PERMIT JOB",
+                    PreparationChoice.CivicBuffer,
+                    VehicleModule.WinchAssembly);
+                DrawPlanButton(
+                    "CIVIC BUFFER + RANGE TANK\nDEPOT-ACCESS BRANCH",
+                    PreparationChoice.CivicBuffer,
+                    VehicleModule.SealedRangeTank);
                 return;
             }
 
@@ -290,12 +313,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (model.ExpeditionPhase == ExpeditionPhase.AtDepot &&
                 model.RepairCargoKind == RepairCargoKind.None)
             {
-                if (GUILayout.Button("COOPERATE · FIELD SLEEVE + OBLIGATION", _buttonStyle))
+                if (GUILayout.Button(
+                        "COOPERATE · FIELD SLEEVE + OBLIGATION\nALTERNATE CONCLUSION",
+                        _buttonStyle))
                 {
                     _controller!.ResolveDepot(cooperate: true);
                 }
 
-                if (GUILayout.Button("TAKE THE CLAIMED BEARING", _buttonStyle))
+                bool opensPermitJob =
+                    model.PreparationChoice == PreparationChoice.CivicBuffer &&
+                    model.PlannedModule == VehicleModule.WinchAssembly;
+                if (GUILayout.Button(
+                        opensPermitJob
+                            ? "RECOMMENDED FIRST RUN · TAKE THE CLAIMED BEARING\nOPENS ONE GOOD BATCH"
+                            : "TAKE THE CLAIMED BEARING\nCERAMIC REPAIR + AGGRIEVED DEPOT",
+                        _buttonStyle))
                 {
                     _controller!.ResolveDepot(cooperate: false);
                 }
@@ -419,7 +451,69 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
-            GUILayout.Label(model.NextObjective, _bodyStyle);
+            GUILayout.Label(permitJob.ProgressLabel, _bodyStyle);
+        }
+
+        private void DrawPermitJob(
+            LastBearingPermitJobPresentation presentation)
+        {
+            GUILayout.Label(
+                "THE PERMIT JOB · STEP " + presentation.StepIndex +
+                " OF " + presentation.StepCount,
+                _headingStyle);
+            GUILayout.Label(presentation.ChapterLabel, _mutedStyle);
+            GUILayout.Label(presentation.Headline, _titleStyle);
+            GUILayout.Label(presentation.Detail, _bodyStyle);
+
+            if (presentation.HasMeasuredPhaseProgress)
+            {
+                DrawProgressBar(
+                    presentation.PhaseProgressCurrent,
+                    presentation.PhaseProgressTarget);
+            }
+
+            GUILayout.Label(presentation.ProgressLabel, _mutedStyle);
+            if (presentation.ShowRecommendedFirstRunCue)
+            {
+                GUILayout.Space(4f);
+                GUILayout.Label(
+                    presentation.RecommendedFirstRunCue,
+                    _bodyStyle);
+            }
+
+            if (presentation.IsFinale)
+            {
+                GUILayout.Space(6f);
+                GUILayout.Label(
+                    "PERMIT JOB COMPLETE · CONSEQUENCES RECORDED",
+                    _headingStyle);
+            }
+            else if (presentation.IsAlternateConclusion)
+            {
+                GUILayout.Space(6f);
+                GUILayout.Label(
+                    "VALID ALTERNATE ENDING · REPLAY FOR THE PERMIT JOB",
+                    _headingStyle);
+            }
+        }
+
+        private static void DrawProgressBar(long current, long target)
+        {
+            float normalized = target <= 0
+                ? 0f
+                : Mathf.Clamp01((float)current / target);
+            Rect rect = GUILayoutUtility.GetRect(
+                1f,
+                12f,
+                GUILayout.ExpandWidth(true));
+            Color previous = GUI.color;
+            GUI.color = new Color(0.16f, 0.17f, 0.16f, 1f);
+            GUI.DrawTexture(rect, Texture2D.whiteTexture);
+            GUI.color = new Color(0.92f, 0.48f, 0.20f, 1f);
+            GUI.DrawTexture(
+                new Rect(rect.x, rect.y, rect.width * normalized, rect.height),
+                Texture2D.whiteTexture);
+            GUI.color = previous;
         }
 
         private void DrawPresentationMode(LastBearingReadModel model)
@@ -634,8 +728,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 .Append("  ·  claim ").Append(FormatTicks(model.ClaimedFactionTicks))
                 .Append("  ·  dust ").Append(FormatTicks(model.DustFrontCrisisTicks))
                 .AppendLine();
-            text.Append("Next  ").Append(model.NextCityDecision)
-                .Append("  ·  ").Append(model.NextObjective);
+            text.Append("Next city decision  ")
+                .Append(model.NextCityDecision);
             return text.ToString();
         }
 

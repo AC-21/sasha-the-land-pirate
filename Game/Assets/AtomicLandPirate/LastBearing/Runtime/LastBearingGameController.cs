@@ -873,6 +873,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _readModel.FutureRouteTollFuelUnits,
                 humanVisible,
                 robotVisible);
+            _world.ApplyGaragePreparationProgress(
+                _readModel.PreparationElapsedTicks,
+                _readModel.PreparationRequiredTicks);
             _modeCoordinator?.ApplyCanonical(_readModel);
         }
 

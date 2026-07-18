@@ -15,6 +15,7 @@ namespace AtomicLandPirate.LastBearingTests
             harness.Run("command sequence mismatch fails closed", SequenceMismatch);
             harness.Run("drive input is bounded and quantized", InputBounds);
             harness.Run("duplicate drive commands fail before tick mutation", DuplicateDriveCommandsFailAtomically);
+            harness.Run("preparation progress is exposed without new authority", PreparationProgressIsExposed);
             harness.Run("preparation completes autonomously", PreparationCompletes);
             WreckLineTests.Run(harness);
             DepotApproachRecoveryTests.Run(harness);
@@ -140,10 +141,46 @@ namespace AtomicLandPirate.LastBearingTests
         {
             CoreTestDriver driver = Prepared();
             TestHarness.Equal(PreparationPhase.Ready, driver.View.PreparationPhase, "preparation phase");
+            TestHarness.Equal(0L, driver.View.PreparationRemainingTicks, "ready preparation remaining ticks");
             TestHarness.Equal(
                 VehicleModule.WinchAssembly,
                 driver.View.VehicleModule,
                 "installed module");
+        }
+
+        private static void PreparationProgressIsExposed()
+        {
+            var driver = new CoreTestDriver(ColonyComposition.Mixed);
+            driver.StartPreparation(
+                ResidentRoster.RobotResidentId,
+                PreparationChoice.CivicBuffer,
+                VehicleModule.WinchAssembly);
+
+            TestHarness.Equal(
+                driver.State.PreparationElapsedTicks,
+                driver.View.PreparationElapsedTicks,
+                "preparation elapsed read model");
+            TestHarness.Equal(
+                driver.State.PreparationRequiredTicks,
+                driver.View.PreparationRequiredTicks,
+                "preparation required read model");
+            TestHarness.Equal(
+                driver.State.PreparationRequiredTicks
+                    - driver.State.PreparationElapsedTicks,
+                driver.View.PreparationRemainingTicks,
+                "preparation remaining read model");
+
+            long elapsedBefore = driver.View.PreparationElapsedTicks;
+            long remainingBefore = driver.View.PreparationRemainingTicks;
+            driver.Advance(17);
+            TestHarness.Equal(
+                elapsedBefore + 17,
+                driver.View.PreparationElapsedTicks,
+                "preparation elapsed advances");
+            TestHarness.Equal(
+                remainingBefore - 17,
+                driver.View.PreparationRemainingTicks,
+                "preparation remaining advances");
         }
 
         private static CoreTestDriver Prepared()

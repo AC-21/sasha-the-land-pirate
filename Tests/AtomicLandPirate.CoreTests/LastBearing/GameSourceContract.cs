@@ -20,6 +20,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(runtimeRoot, "LastBearingWorldBuilder.cs"));
             string hud = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingHud.cs"));
+            string permitJobPresenter = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "LastBearingPermitJobPresenter.cs"));
             string vehicle = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingVehicleView.cs"));
             string camera = File.ReadAllText(
@@ -207,6 +211,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "_world.ApplyRouteModulePoint(");
             Require(controller, "_world.ApplyRoadCargoPresentation(");
             Require(controller, "_world.ApplyCityImprovement(");
+            Require(controller, "_world.ApplyGaragePreparationProgress(");
+            Require(controller, "_readModel.PreparationElapsedTicks");
+            Require(controller, "_readModel.PreparationRequiredTicks");
             Require(controller, "_modeCoordinator?.ApplyCanonical(_readModel);");
             TestHarness.True(
                 controller.IndexOf(
@@ -393,6 +400,49 @@ namespace AtomicLandPirate.LastBearingTests
             Require(hud, "CROSS SEALED DUST EXPOSURE");
             Require(hud, "IsCityImprovementInstallationAvailable");
             Require(hud, "INSTALL REFURBISHED AUXILIARY PUMP");
+            Require(hud, "LastBearingPermitJobPresenter.Present(");
+            Require(hud, "DrawPermitJob(permitJob)");
+            Require(hud, "DrawContextActions(model, permitJob)");
+            Require(hud, "GUILayout.Label(permitJob.ProgressLabel");
+            Require(hud, "bool opensPermitJob");
+            Require(hud, "RECOMMENDED FIRST RUN");
+            Require(hud, "PERMIT JOB");
+            TestHarness.True(
+                hud.IndexOf(
+                    "GUILayout.Label(model.NextObjective",
+                    StringComparison.Ordinal) < 0,
+                "raw objective identifiers must not be the player-facing fallback");
+            TestHarness.True(
+                hud.IndexOf(
+                    "Append(model.NextObjective)",
+                    StringComparison.Ordinal) < 0,
+                "raw objective identifiers must not leak through civic instruments");
+            TestHarness.True(
+                hud.IndexOf(
+                    "FUTURE TOLL 2 FUEL",
+                    StringComparison.Ordinal) < 0,
+                "finale facts must remain presenter-derived instead of HUD-hardcoded");
+            Require(permitJobPresenter, "public static class LastBearingPermitJobPresenter");
+            Require(permitJobPresenter, "public static LastBearingPermitJobPresentation Present(");
+            Require(permitJobPresenter, "IsPermitJobFinale");
+            Require(permitJobPresenter, "PresentAlternateConclusion");
+            foreach (string forbidden in new[]
+            {
+                "using UnityEngine",
+                "LastBearingState",
+                "LastBearingKernel",
+                "LastBearingCommand",
+                "SaveContracts",
+                "System.IO",
+            })
+            {
+                TestHarness.True(
+                    permitJobPresenter.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "Permit Job presenter contains forbidden authority " +
+                    forbidden);
+            }
             TestHarness.True(
                 hud.IndexOf(
                     "model.IsCityImprovementInstallationAvailable",
@@ -531,6 +581,7 @@ namespace AtomicLandPirate.LastBearingTests
             Require(world, "SelectPumpHallCutaway");
             Require(world, "SelectOneGoodBatchCutaway");
             Require(world, "ApplyOneGoodBatch(");
+            Require(world, "ApplyGaragePreparationProgress(");
             Require(hud, "ONE GOOD BATCH");
             Require(hud, "ONE-OFF BARTER · CARAVAN EXCHANGE CLOSED");
             Require(hud, "Future route toll  ");
