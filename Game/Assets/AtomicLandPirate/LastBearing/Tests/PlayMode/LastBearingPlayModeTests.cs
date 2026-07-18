@@ -753,7 +753,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             LastBearingGameController controller =
                 UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
-            string profileDirectory = InstallTemporarySaveAdapter(controller);
+            controller.enabled = false;
             InstallControllerState(controller, CreateOutboundState());
             RoadFeelRigInstance roadRig = controller.World!.RoadFeelRig!;
             long progressBefore = controller.ReadModel!.RouteProgressTicks;
@@ -917,7 +917,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             LastBearingGameController controller =
                 UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
-            controller.enabled = false;
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
             InstallControllerState(controller, CreateOutboundState());
 
             LastBearingWorldBuilder world = controller.World!;
