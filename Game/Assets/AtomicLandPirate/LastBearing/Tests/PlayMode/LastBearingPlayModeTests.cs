@@ -427,8 +427,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             body.position += new Vector3(250f, 40f, -175f);
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Press(keyboard.eKey);
+            yield return null;
             InvokeGlobalShortcuts(controller);
             Release(keyboard.eKey);
+            yield return null;
 
             Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
             Assert.That(controller.CanonicalHash, Is.EqualTo(gateHash));
@@ -633,9 +635,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Press(keyboard.sKey);
             Press(keyboard.spaceKey);
+            yield return null;
             InvokeSimulationTick(controller);
             Release(keyboard.sKey);
             Release(keyboard.spaceKey);
+            yield return null;
 
             Assert.That(roadRig.Adapter.LastThrottleMilli, Is.EqualTo(0));
             Assert.That(roadRig.Adapter.LastBrakeMilli, Is.EqualTo(1000));
@@ -907,6 +911,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
             controller.StartNewGame(ColonyComposition.HumanOnly);
             yield return new WaitForSecondsRealtime(0.15f);
+            controller.enabled = false;
 
             LastBearingWorldBuilder world = controller.World!;
             LastBearingGarageBayView garage = world.GarageBayView!;
