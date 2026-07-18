@@ -3,8 +3,10 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using AtomicLandPirate.Presentation.LastBearing.RoadFeel;
+using AtomicLandPirate.Save.LastBearing;
 using AtomicLandPirate.Simulation.LastBearing;
 using NUnit.Framework;
 using UnityEngine;
@@ -17,6 +19,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
     public sealed class LastBearingPlayModeTests : InputTestFixture
     {
         private const string SceneName = "LastBearing";
+        private readonly List<string> _temporarySaveRoots = new List<string>();
 
         [UnityTearDown]
         public IEnumerator TearDownScene()
@@ -32,6 +35,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     yield return unload;
                 }
             }
+
+            foreach (string root in _temporarySaveRoots)
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, recursive: true);
+                }
+            }
+
+            _temporarySaveRoots.Clear();
 
             yield return null;
         }
@@ -271,14 +284,29 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             coordinator.ApplyQuantizedRoadCommandShadow(1000, 0);
             Assert.That(roadRig.Adapter.LastThrottleMilli, Is.EqualTo(1000));
             yield return new WaitForFixedUpdate();
-            body.linearVelocity = new Vector3(3f, 1f, 7f);
-            body.angularVelocity = new Vector3(0.5f, 1f, 0.25f);
 
             controller.enabled = false;
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Press(keyboard.wKey);
+            Press(keyboard.dKey);
+            yield return null;
+            body.linearVelocity = new Vector3(3f, 1f, 7f);
+            body.angularVelocity = new Vector3(0.5f, 1f, 0.25f);
+            long routeProgressBefore = controller.ReadModel!.RouteProgressTicks;
+            int receiptCountBefore = roadRig.Adapter.CommandReceiptCount;
+
             controller.TogglePause();
             InvokeSimulationTick(controller);
+            Release(keyboard.wKey);
+            Release(keyboard.dKey);
 
             Assert.That(controller.ReadModel!.PauseCause, Is.EqualTo(PauseCause.Explicit));
+            Assert.That(
+                controller.ReadModel.RouteProgressTicks,
+                Is.EqualTo(routeProgressBefore));
+            Assert.That(
+                roadRig.Adapter.CommandReceiptCount,
+                Is.EqualTo(receiptCountBefore));
             AssertMode(coordinator, LastBearingPresentationMode.Driving);
             Assert.That(coordinator.IsRoadPresentationActive, Is.False);
             Assert.That(roadRig.Root.activeInHierarchy, Is.True);
@@ -296,6 +324,71 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Assert.That(body.angularVelocity, Is.EqualTo(Vector3.zero));
                 Assert.That(body.isKinematic, Is.True);
             }
+        }
+
+        [UnityTest]
+        public IEnumerator OutboundSaveLoadSynchronizesRoadRigAfterCanonicalRender()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
+            LastBearingState outbound = CreateOutboundState();
+            var kernel = new LastBearingKernel();
+            for (var tick = 0; tick < 12; tick++)
+            {
+                outbound = Apply(kernel, outbound, sequence =>
+                    new DriveVehicleCommand(sequence, 1000, 500));
+            }
+
+            Assert.That(outbound.ExpeditionPhase, Is.EqualTo(ExpeditionPhase.Outbound));
+            InstallControllerState(controller, outbound);
+            LastBearingWorldBuilder world = controller.World!;
+            RoadFeelRigInstance roadRig = world.RoadFeelRig!;
+            Vector3 expectedPosition = world.VehicleView!.transform.position;
+            Quaternion expectedRotation = world.VehicleView.transform.rotation;
+            string savedHash = controller.CanonicalHash;
+            AssertRoadPresentation(controller, roadRig, active: true);
+
+            controller.Save();
+            Assert.That(Directory.Exists(profileDirectory), Is.True);
+            Assert.That(controller.SaveStatus, Does.Not.Contain("failed"));
+            Assert.That(controller.SaveStatus, Does.Not.Contain("deferred"));
+
+            controller.ReturnToTitle();
+            Assert.That(
+                Vector3.Distance(world.VehicleView.transform.position, expectedPosition),
+                Is.GreaterThan(0.1f));
+
+            controller.Load();
+
+            Assert.That(controller.CanonicalHash, Is.EqualTo(savedHash));
+            Assert.That(
+                controller.ReadModel!.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.Outbound));
+            AssertRoadPresentation(controller, roadRig, active: true);
+            Assert.That(
+                Vector3.Distance(
+                    roadRig.Vehicle.Body.position,
+                    expectedPosition),
+                Is.LessThan(0.001f));
+            Assert.That(
+                Quaternion.Angle(
+                    roadRig.Vehicle.Body.rotation,
+                    expectedRotation),
+                Is.LessThan(0.01f));
+            Assert.That(
+                Vector3.Distance(
+                    roadRig.Vehicle.Body.position,
+                    world.VehicleView.transform.position),
+                Is.LessThan(0.001f));
         }
 
         [UnityTest]
@@ -483,6 +576,36 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 BindingFlags.Instance | BindingFlags.NonPublic);
             Assert.That(simulate, Is.Not.Null);
             simulate!.Invoke(controller, null);
+        }
+
+        private string InstallTemporarySaveAdapter(
+            LastBearingGameController controller)
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "wp0002-last-bearing-load-pose-" + Guid.NewGuid().ToString("N"));
+            string profileDirectory = Path.Combine(
+                root,
+                LastBearingProfileContract.ProfileName);
+            Directory.CreateDirectory(root);
+            _temporarySaveRoots.Add(root);
+            LastBearingProfileStore store =
+                LastBearingProfileStore.OpenFixedProfileDirectory(profileDirectory);
+            ConstructorInfo? constructor = typeof(LastBearingSaveAdapter).GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                binder: null,
+                new[] { typeof(LastBearingProfileStore) },
+                modifiers: null);
+            FieldInfo? adapterField = typeof(LastBearingGameController).GetField(
+                "_saveAdapter",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(constructor, Is.Not.Null);
+            Assert.That(adapterField, Is.Not.Null);
+            var adapter = constructor!.Invoke(new object[] { store }) as
+                LastBearingSaveAdapter;
+            Assert.That(adapter, Is.Not.Null);
+            adapterField!.SetValue(controller, adapter);
+            return profileDirectory;
         }
 
         private static void InstallControllerState(

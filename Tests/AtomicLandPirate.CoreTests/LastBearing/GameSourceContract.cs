@@ -49,6 +49,33 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "AttachRoadModeAdapter");
             Require(controller, "OpenBuildingCutaway");
             Require(controller, "OpenGarageBay");
+            string driveInput = Segment(
+                controller,
+                "private void QueueDriveInputIfApplicable()",
+                "float throttle = 0f;");
+            Require(driveInput, "_pendingCommands.Count != 0");
+            string load = Segment(
+                controller,
+                "public void Load()",
+                "private void Update()");
+            Require(load, "_modeCoordinator?.ClearSession();");
+            TestHarness.True(
+                load.IndexOf("ResetForSession", StringComparison.Ordinal) < 0,
+                "load must not activate road presentation before canonical rendering");
+            TestHarness.True(
+                load.IndexOf("_modeCoordinator?.ClearSession();", StringComparison.Ordinal) <
+                load.IndexOf("ApplyPresentation();", StringComparison.Ordinal),
+                "load must fail closed before applying the loaded presentation");
+            Require(controller, "_world.Apply(new LastBearingVisualSnapshot");
+            Require(controller, "_modeCoordinator?.ApplyCanonical(_readModel);");
+            TestHarness.True(
+                controller.IndexOf(
+                    "_world.Apply(new LastBearingVisualSnapshot",
+                    StringComparison.Ordinal) <
+                controller.IndexOf(
+                    "_modeCoordinator?.ApplyCanonical(_readModel);",
+                    StringComparison.Ordinal),
+                "canonical world pose must render before road activation and synchronization");
             Require(vehicle, "snapshot.VehicleLateralNormalized");
             Require(vehicle, "VisibleLateralOffset");
             Require(vehicle, "FrontWheelSteerDegrees");
@@ -114,6 +141,18 @@ namespace AtomicLandPirate.LastBearingTests
             TestHarness.True(
                 source.IndexOf(token, StringComparison.Ordinal) >= 0,
                 "Game source contract is missing " + token);
+        }
+
+        private static string Segment(
+            string source,
+            string startToken,
+            string endToken)
+        {
+            int start = source.IndexOf(startToken, StringComparison.Ordinal);
+            TestHarness.True(start >= 0, "Game source contract is missing " + startToken);
+            int end = source.IndexOf(endToken, start, StringComparison.Ordinal);
+            TestHarness.True(end > start, "Game source contract is missing " + endToken);
+            return source.Substring(start, end - start);
         }
     }
 }

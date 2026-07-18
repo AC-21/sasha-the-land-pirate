@@ -115,7 +115,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _saveStatus = "Unsaved local development state.";
             _world?.SetCityNeedInspected(false);
             _world?.BeginCityGrammarComparisonSession();
-            _modeCoordinator?.ResetForSession(_readModel);
+            _modeCoordinator?.ClearSession();
 
             AssignDefaultLeadResident();
             _status = "Water is falling. Inspect the turbine, then wake the civic machinery.";
@@ -448,13 +448,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 }
 
                 _pendingCommands.Clear();
+                _modeCoordinator?.ClearSession();
                 _state = result.State;
                 _readModel = LastBearingReadModel.FromState(_state);
                 _accumulator = 0f;
                 _cityNeedInspected = true;
                 _world?.SetCityNeedInspected(true);
                 _world?.BeginCityGrammarComparisonSession();
-                _modeCoordinator?.ResetForSession(_readModel);
                 _saveStatus = result.Code + " · " + CanonicalHash.Substring(0, 12);
                 _status = "Exact city, vehicle, custody, crisis, and faction state restored.";
                 ApplyPresentation();
@@ -535,7 +535,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void QueueDriveInputIfApplicable()
         {
-            if (_readModel == null ||
+            if (_pendingCommands.Count != 0 ||
+                _readModel == null ||
                 _readModel.PauseCause != PauseCause.None ||
                 (_readModel.ExpeditionPhase != ExpeditionPhase.Outbound &&
                  _readModel.ExpeditionPhase != ExpeditionPhase.Returning))
