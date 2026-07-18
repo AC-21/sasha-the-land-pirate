@@ -56,9 +56,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.GetComponentsInChildren<LastBearingRoadFeelModeAdapter>(true);
             Camera[] cameras = controller.GetComponentsInChildren<Camera>(true);
             Assert.That(vehicles, Has.Length.EqualTo(1));
+            Assert.That(vehicles[0].name, Is.EqualTo(RoadFeelRigFactory.RigName));
+            Assert.That(
+                vehicles[0].GetComponentsInChildren<Renderer>(true).Length,
+                Is.GreaterThanOrEqualTo(14));
             Assert.That(chaseCameras, Has.Length.EqualTo(1));
             Assert.That(modeAdapters, Has.Length.EqualTo(1));
             Assert.That(modeAdapters[0].IsRoadModeActive, Is.True);
+            Assert.That(modeAdapters[0].IsPhysicsSuspended, Is.False);
             Assert.That(cameras, Has.Length.EqualTo(1));
             Assert.That(cameras[0].GetComponent<RoadFeelChaseCamera>(), Is.SameAs(chaseCameras[0]));
 

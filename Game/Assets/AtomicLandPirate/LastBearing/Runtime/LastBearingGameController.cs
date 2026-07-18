@@ -80,10 +80,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _initialized = true;
             gameObject.name = RuntimeRootName;
 
-            _world = gameObject.AddComponent<LastBearingWorldBuilder>();
-            _world.Build();
             _modeCoordinator = gameObject.AddComponent<LastBearingModeCoordinator>();
             _modeCoordinator.Initialize();
+            _world = gameObject.AddComponent<LastBearingWorldBuilder>();
+            _world.Build(_modeCoordinator.GetModeRoot(
+                LastBearingPresentationMode.Driving));
+            _modeCoordinator.ConfigurePresentationOwners(
+                _world.CameraRig!,
+                _world.VehicleView!,
+                _world.RoadFeelRig!.Root.transform);
+            _modeCoordinator.AttachRoadModeAdapter(
+                _world.RoadFeelRig.Adapter);
             _hud = gameObject.AddComponent<LastBearingHud>();
             _hud.Configure(this);
 

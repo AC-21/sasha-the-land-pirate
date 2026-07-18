@@ -27,6 +27,7 @@ namespace AtomicLandPirate.LastBearingTests
             string surface = Read(root, "RoadFeelSurface.cs");
             string camera = Read(root, "RoadFeelChaseCamera.cs");
             string lab = Read(root, "RoadFeelLabController.cs");
+            string factory = Read(root, "RoadFeelRigFactory.cs");
             string bootstrap = Read(root, "RoadFeelLabBootstrap.cs");
             string modeAdapter = Read(root, "LastBearingRoadFeelModeAdapter.cs");
 
@@ -57,11 +58,36 @@ namespace AtomicLandPirate.LastBearingTests
             Require(lab, "ResetAt");
             Require(lab, "RoadFeelSurfaceKind.Gravel");
             Require(lab, "RoadFeelSurfaceKind.Sand");
-            Require(lab, "LastBearingRoadFeelModeAdapter");
+            Require(lab, "RoadFeelRigFactory.Create");
+
+            Require(factory, "new RoadFeelRigInstance");
+            Require(factory, "RoadFeelVehicleController");
+            Require(factory, "LastBearingRoadFeelModeAdapter");
+            Require(factory, "CreateHeadlight");
+            Require(factory, "cargoVisuals");
+            Require(factory, "contactStations");
+            foreach (string token in new[]
+                     {
+                         "Camera",
+                         "Keyboard.current",
+                         "Gamepad.current",
+                         "AtomicLandPirate.Simulation",
+                         "SaveContracts",
+                         "Application.persistentDataPath",
+                     })
+            {
+                TestHarness.True(
+                    factory.IndexOf(token, StringComparison.Ordinal) < 0,
+                    "Road Feel rig factory owns forbidden surface " + token);
+            }
 
             Require(modeAdapter, "ILastBearingRoadModeAdapter");
             Require(modeAdapter, "ApplyQuantizedCommandShadow");
             Require(modeAdapter, "SetControlInput");
+            Require(modeAdapter, "SynchronizePresentationPose");
+            Require(modeAdapter, "CommandReceiptCount");
+            Require(modeAdapter, "body.isKinematic = true");
+            Require(modeAdapter, "body.linearVelocity = Vector3.zero");
             TestHarness.True(
                 modeAdapter.IndexOf("RoadFeelTelemetry", StringComparison.Ordinal) < 0,
                 "Road Feel mode adapter must not return physics telemetry");
@@ -84,6 +110,7 @@ namespace AtomicLandPirate.LastBearingTests
                          surface,
                          camera,
                          lab,
+                         factory,
                          bootstrap,
                          modeAdapter,
                      })

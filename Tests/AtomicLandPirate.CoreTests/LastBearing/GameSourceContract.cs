@@ -16,6 +16,8 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(runtimeRoot, "LastBearingGameController.cs"));
             string modeCoordinator = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingModeCoordinator.cs"));
+            string world = File.ReadAllText(
+                Path.Combine(runtimeRoot, "LastBearingWorldBuilder.cs"));
             string hud = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingHud.cs"));
             string vehicle = File.ReadAllText(
@@ -41,6 +43,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "_readModel.VehicleLateralMilli");
             Require(controller, "LastBearingBalanceV1.RoadLateralLimitMilli");
             Require(controller, "ApplyQuantizedRoadCommandShadow");
+            Require(controller, "GetModeRoot(");
+            Require(controller, "LastBearingPresentationMode.Driving");
+            Require(controller, "ConfigurePresentationOwners");
+            Require(controller, "AttachRoadModeAdapter");
             Require(controller, "OpenBuildingCutaway");
             Require(controller, "OpenGarageBay");
             Require(vehicle, "snapshot.VehicleLateralNormalized");
@@ -49,6 +55,10 @@ namespace AtomicLandPirate.LastBearingTests
 
             Require(camera, "D0022-PROVISIONAL-LAST-BEARING-CAMERA-V1");
             Require(camera, "SetComparisonMode");
+            Require(camera, "SetRoadTarget");
+            Require(world, "RoadFeelRigFactory.Create");
+            Require(world, "RoadFeelRigInstance");
+            Require(world, "drivingModeRoot");
             Require(comparison, "RestrainedSnapGrid");
             Require(comparison, "DistrictStamp");
             Require(comparison, "ResetComparison");
@@ -65,6 +75,11 @@ namespace AtomicLandPirate.LastBearingTests
             Require(modeCoordinator, "ExpeditionPhase.Returned");
             Require(modeCoordinator, "ActiveModeCount");
             Require(modeCoordinator, "ILastBearingRoadModeAdapter");
+            Require(modeCoordinator, "readModel.PauseCause == PauseCause.None");
+            Require(modeCoordinator, "LAST_BEARING_ROAD_PRESENTATION_DISABLED");
+            Require(modeCoordinator, "RoadAdapterFaulted");
+            Require(modeCoordinator, "SynchronizePresentationPose");
+            Require(modeCoordinator, "ApplyPresentationOwnership");
             TestHarness.True(
                 modeCoordinator.IndexOf("RoadFeelTelemetry", StringComparison.Ordinal) < 0,
                 "mode coordinator must not read Road Feel outcomes");

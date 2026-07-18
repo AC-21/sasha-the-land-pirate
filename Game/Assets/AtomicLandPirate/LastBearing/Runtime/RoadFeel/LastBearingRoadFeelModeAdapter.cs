@@ -23,18 +23,50 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
 
         public int LastSteeringMilli { get; private set; }
 
+        public int CommandReceiptCount { get; private set; }
+
+        public bool IsPhysicsSuspended { get; private set; }
+
+        public RoadFeelVehicleController? Vehicle => _vehicle;
+
         public void Configure(RoadFeelVehicleController vehicle)
         {
             _vehicle = vehicle ?? throw new ArgumentNullException(nameof(vehicle));
+            SetRoadModeActive(false);
         }
 
         public void SetRoadModeActive(bool active)
         {
-            IsRoadModeActive = active;
+            if (_vehicle == null)
+            {
+                IsRoadModeActive = false;
+                IsPhysicsSuspended = true;
+                return;
+            }
+
+            Rigidbody body = _vehicle.Body;
             if (!active)
             {
                 ResetPresentation();
+                if (!body.isKinematic)
+                {
+                    body.linearVelocity = Vector3.zero;
+                    body.angularVelocity = Vector3.zero;
+                    body.Sleep();
+                    body.isKinematic = true;
+                }
+
+                _vehicle.enabled = false;
+                IsRoadModeActive = false;
+                IsPhysicsSuspended = true;
+                return;
             }
+
+            body.isKinematic = false;
+            _vehicle.enabled = true;
+            body.WakeUp();
+            IsRoadModeActive = active;
+            IsPhysicsSuspended = false;
         }
 
         public void ApplyQuantizedCommandShadow(
@@ -58,11 +90,24 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
                 return;
             }
 
+            CommandReceiptCount++;
             _vehicle.SetControlInput(new RoadFeelControlInput(
                 throttleMilli / 1000f,
                 brake: 0f,
                 steering: steeringMilli / 1000f,
                 handbrake: 0f));
+        }
+
+        public void SynchronizePresentationPose(
+            Vector3 position,
+            Quaternion rotation)
+        {
+            if (_vehicle == null)
+            {
+                return;
+            }
+
+            _vehicle.ResetAt(position, rotation);
         }
 
         public void ResetPresentation()

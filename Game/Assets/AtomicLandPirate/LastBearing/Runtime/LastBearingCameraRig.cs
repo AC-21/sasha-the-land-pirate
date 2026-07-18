@@ -35,6 +35,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool IsComparisonMode => _comparisonMode;
 
+        public Transform? RoadTarget => _roadTarget;
+
         public float CityDistance => _cityDistance;
 
         public Vector3 CityFocus => _cityFocus;
@@ -43,7 +45,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void Configure(Transform roadTarget)
         {
-            _roadTarget = roadTarget;
+            SetRoadTarget(roadTarget);
+        }
+
+        public void SetRoadTarget(Transform roadTarget)
+        {
+            _roadTarget = roadTarget != null
+                ? roadTarget
+                : throw new System.ArgumentNullException(nameof(roadTarget));
             ApplyPose(immediate: true);
         }
 

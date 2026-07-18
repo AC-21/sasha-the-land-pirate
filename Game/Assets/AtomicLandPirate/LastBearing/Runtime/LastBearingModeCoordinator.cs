@@ -30,6 +30,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         void ApplyQuantizedCommandShadow(int throttleMilli, int steeringMilli);
 
+        void SynchronizePresentationPose(
+            Vector3 position,
+            Quaternion rotation);
+
         void ResetPresentation();
     }
 
@@ -58,13 +62,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private LastBearingPresentationMode _requestedCityMode =
             LastBearingPresentationMode.CityOverview;
         private ILastBearingRoadModeAdapter? _roadAdapter;
+        private LastBearingCameraRig? _cameraRig;
+        private LastBearingVehicleView? _canonicalVehicle;
+        private Transform? _roadTarget;
         private Transform? _modeRoot;
+        private bool _roadRunRequested;
+        private bool _roadPresentationActive;
         private bool _initialized;
 
         public bool HasActiveMode { get; private set; }
 
         public LastBearingPresentationMode CurrentMode { get; private set; } =
             LastBearingPresentationMode.CityOverview;
+
+        public bool HasRoadAdapter => _roadAdapter != null;
+
+        public bool RoadAdapterFaulted { get; private set; }
+
+        public bool IsRoadPresentationActive => _roadPresentationActive;
 
         public int ActiveModeCount
         {
@@ -102,6 +117,32 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
         }
 
+        public Transform GetModeRoot(LastBearingPresentationMode mode)
+        {
+            Initialize();
+            for (var index = 0; index < OrderedModes.Length; index++)
+            {
+                if (OrderedModes[index] == mode)
+                {
+                    return _modeRoots[index]!.transform;
+                }
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+
+        public void ConfigurePresentationOwners(
+            LastBearingCameraRig cameraRig,
+            LastBearingVehicleView canonicalVehicle,
+            Transform roadTarget)
+        {
+            _cameraRig = cameraRig ?? throw new ArgumentNullException(nameof(cameraRig));
+            _canonicalVehicle = canonicalVehicle ??
+                                throw new ArgumentNullException(nameof(canonicalVehicle));
+            _roadTarget = roadTarget ?? throw new ArgumentNullException(nameof(roadTarget));
+            ApplyPresentationOwnership();
+        }
+
         public void AttachRoadModeAdapter(ILastBearingRoadModeAdapter adapter)
         {
             if (adapter == null)
@@ -111,13 +152,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (_roadAdapter != null && !ReferenceEquals(_roadAdapter, adapter))
             {
-                _roadAdapter.SetRoadModeActive(false);
-                _roadAdapter.ResetPresentation();
+                SuspendRoadAdapter("replace-adapter");
             }
 
             _roadAdapter = adapter;
-            _roadAdapter.SetRoadModeActive(
-                HasActiveMode && CurrentMode == LastBearingPresentationMode.Driving);
+            RoadAdapterFaulted = false;
+            _roadPresentationActive = false;
+            if (_roadRunRequested)
+            {
+                ActivateRoadAdapter();
+            }
+            else
+            {
+                SuspendRoadAdapter("attach-inactive");
+            }
+
+            ApplyPresentationOwnership();
         }
 
         public bool TryShowCityMode(
@@ -151,8 +201,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 root?.SetActive(false);
             }
 
-            _roadAdapter?.SetRoadModeActive(false);
-            _roadAdapter?.ResetPresentation();
+            _roadRunRequested = false;
+            SuspendRoadAdapter("clear-session");
+            ApplyPresentationOwnership();
         }
 
         public void ApplyCanonical(LastBearingReadModel? readModel)
@@ -164,7 +215,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
-            Activate(ResolveMode(readModel, _requestedCityMode));
+            LastBearingPresentationMode mode = ResolveMode(
+                readModel,
+                _requestedCityMode);
+            Activate(
+                mode,
+                mode == LastBearingPresentationMode.Driving &&
+                readModel.PauseCause == PauseCause.None);
         }
 
         public void ApplyQuantizedRoadCommandShadow(
@@ -172,14 +229,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
             int steeringMilli)
         {
             if (!HasActiveMode ||
-                CurrentMode != LastBearingPresentationMode.Driving)
+                CurrentMode != LastBearingPresentationMode.Driving ||
+                !_roadPresentationActive)
             {
                 return;
             }
 
-            _roadAdapter?.ApplyQuantizedCommandShadow(
-                throttleMilli,
-                steeringMilli);
+            TryInvokeRoadAdapter(
+                "apply-command-shadow",
+                adapter => adapter.ApplyQuantizedCommandShadow(
+                    throttleMilli,
+                    steeringMilli));
         }
 
         public static LastBearingPresentationMode ResolveMode(
@@ -207,7 +267,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
         }
 
-        private void Activate(LastBearingPresentationMode mode)
+        private void Activate(
+            LastBearingPresentationMode mode,
+            bool roadShouldRun)
         {
             for (var index = 0; index < OrderedModes.Length; index++)
             {
@@ -216,11 +278,140 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             HasActiveMode = true;
             CurrentMode = mode;
-            bool roadActive = mode == LastBearingPresentationMode.Driving;
-            _roadAdapter?.SetRoadModeActive(roadActive);
-            if (!roadActive)
+            _roadRunRequested = roadShouldRun;
+            if (roadShouldRun)
             {
-                _roadAdapter?.ResetPresentation();
+                if (!_roadPresentationActive)
+                {
+                    ActivateRoadAdapter();
+                }
+            }
+            else
+            {
+                SuspendRoadAdapter("canonical-mode-or-pause");
+            }
+
+            ApplyPresentationOwnership();
+        }
+
+        private void ActivateRoadAdapter()
+        {
+            if (_roadAdapter == null)
+            {
+                _roadPresentationActive = false;
+                return;
+            }
+
+            if (!TryInvokeRoadAdapter(
+                    "activate-road",
+                    adapter => adapter.SetRoadModeActive(true)))
+            {
+                return;
+            }
+
+            if (_canonicalVehicle != null && !TryInvokeRoadAdapter(
+                    "synchronize-pose",
+                    adapter => adapter.SynchronizePresentationPose(
+                        _canonicalVehicle.transform.position,
+                        _canonicalVehicle.transform.rotation)))
+            {
+                return;
+            }
+
+            _roadPresentationActive = true;
+        }
+
+        private void SuspendRoadAdapter(string operation)
+        {
+            _roadPresentationActive = false;
+            if (_roadAdapter == null)
+            {
+                return;
+            }
+
+            TryInvokeRoadAdapter(
+                operation,
+                adapter =>
+                {
+                    adapter.SetRoadModeActive(false);
+                    adapter.ResetPresentation();
+                });
+        }
+
+        private bool TryInvokeRoadAdapter(
+            string operation,
+            Action<ILastBearingRoadModeAdapter> action)
+        {
+            ILastBearingRoadModeAdapter? adapter = _roadAdapter;
+            if (adapter == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                action(adapter);
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    "LAST_BEARING_ROAD_PRESENTATION_DISABLED " +
+                    operation + " " + exception.GetType().Name,
+                    this);
+                try
+                {
+                    adapter.ResetPresentation();
+                }
+                catch (Exception)
+                {
+                    // The canonical core must keep progressing even if cleanup fails.
+                }
+
+                try
+                {
+                    adapter.SetRoadModeActive(false);
+                }
+                catch (Exception)
+                {
+                    // Detaching below is the final fail-closed boundary.
+                }
+
+                _roadAdapter = null;
+                _roadPresentationActive = false;
+                RoadAdapterFaulted = true;
+                ApplyPresentationOwnership();
+                return false;
+            }
+        }
+
+        private void ApplyPresentationOwnership()
+        {
+            bool roadModeSelected =
+                HasActiveMode &&
+                CurrentMode == LastBearingPresentationMode.Driving;
+            bool roadPresentationAvailable =
+                roadModeSelected &&
+                !RoadAdapterFaulted &&
+                _roadAdapter != null &&
+                _roadTarget != null;
+
+            if (_roadTarget != null)
+            {
+                _roadTarget.gameObject.SetActive(roadPresentationAvailable);
+            }
+
+            if (_canonicalVehicle != null)
+            {
+                _canonicalVehicle.gameObject.SetActive(!roadPresentationAvailable);
+            }
+
+            if (_cameraRig != null && _canonicalVehicle != null)
+            {
+                _cameraRig.SetRoadTarget(
+                    roadPresentationAvailable
+                        ? _roadTarget!
+                        : _canonicalVehicle.transform);
             }
         }
 

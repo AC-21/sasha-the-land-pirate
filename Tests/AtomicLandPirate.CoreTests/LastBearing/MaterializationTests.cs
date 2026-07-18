@@ -49,6 +49,7 @@ namespace AtomicLandPirate.LastBearingTests
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelChaseCamera.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelLabBootstrap.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelLabController.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelRigFactory.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/LastBearingRoadFeelModeAdapter.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/LastBearingAdapterTests.cs",

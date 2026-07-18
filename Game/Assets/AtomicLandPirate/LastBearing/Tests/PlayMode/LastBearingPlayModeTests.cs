@@ -4,6 +4,7 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using AtomicLandPirate.Presentation.LastBearing.RoadFeel;
 using AtomicLandPirate.Simulation.LastBearing;
 using NUnit.Framework;
 using UnityEngine;
@@ -53,6 +54,45 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.name, Is.EqualTo(LastBearingGameController.RuntimeRootName));
             Assert.That(controller.World, Is.Not.Null);
             Assert.That(controller.World!.MainCamera, Is.Not.Null);
+            LastBearingWorldBuilder world = controller.World;
+            LastBearingModeCoordinator coordinator = controller.ModeCoordinator!;
+            RoadFeelRigInstance roadRig = world.RoadFeelRig!;
+            Assert.That(roadRig, Is.Not.Null);
+            Assert.That(
+                roadRig.Root.transform.IsChildOf(coordinator.GetModeRoot(
+                    LastBearingPresentationMode.Driving)),
+                Is.True);
+            Assert.That(
+                roadRig.Root.GetComponentsInChildren<Renderer>(true).Length,
+                Is.GreaterThanOrEqualTo(14));
+            Assert.That(
+                UnityEngine.Object.FindObjectsByType<RoadFeelVehicleController>(
+                    FindObjectsInactive.Include),
+                Has.Length.EqualTo(1));
+            Assert.That(
+                UnityEngine.Object.FindObjectsByType<LastBearingRoadFeelModeAdapter>(
+                    FindObjectsInactive.Include),
+                Has.Length.EqualTo(1));
+            Assert.That(
+                UnityEngine.Object.FindObjectsByType<RoadFeelLabController>(
+                    FindObjectsInactive.Include),
+                Is.Empty);
+            Assert.That(
+                UnityEngine.Object.FindObjectsByType<RoadFeelChaseCamera>(
+                    FindObjectsInactive.Include),
+                Is.Empty);
+            Assert.That(
+                UnityEngine.Object.FindObjectsByType<Camera>(
+                    FindObjectsInactive.Include),
+                Has.Length.EqualTo(1));
+            Assert.That(roadRig.Root.activeInHierarchy, Is.False);
+            Assert.That(roadRig.Adapter.IsPhysicsSuspended, Is.True);
+            Assert.That(roadRig.Vehicle.Body.isKinematic, Is.True);
+            Assert.That(roadRig.Vehicle.enabled, Is.False);
+            Assert.That(world.VehicleView!.gameObject.activeSelf, Is.True);
+            Assert.That(
+                world.CameraRig!.RoadTarget,
+                Is.SameAs(world.VehicleView.transform));
 
             controller.StartNewGame(ColonyComposition.Mixed);
             yield return new WaitForSecondsRealtime(0.15f);
@@ -161,6 +201,17 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingState outbound = CreateOutboundState();
             InstallControllerState(controller, outbound);
             AssertMode(coordinator, LastBearingPresentationMode.Driving);
+            RoadFeelRigInstance roadRig = controller.World!.RoadFeelRig!;
+            AssertRoadPresentation(controller, roadRig, active: true);
+            string hashBeforeShadow = controller.CanonicalHash;
+            int receiptBefore = roadRig.Adapter.CommandReceiptCount;
+            coordinator.ApplyQuantizedRoadCommandShadow(750, -250);
+            Assert.That(
+                roadRig.Adapter.CommandReceiptCount,
+                Is.EqualTo(receiptBefore + 1));
+            Assert.That(roadRig.Adapter.LastThrottleMilli, Is.EqualTo(750));
+            Assert.That(roadRig.Adapter.LastSteeringMilli, Is.EqualTo(-250));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBeforeShadow));
 
             LastBearingState atDepot = DriveUntilPhase(
                 outbound,
@@ -169,6 +220,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             AssertMode(
                 coordinator,
                 LastBearingPresentationMode.DepotEncounter);
+            AssertRoadPresentation(controller, roadRig, active: false);
 
             var kernel = new LastBearingKernel();
             LastBearingState resolved = Apply(kernel, atDepot, sequence =>
@@ -182,15 +234,113 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     fingerprint));
             InstallControllerState(controller, returning);
             AssertMode(coordinator, LastBearingPresentationMode.Driving);
+            AssertRoadPresentation(controller, roadRig, active: true);
 
             LastBearingState returned = DriveUntilPhase(
                 returning,
                 ExpeditionPhase.Returned);
             InstallControllerState(controller, returned);
             AssertMode(coordinator, LastBearingPresentationMode.CityReturn);
+            AssertRoadPresentation(controller, roadRig, active: false);
             Assert.That(
                 controller.CanonicalHash,
                 Is.EqualTo(LastBearingCanonicalCodec.ComputeSha256(returned)));
+
+            controller.ReturnToTitle();
+            Assert.That(coordinator.HasActiveMode, Is.False);
+            AssertRoadPresentation(controller, roadRig, active: false);
+        }
+
+        [UnityTest]
+        public IEnumerator RoadPhysicsSuspendsAcrossPauseAndFixedFrames()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            InstallControllerState(controller, CreateOutboundState());
+            LastBearingModeCoordinator coordinator = controller.ModeCoordinator!;
+            RoadFeelRigInstance roadRig = controller.World!.RoadFeelRig!;
+            Rigidbody body = roadRig.Vehicle.Body;
+
+            coordinator.ApplyQuantizedRoadCommandShadow(1000, 0);
+            Assert.That(roadRig.Adapter.LastThrottleMilli, Is.EqualTo(1000));
+            yield return new WaitForFixedUpdate();
+            body.linearVelocity = new Vector3(3f, 1f, 7f);
+            body.angularVelocity = new Vector3(0.5f, 1f, 0.25f);
+
+            controller.enabled = false;
+            controller.TogglePause();
+            InvokeSimulationTick(controller);
+
+            Assert.That(controller.ReadModel!.PauseCause, Is.EqualTo(PauseCause.Explicit));
+            AssertMode(coordinator, LastBearingPresentationMode.Driving);
+            Assert.That(coordinator.IsRoadPresentationActive, Is.False);
+            Assert.That(roadRig.Root.activeInHierarchy, Is.True);
+            Assert.That(roadRig.Adapter.IsRoadModeActive, Is.False);
+            Assert.That(roadRig.Adapter.IsPhysicsSuspended, Is.True);
+            Assert.That(roadRig.Vehicle.enabled, Is.False);
+            Assert.That(body.isKinematic, Is.True);
+            Assert.That(body.linearVelocity, Is.EqualTo(Vector3.zero));
+            Assert.That(body.angularVelocity, Is.EqualTo(Vector3.zero));
+
+            for (var frame = 0; frame < 3; frame++)
+            {
+                yield return new WaitForFixedUpdate();
+                Assert.That(body.linearVelocity, Is.EqualTo(Vector3.zero));
+                Assert.That(body.angularVelocity, Is.EqualTo(Vector3.zero));
+                Assert.That(body.isKinematic, Is.True);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ThrowingRoadAdapterCannotBlockCanonicalProgress()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            InstallControllerState(controller, CreateOutboundState());
+            controller.enabled = false;
+            LastBearingModeCoordinator coordinator = controller.ModeCoordinator!;
+            var throwingAdapter = new ThrowingRoadAdapter();
+            controller.AttachRoadModeAdapter(throwingAdapter);
+            long progressBefore = controller.ReadModel!.RouteProgressTicks;
+            string hashBefore = controller.CanonicalHash;
+
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Press(keyboard.wKey);
+            yield return null;
+            LogAssert.Expect(
+                LogType.Warning,
+                "LAST_BEARING_ROAD_PRESENTATION_DISABLED " +
+                "apply-command-shadow InvalidOperationException");
+            InvokeSimulationTick(controller);
+            Release(keyboard.wKey);
+            yield return null;
+
+            Assert.That(throwingAdapter.ApplyAttemptCount, Is.EqualTo(1));
+            Assert.That(coordinator.RoadAdapterFaulted, Is.True);
+            Assert.That(coordinator.HasRoadAdapter, Is.False);
+            Assert.That(coordinator.IsRoadPresentationActive, Is.False);
+            Assert.That(
+                controller.ReadModel!.RouteProgressTicks,
+                Is.GreaterThan(progressBefore));
+            Assert.That(controller.CanonicalHash, Is.Not.EqualTo(hashBefore));
+            Assert.That(
+                controller.World!.RoadFeelRig!.Root.activeInHierarchy,
+                Is.False);
+            Assert.That(controller.World.VehicleView!.gameObject.activeSelf, Is.True);
         }
 
         [UnityTest]
@@ -305,6 +455,36 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(coordinator.ActiveModeCount, Is.EqualTo(1));
         }
 
+        private static void AssertRoadPresentation(
+            LastBearingGameController controller,
+            RoadFeelRigInstance roadRig,
+            bool active)
+        {
+            Assert.That(roadRig.Root.activeInHierarchy, Is.EqualTo(active));
+            Assert.That(roadRig.Adapter.IsRoadModeActive, Is.EqualTo(active));
+            Assert.That(roadRig.Adapter.IsPhysicsSuspended, Is.EqualTo(!active));
+            Assert.That(roadRig.Vehicle.enabled, Is.EqualTo(active));
+            Assert.That(roadRig.Vehicle.Body.isKinematic, Is.EqualTo(!active));
+            Assert.That(
+                controller.World!.VehicleView!.gameObject.activeSelf,
+                Is.EqualTo(!active));
+            Assert.That(
+                controller.World.CameraRig!.RoadTarget,
+                active
+                    ? Is.SameAs(roadRig.Root.transform)
+                    : Is.SameAs(controller.World.VehicleView.transform));
+        }
+
+        private static void InvokeSimulationTick(
+            LastBearingGameController controller)
+        {
+            MethodInfo? simulate = typeof(LastBearingGameController).GetMethod(
+                "SimulateOneTick",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(simulate, Is.Not.Null);
+            simulate!.Invoke(controller, null);
+        }
+
         private static void InstallControllerState(
             LastBearingGameController controller,
             LastBearingState state)
@@ -333,6 +513,36 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(pending, Is.Not.Null);
             pending!.Clear();
             applyPresentation!.Invoke(controller, null);
+        }
+
+        private sealed class ThrowingRoadAdapter : ILastBearingRoadModeAdapter
+        {
+            public bool IsRoadModeActive { get; private set; }
+
+            public int ApplyAttemptCount { get; private set; }
+
+            public void SetRoadModeActive(bool active)
+            {
+                IsRoadModeActive = active;
+            }
+
+            public void ApplyQuantizedCommandShadow(
+                int throttleMilli,
+                int steeringMilli)
+            {
+                ApplyAttemptCount++;
+                throw new InvalidOperationException("adversarial-road-adapter");
+            }
+
+            public void SynchronizePresentationPose(
+                Vector3 position,
+                Quaternion rotation)
+            {
+            }
+
+            public void ResetPresentation()
+            {
+            }
         }
     }
 }
