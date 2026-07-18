@@ -86,7 +86,7 @@ New commands are one-shot and retry-safe. Repeating an already completed start o
 The barter must preserve all adverse history:
 
 - `DepotControl.Depleted`
-- `DepotBearingDisposition.TakenBySasha`
+- current `DepotBearingDisposition.InstalledAtTurbine`, while preserving the exact adverse take-bearing lineage in `DepotResolution.TakeBearing` and the existing faction memory
 - `FactionClaimState.Aggrieved`
 - the existing singleton `FactionMemoryRecord`
 - faction trust
