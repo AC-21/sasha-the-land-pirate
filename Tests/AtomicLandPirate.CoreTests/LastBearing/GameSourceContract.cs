@@ -107,6 +107,20 @@ namespace AtomicLandPirate.LastBearingTests
             Require(modeCoordinator, "RoadAdapterFaulted");
             Require(modeCoordinator, "SynchronizePresentationPose");
             Require(modeCoordinator, "ApplyPresentationOwnership");
+            string roadActivation = Segment(
+                modeCoordinator,
+                "private void ActivateRoadAdapter()",
+                "private void SuspendRoadAdapter");
+            Require(roadActivation, "adapter.SynchronizePresentationPose(");
+            Require(roadActivation, "adapter.SetRoadModeActive(true)");
+            TestHarness.True(
+                roadActivation.IndexOf(
+                    "adapter.SynchronizePresentationPose(",
+                    StringComparison.Ordinal) <
+                roadActivation.IndexOf(
+                    "adapter.SetRoadModeActive(true)",
+                    StringComparison.Ordinal),
+                "road pose must synchronize while suspended before physics activation");
             TestHarness.True(
                 modeCoordinator.IndexOf("RoadFeelTelemetry", StringComparison.Ordinal) < 0,
                 "mode coordinator must not read Road Feel outcomes");

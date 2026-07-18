@@ -302,18 +302,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
-            if (!TryInvokeRoadAdapter(
-                    "activate-road",
-                    adapter => adapter.SetRoadModeActive(true)))
-            {
-                return;
-            }
-
             if (_canonicalVehicle != null && !TryInvokeRoadAdapter(
                     "synchronize-pose",
                     adapter => adapter.SynchronizePresentationPose(
                         _canonicalVehicle.transform.position,
                         _canonicalVehicle.transform.rotation)))
+            {
+                return;
+            }
+
+            if (!TryInvokeRoadAdapter(
+                    "activate-road",
+                    adapter => adapter.SetRoadModeActive(true)))
             {
                 return;
             }
