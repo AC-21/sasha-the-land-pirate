@@ -43,12 +43,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             world.SelectOneGoodBatchCutaway();
             controller.OpenBuildingCutaway();
-            float cameraDeadline = Time.realtimeSinceStartup + 3f;
+            float cameraBlendElapsed = 0f;
+            var cameraBlendFrames = 0;
             while (Vector3.Distance(
                        world.MainCamera!.transform.position,
                        view.CameraAnchor!.position) >= 0.15f &&
-                   Time.realtimeSinceStartup < cameraDeadline)
+                   cameraBlendElapsed < 2f &&
+                   cameraBlendFrames < 4096)
             {
+                cameraBlendElapsed += Time.unscaledDeltaTime;
+                cameraBlendFrames++;
                 yield return null;
             }
 
