@@ -1,0 +1,166 @@
+{
+  "authority_evidence_sha256": "ec400aa93d489c1773222082ca9afe1292689c982c91b3605e0f51a3688321cf",
+  "authorization_comment": {
+    "actor": {
+      "author_association": "OWNER",
+      "id": 65501994,
+      "login": "AC-21",
+      "type": "User"
+    },
+    "api_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/issues/comments/5011014242",
+    "body_utf8_sha256": "28cafa2af76a7756227df122a8b59be7822e3655bebc4871b9e70dc14956c6a1",
+    "created_at": "2026-07-18T11:03:42Z",
+    "html_url": "https://github.com/AC-21/sasha-the-land-pirate/pull/65#issuecomment-5011014242",
+    "id": 5011014242,
+    "issue_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/issues/65",
+    "node_id": "IC_kwDOTZ3pzM8AAAABKq4CYg",
+    "updated_at": "2026-07-18T11:03:42Z"
+  },
+  "final_pull_request": {
+    "base_ref": "main",
+    "base_sha": "166d53698d013c605c7bee749368193dc2834644",
+    "changed_files_manifest_sha256": "18d383eb70178c625576763e3ab3f412c61a4d11858a94171b82312d19714c72",
+    "deterministic_patch_sha256": "7aae2b9684fbde0f98f427b8d2acf2a5a4bc8dc120d2263df1a4045e4526823b",
+    "github_patch_sha256": "628cf7b90085b668e1be28b6a380343946dc563f0df2b7d3032fc1d92a5195f1",
+    "head_ref": "agent/wp0002-recovery-v3",
+    "head_repository": "AC-21/sasha-the-land-pirate",
+    "head_sha": "b7245d447ac05c217907256100cfadbf837ba933",
+    "number": 65
+  },
+  "phase": "pre-merge",
+  "protection_before": {
+    "bypass_allowances_empty": true,
+    "conversation_resolution": true,
+    "deletion_disabled": true,
+    "dismiss_stale_reviews": false,
+    "enforce_admins": true,
+    "force_push_disabled": true,
+    "linear_history": true,
+    "main_sha": "166d53698d013c605c7bee749368193dc2834644",
+    "observed_at": "2026-07-18T11:04:57Z",
+    "pull_request_required": true,
+    "push_restrictions_empty": true,
+    "raw_response_sha256": {
+      "branch": "eac5b2ca5aa4ec6d852f59e6e94f897c3ce5d48a1bfb56a2c6e5741397ea0a88",
+      "protection": "8f279972688ecd9b8dedc28672f697cd2bc798c43d178361cc42f17bc75ac95c",
+      "repository": "45d807989da44c577d0a1f996ed8ab178b85b759495aefd723c65b6ef58e82ec",
+      "rulesets": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "raw_sha256": "6493961e559cad55645ae2d70d5cba49c380801d50fc972882fa3e29cd349e65",
+    "required_checks": [
+      {
+        "app_id": 15368,
+        "context": "validate"
+      },
+      {
+        "app_id": 15368,
+        "context": "wp0002-core"
+      },
+      {
+        "app_id": 15368,
+        "context": "wp0002-policy"
+      }
+    ],
+    "rulesets_empty": true,
+    "squash_only": true,
+    "strict": true
+  },
+  "protection_during": {
+    "bypass_allowances_empty": true,
+    "conversation_resolution": true,
+    "deletion_disabled": true,
+    "dismiss_stale_reviews": false,
+    "enforce_admins": true,
+    "force_push_disabled": true,
+    "linear_history": true,
+    "main_sha": "166d53698d013c605c7bee749368193dc2834644",
+    "observed_at": "2026-07-18T11:13:21Z",
+    "pull_request_required": true,
+    "push_restrictions_empty": true,
+    "raw_response_sha256": {
+      "branch": "b2c9e30247a5f5a9bd219d7e95cdbc776b3f9192026f5d5427d2418df64a47ed",
+      "protection": "48bf2d34521a08f2c7059ad44f93beed493d51879fa152b48849047a68508539",
+      "repository": "a545ae4083455a4a29a62f855209a1f617584d89ccf44ab7c525e5722fe41774",
+      "rulesets": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "raw_sha256": "2aeadf84ed48f7abedadde26dc1befc61417c0c2120785725588629f5ac72151",
+    "required_checks": [
+      {
+        "app_id": 15368,
+        "context": "validate"
+      },
+      {
+        "app_id": 15368,
+        "context": "wp0002-core"
+      }
+    ],
+    "rulesets_empty": true,
+    "squash_only": true,
+    "strict": true
+  },
+  "raw_artifacts": {
+    "check_runs": {
+      "byte_size": 21564,
+      "sha256": "ac0872b0ed1f5bd9fa7ed377308086639e97e1de59fd2ecc16397795daf11055"
+    },
+    "github_patch": {
+      "byte_size": 177107,
+      "sha256": "628cf7b90085b668e1be28b6a380343946dc563f0df2b7d3032fc1d92a5195f1"
+    },
+    "protection_before": {
+      "byte_size": 13301,
+      "sha256": "6493961e559cad55645ae2d70d5cba49c380801d50fc972882fa3e29cd349e65"
+    },
+    "protection_during": {
+      "byte_size": 13183,
+      "sha256": "2aeadf84ed48f7abedadde26dc1befc61417c0c2120785725588629f5ac72151"
+    },
+    "pull_request": {
+      "byte_size": 17493,
+      "sha256": "41c591455d9483dac03252042fa269584a146a2f2aa7600628982abab2e2461e"
+    }
+  },
+  "receipt_materialization": {
+    "commit_sha": "b7245d447ac05c217907256100cfadbf837ba933",
+    "delta": [
+      {
+        "new_blob_sha256": "62a0cfadaf7f8e66addc44948ed885475800ce94ced56206829cec348176e089",
+        "new_mode": "100644",
+        "new_oid": "750cba9ae5402110786cdcde0e62ae8d503090ce",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/foundation-v0.1/ledger/receipts/RR-WP0002-LOCAL-OPERATOR-RECOVERY-20260718.json",
+        "status": "A"
+      }
+    ],
+    "delta_patch_sha256": "e28e1e29708aa013c568a52ecad8905547a5603f218575c4b8d1e74962fcf5a1",
+    "parent_sha": "27912061418cc78cf0d98616eca54f230c91a3d8",
+    "receipt_path": "docs/foundation-v0.1/ledger/receipts/RR-WP0002-LOCAL-OPERATOR-RECOVERY-20260718.json",
+    "receipt_sha256": "62a0cfadaf7f8e66addc44948ed885475800ce94ced56206829cec348176e089",
+    "tree_oid": "7d0c06ca895fd7d10764d0ecb98b179d8ca930e1"
+  },
+  "repository": {
+    "full_name": "AC-21/sasha-the-land-pirate",
+    "id": 1302194636,
+    "owner_id": 65501994,
+    "owner_login": "AC-21"
+  },
+  "required_check_runs": [
+    {
+      "app_id": 15368,
+      "conclusion": "success",
+      "head_sha": "b7245d447ac05c217907256100cfadbf837ba933",
+      "name": "validate",
+      "status": "completed"
+    },
+    {
+      "app_id": 15368,
+      "conclusion": "success",
+      "head_sha": "b7245d447ac05c217907256100cfadbf837ba933",
+      "name": "wp0002-core",
+      "status": "completed"
+    }
+  ],
+  "schema_version": 1,
+  "transaction_id": "WP0002-LOCAL-OPERATOR-CLOSURE-RECOVERY-20260718"
+}
