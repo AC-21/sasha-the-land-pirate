@@ -16,18 +16,32 @@ and conditional first-use gate. WP-0003 is now `released` and its reservation
 is released. WP-0002 is the sole active A1 packet under its protected Stage C
 boundary. Its canonical durable checkout is
 `/Users/sasha/Projects/sasha-the-land-pirate`
-and its exact Unity project is the `Game` child. After its receipt, complete
-authenticated online transaction, and separate protected three-report
-evidence-closure merge, the append-only delegated local-operator
-amendment permits visible Computer Use only in Unity Hub bundle
+and its exact Unity project is the `Game` child. The sealed v1 local-operator
+receipt `RR-WP0002-LOCAL-OPERATOR-20260717` and amendment remain append-only
+historical evidence with disposition `superseded-unclosed-never-effective`.
+Their absent `docs/evidence/WP-0002/local-operator-amendment/authority.json`,
+`docs/evidence/WP-0002/local-operator-amendment/pre-merge.json`, and
+`docs/evidence/WP-0002/local-operator-amendment/complete.json` paths are
+permanently forbidden. The only forward route is the v2 successor amendment
+`A1B-WP-0002-LOCAL-OPERATOR-SUCCESSOR-20260718`, transaction
+`WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718`, and receipt
+`RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718`. Only after its complete
+authenticated online transaction and a separate protected exact-three-report
+evidence-closure merge does that successor permit visible Computer Use in
+Unity Hub bundle
 `com.unity3d.unityhub` and Editor bundle `com.unity3d.UnityEditor5.x` to
 add/open/switch that exact project, approve only the receipt-bound Codex Bridge
 client whose visible OS publisher/path and application version/build match,
 and inspect non-secret Unity state. The prior host signature observation is
 context-limited and the UI does not prove a CDHash. It cannot mutate
 Bridge tools or configuration. Implementation remains restricted to the
-five named MCP tools. The historical WP-0003 exception and this narrow UI
-amendment do not amend WP-0001's candidate tuple, ratify the production engine,
+five named MCP tools. Only for the exact successor control PR head and patch may
+`wp0002-policy` be temporarily nonrequired; all other protections remain, it
+must be restored to required checks `validate`, `wp0002-core`, and
+`wp0002-policy` within 600 seconds of the successor control squash, and the
+separate closure PR must pass all three. The historical WP-0003 exception and
+this narrow successor UI amendment do not amend WP-0001's candidate tuple,
+ratify the production engine,
 or waive later IL2CPP, Xcode, package, performance, and rollback proof.
 
 Renderer hypothesis to test:
@@ -53,7 +67,7 @@ The exact fallback/comparison candidate is **Godot .NET 4.7.1 commit `a13da4feb`
 
 Even if Unity is ratified:
 
-- Unity Terms §17.2(ff) is a hard operating gate. An agent or CI runner may not directly invoke Hub, Editor, or Unity CLI unless Unity has documented Authorized Agentic Access for the exact identity, runner, and use. WP-0002's creator-authorized visible-UI operator amendment is limited to the exact installed app bundles, canonical project, trusted Bridge client, and non-secret inspection; it grants no shell, CLI, batchmode, headless, executable, CI, install, or different-project authority. If that cannot satisfy later engine proof, supersede the applicable packet with the Godot fallback. Creator repository/CI permission cannot waive vendor terms.
+- Unity Terms §17.2(ff) is a hard operating gate. An agent or CI runner may not directly invoke Hub, Editor, or Unity CLI unless Unity has documented Authorized Agentic Access for the exact identity, runner, and use. WP-0002's creator-authorized visible-UI operator successor is limited to the exact installed app bundles, canonical project, trusted Bridge client, and non-secret inspection, and becomes effective only after its exact-three-report protected closure; it grants no shell, CLI, batchmode, headless, executable, CI, install, or different-project authority. If that cannot satisfy later engine proof, supersede the applicable packet with the Godot fallback. Creator repository/CI permission cannot waive vendor terms.
 
 - Unity scenes and GameObjects are presentation and authoring containers, not canonical game state.
 - Save data never serializes scene paths, prefab instances, `MonoBehaviour` object graphs, or raw ECS chunks.
