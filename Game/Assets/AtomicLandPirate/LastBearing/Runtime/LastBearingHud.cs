@@ -139,6 +139,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? model.RepairCargoKind == RepairCargoKind.FieldSleeve
                         ? "E or gamepad south · load field sleeve\nP · pause  F5 · save  F9 · load"
                         : "E or gamepad south · load ceramic bearing\nP · pause  F5 · save  F9 · load"
+                    : _controller!.IsReturnCheckInAvailable
+                    ? "E or gamepad south · check in loaded return\nP · pause  F5 · save  F9 · load"
+                    : _controller.IsPumpHallRepairAvailable
+                    ? "E or gamepad south · seat turbine repair\nP · pause  F5 · save  F9 · load"
                     : model.ExpeditionPhase == ExpeditionPhase.Outbound ||
                 model.ExpeditionPhase == ExpeditionPhase.Returning
                     ? _controller!.CanRecoverRoadPresentation
@@ -461,10 +465,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
-            if (model.ExpeditionPhase == ExpeditionPhase.Returned &&
-                model.TransactionPhase != TransactionPhase.Finalized)
+            if (_controller!.IsReturnCheckInAvailable)
             {
-                if (GUILayout.Button("CREDIT RETURN TO LAST BEARING", _buttonStyle))
+                GUILayout.Label(
+                    "Sasha is seated at the fixed return apron with the exact repair cargo still on the scout.",
+                    _bodyStyle);
+                if (GUILayout.Button(
+                        "CHECK IN LOADED RETURN · E / GAMEPAD SOUTH",
+                        _buttonStyle))
                 {
                     _controller!.CompleteReturn();
                 }
@@ -472,12 +480,33 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
-            if (model.TurbineCondition == TurbineCondition.Failing &&
-                model.RepairCargoKind != RepairCargoKind.None)
+            if (_controller.IsTurbineRepairReady)
             {
-                if (GUILayout.Button("INSTALL TURBINE REPAIR", _buttonStyle))
+                if (!_controller.IsPumpHallRepairAvailable)
                 {
-                    _controller!.RepairTurbine();
+                    GUILayout.Label(
+                        "The repair remains on Sasha's cargo socket. Open the pump hall to seat it at the failing civic organ.",
+                        _bodyStyle);
+                    if (GUILayout.Button(
+                            "OPEN PUMP HALL REPAIR LINE",
+                            _buttonStyle))
+                    {
+                        _controller.OpenPumpHallRepair();
+                    }
+                }
+                else
+                {
+                    GUILayout.Label(
+                        model.RepairCargoKind == RepairCargoKind.CeramicBearing
+                            ? "The empty keyed target is ready for the ceramic bearing."
+                            : "The field sleeve will be consumed by this repair.",
+                        _bodyStyle);
+                    if (GUILayout.Button(
+                            "SEAT TURBINE REPAIR · E / GAMEPAD SOUTH",
+                            _buttonStyle))
+                    {
+                        _controller.RepairTurbine();
+                    }
                 }
 
                 return;

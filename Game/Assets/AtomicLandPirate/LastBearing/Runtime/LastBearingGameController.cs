@@ -53,6 +53,36 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool CanRecoverRoadPresentation =>
             _modeCoordinator?.CanRecoverRoadPresentation ?? false;
 
+        public bool IsReturnCheckInAvailable =>
+            _pendingCommands.Count == 0 &&
+            _state != null &&
+            _state.ReturnPayloadFrozen &&
+            _state.TransactionId != null &&
+            _state.TransactionFingerprint != null &&
+            _readModel != null &&
+            _readModel.ExpeditionPhase == ExpeditionPhase.Returned &&
+            _readModel.TransactionPhase == TransactionPhase.ReturnPending &&
+            _readModel.RepairCargoKind != RepairCargoKind.None &&
+            _readModel.RepairCargoCustody == RepairCargoCustody.Vehicle &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode == LastBearingPresentationMode.CityReturn;
+
+        public bool IsTurbineRepairReady =>
+            _readModel != null &&
+            _readModel.ExpeditionPhase == ExpeditionPhase.AtHome &&
+            _readModel.TransactionPhase == TransactionPhase.Finalized &&
+            _readModel.TurbineCondition == TurbineCondition.Failing &&
+            _readModel.RepairCargoKind != RepairCargoKind.None &&
+            _readModel.RepairCargoCustody == RepairCargoCustody.Vehicle;
+
+        public bool IsPumpHallRepairAvailable =>
+            _pendingCommands.Count == 0 &&
+            IsTurbineRepairReady &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.BuildingCutaway &&
+            _world?.IsPumpHallCutawaySelected == true;
+
         public string Status => _status;
 
         public string SaveStatus => _saveStatus;
@@ -130,7 +160,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _modeCoordinator.GetModeRoot(
                     LastBearingPresentationMode.BuildingCutaway),
                 _modeCoordinator.GetModeRoot(
-                    LastBearingPresentationMode.GarageBay));
+                    LastBearingPresentationMode.GarageBay),
+                _modeCoordinator.GetModeRoot(
+                    LastBearingPresentationMode.CityReturn));
             _modeCoordinator.ConfigurePresentationOwners(
                 _world.CameraRig!,
                 _world.VehicleView!,
@@ -138,7 +170,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world.GarageBayView!.CameraAnchor!,
                 _world.GarageBayView.FocusAnchor!,
                 _world.PumpHallCutawayView!.CameraAnchor!,
-                _world.PumpHallCutawayView.FocusAnchor!);
+                _world.PumpHallCutawayView.FocusAnchor!,
+                _world.ReturnServiceView!.CameraAnchor!,
+                _world.ReturnServiceView.FocusAnchor!);
             _modeCoordinator.AttachRoadModeAdapter(
                 _world.RoadFeelRig.Adapter);
             _hud = gameObject.AddComponent<LastBearingHud>();
@@ -238,7 +272,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 HeavyCargoCustody.Depot);
             _world?.ApplyRepairCargoPresentation(
                 RepairCargoKind.None,
-                RepairCargoCustody.None);
+                RepairCargoCustody.None,
+                TurbineCondition.Failing);
+            _world?.ApplyReturnServicePresentation(
+                checkInReady: false,
+                RepairCargoKind.None,
+                RepairCargoCustody.None,
+                humanVisible: false,
+                robotVisible: false);
             _world?.ApplyCityImprovement(
                 HeavyCargoCustody.Depot,
                 CityImprovementKind.None,
@@ -710,22 +751,48 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void CompleteReturn()
         {
+            if (!IsReturnCheckInAvailable)
+            {
+                _status =
+                    "The loaded return can only check in from Sasha's fixed home apron.";
+                return;
+            }
+
+            string transactionId = _state!.TransactionId!;
+            string transactionFingerprint = _state.TransactionFingerprint!;
             Queue(
                 sequence => new CreditCityReturnCommand(
                     sequence,
-                    TransactionId,
-                    TransactionFingerprint),
+                    transactionId,
+                    transactionFingerprint),
                 sequence => new FinalizeExpeditionTransactionCommand(
                     sequence,
-                    TransactionId,
-                    TransactionFingerprint));
+                    transactionId,
+                    transactionFingerprint));
             _status = "The road outcome is back in Last Bearing's inventory and memory.";
         }
 
         public void RepairTurbine()
         {
+            if (!IsPumpHallRepairAvailable)
+            {
+                _status =
+                    "Seat the repair only from the selected pump-hall cutaway.";
+                return;
+            }
+
             Queue(sequence => new InstallTurbineRepairCommand(sequence));
             _status = "The civic organ is turning again.";
+        }
+
+        public void OpenPumpHallRepair()
+        {
+            if (!TryRouteToPumpHallRepair(
+                    "The loaded repair is framed at the pump-hall service line."))
+            {
+                _status =
+                    "The pump-hall repair route is available only after return check-in.";
+            }
         }
 
         public void InstallCityImprovement()
@@ -879,6 +946,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _saveStatus = result.Code + " · " + CanonicalHash.Substring(0, 12);
                 _status = "Exact city, vehicle, custody, crisis, and faction state restored.";
                 ApplyPresentation();
+                TryRouteToPumpHallRepair(
+                    "Exact finalized return restored at the pump-hall service line.");
             }
             catch (Exception exception)
             {
@@ -952,6 +1021,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 LoadDepotRepairCargo();
             }
+            else if (IsReturnCheckInAvailable &&
+                ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
+                 (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
+            {
+                CompleteReturn();
+            }
+            else if (IsPumpHallRepairAvailable &&
+                ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
+                 (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
+            {
+                RepairTurbine();
+            }
         }
 
         private void SimulateOneTick()
@@ -969,6 +1050,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 ExpeditionPhase previousPhase = _readModel.ExpeditionPhase;
                 LastBearingTickResult result = _kernel.Step(_state, commands);
+                bool returnCheckInAccepted =
+                    ContainsEvent(
+                        result.DomainEvents,
+                        LastBearingEventKind.CityReturnCredited) &&
+                    ContainsEvent(
+                        result.DomainEvents,
+                        LastBearingEventKind.ExpeditionTransactionFinalized);
                 _state = result.State;
                 _readModel = result.ReadModel;
                 if (previousPhase == ExpeditionPhase.AtHome &&
@@ -980,6 +1068,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
                 TryAutosave(result.DomainEvents);
                 ApplyPresentation();
+                if (returnCheckInAccepted)
+                {
+                    TryRouteToPumpHallRepair(
+                        "Return checked in. Seat the loaded repair at the pump hall.");
+                }
             }
             catch (Exception exception)
             {
@@ -1184,7 +1277,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _readModel.HeavyCargoCustody);
             _world.ApplyRepairCargoPresentation(
                 _readModel.RepairCargoKind,
-                _readModel.RepairCargoCustody);
+                _readModel.RepairCargoCustody,
+                _readModel.TurbineCondition);
             _world.ApplyCityImprovement(
                 _readModel.HeavyCargoCustody,
                 _readModel.InstalledCityImprovement,
@@ -1207,6 +1301,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? _garagePreparationIntent
                     : _readModel.PreparationChoice);
             _modeCoordinator?.ApplyCanonical(_readModel);
+            _world.ApplyReturnServicePresentation(
+                IsReturnCheckInAvailable,
+                _readModel.RepairCargoKind,
+                _readModel.RepairCargoCustody,
+                humanVisible,
+                robotVisible);
         }
 
         private void TryAutosave(
@@ -1250,6 +1350,43 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     cameraAnchor,
                     focusAnchor);
             }
+        }
+
+        private bool TryRouteToPumpHallRepair(string successStatus)
+        {
+            if (!IsTurbineRepairReady ||
+                _world == null ||
+                _modeCoordinator == null)
+            {
+                return false;
+            }
+
+            _world.SelectPumpHallCutaway();
+            ApplySelectedBuildingCutawayPose();
+            if (!_modeCoordinator.TryShowCityMode(
+                    LastBearingPresentationMode.BuildingCutaway,
+                    _readModel))
+            {
+                return false;
+            }
+
+            _status = successStatus;
+            return true;
+        }
+
+        private static bool ContainsEvent(
+            IReadOnlyList<LastBearingDomainEvent> domainEvents,
+            LastBearingEventKind eventKind)
+        {
+            for (var index = 0; index < domainEvents.Count; index++)
+            {
+                if (domainEvents[index].Kind == eventKind)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void Queue(params Func<long, LastBearingCommand>[] factories)
