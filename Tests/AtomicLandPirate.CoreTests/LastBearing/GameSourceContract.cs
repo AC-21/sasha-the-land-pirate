@@ -28,6 +28,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(runtimeRoot, "LastBearingVehicleView.cs"));
             string camera = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingCameraRig.cs"));
+            string roadChaseCamera = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "RoadFeel/RoadFeelChaseCamera.cs"));
             string comparison = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingCityGrammarComparison.cs"));
             string recovery = File.ReadAllText(
@@ -164,6 +168,12 @@ namespace AtomicLandPirate.LastBearingTests
                 "_readModel.IsDepotApproachRecoveryAvailable");
             Require(globalShortcuts, "keyboard.eKey.wasPressedThisFrame");
             Require(globalShortcuts, "gamepad.buttonSouth.wasPressedThisFrame");
+            Require(globalShortcuts, "keyboard.rKey.wasPressedThisFrame");
+            Require(globalShortcuts, "gamepad.buttonNorth.wasPressedThisFrame");
+            Require(globalShortcuts, "RecoverRoadPresentation();");
+            int recoveryHotkey = globalShortcuts.IndexOf(
+                "RecoverRoadPresentation();",
+                StringComparison.Ordinal);
             int wreckGate = globalShortcuts.IndexOf(
                 "_readModel.IsWreckLineModulePointAvailable",
                 StringComparison.Ordinal);
@@ -179,9 +189,16 @@ namespace AtomicLandPirate.LastBearingTests
                 depotGate,
                 StringComparison.Ordinal);
             TestHarness.True(
+                recoveryHotkey >= 0 && recoveryHotkey < wreckGate &&
                 wreckGate >= 0 && wreckHotkey > wreckGate &&
                 depotGate > wreckHotkey && depotHotkey > depotGate,
-                "road hotkeys must be context-gated before consuming city-camera E");
+                "manual recovery must precede context-gated road interactions");
+            TestHarness.Equal(
+                1,
+                CountOccurrences(
+                    globalShortcuts,
+                    "RecoverRoadPresentation();"),
+                "the explicit shortcut must be the only automatic update-loop call");
             Require(camera, "keyboard.eKey.isPressed");
             string driveInput = Segment(
                 controller,
@@ -288,9 +305,62 @@ namespace AtomicLandPirate.LastBearingTests
             Require(camera, "D0022-PROVISIONAL-LAST-BEARING-CAMERA-V1");
             Require(camera, "SetComparisonMode");
             Require(camera, "SetRoadTarget");
+            Require(camera, "public const float StrategyFieldOfView = 40f;");
+            Require(camera, "SetRoadChaseActive");
+            Require(camera, "IsRoadChaseActive");
+            Require(camera, "IsRoadChaseRecoveryRequired");
+            Require(camera, "HasConfiguredRoadChase");
+            Require(camera, "if (_roadChaseActive)");
+            Require(camera, "_camera.fieldOfView = StrategyFieldOfView;");
+            Require(camera, "FailClosedIfRoadChaseOwnershipWasLost");
+            Require(camera, "EndRoadChaseOwnership");
+            Require(camera, "TryRecoverRoadChaseOwnership");
+            Require(camera, "ResetRoadChaseFailure");
+            Require(camera, "_roadChaseRecoveryRequired = true;");
+            Require(
+                camera,
+                "LAST_BEARING_CHASE_CAMERA_DISABLED ownership-lost");
+            Require(roadChaseCamera, "public const float BaseFieldOfView = 62f;");
+            Require(roadChaseCamera, "public const float MaximumFieldOfView = 67f;");
+            Require(roadChaseCamera, "public bool IsConfigured");
+            Require(roadChaseCamera, "public void SetChaseActive(bool active)");
+            Require(roadChaseCamera, "public void SnapBehind()");
+            Require(roadChaseCamera, "_camera.fieldOfView = BaseFieldOfView;");
             Require(world, "RoadFeelRigFactory.Create");
             Require(world, "RoadFeelRigInstance");
             Require(world, "drivingModeRoot");
+            string cameraBuild = Segment(
+                world,
+                "private void BuildCamera()",
+                "private Material CreateMaterial(");
+            Require(cameraBuild, "cameraObject.AddComponent<Camera>()");
+            Require(cameraBuild, "cameraObject.AddComponent<AudioListener>()");
+            Require(
+                cameraBuild,
+                "cameraObject.AddComponent<RoadFeelChaseCamera>()");
+            Require(
+                cameraBuild,
+                "cameraObject.AddComponent<LastBearingCameraRig>()");
+            TestHarness.Equal(
+                1,
+                CountOccurrences(cameraBuild, "AddComponent<Camera>()"),
+                "the canonical world must build exactly one shared Camera");
+            TestHarness.Equal(
+                1,
+                CountOccurrences(cameraBuild, "AddComponent<AudioListener>()"),
+                "the canonical world must build exactly one shared AudioListener");
+            TestHarness.Equal(
+                1,
+                CountOccurrences(
+                    cameraBuild,
+                    "AddComponent<RoadFeelChaseCamera>()"),
+                "the canonical world must build exactly one chase writer");
+            TestHarness.Equal(
+                1,
+                CountOccurrences(
+                    cameraBuild,
+                    "AddComponent<LastBearingCameraRig>()"),
+                "the canonical world must build exactly one strategy writer");
             Require(world, "LastBearingDepotApproachRecoveryView");
             Require(world, "DepotApproachRecoveryView.Build(");
             Require(world, "LastBearingRouteModulePointView");
@@ -320,6 +390,7 @@ namespace AtomicLandPirate.LastBearingTests
             {
                 "AtomicLandPirate.Simulation",
                 "LastBearingState",
+                "LastBearingReadModel",
                 "LastBearingKernel",
                 "LastBearingCommand",
                 "SaveContracts",
@@ -382,6 +453,117 @@ namespace AtomicLandPirate.LastBearingTests
             Require(modeCoordinator, "RoadAdapterFaulted");
             Require(modeCoordinator, "SynchronizePresentationPose");
             Require(modeCoordinator, "ApplyPresentationOwnership");
+            Require(modeCoordinator, "CanRecoverRoadPresentation");
+            Require(modeCoordinator, "SetRoadChaseActive(");
+            Require(modeCoordinator, "SetRoadModeActiveOrThrow");
+            Require(modeCoordinator, "adapter.IsRoadModeActive != active");
+            string manualRecovery = Segment(
+                modeCoordinator,
+                "public bool TryRecoverRoadPresentation()",
+                "public static LastBearingPresentationMode ResolveMode(");
+            Require(manualRecovery, "active: false");
+            Require(manualRecovery, "_roadPresentationActive = false;");
+            Require(manualRecovery, "canonicalVehicle.SnapToCanonicalRoadPose()");
+            Require(manualRecovery, "adapter.SynchronizePresentationPose(");
+            Require(manualRecovery, "active: true");
+            Require(manualRecovery, "_roadPresentationActive = true;");
+            Require(manualRecovery, "TryRecoverRoadChaseOwnership()");
+            int manualSuspend = manualRecovery.IndexOf(
+                "active: false",
+                StringComparison.Ordinal);
+            int localYield = manualRecovery.IndexOf(
+                "_roadPresentationActive = false;",
+                manualSuspend,
+                StringComparison.Ordinal);
+            int canonicalSnap = manualRecovery.IndexOf(
+                "canonicalVehicle.SnapToCanonicalRoadPose()",
+                localYield,
+                StringComparison.Ordinal);
+            int presentationSync = manualRecovery.IndexOf(
+                "adapter.SynchronizePresentationPose(",
+                canonicalSnap,
+                StringComparison.Ordinal);
+            int manualReactivate = manualRecovery.IndexOf(
+                "active: true",
+                presentationSync,
+                StringComparison.Ordinal);
+            int chaseReclaim = manualRecovery.IndexOf(
+                "_roadPresentationActive = true;",
+                manualReactivate,
+                StringComparison.Ordinal);
+            int cameraReclaim = manualRecovery.IndexOf(
+                "TryRecoverRoadChaseOwnership()",
+                chaseReclaim,
+                StringComparison.Ordinal);
+            TestHarness.True(
+                manualSuspend >= 0 && localYield > manualSuspend &&
+                canonicalSnap > localYield && presentationSync > canonicalSnap &&
+                manualReactivate > presentationSync &&
+                chaseReclaim > manualReactivate &&
+                cameraReclaim > chaseReclaim,
+                "manual recovery must suspend, yield camera, snap, synchronize, " +
+                "reactivate physics, then explicitly reclaim chase ownership");
+            foreach (string forbidden in new[]
+            {
+                "Queue(",
+                "Save(",
+                "_saveAdapter",
+                "_pendingCommands",
+                "_state",
+                "_readModel",
+                "LastBearingState",
+                "LastBearingKernel",
+                "LastBearingCommand",
+                "LastBearingCanonicalCodec",
+                "RoadFeelTelemetry",
+                ".Telemetry",
+                "System.IO",
+                "File.",
+                "PlayerPrefs",
+                "Application.persistentDataPath",
+            })
+            {
+                TestHarness.True(
+                    manualRecovery.IndexOf(forbidden, StringComparison.Ordinal) < 0,
+                    "manual recovery contains forbidden authority " + forbidden);
+            }
+
+            TestHarness.Equal(
+                1,
+                CountOccurrences(
+                    modeCoordinator,
+                    "TryRecoverRoadPresentation()"),
+                "manual recovery must never be invoked automatically by the coordinator");
+            string controllerRecovery = Segment(
+                controller,
+                "public bool RecoverRoadPresentation()",
+                "public void CommitExpedition()");
+            Require(controllerRecovery, "TryRecoverRoadPresentation()");
+            foreach (string forbidden in new[]
+            {
+                "Queue(",
+                "Save(",
+                "_saveAdapter",
+                "_pendingCommands",
+                "_state",
+                "_readModel",
+                "LastBearingState",
+                "LastBearingReadModel",
+                "LastBearingKernel",
+                "LastBearingCommand",
+                "LastBearingCanonicalCodec",
+                "RoadFeelTelemetry",
+                ".Telemetry",
+                "System.IO",
+                "File.",
+                "PlayerPrefs",
+                "Application.persistentDataPath",
+            })
+            {
+                TestHarness.True(
+                    controllerRecovery.IndexOf(forbidden, StringComparison.Ordinal) < 0,
+                    "controller recovery contains forbidden authority " + forbidden);
+            }
             Require(
                 modeCoordinator,
                 "IsRoadPresentationHeldAtRecovery");
@@ -392,12 +574,13 @@ namespace AtomicLandPirate.LastBearingTests
                 modeCoordinator,
                 "private void HoldRoadAdapterAtCanonicalRecoveryPose()",
                 "private void SuspendRoadAdapter");
-            Require(recoveryHold, "adapter.SetRoadModeActive(false)");
+            Require(recoveryHold, "SetRoadModeActiveOrThrow");
+            Require(recoveryHold, "active: false");
             Require(recoveryHold, "_canonicalVehicle.SnapToCanonicalRoadPose()");
             Require(recoveryHold, "adapter.SynchronizePresentationPose(");
             TestHarness.True(
                 recoveryHold.IndexOf(
-                    "adapter.SetRoadModeActive(false)",
+                    "active: false",
                     StringComparison.Ordinal) <
                 recoveryHold.IndexOf(
                     "_canonicalVehicle.SnapToCanonicalRoadPose()",
@@ -417,7 +600,8 @@ namespace AtomicLandPirate.LastBearingTests
                 "private void SuspendRoadAdapter");
             Require(roadActivation, "_canonicalVehicle.SnapToCanonicalRoadPose()");
             Require(roadActivation, "adapter.SynchronizePresentationPose(");
-            Require(roadActivation, "adapter.SetRoadModeActive(true)");
+            Require(roadActivation, "SetRoadModeActiveOrThrow");
+            Require(roadActivation, "active: true");
             TestHarness.True(
                 roadActivation.IndexOf(
                     "_canonicalVehicle.SnapToCanonicalRoadPose()",
@@ -431,7 +615,7 @@ namespace AtomicLandPirate.LastBearingTests
                     "adapter.SynchronizePresentationPose(",
                     StringComparison.Ordinal) <
                 roadActivation.IndexOf(
-                    "adapter.SetRoadModeActive(true)",
+                    "active: true",
                     StringComparison.Ordinal),
                 "road pose must synchronize while suspended before physics activation");
             TestHarness.True(
@@ -676,6 +860,28 @@ namespace AtomicLandPirate.LastBearingTests
             int end = source.IndexOf(endToken, start, StringComparison.Ordinal);
             TestHarness.True(end > start, "Game source contract is missing " + endToken);
             return source.Substring(start, end - start);
+        }
+
+        private static int CountOccurrences(string source, string token)
+        {
+            var count = 0;
+            var offset = 0;
+            while (offset <= source.Length - token.Length)
+            {
+                int match = source.IndexOf(
+                    token,
+                    offset,
+                    StringComparison.Ordinal);
+                if (match < 0)
+                {
+                    break;
+                }
+
+                count++;
+                offset = match + token.Length;
+            }
+
+            return count;
         }
     }
 }

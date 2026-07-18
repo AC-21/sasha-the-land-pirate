@@ -137,7 +137,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? "E or gamepad south · seat recovery bridle\nP · pause  F5 · save  F9 · load"
                     : model.ExpeditionPhase == ExpeditionPhase.Outbound ||
                 model.ExpeditionPhase == ExpeditionPhase.Returning
-                    ? "W/right trigger · throttle\nS/left trigger · presentation brake + reverse\nA/D or stick · steer  Space/LB · handbrake\nP · pause  F5 · save  F9 · load"
+                    ? _controller!.CanRecoverRoadPresentation
+                        ? "W/right trigger · throttle\nS/left trigger · presentation brake + reverse\nA/D or stick · steer  Space/LB · handbrake\nR/gamepad north · recover local rig\nP · pause  F5 · save  F9 · load"
+                        : "W/right trigger · throttle\nS/left trigger · presentation brake + reverse\nA/D or stick · steer  Space/LB · handbrake\nLocal rig recovery unavailable\nP · pause  F5 · save  F9 · load"
                     : model.ExpeditionPhase == ExpeditionPhase.AtDepot
                         ? "Depot view locked · choose encounter and cargo below\nP · pause  F5 · save  F9 · load"
                     : "WASD · camera pan  Q/E · rotate\nMouse wheel · zoom  RMB · orbit\nP · pause  F5 · save  F9 · load",
@@ -320,6 +322,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Drive the authored corridor. Route progress comes only from " +
                     "quantized core commands.",
                     _bodyStyle);
+                if (_controller.CanRecoverRoadPresentation)
+                {
+                    GUILayout.Label(
+                        "If local physics becomes unhelpful, recover only the presentation rig to Sasha's current canonical road marker.",
+                        _mutedStyle);
+                    if (GUILayout.Button(
+                            "RECOVER LOCAL RIG · R / GAMEPAD NORTH",
+                            _buttonStyle))
+                    {
+                        _controller.RecoverRoadPresentation();
+                    }
+                }
+
                 return;
             }
 

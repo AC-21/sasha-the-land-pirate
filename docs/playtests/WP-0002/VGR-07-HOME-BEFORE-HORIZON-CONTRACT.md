@@ -1,8 +1,9 @@
 # VGR-07 — Home Before Horizon Contract
 
-Status: creator-directed observed-comparison milestone; release remains
-conditional on independent review, exact Unity dispatcher gates, protected
-checks, and transparent creator-delegated manual release.
+Status: released on protected `main` in
+`b35157a07a7442f6b02ed179201cd59e89368996` after independent review, exact
+Unity dispatcher gates, protected checks, and transparent creator-delegated
+manual release.
 
 Baseline: protected `main` commit
 `8f2b973e10682a77339b28bde67eb7a9ff5679bf`.

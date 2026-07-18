@@ -50,6 +50,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public LastBearingCameraRig? CameraRig { get; private set; }
 
+        public RoadFeelChaseCamera? RoadChaseCamera { get; private set; }
+
         public LastBearingVehicleView? VehicleView { get; private set; }
 
         public RoadFeelRigInstance? RoadFeelRig { get; private set; }
@@ -900,12 +902,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
             MainCamera = cameraObject.AddComponent<Camera>();
             MainCamera.clearFlags = CameraClearFlags.SolidColor;
             MainCamera.backgroundColor = new Color(0.29f, 0.255f, 0.21f, 1f);
-            MainCamera.fieldOfView = 40f;
+            MainCamera.fieldOfView = LastBearingCameraRig.StrategyFieldOfView;
             MainCamera.nearClipPlane = 0.18f;
             MainCamera.farClipPlane = 400f;
             MainCamera.allowHDR = true;
+            cameraObject.AddComponent<AudioListener>();
+            RoadChaseCamera = cameraObject.AddComponent<RoadFeelChaseCamera>();
+            if (RoadFeelRig != null)
+            {
+                RoadChaseCamera.Configure(
+                    RoadFeelRig.Root.transform,
+                    RoadFeelRig.Vehicle.Body);
+            }
+
+            RoadChaseCamera.SetChaseActive(false);
             CameraRig = cameraObject.AddComponent<LastBearingCameraRig>();
-            CameraRig.Configure(VehicleView!.transform);
+            CameraRig.Configure(VehicleView!.transform, RoadChaseCamera);
         }
 
         private Material CreateMaterial(Color baseColor, Color emission)

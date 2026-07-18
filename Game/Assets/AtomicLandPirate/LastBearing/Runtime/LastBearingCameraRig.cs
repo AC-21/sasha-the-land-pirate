@@ -1,5 +1,6 @@
 #nullable enable
 
+using AtomicLandPirate.Presentation.LastBearing.RoadFeel;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,6 +13,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
     [DisallowMultipleComponent]
     public sealed class LastBearingCameraRig : MonoBehaviour
     {
+        public const float StrategyFieldOfView = 40f;
+
         public const string ComparisonCameraSetupId =
             "D0022-PROVISIONAL-LAST-BEARING-CAMERA-V1";
 
@@ -26,9 +29,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private Transform? _roadTarget;
         private Transform? _inspectionCameraAnchor;
         private Transform? _inspectionFocusAnchor;
+        private Camera? _camera;
+        private RoadFeelChaseCamera? _roadChaseCamera;
         private float _cityYaw = ComparisonYaw;
         private float _cityDistance = ComparisonDistance;
         private bool _roadMode;
+        private bool _roadChaseActive;
+        private bool _roadChaseRecoveryRequired;
         private bool _comparisonMode;
         private bool _inspectionMode;
 
@@ -39,6 +46,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool IsComparisonMode => _comparisonMode;
 
         public bool IsInspectionMode => _inspectionMode;
+
+        public bool IsRoadChaseActive => HasLiveRoadChaseOwnership();
+
+        public bool IsRoadChaseRecoveryRequired =>
+            _roadChaseRecoveryRequired;
+
+        public bool HasConfiguredRoadChase =>
+            _roadChaseCamera?.IsConfigured == true;
 
         public Transform? RoadTarget => _roadTarget;
 
@@ -52,9 +67,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public float CityYaw => _cityYaw;
 
-        public void Configure(Transform roadTarget)
+        public void Configure(
+            Transform roadTarget,
+            RoadFeelChaseCamera? roadChaseCamera = null)
         {
+            _camera = GetComponent<Camera>();
+            _roadChaseCamera = roadChaseCamera;
             SetRoadTarget(roadTarget);
+            if (_camera != null)
+            {
+                _camera.fieldOfView = StrategyFieldOfView;
+            }
+
+            _roadChaseCamera?.SetChaseActive(false);
         }
 
         public void SetRoadTarget(Transform roadTarget)
@@ -69,6 +94,85 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             _roadMode = roadMode;
             ApplyPose(immediate: false);
+        }
+
+        public void SetRoadChaseActive(bool active)
+        {
+            if (!active)
+            {
+                if (!_roadChaseActive &&
+                    !IsRoadChaseComponentActive())
+                {
+                    return;
+                }
+
+                EndRoadChaseOwnership();
+                return;
+            }
+
+            if (_roadChaseActive && !HasLiveRoadChaseOwnership())
+            {
+                FailClosedIfRoadChaseOwnershipWasLost();
+                return;
+            }
+
+            if (_roadChaseRecoveryRequired)
+            {
+                EndRoadChaseOwnership();
+                return;
+            }
+
+            if (HasLiveRoadChaseOwnership())
+            {
+                return;
+            }
+
+            if (_roadChaseCamera == null ||
+                !_roadChaseCamera.IsConfigured)
+            {
+                _roadChaseRecoveryRequired = true;
+                EndRoadChaseOwnership();
+                return;
+            }
+
+            try
+            {
+                _roadChaseCamera.SetChaseActive(true);
+                _roadChaseActive = _roadChaseCamera.IsChaseActive;
+                if (!_roadChaseActive)
+                {
+                    _roadChaseRecoveryRequired = true;
+                    EndRoadChaseOwnership();
+                }
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogWarning(
+                    "LAST_BEARING_CHASE_CAMERA_DISABLED activation " +
+                    exception.GetType().Name,
+                    this);
+                _roadChaseRecoveryRequired = true;
+                EndRoadChaseOwnership();
+            }
+        }
+
+        public bool TryRecoverRoadChaseOwnership()
+        {
+            _roadChaseRecoveryRequired = false;
+            SetRoadChaseActive(true);
+            if (HasLiveRoadChaseOwnership())
+            {
+                return true;
+            }
+
+            _roadChaseRecoveryRequired = true;
+            EndRoadChaseOwnership();
+            return false;
+        }
+
+        public void ResetRoadChaseFailure()
+        {
+            _roadChaseRecoveryRequired = false;
         }
 
         public void SetComparisonMode(bool comparisonMode)
@@ -101,7 +205,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void Update()
         {
-            if (_roadMode || _comparisonMode || _inspectionMode)
+            FailClosedIfRoadChaseOwnershipWasLost();
+            if (_roadChaseActive || _roadMode || _comparisonMode || _inspectionMode)
             {
                 return;
             }
@@ -180,6 +285,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void LateUpdate()
         {
+            FailClosedIfRoadChaseOwnershipWasLost();
+            if (_roadChaseActive)
+            {
+                return;
+            }
+
             ApplyPose(immediate: false);
         }
 
@@ -199,6 +310,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void ApplyPose(bool immediate)
         {
+            if (_roadChaseActive)
+            {
+                return;
+            }
+
             Vector3 targetPosition;
             Quaternion targetRotation;
 
@@ -243,6 +359,78 @@ namespace AtomicLandPirate.Presentation.LastBearing
             var blend = 1f - Mathf.Exp(-7f * Time.unscaledDeltaTime);
             transform.position = Vector3.Lerp(transform.position, targetPosition, blend);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, blend);
+        }
+
+        private bool HasLiveRoadChaseOwnership()
+        {
+            if (!_roadChaseActive || _roadChaseCamera == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                return _roadChaseCamera.IsConfigured &&
+                       _roadChaseCamera.IsChaseActive;
+            }
+            catch (System.Exception)
+            {
+                return false;
+            }
+        }
+
+        private bool IsRoadChaseComponentActive()
+        {
+            if (_roadChaseCamera == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                return _roadChaseCamera.IsChaseActive;
+            }
+            catch (System.Exception)
+            {
+                return false;
+            }
+        }
+
+        private void FailClosedIfRoadChaseOwnershipWasLost()
+        {
+            if (!_roadChaseActive || HasLiveRoadChaseOwnership())
+            {
+                return;
+            }
+
+            Debug.LogWarning(
+                "LAST_BEARING_CHASE_CAMERA_DISABLED ownership-lost",
+                this);
+            _roadChaseRecoveryRequired = true;
+            EndRoadChaseOwnership();
+        }
+
+        private void EndRoadChaseOwnership()
+        {
+            _roadChaseActive = false;
+            try
+            {
+                _roadChaseCamera?.SetChaseActive(false);
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogWarning(
+                    "LAST_BEARING_CHASE_CAMERA_DISABLED deactivation " +
+                    exception.GetType().Name,
+                    this);
+            }
+
+            if (_camera != null)
+            {
+                _camera.fieldOfView = StrategyFieldOfView;
+            }
+
+            ApplyPose(immediate: true);
         }
     }
 }

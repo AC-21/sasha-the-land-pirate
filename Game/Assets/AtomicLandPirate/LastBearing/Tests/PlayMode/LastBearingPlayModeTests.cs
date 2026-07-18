@@ -100,11 +100,31 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 UnityEngine.Object.FindObjectsByType<RoadFeelChaseCamera>(
                     FindObjectsInactive.Include),
-                Is.Empty);
+                Has.Length.EqualTo(1));
             Assert.That(
                 UnityEngine.Object.FindObjectsByType<Camera>(
                     FindObjectsInactive.Include),
                 Has.Length.EqualTo(1));
+            Assert.That(
+                UnityEngine.Object.FindObjectsByType<AudioListener>(
+                    FindObjectsInactive.Include),
+                Has.Length.EqualTo(1));
+            Assert.That(
+                UnityEngine.Object.FindObjectsByType<LastBearingCameraRig>(
+                    FindObjectsInactive.Include),
+                Has.Length.EqualTo(1));
+            Camera sharedCamera = world.MainCamera!;
+            Assert.That(world.CameraRig!.gameObject, Is.SameAs(sharedCamera.gameObject));
+            Assert.That(
+                world.RoadChaseCamera!.gameObject,
+                Is.SameAs(sharedCamera.gameObject));
+            Assert.That(
+                sharedCamera.GetComponent<AudioListener>()!.gameObject,
+                Is.SameAs(sharedCamera.gameObject));
+            Assert.That(world.CameraRig.HasConfiguredRoadChase, Is.True);
+            AssertCameraOwnership(controller, chaseActive: false);
+            Assert.That(controller.CanRecoverRoadPresentation, Is.False);
+            Assert.That(controller.RecoverRoadPresentation(), Is.False);
             Assert.That(roadRig.Root.activeInHierarchy, Is.False);
             Assert.That(roadRig.Adapter.IsPhysicsSuspended, Is.True);
             Assert.That(roadRig.Vehicle.Body.isKinematic, Is.True);
@@ -128,6 +148,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 GameObject.Find("Resident " + ResidentRoster.RobotResidentId),
                 Is.Not.Null);
+            Assert.That(controller.CanRecoverRoadPresentation, Is.False);
+            Assert.That(controller.RecoverRoadPresentation(), Is.False);
+            AssertCameraOwnership(controller, chaseActive: false);
         }
 
         [UnityTest]
@@ -207,6 +230,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.StartNewGame(ColonyComposition.HumanOnly);
             controller.enabled = false;
             controller.InspectCityNeed();
+            AssertCameraOwnership(controller, chaseActive: false);
+            AssertRecoveryUnavailableWithoutWrites(controller);
             string originalHash = controller.CanonicalHash;
             controller.SelectCityGrammarHypothesis(
                 LastBearingCityGrammarHypothesis.RestrainedSnapGrid);
@@ -336,12 +361,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             AssertMode(
                 coordinator,
                 LastBearingPresentationMode.BuildingCutaway);
+            AssertCameraOwnership(controller, chaseActive: false);
+            AssertRecoveryUnavailableWithoutWrites(controller);
 
             LastBearingState outbound = CreateOutboundState();
             InstallControllerState(controller, outbound);
             AssertMode(coordinator, LastBearingPresentationMode.Driving);
             RoadFeelRigInstance roadRig = controller.World!.RoadFeelRig!;
             AssertRoadPresentation(controller, roadRig, active: true);
+            AssertCameraOwnership(controller, chaseActive: true);
             string hashBeforeShadow = controller.CanonicalHash;
             int receiptBefore = roadRig.Adapter.CommandReceiptCount;
             coordinator.ApplyQuantizedRoadCommandShadow(750, -250);
@@ -357,6 +385,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             InstallControllerState(controller, recoveryGate);
             AssertMode(coordinator, LastBearingPresentationMode.Driving);
             AssertRoadRecoveryHold(controller, roadRig);
+            AssertCameraOwnership(controller, chaseActive: false);
             Assert.That(
                 controller.World.DepotApproachRecoveryView!.State,
                 Is.EqualTo(DepotApproachRecoveryPresentationState.Available));
@@ -369,6 +398,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 coordinator,
                 LastBearingPresentationMode.DepotEncounter);
             AssertRoadPresentation(controller, roadRig, active: false);
+            AssertCameraOwnership(controller, chaseActive: false);
+            AssertRecoveryUnavailableWithoutWrites(controller);
             Assert.That(
                 controller.World.DepotApproachRecoveryView!.State,
                 Is.EqualTo(DepotApproachRecoveryPresentationState.Unlocked));
@@ -385,6 +416,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             InstallControllerState(controller, returning);
             AssertMode(coordinator, LastBearingPresentationMode.Driving);
             AssertRoadPresentation(controller, roadRig, active: true);
+            AssertCameraOwnership(controller, chaseActive: true);
 
             LastBearingState returned = DriveUntilPhase(
                 returning,
@@ -392,6 +424,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             InstallControllerState(controller, returned);
             AssertMode(coordinator, LastBearingPresentationMode.CityReturn);
             AssertRoadPresentation(controller, roadRig, active: false);
+            AssertCameraOwnership(controller, chaseActive: false);
+            AssertRecoveryUnavailableWithoutWrites(controller);
             Assert.That(
                 controller.CanonicalHash,
                 Is.EqualTo(LastBearingCanonicalCodec.ComputeSha256(returned)));
@@ -399,6 +433,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.ReturnToTitle();
             Assert.That(coordinator.HasActiveMode, Is.False);
             AssertRoadPresentation(controller, roadRig, active: false);
+            AssertCameraOwnership(controller, chaseActive: false);
         }
 
         [UnityTest]
@@ -693,6 +728,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(body.isKinematic, Is.True);
             Assert.That(body.linearVelocity, Is.EqualTo(Vector3.zero));
             Assert.That(body.angularVelocity, Is.EqualTo(Vector3.zero));
+            Assert.That(controller.CanRecoverRoadPresentation, Is.False);
+            Assert.That(controller.RecoverRoadPresentation(), Is.False);
+            AssertCameraOwnership(controller, chaseActive: false);
 
             for (var frame = 0; frame < 3; frame++)
             {
@@ -743,6 +781,273 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator ManualRoadRecoveryRecentersPresentationWithoutCanonicalOrSaveWrites()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
+            LastBearingState loadedWorn = CreateLoadedWornOutboundState();
+            InstallControllerState(controller, loadedWorn);
+
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingModeCoordinator coordinator = controller.ModeCoordinator!;
+            RoadFeelRigInstance roadRig = world.RoadFeelRig!;
+            LastBearingRoadFeelModeAdapter adapter = roadRig.Adapter;
+            Rigidbody body = roadRig.Vehicle.Body;
+            Camera camera = world.MainCamera!;
+            Transform canonicalVehicle = world.VehicleView!.transform;
+
+            Assert.That(controller.CanRecoverRoadPresentation, Is.True);
+            Assert.That(adapter.LastCargoMassKilograms, Is.EqualTo(1300));
+            Assert.That(adapter.LastDamageBand, Is.EqualTo(LastBearingRoadDamageBand.Worn));
+            Assert.That(roadRig.Vehicle.Telemetry.CargoMassKilograms, Is.EqualTo(1300f));
+            Assert.That(roadRig.Vehicle.Telemetry.DamageBand, Is.EqualTo(RoadFeelDamageBand.Worn));
+            AssertCameraOwnership(controller, chaseActive: true);
+
+            controller.Save();
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"),
+                controller.SaveStatus);
+            Dictionary<string, string> saveBefore = SnapshotSaveFiles(profileDirectory);
+            string saveStatusBefore = controller.SaveStatus;
+            string hashBefore = controller.CanonicalHash;
+            LastBearingState stateBefore = controller.State!;
+            long sequenceBefore = stateBefore.NextCommandSequence;
+            long routeProgressBefore = stateBefore.RouteProgressTicks;
+            long conditionBefore = stateBefore.VehicleConditionMilli;
+            HeavyCargoCustody custodyBefore = stateBefore.HeavyCargoCustody;
+            Vector3 expectedPosition = canonicalVehicle.position;
+            Quaternion expectedRotation = canonicalVehicle.rotation;
+
+            coordinator.ApplyQuantizedRoadCommandShadow(875, -625);
+            coordinator.ApplyPresentationOnlyRoadControls(450, 700);
+            body.position = expectedPosition + new Vector3(70f, 9f, -55f);
+            body.rotation = Quaternion.Euler(18f, 121f, 7f);
+            body.linearVelocity = new Vector3(11f, 3f, -8f);
+            body.angularVelocity = new Vector3(2f, -1.5f, 0.75f);
+            Physics.SyncTransforms();
+            yield return null;
+            Vector3 displacedCameraPosition = camera.transform.position;
+
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Press(keyboard.rKey);
+            yield return null;
+            Assert.That(keyboard.rKey.wasPressedThisFrame, Is.True);
+            InvokeGlobalShortcuts(controller);
+            Release(keyboard.rKey);
+
+            Assert.That(controller.Status, Does.Contain("recovered to Sasha's"));
+            Assert.That(controller.CanRecoverRoadPresentation, Is.True);
+            Assert.That(coordinator.IsRoadPresentationActive, Is.True);
+            Assert.That(adapter.IsRoadModeActive, Is.True);
+            Assert.That(adapter.IsPhysicsSuspended, Is.False);
+            Assert.That(body.isKinematic, Is.False);
+            Assert.That(body.linearVelocity, Is.EqualTo(Vector3.zero));
+            Assert.That(body.angularVelocity, Is.EqualTo(Vector3.zero));
+            Assert.That(adapter.LastThrottleMilli, Is.EqualTo(0));
+            Assert.That(adapter.LastSteeringMilli, Is.EqualTo(0));
+            Assert.That(adapter.LastBrakeMilli, Is.EqualTo(0));
+            Assert.That(adapter.LastHandbrakeMilli, Is.EqualTo(0));
+            Assert.That(
+                Vector3.Distance(body.position, expectedPosition),
+                Is.LessThan(0.001f));
+            Assert.That(
+                Quaternion.Angle(body.rotation, expectedRotation),
+                Is.LessThan(0.01f));
+            Assert.That(adapter.LastCargoMassKilograms, Is.EqualTo(1300));
+            Assert.That(adapter.LastDamageBand, Is.EqualTo(LastBearingRoadDamageBand.Worn));
+            Assert.That(roadRig.Vehicle.Telemetry.CargoMassKilograms, Is.EqualTo(1300f));
+            Assert.That(roadRig.Vehicle.Telemetry.DamageBand, Is.EqualTo(RoadFeelDamageBand.Worn));
+            AssertCameraOwnership(controller, chaseActive: true);
+            Assert.That(
+                Vector3.Distance(camera.transform.position, displacedCameraPosition),
+                Is.GreaterThan(1f));
+            AssertChaseCameraLooksBehindSasha(world, roadRig);
+
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBefore));
+            Assert.That(controller.State, Is.SameAs(stateBefore));
+            Assert.That(stateBefore.NextCommandSequence, Is.EqualTo(sequenceBefore));
+            Assert.That(stateBefore.RouteProgressTicks, Is.EqualTo(routeProgressBefore));
+            Assert.That(stateBefore.VehicleConditionMilli, Is.EqualTo(conditionBefore));
+            Assert.That(stateBefore.HeavyCargoCustody, Is.EqualTo(custodyBefore));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(controller.SaveStatus, Is.EqualTo(saveStatusBefore));
+            AssertSaveSnapshot(saveBefore, SnapshotSaveFiles(profileDirectory));
+
+            Vector3 recoveredCameraPosition = camera.transform.position;
+            Quaternion recoveredCameraRotation = camera.transform.rotation;
+            Assert.That(controller.RecoverRoadPresentation(), Is.True);
+
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBefore));
+            Assert.That(controller.State, Is.SameAs(stateBefore));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(body.linearVelocity, Is.EqualTo(Vector3.zero));
+            Assert.That(body.angularVelocity, Is.EqualTo(Vector3.zero));
+            Assert.That(
+                Vector3.Distance(camera.transform.position, recoveredCameraPosition),
+                Is.LessThan(0.001f));
+            Assert.That(
+                Quaternion.Angle(camera.transform.rotation, recoveredCameraRotation),
+                Is.LessThan(0.01f));
+            Assert.That(adapter.LastCargoMassKilograms, Is.EqualTo(1300));
+            Assert.That(adapter.LastDamageBand, Is.EqualTo(LastBearingRoadDamageBand.Worn));
+            Assert.That(controller.SaveStatus, Is.EqualTo(saveStatusBefore));
+            AssertSaveSnapshot(saveBefore, SnapshotSaveFiles(profileDirectory));
+            AssertCameraOwnership(controller, chaseActive: true);
+        }
+
+        [UnityTest]
+        public IEnumerator ExternallyDisabledChaseFailsClosedToFixedRoadCamera()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
+            InstallControllerState(controller, CreateOutboundState());
+
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingModeCoordinator coordinator = controller.ModeCoordinator!;
+            LastBearingCameraRig cameraRig = world.CameraRig!;
+            RoadFeelChaseCamera chaseCamera = world.RoadChaseCamera!;
+            RoadFeelRigInstance roadRig = world.RoadFeelRig!;
+            Camera sharedCamera = world.MainCamera!;
+            controller.Save();
+            Dictionary<string, string> saveBefore =
+                SnapshotSaveFiles(profileDirectory);
+            long globalTickBefore = controller.State!.GlobalTick;
+            long sequenceBefore = controller.State.NextCommandSequence;
+            long routeProgressBefore = controller.State.RouteProgressTicks;
+            long conditionBefore = controller.State.VehicleConditionMilli;
+            HeavyCargoCustody custodyBefore =
+                controller.State.HeavyCargoCustody;
+            int pendingBefore = PendingCommandCount(controller);
+            string statusBefore = controller.Status;
+            string saveStatusBefore = controller.SaveStatus;
+
+            AssertCameraOwnership(controller, chaseActive: true);
+            Assert.That(coordinator.IsRoadPresentationActive, Is.True);
+            Assert.That(roadRig.Adapter.IsRoadModeActive, Is.True);
+            LogAssert.Expect(
+                LogType.Warning,
+                "LAST_BEARING_CHASE_CAMERA_DISABLED ownership-lost");
+
+            chaseCamera.enabled = false;
+            yield return new WaitForSecondsRealtime(0.25f);
+
+            AssertCameraOwnership(controller, chaseActive: false);
+            Assert.That(cameraRig.IsRoadChaseRecoveryRequired, Is.True);
+            Assert.That(cameraRig.IsRoadMode, Is.True);
+            Assert.That(
+                cameraRig.RoadTarget,
+                Is.SameAs(roadRig.Root.transform));
+            Assert.That(sharedCamera.enabled, Is.True);
+            Assert.That(sharedCamera.gameObject.activeInHierarchy, Is.True);
+            Assert.That(coordinator.IsRoadPresentationActive, Is.True);
+            Assert.That(roadRig.Adapter.IsRoadModeActive, Is.True);
+            Assert.That(roadRig.Adapter.IsPhysicsSuspended, Is.False);
+            Assert.That(roadRig.Vehicle.Body.isKinematic, Is.False);
+            AssertFixedRoadFallbackPose(sharedCamera, roadRig.Root.transform);
+
+            Assert.That(controller.State!.GlobalTick, Is.GreaterThan(globalTickBefore));
+            Assert.That(controller.State.NextCommandSequence, Is.EqualTo(sequenceBefore));
+            Assert.That(controller.State.RouteProgressTicks, Is.EqualTo(routeProgressBefore));
+            Assert.That(controller.State.VehicleConditionMilli, Is.EqualTo(conditionBefore));
+            Assert.That(controller.State.HeavyCargoCustody, Is.EqualTo(custodyBefore));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(pendingBefore));
+            Assert.That(controller.Status, Is.EqualTo(statusBefore));
+            Assert.That(controller.SaveStatus, Is.EqualTo(saveStatusBefore));
+            AssertSaveSnapshot(saveBefore, SnapshotSaveFiles(profileDirectory));
+
+            Assert.That(
+                controller.CanRecoverRoadPresentation,
+                Is.True,
+                "active Driving keeps explicit recovery available so the player " +
+                "can deliberately reclaim chase ownership");
+
+            string hashBeforeRecovery = controller.CanonicalHash;
+            LastBearingState stateBeforeRecovery = controller.State;
+            Assert.That(controller.RecoverRoadPresentation(), Is.True);
+            AssertCameraOwnership(controller, chaseActive: true);
+            Assert.That(cameraRig.IsRoadChaseRecoveryRequired, Is.False);
+            AssertChaseCameraLooksBehindSasha(world, roadRig);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBeforeRecovery));
+            Assert.That(controller.State, Is.SameAs(stateBeforeRecovery));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(pendingBefore));
+            Assert.That(controller.SaveStatus, Is.EqualTo(saveStatusBefore));
+            AssertSaveSnapshot(saveBefore, SnapshotSaveFiles(profileDirectory));
+        }
+
+        [UnityTest]
+        public IEnumerator MissingVehicleControllerMakesManualRecoveryFailClosed()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
+            InstallControllerState(controller, CreateOutboundState());
+
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingModeCoordinator coordinator = controller.ModeCoordinator!;
+            RoadFeelRigInstance roadRig = world.RoadFeelRig!;
+            Rigidbody body = roadRig.Vehicle.Body;
+            controller.Save();
+            Dictionary<string, string> saveBefore =
+                SnapshotSaveFiles(profileDirectory);
+            string hashBefore = controller.CanonicalHash;
+            LastBearingState stateBefore = controller.State!;
+            int pendingBefore = PendingCommandCount(controller);
+            string statusBefore = controller.Status;
+            string saveStatusBefore = controller.SaveStatus;
+
+            Assert.That(controller.CanRecoverRoadPresentation, Is.True);
+            AssertCameraOwnership(controller, chaseActive: true);
+            UnityEngine.Object.DestroyImmediate(roadRig.Vehicle);
+            LogAssert.Expect(
+                LogType.Warning,
+                "LAST_BEARING_ROAD_PRESENTATION_DISABLED " +
+                "manual-recovery-reactivate InvalidOperationException");
+
+            Assert.That(controller.RecoverRoadPresentation(), Is.False);
+
+            Assert.That(coordinator.RoadAdapterFaulted, Is.True);
+            Assert.That(coordinator.HasRoadAdapter, Is.False);
+            Assert.That(coordinator.IsRoadPresentationActive, Is.False);
+            Assert.That(controller.CanRecoverRoadPresentation, Is.False);
+            AssertCameraOwnership(controller, chaseActive: false);
+            Assert.That(roadRig.Root.activeInHierarchy, Is.False);
+            Assert.That(body.gameObject.activeInHierarchy, Is.False);
+            Assert.That(world.VehicleView!.gameObject.activeInHierarchy, Is.True);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBefore));
+            Assert.That(controller.State, Is.SameAs(stateBefore));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(pendingBefore));
+            Assert.That(controller.Status, Is.EqualTo(statusBefore));
+            Assert.That(controller.SaveStatus, Is.EqualTo(saveStatusBefore));
+            AssertSaveSnapshot(saveBefore, SnapshotSaveFiles(profileDirectory));
+        }
+
+        [UnityTest]
         public IEnumerator OutboundSaveLoadSynchronizesRoadRigAfterCanonicalRender()
         {
             AsyncOperation? load = SceneManager.LoadSceneAsync(
@@ -787,6 +1092,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(Directory.Exists(profileDirectory), Is.True);
 
             controller.ReturnToTitle();
+            AssertCameraOwnership(controller, chaseActive: false);
             Assert.That(
                 Vector3.Distance(world.VehicleView.transform.position, expectedPosition),
                 Is.GreaterThan(0.1f));
@@ -804,6 +1110,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 world.VehicleView.VisibleLateralOffset,
                 Is.EqualTo(1.35f).Within(0.001f));
             AssertRoadPresentation(controller, roadRig, active: true);
+            AssertCameraOwnership(controller, chaseActive: true);
             Assert.That(
                 Vector3.Distance(
                     roadRig.Vehicle.Body.position,
@@ -856,6 +1163,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(coordinator.RoadAdapterFaulted, Is.True);
             Assert.That(coordinator.HasRoadAdapter, Is.False);
             Assert.That(coordinator.IsRoadPresentationActive, Is.False);
+            Assert.That(controller.CanRecoverRoadPresentation, Is.False);
+            Assert.That(controller.RecoverRoadPresentation(), Is.False);
+            AssertCameraOwnership(controller, chaseActive: false);
             Assert.That(
                 controller.ReadModel!.RouteProgressTicks,
                 Is.GreaterThan(progressBefore));
@@ -1017,6 +1327,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.ModeCoordinator.ActiveModeCount, Is.EqualTo(1));
             Assert.That(garage.gameObject.activeInHierarchy, Is.True);
             Assert.That(cameraRig.IsInspectionMode, Is.True);
+            AssertCameraOwnership(controller, chaseActive: false);
+            AssertRecoveryUnavailableWithoutWrites(controller);
             Assert.That(
                 Vector3.Distance(
                     world.MainCamera!.transform.position,
@@ -1048,6 +1360,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             Assert.That(garage.gameObject.activeInHierarchy, Is.False);
             Assert.That(cameraRig.IsInspectionMode, Is.False);
+            AssertCameraOwnership(controller, chaseActive: false);
+            AssertRecoveryUnavailableWithoutWrites(controller);
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
         }
 
@@ -1247,6 +1561,37 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     transactionId,
                     fingerprint));
             Assert.That(state.ExpeditionPhase, Is.EqualTo(ExpeditionPhase.Outbound));
+            return state;
+        }
+
+        private static LastBearingState CreateLoadedWornOutboundState()
+        {
+            var kernel = new LastBearingKernel();
+            LastBearingState state = DriveUntilWreckLineAvailable(
+                CreateOutboundState());
+            RouteActionKind action =
+                LastBearingReadModel.FromState(state).RouteActionKind;
+            state = Apply(kernel, state, sequence =>
+                new OperateWreckLineModuleCommand(sequence, action));
+            for (var steer = 0; steer < 20; steer++)
+            {
+                state = Apply(kernel, state, sequence =>
+                    new DriveVehicleCommand(sequence, 0, 1000));
+            }
+
+            state = Apply(kernel, state, sequence =>
+                new DriveVehicleCommand(sequence, 1000, 0));
+            Assert.That(state.ExpeditionPhase, Is.EqualTo(ExpeditionPhase.Outbound));
+            Assert.That(state.RouteActionUsed, Is.True);
+            Assert.That(state.HeavyCargoKind, Is.EqualTo(HeavyCargoKind.PumpRotor));
+            Assert.That(state.HeavyCargoCustody, Is.EqualTo(HeavyCargoCustody.Vehicle));
+            Assert.That(
+                state.VehicleConditionMilli,
+                Is.LessThan(LastBearingBalanceV1.StartingVehicleConditionMilli));
+            Assert.That(
+                LastBearingModeCoordinator.DerivePresentationDamageBand(
+                    state.VehicleConditionMilli),
+                Is.EqualTo(LastBearingRoadDamageBand.Worn));
             return state;
         }
 
@@ -1551,6 +1896,93 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(coordinator.ActiveModeCount, Is.EqualTo(1));
         }
 
+        private static void AssertCameraOwnership(
+            LastBearingGameController controller,
+            bool chaseActive)
+        {
+            LastBearingWorldBuilder world = controller.World!;
+            Camera sharedCamera = world.MainCamera!;
+            LastBearingCameraRig cameraRig = world.CameraRig!;
+            RoadFeelChaseCamera chaseCamera = world.RoadChaseCamera!;
+            AudioListener listener = sharedCamera.GetComponent<AudioListener>()!;
+
+            Assert.That(listener, Is.Not.Null);
+            Assert.That(cameraRig.gameObject, Is.SameAs(sharedCamera.gameObject));
+            Assert.That(chaseCamera.gameObject, Is.SameAs(sharedCamera.gameObject));
+            Assert.That(listener.gameObject, Is.SameAs(sharedCamera.gameObject));
+            Assert.That(cameraRig.IsRoadChaseActive, Is.EqualTo(chaseActive));
+            Assert.That(chaseCamera.IsChaseActive, Is.EqualTo(chaseActive));
+            Assert.That(chaseCamera.enabled, Is.EqualTo(chaseActive));
+            if (chaseActive)
+            {
+                Assert.That(
+                    sharedCamera.fieldOfView,
+                    Is.InRange(
+                        RoadFeelChaseCamera.BaseFieldOfView,
+                        RoadFeelChaseCamera.MaximumFieldOfView));
+            }
+            else
+            {
+                Assert.That(
+                    sharedCamera.fieldOfView,
+                    Is.EqualTo(LastBearingCameraRig.StrategyFieldOfView)
+                        .Within(0.001f));
+            }
+        }
+
+        private static void AssertChaseCameraLooksBehindSasha(
+            LastBearingWorldBuilder world,
+            RoadFeelRigInstance roadRig)
+        {
+            Transform target = roadRig.Root.transform;
+            Camera sharedCamera = world.MainCamera!;
+            Transform camera = sharedCamera.transform;
+            Vector3 targetToCamera = camera.position - target.position;
+            Assert.That(
+                Vector3.Dot(targetToCamera.normalized, target.forward),
+                Is.LessThan(-0.25f));
+            Vector3 focus = target.position + (Vector3.up * 1.65f);
+            Vector3 focusDirection = (focus - camera.position).normalized;
+            Assert.That(
+                Vector3.Dot(camera.forward, focusDirection),
+                Is.GreaterThan(0.9f));
+            Assert.That(
+                sharedCamera.fieldOfView,
+                Is.EqualTo(RoadFeelChaseCamera.BaseFieldOfView).Within(0.001f));
+        }
+
+        private static void AssertFixedRoadFallbackPose(
+            Camera camera,
+            Transform roadTarget)
+        {
+            Vector3 vehicleForward = roadTarget.forward;
+            vehicleForward.y = 0f;
+            if (vehicleForward.sqrMagnitude < 0.001f)
+            {
+                vehicleForward = Vector3.forward;
+            }
+
+            vehicleForward.Normalize();
+            Vector3 focus = roadTarget.position + (Vector3.up * 1.15f);
+            Vector3 expectedPosition =
+                focus - (vehicleForward * 8.5f) + (Vector3.up * 3.8f);
+            Assert.That(
+                Vector3.Distance(camera.transform.position, expectedPosition),
+                Is.LessThan(0.025f),
+                "the moving fail-closed road target may retain a bounded " +
+                "presentation-only smoothing offset while the fixed rig owns " +
+                "the shared camera");
+            Assert.That(
+                Vector3.Dot(
+                    camera.transform.forward,
+                    (focus - camera.transform.position).normalized),
+                Is.GreaterThan(0.999f));
+            Assert.That(
+                camera.fieldOfView,
+                Is.EqualTo(LastBearingCameraRig.StrategyFieldOfView)
+                    .Within(0.001f));
+        }
+
         private static void AssertRoadPresentation(
             LastBearingGameController controller,
             RoadFeelRigInstance roadRig,
@@ -1587,6 +2019,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(body.angularVelocity, Is.EqualTo(Vector3.zero));
             Assert.That(coordinator.IsRoadPresentationActive, Is.False);
             Assert.That(coordinator.IsRoadPresentationHeldAtRecovery, Is.True);
+            Assert.That(coordinator.CanRecoverRoadPresentation, Is.False);
+            Assert.That(controller.CanRecoverRoadPresentation, Is.False);
+            AssertRecoveryUnavailableWithoutWrites(controller);
             Assert.That(world.VehicleView!.gameObject.activeSelf, Is.False);
             Assert.That(
                 world.CameraRig!.RoadTarget,
@@ -1623,6 +2058,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(coordinator.IsRoadPresentationActive, Is.False);
             Assert.That(coordinator.IsRoadPresentationHeldAtRecovery, Is.False);
             Assert.That(coordinator.IsRoadPresentationHeldAtModulePoint, Is.True);
+            Assert.That(coordinator.CanRecoverRoadPresentation, Is.False);
+            Assert.That(controller.CanRecoverRoadPresentation, Is.False);
+            AssertRecoveryUnavailableWithoutWrites(controller);
             Assert.That(world.VehicleView!.gameObject.activeSelf, Is.False);
             Assert.That(
                 world.CameraRig!.RoadTarget,
@@ -1649,6 +2087,53 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             var pending = pendingField!.GetValue(controller) as ICollection;
             Assert.That(pending, Is.Not.Null);
             return pending!.Count;
+        }
+
+        private static void AssertRecoveryUnavailableWithoutWrites(
+            LastBearingGameController controller)
+        {
+            string hashBefore = controller.CanonicalHash;
+            string statusBefore = controller.Status;
+            string saveStatusBefore = controller.SaveStatus;
+            int pendingBefore = PendingCommandCount(controller);
+            LastBearingState? stateBefore = controller.State;
+
+            Assert.That(controller.CanRecoverRoadPresentation, Is.False);
+            Assert.That(controller.RecoverRoadPresentation(), Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBefore));
+            Assert.That(controller.Status, Is.EqualTo(statusBefore));
+            Assert.That(controller.SaveStatus, Is.EqualTo(saveStatusBefore));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(pendingBefore));
+            Assert.That(controller.State, Is.SameAs(stateBefore));
+        }
+
+        private static Dictionary<string, string> SnapshotSaveFiles(
+            string profileDirectory)
+        {
+            Assert.That(Directory.Exists(profileDirectory), Is.True);
+            return Directory.GetFiles(
+                    profileDirectory,
+                    "*",
+                    SearchOption.AllDirectories)
+                .OrderBy(path => path, StringComparer.Ordinal)
+                .ToDictionary(
+                    path => Path.GetRelativePath(profileDirectory, path),
+                    path => Convert.ToBase64String(File.ReadAllBytes(path)),
+                    StringComparer.Ordinal);
+        }
+
+        private static void AssertSaveSnapshot(
+            IReadOnlyDictionary<string, string> expected,
+            IReadOnlyDictionary<string, string> actual)
+        {
+            Assert.That(actual.Keys, Is.EquivalentTo(expected.Keys));
+            foreach (KeyValuePair<string, string> pair in expected)
+            {
+                Assert.That(
+                    actual[pair.Key],
+                    Is.EqualTo(pair.Value),
+                    "manual presentation recovery changed save file " + pair.Key);
+            }
         }
 
         private static void CompleteDistrictObservation(

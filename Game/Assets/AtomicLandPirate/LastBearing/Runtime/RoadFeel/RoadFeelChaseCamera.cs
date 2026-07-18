@@ -13,6 +13,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
     [RequireComponent(typeof(Camera))]
     public sealed class RoadFeelChaseCamera : MonoBehaviour
     {
+        public const float BaseFieldOfView = 62f;
+        public const float MaximumFieldOfView = 67f;
+
         private const float BaseDistance = 7.8f;
         private const float MaximumDistance = 10.2f;
         private const float MinimumPitch = 8f;
@@ -29,6 +32,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
         private float _orbitPitch = DefaultPitch;
         private float _lastOrbitInputTime;
 
+        public bool IsChaseActive => enabled;
+
+        public bool IsConfigured =>
+            _target != null && _body != null && _camera != null;
+
         public void Configure(Transform target, Rigidbody body)
         {
             _target = target;
@@ -37,12 +45,38 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
             SnapBehind();
         }
 
+        public void SetChaseActive(bool active)
+        {
+            if (!IsConfigured)
+            {
+                enabled = false;
+                return;
+            }
+
+            if (enabled == active)
+            {
+                return;
+            }
+
+            enabled = active;
+            _positionVelocity = Vector3.zero;
+            if (active)
+            {
+                SnapBehind();
+            }
+        }
+
         public void SnapBehind()
         {
             _orbitYaw = 0f;
             _orbitPitch = DefaultPitch;
             _positionVelocity = Vector3.zero;
             _lastOrbitInputTime = Time.unscaledTime;
+
+            if (_camera != null)
+            {
+                _camera.fieldOfView = BaseFieldOfView;
+            }
 
             if (_target == null)
             {
@@ -109,8 +143,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
             if (_camera != null)
             {
                 var targetFov = Mathf.Lerp(
-                    62f,
-                    67f,
+                    BaseFieldOfView,
+                    MaximumFieldOfView,
                     Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(2f, 32f, speed)));
                 _camera.fieldOfView = Mathf.Lerp(
                     _camera.fieldOfView,

@@ -2,7 +2,7 @@
 
 Status: **provisional execution ledger**
 
-Baseline: `8f2b973e10682a77339b28bde67eb7a9ff5679bf`
+Baseline: `b35157a07a7442f6b02ed179201cd59e89368996`
 
 Purpose: keep the next playable work vertically integrated, testable, and honest.
 
@@ -273,8 +273,7 @@ Detailed contract:
 Objective: turn the D-0030 comparison into a small, playable city-building and
 local-logistics observation without selecting a grammar.
 
-Status: current implementation candidate; not released until independent,
-Unity, protected, and creator-delegated release gates pass.
+Status: released on protected `main` in `b35157a`.
 
 Scope:
 
@@ -308,12 +307,47 @@ city-grammar recommendation.
 Detailed contract:
 `docs/playtests/WP-0002/VGR-07-HOME-BEFORE-HORIZON-CONTRACT.md`.
 
-## Queued after VGR-07 — Stay With Sasha
+## VGR-08 — Stay With Sasha
 
-The next bounded driving pass should integrate the existing tested chase camera
-into the one shared Last Bearing camera and add presentation-only rig recovery.
-It must not add core telemetry, save state, or a second camera. Exact scope and
-contract remain unimplemented until VGR-07 releases.
+Objective: make the released road leg feel attached to Sasha's physical rig by
+integrating the existing tested chase behavior and one explicit recovery verb.
+
+Status: current implementation candidate; not released until independent,
+Unity, protected, and creator-delegated release gates pass.
+
+Scope:
+
+- Put exactly one existing `RoadFeelChaseCamera` and the sole `AudioListener` on
+  the sole shared Last Bearing camera; add no second camera or listener.
+- Let chase own transform and field of view only while the road physics
+  presentation is actively running under canonical Driving mode.
+- Preserve the existing strategy, D-0030 comparison, garage, and building
+  cutaway camera poses, and restore their field of view when chase yields.
+- Keep existing chase orbit, recenter, speed look-ahead, horizon, and collision
+  behavior presentation-only.
+- Add `R`/gamepad north manual recovery during active driving only: clear local
+  controls and motion, synchronize the physics shadow to the current canonical
+  vehicle pose, preserve derived load/condition, and recenter chase.
+- Add no boundary, inversion, timer, or telemetry-triggered automatic recovery
+  to Last Bearing.
+
+Acceptance:
+
+- every mode retains one shared camera and one unambiguous pose owner;
+- active outbound and return driving use the existing chase behavior;
+- pause, interaction holds, faults, and non-road modes cannot invoke manual
+  recovery and restore the appropriate camera ownership;
+- valid and repeated recovery preserve canonical bytes, pending commands, save
+  data, load/condition, and interaction availability;
+- no presentation condition invokes recovery without explicit player input;
+- deterministic, Unity, visual, save, and protected gates remain green.
+
+Exclude: physics-authored progress, automatic anti-stuck behavior, a second
+camera, camera/recovery save state, new route or interaction rules, core
+telemetry, dependencies, assets, and any D-0030, D-0039, or D-0044 selection.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-08-STAY-WITH-SASHA-CONTRACT.md`.
 
 ## Visual constitution
 
