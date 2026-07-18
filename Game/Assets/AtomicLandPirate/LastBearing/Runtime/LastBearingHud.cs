@@ -110,6 +110,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             DrawCityNeedAndGrammar(model);
             GUILayout.Space(10f);
 
+            DrawPresentationMode(model);
+            GUILayout.Space(10f);
+
             GUILayout.Label("CURRENT ACTION", _headingStyle);
             DrawContextActions(model);
             GUILayout.Space(10f);
@@ -323,6 +326,45 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             GUILayout.Label(model.NextObjective, _bodyStyle);
+        }
+
+        private void DrawPresentationMode(LastBearingReadModel model)
+        {
+            LastBearingModeCoordinator? coordinator = _controller!.ModeCoordinator;
+            GUILayout.Label("ONE-SCENE VIEW", _headingStyle);
+            GUILayout.Label(
+                coordinator?.HasActiveMode == true
+                    ? "R0 ROUTING SCAFFOLD · " + coordinator.CurrentMode
+                    : "Inactive",
+                _bodyStyle);
+            if (model.ExpeditionPhase != ExpeditionPhase.AtHome)
+            {
+                GUILayout.Label(
+                    "Driving, depot encounter, and city return views follow the canonical expedition phase.",
+                    _mutedStyle);
+                return;
+            }
+
+            GUILayout.Label(
+                "These inspection views are local presentation only. There is no on-foot mode.",
+                _mutedStyle);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("CITY", _buttonStyle))
+            {
+                _controller.ShowCityOverview();
+            }
+
+            if (GUILayout.Button("CUTAWAY", _buttonStyle))
+            {
+                _controller.OpenBuildingCutaway();
+            }
+
+            if (GUILayout.Button("GARAGE", _buttonStyle))
+            {
+                _controller.OpenGarageBay();
+            }
+
+            GUILayout.EndHorizontal();
         }
 
         private void DrawCityNeedAndGrammar(LastBearingReadModel model)

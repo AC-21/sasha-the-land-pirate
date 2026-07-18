@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Collections.Generic;
+using AtomicLandPirate.Presentation.LastBearing.RoadFeel;
 using AtomicLandPirate.Simulation.LastBearing;
 using UnityEngine;
 
@@ -46,6 +47,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public LastBearingVehicleView? VehicleView { get; private set; }
 
+        public RoadFeelRigInstance? RoadFeelRig { get; private set; }
+
         public LastBearingCityGrammarComparison? CityGrammarComparison { get; private set; }
 
         public Transform? TurbineRotor => _turbineRotor;
@@ -54,7 +57,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         internal LastBearingVisualSnapshot Snapshot => _snapshot;
 
-        public void Build()
+        public void Build(Transform? drivingModeRoot = null)
         {
             if (_built)
             {
@@ -82,6 +85,30 @@ namespace AtomicLandPirate.Presentation.LastBearing
             BuildResidents(oxide, bone, iron, concrete);
             BuildCityGrammarComparison(concrete, iron, oxide, bone);
             BuildVehicle(iron, darkConcrete, bone);
+            if (drivingModeRoot != null)
+            {
+                Material tungsten = CreateMaterial(
+                    Tungsten * 0.55f,
+                    Tungsten * 2.1f);
+                Material damageLamp = CreateMaterial(
+                    SignalCyan * 0.5f,
+                    SignalCyan * 1.5f);
+                RoadFeelRig = RoadFeelRigFactory.Create(
+                    drivingModeRoot,
+                    VehicleView!.transform.position,
+                    VehicleView.transform.rotation,
+                    new RoadFeelRigMaterials(
+                        iron,
+                        oxide,
+                        bone,
+                        tungsten,
+                        damageLamp));
+                foreach (GameObject cargo in RoadFeelRig.CargoVisuals)
+                {
+                    cargo.SetActive(false);
+                }
+            }
+
             BuildCamera();
 
             Apply(new LastBearingVisualSnapshot(

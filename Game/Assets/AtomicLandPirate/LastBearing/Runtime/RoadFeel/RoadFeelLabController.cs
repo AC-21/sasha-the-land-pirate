@@ -518,151 +518,23 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
             Material bone,
             Material tungsten)
         {
-            var rig = new GameObject("Sasha's Planted Utility Rig");
-            rig.transform.SetParent(transform, false);
-            rig.transform.SetPositionAndRotation(
+            RoadFeelRigInstance rig = RoadFeelRigFactory.Create(
+                transform,
                 _resetAnchors[0].position,
-                _resetAnchors[0].rotation);
-
-            var controller = rig.AddComponent<RoadFeelVehicleController>();
-            _vehicle = controller;
-
-            CreateBlock(
-                "Boxed Iron Chassis",
-                rig.transform,
-                new Vector3(0f, 0.72f, 0f),
-                new Vector3(2.25f, 0.48f, 4.7f),
-                iron,
-                Quaternion.identity);
-            CreateBlock(
-                "Oxide Cab",
-                rig.transform,
-                new Vector3(0f, 1.42f, 0.42f),
-                new Vector3(2.08f, 0.96f, 2.05f),
-                oxide,
-                Quaternion.identity);
-            CreateBlock(
-                "Bone Hood Patch",
-                rig.transform,
-                new Vector3(0f, 1.05f, 1.66f),
-                new Vector3(2.04f, 0.38f, 1.2f),
-                bone,
-                Quaternion.Euler(-3f, 0f, 0f));
-            CreateBlock(
-                "Utility Bed",
-                rig.transform,
-                new Vector3(0f, 1.02f, -1.42f),
-                new Vector3(2.18f, 0.28f, 1.55f),
-                iron,
-                Quaternion.identity);
-            CreateBlock(
-                "Front Ram",
-                rig.transform,
-                new Vector3(0f, 0.58f, 2.55f),
-                new Vector3(2.75f, 0.3f, 0.32f),
-                oxide,
-                Quaternion.identity);
-            CreateBlock(
-                "Left Bed Rail",
-                rig.transform,
-                new Vector3(-1.02f, 1.5f, -1.42f),
-                new Vector3(0.12f, 0.95f, 1.72f),
-                bone,
-                Quaternion.identity);
-            CreateBlock(
-                "Right Bed Rail",
-                rig.transform,
-                new Vector3(1.02f, 1.5f, -1.42f),
-                new Vector3(0.12f, 0.95f, 1.72f),
-                bone,
-                Quaternion.identity);
-
-            CreateHeadlight(rig.transform, -0.72f, tungsten);
-            CreateHeadlight(rig.transform, 0.72f, tungsten);
-            CreateDamageLamp(rig.transform);
-            BuildCargoVisuals(rig.transform, oxide, bone);
-
-            var stationPositions = new[]
-            {
-                new Vector3(-1.12f, 0.62f, 1.55f),
-                new Vector3(1.12f, 0.62f, 1.55f),
-                new Vector3(-1.12f, 0.62f, -1.55f),
-                new Vector3(1.12f, 0.62f, -1.55f)
-            };
-            var contactStations = new Transform[4];
-            var wheelVisuals = new Transform[4];
-            var steeringPivots = new Transform[4];
-            for (var index = 0; index < stationPositions.Length; index++)
-            {
-                var station = new GameObject("Contact Station " + index).transform;
-                station.SetParent(rig.transform, false);
-                station.localPosition = stationPositions[index];
-                contactStations[index] = station;
-
-                var pivot = new GameObject("Steering Pivot " + index).transform;
-                pivot.SetParent(rig.transform, false);
-                pivot.localPosition = stationPositions[index];
-                steeringPivots[index] = pivot;
-
-                var wheel = CreateCylinder(
-                    "Utility Wheel " + index,
-                    pivot,
-                    Vector3.zero,
-                    new Vector3(0.82f, 0.3f, 0.82f),
+                _resetAnchors[0].rotation,
+                new RoadFeelRigMaterials(
                     iron,
-                    disableCollider: true);
-                wheel.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
-                wheelVisuals[index] = wheel.transform;
+                    oxide,
+                    bone,
+                    tungsten,
+                    _damageLampMaterial!));
+            _vehicle = rig.Vehicle;
+            foreach (GameObject cargo in rig.CargoVisuals)
+            {
+                _cargoCrates.Add(cargo);
             }
 
-            controller.Initialize(contactStations, wheelVisuals, steeringPivots);
-        }
-
-        private void CreateHeadlight(
-            Transform parent,
-            float x,
-            Material tungsten)
-        {
-            CreateCylinder(
-                "Tungsten Headlight " + (x < 0f ? "Left" : "Right"),
-                parent,
-                new Vector3(x, 1.03f, 2.42f),
-                new Vector3(0.28f, 0.12f, 0.28f),
-                tungsten,
-                disableCollider: true).transform.localRotation =
-                Quaternion.Euler(90f, 0f, 0f);
-        }
-
-        private void CreateDamageLamp(Transform parent)
-        {
-            CreateSphere(
-                "Rig Condition Tell-Tale",
-                parent,
-                new Vector3(0f, 2.18f, 0.35f),
-                Vector3.one * 0.25f,
-                _damageLampMaterial!,
-                disableCollider: true);
-        }
-
-        private void BuildCargoVisuals(
-            Transform parent,
-            Material oxide,
-            Material bone)
-        {
-            _cargoCrates.Add(CreateBlock(
-                "Cargo Crate 650kg",
-                parent,
-                new Vector3(-0.47f, 1.42f, -1.45f),
-                new Vector3(0.82f, 0.7f, 1.05f),
-                oxide,
-                Quaternion.identity));
-            _cargoCrates.Add(CreateBlock(
-                "Cargo Crate 1300kg",
-                parent,
-                new Vector3(0.47f, 1.42f, -1.45f),
-                new Vector3(0.82f, 0.7f, 1.05f),
-                bone,
-                Quaternion.identity));
+            rig.Adapter.SetRoadModeActive(true);
         }
 
         private void BuildCamera()

@@ -30,6 +30,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private LastBearingReadModel? _readModel;
         private LastBearingWorldBuilder? _world;
         private LastBearingHud? _hud;
+        private LastBearingModeCoordinator? _modeCoordinator;
         private LastBearingSaveAdapter? _saveAdapter;
         private float _accumulator;
         private bool _initialized;
@@ -44,6 +45,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public LastBearingReadModel? ReadModel => _readModel;
 
         public LastBearingWorldBuilder? World => _world;
+
+        public LastBearingModeCoordinator? ModeCoordinator => _modeCoordinator;
 
         public string Status => _status;
 
@@ -77,8 +80,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _initialized = true;
             gameObject.name = RuntimeRootName;
 
+            _modeCoordinator = gameObject.AddComponent<LastBearingModeCoordinator>();
+            _modeCoordinator.Initialize();
             _world = gameObject.AddComponent<LastBearingWorldBuilder>();
-            _world.Build();
+            _world.Build(_modeCoordinator.GetModeRoot(
+                LastBearingPresentationMode.Driving));
+            _modeCoordinator.ConfigurePresentationOwners(
+                _world.CameraRig!,
+                _world.VehicleView!,
+                _world.RoadFeelRig!.Root.transform);
+            _modeCoordinator.AttachRoadModeAdapter(
+                _world.RoadFeelRig.Adapter);
             _hud = gameObject.AddComponent<LastBearingHud>();
             _hud.Configure(this);
 
@@ -103,6 +115,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _saveStatus = "Unsaved local development state.";
             _world?.SetCityNeedInspected(false);
             _world?.BeginCityGrammarComparisonSession();
+            _modeCoordinator?.ClearSession();
 
             AssignDefaultLeadResident();
             _status = "Water is falling. Inspect the turbine, then wake the civic machinery.";
@@ -145,6 +158,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _status = "Choose who calls Last Bearing home.";
             _world?.SetCityNeedInspected(false);
             _world?.BeginCityGrammarComparisonSession();
+            _modeCoordinator?.ClearSession();
             _world?.Apply(new LastBearingVisualSnapshot(
                 LastBearingVisualPhase.Title,
                 LastBearingVisualModule.None,
@@ -245,6 +259,32 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetCityGrammarComparison();
             _status =
                 "City-grammar comparison cleared. D-0030 remains open.";
+        }
+
+        public void ShowCityOverview()
+        {
+            TryShowCityMode(
+                LastBearingPresentationMode.CityOverview,
+                "City overview restored.");
+        }
+
+        public void OpenBuildingCutaway()
+        {
+            TryShowCityMode(
+                LastBearingPresentationMode.BuildingCutaway,
+                "Building cutaway routing scaffold active; the city state is unchanged.");
+        }
+
+        public void OpenGarageBay()
+        {
+            TryShowCityMode(
+                LastBearingPresentationMode.GarageBay,
+                "Garage bay routing scaffold active; the vehicle state is unchanged.");
+        }
+
+        public void AttachRoadModeAdapter(ILastBearingRoadModeAdapter adapter)
+        {
+            _modeCoordinator?.AttachRoadModeAdapter(adapter);
         }
 
         public void CommitExpedition()
@@ -408,6 +448,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 }
 
                 _pendingCommands.Clear();
+                _modeCoordinator?.ClearSession();
                 _state = result.State;
                 _readModel = LastBearingReadModel.FromState(_state);
                 _accumulator = 0f;
@@ -494,7 +535,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void QueueDriveInputIfApplicable()
         {
-            if (_readModel == null ||
+            if (_pendingCommands.Count != 0 ||
+                _readModel == null ||
                 _readModel.PauseCause != PauseCause.None ||
                 (_readModel.ExpeditionPhase != ExpeditionPhase.Outbound &&
                  _readModel.ExpeditionPhase != ExpeditionPhase.Returning))
@@ -541,6 +583,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             float clampedSteering = Mathf.Clamp(steering, -1f, 1f);
             int throttleMilli = Mathf.RoundToInt(Mathf.Clamp01(throttle) * 1000f);
             int steeringMilli = Mathf.RoundToInt(clampedSteering * 1000f);
+            _modeCoordinator?.ApplyQuantizedRoadCommandShadow(
+                throttleMilli,
+                steeringMilli);
             if (throttleMilli == 0 && steeringMilli == 0)
             {
                 return;
@@ -644,6 +689,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 repaired,
                 humanVisible,
                 robotVisible));
+            _modeCoordinator?.ApplyCanonical(_readModel);
         }
 
         private void Queue(params Func<long, LastBearingCommand>[] factories)
@@ -670,6 +716,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _status = "Inspect the failing water system before committing city action.";
             return false;
+        }
+
+        private void TryShowCityMode(
+            LastBearingPresentationMode mode,
+            string successStatus)
+        {
+            if (_modeCoordinator?.TryShowCityMode(mode, _readModel) == true)
+            {
+                _status = successStatus;
+                return;
+            }
+
+            _status = "City inspection views are available only while Sasha is home.";
         }
     }
 }

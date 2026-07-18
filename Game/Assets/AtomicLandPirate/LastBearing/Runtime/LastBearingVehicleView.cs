@@ -93,6 +93,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private GameObject? _tank;
         private Vector3 _lastPosition;
         private float _visibleLateralOffset;
+        private LastBearingVisualSnapshot _lastSnapshot;
+        private bool _hasSnapshot;
 
         internal LastBearingVisualModule Module { get; private set; }
 
@@ -166,14 +168,35 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         internal void Apply(LastBearingVisualSnapshot snapshot)
         {
+            Apply(snapshot, snapLateral: false);
+        }
+
+        internal void SnapToCanonicalRoadPose()
+        {
+            if (!_hasSnapshot || !_lastSnapshot.IsRoadMode)
+            {
+                return;
+            }
+
+            Apply(_lastSnapshot, snapLateral: true);
+        }
+
+        private void Apply(
+            LastBearingVisualSnapshot snapshot,
+            bool snapLateral)
+        {
+            _lastSnapshot = snapshot;
+            _hasSnapshot = true;
             SetModule(snapshot.Module);
             NormalizedRouteProgress = snapshot.RouteProgress;
             float targetLateralOffset =
                 snapshot.VehicleLateralNormalized * MaximumLateralOffsetMetres;
-            _visibleLateralOffset = Mathf.MoveTowards(
-                _visibleLateralOffset,
-                targetLateralOffset,
-                LateralResponsePerTick);
+            _visibleLateralOffset = snapLateral
+                ? targetLateralOffset
+                : Mathf.MoveTowards(
+                    _visibleLateralOffset,
+                    targetLateralOffset,
+                    LateralResponsePerTick);
             float visibleLateralNormalized = Mathf.Approximately(
                 MaximumLateralOffsetMetres,
                 0f)

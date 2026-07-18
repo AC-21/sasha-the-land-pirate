@@ -27,7 +27,9 @@ namespace AtomicLandPirate.LastBearingTests
             string surface = Read(root, "RoadFeelSurface.cs");
             string camera = Read(root, "RoadFeelChaseCamera.cs");
             string lab = Read(root, "RoadFeelLabController.cs");
+            string factory = Read(root, "RoadFeelRigFactory.cs");
             string bootstrap = Read(root, "RoadFeelLabBootstrap.cs");
+            string modeAdapter = Read(root, "LastBearingRoadFeelModeAdapter.cs");
 
             Require(vehicle, "FixedUpdate");
             Require(vehicle, "AddForceAtPosition");
@@ -35,6 +37,14 @@ namespace AtomicLandPirate.LastBearingTests
             Require(vehicle, "SetControlInput");
             Require(vehicle, "SetLoad");
             Require(vehicle, "ResetAt");
+            Require(vehicle, "bool wasKinematic = body.isKinematic");
+            Require(vehicle, "body.isKinematic = true");
+            Require(vehicle, "transform.SetPositionAndRotation(position, rotation)");
+            Require(vehicle, "Physics.SyncTransforms()");
+            Require(vehicle, "body.isKinematic = false");
+            TestHarness.True(
+                vehicle.IndexOf("body.PublishTransform()", StringComparison.Ordinal) < 0,
+                "Road Feel reset must not publish a stale dynamic physics pose");
             Require(vehicle, "RoadFeelTelemetry");
             Require(contracts, "ShouldApplyReverse");
 
@@ -56,6 +66,42 @@ namespace AtomicLandPirate.LastBearingTests
             Require(lab, "ResetAt");
             Require(lab, "RoadFeelSurfaceKind.Gravel");
             Require(lab, "RoadFeelSurfaceKind.Sand");
+            Require(lab, "RoadFeelRigFactory.Create");
+
+            Require(factory, "new RoadFeelRigInstance");
+            Require(factory, "RoadFeelVehicleController");
+            Require(factory, "LastBearingRoadFeelModeAdapter");
+            Require(factory, "CreateHeadlight");
+            Require(factory, "cargoVisuals");
+            Require(factory, "contactStations");
+            foreach (string token in new[]
+                     {
+                         "Camera",
+                         "Keyboard.current",
+                         "Gamepad.current",
+                         "AtomicLandPirate.Simulation",
+                         "SaveContracts",
+                         "Application.persistentDataPath",
+                     })
+            {
+                TestHarness.True(
+                    factory.IndexOf(token, StringComparison.Ordinal) < 0,
+                    "Road Feel rig factory owns forbidden surface " + token);
+            }
+
+            Require(modeAdapter, "ILastBearingRoadModeAdapter");
+            Require(modeAdapter, "ApplyQuantizedCommandShadow");
+            Require(modeAdapter, "SetControlInput");
+            Require(modeAdapter, "SynchronizePresentationPose");
+            Require(modeAdapter, "CommandReceiptCount");
+            Require(modeAdapter, "body.isKinematic = true");
+            Require(modeAdapter, "body.linearVelocity = Vector3.zero");
+            TestHarness.True(
+                modeAdapter.IndexOf("RoadFeelTelemetry", StringComparison.Ordinal) < 0,
+                "Road Feel mode adapter must not return physics telemetry");
+            TestHarness.True(
+                modeAdapter.IndexOf("LastBearingState", StringComparison.Ordinal) < 0,
+                "Road Feel mode adapter must not receive canonical mutable state");
 
             Require(bootstrap, "RoadFeelLab");
             Require(bootstrap, "RuntimeInitializeOnLoadMethod");
@@ -72,7 +118,9 @@ namespace AtomicLandPirate.LastBearingTests
                          surface,
                          camera,
                          lab,
+                         factory,
                          bootstrap,
+                         modeAdapter,
                      })
             {
                 foreach (string token in ForbiddenRuntimeTokens)
