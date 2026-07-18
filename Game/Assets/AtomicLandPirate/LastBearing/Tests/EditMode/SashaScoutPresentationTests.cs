@@ -354,7 +354,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             InvokeSimulationTick(controller);
 
             Assert.That(controller.ReadModel, Is.Not.Null);
-            Assert.That(controller.ReadModel!.SliceInfrastructureActive, Is.True);
+            Assert.That(controller.State!.SliceInfrastructureActive, Is.True);
             Assert.That(
                 controller.ReadModel.PreparationChoice,
                 Is.EqualTo(PreparationChoice.Unselected));

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using AtomicLandPirate.Presentation.LastBearing.Editor;
@@ -1046,7 +1047,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             SimulateOneTick(controller);
 
             Assert.That(controller.ReadModel, Is.Not.Null);
-            Assert.That(controller.ReadModel!.SliceInfrastructureActive, Is.True);
+            Assert.That(controller.State!.SliceInfrastructureActive, Is.True);
             Assert.That(
                 controller.ReadModel.PreparationChoice,
                 Is.EqualTo(PreparationChoice.Unselected));
