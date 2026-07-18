@@ -305,6 +305,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.Initialize();
             controller.StartNewGame(ColonyComposition.HumanOnly);
             controller.InspectCityNeed();
+            CompleteDistrictObservation(controller, clear: true);
             controller.ActivateInfrastructure();
 
             controller.Save();
@@ -338,6 +339,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.ActivateInfrastructure();
 
             Assert.That(controller.CityNeedInspected, Is.True);
+            Assert.That(pending!.Count, Is.EqualTo(0));
+            Assert.That(controller.Status, Does.Contain("Complete either"));
+
+            CompleteDistrictObservation(controller, clear: true);
+            controller.ActivateInfrastructure();
+
             Assert.That(pending!.Count, Is.EqualTo(1));
         }
 
@@ -391,6 +398,172 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(cameraRig.IsComparisonMode, Is.False);
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
             Assert.That(controller.CityGrammarEvidence, Does.Contain("selections=2"));
+        }
+
+        [Test]
+        public void CityGrammarTrialsRetainSeparateNeutralServiceCellObservations()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.Mixed);
+            controller.InspectCityNeed();
+            string canonicalBefore = controller.CanonicalHash;
+            LastBearingCityGrammarComparison comparison =
+                controller.World!.CityGrammarComparison!;
+
+            controller.OpenGarageBay();
+            LastBearingPresentationMode modeBeforeInvalid =
+                controller.ModeCoordinator!.CurrentMode;
+            Vector3 cameraPositionBeforeInvalid =
+                controller.World.CameraRig!.transform.position;
+            Quaternion cameraRotationBeforeInvalid =
+                controller.World.CameraRig.transform.rotation;
+
+            controller.SelectCityGrammarHypothesis(
+                (LastBearingCityGrammarHypothesis)99);
+            Assert.That(
+                comparison.SelectedHypothesis,
+                Is.EqualTo(LastBearingCityGrammarHypothesis.Unselected));
+            Assert.That(controller.World.CameraRig!.IsComparisonMode, Is.False);
+            Assert.That(
+                controller.ModeCoordinator.CurrentMode,
+                Is.EqualTo(modeBeforeInvalid));
+            Assert.That(
+                controller.World.CameraRig.transform.position,
+                Is.EqualTo(cameraPositionBeforeInvalid));
+            Assert.That(
+                controller.World.CameraRig.transform.rotation,
+                Is.EqualTo(cameraRotationBeforeInvalid));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            controller.SelectCityGrammarHypothesis(
+                LastBearingCityGrammarHypothesis.RestrainedSnapGrid);
+            controller.ManipulateCityGrammarPrimary();
+            controller.ToggleCityGrammarTrialPiece();
+            controller.ManipulateCityGrammarPrimary();
+            int interactionsBeforeRejectedLink = comparison.InteractionCount;
+            controller.ConnectCityGrammarLogistics();
+
+            Assert.That(comparison.HasValidSnapGridLayout, Is.False);
+            Assert.That(comparison.IsLogisticsConnected, Is.False);
+            Assert.That(
+                comparison.InteractionCount,
+                Is.EqualTo(interactionsBeforeRejectedLink));
+
+            int interactionsBeforePrematureObservation = comparison.InteractionCount;
+            Assert.That(
+                comparison.RecordPathRead((LastBearingCityTrialPathRead)99),
+                Is.False);
+            controller.RecordCityGrammarPathRead(clear: true);
+            Assert.That(
+                comparison.InteractionCount,
+                Is.EqualTo(interactionsBeforePrematureObservation));
+
+            controller.ManipulateCityGrammarPrimary();
+            controller.ConnectCityGrammarLogistics();
+            controller.AdvanceCityGrammarDelivery();
+            controller.AdvanceCityGrammarDelivery();
+            controller.RecordCityGrammarPathRead(clear: true);
+
+            int interactionsAfterObservation = comparison.InteractionCount;
+            controller.AdvanceCityGrammarDelivery();
+            controller.RecordCityGrammarPathRead(clear: false);
+
+            Assert.That(comparison.HasValidSnapGridLayout, Is.True);
+            Assert.That(comparison.RecyclerPadIndex, Is.EqualTo(0));
+            Assert.That(comparison.WorkshopPadIndex, Is.EqualTo(1));
+            Assert.That(
+                comparison.PathRead,
+                Is.EqualTo(LastBearingCityTrialPathRead.Clear));
+            Assert.That(comparison.TrialReady, Is.True);
+            Assert.That(
+                comparison.InteractionCount,
+                Is.EqualTo(interactionsAfterObservation));
+
+            CompleteDistrictObservation(controller, clear: false);
+
+            Assert.That(comparison.DistrictAnchorIndex, Is.EqualTo(0));
+            Assert.That(
+                comparison.PathRead,
+                Is.EqualTo(LastBearingCityTrialPathRead.Unclear));
+            Assert.That(comparison.TrialReady, Is.True);
+            Assert.That(comparison.CompletedObservationCount, Is.EqualTo(2));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            controller.SelectCityGrammarHypothesis(
+                LastBearingCityGrammarHypothesis.RestrainedSnapGrid);
+
+            Assert.That(comparison.RecyclerPadIndex, Is.EqualTo(0));
+            Assert.That(comparison.WorkshopPadIndex, Is.EqualTo(1));
+            Assert.That(
+                comparison.PathRead,
+                Is.EqualTo(LastBearingCityTrialPathRead.Clear));
+            Assert.That(controller.CityGrammarEvidence, Does.Contain("A{layout="));
+            Assert.That(controller.CityGrammarEvidence, Does.Contain("B{layout="));
+            Assert.That(controller.CityGrammarEvidence, Does.Not.Contain("winner"));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+        }
+
+        [Test]
+        public void EitherObservedTrialConvergesOnIdenticalCanonicalInfrastructure()
+        {
+            _root = new GameObject("City Trial Convergence");
+            var snapRoot = new GameObject("Snap Trial Controller");
+            snapRoot.transform.SetParent(_root.transform, false);
+            var snapController = snapRoot.AddComponent<LastBearingGameController>();
+            snapController.Initialize();
+            snapController.StartNewGame(ColonyComposition.Mixed);
+            snapController.InspectCityNeed();
+            CompleteSnapGridObservation(snapController, clear: true);
+            snapController.ActivateInfrastructure();
+            SimulateOneTick(snapController);
+
+            var stampRoot = new GameObject("Stamp Trial Controller");
+            stampRoot.transform.SetParent(_root.transform, false);
+            var stampController = stampRoot.AddComponent<LastBearingGameController>();
+            stampController.Initialize();
+            stampController.StartNewGame(ColonyComposition.Mixed);
+            stampController.InspectCityNeed();
+            CompleteDistrictObservation(stampController, clear: false);
+            stampController.ActivateInfrastructure();
+            SimulateOneTick(stampController);
+
+            Assert.That(snapController.State!.SliceInfrastructureActive, Is.True);
+            Assert.That(stampController.State!.SliceInfrastructureActive, Is.True);
+            Assert.That(snapController.CanonicalHash, Is.EqualTo(stampController.CanonicalHash));
+            Assert.That(
+                snapController.CityGrammarHypothesis,
+                Is.EqualTo(LastBearingCityGrammarHypothesis.Unselected));
+            Assert.That(
+                stampController.CityGrammarHypothesis,
+                Is.EqualTo(LastBearingCityGrammarHypothesis.Unselected));
+            Assert.That(snapController.Status, Does.Contain("records no layout"));
+            Assert.That(stampController.Status, Does.Contain("records no layout"));
+        }
+
+        [Test]
+        public void CityGrammarTrialClearsAtSessionBoundaries()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            controller.InspectCityNeed();
+            CompleteDistrictObservation(controller, clear: true);
+
+            Assert.That(controller.HasCompletedCityGrammarObservation, Is.True);
+
+            controller.ReturnToTitle();
+            controller.StartNewGame(ColonyComposition.RobotOnly);
+
+            Assert.That(controller.HasCompletedCityGrammarObservation, Is.False);
+            Assert.That(
+                controller.CityGrammarHypothesis,
+                Is.EqualTo(LastBearingCityGrammarHypothesis.Unselected));
+            Assert.That(controller.CityGrammarEvidence, Does.Contain("observations=0"));
         }
 
         [Test]
@@ -608,6 +781,43 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             var pending = pendingField!.GetValue(controller) as ICollection;
             Assert.That(pending, Is.Not.Null);
             return pending!.Count;
+        }
+
+        private static void CompleteSnapGridObservation(
+            LastBearingGameController controller,
+            bool clear)
+        {
+            controller.SelectCityGrammarHypothesis(
+                LastBearingCityGrammarHypothesis.RestrainedSnapGrid);
+            controller.ManipulateCityGrammarPrimary();
+            controller.ToggleCityGrammarTrialPiece();
+            controller.ManipulateCityGrammarPrimary();
+            controller.ManipulateCityGrammarPrimary();
+            controller.ConnectCityGrammarLogistics();
+            controller.AdvanceCityGrammarDelivery();
+            controller.AdvanceCityGrammarDelivery();
+            controller.RecordCityGrammarPathRead(clear);
+        }
+
+        private static void CompleteDistrictObservation(
+            LastBearingGameController controller,
+            bool clear)
+        {
+            controller.SelectCityGrammarHypothesis(
+                LastBearingCityGrammarHypothesis.DistrictStamp);
+            controller.ManipulateCityGrammarPrimary();
+            controller.AdvanceCityGrammarDelivery();
+            controller.AdvanceCityGrammarDelivery();
+            controller.RecordCityGrammarPathRead(clear);
+        }
+
+        private static void SimulateOneTick(LastBearingGameController controller)
+        {
+            MethodInfo? simulate = typeof(LastBearingGameController).GetMethod(
+                "SimulateOneTick",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.That(simulate, Is.Not.Null);
+            simulate!.Invoke(controller, null);
         }
     }
 }

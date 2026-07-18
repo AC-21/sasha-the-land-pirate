@@ -173,10 +173,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     LastBearingPermitJobChapter.CityCrisis,
                     1,
                     "CHAPTER I · THE FALLING RESERVE",
-                    "Wake the civic machinery",
-                    "Bring the recycler and machine shop online so Last " +
-                    "Bearing can prepare an expedition without inventing value.",
-                    "Activate the recycler and machine shop.");
+                    "Lay out one service-cell trial",
+                    "Stage the recycler and machine shop, move one empty " +
+                    "calibration sled, and record whether its path reads " +
+                    "clearly. Either reversible trial unlocks the same " +
+                    "canonical infrastructure fact without selecting D-0030.",
+                    "Complete one city trial, then bring the service cell online.");
             }
 
             if (model.PreparationPhase == PreparationPhase.Unselected)

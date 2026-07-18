@@ -230,7 +230,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             CityGrammarComparison?.SelectHypothesis(hypothesis);
             CameraRig?.SetComparisonMode(
-                hypothesis != LastBearingCityGrammarHypothesis.Unselected);
+                CityGrammarComparison?.SelectedHypothesis !=
+                LastBearingCityGrammarHypothesis.Unselected);
         }
 
         public bool ManipulateCityGrammarPrimary()
@@ -241,6 +242,38 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool RotateCityGrammarPrimary()
         {
             return CityGrammarComparison?.RotatePrimary() ?? false;
+        }
+
+        public bool ToggleCityGrammarTrialPiece()
+        {
+            return CityGrammarComparison?.ToggleSnapGridPiece() ?? false;
+        }
+
+        public bool ConnectCityGrammarLogistics()
+        {
+            return CityGrammarComparison?.ConnectLogistics() ?? false;
+        }
+
+        public bool AdvanceCityGrammarDelivery()
+        {
+            return CityGrammarComparison?.AdvanceDelivery() ?? false;
+        }
+
+        public bool RecordCityGrammarPathRead(
+            LastBearingCityTrialPathRead pathRead)
+        {
+            return CityGrammarComparison?.RecordPathRead(pathRead) ?? false;
+        }
+
+        public bool ResetActiveCityGrammarTrial()
+        {
+            return CityGrammarComparison?.ResetActiveTrial() ?? false;
+        }
+
+        public void LeaveCityGrammarComparison()
+        {
+            CityGrammarComparison?.LeaveComparison();
+            CameraRig?.SetComparisonMode(false);
         }
 
         public void ResetCityGrammarComparison()

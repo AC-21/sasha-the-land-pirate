@@ -307,6 +307,58 @@ namespace AtomicLandPirate.LastBearingTests
             Require(comparison, "DistrictStamp");
             Require(comparison, "ResetComparison");
             Require(comparison, "EvidenceSummary");
+            Require(
+                comparison,
+                "empty-calibration-sled-recycler-to-workshop");
+            Require(comparison, "Individually Placed Recycler");
+            Require(comparison, "Individually Placed Workshop");
+            Require(comparison, "Stamped Shared Logistics Apron");
+            Require(comparison, "Shared Empty Calibration Sled");
+            Require(comparison, "RecordPathRead");
+            Require(comparison, "HasCompletedObservation");
+            foreach (string forbidden in new[]
+            {
+                "AtomicLandPirate.Simulation",
+                "LastBearingState",
+                "LastBearingKernel",
+                "LastBearingCommand",
+                "SaveContracts",
+                "PlayerPrefs",
+                "System.IO",
+                "File.",
+                "UnityWebRequest",
+                "NavMesh",
+            })
+            {
+                TestHarness.True(
+                    comparison.IndexOf(forbidden, StringComparison.Ordinal) < 0,
+                    "city comparison contains forbidden authority " + forbidden);
+            }
+            string cityTrialController = Segment(
+                controller,
+                "public void SelectCityGrammarHypothesis(",
+                "public void ResetCityGrammarComparison()");
+            TestHarness.True(
+                cityTrialController.IndexOf("Queue(", StringComparison.Ordinal) < 0,
+                "reversible city trial verbs must not queue canonical commands");
+            TestHarness.True(
+                cityTrialController.IndexOf(
+                    "LastBearingCommand",
+                    StringComparison.Ordinal) < 0,
+                "reversible city trial verbs must not construct canonical commands");
+            string infrastructureActivation = Segment(
+                controller,
+                "public void ActivateInfrastructure()",
+                "public void ChoosePlan(");
+            Require(
+                infrastructureActivation,
+                "HasCompletedCityGrammarObservation");
+            Require(
+                infrastructureActivation,
+                "new ActivateSliceInfrastructureCommand(sequence)");
+            Require(
+                infrastructureActivation,
+                "records no layout and D-0030 remains open");
 
             Require(modeCoordinator, "LastBearingPresentationMode.CityOverview");
             Require(modeCoordinator, "LastBearingPresentationMode.BuildingCutaway");

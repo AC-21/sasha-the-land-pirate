@@ -62,6 +62,27 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.CityGrammarComparison?.EvidenceSummary ??
             "comparison-surface-unavailable";
 
+        public bool CityGrammarTrialReady =>
+            _world?.CityGrammarComparison?.TrialReady ?? false;
+
+        public bool HasCompletedCityGrammarObservation =>
+            _world?.CityGrammarComparison?.HasCompletedObservation ?? false;
+
+        public LastBearingCityTrialPiece ActiveCityGrammarPiece =>
+            _world?.CityGrammarComparison?.ActiveSnapGridPiece ??
+            LastBearingCityTrialPiece.Recycler;
+
+        public LastBearingCityTrialDeliveryStage CityGrammarDeliveryStage =>
+            _world?.CityGrammarComparison?.DeliveryStage ??
+            LastBearingCityTrialDeliveryStage.AtRecycler;
+
+        public LastBearingCityTrialPathRead CityGrammarPathRead =>
+            _world?.CityGrammarComparison?.PathRead ??
+            LastBearingCityTrialPathRead.Unrecorded;
+
+        public bool CityGrammarLogisticsConnected =>
+            _world?.CityGrammarComparison?.IsLogisticsConnected ?? false;
+
         public string CanonicalHash =>
             _state == null ? "none" : LastBearingCanonicalCodec.ComputeSha256(_state);
 
@@ -216,8 +237,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            if (_readModel?.NextObjective != "activate-slice-infrastructure")
+            {
+                _status = "The recycler and machine shop are already accounted for.";
+                return;
+            }
+
+            if (!HasCompletedCityGrammarObservation)
+            {
+                _status =
+                    "Complete either neutral service-cell trial before bringing the same canonical machinery online.";
+                return;
+            }
+
             Queue(sequence => new ActivateSliceInfrastructureCommand(sequence));
-            _status = "Recycler and machine shop are coming online.";
+            _world?.LeaveCityGrammarComparison();
+            _status =
+                "Recycler and machine shop are coming online. The canonical result records no layout and D-0030 remains open.";
         }
 
         public void ChoosePlan(PreparationChoice preparation, VehicleModule module)
@@ -255,32 +291,54 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public void SelectCityGrammarHypothesis(
             LastBearingCityGrammarHypothesis hypothesis)
         {
-            if (!RequireCityNeedInspected())
+            if (hypothesis == LastBearingCityGrammarHypothesis.Unselected)
             {
+                LeaveCityGrammarComparison();
+                return;
+            }
+
+            if (hypothesis !=
+                    LastBearingCityGrammarHypothesis.RestrainedSnapGrid &&
+                hypothesis != LastBearingCityGrammarHypothesis.DistrictStamp)
+            {
+                _status = "Unknown city-grammar hypothesis ignored.";
+                return;
+            }
+
+            if (!RequireCityTrialAtHome())
+            {
+                return;
+            }
+
+            if (_modeCoordinator?.TryShowCityMode(
+                    LastBearingPresentationMode.CityOverview,
+                    _readModel) != true)
+            {
+                _status = "The city trial is available only while Sasha is home.";
                 return;
             }
 
             _world?.SelectCityGrammarHypothesis(hypothesis);
             _status =
                 hypothesis +
-                " is visible only as a reversible D-0030 comparison; no grammar was selected.";
+                " is staged for the same empty calibration run. No grammar was selected.";
         }
 
         public void ManipulateCityGrammarPrimary()
         {
-            if (!RequireCityNeedInspected())
+            if (!RequireCityTrialAtHome())
             {
                 return;
             }
 
             _status = _world?.ManipulateCityGrammarPrimary() == true
-                ? "Moved the active comparison prototype; canonical city state is unchanged."
+                ? "Placed or moved the active trial piece; canonical city state is unchanged."
                 : "Select one provisional city-grammar hypothesis first.";
         }
 
         public void RotateCityGrammarPrimary()
         {
-            if (!RequireCityNeedInspected())
+            if (!RequireCityTrialAtHome())
             {
                 return;
             }
@@ -288,6 +346,80 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _status = _world?.RotateCityGrammarPrimary() == true
                 ? "Rotated the active comparison prototype; canonical city state is unchanged."
                 : "Select one provisional city-grammar hypothesis first.";
+        }
+
+        public void ToggleCityGrammarTrialPiece()
+        {
+            if (!RequireCityTrialAtHome())
+            {
+                return;
+            }
+
+            _status = _world?.ToggleCityGrammarTrialPiece() == true
+                ? "Active individual building: " + ActiveCityGrammarPiece + "."
+                : "Piece switching belongs to the individual-building trial.";
+        }
+
+        public void ConnectCityGrammarLogistics()
+        {
+            if (!RequireCityTrialAtHome())
+            {
+                return;
+            }
+
+            _status = _world?.ConnectCityGrammarLogistics() == true
+                ? "Recycler output connected to workshop input with a local service link."
+                : "Place the two individual buildings on different pads before linking them.";
+        }
+
+        public void AdvanceCityGrammarDelivery()
+        {
+            if (!RequireCityTrialAtHome())
+            {
+                return;
+            }
+
+            _status = _world?.AdvanceCityGrammarDelivery() == true
+                ? CityGrammarDeliveryStage ==
+                  LastBearingCityTrialDeliveryStage.DeliveredToWorkshop
+                    ? "The empty calibration sled reached the workshop. Record only whether the path reads clearly."
+                    : "The empty calibration sled is crossing the service path."
+                : "Finish a valid layout and logistics link before moving the empty sled.";
+        }
+
+        public void RecordCityGrammarPathRead(bool clear)
+        {
+            if (!RequireCityTrialAtHome())
+            {
+                return;
+            }
+
+            LastBearingCityTrialPathRead pathRead = clear
+                ? LastBearingCityTrialPathRead.Clear
+                : LastBearingCityTrialPathRead.Unclear;
+            _status = _world?.RecordCityGrammarPathRead(pathRead) == true
+                ? "Observation recorded as " + pathRead +
+                  ". It is evidence, not a score or city-grammar selection."
+                : "Deliver the empty calibration sled before recording path legibility.";
+        }
+
+        public void ResetActiveCityGrammarTrial()
+        {
+            if (!RequireCityTrialAtHome())
+            {
+                return;
+            }
+
+            _status = _world?.ResetActiveCityGrammarTrial() == true
+                ? "The active trial was reset; the other hypothesis is unchanged."
+                : "Select a city-grammar hypothesis to reset its trial.";
+        }
+
+        public void LeaveCityGrammarComparison()
+        {
+            _world?.LeaveCityGrammarComparison();
+            _status =
+                "Left the city trial. Its in-memory comparison remains available until departure, title, new game, or load.";
         }
 
         public void ResetCityGrammarComparison()
@@ -306,6 +438,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void OpenBuildingCutaway()
         {
+            _world?.LeaveCityGrammarComparison();
             ApplySelectedBuildingCutawayPose();
             TryShowCityMode(
                 LastBearingPresentationMode.BuildingCutaway,
@@ -314,6 +447,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void OpenGarageBay()
         {
+            _world?.LeaveCityGrammarComparison();
             TryShowCityMode(
                 LastBearingPresentationMode.GarageBay,
                 "Sasha Scout service-bay cutaway active; the vehicle state is unchanged.");
@@ -659,9 +793,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             try
             {
+                ExpeditionPhase previousPhase = _readModel.ExpeditionPhase;
                 LastBearingTickResult result = _kernel.Step(_state, commands);
                 _state = result.State;
                 _readModel = result.ReadModel;
+                if (previousPhase == ExpeditionPhase.AtHome &&
+                    _readModel.ExpeditionPhase != ExpeditionPhase.AtHome)
+                {
+                    _world?.BeginCityGrammarComparisonSession();
+                }
+
                 TryAutosave(result.DomainEvents);
                 ApplyPresentation();
             }
@@ -944,6 +1085,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             _status = "Inspect the failing water system before committing city action.";
+            return false;
+        }
+
+        private bool RequireCityTrialAtHome()
+        {
+            if (!RequireCityNeedInspected())
+            {
+                return false;
+            }
+
+            if (_readModel?.ExpeditionPhase == ExpeditionPhase.AtHome)
+            {
+                return true;
+            }
+
+            _status = "The reversible city trial is available only while Sasha is home.";
             return false;
         }
 

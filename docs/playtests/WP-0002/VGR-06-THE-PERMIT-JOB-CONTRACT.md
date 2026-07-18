@@ -1,8 +1,9 @@
 # VGR-06 — The Permit Job Contract
 
-Status: creator-directed presentation milestone; release remains conditional on
-independent review, the protected checks, exact Unity dispatcher gates, and a
-transparent creator-delegated manual release.
+Status: released on protected `main` in
+`8f2b973e10682a77339b28bde67eb7a9ff5679bf` after independent review, exact
+Unity dispatcher gates, protected checks, and transparent creator-delegated
+manual release.
 
 Baseline: protected `main` commit
 `bea6dacaee95879f3f329d8faf478e8d0036fea2`.
