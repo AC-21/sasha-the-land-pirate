@@ -28,7 +28,7 @@ This is the foundation specification for a future protected control plane for an
 
 Machine-readable schemas, value-sensitive entry gates, proposed work packets, and hash-registered immutable scenarios sit beside these documents. [`schemas/a1-boundary-manifest.schema.json`](schemas/a1-boundary-manifest.schema.json) defines the exact creator-attested quarantine boundary required for any future A1 activation, including a strict distinction between reserved packet outputs, repository-ignored project scratch, and a separately isolated ephemeral runtime HOME/private temp for Unity and relay state. For WP-0001, schema v4 additionally binds the protected empty project seed, exact D-0047 profile, registry-only package graph, direct-MCP process/socket/config/allowlist profile, isolated Codex/XDG/Git environment, exact effective-server inventory, disconnected/revoked preflight, fresh live activation session, raw-source-backed evidence, and physical candidate record. [`tools/validate_wp0001_a1_live.py`](tools/validate_wp0001_a1_live.py) and [`tools/validate_wp0001_mcp_live.py`](tools/validate_wp0001_mcp_live.py) are non-Unity, read-only collectors for the physical quarantine and already-running route; strict raw event/listener/probe parsers reject blank restatements. [`tools/inspect_wp0001_toolchain_static.py`](tools/inspect_wp0001_toolchain_static.py) separately performs an A0-only, filesystem-only D-0047 diagnostic without starting Unity, Hub, Xcode, dotnet, or any other external process; [`schemas/wp0001-static-host-toolchain-observation.schema.json`](schemas/wp0001-static-host-toolchain-observation.schema.json) keeps that output structurally non-authoritative and incompatible with activation evidence. [`schemas/wp0001-a1-activation-evidence.schema.json`](schemas/wp0001-a1-activation-evidence.schema.json) and [`schemas/wp0001-a1-evidence-record.schema.json`](schemas/wp0001-a1-evidence-record.schema.json) define the activation evidence chain. All non-output state is destroy-on-close and non-importable. These are draft control-plane inputs, not evidence that the protected control plane already exists.
 
-WP-0001's historical A0 activation preparation used `/Users/sasha/Documents/Codex/sasha-the-land-pirate`; active WP-0002 now binds the canonical durable checkout `/Users/sasha/Projects/sasha-the-land-pirate`, its exact `Game` child, and remote `https://github.com/AC-21/sasha-the-land-pirate`. The original sealed receipts still accept the exact WP-0001 packet contract, temporary identity, repository, and creator-operated installation of the D-0047 candidate. Owner-authenticated `RR-D0051-20260716` and `RR-WP0001-ROUTE-20260716` protect D-0051's `UNITY-MCP-EXTERNAL` successor—Codex as external client through Unity's MCP Bridge and exact Unity-installed relay, not the API-key Gateway path—and bind it to the unchanged WP-0001 contract.
+WP-0001's A0 activation preparation uses the creator-approved durable checkout `/Users/sasha/Documents/Codex/sasha-the-land-pirate` and remote `https://github.com/AC-21/sasha-the-land-pirate`. The original sealed receipts still accept the exact packet contract, temporary identity, repository, and creator-operated installation of the D-0047 candidate. Owner-authenticated `RR-D0051-20260716` and `RR-WP0001-ROUTE-20260716` protect D-0051's `UNITY-MCP-EXTERNAL` successor—Codex as external client through Unity's MCP Bridge and exact Unity-installed relay, not the API-key Gateway path—and bind it to the unchanged packet contract.
 
 The machine-readable snapshot at `docs/evidence/WP-0001/pre-a1-readiness-20260716.json` records WP-0001 as **blocked** without secrets. The installed Editor/tool/package tuple is not D-0047; the observed project is not the packet project; an eligible Unity AI seat is unverified; the inherited client approval, 54-tool handshakes, non-loopback relay listener, earlier console call, and later direct Editor/Hub probes cannot satisfy the required clean connection cycle; and no standalone physical quarantine exists. The snapshot is A0 observation evidence only. WP-0001 remains accepted but inactive.
 
@@ -40,19 +40,6 @@ released as well. `WP-0002` is creator-accepted and activated under
 Implementation is authorized only within that reservation through protected
 `agent/*` pull requests. Governance, production content, dependency expansion,
 publishing, direct Unity invocation, and autonomy beyond A1 remain closed.
-The append-only WP-0002 local-operator amendment is non-executable until its
-receipt, authenticated online three-phase transaction, and separate protected
-three-report evidence-closure PR complete. All reports absent means pending and
-non-executable; any partial set fails closed. Only the validated closure merge
-permits visible Computer Use in the exact installed Hub and Editor bundles to
-add/open/switch the exact canonical project, approve only the receipt-bound
-Codex Bridge client whose visible OS publisher/path and application
-version/build match, and inspect non-secret Unity state. The prior host
-signature observation remains context-limited and the UI does not prove a
-CDHash. It does
-not permit Bridge tool/configuration mutation or weaken the five-tool MCP allowlist or any
-direct-process, account, credential, package, publishing, protection, or merge
-denial.
 
 ## Source-of-truth order
 
@@ -66,7 +53,7 @@ When two artifacts conflict, the higher item wins:
 6. Implementation
 7. Generated documentation or summaries
 
-At A1, the sealed activation receipt, any append-only sealed boundary-amendment receipt chain, and exact packet/boundary hashes in the same protected tree control executable scope; status prose alone never does. Unsealed creator-source captures remain evidence of words, not protected authority. Any mismatch between a creator source/active decision and its constitutional materialization is a hard stop; precedence never authorizes an agent to silently rewrite either artifact.
+At A1, the sealed activation receipt and exact packet/boundary hashes in the same protected tree control executable scope; status prose alone never does. Unsealed creator-source captures remain evidence of words, not protected authority. Any mismatch between a creator source/active decision and its constitutional materialization is a hard stop; precedence never authorizes an agent to silently rewrite either artifact.
 
 ## Status language
 

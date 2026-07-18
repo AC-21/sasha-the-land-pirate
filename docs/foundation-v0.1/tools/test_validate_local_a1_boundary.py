@@ -198,24 +198,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
         manifest["packet_id"] = "WP-0002"
         manifest["lifecycle_state"] = lifecycle_state
         manifest["repository"]["branch"] = "agent/wp0002-local"
-        manifest["repository"]["root"] = foundation.WP0002_CANONICAL_REPOSITORY_ROOT
-        manifest["repository"]["game_project_path"] = (
-            foundation.WP0002_CANONICAL_PROJECT_PATH
-        )
-        manifest["unity"]["project_path"] = foundation.WP0002_CANONICAL_PROJECT_PATH
         manifest["unity"]["project_state"] = "existing-protected-project"
-        manifest["unity"]["successor_first_use_preconditions"] = copy.deepcopy(
-            foundation.WP0002_SUCCESSOR_FIRST_USE_PRECONDITIONS
-        )
-        manifest["boundary_amendments"] = copy.deepcopy(
-            foundation.WP0002_BOUNDARY_AMENDMENTS
-        )
-        manifest["delegated_local_unity_operator"] = copy.deepcopy(
-            foundation.WP0002_DELEGATED_LOCAL_UNITY_OPERATOR
-        )
-        manifest["local_operator_transaction_evidence_contract"] = copy.deepcopy(
-            foundation.WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT
-        )
         manifest["allowed_mcp_tools"] = [
             "Unity_ReadConsole",
             "Unity_RunCommand",
@@ -271,7 +254,6 @@ class LocalA1BoundaryTests(unittest.TestCase):
             },
         ]
         manifest["working_tree_scope_capture"] = None
-        manifest["local_operator_amendment_scope_capture"] = None
         manifest["github_protection_capture"] = {
             "required_schema": "wp0002-github-protection-v1",
             "artifact": None,
@@ -340,12 +322,33 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 "denied-creator-policy-with-live-audit-and-canary"
             ),
         }
-        manifest["permission_boundary"]["allowed_actions"] = copy.deepcopy(
-            foundation.WP0002_ALLOWED_ACTIONS
-        )
-        manifest["permission_boundary"]["denied_actions"] = copy.deepcopy(
-            foundation.WP0002_DENIED_ACTIONS
-        )
+        manifest["permission_boundary"]["allowed_actions"] = [
+            "edit-declared-repository-paths",
+            "unity-mcp-project-and-object-edits",
+            "unity-mcp-play-mode",
+            "unity-mcp-project-tests",
+            "unity-mcp-console-read",
+            "unity-mcp-screen-capture",
+            "local-nondestructive-validation",
+            "git-commit-push-protected-pr",
+            "creator-delegated-manual-release-after-required-checks",
+            "link-exact-repository-local-upm-simulation-core-and-save-contracts",
+            "unity-runtime-savecontracts-write-fixed-last-bearing-dev-v1-child",
+        ]
+        manifest["permission_boundary"]["denied_actions"] = [
+            "direct-unity-process-invocation",
+            "tool-install-or-package-change-except-two-exact-repository-local-upm-links",
+            "account-seat-license-billing-purchase-change",
+            "credential-or-secret-access",
+            "publish-release-deploy-monetize",
+            "external-third-party-contact",
+            "git-history-rewrite-or-protection-bypass",
+            "direct-agent-write-outside-repository",
+            "foundation-governance-receipt-write-during-implementation",
+            "package-graph-change-except-two-exact-repository-local-upm-links",
+            "registry-network-git-tarball-or-external-dependency-change",
+            "agent-or-manual-direct-merge",
+        ]
         manifest["permission_boundary"]["protected_paths_read_only"] = [
             "AGENTS.md",
             ".codex/config.toml",
@@ -358,7 +361,6 @@ class LocalA1BoundaryTests(unittest.TestCase):
             "Tools/Validation/validate_wp0002_entry_gate.py",
             "Tools/Validation/validate_wp0002_policy.py",
             "Tools/Validation/collect_wp0002_scope_capture.py",
-            "Tools/Validation/verify_wp0002_local_operator_transaction.py",
             ".github/workflows/wp0002-ci.yml",
             ".github/workflows/wp0002-policy.yml",
             "SimulationCore/README.md",
@@ -384,16 +386,6 @@ class LocalA1BoundaryTests(unittest.TestCase):
             manifest["working_tree_scope_capture"] = {
                 "uri": "repo://docs/evidence/WP-0002/scope-capture/working-tree-scope.json",
                 "sha256": "78" * 32,
-            }
-            manifest["local_operator_amendment_scope_capture"] = {
-                "uri": (
-                    "repo://docs/evidence/WP-0002/local-operator-amendment/"
-                    "scope-capture/working-tree-scope.json"
-                ),
-                "sha256": "81" * 32,
-                "base_commit": BASE_COMMIT,
-                "head_commit": BASE_COMMIT,
-                "checkpoint_commit": BASE_COMMIT,
             }
             manifest["external_cursor_review_control"]["policy_source_sha"] = BASE_COMMIT
             manifest["external_cursor_review_control"]["configuration_capture"] = {
@@ -510,7 +502,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
             "packet_id": "WP-0002",
             "boundary_manifest_id": "A1B-WP-0002-LOCAL-DEV",
             "captured_at": "2026-07-16T23:04:00Z",
-            "repository_root": "/Users/sasha/Documents/Codex/sasha-the-land-pirate",
+            "repository_root": manifest["repository"]["root"],
             "base_commit": BASE_COMMIT,
             "head_commit": BASE_COMMIT,
             "head_tree": "3" * 40,
@@ -524,7 +516,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
                     "-c",
                     "core.hooksPath=/dev/null",
                     "-C",
-                    "/Users/sasha/Documents/Codex/sasha-the-land-pirate",
+                    manifest["repository"]["root"],
                     "status",
                     "--porcelain=v2",
                     "-z",
@@ -556,7 +548,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
             "reserved_scope_clean": True,
             "reservation_paths": copy.deepcopy(packet["reservation"]["paths"]),
             "protected_paths_read_only": copy.deepcopy(
-                foundation.WP0002_ACTIVATION_PROTECTED_PATHS
+                manifest["permission_boundary"]["protected_paths_read_only"]
             ),
             "reserved_protected_overlaps": [],
             "privacy": {
@@ -758,12 +750,6 @@ class LocalA1BoundaryTests(unittest.TestCase):
         manifest_path.write_bytes(manifest_data)
         manifest_hash = hashlib.sha256(manifest_data).hexdigest()
         packet["a1_boundary_manifest"]["sha256"] = manifest_hash
-        governance_path = root / foundation.WP0002_LOCAL_OPERATOR_GOVERNANCE_PATH
-        governance_path.parent.mkdir(parents=True, exist_ok=True)
-        governance_path.write_bytes(b"# test delegated local operator amendment\n")
-        packet_path = root / "work-packets" / "proposed" / "WP-0002.json"
-        packet_path.parent.mkdir(parents=True, exist_ok=True)
-        packet_path.write_bytes(json_bytes(packet))
         receipt["receipt_id"] = "RR-WP0002-ACTIVATE"
         receipt["subject_ids"] = ["WP-0002"]
         receipt["subject_claims"] = [
@@ -777,9 +763,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
         ]
         receipt["subject_contract_sha256"] = {"WP-0002": CONTRACT_SHA256}
         receipt["artifact_sha256"] = {
-            packet["a1_boundary_manifest"]["path"]: (
-                foundation.WP0002_PREVIOUS_BOUNDARY_SHA256
-            ),
+            packet["a1_boundary_manifest"]["path"]: manifest_hash,
             capture_relative: capture_hash,
             raw_status_relative: raw_status_hash,
             observations_relative: observations_hash,
@@ -799,9 +783,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
         path.write_bytes(data)
         digest = hashlib.sha256(data).hexdigest()
         packet["a1_boundary_manifest"]["sha256"] = digest
-        packet_path = root / "work-packets" / "proposed" / "WP-0002.json"
-        packet_path.parent.mkdir(parents=True, exist_ok=True)
-        packet_path.write_bytes(json_bytes(packet))
+        receipt["artifact_sha256"][packet["a1_boundary_manifest"]["path"]] = digest
 
     def write_wp0002_capture(
         self,
@@ -847,8 +829,6 @@ class LocalA1BoundaryTests(unittest.TestCase):
         receipt: dict,
         *,
         observed_scope_modes: list[object] | None = None,
-        include_operator_receipt: bool = True,
-        operator_receipt_mutator: object | None = None,
     ) -> list[str]:
         base_bytes = {
             ".codex/config.toml": CONFIG_BASE,
@@ -861,70 +841,10 @@ class LocalA1BoundaryTests(unittest.TestCase):
             / "validate_wp0002_policy.py"
         )
         policy_bytes = policy_path.read_bytes()
-        boundary_relative = packet["a1_boundary_manifest"]["path"]
-        boundary_path = root / boundary_relative
-        governance_relative = foundation.WP0002_LOCAL_OPERATOR_GOVERNANCE_PATH
-        governance_path = root / governance_relative
-        packet_relative = "work-packets/proposed/WP-0002.json"
-        packet_path = root / packet_relative
-        operator_receipt = {
-            "receipt_id": foundation.WP0002_LOCAL_OPERATOR_RECEIPT_ID,
-            "issued_at": "2026-07-17T23:59:00Z",
-            "issued_by": "AC-21",
-            "issuer_role": "creator",
-            "receipt_kind": "creator-authorization",
-            "artifact_resolver": {
-                "type": "external-protected",
-                "resolver_reference": (
-                    "https://github.com/AC-21/sasha-the-land-pirate/"
-                    "pull/99#issuecomment-123"
-                ),
-            },
-            "source_reference": (
-                "https://github.com/AC-21/sasha-the-land-pirate/"
-                "pull/99#issuecomment-123"
-            ),
-            "subject_ids": ["WP-0002"],
-            "subject_claims": [
-                {
-                    "subject_id": "WP-0002",
-                    "claims": [foundation.WP0002_LOCAL_OPERATOR_CLAIM],
-                }
-            ],
-            "approval_text_sha256": "91" * 32,
-            "accepted_commit": ACTIVATION_COMMIT,
-            "artifact_sha256": {
-                "github.com/AC-21/sasha-the-land-pirate/pull/99#issuecomment-123": (
-                    "91" * 32
-                ),
-                boundary_relative: hashlib.sha256(boundary_path.read_bytes()).hexdigest(),
-                governance_relative: hashlib.sha256(
-                    governance_path.read_bytes()
-                ).hexdigest(),
-                packet_relative: hashlib.sha256(packet_path.read_bytes()).hexdigest(),
-            },
-            "subject_contract_sha256": {"WP-0002": CONTRACT_SHA256},
-            "subject_event_sha256": {},
-            "foundation_binding": None,
-            "signature_reference": (
-                "https://github.com/AC-21/sasha-the-land-pirate/"
-                "pull/99#issuecomment-123"
-            ),
-            "sealed": True,
-        }
-        if callable(operator_receipt_mutator):
-            operator_receipt_mutator(operator_receipt)
 
         def git_runner(args: list[str]) -> subprocess.CompletedProcess[bytes]:
             if args[:1] == ["show"]:
                 path = args[1].split(":", 1)[1]
-                foundation_prefix = "docs/foundation-v0.1/"
-                if path.startswith(foundation_prefix):
-                    candidate = root / path.removeprefix(foundation_prefix)
-                    if candidate.is_file():
-                        return subprocess.CompletedProcess(
-                            args, 0, candidate.read_bytes(), b""
-                        )
                 if path == "Tools/Validation/validate_wp0002_policy.py":
                     return subprocess.CompletedProcess(args, 0, policy_bytes, b"")
                 if path in base_bytes:
@@ -970,8 +890,6 @@ class LocalA1BoundaryTests(unittest.TestCase):
             },
             receipt["receipt_id"]: receipt,
         }
-        if include_operator_receipt:
-            receipts[operator_receipt["receipt_id"]] = operator_receipt
         schemas = Path(__file__).resolve().parents[1] / "schemas"
         with (
             mock.patch.object(foundation, "ROOT", root),
@@ -1011,33 +929,11 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 return_value=True,
             ),
             mock.patch.object(foundation, "git_commit_is_ancestor", return_value=True),
-            mock.patch.object(
-                foundation,
-                "git_foundation_blob",
-                side_effect=lambda _commit, relative: (
-                    (root / relative).read_bytes()
-                    if (root / relative).is_file()
-                    else None
-                ),
-            ),
             mock.patch.object(foundation, "run_foundation_git", side_effect=git_runner),
             mock.patch.object(
                 foundation,
                 "_load_wp0002_scope_collector",
                 return_value=({"verify_scope_capture": scope_verifier}, []),
-            ),
-            # Transaction evidence has focused tests of its own.  These local
-            # boundary fixtures intentionally exercise the surrounding
-            # manifest and activation rules without fabricating online proof.
-            mock.patch.object(
-                foundation,
-                "validate_wp0002_local_operator_amendment_scope_capture",
-                return_value=[],
-            ),
-            mock.patch.object(
-                foundation,
-                "validate_wp0002_local_operator_transaction_evidence",
-                return_value=[],
             ),
         ):
             _, errors = foundation.validate_local_a1_boundary_manifest(
@@ -1128,197 +1024,6 @@ class LocalA1BoundaryTests(unittest.TestCase):
             root = Path(temporary)
             packet, state, _, receipt, _, _ = self.wp0002_attested_documents(root)
             self.assertEqual(self.validate_wp0002(root, packet, state, receipt), [])
-
-    def test_local_operator_repository_evidence_pending_or_partial_state(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            receipt = {
-                "source_reference": (
-                    "https://github.com/AC-21/sasha-the-land-pirate/"
-                    "pull/99#issuecomment-123"
-                ),
-                "approval_text_sha256": "91" * 32,
-                "accepted_commit": ACTIVATION_COMMIT,
-                "artifact_sha256": {},
-            }
-            with mock.patch.object(foundation, "REPO_ROOT", root):
-                errors = (
-                    foundation.validate_wp0002_local_operator_transaction_evidence(
-                        receipt
-                    )
-                )
-                self.assertEqual(errors, [])
-                authority = (
-                    root
-                    / foundation.WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT[
-                        "repository_evidence_paths"
-                    ]["authority"]
-                )
-                authority.parent.mkdir(parents=True)
-                authority.write_text("{}\n", encoding="utf-8")
-                errors = foundation.validate_wp0002_local_operator_transaction_evidence(
-                    receipt
-                )
-            self.assertEqual(
-                errors,
-                [
-                    "WP-0002 local operator repository evidence is partial; all three "
-                    "closure reports must appear together"
-                ],
-            )
-
-    def test_local_operator_amendment_requires_exact_scope_reference(self) -> None:
-        self.assertEqual(
-            foundation.validate_wp0002_local_operator_amendment_scope_capture(
-                {},
-                {},
-                {},
-            ),
-            ["WP-0002 local operator amendment scope reference is not exact"],
-        )
-
-    def test_wp0002_local_operator_schema_rejects_path_bundle_or_scope_drift(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            _, _, source, _ = self.base_documents(Path(temporary))
-            manifest = self.wp0002_manifest(source, "attested")
-            self.assertEqual(self.schema_errors(manifest), [])
-            mutations = [
-                lambda item: item["repository"].__setitem__(
-                    "root", "/Users/sasha/Documents/Codex/sasha-the-land-pirate"
-                ),
-                lambda item: item["delegated_local_unity_operator"][
-                    "authorized_application_bundles"
-                ][0].__setitem__("bundle_id", "com.example.not-unity-hub"),
-                lambda item: item["delegated_local_unity_operator"][
-                    "authorized_actions"
-                ].append("open-any-project"),
-                lambda item: item["delegated_local_unity_operator"].__setitem__(
-                    "control_pr_merge_alone_authorizes_actions", True
-                ),
-                lambda item: item["delegated_local_unity_operator"][
-                    "existing_cloud_project_linkage"
-                ].__setitem__("cloud_enabled_asserted", True),
-                lambda item: item["delegated_local_unity_operator"][
-                    "trusted_codex_client_identity"
-                ]["prior_host_signature_observation"].__setitem__(
-                    "bridge_sha256_observed", "00" * 32
-                ),
-                lambda item: item["delegated_local_unity_operator"][
-                    "trusted_codex_client_identity"
-                ].__setitem__("visible_ui_proves_cdhash_or_designated_requirement", True),
-                lambda item: item["delegated_local_unity_operator"][
-                    "trusted_codex_client_identity"
-                ].__setitem__("update_policy", "silently-trust-updates"),
-                lambda item: item["unity"][
-                    "successor_first_use_preconditions"
-                ].remove(
-                    "exact-visible-receipt-bound-codex-client-identity-"
-                    "matched-and-approved"
-                ),
-                lambda item: item["local_operator_transaction_evidence_contract"].__setitem__(
-                    "online_authentication_required", False
-                ),
-                lambda item: item["local_operator_transaction_evidence_contract"].__setitem__(
-                    "repository_ruleset_policy", "allow-unreviewed-rulesets"
-                ),
-                lambda item: item["local_operator_amendment_scope_capture"].__setitem__(
-                    "base_commit", "00" * 19
-                ),
-                lambda item: item["boundary_amendments"][0][
-                    "materialization_control"
-                ].__setitem__("general_protection_bypass_authorized", True),
-                lambda item: item["permission_boundary"]["denied_actions"].remove(
-                    "direct-unity-process-invocation"
-                ),
-                lambda item: item["permission_boundary"]["denied_actions"].remove(
-                    "computer-use-unity-bridge-tool-or-configuration-mutation"
-                ),
-            ]
-            for mutate in mutations:
-                with self.subTest(mutation=mutate):
-                    candidate = copy.deepcopy(manifest)
-                    mutate(candidate)
-                    self.assertTrue(self.schema_errors(candidate))
-
-    def test_wp0002_amendment_root_is_identical_across_collector_schema_and_validator(self) -> None:
-        namespace = {"__name__": "wp0002_scope_collector_root_test"}
-        source = foundation.WP0002_SCOPE_COLLECTOR.read_bytes()
-        exec(
-            compile(source, str(foundation.WP0002_SCOPE_COLLECTOR), "exec"),
-            namespace,
-        )
-        schema = json.loads(
-            foundation.WP0002_LOCAL_OPERATOR_SCOPE_SCHEMA.read_text(
-                encoding="utf-8"
-            )
-        )
-        self.assertEqual(
-            namespace["CANONICAL_AMENDMENT_ROOT"],
-            schema["properties"]["repository_root"]["const"],
-        )
-        self.assertEqual(
-            namespace["CANONICAL_AMENDMENT_ROOT"],
-            foundation.WP0002_CANONICAL_REPOSITORY_ROOT,
-        )
-
-    def test_wp0002_local_operator_requires_exact_sealed_creator_receipt(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            packet, state, _, receipt, _, _ = self.wp0002_attested_documents(root)
-            errors = self.validate_wp0002(
-                root,
-                packet,
-                state,
-                receipt,
-                include_operator_receipt=False,
-            )
-            self.assertTrue(any("lacks its creator-authorization receipt" in e for e in errors))
-
-        receipt_mutations = [
-            lambda item: item.__setitem__("sealed", False),
-            lambda item: item["artifact_resolver"].__setitem__(
-                "type", "local-git-tree"
-            ),
-            lambda item: (
-                item["artifact_resolver"].__setitem__(
-                    "resolver_reference", "https://example.invalid/authority"
-                ),
-                item.__setitem__(
-                    "source_reference", "https://example.invalid/authority"
-                ),
-                item.__setitem__(
-                    "signature_reference", "https://example.invalid/authority"
-                ),
-            ),
-            lambda item: item["subject_claims"][0].__setitem__(
-                "claims", ["AUTHORIZE-EVERYTHING"]
-            ),
-            lambda item: item.__setitem__(
-                "subject_contract_sha256", {"WP-0002": "00" * 32}
-            ),
-        ]
-        for mutate in receipt_mutations:
-            with self.subTest(mutation=mutate), tempfile.TemporaryDirectory() as temporary:
-                root = Path(temporary)
-                packet, state, _, receipt, _, _ = self.wp0002_attested_documents(root)
-                errors = self.validate_wp0002(
-                    root,
-                    packet,
-                    state,
-                    receipt,
-                    operator_receipt_mutator=mutate,
-                )
-                self.assertTrue(errors)
-
-    def test_wp0002_local_operator_retains_prior_boundary(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            packet, state, _, receipt, _, _ = self.wp0002_attested_documents(root)
-            receipt["artifact_sha256"][packet["a1_boundary_manifest"]["path"]] = (
-                "00" * 32
-            )
-            errors = self.validate_wp0002(root, packet, state, receipt)
-            self.assertTrue(any("retain the activated prior boundary hash" in e for e in errors))
 
     def test_active_wp0002_scope_capture_uses_terminal_retained_mode(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -1426,9 +1131,6 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 lambda item: item.__setitem__("reserved_scope_clean_at_activation", True),
                 lambda item: item.__setitem__("excluded_creator_owned_drift", []),
                 lambda item: item.__setitem__("working_tree_scope_capture", None),
-                lambda item: item.__setitem__(
-                    "local_operator_amendment_scope_capture", None
-                ),
             ]
             for mutate in mutations:
                 with self.subTest(mutation=mutate):
@@ -1448,19 +1150,6 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 lambda item: item["reservation"].__setitem__("fencing_token", "fence"),
                 lambda item: item["reservation"].__setitem__("expires_at", "2026-08-01T00:00:00Z"),
                 lambda item: item["repository"].__setitem__("clean_at_activation", True),
-                lambda item: item.__setitem__(
-                    "local_operator_amendment_scope_capture",
-                    {
-                        "uri": (
-                            "repo://docs/evidence/WP-0002/local-operator-amendment/"
-                            "scope-capture/working-tree-scope.json"
-                        ),
-                        "sha256": "81" * 32,
-                        "base_commit": BASE_COMMIT,
-                        "head_commit": BASE_COMMIT,
-                        "checkpoint_commit": BASE_COMMIT,
-                    },
-                ),
             ]
             for mutate in mutations:
                 with self.subTest(mutation=mutate):
@@ -1483,9 +1172,6 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 lambda item: item.__setitem__("index_clean_at_activation", False),
                 lambda item: item.__setitem__("non_excluded_scope_clean_at_activation", False),
                 lambda item: item.__setitem__("reserved_scope_clean_at_activation", False),
-                lambda item: item.__setitem__(
-                    "local_operator_amendment_scope_capture", None
-                ),
             ]
             for mutate in mutations:
                 with self.subTest(mutation=mutate):
@@ -1518,9 +1204,6 @@ class LocalA1BoundaryTests(unittest.TestCase):
             self.assertTrue(self.schema_errors(candidate))
             candidate = copy.deepcopy(manifest)
             candidate["working_tree_scope_capture"] = None
-            self.assertTrue(self.schema_errors(candidate))
-            candidate = copy.deepcopy(manifest)
-            candidate["local_operator_amendment_scope_capture"] = None
             self.assertTrue(self.schema_errors(candidate))
 
     def test_wp0002_schema_rejects_mutated_local_package_link(self) -> None:

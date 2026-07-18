@@ -31,18 +31,13 @@ CONFIG_DIRTY = b"creator private config sentinel alpha 88731\n"
 PROJECT_DIRTY = b"creator private project sentinel beta 99142\n"
 SCENE_DIRTY = b"creator private scene sentinel gamma 66309\n"
 RESERVATION = ["Game/Assets/AtomicLandPirate/LastBearing/"]
-PROTECTED = [
-    "docs/foundation-v0.1/",
-    ".codex/config.toml",
-    "Game/ProjectSettings/ProjectSettings.asset",
-    "Game/ProjectSettings/SceneTemplateSettings.json",
-]
+PROTECTED = ["docs/foundation-v0.1/", ".codex/config.toml"]
 
 
 class WP0002ScopeCaptureTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
-        self.repo = Path(os.path.realpath(self.temporary.name)) / "repo"
+        self.repo = Path(self.temporary.name) / "repo"
         self.repo.mkdir()
         self.git("init", "-b", "main")
         self.git("config", "user.name", "Scope Test")
@@ -53,13 +48,6 @@ class WP0002ScopeCaptureTests(unittest.TestCase):
         self.git("add", ".gitignore", ".codex/config.toml", "Game/ProjectSettings/ProjectSettings.asset")
         self.git("commit", "-m", "base")
         self.base = self.git("rev-parse", "HEAD").stdout.decode().strip()
-        self.git(
-            "remote",
-            "add",
-            "origin",
-            capture_tool.CANONICAL_REMOTE_URL,
-        )
-        self.git("update-ref", "refs/remotes/origin/main", self.base)
         self.write(".codex/config.toml", CONFIG_DIRTY)
         self.write("Game/ProjectSettings/ProjectSettings.asset", PROJECT_DIRTY)
         self.write("Game/ProjectSettings/SceneTemplateSettings.json", SCENE_DIRTY)
@@ -91,22 +79,6 @@ class WP0002ScopeCaptureTests(unittest.TestCase):
         path = self.repo / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
-
-    def write_amendment_gate_reports(
-        self, counts: tuple[int, int, int] = (1, 1, 1)
-    ) -> list[str]:
-        paths: list[str] = []
-        sequence = 1
-        for gate_id, count in zip(capture_tool.AMENDMENT_GATE_IDS, counts):
-            for _ in range(count):
-                path = (
-                    "BuildArtifacts/WP-0002/unity-gates/"
-                    f"{gate_id}-{sequence:032x}.json"
-                )
-                self.write(path, b'{"result":"pass"}\n')
-                paths.append(path)
-                sequence += 1
-        return paths
 
     def capture_path(self) -> Path:
         return self.repo / self.result["path"]
@@ -482,222 +454,6 @@ class WP0002ScopeCaptureTests(unittest.TestCase):
             ][4],
             expected,
         )
-
-    def test_amendment_profile_derives_exact_dirty_owners_and_scope_facts(self) -> None:
-        self.write(".codex/config.toml", CONFIG_BASE)
-        generated_paths = self.write_amendment_gate_reports((2, 1, 3))
-        amendment_reservation = [*RESERVATION, "BuildArtifacts/WP-0002/"]
-        amendment = capture_tool.collect_scope_capture(
-            self.repo,
-            base_commit=self.base,
-            checkpoint_commit=self.base,
-            reservation_paths=amendment_reservation,
-            protected_paths_read_only=PROTECTED,
-            output_relative=capture_tool.AMENDMENT_RETAINED_CAPTURE,
-            captured_at=CAPTURE_TIME,
-            expected_repository_root=str(self.repo),
-            evidence_root=self.repo,
-            status_arguments=capture_tool.AMENDMENT_STATUS_ARGUMENTS,
-        )
-        errors = capture_tool.verify_scope_capture(
-            self.repo,
-            amendment["path"],
-            expected_capture_sha256=amendment["sha256"],
-            expected_base_commit=self.base,
-            expected_head_commit=self.base,
-            expected_checkpoint_commit=self.base,
-            expected_reservation_paths=amendment_reservation,
-            expected_protected_paths=PROTECTED,
-            receipt_issued_at=RECEIPT_TIME,
-            mode="terminal-retained",
-            expected_repository_root=str(self.repo),
-            status_arguments=capture_tool.AMENDMENT_STATUS_ARGUMENTS,
-        )
-        self.assertEqual(errors, [])
-        capture = json.loads(
-            (self.repo / amendment["path"]).read_text(encoding="utf-8")
-        )
-        generated = [
-            item
-            for item in capture["dirty_paths"]
-            if item["path"].startswith("BuildArtifacts/")
-        ]
-        self.assertEqual(
-            [item["path"] for item in generated], sorted(generated_paths)
-        )
-        self.assertTrue(
-            all(item["owner"] == "packet-generated-evidence" for item in generated)
-        )
-        self.assertFalse(capture["reserved_scope_clean"])
-        self.assertFalse(capture["non_excluded_scope_clean"])
-        self.assertEqual(capture["reserved_protected_overlaps"], [])
-        self.assertEqual(
-            capture["canonical_main_binding"],
-            {
-                "top_level": str(self.repo),
-                "branch_ref": "refs/heads/main",
-                "origin_url": capture_tool.CANONICAL_REMOTE_URL,
-                "origin_main_commit": self.base,
-            },
-        )
-
-    def test_amendment_capture_supports_distinct_observed_and_evidence_roots(self) -> None:
-        self.write(".codex/config.toml", CONFIG_BASE)
-        self.write_amendment_gate_reports()
-        evidence_root = Path(self.temporary.name) / "evidence-clone"
-        clone = subprocess.run(
-            [
-                "/usr/bin/git",
-                "clone",
-                "--no-hardlinks",
-                "--no-checkout",
-                str(self.repo),
-                str(evidence_root),
-            ],
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
-        )
-        self.assertEqual(clone.returncode, 0, clone.stderr.decode())
-        amendment_reservation = [*RESERVATION, "BuildArtifacts/WP-0002/"]
-        amendment = capture_tool.collect_scope_capture(
-            self.repo,
-            base_commit=self.base,
-            checkpoint_commit=self.base,
-            reservation_paths=amendment_reservation,
-            protected_paths_read_only=PROTECTED,
-            output_relative=capture_tool.AMENDMENT_RETAINED_CAPTURE,
-            captured_at=CAPTURE_TIME,
-            expected_repository_root=str(self.repo),
-            evidence_root=evidence_root,
-            status_arguments=capture_tool.AMENDMENT_STATUS_ARGUMENTS,
-        )
-        errors = capture_tool.verify_scope_capture(
-            evidence_root,
-            amendment["path"],
-            expected_capture_sha256=amendment["sha256"],
-            expected_base_commit=self.base,
-            expected_head_commit=self.base,
-            expected_checkpoint_commit=self.base,
-            expected_reservation_paths=amendment_reservation,
-            expected_protected_paths=PROTECTED,
-            receipt_issued_at=RECEIPT_TIME,
-            mode="terminal-retained",
-            expected_repository_root=str(self.repo),
-            status_arguments=capture_tool.AMENDMENT_STATUS_ARGUMENTS,
-        )
-        self.assertEqual(errors, [])
-
-    def test_amendment_capture_rejects_unrelated_dirty_path(self) -> None:
-        self.write(".codex/config.toml", CONFIG_BASE)
-        self.write_amendment_gate_reports()
-        self.write("unrelated.txt", b"not part of the retained Unity state\n")
-        with self.assertRaisesRegex(ValueError, "unclassified path: unrelated.txt"):
-            capture_tool.collect_scope_capture(
-                self.repo,
-                base_commit=self.base,
-                checkpoint_commit=self.base,
-                reservation_paths=[*RESERVATION, "BuildArtifacts/WP-0002/"],
-                protected_paths_read_only=PROTECTED,
-                output_relative=capture_tool.AMENDMENT_RETAINED_CAPTURE,
-                captured_at=CAPTURE_TIME,
-                expected_repository_root=str(self.repo),
-                evidence_root=self.repo,
-                status_arguments=capture_tool.AMENDMENT_STATUS_ARGUMENTS,
-            )
-
-    def test_amendment_capture_requires_each_gate_report_kind(self) -> None:
-        self.write(".codex/config.toml", CONFIG_BASE)
-        self.write_amendment_gate_reports((1, 0, 2))
-        with self.assertRaisesRegex(
-            ValueError, "wp0002-editmode-test-assembly"
-        ):
-            capture_tool.collect_scope_capture(
-                self.repo,
-                base_commit=self.base,
-                checkpoint_commit=self.base,
-                reservation_paths=[*RESERVATION, "BuildArtifacts/WP-0002/"],
-                protected_paths_read_only=PROTECTED,
-                output_relative=capture_tool.AMENDMENT_RETAINED_CAPTURE,
-                captured_at=CAPTURE_TIME,
-                expected_repository_root=str(self.repo),
-                evidence_root=self.repo,
-                status_arguments=capture_tool.AMENDMENT_STATUS_ARGUMENTS,
-            )
-
-    def test_amendment_capture_rejects_caller_dirty_classification(self) -> None:
-        self.write(".codex/config.toml", CONFIG_BASE)
-        self.write_amendment_gate_reports()
-        with self.assertRaisesRegex(
-            ValueError, "must be derived from raw Git status"
-        ):
-            capture_tool.collect_scope_capture(
-                self.repo,
-                base_commit=self.base,
-                checkpoint_commit=self.base,
-                reservation_paths=[*RESERVATION, "BuildArtifacts/WP-0002/"],
-                protected_paths_read_only=PROTECTED,
-                output_relative=capture_tool.AMENDMENT_RETAINED_CAPTURE,
-                captured_at=CAPTURE_TIME,
-                expected_repository_root=str(self.repo),
-                expected_dirty_states={},
-                evidence_root=self.repo,
-                status_arguments=capture_tool.AMENDMENT_STATUS_ARGUMENTS,
-            )
-
-    def test_amendment_read_only_index_proof_fails_closed_on_staged_drift(
-        self,
-    ) -> None:
-        self.git("add", "Game/ProjectSettings/ProjectSettings.asset")
-        with mock.patch.object(
-            capture_tool,
-            "_git_output",
-            wraps=capture_tool._git_output,
-        ) as git_output:
-            facts = capture_tool._git_facts(
-                self.repo,
-                read_only_index=True,
-            )
-        self.assertIs(facts["index_clean"], False)
-        self.assertEqual(facts["index_tree"], "")
-        self.assertFalse(
-            any(call.args[1] == ["write-tree"] for call in git_output.call_args_list)
-        )
-
-        self.write(".codex/config.toml", CONFIG_BASE)
-        self.write_amendment_gate_reports()
-        with self.assertRaises(ValueError):
-            capture_tool.collect_scope_capture(
-                self.repo,
-                base_commit=self.base,
-                checkpoint_commit=self.base,
-                reservation_paths=[*RESERVATION, "BuildArtifacts/WP-0002/"],
-                protected_paths_read_only=PROTECTED,
-                output_relative=capture_tool.AMENDMENT_RETAINED_CAPTURE,
-                captured_at=CAPTURE_TIME,
-                expected_repository_root=str(self.repo),
-                evidence_root=self.repo,
-                status_arguments=capture_tool.AMENDMENT_STATUS_ARGUMENTS,
-            )
-
-    def test_amendment_capture_rejects_stale_origin_main(self) -> None:
-        self.write(".codex/config.toml", CONFIG_BASE)
-        self.write_amendment_gate_reports()
-        self.git("update-ref", "-d", "refs/remotes/origin/main")
-        with self.assertRaisesRegex(ValueError, "origin/main"):
-            capture_tool.collect_scope_capture(
-                self.repo,
-                base_commit=self.base,
-                checkpoint_commit=self.base,
-                reservation_paths=[*RESERVATION, "BuildArtifacts/WP-0002/"],
-                protected_paths_read_only=PROTECTED,
-                output_relative=capture_tool.AMENDMENT_RETAINED_CAPTURE,
-                captured_at=CAPTURE_TIME,
-                expected_repository_root=str(self.repo),
-                evidence_root=self.repo,
-                status_arguments=capture_tool.AMENDMENT_STATUS_ARGUMENTS,
-            )
 
     def test_terminal_retained_capture_rejects_invalid_collection_root(self) -> None:
         capture = self.capture()

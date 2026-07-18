@@ -13,22 +13,12 @@ This tuple is D-0047's provisional spike target, not an installation approval or
 WP-0003 separately authorized the already-installed Unity `6000.5.4f1` Editor
 for its completed bounded local bootstrap under an exact sealed local boundary
 and conditional first-use gate. WP-0003 is now `released` and its reservation
-is released. WP-0002 is the sole active A1 packet under its protected Stage C
-boundary. Its canonical durable checkout is
-`/Users/sasha/Projects/sasha-the-land-pirate`
-and its exact Unity project is the `Game` child. After its receipt, complete
-authenticated online transaction, and separate protected three-report
-evidence-closure merge, the append-only delegated local-operator
-amendment permits visible Computer Use only in Unity Hub bundle
-`com.unity3d.unityhub` and Editor bundle `com.unity3d.UnityEditor5.x` to
-add/open/switch that exact project, approve only the receipt-bound Codex Bridge
-client whose visible OS publisher/path and application version/build match,
-and inspect non-secret Unity state. The prior host signature observation is
-context-limited and the UI does not prove a CDHash. It cannot mutate
-Bridge tools or configuration. Implementation remains restricted to the
-five named MCP tools. The historical WP-0003 exception and this narrow UI
-amendment do not amend WP-0001's candidate tuple, ratify the production engine,
-or waive later IL2CPP, Xcode, package, performance, and rollback proof.
+is released. At the current Stage B handoff, autonomy is A0: WP-0002 is
+accepted but inactive and unreserved, and neither implementation nor Unity MCP
+use may begin until a protected Stage C activation transaction lands. The
+historical WP-0003 exception did not amend WP-0001's candidate tuple, ratify the
+production engine, or waive later IL2CPP, Xcode, package, performance, and
+rollback proof.
 
 Renderer hypothesis to test:
 
@@ -53,7 +43,7 @@ The exact fallback/comparison candidate is **Godot .NET 4.7.1 commit `a13da4feb`
 
 Even if Unity is ratified:
 
-- Unity Terms §17.2(ff) is a hard operating gate. An agent or CI runner may not directly invoke Hub, Editor, or Unity CLI unless Unity has documented Authorized Agentic Access for the exact identity, runner, and use. WP-0002's creator-authorized visible-UI operator amendment is limited to the exact installed app bundles, canonical project, trusted Bridge client, and non-secret inspection; it grants no shell, CLI, batchmode, headless, executable, CI, install, or different-project authority. If that cannot satisfy later engine proof, supersede the applicable packet with the Godot fallback. Creator repository/CI permission cannot waive vendor terms.
+- Unity Terms §17.2(ff) is a hard operating gate. An agent or CI runner may not invoke Hub, Editor, or Unity CLI unless Unity has documented Authorized Agentic Access for the exact identity, runner, and use. Otherwise every Unity action is human-invoked while agents only prepare inputs and analyze outputs; if that cannot satisfy WP-0001, supersede it with the Godot fallback. Creator repository/CI permission cannot waive vendor terms.
 
 - Unity scenes and GameObjects are presentation and authoring containers, not canonical game state.
 - Save data never serializes scene paths, prefab instances, `MonoBehaviour` object graphs, or raw ECS chunks.

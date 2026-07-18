@@ -36,23 +36,11 @@ local-development authority; they do not generalize to another packet.
 - work on a non-`main` Git branch in the durable repository;
 - create and edit the Unity project, C# code, tests, technical scenes, UI,
   prototype assets, and supporting build/validation tools inside packet paths;
-- implement in Unity through the creator-approved `UNITY-MCP-EXTERNAL` route;
+- interact with an already-open Unity Editor only through the creator-approved
+  `UNITY-MCP-EXTERNAL` route;
 - enter and exit Play Mode, execute project tests, inspect the console, capture
   screenshots, and create or modify project objects through Unity MCP;
 - create branches, checkpoints, commits, pushes, and protected pull requests.
-
-For active WP-0002 only, append-only amendment
-`A1B-WP-0002-LOCAL-OPERATOR-20260717`, after its receipt, authenticated
-online three-phase transaction, and separate protected three-report evidence
-closure complete, delegates visible Computer Use in
-the exact installed Unity Hub and Editor bundles to add/open/switch the exact
-canonical `Game` project, approve only the receipt-bound Codex Bridge client
-whose visible OS publisher/path and application version/build match, and
-inspect non-secret Unity state. The prior host signature observation is
-context-limited and the UI does not prove a CDHash. It cannot mutate Bridge tools
-or configuration. This is local operation with creator attribution, not
-identity impersonation or a general UI, process, account, or external
-communication authority.
 
 The initial Unity project/CI change was creator-merged. Autonomous auto-merge
 remains unauthorized; later implementation requires the packet's protected
@@ -83,11 +71,8 @@ Unity state. Together they establish:
    intended project path;
 5. Unity MCP authority is conditional on the first-use gate; WP-0003 was
    `bootstrap-pending`, while active WP-0002 binds `existing-protected-project`;
-6. the historical creator-opened first-use record plus the successor rule that
-   creator or receipt-bound delegated operator may open/switch only the exact
-   project, followed by licensed-Editor, Bridge, exact visible receipt-bound
-   client identity, target,
-   and requested-call checks;
+6. the exact first-use preconditions for seat/linkage, Bridge, Codex approval,
+   and target matching;
 7. no committed secrets and no requested credential, account, license, purchase,
    publishing, or release authority;
 8. the allowed and denied action sets below; and
@@ -124,11 +109,6 @@ state that:
 Failure or drift stops Unity calls but does not invalidate unrelated repository
 work already permitted by A1.
 
-The exact project may be brought to this gate by the receipt-bound local UI
-operator action rather than a fresh creator click. That action may not choose a
-different project/client or satisfy a precondition by assertion; the visible
-state must still prove every item above.
-
 ## Allowed actions
 
 Inside declared packet paths:
@@ -160,11 +140,6 @@ Agents may not:
   allowed but non-importable;
 - merge constitutional, governance, credential, dependency, save-migration,
   publishing, or release changes without a fresh creator review.
-
-The first bullet retains shell, CLI, batchmode, headless, executable, and CI
-meaning. It does not prohibit the exact visible Computer Use actions separately
-bound by `RR-WP0002-LOCAL-OPERATOR-20260717`; those actions add no other
-authority and do not alter the remaining denials.
 
 ## Git and rollback
 
@@ -201,35 +176,6 @@ report for later implementation release. Autonomous
 auto-merge is not authorized without a separate governance upgrade. Direct or
 agent-selected merge remains denied.
 
-The delegated local-operator amendment itself requires one bounded
-creator-controlled control-plane materialization because the base-owned policy
-correctly rejects active-to-active governance mutations. For that exact final
-PR head and patch only, `wp0002-policy` may be temporarily nonrequired while
-`validate`, `wp0002-core`, strict PR/admin/conversation/linear enforcement,
-empty bypass allowances, disabled force push/deletion, and squash-only merging
-remain, and each protection snapshot must prove an exact empty inherited and
-repository ruleset inventory. The final head and patch must be reverified before creator-delegated
-squash merge; restored protection must be captured within 600 seconds. The
-three verifier reports are then added as the only three regular files in a
-separate evidence-only PR under the ordinary full three-check protection set.
-Its base-owned policy run hash-checks protected verifier bytes and live-refetches
-both owner comments, the control PR, main, checks, protection, and rulesets.
-The control merge alone is
-non-executable; all reports absent is pending, any partial set fails closed,
-and only the protected evidence-closure merge makes the successor effective.
-The first implementation PR opened after restoration remains the fresh
-latest-head canary.
-
-GitHub's classic branch-protection endpoint cannot be read by a workflow
-`GITHUB_TOKEN`. The evidence-closure job therefore also requires an externally
-provisioned `WP0002_PROTECTION_READ_TOKEN` Actions secret: one repository,
-Administration read only, and short expiry. Only protected-base workflow code
-receives it, only the protection/ruleset reader uses it, candidate code never
-runs, and the check fails closed when it is absent. The agent is not authorized
-to read, copy, display, or provision the credential material.
-This is control-plane configuration, not A1 implementation authority or a
-general protection-bypass permission.
-
 During implementation, `AGENTS.md` and the entire foundation/governance/receipt
 tree are read-only. Unity access is limited to `Unity_ReadConsole`,
 `Unity_RunCommand`, `Unity_ManageEditor`, `Unity_ManageGameObject`, and
@@ -246,14 +192,6 @@ persistent data is the disposable `last-bearing-dev-v1` local profile with
 atomic generation publication and preserved last-good; it has no compatibility
 promise. All colony compositions run the same golden path, while differentiated
 mechanics remain conditional on a later D-0039 receipt.
-
-The canonical active target is
-`/Users/sasha/Projects/sasha-the-land-pirate/Game`.
-The local UI amendment binds Hub `com.unity3d.unityhub` at
-`/Applications/Unity Hub.app` and Editor `com.unity3d.UnityEditor5.x` at
-`/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app`. Its recorded cloud
-project and organization identifiers are non-secret identity checks only; it
-does not assert cloud enablement or authorize a linkage/configuration change.
 
 These are authority constraints, not technical containment. In particular,
 `Unity_RunCommand` compiles and executes arbitrary Editor C# and may reach the
