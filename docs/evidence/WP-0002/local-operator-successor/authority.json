@@ -1,0 +1,276 @@
+{
+  "authorization_comment": {
+    "actor": {
+      "author_association": "OWNER",
+      "id": 65501994,
+      "login": "AC-21",
+      "type": "User"
+    },
+    "api_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/issues/comments/5010652664",
+    "body_utf8_sha256": "173d6cb85e3951de55b61414eec30aaca0933364b9329f76080e202a069e4fee",
+    "created_at": "2026-07-18T08:52:12Z",
+    "html_url": "https://github.com/AC-21/sasha-the-land-pirate/pull/63#issuecomment-5010652664",
+    "id": 5010652664,
+    "issue_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/issues/63",
+    "node_id": "IC_kwDOTZ3pzM8AAAABKqh9-A",
+    "updated_at": "2026-07-18T08:52:12Z"
+  },
+  "parsed_binding": {
+    "changed_files_manifest_sha256": "cd75249b5373e8710e793d91d8d420e995b6e77553e6fdf83e85b874c8aa01c3",
+    "claim": "AUTHORIZE-WP0002-DELEGATED-LOCAL-UNITY-OPERATOR-SUCCESSOR",
+    "contract_sha256": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
+    "receipt_path": "docs/foundation-v0.1/ledger/receipts/RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718.json",
+    "stage1_commit": "fded50fe77b706071da95e4bca80234d6f3f76ac",
+    "stage1_patch_sha256": "1109746522619e881c6e08ae641e2c6c7768f9f748a9bb3fe7122f027a185fad",
+    "stage1_tree": "6d7063a6c2427a0ae2300453de45b6f113b473bd",
+    "superseded_v1_boundary_sha256": "e92e7276dc97478d7412307f43a5f90b60b99256b2a8a7cd5d00626c4f2e0962",
+    "superseded_v1_receipt_id": "RR-WP0002-LOCAL-OPERATOR-20260717",
+    "superseded_v1_receipt_sha256": "fb1df094bac7c4b944e1438eff4e761963e7076fb58b69f36ef497939eba8b8e",
+    "supersession_claim": "SUPERSEDE-WP0002-LOCAL-OPERATOR-20260717-UNEXECUTED",
+    "temporary_nonrequired_check": "wp0002-policy"
+  },
+  "phase": "authority",
+  "pull_request": {
+    "api_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/pulls/63",
+    "base_ref": "main",
+    "base_sha": "96002331dc069db5a7bab36baaf359d1b46cc64c",
+    "head_ref": "agent/wp0002-forward-recovery-r2",
+    "head_repository": "AC-21/sasha-the-land-pirate",
+    "head_sha": "fded50fe77b706071da95e4bca80234d6f3f76ac",
+    "html_url": "https://github.com/AC-21/sasha-the-land-pirate/pull/63",
+    "number": 63
+  },
+  "raw_artifacts": {
+    "authorization_comment": {
+      "byte_size": 2596,
+      "sha256": "2ffedb6ec03f3d312f89ee9b1a9a476b6cfaebbb96ddc9e5c298d7a7f968eeb0"
+    },
+    "pull_request": {
+      "byte_size": 16738,
+      "sha256": "98d014d181ec4ae823b8eed2bdfa8f8fbc12c641e41d14cd19f6fdadf9a732c0"
+    },
+    "repository": {
+      "byte_size": 6116,
+      "sha256": "f21d144ff27690ff69ca925811a0077d945becc8819955f8e7749303bae85c4e"
+    }
+  },
+  "repository": {
+    "full_name": "AC-21/sasha-the-land-pirate",
+    "id": 1302194636,
+    "owner_id": 65501994,
+    "owner_login": "AC-21"
+  },
+  "schema_version": 1,
+  "stage1": {
+    "base_sha": "96002331dc069db5a7bab36baaf359d1b46cc64c",
+    "changed_files": [
+      {
+        "new_blob_sha256": "13ea299f704e9e25a121933b1dfe3c4eb716c2a5bdb982242e4d520a07060670",
+        "new_mode": "100644",
+        "new_oid": "3d4bd7367c73ce931980a9f557bbcb9ba6c0c5f4",
+        "old_mode": "100644",
+        "old_oid": "6a1df11ababe7426a3a24beca78a709a58130906",
+        "path": ".github/workflows/wp0002-policy.yml",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "9a141584f10d0eeda1a42047a97822b5d74112c5d78d690da4f654106d4aa6ca",
+        "new_mode": "100644",
+        "new_oid": "452d605083d75995808079ef3fcc92148e0263a5",
+        "old_mode": "100644",
+        "old_oid": "60ebc8c1b257116aaced9bd0dcf5eb46012dbc85",
+        "path": "AGENTS.md",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "8b388eb38ff74b6092c28e510da6776e057ef5d956977d690b06803be8d20dde",
+        "new_mode": "100644",
+        "new_oid": "85b7f6051785aae9b0e0cf08a7bee3693bbdcbb2",
+        "old_mode": "100644",
+        "old_oid": "7a4aaa7365ac4f33b8e90a61e1b7eb41e93e9a6c",
+        "path": "README.md",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "025fdadb1801c714e997a5a5d8827825e48d71d40257d1106ed1da4d22d8ef90",
+        "new_mode": "100644",
+        "new_oid": "66473746c83e6bf884903d6cfb6c5907ea93a2db",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "Tools/Validation/collect_wp0002_scope_capture_successor.py",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "15ea81750bce5b5d3cee5a5711b8287f55238eb44343386c1d0f5ca88f484a19",
+        "new_mode": "100644",
+        "new_oid": "6b94f0a2eec8932274d3a0261965bdfbf260bfa4",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "16ac5521be7bd4d4513d537ad3e7b627fad7c98b08352d080fe7d51d7cccb99c",
+        "new_mode": "100644",
+        "new_oid": "4bed35a62c397e24b20dc0ac25d5fda3f385c1cc",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/evidence/WP-0002/local-operator-successor/control/protection-before.json",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "44568bd25578e0270b0530abaad3ccfa28a27ea4771de79fa874e039e6ec546e",
+        "new_mode": "100644",
+        "new_oid": "bf2c4b43d03f4f3d6f86e79fd6bf266a26117399",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/evidence/WP-0002/local-operator-successor/scope-capture/working-tree-scope.json",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "aefdb6e421e74daaf72dafebcb601afa5c22d0212d92e8889bc40074476f9aa0",
+        "new_mode": "100644",
+        "new_oid": "1e6a6ba3ec92d0c3d6130450309b0cca7d1827db",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/evidence/WP-0002/local-operator-successor/scope-capture/working-tree-scope.observations.aefdb6e421e74daaf72dafebcb601afa5c22d0212d92e8889bc40074476f9aa0.json",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "bea960c9a69eda2a80c43103d093da728e30df0c65763f17ba6d1a994ea83d02",
+        "new_mode": "100644",
+        "new_oid": "b41b97767503fb059867c35bd72c005694047535",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/evidence/WP-0002/local-operator-successor/scope-capture/working-tree-scope.status.bea960c9a69eda2a80c43103d093da728e30df0c65763f17ba6d1a994ea83d02.bin",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "c46242f9d70738757d5f6d09b018fde35169c33f4cb01b6bc64234c724448b53",
+        "new_mode": "100644",
+        "new_oid": "296711d935f1d3f70ee79c4a3466d2a2184f3869",
+        "old_mode": "100644",
+        "old_oid": "6e6db0a6da797d5f754c68620031d27e9bf2e4b5",
+        "path": "docs/foundation-v0.1/04-TECHNICAL-ARCHITECTURE.md",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "a432eac0a155fbe1bfa2c07bcb8815a256d1787ccf33ff0aa0cba21b2ee3fd9f",
+        "new_mode": "100644",
+        "new_oid": "b05b931aa49d90713d506fef7ed851bbaea8a5bf",
+        "old_mode": "100644",
+        "old_oid": "10a61c50eebe94fd7600f3f2bc860b66707041ff",
+        "path": "docs/foundation-v0.1/15-LEAN-A1-LOCAL-DEVELOPMENT.md",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "6c07f78363eece51d74dbae26aa74a139b55a333869165a380034ba410c77e03",
+        "new_mode": "100644",
+        "new_oid": "d7d7dcc3f456393d4b0283ff7dec45699e0c2f64",
+        "old_mode": "100644",
+        "old_oid": "b0637a689368da5a84093cb338c84a65152ab324",
+        "path": "docs/foundation-v0.1/README.md",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "b09e2e15f1755524a1843c4e0331727b514d8744aa5d511e71c2e845547d892f",
+        "new_mode": "100644",
+        "new_oid": "f91433d90ecdd956595657380c6662248c0113b4",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/foundation-v0.1/governance/WP-0002-DELEGATED-LOCAL-UNITY-OPERATOR-SUCCESSOR.md",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "1f9bbce5906b720ba6aff92143584b9c668731c8c11f71fe6d967cff26e358a2",
+        "new_mode": "100644",
+        "new_oid": "26af64a03619c8ca7c204ffde6a680b935e86a85",
+        "old_mode": "100644",
+        "old_oid": "1d7d2942d233e164805b1fc1c2f8a06b1e73b9b9",
+        "path": "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "b6f673303ec75f153485dc408bffb1d424bc3d6f647d54cdf0686ac57bdd3f76",
+        "new_mode": "100644",
+        "new_oid": "44940c91e2016f1b25072f63bfaa6409bef7af06",
+        "old_mode": "100644",
+        "old_oid": "9e9a0b824e61cf1366bc87141d0e60ee42a948c8",
+        "path": "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "afabbccaa61731c70daf94399d518ef448c68c78d6d2cf5715cc56a713fa2247",
+        "new_mode": "100644",
+        "new_oid": "0f6b7a825c6473e7f3ac68e966fb6f7ef5b2707b",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/foundation-v0.1/schemas/wp0002-local-operator-successor-scope-capture.schema.json",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "96380cf51d29088f2356b37b5d96a564bf04d8fe098f5b109781fc8710f59f16",
+        "new_mode": "100644",
+        "new_oid": "a021759902629c7c93efad46811bfe0fe9a349d5",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/foundation-v0.1/schemas/wp0002-local-operator-successor-transaction-evidence.schema.json",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "fca82cd1438b860267170435f6b97fc78698aa79df678b10adabe01667a90744",
+        "new_mode": "100644",
+        "new_oid": "c03d66fbab56ebb96e722c6f96d34dda5b943d8f",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/foundation-v0.1/tools/test_collect_wp0002_scope_capture_successor.py",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "3ef2481c3295ce97f8cfb2a9a5cf98cbdb71792e61772b063613c567f30a78ed",
+        "new_mode": "100644",
+        "new_oid": "d5ae27525e0b809843ac023f78711d1155a2f7df",
+        "old_mode": "100644",
+        "old_oid": "806b7b636a41e40195c28212a777f85a087c4c2c",
+        "path": "docs/foundation-v0.1/tools/test_validate_local_a1_boundary.py",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "c77d2d2534972d1d510b54b0a75834d9f6fd7340beef773f710eb107a7d6bdff",
+        "new_mode": "100644",
+        "new_oid": "509a5f1636e0df5cac15cd73f0cb9d73aa514ec2",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/foundation-v0.1/tools/test_verify_wp0002_local_operator_transaction_v2.py",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "d0213a6952fe06f8b4d307831514a63c547dcf6814a42ee8d4984ac70a157345",
+        "new_mode": "100644",
+        "new_oid": "35e274557781897602ee72f9ed60521575a70195",
+        "old_mode": "100644",
+        "old_oid": "ba20ff036ff94767bc2c17788377cfb628e10e2c",
+        "path": "docs/foundation-v0.1/tools/validate_foundation.py",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "f8587fcbd774e630b090cd32cf022e3048f182beb306e0f8ddf59497fdcc951f",
+        "new_mode": "100644",
+        "new_oid": "d0521ef0a9410bf7ed4646604fa69250d917fa76",
+        "old_mode": "100644",
+        "old_oid": "71910a0c36aad6e152eeedf760b8673a41dcbdd4",
+        "path": "docs/foundation-v0.1/work-packets/proposed/WP-0002.json",
+        "status": "M"
+      }
+    ],
+    "changed_files_manifest_sha256": "cd75249b5373e8710e793d91d8d420e995b6e77553e6fdf83e85b874c8aa01c3",
+    "commit_sha": "fded50fe77b706071da95e4bca80234d6f3f76ac",
+    "deterministic_patch_sha256": "1109746522619e881c6e08ae641e2c6c7768f9f748a9bb3fe7122f027a185fad",
+    "full_tree_listing_sha256": "fd8d2125a1bcde0339aaa1482fc0cd8cf66b0c43ea7ee9ca6eefe507d63e7008",
+    "parent_shas": [
+      "96002331dc069db5a7bab36baaf359d1b46cc64c"
+    ],
+    "tree_oid": "6d7063a6c2427a0ae2300453de45b6f113b473bd"
+  },
+  "transaction_id": "WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718"
+}
