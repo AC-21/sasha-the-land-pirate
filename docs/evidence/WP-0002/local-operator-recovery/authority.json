@@ -1,0 +1,178 @@
+{
+  "authorization_comment": {
+    "actor": {
+      "author_association": "OWNER",
+      "id": 65501994,
+      "login": "AC-21",
+      "type": "User"
+    },
+    "api_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/issues/comments/5011014242",
+    "body_utf8_sha256": "28cafa2af76a7756227df122a8b59be7822e3655bebc4871b9e70dc14956c6a1",
+    "created_at": "2026-07-18T11:03:42Z",
+    "html_url": "https://github.com/AC-21/sasha-the-land-pirate/pull/65#issuecomment-5011014242",
+    "id": 5011014242,
+    "issue_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/issues/65",
+    "node_id": "IC_kwDOTZ3pzM8AAAABKq4CYg",
+    "updated_at": "2026-07-18T11:03:42Z"
+  },
+  "parsed_binding": {
+    "changed_files_manifest_sha256": "02b90552d56746af1fe22f8c39425657929f4e941e8b1f5bb8cfa20e88c549bf",
+    "claim": "AUTHORIZE-WP0002-LOCAL-OPERATOR-MIXED-READER-RECOVERY",
+    "contract_sha256": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
+    "predecessor_boundary_sha256": "1f9bbce5906b720ba6aff92143584b9c668731c8c11f71fe6d967cff26e358a2",
+    "predecessor_receipt_id": "RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718",
+    "predecessor_receipt_sha256": "b82fc75e9f359f23a976ed3e073fddcf92a1b6d632b5d9e1d5115e70e43904ce",
+    "predecessor_transaction_id": "WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718",
+    "receipt_path": "docs/foundation-v0.1/ledger/receipts/RR-WP0002-LOCAL-OPERATOR-RECOVERY-20260718.json",
+    "stage1_commit": "27912061418cc78cf0d98616eca54f230c91a3d8",
+    "stage1_patch_sha256": "ff79fef5b208cb4716f70334dbdda82c8842fa1d1de71502fdba69c50fa39bc5",
+    "stage1_tree": "3e8818fbbeb923f3367dfb05dbb2e9fa27e868c7",
+    "supersession_claim": "SUPERSEDE-WP0002-LOCAL-OPERATOR-SUCCESSOR-CLOSURE-VERIFIER-V2-UNEXECUTED",
+    "temporary_nonrequired_check": "wp0002-policy"
+  },
+  "phase": "authority",
+  "pull_request": {
+    "api_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/pulls/65",
+    "base_ref": "main",
+    "base_sha": "166d53698d013c605c7bee749368193dc2834644",
+    "head_ref": "agent/wp0002-recovery-v3",
+    "head_repository": "AC-21/sasha-the-land-pirate",
+    "head_sha": "27912061418cc78cf0d98616eca54f230c91a3d8",
+    "html_url": "https://github.com/AC-21/sasha-the-land-pirate/pull/65",
+    "number": 65
+  },
+  "raw_artifacts": {
+    "authorization_comment": {
+      "byte_size": 4372,
+      "sha256": "058266b3fc93e731cc5f5b50e93b90b572d73ee5e1b07ceda3c362d3f9c090f2"
+    },
+    "pull_request": {
+      "byte_size": 17491,
+      "sha256": "5b730cdca972fb4d39775b700ec4c716dbf694b38543f208fd094292a363358f"
+    },
+    "repository": {
+      "byte_size": 6116,
+      "sha256": "45d807989da44c577d0a1f996ed8ab178b85b759495aefd723c65b6ef58e82ec"
+    }
+  },
+  "repository": {
+    "full_name": "AC-21/sasha-the-land-pirate",
+    "id": 1302194636,
+    "owner_id": 65501994,
+    "owner_login": "AC-21"
+  },
+  "schema_version": 1,
+  "stage1": {
+    "base_sha": "166d53698d013c605c7bee749368193dc2834644",
+    "changed_files": [
+      {
+        "new_blob_sha256": "540719548b44d1b6a21e5c930cdf84eb44cf732218092a40d6d5c021435abbfe",
+        "new_mode": "100644",
+        "new_oid": "a7e84d3bc9f2ded0d97d54316a0ac0c9c880186f",
+        "old_mode": "100644",
+        "old_oid": "3d4bd7367c73ce931980a9f557bbcb9ba6c0c5f4",
+        "path": ".github/workflows/wp0002-policy.yml",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "2d8cd873f0a8ee357848d18e2cb57f440f6fd28fb5817e7454f816d07dc8e52d",
+        "new_mode": "100644",
+        "new_oid": "614f9bb93a77f648c6ad697fcfc104784fec2e7a",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "Tools/Validation/verify_wp0002_local_operator_transaction_v3.py",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "58fab2288d4befc59280085cf804b786435f8a3f56fb66cbc3ff415ad0297d61",
+        "new_mode": "100644",
+        "new_oid": "76b3c0aa24222490e09db14b9d95e2cd003ce327",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/foundation-v0.1/governance/WP-0002-LOCAL-OPERATOR-MIXED-READER-RECOVERY.md",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "3bdd2fa06334dfe525071e376924a0d702bff1241effc33bff44dc42783aeaa8",
+        "new_mode": "100644",
+        "new_oid": "b499bd42ca0c2020df4f513c6716568df6e902cc",
+        "old_mode": "100644",
+        "old_oid": "26af64a03619c8ca7c204ffde6a680b935e86a85",
+        "path": "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "ec95d5da2d9b216f9bbda23b94bb3c4b6214db65a46c627f1efa31c3b2d8468e",
+        "new_mode": "100644",
+        "new_oid": "a3b41654ada48daf865871b41778c14b2f21d581",
+        "old_mode": "100644",
+        "old_oid": "44940c91e2016f1b25072f63bfaa6409bef7af06",
+        "path": "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "42cd5b114e75742938ea92b2d651f08442dcf2f0ca58ac9cf030838d9fb0acae",
+        "new_mode": "100644",
+        "new_oid": "bbab11cce197305cc9028488d20ec4c64bff86fa",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/foundation-v0.1/schemas/wp0002-local-operator-recovery-control.schema.json",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "82864ede50cc30062c06099f3e6a29856ce033b7355846cb5dff700b39bb1c1e",
+        "new_mode": "100644",
+        "new_oid": "0cfd865ffc58ec2bc1674a2e5adfd10d9227185d",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/foundation-v0.1/schemas/wp0002-local-operator-recovery-transaction-evidence.schema.json",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "8541569ddc179c48d8592236d27758da849dc9180669c7774edad07472962043",
+        "new_mode": "100644",
+        "new_oid": "9a5fa2933c45b9ad3132c416a420132fd945a52e",
+        "old_mode": "100644",
+        "old_oid": "d5ae27525e0b809843ac023f78711d1155a2f7df",
+        "path": "docs/foundation-v0.1/tools/test_validate_local_a1_boundary.py",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "940b6253f6abfe4e4c6e656eafcffec504acf0985c6920764d34d09ed5ebe7a7",
+        "new_mode": "100644",
+        "new_oid": "6bfc0b2c4e3136b7eaf32aee2c77a44f95190d28",
+        "old_mode": "000000",
+        "old_oid": "0000000000000000000000000000000000000000",
+        "path": "docs/foundation-v0.1/tools/test_verify_wp0002_local_operator_transaction_v3.py",
+        "status": "A"
+      },
+      {
+        "new_blob_sha256": "ccfe698104c569c8e0f80abffa258b4ba9f03678a5ac22498f4c0ebd526de8b4",
+        "new_mode": "100644",
+        "new_oid": "6eba3dc3899dc8fc2040a6c67577558ccbb64fd8",
+        "old_mode": "100644",
+        "old_oid": "35e274557781897602ee72f9ed60521575a70195",
+        "path": "docs/foundation-v0.1/tools/validate_foundation.py",
+        "status": "M"
+      },
+      {
+        "new_blob_sha256": "fd793febf14f000f43c67f6430754df2b2680f19be6911eedcaf141e2d3af84f",
+        "new_mode": "100644",
+        "new_oid": "43b6b4189893b5fb5b7f5eaf6987be7bfa80978e",
+        "old_mode": "100644",
+        "old_oid": "d0521ef0a9410bf7ed4646604fa69250d917fa76",
+        "path": "docs/foundation-v0.1/work-packets/proposed/WP-0002.json",
+        "status": "M"
+      }
+    ],
+    "changed_files_manifest_sha256": "02b90552d56746af1fe22f8c39425657929f4e941e8b1f5bb8cfa20e88c549bf",
+    "commit_sha": "27912061418cc78cf0d98616eca54f230c91a3d8",
+    "deterministic_patch_sha256": "ff79fef5b208cb4716f70334dbdda82c8842fa1d1de71502fdba69c50fa39bc5",
+    "full_tree_listing_sha256": "3ba5aee8148bc7e92106a728f085af158690bf33607f6a07acd47886a58ec1db",
+    "parent_shas": [
+      "166d53698d013c605c7bee749368193dc2834644"
+    ],
+    "tree_oid": "3e8818fbbeb923f3367dfb05dbb2e9fa27e868c7"
+  },
+  "transaction_id": "WP0002-LOCAL-OPERATOR-CLOSURE-RECOVERY-20260718"
+}

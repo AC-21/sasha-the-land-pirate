@@ -1,0 +1,118 @@
+{
+  "completion_comment": {
+    "actor": {
+      "author_association": "OWNER",
+      "id": 65501994,
+      "login": "AC-21",
+      "type": "User"
+    },
+    "api_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/issues/comments/5011048546",
+    "body_utf8_sha256": "733d2c37e959a95ddaa29f8f22df051833fee748f210d751de4f4930645a9a6f",
+    "created_at": "2026-07-18T11:16:03Z",
+    "html_url": "https://github.com/AC-21/sasha-the-land-pirate/pull/65#issuecomment-5011048546",
+    "id": 5011048546,
+    "issue_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/issues/65",
+    "node_id": "IC_kwDOTZ3pzM8AAAABKq6IYg",
+    "updated_at": "2026-07-18T11:16:03Z"
+  },
+  "merge": {
+    "final_head_tree_oid": "7d0c06ca895fd7d10764d0ecb98b179d8ca930e1",
+    "main_contains_merge": true,
+    "sole_parent_sha": "166d53698d013c605c7bee749368193dc2834644",
+    "tree_matches_final_head": true,
+    "tree_oid": "7d0c06ca895fd7d10764d0ecb98b179d8ca930e1"
+  },
+  "merged_pull_request": {
+    "base_sha": "166d53698d013c605c7bee749368193dc2834644",
+    "head_sha": "b7245d447ac05c217907256100cfadbf837ba933",
+    "merge_commit_sha": "1763c20bb07398f81ef82cecb908299946283e3e",
+    "merged": true,
+    "merged_at": "2026-07-18T11:14:25Z",
+    "number": 65
+  },
+  "next_canary_required": "first-post-restoration-implementation-pr",
+  "parsed_completion_binding": {
+    "authority_evidence_sha256": "ec400aa93d489c1773222082ca9afe1292689c982c91b3605e0f51a3688321cf",
+    "base_sha": "166d53698d013c605c7bee749368193dc2834644",
+    "claim": "COMPLETE-WP0002-LOCAL-OPERATOR-RECOVERY-CONTROL-TRANSACTION",
+    "final_patch_sha256": "7aae2b9684fbde0f98f427b8d2acf2a5a4bc8dc120d2263df1a4045e4526823b",
+    "head_sha": "b7245d447ac05c217907256100cfadbf837ba933",
+    "merge_commit_sha": "1763c20bb07398f81ef82cecb908299946283e3e",
+    "merge_tree_oid": "7d0c06ca895fd7d10764d0ecb98b179d8ca930e1",
+    "pr_number": 65,
+    "pre_merge_evidence_sha256": "daac0566833a1b3f1a813876d9d6304850729d64b8c96c25fb0c0c4f82ed9c80",
+    "protection_after_raw_sha256": "db9da4519699a060611be77c445a4afeee06d8f93af202bbf8b7878f88567010",
+    "protection_before_raw_sha256": "6493961e559cad55645ae2d70d5cba49c380801d50fc972882fa3e29cd349e65",
+    "protection_during_raw_sha256": "2aeadf84ed48f7abedadde26dc1befc61417c0c2120785725588629f5ac72151",
+    "transaction_id": "WP0002-LOCAL-OPERATOR-CLOSURE-RECOVERY-20260718"
+  },
+  "phase": "complete",
+  "pre_merge_evidence_sha256": "daac0566833a1b3f1a813876d9d6304850729d64b8c96c25fb0c0c4f82ed9c80",
+  "protection_after": {
+    "bypass_allowances_empty": true,
+    "conversation_resolution": true,
+    "deletion_disabled": true,
+    "dismiss_stale_reviews": false,
+    "enforce_admins": true,
+    "force_push_disabled": true,
+    "linear_history": true,
+    "main_sha": "1763c20bb07398f81ef82cecb908299946283e3e",
+    "observed_at": "2026-07-18T11:14:59Z",
+    "pull_request_required": true,
+    "push_restrictions_empty": true,
+    "raw_response_sha256": {
+      "branch": "ba97544dc3ec33f3978f2b13b5cc269faf9312cdb3302d19b722509464f425fd",
+      "protection": "8f279972688ecd9b8dedc28672f697cd2bc798c43d178361cc42f17bc75ac95c",
+      "repository": "f88f56b412e452925d5a1a7ee33603d9e961bc4e7f64d2200849be2e698481c9",
+      "rulesets": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "raw_sha256": "db9da4519699a060611be77c445a4afeee06d8f93af202bbf8b7878f88567010",
+    "required_checks": [
+      {
+        "app_id": 15368,
+        "context": "validate"
+      },
+      {
+        "app_id": 15368,
+        "context": "wp0002-core"
+      },
+      {
+        "app_id": 15368,
+        "context": "wp0002-policy"
+      }
+    ],
+    "rulesets_empty": true,
+    "squash_only": true,
+    "strict": true
+  },
+  "raw_artifacts": {
+    "authorization_comment": {
+      "byte_size": 4372,
+      "sha256": "058266b3fc93e731cc5f5b50e93b90b572d73ee5e1b07ceda3c362d3f9c090f2"
+    },
+    "completion_comment": {
+      "byte_size": 4290,
+      "sha256": "a6a76ab120182b3f990b4329feb98bce6c30183e2cde2db97ebfa2a03b872fef"
+    },
+    "main": {
+      "byte_size": 5319,
+      "sha256": "ba97544dc3ec33f3978f2b13b5cc269faf9312cdb3302d19b722509464f425fd"
+    },
+    "protection_after": {
+      "byte_size": 13245,
+      "sha256": "db9da4519699a060611be77c445a4afeee06d8f93af202bbf8b7878f88567010"
+    },
+    "pull_request": {
+      "byte_size": 18421,
+      "sha256": "be46b8039bed0c6f1aa1356d1422e02c3ed38e5a7454de9af443d2fad71b9fc3"
+    }
+  },
+  "repository": {
+    "full_name": "AC-21/sasha-the-land-pirate",
+    "id": 1302194636,
+    "owner_id": 65501994,
+    "owner_login": "AC-21"
+  },
+  "schema_version": 1,
+  "transaction_id": "WP0002-LOCAL-OPERATOR-CLOSURE-RECOVERY-20260718"
+}
