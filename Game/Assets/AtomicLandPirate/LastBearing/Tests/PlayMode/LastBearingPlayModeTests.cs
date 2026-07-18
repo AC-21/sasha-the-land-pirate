@@ -140,6 +140,60 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator OneSceneModeFollowsCanonicalExpeditionSequence()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            controller.OpenBuildingCutaway();
+            LastBearingModeCoordinator coordinator = controller.ModeCoordinator!;
+            AssertMode(
+                coordinator,
+                LastBearingPresentationMode.BuildingCutaway);
+
+            LastBearingState outbound = CreateOutboundState();
+            InstallControllerState(controller, outbound);
+            AssertMode(coordinator, LastBearingPresentationMode.Driving);
+
+            LastBearingState atDepot = DriveUntilPhase(
+                outbound,
+                ExpeditionPhase.AtDepot);
+            InstallControllerState(controller, atDepot);
+            AssertMode(
+                coordinator,
+                LastBearingPresentationMode.DepotEncounter);
+
+            var kernel = new LastBearingKernel();
+            LastBearingState resolved = Apply(kernel, atDepot, sequence =>
+                new ResolveDepotCommand(sequence, EncounterChoice.Cooperate));
+            string transactionId = resolved.TransactionId!;
+            string fingerprint = resolved.TransactionFingerprint!;
+            LastBearingState returning = Apply(kernel, resolved, sequence =>
+                new FreezeReturnPayloadCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            InstallControllerState(controller, returning);
+            AssertMode(coordinator, LastBearingPresentationMode.Driving);
+
+            LastBearingState returned = DriveUntilPhase(
+                returning,
+                ExpeditionPhase.Returned);
+            InstallControllerState(controller, returned);
+            AssertMode(coordinator, LastBearingPresentationMode.CityReturn);
+            Assert.That(
+                controller.CanonicalHash,
+                Is.EqualTo(LastBearingCanonicalCodec.ComputeSha256(returned)));
+        }
+
+        [UnityTest]
         public IEnumerator RoadSteeringChangesCanonicalLateralAndVisibleVehiclePose()
         {
             AsyncOperation? load = SceneManager.LoadSceneAsync(
@@ -223,6 +277,32 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             return kernel.Step(
                 state,
                 new[] { create(state.NextCommandSequence) }).State;
+        }
+
+        private static LastBearingState DriveUntilPhase(
+            LastBearingState state,
+            ExpeditionPhase target)
+        {
+            var kernel = new LastBearingKernel();
+            var guard = 0;
+            while (state.ExpeditionPhase != target && guard < 1000)
+            {
+                state = Apply(kernel, state, sequence =>
+                    new DriveVehicleCommand(sequence, 1000, 0));
+                guard++;
+            }
+
+            Assert.That(state.ExpeditionPhase, Is.EqualTo(target));
+            return state;
+        }
+
+        private static void AssertMode(
+            LastBearingModeCoordinator coordinator,
+            LastBearingPresentationMode expected)
+        {
+            Assert.That(coordinator.HasActiveMode, Is.True);
+            Assert.That(coordinator.CurrentMode, Is.EqualTo(expected));
+            Assert.That(coordinator.ActiveModeCount, Is.EqualTo(1));
         }
 
         private static void InstallControllerState(

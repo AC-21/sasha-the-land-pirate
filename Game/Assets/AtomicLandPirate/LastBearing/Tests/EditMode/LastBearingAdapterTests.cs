@@ -5,6 +5,7 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 using AtomicLandPirate.Presentation.LastBearing.Editor;
+using AtomicLandPirate.Presentation.LastBearing.RoadFeel;
 using AtomicLandPirate.Simulation.LastBearing;
 using NUnit.Framework;
 using UnityEngine;
@@ -219,6 +220,115 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(cameraRig.IsComparisonMode, Is.False);
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
             Assert.That(controller.CityGrammarEvidence, Does.Contain("selections=2"));
+        }
+
+        [Test]
+        public void CityInspectionModesAreCoreIsolatedAndExactlyOneIsActive()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.Mixed);
+            string canonicalBefore = controller.CanonicalHash;
+            LastBearingModeCoordinator coordinator = controller.ModeCoordinator!;
+
+            Assert.That(
+                coordinator.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.CityOverview));
+            Assert.That(coordinator.ActiveModeCount, Is.EqualTo(1));
+
+            controller.OpenBuildingCutaway();
+            Assert.That(
+                coordinator.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.BuildingCutaway));
+            Assert.That(coordinator.ActiveModeCount, Is.EqualTo(1));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            controller.OpenGarageBay();
+            Assert.That(
+                coordinator.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.GarageBay));
+            Assert.That(coordinator.ActiveModeCount, Is.EqualTo(1));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            controller.ShowCityOverview();
+            Assert.That(
+                coordinator.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.CityOverview));
+            Assert.That(coordinator.ActiveModeCount, Is.EqualTo(1));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+        }
+
+        [Test]
+        public void SessionResetAndLoadSynchronizationDropLocalInspectionIntent()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            controller.OpenGarageBay();
+            LastBearingModeCoordinator coordinator = controller.ModeCoordinator!;
+
+            controller.ReturnToTitle();
+
+            Assert.That(coordinator.HasActiveMode, Is.False);
+            Assert.That(coordinator.ActiveModeCount, Is.EqualTo(0));
+
+            LastBearingState loadedState = LastBearingScenarioFactory.CreateInitial(
+                ColonyComposition.RobotOnly,
+                2011);
+            coordinator.ResetForSession(LastBearingReadModel.FromState(loadedState));
+
+            Assert.That(coordinator.HasActiveMode, Is.True);
+            Assert.That(
+                coordinator.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.CityOverview));
+            Assert.That(coordinator.ActiveModeCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void RoadFeelAdapterAcceptsOnlyQuantizedInputsAndReturnsNoOutcome()
+        {
+            _root = new GameObject("Road Feel Mode Adapter Test");
+            var vehicleRoot = new GameObject("Road Feel Vehicle");
+            vehicleRoot.transform.SetParent(_root.transform, false);
+            var vehicle = vehicleRoot.AddComponent<RoadFeelVehicleController>();
+            var adapter = vehicleRoot.AddComponent<LastBearingRoadFeelModeAdapter>();
+            adapter.Configure(vehicle);
+
+            var controllerRoot = new GameObject(LastBearingGameController.RuntimeRootName);
+            controllerRoot.transform.SetParent(_root.transform, false);
+            var controller = controllerRoot.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            string canonicalBefore = controller.CanonicalHash;
+            controller.AttachRoadModeAdapter(adapter);
+            controller.ModeCoordinator!.ApplyQuantizedRoadCommandShadow(750, -250);
+
+            Assert.That(adapter.IsRoadModeActive, Is.False);
+            Assert.That(adapter.LastThrottleMilli, Is.EqualTo(0));
+            Assert.That(adapter.LastSteeringMilli, Is.EqualTo(0));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            adapter.SetRoadModeActive(true);
+
+            adapter.ApplyQuantizedCommandShadow(750, -250);
+
+            Assert.That(adapter.IsRoadModeActive, Is.True);
+            Assert.That(adapter.LastThrottleMilli, Is.EqualTo(750));
+            Assert.That(adapter.LastSteeringMilli, Is.EqualTo(-250));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                adapter.ApplyQuantizedCommandShadow(1001, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                adapter.ApplyQuantizedCommandShadow(0, -1001));
+
+            Type interfaceType = typeof(ILastBearingRoadModeAdapter);
+            foreach (MethodInfo method in interfaceType.GetMethods())
+            {
+                Assert.That(method.ReturnType, Is.Not.EqualTo(typeof(RoadFeelTelemetry)));
+                Assert.That(method.ReturnType, Is.Not.EqualTo(typeof(Rigidbody)));
+                Assert.That(method.ReturnType, Is.Not.EqualTo(typeof(LastBearingState)));
+            }
         }
 
         [TestCase(1, 0, 0, 0, true)]

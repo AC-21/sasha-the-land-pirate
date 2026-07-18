@@ -616,6 +616,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
             }
 
             controller.Initialize(contactStations, wheelVisuals, steeringPivots);
+            var modeAdapter = rig.AddComponent<LastBearingRoadFeelModeAdapter>();
+            modeAdapter.Configure(controller);
+            modeAdapter.SetRoadModeActive(true);
         }
 
         private void CreateHeadlight(

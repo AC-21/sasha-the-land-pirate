@@ -14,6 +14,10 @@ namespace AtomicLandPirate.LastBearingTests
                 "Game/Assets/AtomicLandPirate/LastBearing/Runtime");
             string controller = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingGameController.cs"));
+            string modeCoordinator = File.ReadAllText(
+                Path.Combine(runtimeRoot, "LastBearingModeCoordinator.cs"));
+            string hud = File.ReadAllText(
+                Path.Combine(runtimeRoot, "LastBearingHud.cs"));
             string vehicle = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingVehicleView.cs"));
             string camera = File.ReadAllText(
@@ -36,6 +40,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "Unity adapter queues ReturnHome before the vehicle has returned");
             Require(controller, "_readModel.VehicleLateralMilli");
             Require(controller, "LastBearingBalanceV1.RoadLateralLimitMilli");
+            Require(controller, "ApplyQuantizedRoadCommandShadow");
+            Require(controller, "OpenBuildingCutaway");
+            Require(controller, "OpenGarageBay");
             Require(vehicle, "snapshot.VehicleLateralNormalized");
             Require(vehicle, "VisibleLateralOffset");
             Require(vehicle, "FrontWheelSteerDegrees");
@@ -46,6 +53,29 @@ namespace AtomicLandPirate.LastBearingTests
             Require(comparison, "DistrictStamp");
             Require(comparison, "ResetComparison");
             Require(comparison, "EvidenceSummary");
+
+            Require(modeCoordinator, "LastBearingPresentationMode.CityOverview");
+            Require(modeCoordinator, "LastBearingPresentationMode.BuildingCutaway");
+            Require(modeCoordinator, "LastBearingPresentationMode.GarageBay");
+            Require(modeCoordinator, "LastBearingPresentationMode.Driving");
+            Require(modeCoordinator, "LastBearingPresentationMode.DepotEncounter");
+            Require(modeCoordinator, "LastBearingPresentationMode.CityReturn");
+            Require(modeCoordinator, "ExpeditionPhase.Outbound");
+            Require(modeCoordinator, "ExpeditionPhase.AtDepot");
+            Require(modeCoordinator, "ExpeditionPhase.Returned");
+            Require(modeCoordinator, "ActiveModeCount");
+            Require(modeCoordinator, "ILastBearingRoadModeAdapter");
+            TestHarness.True(
+                modeCoordinator.IndexOf("RoadFeelTelemetry", StringComparison.Ordinal) < 0,
+                "mode coordinator must not read Road Feel outcomes");
+            TestHarness.True(
+                modeCoordinator.IndexOf("new LastBearingState", StringComparison.Ordinal) < 0,
+                "mode coordinator must not construct canonical state");
+            TestHarness.True(
+                modeCoordinator.IndexOf("SaveContracts", StringComparison.Ordinal) < 0,
+                "mode coordinator must not add a save seam");
+            Require(hud, "R0 ROUTING SCAFFOLD");
+            Require(hud, "There is no on-foot mode.");
 
             Require(dispatcher, "[assembly: TestRunCallback(");
             Require(dispatcher, "WP0002TestRunCallback : ITestRunCallback");

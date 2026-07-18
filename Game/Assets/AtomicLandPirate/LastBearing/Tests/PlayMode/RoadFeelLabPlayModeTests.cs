@@ -52,9 +52,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.GetComponentsInChildren<RoadFeelVehicleController>(true);
             RoadFeelChaseCamera[] chaseCameras =
                 controller.GetComponentsInChildren<RoadFeelChaseCamera>(true);
+            LastBearingRoadFeelModeAdapter[] modeAdapters =
+                controller.GetComponentsInChildren<LastBearingRoadFeelModeAdapter>(true);
             Camera[] cameras = controller.GetComponentsInChildren<Camera>(true);
             Assert.That(vehicles, Has.Length.EqualTo(1));
             Assert.That(chaseCameras, Has.Length.EqualTo(1));
+            Assert.That(modeAdapters, Has.Length.EqualTo(1));
+            Assert.That(modeAdapters[0].IsRoadModeActive, Is.True);
             Assert.That(cameras, Has.Length.EqualTo(1));
             Assert.That(cameras[0].GetComponent<RoadFeelChaseCamera>(), Is.SameAs(chaseCameras[0]));
 

@@ -28,6 +28,7 @@ namespace AtomicLandPirate.LastBearingTests
             string camera = Read(root, "RoadFeelChaseCamera.cs");
             string lab = Read(root, "RoadFeelLabController.cs");
             string bootstrap = Read(root, "RoadFeelLabBootstrap.cs");
+            string modeAdapter = Read(root, "LastBearingRoadFeelModeAdapter.cs");
 
             Require(vehicle, "FixedUpdate");
             Require(vehicle, "AddForceAtPosition");
@@ -56,6 +57,17 @@ namespace AtomicLandPirate.LastBearingTests
             Require(lab, "ResetAt");
             Require(lab, "RoadFeelSurfaceKind.Gravel");
             Require(lab, "RoadFeelSurfaceKind.Sand");
+            Require(lab, "LastBearingRoadFeelModeAdapter");
+
+            Require(modeAdapter, "ILastBearingRoadModeAdapter");
+            Require(modeAdapter, "ApplyQuantizedCommandShadow");
+            Require(modeAdapter, "SetControlInput");
+            TestHarness.True(
+                modeAdapter.IndexOf("RoadFeelTelemetry", StringComparison.Ordinal) < 0,
+                "Road Feel mode adapter must not return physics telemetry");
+            TestHarness.True(
+                modeAdapter.IndexOf("LastBearingState", StringComparison.Ordinal) < 0,
+                "Road Feel mode adapter must not receive canonical mutable state");
 
             Require(bootstrap, "RoadFeelLab");
             Require(bootstrap, "RuntimeInitializeOnLoadMethod");
@@ -73,6 +85,7 @@ namespace AtomicLandPirate.LastBearingTests
                          camera,
                          lab,
                          bootstrap,
+                         modeAdapter,
                      })
             {
                 foreach (string token in ForbiddenRuntimeTokens)
