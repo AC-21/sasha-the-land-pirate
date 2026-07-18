@@ -188,6 +188,78 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
         }
 
+        [Test]
+        public void GarageAssemblyGaugeShowsDerivedPreparationProgressOnly()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.Mixed);
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingGarageBayView garage = world.GarageBayView!;
+            string canonicalBefore = controller.CanonicalHash;
+
+            Assert.That(garage.IsPreparationGaugeVisible, Is.False);
+            Assert.That(garage.PreparationGaugeLitSegments, Is.Zero);
+            Assert.That(garage.PreparationProgressNormalized, Is.Zero);
+
+            world.ApplyGaragePreparationProgress(60, 120);
+
+            Assert.That(garage.IsPreparationGaugeVisible, Is.True);
+            Assert.That(
+                garage.PreparationGaugeLitSegments,
+                Is.EqualTo(LastBearingGarageBayView.PreparationGaugeSegmentCount / 2));
+            Assert.That(
+                CountActiveGaugeSegments(garage),
+                Is.EqualTo(LastBearingGarageBayView.PreparationGaugeSegmentCount / 2));
+            Assert.That(garage.PreparationProgressNormalized, Is.EqualTo(0.5f));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            world.ApplyGaragePreparationProgress(119, 120);
+
+            Assert.That(
+                garage.PreparationGaugeLitSegments,
+                Is.EqualTo(LastBearingGarageBayView.PreparationGaugeSegmentCount - 1),
+                "the final segment is reserved for exact canonical completion");
+            Assert.That(
+                CountActiveGaugeSegments(garage),
+                Is.EqualTo(LastBearingGarageBayView.PreparationGaugeSegmentCount - 1));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            world.ApplyGaragePreparationProgress(120, 120);
+
+            Assert.That(
+                garage.PreparationGaugeLitSegments,
+                Is.EqualTo(LastBearingGarageBayView.PreparationGaugeSegmentCount));
+            Assert.That(
+                CountActiveGaugeSegments(garage),
+                Is.EqualTo(LastBearingGarageBayView.PreparationGaugeSegmentCount));
+            Assert.That(garage.PreparationProgressNormalized, Is.EqualTo(1f));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            controller.ReturnToTitle();
+
+            Assert.That(garage.IsPreparationGaugeVisible, Is.False);
+            Assert.That(garage.PreparationGaugeLitSegments, Is.Zero);
+        }
+
+        private static int CountActiveGaugeSegments(
+            LastBearingGarageBayView garage)
+        {
+            var count = 0;
+            foreach (Transform child in
+                     garage.GetComponentsInChildren<Transform>(true))
+            {
+                if (child.name.StartsWith("ASSEMBLY_PROGRESS_LIT_")
+                    && child.gameObject.activeSelf)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
         private SashaScoutBlockoutMaterials CreateMaterials()
         {
             Shader shader = Shader.Find("Universal Render Pipeline/Lit") ??

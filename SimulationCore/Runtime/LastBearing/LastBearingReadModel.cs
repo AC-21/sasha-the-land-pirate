@@ -25,6 +25,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
             TurbineCondition = state.TurbineCondition;
             PreparationChoice = state.PreparationChoice;
             PreparationPhase = state.PreparationPhase;
+            PreparationElapsedTicks = state.PreparationElapsedTicks;
+            PreparationRequiredTicks = state.PreparationRequiredTicks;
+            PreparationRemainingTicks = Math.Max(
+                0,
+                state.PreparationRequiredTicks
+                    - state.PreparationElapsedTicks);
             PlannedModule = state.PlannedModule;
             VehicleModule = state.VehicleModule;
             ExpeditionPhase = state.ExpeditionPhase;
@@ -137,6 +143,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public TurbineCondition TurbineCondition { get; }
         public PreparationChoice PreparationChoice { get; }
         public PreparationPhase PreparationPhase { get; }
+        public long PreparationElapsedTicks { get; }
+        public long PreparationRequiredTicks { get; }
+        public long PreparationRemainingTicks { get; }
         public VehicleModule PlannedModule { get; }
         public VehicleModule VehicleModule { get; }
         public ExpeditionPhase ExpeditionPhase { get; }

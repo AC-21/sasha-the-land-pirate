@@ -365,6 +365,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
             DepotApproachRecoveryView?.ApplyRoutePermit(routePermitGranted);
         }
 
+        public void ApplyGaragePreparationProgress(
+            long elapsedTicks,
+            long requiredTicks)
+        {
+            GarageBayView?.ApplyPreparationProgress(
+                elapsedTicks,
+                requiredTicks);
+        }
+
         public void SelectPumpHallCutaway()
         {
             PumpHallCutawayView?.gameObject.SetActive(true);
@@ -388,6 +397,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
         internal void Apply(LastBearingVisualSnapshot snapshot)
         {
             _snapshot = snapshot;
+
+            if (snapshot.Phase == LastBearingVisualPhase.Title)
+            {
+                GarageBayView?.ApplyPreparationProgress(0, 0);
+            }
 
             if (_waterFill != null)
             {

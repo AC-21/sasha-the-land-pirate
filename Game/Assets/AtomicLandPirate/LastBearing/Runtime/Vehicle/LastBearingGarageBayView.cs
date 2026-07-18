@@ -12,9 +12,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
     public sealed class LastBearingGarageBayView : MonoBehaviour
     {
         public const string RootName = "bld_service_bay_cutaway_a [C0 Blockout]";
+        public const int PreparationGaugeSegmentCount = 8;
 
         private GameObject? _winchStand;
         private GameObject? _tankStand;
+        private GameObject? _preparationGaugeRoot;
+        private readonly GameObject?[] _preparationGaugeSegments =
+            new GameObject?[PreparationGaugeSegmentCount];
         private Light? _moduleWorkLight;
         private bool _built;
 
@@ -35,6 +39,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 
         public bool IsRangeTankStaged =>
             _tankStand != null && _tankStand.activeSelf;
+
+        public bool IsPreparationGaugeVisible =>
+            _preparationGaugeRoot != null && _preparationGaugeRoot.activeSelf;
+
+        public int PreparationGaugeLitSegments { get; private set; }
+
+        public float PreparationProgressNormalized { get; private set; }
 
         internal void Build(
             Vector3 vehicleWorldPosition,
@@ -143,6 +154,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 new Vector3(-2.2f, 3.25f, -4.16f),
                 new Vector3(2.8f, 0.48f, 0.06f),
                 tungsten);
+            BuildPreparationGauge(darkIron, signal);
 
             _winchStand = CreateWinchStand(
                 new Vector3(3.05f, 0f, -2.9f),
@@ -180,6 +192,40 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 5f);
 
             ApplyModule(SashaScoutModulePresentation.None);
+            ApplyPreparationProgress(0, 0);
+        }
+
+        /// <summary>
+        /// Updates the physical assembly gauge from derived simulation progress.
+        /// It never feeds values back into the canonical state.
+        /// </summary>
+        public void ApplyPreparationProgress(long elapsedTicks, long requiredTicks)
+        {
+            bool hasPreparation = requiredTicks > 0;
+            PreparationProgressNormalized = hasPreparation
+                ? Mathf.Clamp01((float)elapsedTicks / requiredTicks)
+                : 0f;
+            PreparationGaugeLitSegments = hasPreparation
+                ? elapsedTicks >= requiredTicks
+                    ? PreparationGaugeSegmentCount
+                    : Mathf.Clamp(
+                        Mathf.FloorToInt(
+                            PreparationProgressNormalized
+                            * PreparationGaugeSegmentCount),
+                        0,
+                        PreparationGaugeSegmentCount - 1)
+                : 0;
+
+            if (_preparationGaugeRoot != null)
+            {
+                _preparationGaugeRoot.SetActive(hasPreparation);
+            }
+
+            for (var index = 0; index < _preparationGaugeSegments.Length; index++)
+            {
+                _preparationGaugeSegments[index]?.SetActive(
+                    hasPreparation && index < PreparationGaugeLitSegments);
+            }
         }
 
         public void ApplyModule(SashaScoutModulePresentation module)
@@ -269,6 +315,41 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 useParentLocalPosition: true).transform.localRotation =
                 Quaternion.Euler(0f, 0f, 90f);
             return stand;
+        }
+
+        private void BuildPreparationGauge(Material darkIron, Material signal)
+        {
+            _preparationGaugeRoot = new GameObject(
+                "ASSEMBLY_PROGRESS_GAUGE");
+            _preparationGaugeRoot.transform.SetParent(transform, false);
+
+            CreatePart(
+                "ASSEMBLY_PROGRESS_GAUGE_HOUSING",
+                PrimitiveType.Cube,
+                new Vector3(1.15f, 3.42f, -4.13f),
+                new Vector3(2.7f, 0.62f, 0.08f),
+                darkIron,
+                _preparationGaugeRoot.transform);
+
+            const float startX = 0.12f;
+            const float spacing = 0.3f;
+            for (var index = 0; index < PreparationGaugeSegmentCount; index++)
+            {
+                CreatePart(
+                    "ASSEMBLY_PROGRESS_SLOT_" + (index + 1),
+                    PrimitiveType.Cube,
+                    new Vector3(startX + index * spacing, 3.42f, -4.08f),
+                    new Vector3(0.22f, 0.34f, 0.04f),
+                    darkIron,
+                    _preparationGaugeRoot.transform);
+                _preparationGaugeSegments[index] = CreatePart(
+                    "ASSEMBLY_PROGRESS_LIT_" + (index + 1),
+                    PrimitiveType.Cube,
+                    new Vector3(startX + index * spacing, 3.42f, -4.03f),
+                    new Vector3(0.16f, 0.25f, 0.03f),
+                    signal,
+                    _preparationGaugeRoot.transform);
+            }
         }
 
         private Transform CreateAnchor(string name, Vector3 localPosition)
