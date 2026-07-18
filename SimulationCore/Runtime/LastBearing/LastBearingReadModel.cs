@@ -53,6 +53,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             MaintenanceDue = state.MaintenanceDue;
             NextCityDecision = state.NextCityDecision;
             PauseCause = state.PauseCause;
+            IsDepotApproachRecoveryAvailable =
+                ComputeDepotApproachRecoveryAvailable(state);
 
             WaterZeroSettlementTicks = WaterTrendMilliPerSettlementTick < 0
                 ? DivideCeiling(
@@ -136,6 +138,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public bool MaintenanceDue { get; }
         public NextCityDecision NextCityDecision { get; }
         public PauseCause PauseCause { get; }
+        public bool IsDepotApproachRecoveryAvailable { get; }
         public long? WaterZeroSettlementTicks { get; }
         public long ClaimContestedFactionTicks { get; }
         public long ClaimedFactionTicks { get; }
@@ -243,7 +246,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             if (state.ExpeditionPhase == ExpeditionPhase.Outbound)
             {
-                return "drive-to-depot";
+                return ComputeDepotApproachRecoveryAvailable(state)
+                    ? "operate-depot-recovery-point"
+                    : "drive-to-depot";
             }
 
             if (state.ExpeditionPhase == ExpeditionPhase.AtDepot
@@ -279,6 +284,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             return "observe-recovering-waterworks";
+        }
+
+        private static bool ComputeDepotApproachRecoveryAvailable(
+            LastBearingState state)
+        {
+            return state.ExpeditionPhase == ExpeditionPhase.Outbound
+                && state.TransactionPhase == TransactionPhase.RoadOwned
+                && state.RouteTargetTicks > 0
+                && state.RouteProgressTicks == state.RouteTargetTicks
+                && state.HasArrivalClaimSnapshot;
         }
     }
 }

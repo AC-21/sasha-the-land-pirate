@@ -129,6 +129,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 ApplyDrive(builder, drive, events);
             }
+            else if (command is OperateDepotRecoveryPointCommand operateRecovery)
+            {
+                ApplyOperateDepotRecoveryPoint(
+                    builder,
+                    operateRecovery,
+                    events);
+            }
             else if (command is ResolveDepotCommand resolve)
             {
                 ApplyResolveDepot(builder, resolve, events);
@@ -466,6 +473,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     "LAST_BEARING_DRIVE_PHASE_INVALID");
             }
 
+            if (IsDepotApproachRecoveryAvailable(builder))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_DEPOT_RECOVERY_REQUIRED");
+            }
+
             var before = builder.RouteProgressTicks;
             var previousLateral = builder.VehicleLateralMilli;
             var steeringDelta =
@@ -552,7 +565,6 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 if (builder.ExpeditionPhase == ExpeditionPhase.Outbound)
                 {
-                    builder.ExpeditionPhase = ExpeditionPhase.AtDepot;
                     builder.HasArrivalClaimSnapshot = true;
                     builder.ArrivalFactionClaimProgressMilli =
                         builder.FactionClaimProgressMilli;
@@ -575,6 +587,48 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
                 builder.RouteMovementAccumulatorMilli = 0;
             }
+        }
+
+        private static void ApplyOperateDepotRecoveryPoint(
+            LastBearingStateBuilder builder,
+            OperateDepotRecoveryPointCommand command,
+            List<LastBearingDomainEvent> events)
+        {
+            if (builder.HasArrivalClaimSnapshot
+                && builder.ExpeditionPhase != ExpeditionPhase.Outbound)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (!IsDepotApproachRecoveryAvailable(builder))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_DEPOT_RECOVERY_NOT_READY");
+            }
+
+            builder.RouteMovementAccumulatorMilli = 0;
+            builder.ExpeditionPhase = ExpeditionPhase.AtDepot;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.DepotRecoveryPointOperated,
+                LastBearingEventCause.PlayerCommand,
+                builder.RoadTick,
+                command.Sequence,
+                "world:last-bearing:depot-approach-recovery",
+                (long)ExpeditionPhase.Outbound,
+                (long)ExpeditionPhase.AtDepot);
+        }
+
+        private static bool IsDepotApproachRecoveryAvailable(
+            LastBearingStateBuilder builder)
+        {
+            return builder.ExpeditionPhase == ExpeditionPhase.Outbound
+                && builder.TransactionPhase == TransactionPhase.RoadOwned
+                && builder.RouteTargetTicks > 0
+                && builder.RouteProgressTicks == builder.RouteTargetTicks
+                && builder.HasArrivalClaimSnapshot;
         }
 
         private static void ApplyResolveDepot(

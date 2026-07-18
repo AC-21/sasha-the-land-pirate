@@ -251,6 +251,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         MaintenanceServiced = 34,
         IdempotentReplayAccepted = 35,
         VehicleSteered = 36,
+        DepotRecoveryPointOperated = 37,
     }
 
     public enum LastBearingEventCause

@@ -127,7 +127,9 @@ namespace AtomicLandPirate.LastBearingTests
             TestHarness.Equal(PauseCause.Explicit, driver.View.PauseCause, "explicit pause cause");
 
             driver.Apply(sequence => new SetPauseCommand(sequence, false));
-            DriveUntil(driver, ExpeditionPhase.AtDepot, 400);
+            DriveUntilDepotRecoveryAvailable(driver, 400);
+            driver.Apply(sequence =>
+                new OperateDepotRecoveryPointCommand(sequence));
             TestHarness.Equal(0L, RequiredForecast(
                 driver.View.RouteArrivalGlobalTicks,
                 "arrival forecast at depot"), "arrival forecast at depot");
@@ -453,7 +455,9 @@ namespace AtomicLandPirate.LastBearingTests
                 transactionId,
                 fingerprint,
                 worldSeed);
-            DriveUntil(driver, ExpeditionPhase.AtDepot, 400);
+            DriveUntilDepotRecoveryAvailable(driver, 400);
+            driver.Apply(sequence =>
+                new OperateDepotRecoveryPointCommand(sequence));
             driver.Apply(sequence => new ResolveDepotCommand(
                 sequence,
                 EncounterChoice.Cooperate));
@@ -501,6 +505,24 @@ namespace AtomicLandPirate.LastBearingTests
             }
 
             TestHarness.Equal(expected, driver.View.ExpeditionPhase, "route phase");
+        }
+
+        private static void DriveUntilDepotRecoveryAvailable(
+            CoreTestDriver driver,
+            int maximumTicks)
+        {
+            int ticks = 0;
+            while (!driver.View.IsDepotApproachRecoveryAvailable
+                   && ticks < maximumTicks)
+            {
+                driver.Apply(sequence =>
+                    new DriveVehicleCommand(sequence, 1000, 0));
+                ticks++;
+            }
+
+            TestHarness.True(
+                driver.View.IsDepotApproachRecoveryAvailable,
+                "depot recovery gate was not reached");
         }
 
         private static string MechanicalOutcome(LastBearingReadModel view)

@@ -73,6 +73,63 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.GreaterThan(30));
         }
 
+        [Test]
+        public void DepotRecoveryViewIsReadablePhysicsFreeAndCoreIsolated()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            LastBearingDepotApproachRecoveryView recovery =
+                controller.World!.DepotApproachRecoveryView!;
+            string canonicalBefore = controller.CanonicalHash;
+
+            Assert.That(
+                LastBearingDepotApproachRecoveryView.DirectionPackageId,
+                Is.EqualTo("C0-VGR-02"));
+            Assert.That(
+                LastBearingDepotApproachRecoveryView.Revision,
+                Is.EqualTo("R1"));
+            Assert.That(
+                LastBearingDepotApproachRecoveryView.ContentId,
+                Is.EqualTo("poi_depot_approach_recovery_a"));
+            Assert.That(recovery.InteractionAnchor, Is.Not.Null);
+            Assert.That(
+                recovery.InteractionAnchor!.name,
+                Is.EqualTo(
+                    LastBearingDepotApproachRecoveryView.InteractionAnchorName));
+            Assert.That(
+                recovery.GetComponentsInChildren<Rigidbody>(true),
+                Is.Empty);
+            Assert.That(
+                recovery.GetComponentsInChildren<Camera>(true),
+                Is.Empty);
+            Assert.That(
+                recovery.GetComponentsInChildren<Collider>(true),
+                Is.Not.Empty);
+            foreach (Collider collider in
+                     recovery.GetComponentsInChildren<Collider>(true))
+            {
+                Assert.That(collider.enabled, Is.False, collider.name);
+            }
+
+            recovery.ApplyState(
+                DepotApproachRecoveryPresentationState.Available);
+            Assert.That(recovery.IsAvailableToolVisible, Is.True);
+            Assert.That(recovery.IsUnlockedLatchVisible, Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            recovery.ApplyState(
+                DepotApproachRecoveryPresentationState.Unlocked);
+            Assert.That(recovery.IsAvailableToolVisible, Is.False);
+            Assert.That(recovery.IsUnlockedLatchVisible, Is.True);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            controller.OperateDepotApproachRecoveryPoint();
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+        }
+
         [TestCase(ColonyComposition.HumanOnly)]
         [TestCase(ColonyComposition.RobotOnly)]
         [TestCase(ColonyComposition.Mixed)]

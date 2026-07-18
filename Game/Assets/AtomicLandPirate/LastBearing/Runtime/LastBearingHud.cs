@@ -119,7 +119,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             GUILayout.Label("CONTROLS", _headingStyle);
             GUILayout.Label(
-                model.ExpeditionPhase == ExpeditionPhase.Outbound ||
+                model.IsDepotApproachRecoveryAvailable
+                    ? "E or gamepad south · seat recovery bridle\nP · pause  F5 · save  F9 · load"
+                    : model.ExpeditionPhase == ExpeditionPhase.Outbound ||
                 model.ExpeditionPhase == ExpeditionPhase.Returning
                     ? "W/S or triggers · throttle\nA/D or stick · steer\nP · pause  F5 · save  F9 · load"
                     : model.ExpeditionPhase == ExpeditionPhase.AtDepot
@@ -234,6 +236,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (model.ExpeditionPhase == ExpeditionPhase.Outbound ||
                 model.ExpeditionPhase == ExpeditionPhase.Returning)
             {
+                if (model.IsDepotApproachRecoveryAvailable)
+                {
+                    GUILayout.Label(
+                        "The route is complete. The canonical recovery point is " +
+                        "lit in tungsten; seat the depot bridle before entering.",
+                        _bodyStyle);
+                    if (GUILayout.Button(
+                            "OPERATE DEPOT RECOVERY POINT",
+                            _buttonStyle))
+                    {
+                        _controller!.OperateDepotApproachRecoveryPoint();
+                    }
+
+                    return;
+                }
+
                 GUILayout.Label(
                     "Drive the authored corridor. Route progress comes only from " +
                     "quantized core commands.",

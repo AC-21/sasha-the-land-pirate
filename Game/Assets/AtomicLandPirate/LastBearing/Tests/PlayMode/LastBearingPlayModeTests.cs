@@ -155,6 +155,38 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator CityCameraEInputDoesNotInvokeDepotRecovery()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            controller.enabled = false;
+            LastBearingCameraRig rig = controller.World!.CameraRig!;
+            float originalYaw = rig.CityYaw;
+            string originalStatus = controller.Status;
+            string originalHash = controller.CanonicalHash;
+
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Press(keyboard.eKey);
+            InvokeGlobalShortcuts(controller);
+            yield return null;
+            Release(keyboard.eKey);
+            yield return null;
+
+            Assert.That(rig.CityYaw, Is.GreaterThan(originalYaw));
+            Assert.That(controller.Status, Is.EqualTo(originalStatus));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(originalHash));
+        }
+
+        [UnityTest]
         public IEnumerator CityGrammarHypothesesShareOneLockedCameraAndCoreState()
         {
             AsyncOperation? load = SceneManager.LoadSceneAsync(
@@ -227,16 +259,27 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(roadRig.Adapter.LastSteeringMilli, Is.EqualTo(-250));
             Assert.That(controller.CanonicalHash, Is.EqualTo(hashBeforeShadow));
 
-            LastBearingState atDepot = DriveUntilPhase(
-                outbound,
-                ExpeditionPhase.AtDepot);
+            LastBearingState recoveryGate =
+                DriveUntilDepotRecoveryAvailable(outbound);
+            InstallControllerState(controller, recoveryGate);
+            AssertMode(coordinator, LastBearingPresentationMode.Driving);
+            AssertRoadRecoveryHold(controller, roadRig);
+            Assert.That(
+                controller.World.DepotApproachRecoveryView!.State,
+                Is.EqualTo(DepotApproachRecoveryPresentationState.Available));
+
+            var kernel = new LastBearingKernel();
+            LastBearingState atDepot = Apply(kernel, recoveryGate, sequence =>
+                new OperateDepotRecoveryPointCommand(sequence));
             InstallControllerState(controller, atDepot);
             AssertMode(
                 coordinator,
                 LastBearingPresentationMode.DepotEncounter);
             AssertRoadPresentation(controller, roadRig, active: false);
+            Assert.That(
+                controller.World.DepotApproachRecoveryView!.State,
+                Is.EqualTo(DepotApproachRecoveryPresentationState.Unlocked));
 
-            var kernel = new LastBearingKernel();
             LastBearingState resolved = Apply(kernel, atDepot, sequence =>
                 new ResolveDepotCommand(sequence, EncounterChoice.Cooperate));
             string transactionId = resolved.TransactionId!;
@@ -263,6 +306,173 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.ReturnToTitle();
             Assert.That(coordinator.HasActiveMode, Is.False);
             AssertRoadPresentation(controller, roadRig, active: false);
+        }
+
+        [UnityTest]
+        public IEnumerator DepotRecoveryUsesCanonicalGateNotRoadRigPose()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            LastBearingState outbound = CreateOutboundState();
+            InstallControllerState(controller, outbound);
+            LastBearingWorldBuilder world = controller.World!;
+            RoadFeelRigInstance roadRig = world.RoadFeelRig!;
+            Rigidbody body = roadRig.Vehicle.Body;
+            Transform interactionAnchor =
+                world.DepotApproachRecoveryView!.InteractionAnchor!;
+            string outboundHash = controller.CanonicalHash;
+
+            body.isKinematic = true;
+            body.position = interactionAnchor.position;
+            controller.OperateDepotApproachRecoveryPoint();
+
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(outboundHash));
+            Assert.That(
+                controller.ReadModel!.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.Outbound));
+
+            LastBearingState recoveryGate =
+                DriveUntilDepotRecoveryAvailable(outbound);
+            InstallControllerState(controller, recoveryGate);
+            AssertRoadRecoveryHold(controller, roadRig);
+            long arrivalProgress =
+                controller.State!.ArrivalFactionClaimProgressMilli;
+            long factionProgress = controller.State.FactionClaimProgressMilli;
+            for (var tick = 0; tick < 8; tick++)
+            {
+                InvokeSimulationTick(controller);
+            }
+
+            Assert.That(
+                controller.State.FactionClaimProgressMilli,
+                Is.GreaterThan(factionProgress));
+            Assert.That(
+                controller.State.ArrivalFactionClaimProgressMilli,
+                Is.EqualTo(arrivalProgress));
+            Assert.That(
+                controller.ReadModel!.IsDepotApproachRecoveryAvailable,
+                Is.True);
+            AssertRoadRecoveryHold(controller, roadRig);
+            string gateHash = controller.CanonicalHash;
+
+            body.position += new Vector3(400f, 40f, -300f);
+            controller.OperateDepotApproachRecoveryPoint();
+
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(gateHash));
+            InvokeSimulationTick(controller);
+
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(controller.CanonicalHash, Is.Not.EqualTo(gateHash));
+            Assert.That(
+                controller.ReadModel!.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.AtDepot));
+            Assert.That(
+                controller.State.ArrivalFactionClaimProgressMilli,
+                Is.EqualTo(arrivalProgress));
+            AssertMode(
+                controller.ModeCoordinator!,
+                LastBearingPresentationMode.DepotEncounter);
+            Assert.That(
+                world.DepotApproachRecoveryView.State,
+                Is.EqualTo(DepotApproachRecoveryPresentationState.Unlocked));
+        }
+
+        [UnityTest]
+        public IEnumerator DepotRecoveryGateSaveLoadRestoresHeldRoadRig()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
+            LastBearingState recoveryGate =
+                DriveUntilDepotRecoveryAvailable(CreateOutboundState());
+            InstallControllerState(controller, recoveryGate);
+            RoadFeelRigInstance roadRig = controller.World!.RoadFeelRig!;
+            string savedHash = controller.CanonicalHash;
+            AssertRoadRecoveryHold(controller, roadRig);
+
+            controller.Save();
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"),
+                controller.SaveStatus);
+            Assert.That(Directory.Exists(profileDirectory), Is.True);
+
+            controller.ReturnToTitle();
+            controller.Load();
+
+            Assert.That(controller.CanonicalHash, Is.EqualTo(savedHash));
+            Assert.That(
+                controller.ReadModel!.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.Outbound));
+            Assert.That(
+                controller.ReadModel.IsDepotApproachRecoveryAvailable,
+                Is.True);
+            AssertMode(
+                controller.ModeCoordinator!,
+                LastBearingPresentationMode.Driving);
+            AssertRoadRecoveryHold(controller, roadRig);
+        }
+
+        [UnityTest]
+        public IEnumerator FaultingRoadAdapterCannotBlockDepotRecoveryOperation()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            LastBearingState recoveryGate =
+                DriveUntilDepotRecoveryAvailable(CreateOutboundState());
+            InstallControllerState(controller, recoveryGate);
+            var throwingAdapter = new ThrowingRoadAdapter(
+                throwOnSynchronize: true);
+            LogAssert.Expect(
+                LogType.Warning,
+                "LAST_BEARING_ROAD_PRESENTATION_DISABLED " +
+                "hold-recovery-synchronize InvalidOperationException");
+
+            controller.AttachRoadModeAdapter(throwingAdapter);
+
+            Assert.That(controller.ModeCoordinator!.RoadAdapterFaulted, Is.True);
+            Assert.That(controller.ModeCoordinator.HasRoadAdapter, Is.False);
+            string gateHash = controller.CanonicalHash;
+            controller.OperateDepotApproachRecoveryPoint();
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            InvokeSimulationTick(controller);
+
+            Assert.That(controller.CanonicalHash, Is.Not.EqualTo(gateHash));
+            Assert.That(
+                controller.ReadModel!.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.AtDepot));
+            AssertMode(
+                controller.ModeCoordinator,
+                LastBearingPresentationMode.DepotEncounter);
+            Assert.That(
+                controller.World!.DepotApproachRecoveryView!.State,
+                Is.EqualTo(DepotApproachRecoveryPresentationState.Unlocked));
         }
 
         [UnityTest]
@@ -919,6 +1129,31 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             return state;
         }
 
+        private static LastBearingState DriveUntilDepotRecoveryAvailable(
+            LastBearingState state)
+        {
+            var kernel = new LastBearingKernel();
+            var guard = 0;
+            while (!LastBearingReadModel.FromState(state)
+                       .IsDepotApproachRecoveryAvailable &&
+                   guard < 1000)
+            {
+                state = Apply(kernel, state, sequence =>
+                    new DriveVehicleCommand(sequence, 1000, 0));
+                guard++;
+            }
+
+            LastBearingReadModel readModel = LastBearingReadModel.FromState(state);
+            Assert.That(
+                readModel.IsDepotApproachRecoveryAvailable,
+                Is.True,
+                "depot recovery gate was not reached within 1000 canonical drives");
+            Assert.That(state.ExpeditionPhase, Is.EqualTo(ExpeditionPhase.Outbound));
+            Assert.That(state.RouteProgressTicks, Is.EqualTo(state.RouteTargetTicks));
+            Assert.That(state.HasArrivalClaimSnapshot, Is.True);
+            return state;
+        }
+
         private static void AssertMode(
             LastBearingModeCoordinator coordinator,
             LastBearingPresentationMode expected)
@@ -948,6 +1183,53 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     : Is.SameAs(controller.World.VehicleView.transform));
         }
 
+        private static void AssertRoadRecoveryHold(
+            LastBearingGameController controller,
+            RoadFeelRigInstance roadRig)
+        {
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingModeCoordinator coordinator = controller.ModeCoordinator!;
+            Rigidbody body = roadRig.Vehicle.Body;
+            Assert.That(roadRig.Root.activeInHierarchy, Is.True);
+            Assert.That(roadRig.Adapter.IsRoadModeActive, Is.False);
+            Assert.That(roadRig.Adapter.IsPhysicsSuspended, Is.True);
+            Assert.That(roadRig.Vehicle.enabled, Is.False);
+            Assert.That(body.isKinematic, Is.True);
+            Assert.That(body.linearVelocity, Is.EqualTo(Vector3.zero));
+            Assert.That(body.angularVelocity, Is.EqualTo(Vector3.zero));
+            Assert.That(coordinator.IsRoadPresentationActive, Is.False);
+            Assert.That(coordinator.IsRoadPresentationHeldAtRecovery, Is.True);
+            Assert.That(world.VehicleView!.gameObject.activeSelf, Is.False);
+            Assert.That(
+                world.CameraRig!.RoadTarget,
+                Is.SameAs(roadRig.Root.transform));
+            Assert.That(
+                Vector3.Distance(
+                    body.position,
+                    world.VehicleView.transform.position),
+                Is.LessThan(0.001f));
+            Assert.That(
+                Quaternion.Angle(
+                    body.rotation,
+                    world.VehicleView.transform.rotation),
+                Is.LessThan(0.01f));
+            Assert.That(
+                world.DepotApproachRecoveryView!.State,
+                Is.EqualTo(DepotApproachRecoveryPresentationState.Available));
+        }
+
+        private static int PendingCommandCount(
+            LastBearingGameController controller)
+        {
+            FieldInfo? pendingField = typeof(LastBearingGameController).GetField(
+                "_pendingCommands",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(pendingField, Is.Not.Null);
+            var pending = pendingField!.GetValue(controller) as ICollection;
+            Assert.That(pending, Is.Not.Null);
+            return pending!.Count;
+        }
+
         private static void InvokeSimulationTick(
             LastBearingGameController controller)
         {
@@ -956,6 +1238,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 BindingFlags.Instance | BindingFlags.NonPublic);
             Assert.That(simulate, Is.Not.Null);
             simulate!.Invoke(controller, null);
+        }
+
+        private static void InvokeGlobalShortcuts(
+            LastBearingGameController controller)
+        {
+            MethodInfo? shortcuts = typeof(LastBearingGameController).GetMethod(
+                "HandleGlobalShortcuts",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(shortcuts, Is.Not.Null);
+            shortcuts!.Invoke(controller, null);
         }
 
         private string InstallTemporarySaveAdapter(
@@ -1034,6 +1326,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
         private sealed class ThrowingRoadAdapter : ILastBearingRoadModeAdapter
         {
+            private readonly bool _throwOnSynchronize;
+
+            public ThrowingRoadAdapter(bool throwOnSynchronize = false)
+            {
+                _throwOnSynchronize = throwOnSynchronize;
+            }
+
             public bool IsRoadModeActive { get; private set; }
 
             public int ApplyAttemptCount { get; private set; }
@@ -1055,6 +1354,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Vector3 position,
                 Quaternion rotation)
             {
+                if (_throwOnSynchronize)
+                {
+                    throw new InvalidOperationException(
+                        "adversarial-road-synchronization");
+                }
             }
 
             public void ResetPresentation()

@@ -26,6 +26,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(runtimeRoot, "LastBearingCameraRig.cs"));
             string comparison = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingCityGrammarComparison.cs"));
+            string recovery = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "LastBearingDepotApproachRecoveryView.cs"));
             string dispatcher = File.ReadAllText(
                 Path.Combine(
                     repoRoot,
@@ -49,11 +53,59 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "AttachRoadModeAdapter");
             Require(controller, "OpenBuildingCutaway");
             Require(controller, "OpenGarageBay");
+            string recoveryOperation = Segment(
+                controller,
+                "public void OperateDepotApproachRecoveryPoint()",
+                "public void ChooseLiquidReturn");
+            Require(
+                recoveryOperation,
+                "_readModel.IsDepotApproachRecoveryAvailable");
+            Require(
+                recoveryOperation,
+                "new OperateDepotRecoveryPointCommand");
+            foreach (string forbidden in new[]
+            {
+                "Rigidbody",
+                "RoadFeelTelemetry",
+                "Collider",
+                "Physics",
+                ".position",
+                ".transform",
+            })
+            {
+                TestHarness.True(
+                    recoveryOperation.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "depot recovery controller operation reads presentation authority " +
+                    forbidden);
+            }
+            string globalShortcuts = Segment(
+                controller,
+                "private void HandleGlobalShortcuts()",
+                "private void SimulateOneTick()");
+            Require(
+                globalShortcuts,
+                "_readModel.IsDepotApproachRecoveryAvailable");
+            Require(globalShortcuts, "keyboard.eKey.wasPressedThisFrame");
+            Require(globalShortcuts, "gamepad.buttonSouth.wasPressedThisFrame");
+            TestHarness.True(
+                globalShortcuts.IndexOf(
+                    "_readModel.IsDepotApproachRecoveryAvailable",
+                    StringComparison.Ordinal) <
+                globalShortcuts.IndexOf(
+                    "keyboard.eKey.wasPressedThisFrame",
+                    StringComparison.Ordinal),
+                "recovery hotkey must be context-gated before consuming city-camera E");
+            Require(camera, "keyboard.eKey.isPressed");
             string driveInput = Segment(
                 controller,
                 "private void QueueDriveInputIfApplicable()",
                 "float throttle = 0f;");
             Require(driveInput, "_pendingCommands.Count != 0");
+            Require(
+                driveInput,
+                "_readModel.IsDepotApproachRecoveryAvailable");
             string load = Segment(
                 controller,
                 "public void Load()",
@@ -67,6 +119,7 @@ namespace AtomicLandPirate.LastBearingTests
                 load.IndexOf("ApplyPresentation();", StringComparison.Ordinal),
                 "load must fail closed before applying the loaded presentation");
             Require(controller, "_world.Apply(new LastBearingVisualSnapshot");
+            Require(controller, "_world.ApplyDepotApproachRecovery(");
             Require(controller, "_modeCoordinator?.ApplyCanonical(_readModel);");
             TestHarness.True(
                 controller.IndexOf(
@@ -89,6 +142,8 @@ namespace AtomicLandPirate.LastBearingTests
             Require(world, "RoadFeelRigFactory.Create");
             Require(world, "RoadFeelRigInstance");
             Require(world, "drivingModeRoot");
+            Require(world, "LastBearingDepotApproachRecoveryView");
+            Require(world, "DepotApproachRecoveryView.Build(");
             Require(comparison, "RestrainedSnapGrid");
             Require(comparison, "DistrictStamp");
             Require(comparison, "ResetComparison");
@@ -110,6 +165,32 @@ namespace AtomicLandPirate.LastBearingTests
             Require(modeCoordinator, "RoadAdapterFaulted");
             Require(modeCoordinator, "SynchronizePresentationPose");
             Require(modeCoordinator, "ApplyPresentationOwnership");
+            Require(
+                modeCoordinator,
+                "IsRoadPresentationHeldAtRecovery");
+            string recoveryHold = Segment(
+                modeCoordinator,
+                "private void HoldRoadAdapterAtCanonicalRecoveryPose()",
+                "private void SuspendRoadAdapter");
+            Require(recoveryHold, "adapter.SetRoadModeActive(false)");
+            Require(recoveryHold, "_canonicalVehicle.SnapToCanonicalRoadPose()");
+            Require(recoveryHold, "adapter.SynchronizePresentationPose(");
+            TestHarness.True(
+                recoveryHold.IndexOf(
+                    "adapter.SetRoadModeActive(false)",
+                    StringComparison.Ordinal) <
+                recoveryHold.IndexOf(
+                    "_canonicalVehicle.SnapToCanonicalRoadPose()",
+                    StringComparison.Ordinal),
+                "recovery hold must suspend physics before snapping canonical pose");
+            TestHarness.True(
+                recoveryHold.IndexOf(
+                    "_canonicalVehicle.SnapToCanonicalRoadPose()",
+                    StringComparison.Ordinal) <
+                recoveryHold.IndexOf(
+                    "adapter.SynchronizePresentationPose(",
+                    StringComparison.Ordinal),
+                "recovery hold must render canonical pose before synchronization");
             string roadActivation = Segment(
                 modeCoordinator,
                 "private void ActivateRoadAdapter()",
@@ -144,6 +225,36 @@ namespace AtomicLandPirate.LastBearingTests
                 "mode coordinator must not add a save seam");
             Require(hud, "R0 ROUTING SCAFFOLD");
             Require(hud, "There is no on-foot mode.");
+            Require(hud, "OperateDepotApproachRecoveryPoint");
+            Require(hud, "OPERATE DEPOT RECOVERY POINT");
+
+            Require(recovery, "C0-VGR-02");
+            Require(recovery, "Revision = \"R1\"");
+            Require(recovery, "poi_depot_approach_recovery_a");
+            Require(recovery, "ANCHOR_DEPOT_RECOVERY_INTERACTION");
+            Require(recovery, "collider.enabled = false");
+            foreach (string forbidden in new[]
+            {
+                "Rigidbody",
+                "RoadFeelTelemetry",
+                "Physics.",
+                "OnTrigger",
+                "OnCollision",
+                "LastBearingKernel",
+                "LastBearingCommand",
+                "LastBearingState",
+                "SaveContracts",
+                "System.IO",
+                "Application.persistentDataPath",
+                "Keyboard.current",
+                "Gamepad.current",
+            })
+            {
+                TestHarness.True(
+                    recovery.IndexOf(forbidden, StringComparison.Ordinal) < 0,
+                    "depot recovery view contains forbidden authority " +
+                    forbidden);
+            }
 
             Require(dispatcher, "[assembly: TestRunCallback(");
             Require(dispatcher, "WP0002TestRunCallback : ITestRunCallback");

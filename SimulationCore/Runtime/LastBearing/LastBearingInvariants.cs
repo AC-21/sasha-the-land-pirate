@@ -279,6 +279,28 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 || state.TransactionPhase >= TransactionPhase.CityCredited,
                 "LAST_BEARING_DEPOT_RESOLUTION_PHASE_INVALID");
 
+            if (state.ExpeditionPhase == ExpeditionPhase.Outbound)
+            {
+                Require(
+                    state.RouteProgressTicks != state.RouteTargetTicks
+                    || state.HasArrivalClaimSnapshot,
+                    "LAST_BEARING_ROUTE_ARRIVAL_SNAPSHOT_REQUIRED");
+                Require(
+                    !state.HasArrivalClaimSnapshot
+                    || (state.RouteTargetTicks > 0
+                        && state.RouteProgressTicks == state.RouteTargetTicks),
+                    "LAST_BEARING_OUTBOUND_ARRIVAL_SNAPSHOT_INVALID");
+            }
+
+            if (state.ExpeditionPhase == ExpeditionPhase.AtDepot
+                || state.ExpeditionPhase == ExpeditionPhase.Returning
+                || state.ExpeditionPhase == ExpeditionPhase.Returned)
+            {
+                Require(
+                    state.HasArrivalClaimSnapshot,
+                    "LAST_BEARING_POST_ARRIVAL_SNAPSHOT_REQUIRED");
+            }
+
             if (state.HasArrivalClaimSnapshot)
             {
                 RequireRange(

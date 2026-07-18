@@ -176,6 +176,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 turbineRepaired: false,
                 humanVisible: true,
                 robotVisible: true));
+            _world?.ApplyDepotApproachRecovery(
+                available: false,
+                unlocked: false);
         }
 
         public void ActivateInfrastructure()
@@ -315,6 +318,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _status = cooperate
                 ? "The bearing stays claimed; a field sleeve and obligation come home."
                 : "Sasha takes the claimed bearing. The faction will remember the custody change.";
+        }
+
+        public void OperateDepotApproachRecoveryPoint()
+        {
+            if (_readModel == null ||
+                !_readModel.IsDepotApproachRecoveryAvailable)
+            {
+                _status =
+                    "The depot recovery point is not canonically available yet.";
+                return;
+            }
+
+            Queue(sequence =>
+                new OperateDepotRecoveryPointCommand(sequence));
+            _status =
+                "Recovery bridle seated. The depot encounter can now begin.";
         }
 
         public void ChooseLiquidReturn(LiquidCargoKind kind)
@@ -492,24 +511,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private void HandleGlobalShortcuts()
         {
             var keyboard = Keyboard.current;
-            if (keyboard == null)
-            {
-                return;
-            }
+            var gamepad = Gamepad.current;
 
-            if (keyboard.pKey.wasPressedThisFrame)
+            if (keyboard != null && keyboard.pKey.wasPressedThisFrame)
             {
                 TogglePause();
             }
 
-            if (keyboard.f5Key.wasPressedThisFrame)
+            if (keyboard != null && keyboard.f5Key.wasPressedThisFrame)
             {
                 Save();
             }
 
-            if (keyboard.f9Key.wasPressedThisFrame)
+            if (keyboard != null && keyboard.f9Key.wasPressedThisFrame)
             {
                 Load();
+            }
+
+            if (_readModel != null &&
+                _readModel.IsDepotApproachRecoveryAvailable &&
+                ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
+                 (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
+            {
+                OperateDepotApproachRecoveryPoint();
             }
         }
 
@@ -543,6 +567,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_pendingCommands.Count != 0 ||
                 _readModel == null ||
                 _readModel.PauseCause != PauseCause.None ||
+                _readModel.IsDepotApproachRecoveryAvailable ||
                 (_readModel.ExpeditionPhase != ExpeditionPhase.Outbound &&
                  _readModel.ExpeditionPhase != ExpeditionPhase.Returning))
             {
@@ -694,6 +719,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 repaired,
                 humanVisible,
                 robotVisible));
+            _world.ApplyDepotApproachRecovery(
+                _readModel.IsDepotApproachRecoveryAvailable,
+                _readModel.ExpeditionPhase == ExpeditionPhase.AtDepot);
             _modeCoordinator?.ApplyCanonical(_readModel);
         }
 

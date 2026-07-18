@@ -54,6 +54,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public LastBearingCityGrammarComparison? CityGrammarComparison { get; private set; }
 
+        public LastBearingDepotApproachRecoveryView? DepotApproachRecoveryView
+        {
+            get;
+            private set;
+        }
+
         public Transform? TurbineRotor => _turbineRotor;
 
         public Transform? WaterFill => _waterFill;
@@ -92,7 +98,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             BuildGround(darkConcrete, concrete, oxide);
             BuildWaterworks(concrete, darkConcrete, iron, bone);
             BuildSettlement(concrete, iron, oxide, bone);
-            BuildRoadAndDepot(concrete, darkConcrete, iron, bone);
+            BuildRoadAndDepot(
+                concrete,
+                darkConcrete,
+                iron,
+                bone,
+                tungsten,
+                signal);
             BuildResidents(oxide, bone, iron, concrete);
             BuildCityGrammarComparison(concrete, iron, oxide, bone);
             BuildVehicle(
@@ -185,6 +197,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             CityGrammarComparison?.BeginSession();
             CameraRig?.SetComparisonMode(false);
+        }
+
+        public void ApplyDepotApproachRecovery(
+            bool available,
+            bool unlocked)
+        {
+            DepotApproachRecoveryPresentationState state = unlocked
+                ? DepotApproachRecoveryPresentationState.Unlocked
+                : available
+                    ? DepotApproachRecoveryPresentationState.Available
+                    : DepotApproachRecoveryPresentationState.Dormant;
+            DepotApproachRecoveryView?.ApplyState(state);
         }
 
         internal void Apply(LastBearingVisualSnapshot snapshot)
@@ -382,7 +406,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Material concrete,
             Material darkConcrete,
             Material iron,
-            Material bone)
+            Material bone,
+            Material tungsten,
+            Material signal)
         {
             var root = new GameObject("Two Path Road Corridor").transform;
             root.SetParent(transform, false);
@@ -402,6 +428,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
             CreateBlock("Depot Roof", depot, new Vector3(0f, 6.4f, 0f), new Vector3(11f, 1.1f, 8f), darkConcrete);
             CreateBlock("Ledger Table", depot, new Vector3(0f, 0.9f, -1f), new Vector3(4f, 0.25f, 2f), bone);
             CreateCylinder("Bearing Cradle", depot, new Vector3(0f, 1.35f, 1.4f), new Vector3(0.9f, 0.35f, 0.9f), bone);
+
+            var recovery = new GameObject(
+                LastBearingDepotApproachRecoveryView.RootName);
+            recovery.transform.SetParent(depot, false);
+            recovery.transform.localPosition = new Vector3(0f, 0f, -3.75f);
+            DepotApproachRecoveryView =
+                recovery.AddComponent<LastBearingDepotApproachRecoveryView>();
+            DepotApproachRecoveryView.Build(iron, bone, tungsten, signal);
 
             for (var index = -2; index <= 2; index++)
             {

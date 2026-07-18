@@ -69,6 +69,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private Transform? _garageFocusAnchor;
         private Transform? _modeRoot;
         private bool _roadRunRequested;
+        private bool _roadRecoveryHoldRequested;
         private bool _roadPresentationActive;
         private bool _initialized;
 
@@ -82,6 +83,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool RoadAdapterFaulted { get; private set; }
 
         public bool IsRoadPresentationActive => _roadPresentationActive;
+
+        public bool IsRoadPresentationHeldAtRecovery { get; private set; }
 
         public int ActiveModeCount
         {
@@ -166,7 +169,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _roadAdapter = adapter;
             RoadAdapterFaulted = false;
             _roadPresentationActive = false;
-            if (_roadRunRequested)
+            if (_roadRecoveryHoldRequested)
+            {
+                HoldRoadAdapterAtCanonicalRecoveryPose();
+            }
+            else if (_roadRunRequested)
             {
                 ActivateRoadAdapter();
             }
@@ -210,6 +217,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             _roadRunRequested = false;
+            _roadRecoveryHoldRequested = false;
             SuspendRoadAdapter("clear-session");
             ApplyPresentationOwnership();
         }
@@ -226,10 +234,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingPresentationMode mode = ResolveMode(
                 readModel,
                 _requestedCityMode);
+            bool holdAtRecovery =
+                mode == LastBearingPresentationMode.Driving &&
+                readModel.IsDepotApproachRecoveryAvailable;
             Activate(
                 mode,
                 mode == LastBearingPresentationMode.Driving &&
-                readModel.PauseCause == PauseCause.None);
+                readModel.PauseCause == PauseCause.None &&
+                !holdAtRecovery,
+                holdAtRecovery);
         }
 
         public void ApplyQuantizedRoadCommandShadow(
@@ -277,7 +290,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void Activate(
             LastBearingPresentationMode mode,
-            bool roadShouldRun)
+            bool roadShouldRun,
+            bool holdAtRecovery)
         {
             for (var index = 0; index < OrderedModes.Length; index++)
             {
@@ -287,7 +301,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             HasActiveMode = true;
             CurrentMode = mode;
             _roadRunRequested = roadShouldRun;
-            if (roadShouldRun)
+            _roadRecoveryHoldRequested = holdAtRecovery;
+            if (holdAtRecovery)
+            {
+                HoldRoadAdapterAtCanonicalRecoveryPose();
+            }
+            else if (roadShouldRun)
             {
                 if (!_roadPresentationActive)
                 {
@@ -304,6 +323,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void ActivateRoadAdapter()
         {
+            IsRoadPresentationHeldAtRecovery = false;
             if (_roadAdapter == null)
             {
                 _roadPresentationActive = false;
@@ -333,9 +353,39 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _roadPresentationActive = true;
         }
 
+        private void HoldRoadAdapterAtCanonicalRecoveryPose()
+        {
+            _roadPresentationActive = false;
+            IsRoadPresentationHeldAtRecovery = false;
+            if (_roadAdapter == null || _canonicalVehicle == null)
+            {
+                return;
+            }
+
+            if (!TryInvokeRoadAdapter(
+                    "hold-recovery-suspend",
+                    adapter => adapter.SetRoadModeActive(false)))
+            {
+                return;
+            }
+
+            _canonicalVehicle.SnapToCanonicalRoadPose();
+            if (!TryInvokeRoadAdapter(
+                    "hold-recovery-synchronize",
+                    adapter => adapter.SynchronizePresentationPose(
+                        _canonicalVehicle.transform.position,
+                        _canonicalVehicle.transform.rotation)))
+            {
+                return;
+            }
+
+            IsRoadPresentationHeldAtRecovery = true;
+        }
+
         private void SuspendRoadAdapter(string operation)
         {
             _roadPresentationActive = false;
+            IsRoadPresentationHeldAtRecovery = false;
             if (_roadAdapter == null)
             {
                 return;
@@ -391,6 +441,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
                 _roadAdapter = null;
                 _roadPresentationActive = false;
+                IsRoadPresentationHeldAtRecovery = false;
                 RoadAdapterFaulted = true;
                 ApplyPresentationOwnership();
                 return false;

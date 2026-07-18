@@ -189,6 +189,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public EncounterChoice Choice { get; }
     }
 
+    public sealed class OperateDepotRecoveryPointCommand : LastBearingCommand
+    {
+        public OperateDepotRecoveryPointCommand(long sequence)
+            : base(sequence)
+        {
+        }
+    }
+
     public sealed class ChooseLiquidReturnCommand : LastBearingCommand
     {
         public ChooseLiquidReturnCommand(long sequence, LiquidCargoKind kind)
