@@ -44,6 +44,7 @@ namespace AtomicLandPirate.LastBearingTests
                 MaterializationTests.CompleteUnionIsPresent(repoRoot));
             SimulationTests.Run(harness);
             SaveAtomicTests.Run(harness, repoRoot);
+            HomecomingTests.RunSave(harness, repoRoot);
             SaveBoundaryTests.Run(harness, repoRoot);
             foreach (string scenarioId in ScenarioIds)
             {
@@ -97,6 +98,7 @@ namespace AtomicLandPirate.LastBearingTests
             {
                 case "dev-save-atomic":
                     SaveAtomicTests.Run(harness, repoRoot);
+                    HomecomingTests.RunSave(harness, repoRoot);
                     break;
                 case "dev-save-boundary":
                     SaveBoundaryTests.Run(harness, repoRoot);

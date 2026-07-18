@@ -17,6 +17,7 @@ namespace AtomicLandPirate.LastBearingTests
             harness.Run("duplicate drive commands fail before tick mutation", DuplicateDriveCommandsFailAtomically);
             harness.Run("preparation progress is exposed without new authority", PreparationProgressIsExposed);
             harness.Run("preparation completes autonomously", PreparationCompletes);
+            HomecomingTests.RunCore(harness);
             WreckLineTests.Run(harness);
             DepotApproachRecoveryTests.Run(harness);
             DepotRepairCargoLoadingTests.Run(harness);

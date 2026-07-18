@@ -372,7 +372,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Credit the road back to Last Bearing",
                     "Move the frozen return payload into settlement custody and " +
                     "finalize the one expedition transaction.",
-                    "Credit and finalize the return.");
+                    "Check in at the fixed return apron with E or gamepad south.");
             }
 
             if (model.TurbineCondition == TurbineCondition.Failing
@@ -388,7 +388,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                           "erase the depot's grievance."
                         : "Install the cooperative field sleeve. Its maintenance " +
                           "obligation remains part of the settlement.",
-                    "Install the turbine repair.");
+                    "Open the pump hall, then seat the repair with E or gamepad south.");
             }
 
             if (model.IsCityImprovementInstallationAvailable)

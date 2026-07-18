@@ -58,6 +58,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public LastBearingGarageBayView? GarageBayView { get; private set; }
 
+        public LastBearingReturnServiceView? ReturnServiceView { get; private set; }
+
         public LastBearingPumpHallCutawayView? PumpHallCutawayView
         {
             get;
@@ -73,6 +75,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public Transform? SelectedBuildingCutawayCameraAnchor { get; private set; }
 
         public Transform? SelectedBuildingCutawayFocusAnchor { get; private set; }
+
+        public bool IsPumpHallCutawaySelected =>
+            PumpHallCutawayView?.gameObject.activeSelf == true &&
+            OneGoodBatchCutawayView?.gameObject.activeSelf != true;
 
         public LastBearingCityGrammarComparison? CityGrammarComparison { get; private set; }
 
@@ -103,7 +109,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public void Build(
             Transform? drivingModeRoot = null,
             Transform? buildingCutawayModeRoot = null,
-            Transform? garageModeRoot = null)
+            Transform? garageModeRoot = null,
+            Transform? cityReturnModeRoot = null)
         {
             if (_built)
             {
@@ -156,6 +163,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 darkConcrete,
                 tungsten,
                 signal);
+            if (cityReturnModeRoot != null)
+            {
+                BuildReturnService(
+                    cityReturnModeRoot,
+                    concrete,
+                    darkConcrete,
+                    oxide,
+                    bone,
+                    tungsten,
+                    signal);
+            }
+
             if (garageModeRoot != null)
             {
                 BuildGarageBay(
@@ -375,9 +394,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void ApplyRepairCargoPresentation(
             RepairCargoKind kind,
-            RepairCargoCustody custody)
+            RepairCargoCustody custody,
+            TurbineCondition turbineCondition)
         {
             DepotCargoLoadingView?.Apply(kind, custody);
+            PumpHallCutawayView?.ApplyTurbineRepair(
+                kind,
+                custody,
+                turbineCondition);
+        }
+
+        public void ApplyReturnServicePresentation(
+            bool checkInReady,
+            RepairCargoKind kind,
+            RepairCargoCustody custody,
+            bool humanVisible,
+            bool robotVisible)
+        {
+            ReturnServiceView?.Apply(
+                checkInReady,
+                kind,
+                custody,
+                humanVisible,
+                robotVisible);
         }
 
         public void ApplyCityImprovement(
@@ -885,6 +924,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
             GarageBayView = garage.AddComponent<LastBearingGarageBayView>();
             GarageBayView.Build(
                 VehicleView!.transform.position,
+                concrete,
+                darkIron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
+        }
+
+        private void BuildReturnService(
+            Transform cityReturnModeRoot,
+            Material concrete,
+            Material darkIron,
+            Material oxide,
+            Material bone,
+            Material tungsten,
+            Material signal)
+        {
+            var returnService = new GameObject(
+                LastBearingReturnServiceView.RootName);
+            returnService.transform.SetParent(cityReturnModeRoot, false);
+            ReturnServiceView =
+                returnService.AddComponent<LastBearingReturnServiceView>();
+            ReturnServiceView.Build(
                 concrete,
                 darkIron,
                 oxide,

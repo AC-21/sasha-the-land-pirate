@@ -85,6 +85,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private Transform? _garageFocusAnchor;
         private Transform? _pumpHallCameraAnchor;
         private Transform? _pumpHallFocusAnchor;
+        private Transform? _returnServiceCameraAnchor;
+        private Transform? _returnServiceFocusAnchor;
         private Transform? _modeRoot;
         private bool _roadRunRequested;
         private bool _roadRecoveryHoldRequested;
@@ -174,7 +176,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Transform garageCameraAnchor,
             Transform garageFocusAnchor,
             Transform pumpHallCameraAnchor,
-            Transform pumpHallFocusAnchor)
+            Transform pumpHallFocusAnchor,
+            Transform returnServiceCameraAnchor,
+            Transform returnServiceFocusAnchor)
         {
             _cameraRig = cameraRig ?? throw new ArgumentNullException(nameof(cameraRig));
             _canonicalVehicle = canonicalVehicle ??
@@ -187,7 +191,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _pumpHallCameraAnchor = pumpHallCameraAnchor ??
                                     throw new ArgumentNullException(nameof(pumpHallCameraAnchor));
             _pumpHallFocusAnchor = pumpHallFocusAnchor ??
-                                   throw new ArgumentNullException(nameof(pumpHallFocusAnchor));
+                                    throw new ArgumentNullException(nameof(pumpHallFocusAnchor));
+            _returnServiceCameraAnchor = returnServiceCameraAnchor ??
+                throw new ArgumentNullException(nameof(returnServiceCameraAnchor));
+            _returnServiceFocusAnchor = returnServiceFocusAnchor ??
+                throw new ArgumentNullException(nameof(returnServiceFocusAnchor));
             ApplyPresentationOwnership();
         }
 
@@ -642,6 +650,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool pumpHallInspectionSelected =
                 HasActiveMode &&
                 CurrentMode == LastBearingPresentationMode.BuildingCutaway;
+            bool returnServiceInspectionSelected =
+                HasActiveMode &&
+                CurrentMode == LastBearingPresentationMode.CityReturn;
 
             if (_roadTarget != null)
             {
@@ -659,16 +670,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     roadPresentationAvailable
                         ? _roadTarget!
                         : _canonicalVehicle.transform);
-                if (_garageCameraAnchor != null && _garageFocusAnchor != null)
+                if (_garageCameraAnchor != null &&
+                    _garageFocusAnchor != null &&
+                    _pumpHallCameraAnchor != null &&
+                    _pumpHallFocusAnchor != null &&
+                    _returnServiceCameraAnchor != null &&
+                    _returnServiceFocusAnchor != null)
                 {
+                    Transform cameraAnchor = returnServiceInspectionSelected
+                        ? _returnServiceCameraAnchor
+                        : pumpHallInspectionSelected
+                            ? _pumpHallCameraAnchor
+                            : _garageCameraAnchor;
+                    Transform focusAnchor = returnServiceInspectionSelected
+                        ? _returnServiceFocusAnchor
+                        : pumpHallInspectionSelected
+                            ? _pumpHallFocusAnchor
+                            : _garageFocusAnchor;
                     _cameraRig.SetInspectionPose(
-                        pumpHallInspectionSelected
-                            ? _pumpHallCameraAnchor!
-                            : _garageCameraAnchor,
-                        pumpHallInspectionSelected
-                            ? _pumpHallFocusAnchor!
-                            : _garageFocusAnchor,
-                        garageInspectionSelected || pumpHallInspectionSelected);
+                        cameraAnchor,
+                        focusAnchor,
+                        garageInspectionSelected ||
+                        pumpHallInspectionSelected ||
+                        returnServiceInspectionSelected);
                 }
 
                 _cameraRig.SetRoadChaseActive(

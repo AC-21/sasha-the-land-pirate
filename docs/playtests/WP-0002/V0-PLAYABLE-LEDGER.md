@@ -2,7 +2,7 @@
 
 Status: **provisional execution ledger**
 
-Baseline: `cf135abe0d1acae414d18ec08d8b63f593d1aa37`
+Baseline: `b87a3530c733d959a5b57849105784a46494e314`
 
 Purpose: keep the next playable work vertically integrated, testable, and honest.
 
@@ -47,10 +47,10 @@ The current experience is still a constitutional toy:
 
 | Area | Current state | V0 gap |
 |---|---|---|
-| City | Water need, camera, reversible D-0030 comparison, and one fixed-socket auxiliary-pump improvement | No authoritative placement or logistics path |
+| City | Water need, camera, reversible D-0030 comparison, turbine repair, and one fixed-socket auxiliary-pump improvement | Return check-in and turbine installation are still global HUD actions; no authoritative placement or logistics path |
 | Driving | Real local physics shadowing deterministic progress/lateral commands, with explicit Wreck Line and depot-recovery verbs | Brake/reverse remain presentation-only; one corridor and two interactions are still thin |
-| Garage | Stable C0 scout sockets and fixed dollhouse bay | Inspection only; module work is still a global HUD action |
-| Depot/scavenging | Recovery gate, faction choice, heavy/liquid cargo fields and exact custody | Cargo appears through buttons; no operated salvage/load staging |
+| Garage | Stable C0 scout sockets, fixed dollhouse bay, and garage-local module commitment | Module assembly remains one authored operation; no generalized rig-upgrade path |
+| Depot/scavenging | Recovery gate, faction choice, heavy/liquid cargo fields, exact custody, and one operated repair-cargo handoff | Range-tank liquid selection and return sealing remain HUD-led; one depot and its interactions are still thin |
 | Colony | Exact typed rosters and visible human/robot primitives | No lived work feedback; mechanical differentiation remains forbidden while D-0039 is open |
 | Manufacturing/trade | One conserved spare-bearing batch, physical lot, one-off caravaner barter, and persistent corridor permit | No broader exchange by design; D-0044 remains open |
 | Save | Exact disposable profile, fault-tested atomic store, and critical-transition autosaves | One dev slot; no production compatibility promise |
@@ -393,8 +393,9 @@ Detailed contract:
 Objective: make the repair-cargo outcome a physical, player-controlled custody
 handoff from its truthful depot source to Sasha's scout.
 
-Status: current implementation candidate; not released until independent,
-Unity, protected, and creator-delegated release gates pass.
+Status: released on protected `main` in `b87a353` after independent review,
+exact Unity dispatcher gates, protected checks, and transparent
+creator-delegated manual release.
 
 Scope:
 
@@ -427,6 +428,65 @@ authored state.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-10-WORK-THE-DEPOT-CONTRACT.md`.
+
+## VGR-11 — Seat the Repair
+
+Objective: make the loaded homecoming and turbine repair one physical city-road
+handoff instead of two global HUD actions.
+
+Status: current implementation target; not released until independent, Unity,
+protected, and creator-delegated release gates pass.
+
+Scope:
+
+- Arrive in the existing `CityReturn` mode with the exact repair cargo still
+  visible on Sasha's scout at one fixed home service apron.
+- Use one contextual check-in action to queue the existing city-credit and
+  transaction-finalize command pair unchanged.
+- Keep repair cargo in `Vehicle` custody through check-in; do not teleport,
+  stage, consume, or hide it before the repair command is accepted.
+- Open, or direct the player into, the existing fixed pump-hall cutaway and
+  frame the scout, cargo, failing turbine, service access, exact residents, and
+  exit route through the sole shared camera.
+- Use one pump-hall contextual action to queue the existing turbine-install
+  command unchanged, then show ceramic-bearing `Turbine` custody or consumed
+  field-sleeve custody and the existing repaired-city consequence.
+- Re-derive both actions, framing, and markers from canonical state after save,
+  load, title, new game, and mode changes; add no saved transient intent.
+- Keep all three colony compositions mechanically identical and show only the
+  exact resident kinds present in the canonical roster.
+
+Acceptance:
+
+- check-in is available only in the exact returned/return-pending CityReturn
+  state and is byte-equivalent to the existing credit/finalize composite;
+- accepted check-in finishes at `AtHome`/`Finalized` while leaving repair kind,
+  `Vehicle` custody, ordinary-cargo occupancy, and turbine condition unchanged;
+- the install action is available only in the selected pump-hall cutaway with
+  the finalized, failing-turbine, vehicle-cargo state and queues exactly one
+  existing install command;
+- ceramic repair transfers `Vehicle` to `Turbine`; field-sleeve repair transfers
+  `Vehicle` to `Consumed`; no early hide, duplicate cargo, or stale scout marker
+  exists;
+- early, stale, wrong-mode, invalid-state, repaired, duplicate, and lifecycle
+  requests queue no command and preserve canonical/save bytes;
+- arrival, finalized-before-repair, and repaired checkpoints round-trip
+  byte-exactly and restore the same derived mode, markers, and availability
+  without a codec field, save-version change, or migration;
+- the fixed apron and pump-hall target remain presentation-only sockets and do
+  not select D-0030; composition mechanics and exchange law remain unchanged;
+- one shared camera/listener and physics-free views preserve exact
+  human/robot/mixed parity, and all deterministic, Unity, visual, save, and
+  protected gates remain green.
+
+Exclude: a new core command, canonical field/event, free-form placement or
+logistics, arbitrary unload/carry/pickup, repair recipe or minigame, avatar,
+walking mode, generalized interaction framework, production asset, dependency,
+scene, package, project setting, audio asset, composition differentiation, or
+caravan exchange.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-11-SEAT-THE-REPAIR-CONTRACT.md`.
 
 ## Visual constitution
 
