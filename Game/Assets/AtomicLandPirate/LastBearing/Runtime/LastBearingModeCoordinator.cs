@@ -302,13 +302,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
-            if (_canonicalVehicle != null && !TryInvokeRoadAdapter(
-                    "synchronize-pose",
-                    adapter => adapter.SynchronizePresentationPose(
-                        _canonicalVehicle.transform.position,
-                        _canonicalVehicle.transform.rotation)))
+            if (_canonicalVehicle != null)
             {
-                return;
+                _canonicalVehicle.SnapToCanonicalRoadPose();
+                if (!TryInvokeRoadAdapter(
+                        "synchronize-pose",
+                        adapter => adapter.SynchronizePresentationPose(
+                            _canonicalVehicle.transform.position,
+                            _canonicalVehicle.transform.rotation)))
+                {
+                    return;
+                }
             }
 
             if (!TryInvokeRoadAdapter(

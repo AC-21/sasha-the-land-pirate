@@ -342,16 +342,22 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             string profileDirectory = InstallTemporarySaveAdapter(controller);
             LastBearingState outbound = CreateOutboundState();
             var kernel = new LastBearingKernel();
-            for (var tick = 0; tick < 12; tick++)
+            for (var tick = 0; tick < 20; tick++)
             {
                 outbound = Apply(kernel, outbound, sequence =>
-                    new DriveVehicleCommand(sequence, 1000, 500));
+                    new DriveVehicleCommand(sequence, 0, 1000));
             }
 
             Assert.That(outbound.ExpeditionPhase, Is.EqualTo(ExpeditionPhase.Outbound));
+            Assert.That(
+                outbound.VehicleLateralMilli,
+                Is.EqualTo(LastBearingBalanceV1.RoadLateralLimitMilli));
             InstallControllerState(controller, outbound);
             LastBearingWorldBuilder world = controller.World!;
             RoadFeelRigInstance roadRig = world.RoadFeelRig!;
+            Assert.That(
+                world.VehicleView!.VisibleLateralOffset,
+                Is.EqualTo(1.35f).Within(0.001f));
             Vector3 expectedPosition = world.VehicleView!.transform.position;
             Quaternion expectedRotation = world.VehicleView.transform.rotation;
             string savedHash = controller.CanonicalHash;
@@ -375,6 +381,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.ReadModel!.ExpeditionPhase,
                 Is.EqualTo(ExpeditionPhase.Outbound));
+            Assert.That(
+                controller.ReadModel.VehicleLateralMilli,
+                Is.EqualTo(LastBearingBalanceV1.RoadLateralLimitMilli));
+            Assert.That(
+                world.VehicleView.VisibleLateralOffset,
+                Is.EqualTo(1.35f).Within(0.001f));
             AssertRoadPresentation(controller, roadRig, active: true);
             Assert.That(
                 Vector3.Distance(

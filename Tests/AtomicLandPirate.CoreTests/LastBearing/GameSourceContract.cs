@@ -79,6 +79,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(vehicle, "snapshot.VehicleLateralNormalized");
             Require(vehicle, "VisibleLateralOffset");
             Require(vehicle, "FrontWheelSteerDegrees");
+            Require(vehicle, "SnapToCanonicalRoadPose");
+            Require(vehicle, "Apply(snapshot, snapLateral: false)");
+            Require(vehicle, "Apply(_lastSnapshot, snapLateral: true)");
 
             Require(camera, "D0022-PROVISIONAL-LAST-BEARING-CAMERA-V1");
             Require(camera, "SetComparisonMode");
@@ -111,8 +114,17 @@ namespace AtomicLandPirate.LastBearingTests
                 modeCoordinator,
                 "private void ActivateRoadAdapter()",
                 "private void SuspendRoadAdapter");
+            Require(roadActivation, "_canonicalVehicle.SnapToCanonicalRoadPose()");
             Require(roadActivation, "adapter.SynchronizePresentationPose(");
             Require(roadActivation, "adapter.SetRoadModeActive(true)");
+            TestHarness.True(
+                roadActivation.IndexOf(
+                    "_canonicalVehicle.SnapToCanonicalRoadPose()",
+                    StringComparison.Ordinal) <
+                roadActivation.IndexOf(
+                    "adapter.SynchronizePresentationPose(",
+                    StringComparison.Ordinal),
+                "canonical road pose must snap before adapter synchronization");
             TestHarness.True(
                 roadActivation.IndexOf(
                     "adapter.SynchronizePresentationPose(",
