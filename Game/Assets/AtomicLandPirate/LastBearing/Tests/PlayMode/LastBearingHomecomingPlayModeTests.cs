@@ -78,6 +78,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Press(keyboard.wKey);
+            yield return null;
             InvokeSimulationTick(controller);
             Release(keyboard.wKey);
             yield return null;
@@ -126,8 +127,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             InvokeApplyPresentation(controller);
             Assert.That(controller.IsReturnCheckInAvailable, Is.True);
             Press(keyboard.eKey);
-            InvokeGlobalShortcuts(controller);
             yield return null;
+            InvokeGlobalShortcuts(controller);
             Release(keyboard.eKey);
             yield return null;
 
@@ -232,6 +233,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             Gamepad gamepad = InputSystem.AddDevice<Gamepad>();
             Press(gamepad.buttonSouth);
+            yield return null;
             InvokeGlobalShortcuts(controller);
             Release(gamepad.buttonSouth);
             yield return null;
