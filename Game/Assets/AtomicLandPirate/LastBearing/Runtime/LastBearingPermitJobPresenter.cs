@@ -297,12 +297,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
                 bool fieldSleeve =
                     model.RepairCargoKind == RepairCargoKind.FieldSleeve;
-                bool ceramicAtFaction =
+                bool ceramicWasFactionHeld =
                     model.RepairCargoKind == RepairCargoKind.CeramicBearing &&
-                    model.RepairCargoCustody == RepairCargoCustody.Faction;
+                    model.FactionClaimProgressMilli ==
+                        LastBearingBalanceV1.FactionClaimThresholdMilli;
                 string cargoDetail = fieldSleeve
                     ? "The field sleeve comes with an ongoing maintenance promise."
-                    : ceramicAtFaction
+                    : ceramicWasFactionHeld
                         ? "The faction-held ceramic bearing carries an aggrieved faction memory."
                         : "Taking the unclaimed ceramic bearing creates an aggrieved faction memory.";
                 if (model.IsRepairCargoLoadAvailable)
@@ -313,7 +314,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         "CHAPTER IV · WORK THE DEPOT",
                         fieldSleeve
                             ? "Load the faction field sleeve"
-                            : ceramicAtFaction
+                            : ceramicWasFactionHeld
                                 ? "Load the faction-held ceramic bearing"
                                 : "Load the unclaimed ceramic bearing",
                         cargoDetail +

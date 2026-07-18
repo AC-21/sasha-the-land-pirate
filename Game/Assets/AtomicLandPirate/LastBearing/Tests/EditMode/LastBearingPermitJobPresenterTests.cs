@@ -247,6 +247,51 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             AssertLegible(payload);
         }
 
+        [TestCase(false, "unclaimed", "faction-held")]
+        [TestCase(true, "faction-held", "unclaimed")]
+        public void LoadedBearingGuidancePreservesCanonicalSourceLineage(
+            bool waitForFactionClaim,
+            string expectedSource,
+            string rejectedSource)
+        {
+            LastBearingState state = ReachUnresolvedDepot(
+                PreparationChoice.CivicBuffer,
+                VehicleModule.SealedRangeTank,
+                worldSeed: waitForFactionClaim ? 3311 : 3310,
+                waitForFactionClaim: waitForFactionClaim);
+            state = ApplyOne(
+                state,
+                sequence => new ResolveDepotCommand(
+                    sequence,
+                    EncounterChoice.TakeBearing));
+            Assert.That(
+                state.RepairCargoCustody,
+                Is.EqualTo(
+                    waitForFactionClaim
+                        ? RepairCargoCustody.Faction
+                        : RepairCargoCustody.Depot));
+
+            state = ApplyOne(
+                state,
+                sequence => new LoadDepotRepairCargoCommand(sequence));
+            Assert.That(
+                state.RepairCargoCustody,
+                Is.EqualTo(RepairCargoCustody.Vehicle));
+
+            LastBearingPermitJobPresentation selection = Present(state, true);
+            Assert.That(selection.Detail, Does.Contain(expectedSource));
+            Assert.That(selection.Detail, Does.Not.Contain(rejectedSource));
+
+            state = ApplyOne(
+                state,
+                sequence => new ChooseLiquidReturnCommand(
+                    sequence,
+                    LiquidCargoKind.Water));
+            LastBearingPermitJobPresentation payload = Present(state, true);
+            Assert.That(payload.Detail, Does.Contain(expectedSource));
+            Assert.That(payload.Detail, Does.Not.Contain(rejectedSource));
+        }
+
         [Test]
         public void HomecomingBatchBarterAndFinaleAreOneLegibleArc()
         {
@@ -514,12 +559,24 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         private static LastBearingState ReachUnresolvedDepot(
             PreparationChoice preparation,
             VehicleModule module,
-            int worldSeed)
+            int worldSeed,
+            bool waitForFactionClaim = false)
         {
             LastBearingState state = CreatePreparation(
                 preparation,
                 module,
                 worldSeed);
+            if (waitForFactionClaim)
+            {
+                state = Advance(state, 9000);
+                Assert.That(
+                    state.FactionClaimState,
+                    Is.EqualTo(FactionClaimState.Claimed));
+                Assert.That(
+                    state.DepotBearingDisposition,
+                    Is.EqualTo(DepotBearingDisposition.FactionHeld));
+            }
+
             state = AdvanceUntil(
                 state,
                 model => model.PreparationPhase == PreparationPhase.Ready);

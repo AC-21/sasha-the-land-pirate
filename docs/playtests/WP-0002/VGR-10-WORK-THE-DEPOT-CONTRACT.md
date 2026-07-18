@@ -23,11 +23,13 @@ trade, hauling, interaction, or vehicle-upgrade system.
 ## Player sequence
 
 1. Reach the existing depot recovery point and resolve the encounter.
-2. Cooperation stages the `FieldSleeve` in `Faction` custody at the claims
-   counter. Taking the bearing stages the `CeramicBearing` at its truthful
+2. Cooperation stages the `FieldSleeve` in `Faction` custody at the faction
+   service stand. Taking the bearing stages the `CeramicBearing` at its truthful
    pre-resolution source: `Depot` custody while it remains unclaimed, or
    `Faction` custody once the faction claim is established. Trust, grievance,
-   memory, access, aid, and maintenance consequences commit at resolution.
+   memory, and the pending outcome commit at resolution. Existing access and
+   aid mature only on their authored faction clocks; maintenance remains
+   created at return credit.
    `TakenBySasha` disposition and depleted depot control wait for the accepted
    physical load.
 3. A physical source marker and Sasha's scout cargo socket show the pending
@@ -79,8 +81,8 @@ byte-exactly.
 - Retain the sole shared camera, canonical vehicle pose, and existing
   `DepotEncounter` mode. Add no second camera, cutaway, avatar, walking mode,
   trigger-authored action, or physics-to-core seam.
-- Show only the repair cargo implied by the read model: at the claims counter
-  for `Faction` custody or bearing cradle for `Depot` custody; on the existing
+- Show only the repair cargo implied by the read model: at the faction service
+  stand for `Faction` custody or bearing cradle for `Depot` custody; on the existing
   scout cargo socket for vehicle custody; nowhere at the depot after
   turbine/consumed custody.
 - Source and stowed markers are primitive C0 presentation with distinct
