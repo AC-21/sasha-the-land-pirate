@@ -1,0 +1,46 @@
+{
+  "receipt_id": "RR-WP0002-VGR05-ONE-GOOD-BATCH-20260718",
+  "issued_at": "2026-07-18T13:44:11Z",
+  "issued_by": "AC-21",
+  "issuer_role": "creator",
+  "receipt_kind": "creator-authorization",
+  "artifact_resolver": {
+    "type": "external-protected",
+    "resolver_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/69#issuecomment-5011481486"
+  },
+  "source_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/69#issuecomment-5011481486",
+  "subject_ids": [
+    "WP-0002",
+    "WP0002-VGR05-ONE-GOOD-BATCH"
+  ],
+  "subject_claims": [
+    {
+      "subject_id": "WP-0002",
+      "claims": [
+        "AUTHORIZE-WP0002-VGR05-ONE-GOOD-BATCH",
+        "AUTHORIZE-WP0002-VGR05-SPARE-BEARING-FOR-DEPOT-CORRIDOR-PERMIT"
+      ]
+    },
+    {
+      "subject_id": "WP0002-VGR05-ONE-GOOD-BATCH",
+      "claims": [
+        "AUTHORIZE-WP0002-VGR05-ONE-GOOD-BATCH",
+        "AUTHORIZE-WP0002-VGR05-SPARE-BEARING-FOR-DEPOT-CORRIDOR-PERMIT"
+      ]
+    }
+  ],
+  "approval_text_sha256": "a41192e2c31c841852ebed35c367306b6f60682916aeee943ff458db94f0f762",
+  "accepted_commit": "65764892b5e263d68a46272d60c73ab69af60afe",
+  "artifact_sha256": {
+    "docs/playtests/WP-0002/VGR-05-ONE-GOOD-BATCH-CONTRACT.md": "035dac606dddd9b5093181e9c3ca110c87da4460a388ca604c301a9d8d29a6a9",
+    "github.com/AC-21/sasha-the-land-pirate/pull/69#issuecomment-5011481486": "a41192e2c31c841852ebed35c367306b6f60682916aeee943ff458db94f0f762"
+  },
+  "subject_contract_sha256": {
+    "WP-0002": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
+    "WP0002-VGR05-ONE-GOOD-BATCH": "035dac606dddd9b5093181e9c3ca110c87da4460a388ca604c301a9d8d29a6a9"
+  },
+  "subject_event_sha256": {},
+  "foundation_binding": null,
+  "signature_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/69#issuecomment-5011481486",
+  "sealed": true
+}
