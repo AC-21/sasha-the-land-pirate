@@ -192,11 +192,24 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
         public void ResetAt(Vector3 position, Quaternion rotation)
         {
             Rigidbody body = Body;
-            body.position = position;
-            body.rotation = rotation;
+            if (body.isKinematic)
+            {
+                transform.SetPositionAndRotation(position, rotation);
+                Physics.SyncTransforms();
+            }
+            else
+            {
+                body.position = position;
+                body.rotation = rotation;
+                body.PublishTransform();
+            }
+
             body.linearVelocity = Vector3.zero;
             body.angularVelocity = Vector3.zero;
-            body.WakeUp();
+            if (!body.isKinematic)
+            {
+                body.WakeUp();
+            }
 
             _controlInput = default;
             _steeringAngleDegrees = 0f;

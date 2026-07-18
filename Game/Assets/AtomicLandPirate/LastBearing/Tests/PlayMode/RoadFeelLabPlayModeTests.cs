@@ -142,6 +142,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             Assert.That(Vector3.Distance(body.position, resetPosition), Is.LessThan(0.001f));
             Assert.That(Quaternion.Angle(body.rotation, resetRotation), Is.LessThan(0.001f));
+            Assert.That(
+                Vector3.Distance(vehicle.transform.position, resetPosition),
+                Is.LessThan(0.001f));
+            Assert.That(
+                Quaternion.Angle(vehicle.transform.rotation, resetRotation),
+                Is.LessThan(0.001f));
             Assert.That(body.linearVelocity, Is.EqualTo(Vector3.zero));
             Assert.That(body.angularVelocity, Is.EqualTo(Vector3.zero));
             Assert.That(vehicle.Telemetry.SpeedMetresPerSecond, Is.EqualTo(0f));

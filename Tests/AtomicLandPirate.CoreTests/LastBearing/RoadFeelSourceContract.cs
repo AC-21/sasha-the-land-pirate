@@ -37,6 +37,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(vehicle, "SetControlInput");
             Require(vehicle, "SetLoad");
             Require(vehicle, "ResetAt");
+            Require(vehicle, "if (body.isKinematic)");
+            Require(vehicle, "transform.SetPositionAndRotation(position, rotation)");
+            Require(vehicle, "Physics.SyncTransforms()");
+            Require(vehicle, "body.PublishTransform()");
             Require(vehicle, "RoadFeelTelemetry");
             Require(contracts, "ShouldApplyReverse");
 
