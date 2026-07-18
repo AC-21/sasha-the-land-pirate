@@ -358,9 +358,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             AssertRoadPresentation(controller, roadRig, active: true);
 
             controller.Save();
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"),
+                controller.SaveStatus);
             Assert.That(Directory.Exists(profileDirectory), Is.True);
-            Assert.That(controller.SaveStatus, Does.Not.Contain("failed"));
-            Assert.That(controller.SaveStatus, Does.Not.Contain("deferred"));
 
             controller.ReturnToTitle();
             Assert.That(
@@ -582,7 +584,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingGameController controller)
         {
             string root = Path.Combine(
-                Path.GetTempPath(),
+                GetConfinementSafeTemporaryRoot(),
                 "wp0002-last-bearing-load-pose-" + Guid.NewGuid().ToString("N"));
             string profileDirectory = Path.Combine(
                 root,
@@ -606,6 +608,20 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(adapter, Is.Not.Null);
             adapterField!.SetValue(controller, adapter);
             return profileDirectory;
+        }
+
+        private static string GetConfinementSafeTemporaryRoot()
+        {
+            string temporaryRoot = Path.GetTempPath();
+            bool isMacOs = Application.platform == RuntimePlatform.OSXEditor ||
+                           Application.platform == RuntimePlatform.OSXPlayer;
+            if (isMacOs &&
+                temporaryRoot.StartsWith("/var/", StringComparison.Ordinal))
+            {
+                return "/private" + temporaryRoot;
+            }
+
+            return temporaryRoot;
         }
 
         private static void InstallControllerState(
