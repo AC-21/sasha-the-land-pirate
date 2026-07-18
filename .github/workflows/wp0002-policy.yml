@@ -99,6 +99,10 @@ jobs:
           expected_verifier_sha256="2d8cd873f0a8ee357848d18e2cb57f440f6fd28fb5817e7454f816d07dc8e52d"
           actual_verifier_sha256="$(shasum -a 256 "$verifier" | cut -d ' ' -f 1)"
           [[ "$actual_verifier_sha256" == "$expected_verifier_sha256" ]]
+          verifier="Tools/Validation/verify_wp0002_local_operator_transaction_v4.py"
+          expected_verifier_sha256="5f02ee7fd59bb0a6eea5cac3ba26cbb7c82d59ae8ae1008ab58cb3b72c541d19"
+          actual_verifier_sha256="$(shasum -a 256 "$verifier" | cut -d ' ' -f 1)"
+          [[ "$actual_verifier_sha256" == "$expected_verifier_sha256" ]]
           env PYTHONDONTWRITEBYTECODE=1 python3 -B "$verifier" \
             verify-evidence-closure \
             --repository-path "$OBJECT_STORE" \
