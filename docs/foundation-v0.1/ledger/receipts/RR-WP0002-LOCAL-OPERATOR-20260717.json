@@ -1,0 +1,56 @@
+{
+  "accepted_commit": "16ed346cd8f96b357785d9e46ac358ab6d559708",
+  "approval_text_sha256": "874eea961cf9a8a04eada1356db3dfc8501038d80c7c8303c619c06e686525be",
+  "artifact_resolver": {
+    "resolver_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/60#issuecomment-5009875047",
+    "type": "external-protected"
+  },
+  "artifact_sha256": {
+    ".github/workflows/wp0002-policy.yml": "9a72d80e80c482c462640c0e9fc7c7c1b47f2ebec4e01561bb259be083e1cd0b",
+    "AGENTS.md": "df0b40a1206ef5334029df42a3d8264ab61684619430cc0bb65acb63c9b0f95a",
+    "README.md": "867614f9c95ef1924d6938e2230a8abe2fa345733b1ff006bf8c9a3a674ca20e",
+    "Tools/Validation/collect_wp0002_scope_capture.py": "68dfa2c5ce802b71a29717f530be63344d74c50cc8e5e5de4c1b26aa3dcde9f2",
+    "Tools/Validation/verify_wp0002_local_operator_transaction.py": "16a3a5950e191f25b64d86977a64489eb77961ee8b8ca16673c7673e17779c51",
+    "docs/evidence/WP-0002/local-operator-amendment/scope-capture/working-tree-scope.json": "06427c95857bf1763a036cdad7c2de7d8864efd4f53ac8f68120573bdce283a1",
+    "docs/evidence/WP-0002/local-operator-amendment/scope-capture/working-tree-scope.observations.089a49fc03dbbc473158a02b31c6a3ca5fea1f7707c78b5466247f17511554ad.json": "089a49fc03dbbc473158a02b31c6a3ca5fea1f7707c78b5466247f17511554ad",
+    "docs/evidence/WP-0002/local-operator-amendment/scope-capture/working-tree-scope.status.bea960c9a69eda2a80c43103d093da728e30df0c65763f17ba6d1a994ea83d02.bin": "bea960c9a69eda2a80c43103d093da728e30df0c65763f17ba6d1a994ea83d02",
+    "docs/foundation-v0.1/04-TECHNICAL-ARCHITECTURE.md": "7f794c547fdd3c6c789e11702a810009b4532c8899381ea938d7e6a81b542e19",
+    "docs/foundation-v0.1/15-LEAN-A1-LOCAL-DEVELOPMENT.md": "8ef735e0a7f6a65962850953fa99484ec069b473a018754937c553a52025a204",
+    "docs/foundation-v0.1/README.md": "72c1e25fa946771ee631859e10054d6dcb3ab241e587d02aa55eebeb4878c2c2",
+    "docs/foundation-v0.1/governance/WP-0002-DELEGATED-LOCAL-UNITY-OPERATOR-AMENDMENT.md": "c9214dda35e7f484e8fdfe342e4b4f3c88fb959bd79706c25f5d4b5d42c20d40",
+    "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json": "e92e7276dc97478d7412307f43a5f90b60b99256b2a8a7cd5d00626c4f2e0962",
+    "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json": "a645e477d449d8ec044e26f5c964414ceca866bfe11fb427c91c73685289d3b0",
+    "docs/foundation-v0.1/schemas/wp0002-local-operator-scope-capture.schema.json": "391a24931c0eff1fd2c605eb171f2dabeb2bbb896b95ba702d839713d908cb7c",
+    "docs/foundation-v0.1/schemas/wp0002-local-operator-transaction-evidence.schema.json": "0baed1e7f44e3aeeb402f4b278d5e0ffde5899d6551481ec9385199052b45aca",
+    "docs/foundation-v0.1/tools/test_collect_wp0002_scope_capture.py": "8891447debe6946485512fc1834209a3371ef886c932cfbd4d779f2c83656de9",
+    "docs/foundation-v0.1/tools/test_validate_local_a1_boundary.py": "91ae0d7b7f6786fb0ded43e92a5152f062270a12e8774fb307b23a9b373a1329",
+    "docs/foundation-v0.1/tools/test_verify_wp0002_local_operator_transaction.py": "dea35a4a689bdf196910d23c7d6742bd4265907c0833cc1fce87aa9c12810ad9",
+    "docs/foundation-v0.1/tools/validate_foundation.py": "97c7eef0be55a5bd5009b8e079bbac3f43638d38fb95394603bee6b66d30060c",
+    "docs/foundation-v0.1/work-packets/proposed/WP-0002.json": "a3db8be16e87721e8858298df4d3be824159ac60c920215772c2e0e45a37f2b8",
+    "github.com/AC-21/sasha-the-land-pirate/pull/60#issuecomment-5009875047": "874eea961cf9a8a04eada1356db3dfc8501038d80c7c8303c619c06e686525be"
+  },
+  "foundation_binding": null,
+  "issued_at": "2026-07-18T04:19:34Z",
+  "issued_by": "AC-21",
+  "issuer_role": "creator",
+  "receipt_id": "RR-WP0002-LOCAL-OPERATOR-20260717",
+  "receipt_kind": "creator-authorization",
+  "sealed": true,
+  "signature_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/60#issuecomment-5009875047",
+  "source_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/60#issuecomment-5009875047",
+  "subject_claims": [
+    {
+      "claims": [
+        "AUTHORIZE-WP0002-DELEGATED-LOCAL-UNITY-OPERATOR"
+      ],
+      "subject_id": "WP-0002"
+    }
+  ],
+  "subject_contract_sha256": {
+    "WP-0002": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"
+  },
+  "subject_event_sha256": {},
+  "subject_ids": [
+    "WP-0002"
+  ]
+}
