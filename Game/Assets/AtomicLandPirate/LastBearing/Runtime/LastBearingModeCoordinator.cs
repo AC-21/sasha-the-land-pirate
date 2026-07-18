@@ -16,11 +16,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
         CityReturn = 5,
     }
 
+    public enum LastBearingRoadDamageBand
+    {
+        Healthy = 0,
+        Worn = 1,
+        Critical = 2,
+    }
+
     /// <summary>
     /// Narrow input-only bridge for a road presentation. Physics telemetry and
     /// object state deliberately have no route back through this interface.
-    /// This is not the lab's complete local driving surface: service brake and
-    /// reverse remain local until a canonical command contract exists.
+    /// Service brake, reverse arming, handbrake, cargo mass, and the derived
+    /// damage band are explicitly local presentation inputs; none can author
+    /// canonical progress.
     /// </summary>
     public interface ILastBearingRoadModeAdapter
     {
@@ -29,6 +37,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
         void SetRoadModeActive(bool active);
 
         void ApplyQuantizedCommandShadow(int throttleMilli, int steeringMilli);
+
+        void ApplyPresentationOnlyControls(
+            int brakeMilli,
+            int handbrakeMilli);
+
+        void ApplyDerivedPresentationLoad(
+            int cargoMassKilograms,
+            LastBearingRoadDamageBand damageBand);
 
         void SynchronizePresentationPose(
             Vector3 position,
@@ -70,6 +86,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private Transform? _modeRoot;
         private bool _roadRunRequested;
         private bool _roadRecoveryHoldRequested;
+        private bool _roadModulePointHoldRequested;
         private bool _roadPresentationActive;
         private bool _initialized;
 
@@ -85,6 +102,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool IsRoadPresentationActive => _roadPresentationActive;
 
         public bool IsRoadPresentationHeldAtRecovery { get; private set; }
+
+        public bool IsRoadPresentationHeldAtModulePoint { get; private set; }
 
         public int ActiveModeCount
         {
@@ -169,7 +188,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _roadAdapter = adapter;
             RoadAdapterFaulted = false;
             _roadPresentationActive = false;
-            if (_roadRecoveryHoldRequested)
+            if (_roadRecoveryHoldRequested || _roadModulePointHoldRequested)
             {
                 HoldRoadAdapterAtCanonicalRecoveryPose();
             }
@@ -218,6 +237,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _roadRunRequested = false;
             _roadRecoveryHoldRequested = false;
+            _roadModulePointHoldRequested = false;
             SuspendRoadAdapter("clear-session");
             ApplyPresentationOwnership();
         }
@@ -237,12 +257,52 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool holdAtRecovery =
                 mode == LastBearingPresentationMode.Driving &&
                 readModel.IsDepotApproachRecoveryAvailable;
+            bool holdAtModulePoint =
+                mode == LastBearingPresentationMode.Driving &&
+                readModel.IsWreckLineModulePointAvailable;
+            int presentationCargoMass =
+                readModel.HeavyCargoKind == HeavyCargoKind.PumpRotor &&
+                readModel.HeavyCargoCustody == HeavyCargoCustody.Vehicle
+                    ? 1300
+                    : 0;
+            LastBearingRoadDamageBand presentationDamageBand =
+                DerivePresentationDamageBand(readModel.VehicleConditionMilli);
+            TryInvokeRoadAdapter(
+                "apply-derived-load",
+                adapter => adapter.ApplyDerivedPresentationLoad(
+                    presentationCargoMass,
+                    presentationDamageBand));
             Activate(
                 mode,
                 mode == LastBearingPresentationMode.Driving &&
                 readModel.PauseCause == PauseCause.None &&
-                !holdAtRecovery,
-                holdAtRecovery);
+                !holdAtRecovery &&
+                !holdAtModulePoint,
+                holdAtRecovery,
+                holdAtModulePoint);
+        }
+
+        public static LastBearingRoadDamageBand DerivePresentationDamageBand(
+            long vehicleConditionMilli)
+        {
+            if (vehicleConditionMilli < 0 ||
+                vehicleConditionMilli >
+                    LastBearingBalanceV1.StartingVehicleConditionMilli)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(vehicleConditionMilli));
+            }
+
+            if (vehicleConditionMilli <=
+                LastBearingBalanceV1.MinimumReturnVehicleConditionMilli)
+            {
+                return LastBearingRoadDamageBand.Critical;
+            }
+
+            return vehicleConditionMilli <
+                LastBearingBalanceV1.StartingVehicleConditionMilli
+                    ? LastBearingRoadDamageBand.Worn
+                    : LastBearingRoadDamageBand.Healthy;
         }
 
         public void ApplyQuantizedRoadCommandShadow(
@@ -261,6 +321,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 adapter => adapter.ApplyQuantizedCommandShadow(
                     throttleMilli,
                     steeringMilli));
+        }
+
+        public void ApplyPresentationOnlyRoadControls(
+            int brakeMilli,
+            int handbrakeMilli)
+        {
+            if (!HasActiveMode ||
+                CurrentMode != LastBearingPresentationMode.Driving ||
+                !_roadPresentationActive)
+            {
+                return;
+            }
+
+            TryInvokeRoadAdapter(
+                "apply-presentation-controls",
+                adapter => adapter.ApplyPresentationOnlyControls(
+                    brakeMilli,
+                    handbrakeMilli));
         }
 
         public static LastBearingPresentationMode ResolveMode(
@@ -291,7 +369,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private void Activate(
             LastBearingPresentationMode mode,
             bool roadShouldRun,
-            bool holdAtRecovery)
+            bool holdAtRecovery,
+            bool holdAtModulePoint)
         {
             for (var index = 0; index < OrderedModes.Length; index++)
             {
@@ -302,7 +381,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             CurrentMode = mode;
             _roadRunRequested = roadShouldRun;
             _roadRecoveryHoldRequested = holdAtRecovery;
-            if (holdAtRecovery)
+            _roadModulePointHoldRequested = holdAtModulePoint;
+            if (holdAtRecovery || holdAtModulePoint)
             {
                 HoldRoadAdapterAtCanonicalRecoveryPose();
             }
@@ -324,6 +404,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private void ActivateRoadAdapter()
         {
             IsRoadPresentationHeldAtRecovery = false;
+            IsRoadPresentationHeldAtModulePoint = false;
             if (_roadAdapter == null)
             {
                 _roadPresentationActive = false;
@@ -357,6 +438,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             _roadPresentationActive = false;
             IsRoadPresentationHeldAtRecovery = false;
+            IsRoadPresentationHeldAtModulePoint = false;
             if (_roadAdapter == null || _canonicalVehicle == null)
             {
                 return;
@@ -379,13 +461,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
-            IsRoadPresentationHeldAtRecovery = true;
+            IsRoadPresentationHeldAtRecovery = _roadRecoveryHoldRequested;
+            IsRoadPresentationHeldAtModulePoint =
+                _roadModulePointHoldRequested;
         }
 
         private void SuspendRoadAdapter(string operation)
         {
             _roadPresentationActive = false;
             IsRoadPresentationHeldAtRecovery = false;
+            IsRoadPresentationHeldAtModulePoint = false;
             if (_roadAdapter == null)
             {
                 return;
@@ -442,6 +527,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _roadAdapter = null;
                 _roadPresentationActive = false;
                 IsRoadPresentationHeldAtRecovery = false;
+                IsRoadPresentationHeldAtModulePoint = false;
                 RoadAdapterFaulted = true;
                 ApplyPresentationOwnership();
                 return false;

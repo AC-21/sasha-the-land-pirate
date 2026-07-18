@@ -500,6 +500,7 @@ namespace AtomicLandPirate.LastBearingTests
             int ticks = 0;
             while (driver.View.ExpeditionPhase != expected && ticks < maximumTicks)
             {
+                driver.OperateWreckLineIfAvailable();
                 driver.Apply(sequence => new DriveVehicleCommand(sequence, 1000, 0));
                 ticks++;
             }
@@ -515,6 +516,7 @@ namespace AtomicLandPirate.LastBearingTests
             while (!driver.View.IsDepotApproachRecoveryAvailable
                    && ticks < maximumTicks)
             {
+                driver.OperateWreckLineIfAvailable();
                 driver.Apply(sequence =>
                     new DriveVehicleCommand(sequence, 1000, 0));
                 ticks++;

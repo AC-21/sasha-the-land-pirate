@@ -60,6 +60,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             private set;
         }
 
+        public LastBearingRouteModulePointView? RouteModulePointView
+        {
+            get;
+            private set;
+        }
+
         public Transform? TurbineRotor => _turbineRotor;
 
         public Transform? WaterFill => _waterFill;
@@ -102,6 +108,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 concrete,
                 darkConcrete,
                 iron,
+                oxide,
                 bone,
                 tungsten,
                 signal);
@@ -209,6 +216,50 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? DepotApproachRecoveryPresentationState.Available
                     : DepotApproachRecoveryPresentationState.Dormant;
             DepotApproachRecoveryView?.ApplyState(state);
+        }
+
+        public void ApplyRouteModulePoint(
+            bool available,
+            RouteActionKind action,
+            bool operated)
+        {
+            RouteModulePointPresentationState state;
+            if (operated)
+            {
+                state = action == RouteActionKind.DeployWinch
+                    ? RouteModulePointPresentationState.WinchRecovered
+                    : RouteModulePointPresentationState.TankCrossed;
+            }
+            else if (available)
+            {
+                state = action == RouteActionKind.DeployWinch
+                    ? RouteModulePointPresentationState.WinchAvailable
+                    : RouteModulePointPresentationState.TankAvailable;
+            }
+            else
+            {
+                state = RouteModulePointPresentationState.Dormant;
+            }
+
+            RouteModulePointView?.ApplyState(state);
+        }
+
+        public void ApplyRoadCargoPresentation(
+            HeavyCargoKind kind,
+            HeavyCargoCustody custody)
+        {
+            if (RoadFeelRig == null)
+            {
+                return;
+            }
+
+            bool rotorInVehicle = kind == HeavyCargoKind.PumpRotor &&
+                                  custody == HeavyCargoCustody.Vehicle;
+            for (var index = 0; index < RoadFeelRig.CargoVisuals.Count; index++)
+            {
+                RoadFeelRig.CargoVisuals[index].SetActive(
+                    rotorInVehicle && index == 1);
+            }
         }
 
         internal void Apply(LastBearingVisualSnapshot snapshot)
@@ -406,6 +457,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Material concrete,
             Material darkConcrete,
             Material iron,
+            Material oxide,
             Material bone,
             Material tungsten,
             Material signal)
@@ -418,7 +470,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
             CreateBlock("Exposed Long Route A", root, new Vector3(10f, 0f, 11f), new Vector3(4f, 0.24f, 22f), iron).transform.localRotation = Quaternion.Euler(0f, -52f, 0f);
             CreateBlock("Exposed Long Route B", root, new Vector3(15f, 0f, 25f), new Vector3(4f, 0.24f, 18f), iron).transform.localRotation = Quaternion.Euler(0f, 25f, 0f);
 
-            CreateBlock("Pipeline Ruin", root, new Vector3(-8f, 2.4f, 19f), new Vector3(18f, 0.55f, 0.55f), oxide: CreateMaterial(Oxide, Color.black));
+            CreateBlock("Pipeline Ruin", root, new Vector3(-8f, 2.4f, 19f), new Vector3(18f, 0.55f, 0.55f), oxide);
+
+            var routeModulePoint = new GameObject(
+                LastBearingRouteModulePointView.RootName);
+            routeModulePoint.transform.SetParent(root, false);
+            RouteModulePointView =
+                routeModulePoint.AddComponent<LastBearingRouteModulePointView>();
+            RouteModulePointView.Build(
+                iron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
 
             var depot = new GameObject("Ruined Transit Depot").transform;
             depot.SetParent(root, false);

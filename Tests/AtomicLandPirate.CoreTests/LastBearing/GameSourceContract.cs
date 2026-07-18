@@ -30,6 +30,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(
                     runtimeRoot,
                     "LastBearingDepotApproachRecoveryView.cs"));
+            string wreckLine = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "LastBearingRouteModulePointView.cs"));
             string dispatcher = File.ReadAllText(
                 Path.Combine(
                     repoRoot,
@@ -51,8 +55,36 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "LastBearingPresentationMode.Driving");
             Require(controller, "ConfigurePresentationOwners");
             Require(controller, "AttachRoadModeAdapter");
+            Require(controller, "ApplyPresentationOnlyRoadControls");
             Require(controller, "OpenBuildingCutaway");
             Require(controller, "OpenGarageBay");
+            string wreckLineOperation = Segment(
+                controller,
+                "public void OperateWreckLineModulePoint()",
+                "public void ChooseLiquidReturn");
+            Require(
+                wreckLineOperation,
+                "_readModel.IsWreckLineModulePointAvailable");
+            Require(
+                wreckLineOperation,
+                "new OperateWreckLineModuleCommand");
+            foreach (string forbidden in new[]
+            {
+                "Rigidbody",
+                "RoadFeelTelemetry",
+                "Collider",
+                "Physics",
+                ".position",
+                ".transform",
+            })
+            {
+                TestHarness.True(
+                    wreckLineOperation.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "Wreck Line controller operation reads presentation authority " +
+                    forbidden);
+            }
             string recoveryOperation = Segment(
                 controller,
                 "public void OperateDepotApproachRecoveryPoint()",
@@ -86,23 +118,39 @@ namespace AtomicLandPirate.LastBearingTests
                 "private void SimulateOneTick()");
             Require(
                 globalShortcuts,
+                "_readModel.IsWreckLineModulePointAvailable");
+            Require(
+                globalShortcuts,
                 "_readModel.IsDepotApproachRecoveryAvailable");
             Require(globalShortcuts, "keyboard.eKey.wasPressedThisFrame");
             Require(globalShortcuts, "gamepad.buttonSouth.wasPressedThisFrame");
+            int wreckGate = globalShortcuts.IndexOf(
+                "_readModel.IsWreckLineModulePointAvailable",
+                StringComparison.Ordinal);
+            int depotGate = globalShortcuts.IndexOf(
+                "_readModel.IsDepotApproachRecoveryAvailable",
+                StringComparison.Ordinal);
+            int wreckHotkey = globalShortcuts.IndexOf(
+                "keyboard.eKey.wasPressedThisFrame",
+                wreckGate,
+                StringComparison.Ordinal);
+            int depotHotkey = globalShortcuts.IndexOf(
+                "keyboard.eKey.wasPressedThisFrame",
+                depotGate,
+                StringComparison.Ordinal);
             TestHarness.True(
-                globalShortcuts.IndexOf(
-                    "_readModel.IsDepotApproachRecoveryAvailable",
-                    StringComparison.Ordinal) <
-                globalShortcuts.IndexOf(
-                    "keyboard.eKey.wasPressedThisFrame",
-                    StringComparison.Ordinal),
-                "recovery hotkey must be context-gated before consuming city-camera E");
+                wreckGate >= 0 && wreckHotkey > wreckGate &&
+                depotGate > wreckHotkey && depotHotkey > depotGate,
+                "road hotkeys must be context-gated before consuming city-camera E");
             Require(camera, "keyboard.eKey.isPressed");
             string driveInput = Segment(
                 controller,
                 "private void QueueDriveInputIfApplicable()",
                 "float throttle = 0f;");
             Require(driveInput, "_pendingCommands.Count != 0");
+            Require(
+                driveInput,
+                "_readModel.IsWreckLineModulePointAvailable");
             Require(
                 driveInput,
                 "_readModel.IsDepotApproachRecoveryAvailable");
@@ -120,6 +168,8 @@ namespace AtomicLandPirate.LastBearingTests
                 "load must fail closed before applying the loaded presentation");
             Require(controller, "_world.Apply(new LastBearingVisualSnapshot");
             Require(controller, "_world.ApplyDepotApproachRecovery(");
+            Require(controller, "_world.ApplyRouteModulePoint(");
+            Require(controller, "_world.ApplyRoadCargoPresentation(");
             Require(controller, "_modeCoordinator?.ApplyCanonical(_readModel);");
             TestHarness.True(
                 controller.IndexOf(
@@ -144,6 +194,8 @@ namespace AtomicLandPirate.LastBearingTests
             Require(world, "drivingModeRoot");
             Require(world, "LastBearingDepotApproachRecoveryView");
             Require(world, "DepotApproachRecoveryView.Build(");
+            Require(world, "LastBearingRouteModulePointView");
+            Require(world, "RouteModulePointView.Build(");
             Require(comparison, "RestrainedSnapGrid");
             Require(comparison, "DistrictStamp");
             Require(comparison, "ResetComparison");
@@ -161,6 +213,12 @@ namespace AtomicLandPirate.LastBearingTests
             Require(modeCoordinator, "ActiveModeCount");
             Require(modeCoordinator, "ILastBearingRoadModeAdapter");
             Require(modeCoordinator, "readModel.PauseCause == PauseCause.None");
+            Require(modeCoordinator, "readModel.IsWreckLineModulePointAvailable");
+            Require(modeCoordinator, "ApplyDerivedPresentationLoad");
+            Require(modeCoordinator, "readModel.VehicleConditionMilli");
+            Require(modeCoordinator, "DerivePresentationDamageBand");
+            Require(modeCoordinator, "LastBearingRoadDamageBand.Critical");
+            Require(modeCoordinator, "ApplyPresentationOnlyControls");
             Require(modeCoordinator, "LAST_BEARING_ROAD_PRESENTATION_DISABLED");
             Require(modeCoordinator, "RoadAdapterFaulted");
             Require(modeCoordinator, "SynchronizePresentationPose");
@@ -168,6 +226,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 modeCoordinator,
                 "IsRoadPresentationHeldAtRecovery");
+            Require(
+                modeCoordinator,
+                "IsRoadPresentationHeldAtModulePoint");
             string recoveryHold = Segment(
                 modeCoordinator,
                 "private void HoldRoadAdapterAtCanonicalRecoveryPose()",
@@ -227,6 +288,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(hud, "There is no on-foot mode.");
             Require(hud, "OperateDepotApproachRecoveryPoint");
             Require(hud, "OPERATE DEPOT RECOVERY POINT");
+            Require(hud, "OperateWreckLineModulePoint");
+            Require(hud, "DEPLOY WINCH · RECOVER PUMP ROTOR");
+            Require(hud, "CROSS SEALED DUST EXPOSURE");
 
             Require(recovery, "C0-VGR-02");
             Require(recovery, "Revision = \"R1\"");
@@ -253,6 +317,36 @@ namespace AtomicLandPirate.LastBearingTests
                 TestHarness.True(
                     recovery.IndexOf(forbidden, StringComparison.Ordinal) < 0,
                     "depot recovery view contains forbidden authority " +
+                    forbidden);
+            }
+
+            Require(wreckLine, "C0-VGR-03");
+            Require(wreckLine, "Revision = \"R1\"");
+            Require(wreckLine, "poi_wreck_line_module_point_a");
+            Require(wreckLine, "ANCHOR_WRECK_LINE_MODULE_INTERACTION");
+            Require(wreckLine, "Existing Pump Rotor");
+            Require(wreckLine, "Dust Exposure Curtain");
+            Require(wreckLine, "collider.enabled = false");
+            foreach (string forbidden in new[]
+            {
+                "Rigidbody",
+                "RoadFeelTelemetry",
+                "Physics.",
+                "OnTrigger",
+                "OnCollision",
+                "LastBearingKernel",
+                "LastBearingCommand",
+                "LastBearingState",
+                "SaveContracts",
+                "System.IO",
+                "Application.persistentDataPath",
+                "Keyboard.current",
+                "Gamepad.current",
+            })
+            {
+                TestHarness.True(
+                    wreckLine.IndexOf(forbidden, StringComparison.Ordinal) < 0,
+                    "Wreck Line view contains forbidden authority " +
                     forbidden);
             }
 

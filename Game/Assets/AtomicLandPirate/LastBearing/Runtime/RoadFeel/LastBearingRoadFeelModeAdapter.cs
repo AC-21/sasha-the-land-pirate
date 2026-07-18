@@ -9,7 +9,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
     /// Input-only adapter around the existing Road Feel rig. It accepts the
     /// same bounded integers sent to DriveVehicleCommand and intentionally
     /// exposes no Rigidbody or telemetry outcome to the canonical core. The
-    /// lab's service brake and reverse controls remain local and unchanged.
+    /// Service brake, reverse arming, handbrake, and derived cargo/damage load
+    /// remain presentation-only and cannot author canonical route progress.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class LastBearingRoadFeelModeAdapter : MonoBehaviour,
@@ -22,6 +23,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
         public int LastThrottleMilli { get; private set; }
 
         public int LastSteeringMilli { get; private set; }
+
+        public int LastBrakeMilli { get; private set; }
+
+        public int LastHandbrakeMilli { get; private set; }
+
+        public int LastCargoMassKilograms { get; private set; }
+
+        public LastBearingRoadDamageBand LastDamageBand { get; private set; }
 
         public int CommandReceiptCount { get; private set; }
 
@@ -91,11 +100,53 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
             }
 
             CommandReceiptCount++;
-            _vehicle.SetControlInput(new RoadFeelControlInput(
-                throttleMilli / 1000f,
-                brake: 0f,
-                steering: steeringMilli / 1000f,
-                handbrake: 0f));
+            ApplyPresentationControls();
+        }
+
+        public void ApplyPresentationOnlyControls(
+            int brakeMilli,
+            int handbrakeMilli)
+        {
+            if (brakeMilli < 0 || brakeMilli > 1000)
+            {
+                throw new ArgumentOutOfRangeException(nameof(brakeMilli));
+            }
+
+            if (handbrakeMilli < 0 || handbrakeMilli > 1000)
+            {
+                throw new ArgumentOutOfRangeException(nameof(handbrakeMilli));
+            }
+
+            LastBrakeMilli = brakeMilli;
+            LastHandbrakeMilli = handbrakeMilli;
+            if (!IsRoadModeActive || _vehicle == null)
+            {
+                return;
+            }
+
+            ApplyPresentationControls();
+        }
+
+        public void ApplyDerivedPresentationLoad(
+            int cargoMassKilograms,
+            LastBearingRoadDamageBand damageBand)
+        {
+            if (cargoMassKilograms < 0 || cargoMassKilograms > 3000)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(cargoMassKilograms));
+            }
+
+            if (!Enum.IsDefined(typeof(LastBearingRoadDamageBand), damageBand))
+            {
+                throw new ArgumentOutOfRangeException(nameof(damageBand));
+            }
+
+            LastCargoMassKilograms = cargoMassKilograms;
+            LastDamageBand = damageBand;
+            _vehicle?.SetLoad(
+                cargoMassKilograms,
+                ToRoadFeelDamageBand(damageBand));
         }
 
         public void SynchronizePresentationPose(
@@ -114,7 +165,34 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
         {
             LastThrottleMilli = 0;
             LastSteeringMilli = 0;
+            LastBrakeMilli = 0;
+            LastHandbrakeMilli = 0;
             _vehicle?.SetControlInput(default);
+        }
+
+        private void ApplyPresentationControls()
+        {
+            _vehicle?.SetControlInput(new RoadFeelControlInput(
+                LastThrottleMilli / 1000f,
+                LastBrakeMilli / 1000f,
+                LastSteeringMilli / 1000f,
+                LastHandbrakeMilli / 1000f));
+        }
+
+        private static RoadFeelDamageBand ToRoadFeelDamageBand(
+            LastBearingRoadDamageBand damageBand)
+        {
+            switch (damageBand)
+            {
+                case LastBearingRoadDamageBand.Healthy:
+                    return RoadFeelDamageBand.Healthy;
+                case LastBearingRoadDamageBand.Worn:
+                    return RoadFeelDamageBand.Worn;
+                case LastBearingRoadDamageBand.Critical:
+                    return RoadFeelDamageBand.Critical;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(damageBand));
+            }
         }
     }
 }

@@ -198,6 +198,18 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
         }
 
+        public static long WreckLineGateTicks(VehicleModule module)
+        {
+            var oneWayTicks = RouteOneWayTicks(module);
+            if (oneWayTicks < 2)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_WRECK_LINE_ROUTE_TOO_SHORT");
+            }
+
+            return oneWayTicks / 2;
+        }
+
         private static long PreparationBaseTicks(PreparationChoice choice)
         {
             switch (choice)

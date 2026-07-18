@@ -189,6 +189,24 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public EncounterChoice Choice { get; }
     }
 
+    public sealed class OperateWreckLineModuleCommand : LastBearingCommand
+    {
+        public OperateWreckLineModuleCommand(
+            long sequence,
+            RouteActionKind action)
+            : base(sequence)
+        {
+            if (action == RouteActionKind.None)
+            {
+                throw new ArgumentOutOfRangeException(nameof(action));
+            }
+
+            Action = action;
+        }
+
+        public RouteActionKind Action { get; }
+    }
+
     public sealed class OperateDepotRecoveryPointCommand : LastBearingCommand
     {
         public OperateDepotRecoveryPointCommand(long sequence)

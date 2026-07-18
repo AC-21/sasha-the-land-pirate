@@ -102,7 +102,11 @@ namespace AtomicLandPirate.LastBearingTests
             LastBearingInvariants.Validate(initial);
             TestHarness.Equal(RepairCargoKind.None, initial.RepairCargoKind, "repair cargo");
             TestHarness.Equal(RepairCargoCustody.None, initial.RepairCargoCustody, "repair custody");
-            TestHarness.Equal(HeavyCargoKind.None, initial.HeavyCargoKind, "heavy cargo");
+            TestHarness.Equal(HeavyCargoKind.PumpRotor, initial.HeavyCargoKind, "heavy cargo");
+            TestHarness.Equal(
+                HeavyCargoCustody.Depot,
+                initial.HeavyCargoCustody,
+                "initial pump rotor custody");
             TestHarness.Equal(LiquidCargoKind.None, initial.LiquidCargoKind, "liquid cargo");
             TestHarness.Equal(
                 DepotBearingDisposition.AtDepot,

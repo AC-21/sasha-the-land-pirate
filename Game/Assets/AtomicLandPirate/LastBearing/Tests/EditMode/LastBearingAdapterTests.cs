@@ -66,11 +66,56 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.World, Is.Not.Null);
             Assert.That(controller.World!.MainCamera, Is.Not.Null);
             Assert.That(controller.World.VehicleView, Is.Not.Null);
+            Assert.That(controller.World.RouteModulePointView, Is.Not.Null);
             Assert.That(controller.World.TurbineRotor, Is.Not.Null);
             Assert.That(controller.World.WaterFill, Is.Not.Null);
             Assert.That(
                 _root.GetComponentsInChildren<Renderer>(includeInactive: true).Length,
                 Is.GreaterThan(30));
+        }
+
+        [Test]
+        public void WreckLineViewIsOnePhysicsFreeCoreIsolatedModulePoint()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            Assert.That(
+                _root.GetComponentsInChildren<LastBearingRouteModulePointView>(
+                    includeInactive: true),
+                Has.Length.EqualTo(1));
+            LastBearingRouteModulePointView view =
+                controller.World!.RouteModulePointView!;
+            string canonicalBefore = controller.CanonicalHash;
+
+            Assert.That(
+                LastBearingRouteModulePointView.DirectionPackageId,
+                Is.EqualTo("C0-VGR-03"));
+            Assert.That(
+                LastBearingRouteModulePointView.ContentId,
+                Is.EqualTo("poi_wreck_line_module_point_a"));
+            Assert.That(view.InteractionAnchor, Is.Not.Null);
+            Assert.That(view.GetComponentsInChildren<Rigidbody>(true), Is.Empty);
+            Assert.That(view.GetComponentsInChildren<Camera>(true), Is.Empty);
+            foreach (Collider collider in view.GetComponentsInChildren<Collider>(true))
+            {
+                Assert.That(collider.enabled, Is.False, collider.name);
+            }
+
+            view.ApplyState(RouteModulePointPresentationState.WinchAvailable);
+            Assert.That(view.IsPumpRotorVisible, Is.True);
+            Assert.That(view.IsDustCurtainVisible, Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            view.ApplyState(RouteModulePointPresentationState.WinchRecovered);
+            Assert.That(view.IsPumpRotorVisible, Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            view.ApplyState(RouteModulePointPresentationState.TankAvailable);
+            Assert.That(view.IsDustCurtainVisible, Is.True);
+            Assert.That(view.IsPumpRotorVisible, Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
         }
 
         [Test]
@@ -370,14 +415,42 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             adapter.SetRoadModeActive(true);
 
             adapter.ApplyQuantizedCommandShadow(750, -250);
+            adapter.ApplyPresentationOnlyControls(600, 1000);
+            adapter.ApplyDerivedPresentationLoad(
+                1300,
+                LastBearingRoadDamageBand.Worn);
 
             Assert.That(adapter.IsRoadModeActive, Is.True);
             Assert.That(adapter.LastThrottleMilli, Is.EqualTo(750));
             Assert.That(adapter.LastSteeringMilli, Is.EqualTo(-250));
+            Assert.That(adapter.LastBrakeMilli, Is.EqualTo(600));
+            Assert.That(adapter.LastHandbrakeMilli, Is.EqualTo(1000));
+            Assert.That(adapter.LastCargoMassKilograms, Is.EqualTo(1300));
+            Assert.That(
+                adapter.LastDamageBand,
+                Is.EqualTo(LastBearingRoadDamageBand.Worn));
+            Assert.That(
+                adapter.Vehicle!.Telemetry.CargoMassKilograms,
+                Is.EqualTo(1300f));
+            Assert.That(
+                adapter.Vehicle.Telemetry.DamageBand,
+                Is.EqualTo(RoadFeelDamageBand.Worn));
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 adapter.ApplyQuantizedCommandShadow(1001, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 adapter.ApplyQuantizedCommandShadow(0, -1001));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                adapter.ApplyPresentationOnlyControls(-1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                adapter.ApplyPresentationOnlyControls(0, 1001));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                adapter.ApplyDerivedPresentationLoad(
+                    3001,
+                    LastBearingRoadDamageBand.Healthy));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                adapter.ApplyDerivedPresentationLoad(
+                    0,
+                    (LastBearingRoadDamageBand)99));
 
             Type interfaceType = typeof(ILastBearingRoadModeAdapter);
             foreach (MethodInfo method in interfaceType.GetMethods())
@@ -386,6 +459,31 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Assert.That(method.ReturnType, Is.Not.EqualTo(typeof(Rigidbody)));
                 Assert.That(method.ReturnType, Is.Not.EqualTo(typeof(LastBearingState)));
             }
+        }
+
+        [TestCase(1000, LastBearingRoadDamageBand.Healthy)]
+        [TestCase(999, LastBearingRoadDamageBand.Worn)]
+        [TestCase(501, LastBearingRoadDamageBand.Worn)]
+        [TestCase(500, LastBearingRoadDamageBand.Critical)]
+        [TestCase(0, LastBearingRoadDamageBand.Critical)]
+        public void CanonicalConditionDerivesPresentationDamageBand(
+            long vehicleConditionMilli,
+            LastBearingRoadDamageBand expected)
+        {
+            Assert.That(
+                LastBearingModeCoordinator.DerivePresentationDamageBand(
+                    vehicleConditionMilli),
+                Is.EqualTo(expected));
+        }
+
+        [TestCase(-1)]
+        [TestCase(1001)]
+        public void PresentationDamageBandRejectsInvalidCanonicalCondition(
+            long vehicleConditionMilli)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                LastBearingModeCoordinator.DerivePresentationDamageBand(
+                    vehicleConditionMilli));
         }
 
         [TestCase(1, 0, 0, 0, true)]

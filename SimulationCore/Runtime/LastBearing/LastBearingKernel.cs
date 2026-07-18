@@ -129,6 +129,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 ApplyDrive(builder, drive, events);
             }
+            else if (command is OperateWreckLineModuleCommand operateModule)
+            {
+                ApplyOperateWreckLineModule(builder, operateModule, events);
+            }
             else if (command is OperateDepotRecoveryPointCommand operateRecovery)
             {
                 ApplyOperateDepotRecoveryPoint(
@@ -473,6 +477,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     "LAST_BEARING_DRIVE_PHASE_INVALID");
             }
 
+            if (IsWreckLineModulePointAvailable(builder))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_WRECK_LINE_MODULE_ACTION_REQUIRED");
+            }
+
             if (IsDepotApproachRecoveryAvailable(builder))
             {
                 throw new InvalidOperationException(
@@ -509,8 +519,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 accumulator % LastBearingBalanceV1.FullClockScaleMilli;
             if (progress > 0)
             {
+                var progressLimit = builder.ExpeditionPhase ==
+                        ExpeditionPhase.Outbound &&
+                    !builder.RouteActionUsed
+                    ? LastBearingBalanceV1.WreckLineGateTicks(
+                        builder.VehicleModule)
+                    : builder.RouteTargetTicks;
                 builder.RouteProgressTicks = Math.Min(
-                    builder.RouteTargetTicks,
+                    progressLimit,
                     checked(builder.RouteProgressTicks + progress));
                 if (Math.Abs(builder.VehicleLateralMilli)
                     > LastBearingBalanceV1.RoadSafeHalfWidthMilli)
@@ -534,21 +550,6 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         previousCondition,
                         builder.VehicleConditionMilli);
                 }
-                if (!builder.RouteActionUsed)
-                {
-                    builder.RouteActionUsed = true;
-                    Emit(
-                        builder,
-                        events,
-                        LastBearingEventKind.RouteActionUsed,
-                        LastBearingEventCause.PlayerCommand,
-                        builder.RoadTick,
-                        command.Sequence,
-                        "vehicle:sasha:route-action",
-                        0,
-                        (long)builder.RouteActionKind);
-                }
-
                 Emit(
                     builder,
                     events,
@@ -589,6 +590,76 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
         }
 
+        private static void ApplyOperateWreckLineModule(
+            LastBearingStateBuilder builder,
+            OperateWreckLineModuleCommand command,
+            List<LastBearingDomainEvent> events)
+        {
+            if (command.Action != builder.RouteActionKind)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_WRECK_LINE_MODULE_ACTION_MISMATCH");
+            }
+
+            if (builder.RouteActionUsed)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (!IsWreckLineModulePointAvailable(builder))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_WRECK_LINE_MODULE_POINT_NOT_READY");
+            }
+
+            if (builder.VehicleModule == VehicleModule.WinchAssembly)
+            {
+                LastBearingOwnershipTransaction.RecoverHeavyCargoToVehicle(
+                    builder);
+                Emit(
+                    builder,
+                    events,
+                    LastBearingEventKind.HeavyCargoTransferred,
+                    LastBearingEventCause.PlayerCommand,
+                    builder.RoadTick,
+                    command.Sequence,
+                    "cargo:last-bearing:pump-rotor",
+                    (long)HeavyCargoCustody.Depot,
+                    (long)HeavyCargoCustody.Vehicle);
+            }
+            else if (builder.VehicleModule != VehicleModule.SealedRangeTank)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_WRECK_LINE_MODULE_INVALID");
+            }
+
+            builder.RouteMovementAccumulatorMilli = 0;
+            builder.RouteActionUsed = true;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.RouteActionUsed,
+                LastBearingEventCause.PlayerCommand,
+                builder.RoadTick,
+                command.Sequence,
+                "world:last-bearing:wreck-line",
+                0,
+                (long)command.Action);
+        }
+
+        private static bool IsWreckLineModulePointAvailable(
+            LastBearingStateBuilder builder)
+        {
+            return builder.ExpeditionPhase == ExpeditionPhase.Outbound
+                && builder.TransactionPhase == TransactionPhase.RoadOwned
+                && builder.VehicleModule != VehicleModule.None
+                && !builder.RouteActionUsed
+                && builder.RouteProgressTicks ==
+                    LastBearingBalanceV1.WreckLineGateTicks(
+                        builder.VehicleModule);
+        }
+
         private static void ApplyOperateDepotRecoveryPoint(
             LastBearingStateBuilder builder,
             OperateDepotRecoveryPointCommand command,
@@ -626,6 +697,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         {
             return builder.ExpeditionPhase == ExpeditionPhase.Outbound
                 && builder.TransactionPhase == TransactionPhase.RoadOwned
+                && builder.RouteActionUsed
                 && builder.RouteTargetTicks > 0
                 && builder.RouteProgressTicks == builder.RouteTargetTicks
                 && builder.HasArrivalClaimSnapshot;
@@ -769,7 +841,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             if (builder.TransactionPhase != TransactionPhase.RoadOwned
                 || builder.ExpeditionPhase != ExpeditionPhase.AtDepot
-                || builder.DepotResolution == EncounterChoice.Unresolved)
+                || builder.DepotResolution == EncounterChoice.Unresolved
+                || !builder.RouteActionUsed)
             {
                 throw new InvalidOperationException(
                     "LAST_BEARING_RETURN_FREEZE_PHASE_INVALID");
@@ -777,7 +850,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             if (builder.VehicleModule == VehicleModule.WinchAssembly)
             {
-                LastBearingOwnershipTransaction.CreateHeavyCargo(builder);
+                if (builder.HeavyCargoKind != HeavyCargoKind.PumpRotor
+                    || builder.HeavyCargoCustody
+                        != HeavyCargoCustody.Vehicle
+                    || builder.TowSlotsUsed != 1)
+                {
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_WINCH_ROTOR_NOT_RECOVERED");
+                }
             }
             else if (builder.LiquidCargoKind == LiquidCargoKind.None)
             {
@@ -792,7 +872,6 @@ namespace AtomicLandPirate.Simulation.LastBearing
             builder.RouteProgressTicks = 0;
             builder.RouteMovementAccumulatorMilli = 0;
             builder.VehicleLateralMilli = 0;
-            builder.RouteActionUsed = false;
             Emit(
                 builder,
                 events,

@@ -388,6 +388,77 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator WreckLineHotkeyUsesCanonicalGateAndDerivedRoadLoad()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            LastBearingState gate = DriveUntilWreckLineAvailable(
+                CreateOutboundState());
+            InstallControllerState(controller, gate);
+            LastBearingWorldBuilder world = controller.World!;
+            RoadFeelRigInstance roadRig = world.RoadFeelRig!;
+            Rigidbody body = roadRig.Vehicle.Body;
+
+            AssertMode(
+                controller.ModeCoordinator!,
+                LastBearingPresentationMode.Driving);
+            AssertRoadModulePointHold(controller, roadRig);
+            Assert.That(
+                world.RouteModulePointView!.State,
+                Is.EqualTo(RouteModulePointPresentationState.WinchAvailable));
+            Assert.That(world.RouteModulePointView.IsPumpRotorVisible, Is.True);
+            Assert.That(
+                controller.ReadModel!.HeavyCargoCustody,
+                Is.EqualTo(HeavyCargoCustody.Depot));
+            string gateHash = controller.CanonicalHash;
+
+            body.position += new Vector3(250f, 40f, -175f);
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Press(keyboard.eKey);
+            InvokeGlobalShortcuts(controller);
+            Release(keyboard.eKey);
+
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(gateHash));
+            InvokeSimulationTick(controller);
+
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(controller.CanonicalHash, Is.Not.EqualTo(gateHash));
+            Assert.That(controller.ReadModel!.RouteActionUsed, Is.True);
+            Assert.That(
+                controller.ReadModel.HeavyCargoCustody,
+                Is.EqualTo(HeavyCargoCustody.Vehicle));
+            Assert.That(
+                controller.ReadModel.RouteProgressTicks,
+                Is.EqualTo(controller.ReadModel.WreckLineGateTicks));
+            Assert.That(
+                world.RouteModulePointView.State,
+                Is.EqualTo(RouteModulePointPresentationState.WinchRecovered));
+            Assert.That(world.RouteModulePointView.IsPumpRotorVisible, Is.False);
+            AssertRoadPresentation(controller, roadRig, active: true);
+            Assert.That(roadRig.Adapter.LastCargoMassKilograms, Is.EqualTo(1300));
+            Assert.That(
+                roadRig.Vehicle.Telemetry.CargoMassKilograms,
+                Is.EqualTo(1300f));
+            Assert.That(
+                roadRig.Adapter.LastDamageBand,
+                Is.EqualTo(LastBearingRoadDamageBand.Healthy));
+            Assert.That(
+                roadRig.Vehicle.Telemetry.DamageBand,
+                Is.EqualTo(RoadFeelDamageBand.Healthy));
+            Assert.That(roadRig.CargoVisuals[0].activeSelf, Is.False);
+            Assert.That(roadRig.CargoVisuals[1].activeSelf, Is.True);
+        }
+
+        [UnityTest]
         public IEnumerator DepotRecoveryGateSaveLoadRestoresHeldRoadRig()
         {
             AsyncOperation? load = SceneManager.LoadSceneAsync(
@@ -535,6 +606,43 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Assert.That(body.angularVelocity, Is.EqualTo(Vector3.zero));
                 Assert.That(body.isKinematic, Is.True);
             }
+        }
+
+        [UnityTest]
+        public IEnumerator BrakeReverseAndHandbrakeRemainPresentationOnly()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            InstallControllerState(controller, CreateOutboundState());
+            RoadFeelRigInstance roadRig = controller.World!.RoadFeelRig!;
+            long progressBefore = controller.ReadModel!.RouteProgressTicks;
+            long sequenceBefore = controller.State!.NextCommandSequence;
+
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Press(keyboard.sKey);
+            Press(keyboard.spaceKey);
+            InvokeSimulationTick(controller);
+            Release(keyboard.sKey);
+            Release(keyboard.spaceKey);
+
+            Assert.That(roadRig.Adapter.LastThrottleMilli, Is.EqualTo(0));
+            Assert.That(roadRig.Adapter.LastBrakeMilli, Is.EqualTo(1000));
+            Assert.That(roadRig.Adapter.LastHandbrakeMilli, Is.EqualTo(1000));
+            Assert.That(
+                controller.ReadModel!.RouteProgressTicks,
+                Is.EqualTo(progressBefore));
+            Assert.That(
+                controller.State!.NextCommandSequence,
+                Is.EqualTo(sequenceBefore));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
         }
 
         [UnityTest]
@@ -1120,6 +1228,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             var guard = 0;
             while (state.ExpeditionPhase != target && guard < 1000)
             {
+                LastBearingReadModel readModel =
+                    LastBearingReadModel.FromState(state);
+                if (readModel.IsWreckLineModulePointAvailable)
+                {
+                    state = Apply(kernel, state, sequence =>
+                        new OperateWreckLineModuleCommand(
+                            sequence,
+                            readModel.RouteActionKind));
+                }
+
                 state = Apply(kernel, state, sequence =>
                     new DriveVehicleCommand(sequence, 1000, 0));
                 guard++;
@@ -1138,6 +1256,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                        .IsDepotApproachRecoveryAvailable &&
                    guard < 1000)
             {
+                LastBearingReadModel current =
+                    LastBearingReadModel.FromState(state);
+                if (current.IsWreckLineModulePointAvailable)
+                {
+                    state = Apply(kernel, state, sequence =>
+                        new OperateWreckLineModuleCommand(
+                            sequence,
+                            current.RouteActionKind));
+                }
+
                 state = Apply(kernel, state, sequence =>
                     new DriveVehicleCommand(sequence, 1000, 0));
                 guard++;
@@ -1151,6 +1279,33 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(state.ExpeditionPhase, Is.EqualTo(ExpeditionPhase.Outbound));
             Assert.That(state.RouteProgressTicks, Is.EqualTo(state.RouteTargetTicks));
             Assert.That(state.HasArrivalClaimSnapshot, Is.True);
+            return state;
+        }
+
+        private static LastBearingState DriveUntilWreckLineAvailable(
+            LastBearingState state)
+        {
+            var kernel = new LastBearingKernel();
+            var guard = 0;
+            while (!LastBearingReadModel.FromState(state)
+                       .IsWreckLineModulePointAvailable &&
+                   guard < 1000)
+            {
+                state = Apply(kernel, state, sequence =>
+                    new DriveVehicleCommand(sequence, 1000, 0));
+                guard++;
+            }
+
+            LastBearingReadModel readModel = LastBearingReadModel.FromState(state);
+            Assert.That(
+                readModel.IsWreckLineModulePointAvailable,
+                Is.True,
+                "Wreck Line was not reached within 1000 canonical drives");
+            Assert.That(state.ExpeditionPhase, Is.EqualTo(ExpeditionPhase.Outbound));
+            Assert.That(
+                state.RouteProgressTicks,
+                Is.EqualTo(readModel.WreckLineGateTicks));
+            Assert.That(state.RouteActionUsed, Is.False);
             return state;
         }
 
@@ -1216,6 +1371,39 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 world.DepotApproachRecoveryView!.State,
                 Is.EqualTo(DepotApproachRecoveryPresentationState.Available));
+        }
+
+        private static void AssertRoadModulePointHold(
+            LastBearingGameController controller,
+            RoadFeelRigInstance roadRig)
+        {
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingModeCoordinator coordinator = controller.ModeCoordinator!;
+            Rigidbody body = roadRig.Vehicle.Body;
+            Assert.That(roadRig.Root.activeInHierarchy, Is.True);
+            Assert.That(roadRig.Adapter.IsRoadModeActive, Is.False);
+            Assert.That(roadRig.Adapter.IsPhysicsSuspended, Is.True);
+            Assert.That(roadRig.Vehicle.enabled, Is.False);
+            Assert.That(body.isKinematic, Is.True);
+            Assert.That(body.linearVelocity, Is.EqualTo(Vector3.zero));
+            Assert.That(body.angularVelocity, Is.EqualTo(Vector3.zero));
+            Assert.That(coordinator.IsRoadPresentationActive, Is.False);
+            Assert.That(coordinator.IsRoadPresentationHeldAtRecovery, Is.False);
+            Assert.That(coordinator.IsRoadPresentationHeldAtModulePoint, Is.True);
+            Assert.That(world.VehicleView!.gameObject.activeSelf, Is.False);
+            Assert.That(
+                world.CameraRig!.RoadTarget,
+                Is.SameAs(roadRig.Root.transform));
+            Assert.That(
+                Vector3.Distance(
+                    body.position,
+                    world.VehicleView.transform.position),
+                Is.LessThan(0.001f));
+            Assert.That(
+                Quaternion.Angle(
+                    body.rotation,
+                    world.VehicleView.transform.rotation),
+                Is.LessThan(0.01f));
         }
 
         private static int PendingCommandCount(
@@ -1348,6 +1536,18 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             {
                 ApplyAttemptCount++;
                 throw new InvalidOperationException("adversarial-road-adapter");
+            }
+
+            public void ApplyPresentationOnlyControls(
+                int brakeMilli,
+                int handbrakeMilli)
+            {
+            }
+
+            public void ApplyDerivedPresentationLoad(
+                int cargoMassKilograms,
+                LastBearingRoadDamageBand damageBand)
+            {
             }
 
             public void SynchronizePresentationPose(

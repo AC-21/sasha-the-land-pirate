@@ -205,12 +205,13 @@ namespace AtomicLandPirate.LastBearingTests
                 "replay replaced arrival snapshot");
             TestHarness.Equal(
                 1,
-                replay.DomainEvents.Count,
-                "replay emitted duplicate recovery effects");
-            TestHarness.Equal(
-                LastBearingEventKind.IdempotentReplayAccepted,
-                replay.DomainEvents[0].Kind,
+                replay.DomainEvents.Count(item =>
+                    item.Kind == LastBearingEventKind.IdempotentReplayAccepted),
                 "recovery replay event");
+            TestHarness.True(
+                replay.DomainEvents.All(item =>
+                    item.Kind != LastBearingEventKind.DepotRecoveryPointOperated),
+                "replay emitted duplicate recovery effects");
         }
 
         private static void ArrivalSnapshotSurvivesIdleTicks()
@@ -329,6 +330,7 @@ namespace AtomicLandPirate.LastBearingTests
             int guard = 0;
             while (!driver.View.IsDepotApproachRecoveryAvailable && guard < 1000)
             {
+                driver.OperateWreckLineIfAvailable();
                 driver.Apply(sequence =>
                     new DriveVehicleCommand(sequence, 1000, 0));
                 guard++;

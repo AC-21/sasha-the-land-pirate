@@ -179,6 +179,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ApplyDepotApproachRecovery(
                 available: false,
                 unlocked: false);
+            _world?.ApplyRouteModulePoint(
+                available: false,
+                RouteActionKind.None,
+                operated: false);
+            _world?.ApplyRoadCargoPresentation(
+                HeavyCargoKind.PumpRotor,
+                HeavyCargoCustody.Depot);
         }
 
         public void ActivateInfrastructure()
@@ -334,6 +341,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 new OperateDepotRecoveryPointCommand(sequence));
             _status =
                 "Recovery bridle seated. The depot encounter can now begin.";
+        }
+
+        public void OperateWreckLineModulePoint()
+        {
+            if (_readModel == null ||
+                !_readModel.IsWreckLineModulePointAvailable)
+            {
+                _status = "The Wreck Line module point is not canonically available yet.";
+                return;
+            }
+
+            RouteActionKind action = _readModel.RouteActionKind;
+            Queue(sequence => new OperateWreckLineModuleCommand(
+                sequence,
+                action));
+            _status = action == RouteActionKind.DeployWinch
+                ? "Winch seated. The existing pump rotor is coming into vehicle custody."
+                : "Seals checked. Cross the Wreck Line dust exposure without heavy cargo.";
         }
 
         public void ChooseLiquidReturn(LiquidCargoKind kind)
@@ -529,6 +554,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             if (_readModel != null &&
+                _readModel.IsWreckLineModulePointAvailable &&
+                ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
+                 (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
+            {
+                OperateWreckLineModulePoint();
+            }
+            else if (_readModel != null &&
                 _readModel.IsDepotApproachRecoveryAvailable &&
                 ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
                  (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
@@ -567,6 +599,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_pendingCommands.Count != 0 ||
                 _readModel == null ||
                 _readModel.PauseCause != PauseCause.None ||
+                _readModel.IsWreckLineModulePointAvailable ||
                 _readModel.IsDepotApproachRecoveryAvailable ||
                 (_readModel.ExpeditionPhase != ExpeditionPhase.Outbound &&
                  _readModel.ExpeditionPhase != ExpeditionPhase.Returning))
@@ -575,7 +608,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             float throttle = 0f;
+            float brake = 0f;
             float steering = 0f;
+            float handbrake = 0f;
             var keyboard = Keyboard.current;
             if (keyboard != null)
             {
@@ -586,7 +621,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
                 if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed)
                 {
-                    throttle = 0f;
+                    brake = 1f;
                 }
 
                 if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed)
@@ -598,24 +633,39 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 {
                     steering += 1f;
                 }
+
+                if (keyboard.spaceKey.isPressed)
+                {
+                    handbrake = 1f;
+                }
             }
 
             var gamepad = Gamepad.current;
             if (gamepad != null)
             {
                 throttle += gamepad.rightTrigger.ReadValue();
-                throttle = Mathf.Max(
-                    0f,
-                    throttle - gamepad.leftTrigger.ReadValue());
+                brake = Mathf.Max(
+                    brake,
+                    gamepad.leftTrigger.ReadValue());
                 steering += gamepad.leftStick.x.ReadValue();
+                if (gamepad.leftShoulder.isPressed)
+                {
+                    handbrake = 1f;
+                }
             }
 
             float clampedSteering = Mathf.Clamp(steering, -1f, 1f);
             int throttleMilli = Mathf.RoundToInt(Mathf.Clamp01(throttle) * 1000f);
+            int brakeMilli = Mathf.RoundToInt(Mathf.Clamp01(brake) * 1000f);
             int steeringMilli = Mathf.RoundToInt(clampedSteering * 1000f);
+            int handbrakeMilli = Mathf.RoundToInt(
+                Mathf.Clamp01(handbrake) * 1000f);
             _modeCoordinator?.ApplyQuantizedRoadCommandShadow(
                 throttleMilli,
                 steeringMilli);
+            _modeCoordinator?.ApplyPresentationOnlyRoadControls(
+                brakeMilli,
+                handbrakeMilli);
             if (throttleMilli == 0 && steeringMilli == 0)
             {
                 return;
@@ -722,6 +772,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ApplyDepotApproachRecovery(
                 _readModel.IsDepotApproachRecoveryAvailable,
                 _readModel.ExpeditionPhase == ExpeditionPhase.AtDepot);
+            _world.ApplyRouteModulePoint(
+                _readModel.IsWreckLineModulePointAvailable,
+                _readModel.RouteActionKind,
+                _readModel.RouteActionUsed);
+            _world.ApplyRoadCargoPresentation(
+                _readModel.HeavyCargoKind,
+                _readModel.HeavyCargoCustody);
             _modeCoordinator?.ApplyCanonical(_readModel);
         }
 

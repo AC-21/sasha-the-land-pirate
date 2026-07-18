@@ -119,11 +119,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             GUILayout.Label("CONTROLS", _headingStyle);
             GUILayout.Label(
-                model.IsDepotApproachRecoveryAvailable
+                model.IsWreckLineModulePointAvailable
+                    ? model.RouteActionKind == RouteActionKind.DeployWinch
+                        ? "E or gamepad south · deploy winch + recover rotor\nP · pause  F5 · save  F9 · load"
+                        : "E or gamepad south · cross sealed dust exposure\nP · pause  F5 · save  F9 · load"
+                    : model.IsDepotApproachRecoveryAvailable
                     ? "E or gamepad south · seat recovery bridle\nP · pause  F5 · save  F9 · load"
                     : model.ExpeditionPhase == ExpeditionPhase.Outbound ||
                 model.ExpeditionPhase == ExpeditionPhase.Returning
-                    ? "W/S or triggers · throttle\nA/D or stick · steer\nP · pause  F5 · save  F9 · load"
+                    ? "W/right trigger · throttle\nS/left trigger · presentation brake + reverse\nA/D or stick · steer  Space/LB · handbrake\nP · pause  F5 · save  F9 · load"
                     : model.ExpeditionPhase == ExpeditionPhase.AtDepot
                         ? "Depot view locked · choose encounter and cargo below\nP · pause  F5 · save  F9 · load"
                     : "WASD · camera pan  Q/E · rotate\nMouse wheel · zoom  RMB · orbit\nP · pause  F5 · save  F9 · load",
@@ -236,6 +240,27 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (model.ExpeditionPhase == ExpeditionPhase.Outbound ||
                 model.ExpeditionPhase == ExpeditionPhase.Returning)
             {
+                if (model.IsWreckLineModulePointAvailable)
+                {
+                    bool winch = model.RouteActionKind ==
+                        RouteActionKind.DeployWinch;
+                    GUILayout.Label(
+                        winch
+                            ? "Wreck Line: deploy the fitted winch to take the one existing pump rotor into vehicle custody."
+                            : "Wreck Line: use the sealed range tank to cross the dust exposure; the pump rotor remains behind.",
+                        _bodyStyle);
+                    if (GUILayout.Button(
+                            winch
+                                ? "DEPLOY WINCH · RECOVER PUMP ROTOR"
+                                : "CROSS SEALED DUST EXPOSURE",
+                            _buttonStyle))
+                    {
+                        _controller!.OperateWreckLineModulePoint();
+                    }
+
+                    return;
+                }
+
                 if (model.IsDepotApproachRecoveryAvailable)
                 {
                     GUILayout.Label(
@@ -493,6 +518,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 .Append("  ·  lateral ").Append(model.VehicleLateralMilli)
                 .Append("/±")
                 .Append(LastBearingBalanceV1.RoadLateralLimitMilli)
+                .AppendLine();
+            text.Append("Road verb  ").Append(model.RouteActionKind)
+                .Append("  ·  operated ").Append(model.RouteActionUsed)
+                .Append("  ·  Wreck Line ").Append(model.WreckLineGateTicks)
+                .AppendLine();
+            text.Append("Pump rotor  ").Append(model.HeavyCargoCustody)
                 .AppendLine();
             text.Append("Faction  ").Append(model.FactionClaimState)
                 .Append("  ").Append(model.FactionClaimProgressMilli)
