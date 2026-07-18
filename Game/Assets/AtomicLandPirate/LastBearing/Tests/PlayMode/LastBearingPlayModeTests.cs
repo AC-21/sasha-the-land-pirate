@@ -840,6 +840,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Press(keyboard.rKey);
+            yield return null;
+            Assert.That(keyboard.rKey.wasPressedThisFrame, Is.True);
             InvokeGlobalShortcuts(controller);
             Release(keyboard.rKey);
 
