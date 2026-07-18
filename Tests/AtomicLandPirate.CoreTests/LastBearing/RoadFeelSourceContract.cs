@@ -37,10 +37,14 @@ namespace AtomicLandPirate.LastBearingTests
             Require(vehicle, "SetControlInput");
             Require(vehicle, "SetLoad");
             Require(vehicle, "ResetAt");
-            Require(vehicle, "if (body.isKinematic)");
+            Require(vehicle, "bool wasKinematic = body.isKinematic");
+            Require(vehicle, "body.isKinematic = true");
             Require(vehicle, "transform.SetPositionAndRotation(position, rotation)");
             Require(vehicle, "Physics.SyncTransforms()");
-            Require(vehicle, "body.PublishTransform()");
+            Require(vehicle, "body.isKinematic = false");
+            TestHarness.True(
+                vehicle.IndexOf("body.PublishTransform()", StringComparison.Ordinal) < 0,
+                "Road Feel reset must not publish a stale dynamic physics pose");
             Require(vehicle, "RoadFeelTelemetry");
             Require(contracts, "ShouldApplyReverse");
 
