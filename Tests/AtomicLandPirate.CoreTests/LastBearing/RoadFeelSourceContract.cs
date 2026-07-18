@@ -71,7 +71,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(factory, "new RoadFeelRigInstance");
             Require(factory, "RoadFeelVehicleController");
             Require(factory, "LastBearingRoadFeelModeAdapter");
-            Require(factory, "CreateHeadlight");
+            Require(factory, "SashaScoutBlockoutFactory.Create");
+            Require(factory, "CopyContactStations");
+            Require(factory, "ScoutVisual");
             Require(factory, "cargoVisuals");
             Require(factory, "contactStations");
             foreach (string token in new[]

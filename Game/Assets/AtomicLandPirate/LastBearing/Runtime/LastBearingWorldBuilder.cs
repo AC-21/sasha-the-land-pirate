@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using AtomicLandPirate.Presentation.LastBearing.RoadFeel;
+using AtomicLandPirate.Presentation.LastBearing.Vehicle;
 using AtomicLandPirate.Simulation.LastBearing;
 using UnityEngine;
 
@@ -49,6 +50,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public RoadFeelRigInstance? RoadFeelRig { get; private set; }
 
+        public LastBearingGarageBayView? GarageBayView { get; private set; }
+
         public LastBearingCityGrammarComparison? CityGrammarComparison { get; private set; }
 
         public Transform? TurbineRotor => _turbineRotor;
@@ -57,7 +60,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         internal LastBearingVisualSnapshot Snapshot => _snapshot;
 
-        public void Build(Transform? drivingModeRoot = null)
+        public void Build(
+            Transform? drivingModeRoot = null,
+            Transform? garageModeRoot = null)
         {
             if (_built)
             {
@@ -77,6 +82,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _workshopWindow = CreateMaterial(Iron, Color.black);
             _civicWindow = CreateMaterial(Iron, Color.black);
             _claimMaterial = CreateMaterial(Iron, SignalCyan * 0.8f);
+            Material tungsten = CreateMaterial(
+                Tungsten * 0.55f,
+                Tungsten * 2.1f);
+            Material signal = CreateMaterial(
+                SignalCyan * 0.5f,
+                SignalCyan * 1.5f);
 
             BuildGround(darkConcrete, concrete, oxide);
             BuildWaterworks(concrete, darkConcrete, iron, bone);
@@ -84,15 +95,27 @@ namespace AtomicLandPirate.Presentation.LastBearing
             BuildRoadAndDepot(concrete, darkConcrete, iron, bone);
             BuildResidents(oxide, bone, iron, concrete);
             BuildCityGrammarComparison(concrete, iron, oxide, bone);
-            BuildVehicle(iron, darkConcrete, bone);
+            BuildVehicle(
+                iron,
+                oxide,
+                bone,
+                darkConcrete,
+                tungsten,
+                signal);
+            if (garageModeRoot != null)
+            {
+                BuildGarageBay(
+                    garageModeRoot,
+                    concrete,
+                    darkConcrete,
+                    oxide,
+                    bone,
+                    tungsten,
+                    signal);
+            }
+
             if (drivingModeRoot != null)
             {
-                Material tungsten = CreateMaterial(
-                    Tungsten * 0.55f,
-                    Tungsten * 2.1f);
-                Material damageLamp = CreateMaterial(
-                    SignalCyan * 0.5f,
-                    SignalCyan * 1.5f);
                 RoadFeelRig = RoadFeelRigFactory.Create(
                     drivingModeRoot,
                     VehicleView!.transform.position,
@@ -101,8 +124,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         iron,
                         oxide,
                         bone,
+                        darkConcrete,
                         tungsten,
-                        damageLamp));
+                        signal));
                 foreach (GameObject cargo in RoadFeelRig.CargoVisuals)
                 {
                     cargo.SetActive(false);
@@ -226,6 +250,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             VehicleView?.Apply(snapshot);
+            RoadFeelRig?.ScoutVisual.ApplyModule(snapshot.Module);
+            GarageBayView?.ApplyModule(snapshot.Module);
             CameraRig?.SetRoadMode(snapshot.IsRoadMode);
         }
 
@@ -406,12 +432,46 @@ namespace AtomicLandPirate.Presentation.LastBearing
             CreateBlock("Robot Personal Token", _robotResident.transform, new Vector3(0.46f, 1.25f, 0f), new Vector3(0.12f, 0.5f, 0.3f), humanMaterial);
         }
 
-        private void BuildVehicle(Material iron, Material darkIron, Material bone)
+        private void BuildVehicle(
+            Material iron,
+            Material oxide,
+            Material bone,
+            Material rubber,
+            Material tungsten,
+            Material signal)
         {
             var vehicle = new GameObject("Sasha Vehicle");
             vehicle.transform.SetParent(transform, false);
             VehicleView = vehicle.AddComponent<LastBearingVehicleView>();
-            VehicleView.Build(iron, darkIron, bone);
+            VehicleView.Build(
+                iron,
+                oxide,
+                bone,
+                rubber,
+                tungsten,
+                signal);
+        }
+
+        private void BuildGarageBay(
+            Transform garageModeRoot,
+            Material concrete,
+            Material darkIron,
+            Material oxide,
+            Material bone,
+            Material tungsten,
+            Material signal)
+        {
+            var garage = new GameObject(LastBearingGarageBayView.RootName);
+            garage.transform.SetParent(garageModeRoot, false);
+            GarageBayView = garage.AddComponent<LastBearingGarageBayView>();
+            GarageBayView.Build(
+                VehicleView!.transform.position,
+                concrete,
+                darkIron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
         }
 
         private void BuildCityGrammarComparison(

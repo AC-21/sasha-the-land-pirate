@@ -83,12 +83,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _modeCoordinator = gameObject.AddComponent<LastBearingModeCoordinator>();
             _modeCoordinator.Initialize();
             _world = gameObject.AddComponent<LastBearingWorldBuilder>();
-            _world.Build(_modeCoordinator.GetModeRoot(
-                LastBearingPresentationMode.Driving));
+            _world.Build(
+                _modeCoordinator.GetModeRoot(
+                    LastBearingPresentationMode.Driving),
+                _modeCoordinator.GetModeRoot(
+                    LastBearingPresentationMode.GarageBay));
             _modeCoordinator.ConfigurePresentationOwners(
                 _world.CameraRig!,
                 _world.VehicleView!,
-                _world.RoadFeelRig!.Root.transform);
+                _world.RoadFeelRig!.Root.transform,
+                _world.GarageBayView!.CameraAnchor!,
+                _world.GarageBayView.FocusAnchor!);
             _modeCoordinator.AttachRoadModeAdapter(
                 _world.RoadFeelRig.Adapter);
             _hud = gameObject.AddComponent<LastBearingHud>();
@@ -279,7 +284,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             TryShowCityMode(
                 LastBearingPresentationMode.GarageBay,
-                "Garage bay routing scaffold active; the vehicle state is unchanged.");
+                "Sasha Scout service-bay cutaway active; the vehicle state is unchanged.");
         }
 
         public void AttachRoadModeAdapter(ILastBearingRoadModeAdapter adapter)

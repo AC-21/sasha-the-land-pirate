@@ -65,6 +65,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private LastBearingCameraRig? _cameraRig;
         private LastBearingVehicleView? _canonicalVehicle;
         private Transform? _roadTarget;
+        private Transform? _garageCameraAnchor;
+        private Transform? _garageFocusAnchor;
         private Transform? _modeRoot;
         private bool _roadRunRequested;
         private bool _roadPresentationActive;
@@ -134,12 +136,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public void ConfigurePresentationOwners(
             LastBearingCameraRig cameraRig,
             LastBearingVehicleView canonicalVehicle,
-            Transform roadTarget)
+            Transform roadTarget,
+            Transform garageCameraAnchor,
+            Transform garageFocusAnchor)
         {
             _cameraRig = cameraRig ?? throw new ArgumentNullException(nameof(cameraRig));
             _canonicalVehicle = canonicalVehicle ??
                                 throw new ArgumentNullException(nameof(canonicalVehicle));
             _roadTarget = roadTarget ?? throw new ArgumentNullException(nameof(roadTarget));
+            _garageCameraAnchor = garageCameraAnchor ??
+                                  throw new ArgumentNullException(nameof(garageCameraAnchor));
+            _garageFocusAnchor = garageFocusAnchor ??
+                                 throw new ArgumentNullException(nameof(garageFocusAnchor));
             ApplyPresentationOwnership();
         }
 
@@ -399,6 +407,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 !RoadAdapterFaulted &&
                 _roadAdapter != null &&
                 _roadTarget != null;
+            bool garageInspectionSelected =
+                HasActiveMode &&
+                CurrentMode == LastBearingPresentationMode.GarageBay;
 
             if (_roadTarget != null)
             {
@@ -416,6 +427,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     roadPresentationAvailable
                         ? _roadTarget!
                         : _canonicalVehicle.transform);
+                if (_garageCameraAnchor != null && _garageFocusAnchor != null)
+                {
+                    _cameraRig.SetInspectionPose(
+                        _garageCameraAnchor,
+                        _garageFocusAnchor,
+                        garageInspectionSelected);
+                }
             }
         }
 

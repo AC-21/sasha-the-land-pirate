@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using AtomicLandPirate.Presentation.LastBearing.RoadFeel;
+using AtomicLandPirate.Presentation.LastBearing.Vehicle;
 using AtomicLandPirate.Save.LastBearing;
 using AtomicLandPirate.Simulation.LastBearing;
 using NUnit.Framework;
@@ -483,6 +484,214 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(vehicle.transform.position, Is.Not.EqualTo(positionBefore));
         }
 
+        [UnityTest]
+        public IEnumerator SharedScoutOwnsStableSemanticsInStaticAndRoadPresentations()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.StartNewGame(ColonyComposition.Mixed);
+            yield return new WaitForSecondsRealtime(0.15f);
+
+            SashaScoutVisual[] scouts =
+                UnityEngine.Object.FindObjectsByType<SashaScoutVisual>(
+                    FindObjectsInactive.Include);
+            Assert.That(scouts, Has.Length.EqualTo(2));
+            foreach (SashaScoutVisual scout in scouts)
+            {
+                Assert.That(
+                    scout.DirectionStage,
+                    Is.EqualTo(SashaScoutSemanticContract.Stage));
+                Assert.That(scout.HasProductionGeometry, Is.False);
+                Assert.That(
+                    scout.ContactStationCount,
+                    Is.EqualTo(SashaScoutSemanticContract.WheelCount));
+                Assert.That(
+                    scout.WheelVisualCount,
+                    Is.EqualTo(SashaScoutSemanticContract.WheelCount));
+            }
+
+            LastBearingWorldBuilder world = controller.World!;
+            SashaScoutVisual staticScout = world.VehicleView!.ScoutVisual!;
+            SashaScoutVisual roadScout = world.RoadFeelRig!.ScoutVisual;
+            AssertSharedScoutPalette(staticScout, roadScout);
+            AssertModuleSocketAlignment(staticScout);
+            AssertModuleSocketAlignment(roadScout);
+            Assert.That(staticScout.gameObject.activeInHierarchy, Is.True);
+            Assert.That(roadScout.gameObject.activeInHierarchy, Is.False);
+            Assert.That(CountActiveScouts(scouts), Is.EqualTo(1));
+            Assert.That(
+                staticScout.CollisionRoot!
+                    .GetComponentsInChildren<BoxCollider>(true),
+                Is.Empty);
+            Assert.That(
+                roadScout.CollisionRoot!
+                    .GetComponentsInChildren<BoxCollider>(true),
+                Has.Length.EqualTo(
+                    SashaScoutBlockoutFactory.RoadCollisionBoxCount));
+            Assert.That(
+                roadScout.GetComponentsInChildren<MeshCollider>(true),
+                Is.Empty);
+
+            Transform[] contacts = roadScout.CopyContactStations();
+            for (var index = 0; index < contacts.Length; index++)
+            {
+                Assert.That(
+                    contacts[index].localPosition,
+                    Is.EqualTo(
+                        SashaScoutSemanticContract.GetContactStationLocalPosition(index)));
+            }
+
+            InstallControllerState(controller, CreateOutboundState());
+            yield return null;
+
+            Assert.That(staticScout.gameObject.activeInHierarchy, Is.False);
+            Assert.That(roadScout.gameObject.activeInHierarchy, Is.True);
+            Assert.That(CountActiveScouts(scouts), Is.EqualTo(1));
+            Assert.That(
+                UnityEngine.Object.FindObjectsByType<Camera>(
+                    FindObjectsInactive.Include),
+                Has.Length.EqualTo(1));
+            Assert.That(
+                UnityEngine.Object.FindObjectsByType<RoadFeelVehicleController>(
+                    FindObjectsInactive.Include),
+                Has.Length.EqualTo(1));
+            Rigidbody[] rigidbodies =
+                UnityEngine.Object.FindObjectsByType<Rigidbody>(
+                    FindObjectsInactive.Include);
+            Assert.That(rigidbodies, Has.Length.EqualTo(1));
+            Assert.That(
+                rigidbodies[0],
+                Is.SameAs(world.RoadFeelRig.Vehicle.Body));
+        }
+
+        [UnityTest]
+        public IEnumerator GarageCutawayUsesFixedInspectionPoseWithoutCanonicalWrites()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            yield return new WaitForSecondsRealtime(0.15f);
+
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingGarageBayView garage = world.GarageBayView!;
+            LastBearingCameraRig cameraRig = world.CameraRig!;
+            string canonicalBefore = controller.CanonicalHash;
+            Vector3 cityFocusBefore = cameraRig.CityFocus;
+
+            controller.OpenGarageBay();
+            yield return new WaitForSecondsRealtime(1f);
+
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.GarageBay));
+            Assert.That(controller.ModeCoordinator.ActiveModeCount, Is.EqualTo(1));
+            Assert.That(garage.gameObject.activeInHierarchy, Is.True);
+            Assert.That(cameraRig.IsInspectionMode, Is.True);
+            Assert.That(
+                Vector3.Distance(
+                    world.MainCamera!.transform.position,
+                    garage.CameraAnchor!.position),
+                Is.LessThan(0.15f));
+            Vector3 cameraForward = world.MainCamera.transform.forward;
+            Vector3 focusDirection =
+                (garage.FocusAnchor!.position - world.MainCamera.transform.position)
+                .normalized;
+            Assert.That(Vector3.Dot(cameraForward, focusDirection), Is.GreaterThan(0.998f));
+
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Press(keyboard.dKey);
+            yield return new WaitForSecondsRealtime(0.1f);
+            Release(keyboard.dKey);
+            yield return null;
+
+            Assert.That(cameraRig.CityFocus, Is.EqualTo(cityFocusBefore));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+            Assert.That(
+                garage.GetComponentsInChildren<Camera>(true),
+                Is.Empty);
+            Assert.That(
+                garage.GetComponentsInChildren<CharacterController>(true),
+                Is.Empty);
+
+            controller.ShowCityOverview();
+            yield return null;
+
+            Assert.That(garage.gameObject.activeInHierarchy, Is.False);
+            Assert.That(cameraRig.IsInspectionMode, Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+        }
+
+        [UnityTest]
+        public IEnumerator InstalledModuleStaysExclusiveAndSynchronizedAcrossAllViews()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            LastBearingWorldBuilder world = controller.World!;
+            SashaScoutVisual staticScout = world.VehicleView!.ScoutVisual!;
+            SashaScoutVisual roadScout = world.RoadFeelRig!.ScoutVisual;
+            LastBearingGarageBayView garage = world.GarageBayView!;
+
+            InstallControllerState(
+                controller,
+                CreatePlannedModuleState(VehicleModule.WinchAssembly));
+            yield return null;
+
+            Assert.That(
+                controller.ReadModel!.PlannedModule,
+                Is.EqualTo(VehicleModule.WinchAssembly));
+            Assert.That(
+                controller.ReadModel.VehicleModule,
+                Is.EqualTo(VehicleModule.None));
+            AssertModulePresentation(
+                staticScout,
+                roadScout,
+                garage,
+                SashaScoutModulePresentation.WinchAssembly);
+
+            InstallControllerState(
+                controller,
+                CreateAtHomeModuleState(VehicleModule.WinchAssembly));
+            yield return null;
+
+            AssertModulePresentation(
+                staticScout,
+                roadScout,
+                garage,
+                SashaScoutModulePresentation.WinchAssembly);
+
+            InstallControllerState(
+                controller,
+                CreateAtHomeModuleState(VehicleModule.SealedRangeTank));
+            yield return null;
+
+            AssertModulePresentation(
+                staticScout,
+                roadScout,
+                garage,
+                SashaScoutModulePresentation.SealedRangeTank);
+        }
+
         private static LastBearingState CreateOutboundState()
         {
             var kernel = new LastBearingKernel();
@@ -524,6 +733,163 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     fingerprint));
             Assert.That(state.ExpeditionPhase, Is.EqualTo(ExpeditionPhase.Outbound));
             return state;
+        }
+
+        private static LastBearingState CreateAtHomeModuleState(
+            VehicleModule module)
+        {
+            LastBearingState state = CreatePlannedModuleState(module);
+            var kernel = new LastBearingKernel();
+            var guard = 0;
+            while ((state.PreparationPhase != PreparationPhase.Ready ||
+                    state.ModuleInstallationState !=
+                    ModuleInstallationState.Installed) &&
+                   guard < 1000)
+            {
+                state = kernel.Step(
+                    state,
+                    Array.Empty<LastBearingCommand>()).State;
+                guard++;
+            }
+
+            Assert.That(
+                state.PreparationPhase,
+                Is.EqualTo(PreparationPhase.Ready),
+                "module preparation did not become ready within 1000 deterministic ticks");
+            Assert.That(
+                state.ModuleInstallationState,
+                Is.EqualTo(ModuleInstallationState.Installed),
+                "module installation did not complete within 1000 deterministic ticks");
+            Assert.That(state.VehicleModule, Is.EqualTo(module));
+            Assert.That(state.ExpeditionPhase, Is.EqualTo(ExpeditionPhase.AtHome));
+            return state;
+        }
+
+        private static LastBearingState CreatePlannedModuleState(
+            VehicleModule module)
+        {
+            var kernel = new LastBearingKernel();
+            LastBearingState state = LastBearingScenarioFactory.CreateInitial(
+                ColonyComposition.HumanOnly,
+                2011);
+            state = Apply(kernel, state, sequence =>
+                new AssignResidentCommand(sequence, ResidentRoster.HumanResidentId));
+            state = Apply(kernel, state, sequence =>
+                new ActivateSliceInfrastructureCommand(sequence));
+            state = Apply(kernel, state, sequence =>
+                new SelectPreparationCommand(
+                    sequence,
+                    PreparationChoice.WorkshopPush,
+                    module));
+            state = Apply(kernel, state, sequence =>
+                new InstallVehicleModuleCommand(sequence, module));
+            Assert.That(state.PlannedModule, Is.EqualTo(module));
+            Assert.That(state.VehicleModule, Is.EqualTo(VehicleModule.None));
+            Assert.That(
+                state.ModuleInstallationState,
+                Is.EqualTo(ModuleInstallationState.Pending));
+            Assert.That(state.PreparationPhase, Is.EqualTo(PreparationPhase.Preparing));
+            return state;
+        }
+
+        private static int CountActiveScouts(
+            IEnumerable<SashaScoutVisual> scouts)
+        {
+            var count = 0;
+            foreach (SashaScoutVisual scout in scouts)
+            {
+                if (scout.gameObject.activeInHierarchy)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private static void AssertModulePresentation(
+            SashaScoutVisual staticScout,
+            SashaScoutVisual roadScout,
+            LastBearingGarageBayView garage,
+            SashaScoutModulePresentation expected)
+        {
+            Assert.That(staticScout.Module, Is.EqualTo(expected));
+            Assert.That(roadScout.Module, Is.EqualTo(expected));
+            Assert.That(
+                staticScout.IsWinchVisible,
+                Is.EqualTo(expected == SashaScoutModulePresentation.WinchAssembly));
+            Assert.That(
+                staticScout.IsRangeTankVisible,
+                Is.EqualTo(expected == SashaScoutModulePresentation.SealedRangeTank));
+            Assert.That(
+                roadScout.IsWinchVisible,
+                Is.EqualTo(expected == SashaScoutModulePresentation.WinchAssembly));
+            Assert.That(
+                roadScout.IsRangeTankVisible,
+                Is.EqualTo(expected == SashaScoutModulePresentation.SealedRangeTank));
+            Assert.That(
+                garage.IsWinchStaged,
+                Is.EqualTo(expected != SashaScoutModulePresentation.WinchAssembly));
+            Assert.That(
+                garage.IsRangeTankStaged,
+                Is.EqualTo(expected != SashaScoutModulePresentation.SealedRangeTank));
+        }
+
+        private static void AssertSharedScoutPalette(
+            SashaScoutVisual staticScout,
+            SashaScoutVisual roadScout)
+        {
+            Assert.That(
+                roadScout.Materials.Iron,
+                Is.SameAs(staticScout.Materials.Iron));
+            Assert.That(
+                roadScout.Materials.Oxide,
+                Is.SameAs(staticScout.Materials.Oxide));
+            Assert.That(
+                roadScout.Materials.Bone,
+                Is.SameAs(staticScout.Materials.Bone));
+            Assert.That(
+                roadScout.Materials.Rubber,
+                Is.SameAs(staticScout.Materials.Rubber));
+            Assert.That(
+                roadScout.Materials.Tungsten,
+                Is.SameAs(staticScout.Materials.Tungsten));
+            Assert.That(
+                roadScout.Materials.Signal,
+                Is.SameAs(staticScout.Materials.Signal));
+        }
+
+        private static void AssertModuleSocketAlignment(
+            SashaScoutVisual scout)
+        {
+            Transform? winchSocket = scout.FindSocket(
+                SashaScoutSemanticContract.FrontUpgradeSocketName);
+            Transform? tankSocket = scout.FindSocket(
+                SashaScoutSemanticContract.CargoUpgradeSocketName);
+            Assert.That(winchSocket, Is.Not.Null);
+            Assert.That(tankSocket, Is.Not.Null);
+            Assert.That(scout.WinchModuleRoot, Is.Not.Null);
+            Assert.That(scout.RangeTankModuleRoot, Is.Not.Null);
+            Assert.That(
+                Vector3.Distance(
+                    scout.WinchModuleRoot!.position,
+                    winchSocket!.position),
+                Is.LessThan(0.00001f));
+            Assert.That(
+                Quaternion.Angle(
+                    scout.WinchModuleRoot.rotation,
+                    winchSocket.rotation),
+                Is.LessThan(0.00001f));
+            Assert.That(
+                Vector3.Distance(
+                    scout.RangeTankModuleRoot!.position,
+                    tankSocket!.position),
+                Is.LessThan(0.00001f));
+            Assert.That(
+                Quaternion.Angle(
+                    scout.RangeTankModuleRoot.rotation,
+                    tankSocket.rotation),
+                Is.LessThan(0.00001f));
         }
 
         private static LastBearingState Apply(

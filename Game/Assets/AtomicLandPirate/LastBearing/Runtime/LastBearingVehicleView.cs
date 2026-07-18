@@ -1,6 +1,6 @@
 #nullable enable
 
-using System.Collections.Generic;
+using AtomicLandPirate.Presentation.LastBearing.Vehicle;
 using UnityEngine;
 
 namespace AtomicLandPirate.Presentation.LastBearing
@@ -86,11 +86,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private const float MaximumBodyLeanDegrees = 6.5f;
         private const float MaximumFrontWheelSteerDegrees = 24f;
 
-        private readonly List<Transform> _wheels = new List<Transform>();
-        private readonly List<Transform> _frontWheelSteeringPivots =
-            new List<Transform>();
-        private GameObject? _winch;
-        private GameObject? _tank;
+        private SashaScoutVisual? _scoutVisual;
         private Vector3 _lastPosition;
         private float _visibleLateralOffset;
         private LastBearingVisualSnapshot _lastSnapshot;
@@ -106,61 +102,28 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public float FrontWheelSteerDegrees { get; private set; }
 
-        internal void Build(Material iron, Material darkIron, Material enamel)
+        public SashaScoutVisual? ScoutVisual => _scoutVisual;
+
+        public static Vector3 HomePosition => new Vector3(-8.5f, 0f, -5f);
+
+        internal void Build(
+            Material iron,
+            Material oxide,
+            Material enamel,
+            Material rubber,
+            Material tungsten,
+            Material signal)
         {
-            CreatePart(
-                "Low Cab",
-                PrimitiveType.Cube,
-                new Vector3(0f, 1.2f, 0.2f),
-                new Vector3(2.25f, 1.35f, 2.3f),
-                iron);
-            CreatePart(
-                "Utility Shoulder Left",
-                PrimitiveType.Cube,
-                new Vector3(-1.25f, 1.15f, -0.55f),
-                new Vector3(0.65f, 1.15f, 3.6f),
-                darkIron);
-            CreatePart(
-                "Utility Shoulder Right",
-                PrimitiveType.Cube,
-                new Vector3(1.25f, 1.05f, -0.25f),
-                new Vector3(0.65f, 0.95f, 3.0f),
-                darkIron);
-            CreatePart(
-                "Bone Enamel Nose",
-                PrimitiveType.Cube,
-                new Vector3(0f, 0.85f, 1.62f),
-                new Vector3(1.65f, 0.5f, 0.5f),
-                enamel);
-
-            CreateWheel("Front Left Wheel", new Vector3(-1.4f, 0.55f, 1.2f), darkIron, steerable: true);
-            CreateWheel("Front Right Wheel", new Vector3(1.4f, 0.55f, 1.2f), darkIron, steerable: true);
-            CreateWheel("Rear Left Wheel", new Vector3(-1.4f, 0.55f, -1.35f), darkIron, steerable: false);
-            CreateWheel("Rear Right Wheel", new Vector3(1.4f, 0.55f, -1.35f), darkIron, steerable: false);
-
-            _winch = CreatePart(
-                "Winch Assembly - Steel Jaw",
-                PrimitiveType.Cube,
-                new Vector3(0f, 0.62f, 2.18f),
-                new Vector3(1.9f, 0.45f, 0.75f),
-                iron);
-            var drum = CreatePart(
-                "Winch Cable Drum",
-                PrimitiveType.Cylinder,
-                new Vector3(0f, 0.78f, 1.92f),
-                new Vector3(0.48f, 0.8f, 0.48f),
-                darkIron);
-            drum.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
-            drum.transform.SetParent(_winch.transform, true);
-
-            _tank = CreatePart(
-                "Sealed Range Tank",
-                PrimitiveType.Cylinder,
-                new Vector3(0f, 1.65f, -1.05f),
-                new Vector3(1.05f, 1.45f, 1.05f),
-                enamel);
-            _tank.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
-
+            _scoutVisual = SashaScoutBlockoutFactory.Create(
+                transform,
+                new SashaScoutBlockoutMaterials(
+                    iron,
+                    oxide,
+                    enamel,
+                    rubber,
+                    tungsten,
+                    signal),
+                includeRoadCollisionShell: false);
             SetModule(LastBearingVisualModule.None);
             transform.position = HomePosition;
             _lastPosition = transform.position;
@@ -242,34 +205,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             transform.position = position;
-            ApplyFrontWheelSteering();
+            _scoutVisual?.SetFrontSteering(FrontWheelSteerDegrees);
 
             var travelled = Vector3.Distance(_lastPosition, transform.position);
             if (travelled > 0f)
             {
-                foreach (var wheel in _wheels)
-                {
-                    wheel.Rotate(Vector3.right, travelled * 62f, Space.Self);
-                }
+                _scoutVisual?.RotateWheels(travelled * 62f);
             }
 
             _lastPosition = transform.position;
         }
 
-        private static Vector3 HomePosition => new Vector3(-8.5f, 0f, -5f);
-
         private void SetModule(LastBearingVisualModule module)
         {
             Module = module;
-            if (_winch != null)
-            {
-                _winch.SetActive(module == LastBearingVisualModule.WinchAssembly);
-            }
-
-            if (_tank != null)
-            {
-                _tank.SetActive(module == LastBearingVisualModule.SealedRangeTank);
-            }
+            _scoutVisual?.ApplyModule(module);
         }
 
         private void EvaluateRoute(
@@ -316,53 +266,5 @@ namespace AtomicLandPirate.Presentation.LastBearing
                    2f * t * (end - control);
         }
 
-        private GameObject CreatePart(
-            string partName,
-            PrimitiveType primitive,
-            Vector3 localPosition,
-            Vector3 localScale,
-            Material material)
-        {
-            var part = GameObject.CreatePrimitive(primitive);
-            part.name = partName;
-            part.transform.SetParent(transform, false);
-            part.transform.localPosition = localPosition;
-            part.transform.localScale = localScale;
-            part.GetComponent<Renderer>().sharedMaterial = material;
-            return part;
-        }
-
-        private void CreateWheel(
-            string wheelName,
-            Vector3 localPosition,
-            Material material,
-            bool steerable)
-        {
-            var pivot = new GameObject(wheelName + " Steering Pivot");
-            pivot.transform.SetParent(transform, false);
-            pivot.transform.localPosition = localPosition;
-            var wheel = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            wheel.name = wheelName;
-            wheel.transform.SetParent(pivot.transform, false);
-            wheel.transform.localScale = new Vector3(0.72f, 0.42f, 0.72f);
-            wheel.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
-            wheel.GetComponent<Renderer>().sharedMaterial = material;
-            _wheels.Add(wheel.transform);
-            if (steerable)
-            {
-                _frontWheelSteeringPivots.Add(pivot.transform);
-            }
-        }
-
-        private void ApplyFrontWheelSteering()
-        {
-            foreach (Transform pivot in _frontWheelSteeringPivots)
-            {
-                pivot.localRotation = Quaternion.Euler(
-                    0f,
-                    FrontWheelSteerDegrees,
-                    0f);
-            }
-        }
     }
 }
