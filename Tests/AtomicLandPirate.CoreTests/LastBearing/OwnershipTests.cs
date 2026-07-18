@@ -47,18 +47,10 @@ namespace AtomicLandPirate.LastBearingTests
 
         private static void StrandedRepairCargoFails()
         {
-            LastBearingState initial = LastBearingScenarioFactory.CreateInitial(
-                ColonyComposition.HumanOnly,
-                2011);
-
-            var bearingBuilder = new LastBearingStateBuilder(initial);
-            LastBearingOwnershipTransaction.CreateRepairCargo(
-                bearingBuilder,
-                RepairCargoKind.CeramicBearing,
-                RepairCargoCustody.Vehicle);
-            bearingBuilder.DepotBearingDisposition =
-                DepotBearingDisposition.TakenBySasha;
-            LastBearingState bearingInVehicle = bearingBuilder.Build();
+            LastBearingState bearingInVehicle =
+                ReachLoadedDepotRepair(
+                    EncounterChoice.TakeBearing,
+                    2111).State;
             InvalidOperationException bearingError =
                 TestHarness.Throws<InvalidOperationException>(
                     () => LastBearingOwnershipTransaction.TransferRepairCargo(
@@ -72,14 +64,10 @@ namespace AtomicLandPirate.LastBearingTests
                 bearingError.Message,
                 "bearing invariant error");
 
-            var sleeveBuilder = new LastBearingStateBuilder(initial);
-            LastBearingOwnershipTransaction.CreateRepairCargo(
-                sleeveBuilder,
-                RepairCargoKind.FieldSleeve,
-                RepairCargoCustody.Vehicle);
-            sleeveBuilder.DepotBearingDisposition =
-                DepotBearingDisposition.FactionHeld;
-            LastBearingState sleeveInVehicle = sleeveBuilder.Build();
+            LastBearingState sleeveInVehicle =
+                ReachLoadedDepotRepair(
+                    EncounterChoice.Cooperate,
+                    2112).State;
             InvalidOperationException sleeveError =
                 TestHarness.Throws<InvalidOperationException>(
                     () => LastBearingOwnershipTransaction.TransferRepairCargo(
@@ -92,6 +80,48 @@ namespace AtomicLandPirate.LastBearingTests
                 "LAST_BEARING_UNAPPLIED_REPAIR_CARGO_INVALID",
                 sleeveError.Message,
                 "sleeve invariant error");
+        }
+
+        private static CoreTestDriver ReachLoadedDepotRepair(
+            EncounterChoice choice,
+            int worldSeed)
+        {
+            var driver = new CoreTestDriver(
+                ColonyComposition.HumanOnly,
+                worldSeed);
+            driver.StartPreparation(
+                ResidentRoster.HumanResidentId,
+                PreparationChoice.WorkshopPush,
+                VehicleModule.WinchAssembly);
+            while (driver.View.PreparationPhase != PreparationPhase.Ready)
+            {
+                driver.Advance(1);
+            }
+
+            string transactionId = "tx:ownership:" + worldSeed;
+            string fingerprint = "fp:ownership:" + worldSeed;
+            driver.Apply(sequence => new PrepareExpeditionTransactionCommand(
+                sequence,
+                transactionId,
+                fingerprint));
+            driver.Apply(sequence => new DebitCityManifestCommand(
+                sequence,
+                transactionId,
+                fingerprint));
+            while (!driver.View.IsDepotApproachRecoveryAvailable)
+            {
+                driver.OperateWreckLineIfAvailable();
+                driver.Apply(sequence =>
+                    new DriveVehicleCommand(sequence, 1000, 0));
+            }
+
+            driver.Apply(sequence =>
+                new OperateDepotRecoveryPointCommand(sequence));
+            driver.Apply(sequence =>
+                new ResolveDepotCommand(sequence, choice));
+            driver.Apply(sequence =>
+                new LoadDepotRepairCargoCommand(sequence));
+            return driver;
         }
 
         private static void InitialOwnershipIsExact()

@@ -151,6 +151,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 ApplyResolveDepot(builder, resolve, events);
             }
+            else if (command is LoadDepotRepairCargoCommand loadRepairCargo)
+            {
+                ApplyLoadDepotRepairCargo(
+                    builder,
+                    loadRepairCargo,
+                    events);
+            }
             else if (command is ChooseLiquidReturnCommand chooseLiquid)
             {
                 ApplyChooseLiquid(builder, chooseLiquid, events);
@@ -846,6 +853,118 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 quantity);
         }
 
+        private static void ApplyLoadDepotRepairCargo(
+            LastBearingStateBuilder builder,
+            LoadDepotRepairCargoCommand command,
+            List<LastBearingDomainEvent> events)
+        {
+            if (builder.ExpeditionPhase != ExpeditionPhase.AtDepot
+                || builder.TransactionPhase != TransactionPhase.RoadOwned
+                || builder.DepotResolution == EncounterChoice.Unresolved
+                || builder.ReturnPayloadFrozen)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_REPAIR_CARGO_LOAD_PHASE_INVALID");
+            }
+
+            RepairCargoKind expectedKind;
+            RepairCargoCustody expectedSource;
+            if (builder.DepotResolution == EncounterChoice.Cooperate)
+            {
+                expectedKind = RepairCargoKind.FieldSleeve;
+                expectedSource = RepairCargoCustody.Faction;
+            }
+            else
+            {
+                expectedKind = RepairCargoKind.CeramicBearing;
+                bool exactDepotLineage =
+                    builder.DepotBearingDisposition
+                        == DepotBearingDisposition.AtDepot
+                    && ((builder.DepotControl == DepotControl.Unclaimed
+                            && builder.FactionClaimProgressMilli
+                                < LastBearingBalanceV1
+                                    .FactionContestedThresholdMilli)
+                        || (builder.DepotControl == DepotControl.Contested
+                            && builder.FactionClaimProgressMilli
+                                >= LastBearingBalanceV1
+                                    .FactionContestedThresholdMilli
+                            && builder.FactionClaimProgressMilli
+                                < LastBearingBalanceV1
+                                    .FactionClaimThresholdMilli));
+                bool exactFactionLineage =
+                    builder.DepotBearingDisposition
+                        == DepotBearingDisposition.FactionHeld
+                    && builder.DepotControl == DepotControl.FactionClaimed
+                    && builder.FactionClaimProgressMilli
+                        == LastBearingBalanceV1.FactionClaimThresholdMilli;
+                if (exactDepotLineage)
+                {
+                    expectedSource = RepairCargoCustody.Depot;
+                }
+                else if (exactFactionLineage)
+                {
+                    expectedSource = RepairCargoCustody.Faction;
+                }
+                else if (builder.DepotBearingDisposition
+                    == DepotBearingDisposition.TakenBySasha
+                    && builder.DepotControl == DepotControl.Depleted
+                    && builder.RepairCargoKind == expectedKind
+                    && builder.RepairCargoCustody
+                        == RepairCargoCustody.Vehicle)
+                {
+                    EmitReplay(builder, command.Sequence, events);
+                    return;
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_REPAIR_CARGO_LOAD_SOURCE_INVALID");
+                }
+            }
+
+            if (builder.RepairCargoKind == expectedKind
+                && builder.RepairCargoCustody == RepairCargoCustody.Vehicle)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (builder.RepairCargoKind != expectedKind
+                || builder.RepairCargoCustody != expectedSource
+                || builder.OrdinaryCargoUsedUnits != 0
+                || builder.OrdinaryCargoCapacityUnits < 1)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_REPAIR_CARGO_LOAD_SOURCE_INVALID");
+            }
+
+            LastBearingOwnershipTransaction.TransferRepairCargo(
+                builder,
+                expectedKind,
+                expectedSource,
+                RepairCargoCustody.Vehicle);
+            builder.OrdinaryCargoUsedUnits = 1;
+            if (builder.DepotResolution == EncounterChoice.TakeBearing)
+            {
+                builder.DepotBearingDisposition =
+                    DepotBearingDisposition.TakenBySasha;
+                builder.DepotControl = DepotControl.Depleted;
+            }
+
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.RepairCargoTransferred,
+                LastBearingEventCause.PlayerCommand,
+                builder.GlobalTick,
+                command.Sequence,
+                expectedKind == RepairCargoKind.CeramicBearing
+                    ? "cargo:last-bearing:ceramic-bearing"
+                    : "cargo:last-bearing:field-sleeve",
+                (long)expectedSource,
+                (long)RepairCargoCustody.Vehicle);
+        }
+
         private static void ApplyFreezeReturn(
             LastBearingStateBuilder builder,
             FreezeReturnPayloadCommand command,
@@ -870,6 +989,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     "LAST_BEARING_RETURN_FREEZE_PHASE_INVALID");
             }
 
+            RepairCargoKind expectedRepairCargo =
+                builder.DepotResolution == EncounterChoice.Cooperate
+                    ? RepairCargoKind.FieldSleeve
+                    : RepairCargoKind.CeramicBearing;
+            if (builder.RepairCargoKind != expectedRepairCargo
+                || builder.RepairCargoCustody != RepairCargoCustody.Vehicle)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_REPAIR_CARGO_NOT_LOADED");
+            }
+
             if (builder.VehicleModule == VehicleModule.WinchAssembly)
             {
                 if (builder.HeavyCargoKind != HeavyCargoKind.PumpRotor
@@ -887,7 +1017,19 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     "LAST_BEARING_TANK_RETURN_SELECTION_REQUIRED");
             }
 
-            builder.OrdinaryCargoUsedUnits = 1;
+            if (builder.OrdinaryCargoUsedUnits == 0)
+            {
+                // Compatibility for valid development saves created before
+                // the explicit depot load command existed.
+                builder.OrdinaryCargoUsedUnits = 1;
+            }
+
+            if (builder.OrdinaryCargoUsedUnits != 1)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_REPAIR_CARGO_OCCUPANCY_INVALID");
+            }
+
             builder.ReturnPayloadFrozen = true;
             builder.TransactionPhase = TransactionPhase.ReturnPending;
             builder.ExpeditionPhase = ExpeditionPhase.Returning;
@@ -1549,7 +1691,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             LastBearingOwnershipTransaction.CreateRepairCargo(
                 builder,
                 RepairCargoKind.FieldSleeve,
-                RepairCargoCustody.Vehicle);
+                RepairCargoCustody.Faction);
             builder.DepotBearingDisposition = DepotBearingDisposition.FactionHeld;
             builder.DepotControl = DepotControl.SharedAccess;
             builder.FactionClaimState = FactionClaimState.Cooperating;
@@ -1574,7 +1716,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 commandSequence,
                 "cargo:last-bearing:field-sleeve",
                 (long)RepairCargoCustody.None,
-                (long)RepairCargoCustody.Vehicle);
+                (long)RepairCargoCustody.Faction);
             Emit(
                 builder,
                 events,
@@ -1600,13 +1742,15 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     "LAST_BEARING_BEARING_NOT_AT_DEPOT");
             }
 
+            RepairCargoCustody sourceCustody =
+                builder.DepotBearingDisposition
+                    == DepotBearingDisposition.AtDepot
+                    ? RepairCargoCustody.Depot
+                    : RepairCargoCustody.Faction;
             LastBearingOwnershipTransaction.CreateRepairCargo(
                 builder,
                 RepairCargoKind.CeramicBearing,
-                RepairCargoCustody.Vehicle);
-            builder.DepotBearingDisposition =
-                DepotBearingDisposition.TakenBySasha;
-            builder.DepotControl = DepotControl.Depleted;
+                sourceCustody);
             builder.FactionClaimState = FactionClaimState.Aggrieved;
             builder.FactionTrust = checked(
                 builder.FactionTrust + LastBearingBalanceV1.TakeTrustDelta);
@@ -1632,7 +1776,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 commandSequence,
                 "cargo:last-bearing:ceramic-bearing",
                 (long)RepairCargoCustody.None,
-                (long)RepairCargoCustody.Vehicle);
+                (long)sourceCustody);
             Emit(
                 builder,
                 events,

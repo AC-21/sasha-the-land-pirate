@@ -88,6 +88,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 ComputeDepotApproachRecoveryAvailable(state);
             IsWreckLineModulePointAvailable =
                 ComputeWreckLineModulePointAvailable(state);
+            IsRepairCargoLoadAvailable =
+                ComputeRepairCargoLoadAvailable(state);
 
             WaterZeroSettlementTicks = WaterTrendMilliPerSettlementTick < 0
                 ? DivideCeiling(
@@ -192,6 +194,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public PauseCause PauseCause { get; }
         public bool IsDepotApproachRecoveryAvailable { get; }
         public bool IsWreckLineModulePointAvailable { get; }
+        public bool IsRepairCargoLoadAvailable { get; }
         public long? WaterZeroSettlementTicks { get; }
         public long ClaimContestedFactionTicks { get; }
         public long ClaimedFactionTicks { get; }
@@ -322,6 +325,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             if (state.ExpeditionPhase == ExpeditionPhase.AtDepot)
             {
+                if (ComputeRepairCargoLoadAvailable(state))
+                {
+                    return "load-depot-repair-cargo";
+                }
+
                 return "freeze-return-payload";
             }
 
@@ -400,6 +408,39 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.HeavyCargoCustody == HeavyCargoCustody.Settlement
                 && state.TowSlotsUsed == 1
                 && state.PartsUnits >= requiredParts;
+        }
+
+        private static bool ComputeRepairCargoLoadAvailable(
+            LastBearingState state)
+        {
+            if (state.ExpeditionPhase != ExpeditionPhase.AtDepot
+                || state.TransactionPhase != TransactionPhase.RoadOwned
+                || state.DepotResolution == EncounterChoice.Unresolved
+                || state.ReturnPayloadFrozen
+                || state.OrdinaryCargoUsedUnits != 0
+                || state.OrdinaryCargoCapacityUnits < 1)
+            {
+                return false;
+            }
+
+            if (state.DepotResolution == EncounterChoice.Cooperate)
+            {
+                return state.RepairCargoKind == RepairCargoKind.FieldSleeve
+                    && state.RepairCargoCustody
+                        == RepairCargoCustody.Faction;
+            }
+
+            RepairCargoCustody expectedSource =
+                state.DepotBearingDisposition
+                    == DepotBearingDisposition.AtDepot
+                    ? RepairCargoCustody.Depot
+                    : state.DepotBearingDisposition
+                            == DepotBearingDisposition.FactionHeld
+                        ? RepairCargoCustody.Faction
+                        : RepairCargoCustody.None;
+            return state.RepairCargoKind == RepairCargoKind.CeramicBearing
+                && expectedSource != RepairCargoCustody.None
+                && state.RepairCargoCustody == expectedSource;
         }
 
         private static bool ComputeSpareBearingBatchStartAvailable(

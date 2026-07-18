@@ -134,7 +134,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 depot.Chapter,
                 Is.EqualTo(LastBearingPermitJobChapter.Depot));
             Assert.That(depot.ShowRecommendedFirstRunCue, Is.True);
-            Assert.That(depot.RecommendedFirstRunCue, Does.Contain("TAKE THE CLAIMED BEARING"));
+            Assert.That(depot.RecommendedFirstRunCue, Does.Contain("TAKE THE CERAMIC BEARING"));
             Assert.That(depot.RecommendedFirstRunCue, Does.Contain("One Good Batch"));
 
             state = ApplyOne(
@@ -142,6 +142,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 sequence => new ResolveDepotCommand(
                     sequence,
                     EncounterChoice.TakeBearing));
+            LastBearingPermitJobPresentation loading = Present(state, true);
+            Assert.That(
+                loading.Headline,
+                state.RepairCargoCustody == RepairCargoCustody.Faction
+                    ? Does.Contain("Load the faction-held ceramic bearing")
+                    : Does.Contain("Load the unclaimed ceramic bearing"));
+            Assert.That(loading.ProgressLabel, Does.Contain("E or gamepad south"));
+            state = ApplyOne(
+                state,
+                sequence => new LoadDepotRepairCargoCommand(sequence));
             LastBearingPermitJobPresentation payload = Present(state, true);
             Assert.That(payload.Headline, Does.Contain("Seal the consequences"));
             state = ApplyOne(
@@ -209,6 +219,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 sequence => new ResolveDepotCommand(
                     sequence,
                     EncounterChoice.TakeBearing));
+
+            LastBearingPermitJobPresentation loading = Present(state, true);
+            Assert.That(
+                loading.Headline,
+                state.RepairCargoCustody == RepairCargoCustody.Faction
+                    ? Does.Contain("Load the faction-held ceramic bearing")
+                    : Does.Contain("Load the unclaimed ceramic bearing"));
+            state = ApplyOne(
+                state,
+                sequence => new LoadDepotRepairCargoCommand(sequence));
 
             LastBearingPermitJobPresentation selection = Present(state, true);
             Assert.That(selection.Headline, Does.Contain("fills the range tank"));
@@ -363,7 +383,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(presentation.Headline, Does.Contain(expectedHeadline).IgnoreCase);
             Assert.That(presentation.ShowRecommendedFirstRunCue, Is.True);
             Assert.That(presentation.RecommendedFirstRunCue, Does.Contain("CIVIC BUFFER + WINCH"));
-            Assert.That(presentation.RecommendedFirstRunCue, Does.Contain("TAKE THE CLAIMED BEARING"));
+            Assert.That(presentation.RecommendedFirstRunCue, Does.Contain("TAKE THE CERAMIC BEARING"));
             if (preparation == PreparationChoice.WorkshopPush
                 && module == VehicleModule.WinchAssembly
                 && encounter == EncounterChoice.Cooperate)
@@ -457,6 +477,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             state = ApplyOne(
                 state,
                 sequence => new ResolveDepotCommand(sequence, encounter));
+            state = ApplyOne(
+                state,
+                sequence => new LoadDepotRepairCargoCommand(sequence));
             if (module == VehicleModule.SealedRangeTank)
             {
                 state = ApplyOne(

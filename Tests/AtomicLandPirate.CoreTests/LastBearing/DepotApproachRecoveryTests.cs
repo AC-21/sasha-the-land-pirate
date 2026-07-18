@@ -265,6 +265,9 @@ namespace AtomicLandPirate.LastBearingTests
 
             AssertRecoveryReplay(driver, "resolved depot");
 
+            driver.Apply(sequence =>
+                new LoadDepotRepairCargoCommand(sequence));
+
             string transactionId = driver.State.TransactionId!;
             string fingerprint = driver.State.TransactionFingerprint!;
             driver.Apply(sequence => new FreezeReturnPayloadCommand(

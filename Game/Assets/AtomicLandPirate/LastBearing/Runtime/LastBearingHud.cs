@@ -135,6 +135,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         : "E or gamepad south · cross sealed dust exposure\nP · pause  F5 · save  F9 · load"
                     : model.IsDepotApproachRecoveryAvailable
                     ? "E or gamepad south · seat recovery bridle\nP · pause  F5 · save  F9 · load"
+                    : model.IsRepairCargoLoadAvailable
+                    ? model.RepairCargoKind == RepairCargoKind.FieldSleeve
+                        ? "E or gamepad south · load field sleeve\nP · pause  F5 · save  F9 · load"
+                        : "E or gamepad south · load ceramic bearing\nP · pause  F5 · save  F9 · load"
                     : model.ExpeditionPhase == ExpeditionPhase.Outbound ||
                 model.ExpeditionPhase == ExpeditionPhase.Returning
                     ? _controller!.CanRecoverRoadPresentation
@@ -388,11 +392,34 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     model.PlannedModule == VehicleModule.WinchAssembly;
                 if (GUILayout.Button(
                         opensPermitJob
-                            ? "RECOMMENDED FIRST RUN · TAKE THE CLAIMED BEARING\nOPENS ONE GOOD BATCH"
-                            : "TAKE THE CLAIMED BEARING\nCERAMIC REPAIR + AGGRIEVED DEPOT",
+                            ? "RECOMMENDED FIRST RUN · TAKE THE CERAMIC BEARING\nOPENS ONE GOOD BATCH"
+                            : "TAKE THE CERAMIC BEARING\nCERAMIC REPAIR + AGGRIEVED DEPOT",
                         _buttonStyle))
                 {
                     _controller!.ResolveDepot(cooperate: false);
+                }
+
+                return;
+            }
+
+            if (model.IsRepairCargoLoadAvailable)
+            {
+                bool fieldSleeve =
+                    model.RepairCargoKind == RepairCargoKind.FieldSleeve;
+                GUILayout.Label(
+                    fieldSleeve
+                        ? "The faction field sleeve remains on its service stand. Cargo custody has not changed yet."
+                        : model.RepairCargoCustody == RepairCargoCustody.Faction
+                            ? "The faction-held ceramic bearing remains on the service stand. Cargo custody has not changed yet."
+                            : "The unclaimed ceramic bearing remains in the depot cradle. Cargo custody has not changed yet.",
+                    _bodyStyle);
+                if (GUILayout.Button(
+                        fieldSleeve
+                            ? "LOAD FIELD SLEEVE · E / GAMEPAD SOUTH"
+                            : "LOAD CERAMIC BEARING · E / GAMEPAD SOUTH",
+                        _buttonStyle))
+                {
+                    _controller!.LoadDepotRepairCargo();
                 }
 
                 return;
@@ -876,6 +903,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 .Append("  ·  Wreck Line ").Append(model.WreckLineGateTicks)
                 .AppendLine();
             text.Append("Pump rotor  ").Append(model.HeavyCargoCustody)
+                .AppendLine();
+            text.Append("Repair cargo  ").Append(model.RepairCargoKind)
+                .Append("  ·  custody ").Append(model.RepairCargoCustody)
                 .AppendLine();
             text.Append("City improvement  ")
                 .Append(model.InstalledCityImprovement)

@@ -427,6 +427,8 @@ namespace AtomicLandPirate.LastBearingTests
             driver.Apply(sequence => new ResolveDepotCommand(
                 sequence,
                 EncounterChoice.TakeBearing));
+            driver.Apply(sequence =>
+                new LoadDepotRepairCargoCommand(sequence));
             if (module == VehicleModule.SealedRangeTank)
             {
                 driver.Apply(sequence => new ChooseLiquidReturnCommand(

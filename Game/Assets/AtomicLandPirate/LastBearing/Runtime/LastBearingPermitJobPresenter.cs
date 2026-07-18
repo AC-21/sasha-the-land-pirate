@@ -100,11 +100,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             "FIRST RUN · CIVIC BUFFER + WINCH opens the complete " +
             "manufacturing-and-permit continuation.";
         private const string RecommendedDepotCue =
-            "FIRST RUN · TAKE THE CLAIMED BEARING opens One Good Batch; " +
+            "FIRST RUN · TAKE THE CERAMIC BEARING opens One Good Batch; " +
             "COOPERATE closes on the maintenance promise.";
         private const string ReplayCue =
             "REPLAY CUE · Choose CIVIC BUFFER + WINCH, then TAKE THE " +
-            "CLAIMED BEARING to reach manufacturing and barter.";
+            "CERAMIC BEARING to reach manufacturing and barter.";
 
         public static LastBearingPermitJobPresentation Present(
             LastBearingReadModel? model,
@@ -290,14 +290,39 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         "CHAPTER IV · THE LAST BEARING",
                         "Choose what the depot will remember",
                         "Cooperate for a field sleeve and maintenance promise, " +
-                        "or take the claimed ceramic bearing and carry the grievance home.",
+                        "or take the ceramic bearing without agreement and carry the grievance home.",
                         "Resolve the depot encounter.",
                         recommendedFirstRunCue: DepotChoiceCue(model));
                 }
 
-                string cargoDetail = model.RepairCargoKind == RepairCargoKind.FieldSleeve
+                bool fieldSleeve =
+                    model.RepairCargoKind == RepairCargoKind.FieldSleeve;
+                bool ceramicAtFaction =
+                    model.RepairCargoKind == RepairCargoKind.CeramicBearing &&
+                    model.RepairCargoCustody == RepairCargoCustody.Faction;
+                string cargoDetail = fieldSleeve
                     ? "The field sleeve comes with an ongoing maintenance promise."
-                    : "The claimed ceramic bearing comes with an aggrieved faction memory.";
+                    : ceramicAtFaction
+                        ? "The faction-held ceramic bearing carries an aggrieved faction memory."
+                        : "Taking the unclaimed ceramic bearing creates an aggrieved faction memory.";
+                if (model.IsRepairCargoLoadAvailable)
+                {
+                    return Create(
+                        LastBearingPermitJobChapter.Depot,
+                        4,
+                        "CHAPTER IV · WORK THE DEPOT",
+                        fieldSleeve
+                            ? "Load the faction field sleeve"
+                            : ceramicAtFaction
+                                ? "Load the faction-held ceramic bearing"
+                                : "Load the unclaimed ceramic bearing",
+                        cargoDetail +
+                        (model.RepairCargoCustody == RepairCargoCustody.Faction
+                            ? " It remains at the faction service stand until Sasha loads the scout cargo socket."
+                            : " It remains at the depot cradle until Sasha loads the scout cargo socket."),
+                        "Load the repair cargo with E or gamepad south.");
+                }
+
                 if (model.VehicleModule == VehicleModule.SealedRangeTank
                     && model.LiquidCargoKind == LiquidCargoKind.None)
                 {

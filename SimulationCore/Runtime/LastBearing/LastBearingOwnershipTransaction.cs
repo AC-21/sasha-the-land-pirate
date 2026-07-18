@@ -226,14 +226,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
             RepairCargoCustody custody)
         {
             if (kind == RepairCargoKind.CeramicBearing
-                && (custody == RepairCargoCustody.Vehicle
+                && (custody == RepairCargoCustody.Depot
+                    || custody == RepairCargoCustody.Faction
+                    || custody == RepairCargoCustody.Vehicle
                     || custody == RepairCargoCustody.Turbine))
             {
                 return;
             }
 
             if (kind == RepairCargoKind.FieldSleeve
-                && (custody == RepairCargoCustody.Vehicle
+                && (custody == RepairCargoCustody.Faction
+                    || custody == RepairCargoCustody.Vehicle
                     || custody == RepairCargoCustody.Consumed))
             {
                 return;
@@ -251,8 +254,23 @@ namespace AtomicLandPirate.Simulation.LastBearing
             RequireLegalRepairCustody(kind, previous);
             RequireLegalRepairCustody(kind, next);
             if (kind == RepairCargoKind.CeramicBearing
+                && (previous == RepairCargoCustody.Depot
+                    || previous == RepairCargoCustody.Faction)
+                && next == RepairCargoCustody.Vehicle)
+            {
+                return;
+            }
+
+            if (kind == RepairCargoKind.CeramicBearing
                 && previous == RepairCargoCustody.Vehicle
                 && next == RepairCargoCustody.Turbine)
+            {
+                return;
+            }
+
+            if (kind == RepairCargoKind.FieldSleeve
+                && previous == RepairCargoCustody.Faction
+                && next == RepairCargoCustody.Vehicle)
             {
                 return;
             }

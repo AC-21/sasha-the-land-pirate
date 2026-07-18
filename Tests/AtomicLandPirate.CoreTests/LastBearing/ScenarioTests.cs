@@ -40,6 +40,9 @@ namespace AtomicLandPirate.LastBearingTests
                     case "SCN_BEARING_COOPERATE":
                         BearingCooperate();
                         break;
+                    case "SCN_BEARING_TAKE":
+                        BearingTake();
+                        break;
                     default:
                         throw new InvalidOperationException(
                             "unknown protected scenario " + scenarioId);
@@ -185,6 +188,8 @@ namespace AtomicLandPirate.LastBearingTests
                 driver.View.ClaimedFactionTicks,
                 "resolved depot claimed forecast");
 
+            driver.Apply(sequence =>
+                new LoadDepotRepairCargoCommand(sequence));
             driver.Apply(sequence => new FreezeReturnPayloadCommand(
                 sequence,
                 transactionId,
@@ -376,6 +381,197 @@ namespace AtomicLandPirate.LastBearingTests
             TestHarness.True(changedDomains >= 3, "fewer than three persistent domains changed");
         }
 
+        private static void BearingTake()
+        {
+            const string transactionId = "tx:take:001";
+            const string fingerprint = "fp:take:001";
+            var driver = new CoreTestDriver(
+                ColonyComposition.HumanOnly,
+                2003);
+            LastBearingReadModel before = driver.View;
+            driver.Advance(9000);
+            TestHarness.Equal(
+                FactionClaimState.Claimed,
+                driver.View.FactionClaimState,
+                "take fixture claim state");
+            TestHarness.Equal(
+                DepotControl.FactionClaimed,
+                driver.View.DepotControl,
+                "take fixture depot control");
+            TestHarness.Equal(
+                DepotBearingDisposition.FactionHeld,
+                driver.State.DepotBearingDisposition,
+                "take fixture bearing disposition");
+
+            driver.StartPreparation(
+                ResidentRoster.HumanResidentId,
+                PreparationChoice.CivicBuffer,
+                VehicleModule.SealedRangeTank);
+            while (driver.View.PreparationPhase != PreparationPhase.Ready)
+            {
+                driver.Advance(1);
+            }
+
+            driver.Apply(sequence => new PrepareExpeditionTransactionCommand(
+                sequence,
+                transactionId,
+                fingerprint));
+            driver.Apply(sequence => new DebitCityManifestCommand(
+                sequence,
+                transactionId,
+                fingerprint));
+            DriveUntilDepotRecoveryAvailable(driver, 400);
+            driver.Apply(sequence =>
+                new OperateDepotRecoveryPointCommand(sequence));
+            TestHarness.Equal(
+                FactionClaimState.Claimed,
+                driver.State.ArrivalFactionClaimState,
+                "take arrival claim snapshot");
+
+            LastBearingTickResult resolution = driver.Apply(sequence =>
+                new ResolveDepotCommand(
+                    sequence,
+                    EncounterChoice.TakeBearing));
+            TestHarness.Equal(
+                RepairCargoKind.CeramicBearing,
+                driver.View.RepairCargoKind,
+                "take source kind");
+            TestHarness.Equal(
+                RepairCargoCustody.Faction,
+                driver.View.RepairCargoCustody,
+                "take truthful source custody");
+            TestHarness.True(
+                driver.View.IsRepairCargoLoadAvailable,
+                "take source load availability");
+            TestHarness.Equal(
+                DepotBearingDisposition.FactionHeld,
+                driver.State.DepotBearingDisposition,
+                "take disposition changed before load");
+            TestHarness.Equal(
+                DepotControl.FactionClaimed,
+                driver.View.DepotControl,
+                "take control changed before load");
+            int grievanceEvents = resolution.DomainEvents.Count(domainEvent =>
+                domainEvent.Kind
+                    == LastBearingEventKind.FactionGrievanceRecorded);
+            TestHarness.True(
+                grievanceEvents >= 1,
+                "take resolution omitted grievance event");
+
+            LastBearingTickResult load = driver.Apply(sequence =>
+                new LoadDepotRepairCargoCommand(sequence));
+            LastBearingDomainEvent[] transfers = load.DomainEvents
+                .Where(domainEvent => domainEvent.Kind
+                    == LastBearingEventKind.RepairCargoTransferred)
+                .ToArray();
+            TestHarness.Equal(1, transfers.Length, "take load transfer count");
+            TestHarness.Equal(
+                (long)RepairCargoCustody.Faction,
+                transfers[0].BeforeValue,
+                "take load source");
+            TestHarness.Equal(
+                (long)RepairCargoCustody.Vehicle,
+                transfers[0].AfterValue,
+                "take load destination");
+            TestHarness.Equal(
+                DepotBearingDisposition.TakenBySasha,
+                driver.State.DepotBearingDisposition,
+                "take disposition after load");
+            TestHarness.Equal(
+                DepotControl.Depleted,
+                driver.View.DepotControl,
+                "take depot control after load");
+            TestHarness.Equal(
+                1L,
+                driver.State.OrdinaryCargoUsedUnits,
+                "take load occupancy");
+
+            driver.Apply(sequence => new ChooseLiquidReturnCommand(
+                sequence,
+                LiquidCargoKind.Water));
+            driver.Apply(sequence => new FreezeReturnPayloadCommand(
+                sequence,
+                transactionId,
+                fingerprint));
+            DriveUntil(driver, ExpeditionPhase.Returned, 400);
+            driver.Apply(sequence => new CreditCityReturnCommand(
+                sequence,
+                transactionId,
+                fingerprint));
+            driver.Apply(sequence =>
+                new FinalizeExpeditionTransactionCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            driver.Apply(sequence =>
+                new InstallTurbineRepairCommand(sequence));
+            driver.Advance(8);
+
+            byte[] canonical = LastBearingCanonicalCodec.Encode(driver.State);
+            LastBearingDecodeResult decoded =
+                LastBearingCanonicalCodec.TryDecode(canonical);
+            TestHarness.True(
+                decoded.Succeeded && decoded.State != null,
+                "take canonical reload");
+            TestHarness.True(
+                canonical.SequenceEqual(
+                    LastBearingCanonicalCodec.Encode(decoded.State!)),
+                "take canonical state mismatch after reload");
+            LastBearingReadModel outcome =
+                LastBearingReadModel.FromState(decoded.State!);
+            TestHarness.Equal(
+                TurbineCondition.BearingRepaired,
+                outcome.TurbineCondition,
+                "take turbine repair");
+            TestHarness.Equal(
+                RepairCargoCustody.Turbine,
+                outcome.RepairCargoCustody,
+                "take terminal bearing custody");
+            TestHarness.Equal(
+                FactionClaimState.Aggrieved,
+                outcome.FactionClaimState,
+                "take faction claim state");
+            TestHarness.Equal(
+                FactionAccessPolicy.Closed,
+                outcome.FactionAccessPolicy,
+                "take faction access policy");
+            TestHarness.Equal(
+                FactionAidPolicy.Withheld,
+                outcome.FactionAidPolicy,
+                "take faction aid policy");
+            TestHarness.True(
+                outcome.FactionGrievance > before.FactionGrievance,
+                "take grievance did not persist");
+            TestHarness.True(
+                outcome.FutureRouteTollFuelUnits > 0,
+                "take future toll missing");
+
+            int factionBehaviorChanges = 0;
+            factionBehaviorChanges += before.FactionAccessPolicy
+                != outcome.FactionAccessPolicy ? 1 : 0;
+            factionBehaviorChanges += before.FactionAidPolicy
+                != outcome.FactionAidPolicy ? 1 : 0;
+            factionBehaviorChanges += before.FactionTrust
+                != outcome.FactionTrust ? 1 : 0;
+            factionBehaviorChanges += before.FactionGrievance
+                != outcome.FactionGrievance ? 1 : 0;
+            TestHarness.True(
+                factionBehaviorChanges >= 2,
+                "take changed fewer than two faction behaviors");
+
+            int changedDomains = 0;
+            changedDomains += before.TurbineCondition
+                != outcome.TurbineCondition ? 1 : 0;
+            changedDomains += before.TransactionPhase
+                != outcome.TransactionPhase ? 1 : 0;
+            changedDomains += factionBehaviorChanges > 0 ? 1 : 0;
+            changedDomains += before.DepotControl
+                != outcome.DepotControl ? 1 : 0;
+            TestHarness.True(
+                changedDomains >= 3,
+                "take changed fewer than three persistent domains");
+        }
+
         private static CoreTestDriver ReadyForRoad(
             ColonyComposition composition,
             string residentId,
@@ -461,6 +657,8 @@ namespace AtomicLandPirate.LastBearingTests
             driver.Apply(sequence => new ResolveDepotCommand(
                 sequence,
                 EncounterChoice.Cooperate));
+            driver.Apply(sequence =>
+                new LoadDepotRepairCargoCommand(sequence));
             if (module == VehicleModule.SealedRangeTank)
             {
                 LiquidCargoKind liquid = choice == PreparationChoice.CivicBuffer
