@@ -8,8 +8,43 @@
   "created_at": "2026-07-17T04:46:30Z",
   "attested_by": "AC-21",
   "attestation_receipt_id": "RR-WP0002-ACTIVATE-20260717",
+  "boundary_amendments": [
+    {
+      "amendment_id": "A1B-WP-0002-LOCAL-OPERATOR-20260717",
+      "amendment_kind": "append-only-delegated-local-operator",
+      "previous_boundary_sha256": "770f46788ab927bc18638851b220b33e89adb3ee4d5dcfd08b82fcb587dbff52",
+      "authorization_receipt_id": "RR-WP0002-LOCAL-OPERATOR-20260717",
+      "required_claim": "AUTHORIZE-WP0002-DELEGATED-LOCAL-UNITY-OPERATOR",
+      "governance_record": "governance/WP-0002-DELEGATED-LOCAL-UNITY-OPERATOR-AMENDMENT.md",
+      "packet_contract_changed": false,
+      "materialization_control": {
+        "classification": "creator-controlled-control-plane-configuration-not-a1-implementation-authority",
+        "temporary_nonrequired_check": "wp0002-policy",
+        "exact_final_pr_head_and_patch_binding_required": true,
+        "retained_required_checks": [
+          "validate",
+          "wp0002-core"
+        ],
+        "retained_protections": [
+          "strict-up-to-date",
+          "pull-request-required",
+          "enforce-admins",
+          "conversation-resolution-required",
+          "linear-history-required",
+          "no-bypass-allowances",
+          "force-push-disabled",
+          "deletion-disabled",
+          "squash-only"
+        ],
+        "creator_delegated_squash_merge_only": true,
+        "restore_wp0002_policy_immediately_after_merge": true,
+        "fresh_canary_pr": "first-post-restoration-implementation-pr",
+        "general_protection_bypass_authorized": false
+      }
+    }
+  ],
   "repository": {
-    "root": "/Users/sasha/Documents/Codex/sasha-the-land-pirate",
+    "root": "/Users/sasha/Projects/sasha-the-land-pirate",
     "remote_url": "https://github.com/AC-21/sasha-the-land-pirate",
     "base_commit": "f83ef8aa4d2bac7d0c8817180feebc24c0c1e835",
     "branch": "agent/wp0002-activation-20260717t160516z-c92f112705a1",
@@ -18,7 +53,7 @@
     "independent_git_directory": true,
     "shared_worktree": false,
     "clean_at_activation": false,
-    "game_project_path": "/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game"
+    "game_project_path": "/Users/sasha/Projects/sasha-the-land-pirate/Game"
   },
   "reservation": {
     "lease_id": "lease-20260717t160516z-c92f112705a1-b8c98c1cf9915678",
@@ -62,7 +97,7 @@
   },
   "unity": {
     "editor_version": "6000.5.4f1",
-    "project_path": "/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game",
+    "project_path": "/Users/sasha/Projects/sasha-the-land-pirate/Game",
     "project_state": "existing-protected-project",
     "mcp_authorization_mode": "conditional-first-use",
     "first_use_preconditions": [
@@ -72,7 +107,133 @@
       "codex-selected-and-approved",
       "target-matches-game",
       "requested-call-within-allowed-actions"
+    ],
+    "successor_first_use_preconditions": [
+      "creator-or-receipt-bound-delegated-local-operator-opened-or-switched-exact-game-project",
+      "creator-confirmed-licensed-editor",
+      "bridge-running",
+      "exact-visible-receipt-bound-codex-client-identity-matched-and-approved",
+      "target-matches-game",
+      "requested-call-within-allowed-actions"
     ]
+  },
+  "delegated_local_unity_operator": {
+    "authorization_receipt_id": "RR-WP0002-LOCAL-OPERATOR-20260717",
+    "effective_authority_condition": "all-three-transaction-reports-validated-in-protected-main-after-evidence-closure-pr",
+    "control_pr_merge_alone_authorizes_actions": false,
+    "interaction_route": "computer-use-visible-ui-only",
+    "repository_root": "/Users/sasha/Projects/sasha-the-land-pirate",
+    "project_path": "/Users/sasha/Projects/sasha-the-land-pirate/Game",
+    "authorized_application_bundles": [
+      {
+        "bundle_id": "com.unity3d.unityhub",
+        "bundle_path": "/Applications/Unity Hub.app",
+        "role": "project-add-open-switch"
+      },
+      {
+        "bundle_id": "com.unity3d.UnityEditor5.x",
+        "bundle_path": "/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app",
+        "role": "project-open-bridge-approval-and-inspection"
+      }
+    ],
+    "authorized_actions": [
+      "add-exact-canonical-project-to-unity-hub",
+      "open-or-switch-to-exact-canonical-project-in-unity-hub-or-editor",
+      "approve-or-reapprove-trusted-codex-mcp-client-in-visible-unity-bridge-ui",
+      "inspect-visible-non-secret-seat-organization-project-editor-package-bridge-tool-console-and-hierarchy-state"
+    ],
+    "trusted_codex_client_identity": {
+      "approval_authority": "bridge-visible-os-publisher-and-path-plus-receipt-bound-prior-host-observation",
+      "visible_bridge_match": {
+        "client_label": "codex-mcp-client",
+        "publisher_display_name": "OpenAI OpCo, LLC",
+        "executable_path": "/Applications/ChatGPT.app/Contents/Resources/codex",
+        "connection_state": "Accepted",
+        "all_fields_required": true
+      },
+      "application_version_match": {
+        "path": "/Applications/ChatGPT.app",
+        "bundle_identifier": "com.openai.codex",
+        "version": "26.707.91948",
+        "build": "5440",
+        "all_fields_required": true
+      },
+      "prior_host_signature_observation": {
+        "evidence_path": "docs/evidence/WP-0001/COMPONENT-SIGNATURE-RECHECK-20260716.md",
+        "observation_scope": "context-limited-a0-read-only-host-diagnostic-not-authoritative-a1-verification",
+        "application_cdhash_observed": "3972f0bc0675d00e71d20be5009b5b5c22b3d905",
+        "bridge_cdhash_observed": "398aca71386fdc89bd7a9e30cceefe36764c3809",
+        "bridge_sha256_observed": "bdcb530615d44fcc7b35d12fe00f30c3025c25fc22a21193591dcdb064304385",
+        "team_identifier": "2DC432GLL2",
+        "designated_requirement": "identifier codex and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] exists and certificate leaf[field.1.2.840.113635.100.6.1.13] exists and certificate leaf[subject.OU] = \"2DC432GLL2\"",
+        "signing_context_gap_resolved": false
+      },
+      "visible_ui_proves_cdhash_or_designated_requirement": false,
+      "current_approval_condition": "all-visible-bridge-fields-and-application-version-build-match-receipt-bound-prior-observation",
+      "update_policy": "any-visible-field-or-version-build-drift-denies-approval-until-new-receipt-and-re-attestation"
+    },
+    "existing_cloud_project_linkage": {
+      "cloud_project_id": "b2f6f654-8c39-4360-bc5e-26a62e50e159",
+      "cloud_project_id_sha256": "0bc8f812dc0be6e99edcea952518fe09437762f5353d450c76e0e62992ab56e1",
+      "organization_id": "unity_2d2aeb94bdf989c70701",
+      "organization_id_sha256": "9b502c7e60d87721337fb9836a5bcfbaa6624d472e480de7ecbb328bf97d622a",
+      "identifiers_are_non_secret": true,
+      "cloud_enabled_asserted": false,
+      "account_or_cloud_configuration_change_authorized": false
+    },
+    "creator_delegation_limits": {
+      "creator_presence_required_for_repeated_exact_actions": false,
+      "identity_impersonation_authorized": false,
+      "external_communication_or_creator_commitment_authorized": false,
+      "new_authority_inference_authorized": false,
+      "action_attribution": "creator-authorized-local-operation-by-Codex"
+    },
+    "shell-cli-batchmode-or-headless-unity-authorized": false
+  },
+  "local_operator_transaction_evidence_contract": {
+    "schema_path": "docs/foundation-v0.1/schemas/wp0002-local-operator-transaction-evidence.schema.json",
+    "online_verifier_path": "Tools/Validation/verify_wp0002_local_operator_transaction.py",
+    "online_authentication_required": true,
+    "offline_validation_scope": "structural-and-content-consistency-only-not-live-github-authentication",
+    "phases": [
+      "authority",
+      "pre-merge",
+      "complete"
+    ],
+    "authority_comment_policy": "refetch-and-reject-id-actor-association-updated-at-or-body-hash-drift",
+    "normalized_extra_or_missing_keys_rejected": true,
+    "raw_github_responses_hash_bound": true,
+    "receipt_artifact_key_policy": "exact-stage1-changed-file-set-plus-authenticated-authority-comment",
+    "receipt_delta_policy": "exactly-one-added-regular-receipt-file",
+    "protection_evidence_phases": [
+      "before",
+      "during",
+      "after"
+    ],
+    "repository_ruleset_policy": "exact-empty-inventory-before-during-after",
+    "pending_without_repository_evidence": "valid-control-materialization-but-successor-non-executable",
+    "partial_repository_evidence_rejected": true,
+    "evidence_closure_policy": "separate-protected-evidence-only-pr-after-control-squash-restoration-and-completion-comment",
+    "evidence_closure_delta_policy": "exact-three-regular-added-report-files-and-no-other-delta",
+    "evidence_closure_required_checks": [
+      "validate",
+      "wp0002-core",
+      "wp0002-policy"
+    ],
+    "evidence_closure_online_reverification": "base-owned-wp0002-policy-refetches-owner-comments-control-pr-main-checks-and-restored-protection",
+    "closure_verifier_execution": "protected-base-verifier-sha256-checked-before-execution-no-candidate-code",
+    "closure_protection_authentication": "base-owned-workflow-single-repository-short-expiry-administration-read-secret-never-candidate-code",
+    "maximum_restoration_delay_seconds": 600,
+    "successor_authority_condition": "all-three-reports-validated-and-evidence-closure-merged-to-protected-main",
+    "completion_required_before_successor_authority": true,
+    "protected_transaction_paths": [
+      "Tools/Validation/verify_wp0002_local_operator_transaction.py"
+    ],
+    "repository_evidence_paths": {
+      "authority": "docs/evidence/WP-0002/local-operator-amendment/authority.json",
+      "pre-merge": "docs/evidence/WP-0002/local-operator-amendment/pre-merge.json",
+      "complete": "docs/evidence/WP-0002/local-operator-amendment/complete.json"
+    }
   },
   "allowed_mcp_tools": [
     "Unity_ReadConsole",
@@ -134,6 +295,13 @@
   "working_tree_scope_capture": {
     "uri": "repo://docs/evidence/WP-0002/scope-capture/working-tree-scope.json",
     "sha256": "a65d37c6a140eb68158103902b842e1cd049643a4a27c8420ec035af07fd5c30"
+  },
+  "local_operator_amendment_scope_capture": {
+    "uri": "repo://docs/evidence/WP-0002/local-operator-amendment/scope-capture/working-tree-scope.json",
+    "sha256": "5eef772b1566c0b0a680d861f8e4ffc7b0e8acd7191c19b13e2f0b3eed8376ec",
+    "base_commit": "375416c0dd7f60c2a36f9a7d8f7df819d74b60eb",
+    "head_commit": "375416c0dd7f60c2a36f9a7d8f7df819d74b60eb",
+    "checkpoint_commit": "375416c0dd7f60c2a36f9a7d8f7df819d74b60eb"
   },
   "github_protection_capture": {
     "required_schema": "wp0002-github-protection-v1",
@@ -248,7 +416,10 @@
       "git-commit-push-protected-pr",
       "creator-delegated-manual-release-after-required-checks",
       "link-exact-repository-local-upm-simulation-core-and-save-contracts",
-      "unity-runtime-savecontracts-write-fixed-last-bearing-dev-v1-child"
+      "unity-runtime-savecontracts-write-fixed-last-bearing-dev-v1-child",
+      "computer-use-local-unity-hub-editor-exact-project-open-switch",
+      "computer-use-approve-trusted-codex-unity-bridge-connection",
+      "computer-use-non-secret-unity-state-inspection"
     ],
     "denied_actions": [
       "direct-unity-process-invocation",
@@ -262,7 +433,9 @@
       "foundation-governance-receipt-write-during-implementation",
       "package-graph-change-except-two-exact-repository-local-upm-links",
       "registry-network-git-tarball-or-external-dependency-change",
-      "agent-or-manual-direct-merge"
+      "agent-or-manual-direct-merge",
+      "computer-use-unity-bridge-tool-or-configuration-mutation",
+      "computer-use-approve-different-or-unattested-client"
     ],
     "protected_paths_read_only": [
       "AGENTS.md",
@@ -276,6 +449,7 @@
       "Tools/Validation/validate_wp0002_entry_gate.py",
       "Tools/Validation/validate_wp0002_policy.py",
       "Tools/Validation/collect_wp0002_scope_capture.py",
+      "Tools/Validation/verify_wp0002_local_operator_transaction.py",
       ".github/workflows/wp0002-ci.yml",
       ".github/workflows/wp0002-policy.yml",
       "SimulationCore/README.md",
