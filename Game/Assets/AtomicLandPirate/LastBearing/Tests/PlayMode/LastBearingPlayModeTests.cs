@@ -753,7 +753,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             LastBearingGameController controller =
                 UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
-            controller.enabled = false;
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
             InstallControllerState(controller, CreateOutboundState());
             RoadFeelRigInstance roadRig = controller.World!.RoadFeelRig!;
             long progressBefore = controller.ReadModel!.RouteProgressTicks;
@@ -926,8 +926,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             RoadFeelChaseCamera chaseCamera = world.RoadChaseCamera!;
             RoadFeelRigInstance roadRig = world.RoadFeelRig!;
             Camera sharedCamera = world.MainCamera!;
-            string hashBefore = controller.CanonicalHash;
-            LastBearingState stateBefore = controller.State!;
+            controller.Save();
+            Dictionary<string, string> saveBefore =
+                SnapshotSaveFiles(profileDirectory);
+            long globalTickBefore = controller.State!.GlobalTick;
+            long sequenceBefore = controller.State.NextCommandSequence;
+            long routeProgressBefore = controller.State.RouteProgressTicks;
+            long conditionBefore = controller.State.VehicleConditionMilli;
+            HeavyCargoCustody custodyBefore =
+                controller.State.HeavyCargoCustody;
             int pendingBefore = PendingCommandCount(controller);
             string statusBefore = controller.Status;
             string saveStatusBefore = controller.SaveStatus;
@@ -940,9 +947,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 "LAST_BEARING_CHASE_CAMERA_DISABLED ownership-lost");
 
             chaseCamera.enabled = false;
-            yield return null;
+            yield return new WaitForSecondsRealtime(0.25f);
 
             AssertCameraOwnership(controller, chaseActive: false);
+            Assert.That(cameraRig.IsRoadChaseRecoveryRequired, Is.True);
             Assert.That(cameraRig.IsRoadMode, Is.True);
             Assert.That(
                 cameraRig.RoadTarget,
@@ -955,17 +963,88 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(roadRig.Vehicle.Body.isKinematic, Is.False);
             AssertFixedRoadFallbackPose(sharedCamera, roadRig.Root.transform);
 
-            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBefore));
-            Assert.That(controller.State, Is.SameAs(stateBefore));
+            Assert.That(controller.State!.GlobalTick, Is.GreaterThan(globalTickBefore));
+            Assert.That(controller.State.NextCommandSequence, Is.EqualTo(sequenceBefore));
+            Assert.That(controller.State.RouteProgressTicks, Is.EqualTo(routeProgressBefore));
+            Assert.That(controller.State.VehicleConditionMilli, Is.EqualTo(conditionBefore));
+            Assert.That(controller.State.HeavyCargoCustody, Is.EqualTo(custodyBefore));
             Assert.That(PendingCommandCount(controller), Is.EqualTo(pendingBefore));
             Assert.That(controller.Status, Is.EqualTo(statusBefore));
             Assert.That(controller.SaveStatus, Is.EqualTo(saveStatusBefore));
+            AssertSaveSnapshot(saveBefore, SnapshotSaveFiles(profileDirectory));
 
             Assert.That(
                 controller.CanRecoverRoadPresentation,
                 Is.True,
                 "active Driving keeps explicit recovery available so the player " +
                 "can deliberately reclaim chase ownership");
+
+            string hashBeforeRecovery = controller.CanonicalHash;
+            LastBearingState stateBeforeRecovery = controller.State;
+            Assert.That(controller.RecoverRoadPresentation(), Is.True);
+            AssertCameraOwnership(controller, chaseActive: true);
+            Assert.That(cameraRig.IsRoadChaseRecoveryRequired, Is.False);
+            AssertChaseCameraLooksBehindSasha(world, roadRig);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBeforeRecovery));
+            Assert.That(controller.State, Is.SameAs(stateBeforeRecovery));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(pendingBefore));
+            Assert.That(controller.SaveStatus, Is.EqualTo(saveStatusBefore));
+            AssertSaveSnapshot(saveBefore, SnapshotSaveFiles(profileDirectory));
+        }
+
+        [UnityTest]
+        public IEnumerator MissingVehicleControllerMakesManualRecoveryFailClosed()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
+            InstallControllerState(controller, CreateOutboundState());
+
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingModeCoordinator coordinator = controller.ModeCoordinator!;
+            RoadFeelRigInstance roadRig = world.RoadFeelRig!;
+            Rigidbody body = roadRig.Vehicle.Body;
+            controller.Save();
+            Dictionary<string, string> saveBefore =
+                SnapshotSaveFiles(profileDirectory);
+            string hashBefore = controller.CanonicalHash;
+            LastBearingState stateBefore = controller.State!;
+            int pendingBefore = PendingCommandCount(controller);
+            string statusBefore = controller.Status;
+            string saveStatusBefore = controller.SaveStatus;
+
+            Assert.That(controller.CanRecoverRoadPresentation, Is.True);
+            AssertCameraOwnership(controller, chaseActive: true);
+            UnityEngine.Object.DestroyImmediate(roadRig.Vehicle);
+            LogAssert.Expect(
+                LogType.Warning,
+                "LAST_BEARING_ROAD_PRESENTATION_DISABLED " +
+                "manual-recovery-reactivate InvalidOperationException");
+
+            Assert.That(controller.RecoverRoadPresentation(), Is.False);
+
+            Assert.That(coordinator.RoadAdapterFaulted, Is.True);
+            Assert.That(coordinator.HasRoadAdapter, Is.False);
+            Assert.That(coordinator.IsRoadPresentationActive, Is.False);
+            Assert.That(controller.CanRecoverRoadPresentation, Is.False);
+            AssertCameraOwnership(controller, chaseActive: false);
+            Assert.That(roadRig.Root.activeInHierarchy, Is.False);
+            Assert.That(body.gameObject.activeInHierarchy, Is.False);
+            Assert.That(world.VehicleView!.gameObject.activeInHierarchy, Is.True);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBefore));
+            Assert.That(controller.State, Is.SameAs(stateBefore));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(pendingBefore));
+            Assert.That(controller.Status, Is.EqualTo(statusBefore));
+            Assert.That(controller.SaveStatus, Is.EqualTo(saveStatusBefore));
+            AssertSaveSnapshot(saveBefore, SnapshotSaveFiles(profileDirectory));
         }
 
         [UnityTest]

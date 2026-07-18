@@ -267,6 +267,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _roadRunRequested = false;
             _roadRecoveryHoldRequested = false;
             _roadModulePointHoldRequested = false;
+            _cameraRig?.ResetRoadChaseFailure();
             SuspendRoadAdapter("clear-session");
             ApplyPresentationOwnership();
         }
@@ -381,7 +382,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (!TryInvokeRoadAdapter(
                     "manual-recovery-suspend",
-                    adapter => adapter.SetRoadModeActive(false)))
+                    adapter => SetRoadModeActiveOrThrow(
+                        adapter,
+                        active: false)))
             {
                 return false;
             }
@@ -400,14 +403,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (!TryInvokeRoadAdapter(
                     "manual-recovery-reactivate",
-                    adapter => adapter.SetRoadModeActive(true)))
+                    adapter => SetRoadModeActiveOrThrow(
+                        adapter,
+                        active: true)))
             {
                 return false;
             }
 
             _roadPresentationActive = true;
+            bool chaseRecovered =
+                _cameraRig?.TryRecoverRoadChaseOwnership() == true;
             ApplyPresentationOwnership();
-            return true;
+            return chaseRecovered;
         }
 
         public static LastBearingPresentationMode ResolveMode(
@@ -495,7 +502,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (!TryInvokeRoadAdapter(
                     "activate-road",
-                    adapter => adapter.SetRoadModeActive(true)))
+                    adapter => SetRoadModeActiveOrThrow(
+                        adapter,
+                        active: true)))
             {
                 return;
             }
@@ -515,7 +524,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (!TryInvokeRoadAdapter(
                     "hold-recovery-suspend",
-                    adapter => adapter.SetRoadModeActive(false)))
+                    adapter => SetRoadModeActiveOrThrow(
+                        adapter,
+                        active: false)))
             {
                 return;
             }
@@ -549,9 +560,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 operation,
                 adapter =>
                 {
-                    adapter.SetRoadModeActive(false);
+                    SetRoadModeActiveOrThrow(adapter, active: false);
                     adapter.ResetPresentation();
                 });
+        }
+
+        private static void SetRoadModeActiveOrThrow(
+            ILastBearingRoadModeAdapter adapter,
+            bool active)
+        {
+            adapter.SetRoadModeActive(active);
+            if (adapter.IsRoadModeActive != active)
+            {
+                throw new InvalidOperationException(
+                    "road adapter refused the requested active state");
+            }
         }
 
         private bool TryInvokeRoadAdapter(

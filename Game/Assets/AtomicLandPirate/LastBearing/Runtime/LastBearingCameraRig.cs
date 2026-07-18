@@ -35,6 +35,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private float _cityDistance = ComparisonDistance;
         private bool _roadMode;
         private bool _roadChaseActive;
+        private bool _roadChaseRecoveryRequired;
         private bool _comparisonMode;
         private bool _inspectionMode;
 
@@ -47,6 +48,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool IsInspectionMode => _inspectionMode;
 
         public bool IsRoadChaseActive => HasLiveRoadChaseOwnership();
+
+        public bool IsRoadChaseRecoveryRequired =>
+            _roadChaseRecoveryRequired;
 
         public bool HasConfiguredRoadChase =>
             _roadChaseCamera?.IsConfigured == true;
@@ -94,49 +98,81 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void SetRoadChaseActive(bool active)
         {
-            if (active && HasLiveRoadChaseOwnership())
+            if (!active)
             {
-                return;
-            }
-
-            if (!active &&
-                !_roadChaseActive &&
-                !IsRoadChaseComponentActive())
-            {
-                return;
-            }
-
-            if (active)
-            {
-                if (_roadChaseCamera == null ||
-                    !_roadChaseCamera.IsConfigured)
+                if (!_roadChaseActive &&
+                    !IsRoadChaseComponentActive())
                 {
-                    EndRoadChaseOwnership();
                     return;
                 }
 
-                try
-                {
-                    _roadChaseCamera.SetChaseActive(true);
-                    _roadChaseActive = _roadChaseCamera.IsChaseActive;
-                    if (!_roadChaseActive)
-                    {
-                        EndRoadChaseOwnership();
-                    }
-                }
-                catch (System.Exception exception)
-                {
-                    Debug.LogWarning(
-                        "LAST_BEARING_CHASE_CAMERA_DISABLED activation " +
-                        exception.GetType().Name,
-                        this);
-                    EndRoadChaseOwnership();
-                }
-
+                EndRoadChaseOwnership();
                 return;
             }
 
+            if (_roadChaseActive && !HasLiveRoadChaseOwnership())
+            {
+                FailClosedIfRoadChaseOwnershipWasLost();
+                return;
+            }
+
+            if (_roadChaseRecoveryRequired)
+            {
+                EndRoadChaseOwnership();
+                return;
+            }
+
+            if (HasLiveRoadChaseOwnership())
+            {
+                return;
+            }
+
+            if (_roadChaseCamera == null ||
+                !_roadChaseCamera.IsConfigured)
+            {
+                _roadChaseRecoveryRequired = true;
+                EndRoadChaseOwnership();
+                return;
+            }
+
+            try
+            {
+                _roadChaseCamera.SetChaseActive(true);
+                _roadChaseActive = _roadChaseCamera.IsChaseActive;
+                if (!_roadChaseActive)
+                {
+                    _roadChaseRecoveryRequired = true;
+                    EndRoadChaseOwnership();
+                }
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogWarning(
+                    "LAST_BEARING_CHASE_CAMERA_DISABLED activation " +
+                    exception.GetType().Name,
+                    this);
+                _roadChaseRecoveryRequired = true;
+                EndRoadChaseOwnership();
+            }
+        }
+
+        public bool TryRecoverRoadChaseOwnership()
+        {
+            _roadChaseRecoveryRequired = false;
+            SetRoadChaseActive(true);
+            if (HasLiveRoadChaseOwnership())
+            {
+                return true;
+            }
+
+            _roadChaseRecoveryRequired = true;
             EndRoadChaseOwnership();
+            return false;
+        }
+
+        public void ResetRoadChaseFailure()
+        {
+            _roadChaseRecoveryRequired = false;
         }
 
         public void SetComparisonMode(bool comparisonMode)
@@ -370,6 +406,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Debug.LogWarning(
                 "LAST_BEARING_CHASE_CAMERA_DISABLED ownership-lost",
                 this);
+            _roadChaseRecoveryRequired = true;
             EndRoadChaseOwnership();
         }
 

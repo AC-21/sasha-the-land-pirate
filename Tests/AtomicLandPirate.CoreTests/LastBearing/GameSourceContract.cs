@@ -308,11 +308,15 @@ namespace AtomicLandPirate.LastBearingTests
             Require(camera, "public const float StrategyFieldOfView = 40f;");
             Require(camera, "SetRoadChaseActive");
             Require(camera, "IsRoadChaseActive");
+            Require(camera, "IsRoadChaseRecoveryRequired");
             Require(camera, "HasConfiguredRoadChase");
             Require(camera, "if (_roadChaseActive)");
             Require(camera, "_camera.fieldOfView = StrategyFieldOfView;");
             Require(camera, "FailClosedIfRoadChaseOwnershipWasLost");
             Require(camera, "EndRoadChaseOwnership");
+            Require(camera, "TryRecoverRoadChaseOwnership");
+            Require(camera, "ResetRoadChaseFailure");
+            Require(camera, "_roadChaseRecoveryRequired = true;");
             Require(
                 camera,
                 "LAST_BEARING_CHASE_CAMERA_DISABLED ownership-lost");
@@ -451,18 +455,21 @@ namespace AtomicLandPirate.LastBearingTests
             Require(modeCoordinator, "ApplyPresentationOwnership");
             Require(modeCoordinator, "CanRecoverRoadPresentation");
             Require(modeCoordinator, "SetRoadChaseActive(");
+            Require(modeCoordinator, "SetRoadModeActiveOrThrow");
+            Require(modeCoordinator, "adapter.IsRoadModeActive != active");
             string manualRecovery = Segment(
                 modeCoordinator,
                 "public bool TryRecoverRoadPresentation()",
                 "public static LastBearingPresentationMode ResolveMode(");
-            Require(manualRecovery, "adapter.SetRoadModeActive(false)");
+            Require(manualRecovery, "active: false");
             Require(manualRecovery, "_roadPresentationActive = false;");
             Require(manualRecovery, "canonicalVehicle.SnapToCanonicalRoadPose()");
             Require(manualRecovery, "adapter.SynchronizePresentationPose(");
-            Require(manualRecovery, "adapter.SetRoadModeActive(true)");
+            Require(manualRecovery, "active: true");
             Require(manualRecovery, "_roadPresentationActive = true;");
+            Require(manualRecovery, "TryRecoverRoadChaseOwnership()");
             int manualSuspend = manualRecovery.IndexOf(
-                "adapter.SetRoadModeActive(false)",
+                "active: false",
                 StringComparison.Ordinal);
             int localYield = manualRecovery.IndexOf(
                 "_roadPresentationActive = false;",
@@ -477,20 +484,25 @@ namespace AtomicLandPirate.LastBearingTests
                 canonicalSnap,
                 StringComparison.Ordinal);
             int manualReactivate = manualRecovery.IndexOf(
-                "adapter.SetRoadModeActive(true)",
+                "active: true",
                 presentationSync,
                 StringComparison.Ordinal);
             int chaseReclaim = manualRecovery.IndexOf(
                 "_roadPresentationActive = true;",
                 manualReactivate,
                 StringComparison.Ordinal);
+            int cameraReclaim = manualRecovery.IndexOf(
+                "TryRecoverRoadChaseOwnership()",
+                chaseReclaim,
+                StringComparison.Ordinal);
             TestHarness.True(
                 manualSuspend >= 0 && localYield > manualSuspend &&
                 canonicalSnap > localYield && presentationSync > canonicalSnap &&
                 manualReactivate > presentationSync &&
-                chaseReclaim > manualReactivate,
+                chaseReclaim > manualReactivate &&
+                cameraReclaim > chaseReclaim,
                 "manual recovery must suspend, yield camera, snap, synchronize, " +
-                "reactivate, then restore chase ownership in that order");
+                "reactivate physics, then explicitly reclaim chase ownership");
             foreach (string forbidden in new[]
             {
                 "Queue(",
@@ -562,12 +574,13 @@ namespace AtomicLandPirate.LastBearingTests
                 modeCoordinator,
                 "private void HoldRoadAdapterAtCanonicalRecoveryPose()",
                 "private void SuspendRoadAdapter");
-            Require(recoveryHold, "adapter.SetRoadModeActive(false)");
+            Require(recoveryHold, "SetRoadModeActiveOrThrow");
+            Require(recoveryHold, "active: false");
             Require(recoveryHold, "_canonicalVehicle.SnapToCanonicalRoadPose()");
             Require(recoveryHold, "adapter.SynchronizePresentationPose(");
             TestHarness.True(
                 recoveryHold.IndexOf(
-                    "adapter.SetRoadModeActive(false)",
+                    "active: false",
                     StringComparison.Ordinal) <
                 recoveryHold.IndexOf(
                     "_canonicalVehicle.SnapToCanonicalRoadPose()",
@@ -587,7 +600,8 @@ namespace AtomicLandPirate.LastBearingTests
                 "private void SuspendRoadAdapter");
             Require(roadActivation, "_canonicalVehicle.SnapToCanonicalRoadPose()");
             Require(roadActivation, "adapter.SynchronizePresentationPose(");
-            Require(roadActivation, "adapter.SetRoadModeActive(true)");
+            Require(roadActivation, "SetRoadModeActiveOrThrow");
+            Require(roadActivation, "active: true");
             TestHarness.True(
                 roadActivation.IndexOf(
                     "_canonicalVehicle.SnapToCanonicalRoadPose()",
@@ -601,7 +615,7 @@ namespace AtomicLandPirate.LastBearingTests
                     "adapter.SynchronizePresentationPose(",
                     StringComparison.Ordinal) <
                 roadActivation.IndexOf(
-                    "adapter.SetRoadModeActive(true)",
+                    "active: true",
                     StringComparison.Ordinal),
                 "road pose must synchronize while suspended before physics activation");
             TestHarness.True(

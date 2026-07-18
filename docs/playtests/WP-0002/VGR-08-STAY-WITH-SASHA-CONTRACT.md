@@ -96,6 +96,13 @@ authorized accessibility or anti-stuck design.
 - A chase-camera or adapter failure must fail closed to the existing canonical
   vehicle presentation. It cannot block canonical driving, interaction,
   save/load, or mode progression.
+- A lost chase owner latches the fixed-road fallback for the active session;
+  canonical refresh, pause/resume, and interaction holds cannot silently
+  reacquire it. Only a successful explicit local-rig recovery may reclaim
+  chase ownership before title, new game, or load resets the session latch.
+- Adapter activation and manual reactivation must confirm the adapter reports
+  road mode active. A non-throwing refusal is a fault, not a successful
+  recovery, and detaches through the same fail-closed boundary.
 - Recovery replay is harmless presentation reset behavior, not semantic
   idempotency evidence for a gameplay command.
 
