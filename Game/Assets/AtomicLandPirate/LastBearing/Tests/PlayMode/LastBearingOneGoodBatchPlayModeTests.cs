@@ -54,9 +54,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     world.MainCamera!.transform.position,
                     view.CameraAnchor!.position),
                 Is.LessThan(0.15f));
-            Assert.That(
-                Object.FindObjectsByType<Camera>(FindObjectsInactive.Include),
-                Has.Length.EqualTo(1));
+            Camera[] runtimeCameras =
+                controller.GetComponentsInChildren<Camera>(true);
+            Assert.That(runtimeCameras, Has.Length.EqualTo(1));
+            Assert.That(runtimeCameras[0], Is.SameAs(world.MainCamera));
 
             view.Apply(
                 batchStartAvailable: false,
@@ -151,9 +152,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             yield return null;
 
             Assert.That(workshop.IsPermitGrantedVisible, Is.True);
-            Assert.That(
-                Object.FindObjectsByType<Camera>(FindObjectsInactive.Include),
-                Has.Length.EqualTo(1));
+            Camera[] runtimeCameras =
+                controller.GetComponentsInChildren<Camera>(true);
+            Assert.That(runtimeCameras, Has.Length.EqualTo(1));
+            Assert.That(runtimeCameras[0], Is.SameAs(world.MainCamera));
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
         }
     }

@@ -91,9 +91,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 CountNamedParts(view, "FUTURE_TOLL_FUEL_UNIT_"),
                 Is.EqualTo(2));
 
-            Assert.That(
-                Object.FindObjectsByType<Camera>(FindObjectsInactive.Include),
-                Has.Length.EqualTo(1));
+            Camera[] runtimeCameras =
+                controller.GetComponentsInChildren<Camera>(true);
+            Assert.That(runtimeCameras, Has.Length.EqualTo(1));
+            Assert.That(runtimeCameras[0], Is.SameAs(world.MainCamera));
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
         }
 
