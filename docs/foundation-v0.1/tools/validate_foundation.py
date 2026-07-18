@@ -94,6 +94,12 @@ WP0002_LOCAL_OPERATOR_ONLINE_VERIFIER = (
     / "Validation"
     / "verify_wp0002_local_operator_transaction_v3.py"
 )
+WP0002_LOCAL_OPERATOR_FORWARD_VERIFIER = (
+    REPO_ROOT
+    / "Tools"
+    / "Validation"
+    / "verify_wp0002_local_operator_transaction_v4.py"
+)
 WP0002_LOCAL_OPERATOR_RECOVERY_CONTROL_SCHEMA = (
     ROOT
     / "schemas"
@@ -1037,6 +1043,9 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
     "Tools/Validation/verify_wp0002_local_operator_transaction_v3.py": (
         "2d8cd873f0a8ee357848d18e2cb57f440f6fd28fb5817e7454f816d07dc8e52d"
     ),
+    "Tools/Validation/verify_wp0002_local_operator_transaction_v4.py": (
+        "5f02ee7fd59bb0a6eea5cac3ba26cbb7c82d59ae8ae1008ab58cb3b72c541d19"
+    ),
     "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json": (
         "ec95d5da2d9b216f9bbda23b94bb3c4b6214db65a46c627f1efa31c3b2d8468e"
     ),
@@ -1071,11 +1080,15 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
     "test_verify_wp0002_local_operator_transaction_v3.py": (
         "940b6253f6abfe4e4c6e656eafcffec504acf0985c6920764d34d09ed5ebe7a7"
     ),
+    "docs/foundation-v0.1/tools/"
+    "test_verify_wp0002_local_operator_transaction_v4.py": (
+        "115a1c46362856b1a9e3602a7aacc618daa1f9e2fbe27b0b95d62d1e002822c4"
+    ),
     ".github/workflows/wp0002-ci.yml": (
         "893cd3faacb887b2d9112c30e15a29b27fb8f3511001ef4091a04f1f88e2f0b9"
     ),
     ".github/workflows/wp0002-policy.yml": (
-        "540719548b44d1b6a21e5c930cdf84eb44cf732218092a40d6d5c021435abbfe"
+        "ac231e777812373d39375642d3a252296e04907326d25a14a87fede5fea8e564"
     ),
 }
 PACKET_TRANSITIONS = {
@@ -7054,6 +7067,18 @@ def _load_wp0002_transaction_verifier() -> tuple[dict[str, object] | None, list[
     )
 
 
+def _load_wp0002_forward_verifier() -> tuple[dict[str, object] | None, list[str]]:
+    """Load the hash-pinned forward verifier-fix pending-state validator."""
+    return _load_wp0002_pinned_module(
+        relative_path=(
+            "Tools/Validation/verify_wp0002_local_operator_transaction_v4.py"
+        ),
+        path=WP0002_LOCAL_OPERATOR_FORWARD_VERIFIER,
+        label="forward transaction verifier",
+        module_name="_foundation_wp0002_forward_transaction_verifier_pinned",
+    )
+
+
 def _load_wp0002_repo_evidence(
     reference: object,
     *,
@@ -7906,34 +7931,50 @@ def validate_wp0002_local_operator_transaction_evidence(
         phase for phase, path in resolved_paths.items() if path.is_file()
     }
     if not present_phases:
-        # The exact receipt-only control PR cannot contain reports generated
-        # after Stage-1 and after merge.  All-absent is therefore a valid but
-        # explicitly non-executable pending-evidence state; the separate
-        # protected closure PR must add all three together.
+        # Neither the exact receipt-only control PR nor the one exact forward
+        # verifier-fix child can contain reports generated after Stage-1 and
+        # after merge. All-absent is valid only when one of those two protected
+        # validators proves the complete pending Git shape and content.
         if (
             amendment_receipt.get("receipt_id")
             == WP0002_LOCAL_OPERATOR_RECOVERY_RECEIPT_ID
         ):
             verifier, verifier_errors = _load_wp0002_transaction_verifier()
-            errors.extend(verifier_errors)
+            pending_state_valid = False
             if verifier is not None:
                 repository_type = verifier.get("GitRepository")
                 pending_validator = verifier.get("validate_pending_receipt_child")
-                if not callable(repository_type) or not callable(pending_validator):
-                    errors.append(
-                        "WP-0002 protected verifier lacks pending receipt-child validation"
-                    )
-                else:
+                if callable(repository_type) and callable(pending_validator):
                     try:
                         pending_validator(
                             repository_type(REPO_ROOT),
                             amendment_receipt,
                         )
-                    except Exception as exc:
-                        errors.append(
-                            "WP-0002 pending receipt-only child validation failed: "
-                            f"{exc}"
-                        )
+                    except Exception:
+                        pass
+                    else:
+                        pending_state_valid = True
+            if not pending_state_valid:
+                forward, forward_errors = _load_wp0002_forward_verifier()
+                if forward is not None:
+                    repository_type = forward.get("GitRepository")
+                    pending_validator = forward.get(
+                        "validate_pending_v4_fix_head"
+                    )
+                    if callable(repository_type) and callable(pending_validator):
+                        try:
+                            pending_validator(repository_type(REPO_ROOT))
+                        except Exception:
+                            pass
+                        else:
+                            pending_state_valid = True
+                if not pending_state_valid:
+                    errors.extend(verifier_errors)
+                    errors.extend(forward_errors)
+                    errors.append(
+                        "WP-0002 pending state is neither the exact receipt-only "
+                        "child nor the exact forward verifier-fix child"
+                    )
         return errors
     if present_phases != {"authority", "pre-merge", "complete"}:
         return [
