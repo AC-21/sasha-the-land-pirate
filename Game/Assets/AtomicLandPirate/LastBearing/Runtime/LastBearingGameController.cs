@@ -35,6 +35,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private float _accumulator;
         private bool _initialized;
         private bool _cityNeedInspected;
+        private PreparationChoice _garagePreparationIntent =
+            PreparationChoice.Unselected;
         private string _status = "Choose who calls Last Bearing home.";
         private string _saveStatus = "No local profile loaded.";
 
@@ -56,6 +58,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public string SaveStatus => _saveStatus;
 
         public bool CityNeedInspected => _cityNeedInspected;
+
+        public PreparationChoice GaragePreparationIntent =>
+            _garagePreparationIntent;
+
+        public bool IsGaragePlanIntentActive =>
+            _garagePreparationIntent != PreparationChoice.Unselected;
+
+        public bool IsGaragePlanCommitAvailable =>
+            IsGaragePlanIntentActive &&
+            _pendingCommands.Count == 0 &&
+            _readModel != null &&
+            _readModel.ExpeditionPhase == ExpeditionPhase.AtHome &&
+            _readModel.PreparationChoice == PreparationChoice.Unselected &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode == LastBearingPresentationMode.GarageBay;
 
         public LastBearingCityGrammarHypothesis CityGrammarHypothesis =>
             _world?.CityGrammarComparison?.SelectedHypothesis ??
@@ -141,6 +158,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public void StartNewGame(ColonyComposition composition)
         {
             _pendingCommands.Clear();
+            ClearGaragePlanIntent();
             _accumulator = 0f;
             _state = LastBearingScenarioFactory.CreateInitial(composition, 2011);
             _readModel = LastBearingReadModel.FromState(_state);
@@ -185,6 +203,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public void ReturnToTitle()
         {
             _pendingCommands.Clear();
+            ClearGaragePlanIntent();
             _state = null;
             _readModel = null;
             _accumulator = 0f;
@@ -259,22 +278,123 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 "Recycler and machine shop are coming online. The canonical result records no layout and D-0030 remains open.";
         }
 
-        public void ChoosePlan(PreparationChoice preparation, VehicleModule module)
+        public void BeginGaragePlan(PreparationChoice preparation)
         {
             if (!RequireCityNeedInspected())
             {
                 return;
             }
 
+            if (preparation != PreparationChoice.WorkshopPush &&
+                preparation != PreparationChoice.CivicBuffer)
+            {
+                _status = "Unknown preparation posture ignored.";
+                return;
+            }
+
+            if (_readModel == null ||
+                _readModel.ExpeditionPhase != ExpeditionPhase.AtHome ||
+                _readModel.PreparationChoice != PreparationChoice.Unselected ||
+                _readModel.NextObjective != "select-preparation-and-module" ||
+                _pendingCommands.Count != 0)
+            {
+                ClearGaragePlanIntent();
+                _status =
+                    "Rig planning is available only after the service cell is online and Sasha is home.";
+                return;
+            }
+
+            _world?.LeaveCityGrammarComparison();
+            if (_modeCoordinator?.TryShowCityMode(
+                    LastBearingPresentationMode.GarageBay,
+                    _readModel) != true)
+            {
+                ClearGaragePlanIntent();
+                _status = "The fixed garage cutaway could not be opened safely.";
+                return;
+            }
+
+            _garagePreparationIntent = preparation;
+            _world?.ApplyGaragePlanIntent(_garagePreparationIntent);
+            _status = preparation == PreparationChoice.WorkshopPush
+                ? "Workshop Push is penciled in. Choose Sasha's rig module in the garage to commit it."
+                : "Civic Buffer is penciled in. Choose Sasha's rig module in the garage to commit it.";
+        }
+
+        public void CommitGaragePlan(VehicleModule module)
+        {
+            if (!IsGaragePlanIntentActive)
+            {
+                _status = "Choose a city preparation posture before committing rig work.";
+                return;
+            }
+
+            if (module != VehicleModule.WinchAssembly &&
+                module != VehicleModule.SealedRangeTank)
+            {
+                _status = "Unknown Sasha Scout module ignored.";
+                return;
+            }
+
+            if (_readModel == null ||
+                _readModel.ExpeditionPhase != ExpeditionPhase.AtHome ||
+                _readModel.PreparationChoice != PreparationChoice.Unselected ||
+                _pendingCommands.Count != 0)
+            {
+                ClearGaragePlanIntent();
+                _status = "That garage plan is stale and was cleared without committing work.";
+                return;
+            }
+
+            if (!IsGaragePlanCommitAvailable)
+            {
+                _status = "Return to the fixed garage cutaway before committing Sasha's rig.";
+                return;
+            }
+
+            PreparationChoice preparation = _garagePreparationIntent;
             Queue(
                 sequence => new SelectPreparationCommand(
                     sequence,
                     preparation,
                     module),
                 sequence => new InstallVehicleModuleCommand(sequence, module));
-            _status = preparation == PreparationChoice.WorkshopPush
-                ? "Workshop Push: leave sooner and ask home to run lean."
-                : "Civic Buffer: protect home and risk a later claim.";
+            ClearGaragePlanIntent();
+            _status = preparation + " + " + module +
+                " committed at Sasha's rig. Work begins only if both canonical commands are accepted.";
+        }
+
+        public void CancelGaragePlan()
+        {
+            if (!IsGaragePlanIntentActive)
+            {
+                _status = "No uncommitted garage plan is active.";
+                return;
+            }
+
+            ClearGaragePlanIntent();
+            if (_readModel?.ExpeditionPhase == ExpeditionPhase.AtHome)
+            {
+                _modeCoordinator?.TryShowCityMode(
+                    LastBearingPresentationMode.CityOverview,
+                    _readModel);
+            }
+
+            _status = "Garage plan canceled. No preparation or module command was queued.";
+        }
+
+        /// <summary>
+        /// Compatibility seam for existing tests and callers. New player flow
+        /// stages preparation first and commits the module from the garage.
+        /// </summary>
+        public void ChoosePlan(PreparationChoice preparation, VehicleModule module)
+        {
+            BeginGaragePlan(preparation);
+            if (_garagePreparationIntent == preparation &&
+                IsGaragePlanCommitAvailable)
+            {
+                CommitGaragePlan(module);
+            }
         }
 
         public void InspectCityNeed()
@@ -706,6 +826,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void Load()
         {
+            ClearGaragePlanIntent();
             if (_saveAdapter == null)
             {
                 _saveStatus = "Save boundary unavailable.";
@@ -821,6 +942,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 if (previousPhase == ExpeditionPhase.AtHome &&
                     _readModel.ExpeditionPhase != ExpeditionPhase.AtHome)
                 {
+                    ClearGaragePlanIntent();
                     _world?.BeginCityGrammarComparisonSession();
                 }
 
@@ -922,6 +1044,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_readModel == null || _world == null)
             {
                 return;
+            }
+
+            if (IsGaragePlanIntentActive &&
+                (_readModel.ExpeditionPhase != ExpeditionPhase.AtHome ||
+                 _readModel.PreparationChoice != PreparationChoice.Unselected))
+            {
+                ClearGaragePlanIntent();
             }
 
             bool repaired = _readModel.TurbineCondition != TurbineCondition.Failing;
@@ -1038,6 +1167,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ApplyGaragePreparationProgress(
                 _readModel.PreparationElapsedTicks,
                 _readModel.PreparationRequiredTicks);
+            _world.ApplyGaragePlanIntent(
+                IsGaragePlanIntentActive
+                    ? _garagePreparationIntent
+                    : _readModel.PreparationChoice);
             _modeCoordinator?.ApplyCanonical(_readModel);
         }
 
@@ -1096,6 +1229,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _state.NextCommandSequence + _pendingCommands.Count);
                 _pendingCommands.Add(factory(sequence));
             }
+        }
+
+        private void ClearGaragePlanIntent()
+        {
+            _garagePreparationIntent = PreparationChoice.Unselected;
+            _world?.ApplyGaragePlanIntent(
+                _readModel?.PreparationChoice ?? PreparationChoice.Unselected);
         }
 
         private bool RequireCityNeedInspected()

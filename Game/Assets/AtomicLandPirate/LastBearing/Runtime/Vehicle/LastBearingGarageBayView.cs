@@ -4,6 +4,13 @@ using UnityEngine;
 
 namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 {
+    public enum GaragePlanMarkerPresentation
+    {
+        None = 0,
+        WorkshopPush = 1,
+        CivicBuffer = 2,
+    }
+
     /// <summary>
     /// Derived-only dollhouse service bay. It stages vehicle inspection from
     /// one fixed camera pose and deliberately adds no on-foot mode.
@@ -16,6 +23,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 
         private GameObject? _winchStand;
         private GameObject? _tankStand;
+        private GameObject? _workshopPushPlanMarker;
+        private GameObject? _civicBufferPlanMarker;
         private GameObject? _preparationGaugeRoot;
         private readonly GameObject?[] _preparationGaugeSegments =
             new GameObject?[PreparationGaugeSegmentCount];
@@ -42,6 +51,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 
         public bool IsPreparationGaugeVisible =>
             _preparationGaugeRoot != null && _preparationGaugeRoot.activeSelf;
+
+        public bool IsWorkshopPushPlanMarkerVisible =>
+            _workshopPushPlanMarker != null &&
+            _workshopPushPlanMarker.activeSelf;
+
+        public bool IsCivicBufferPlanMarkerVisible =>
+            _civicBufferPlanMarker != null &&
+            _civicBufferPlanMarker.activeSelf;
+
+        public GaragePlanMarkerPresentation ActivePlanMarker { get; private set; }
 
         public int PreparationGaugeLitSegments { get; private set; }
 
@@ -155,6 +174,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 new Vector3(2.8f, 0.48f, 0.06f),
                 tungsten);
             BuildPreparationGauge(darkIron, signal);
+            BuildPlanMarkers(darkIron, tungsten, signal);
 
             _winchStand = CreateWinchStand(
                 new Vector3(3.05f, 0f, -2.9f),
@@ -193,6 +213,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 
             ApplyModule(SashaScoutModulePresentation.None);
             ApplyPreparationProgress(0, 0);
+            ApplyPlanMarker(GaragePlanMarkerPresentation.None);
         }
 
         /// <summary>
@@ -246,6 +267,32 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             {
                 _moduleWorkLight.intensity =
                     module == SashaScoutModulePresentation.None ? 180f : 110f;
+            }
+        }
+
+        /// <summary>
+        /// Shows one physical planning card for the controller's derived
+        /// preparation posture. The card cannot author or retain game state.
+        /// </summary>
+        public void ApplyPlanMarker(GaragePlanMarkerPresentation marker)
+        {
+            if (marker != GaragePlanMarkerPresentation.WorkshopPush &&
+                marker != GaragePlanMarkerPresentation.CivicBuffer)
+            {
+                marker = GaragePlanMarkerPresentation.None;
+            }
+
+            ActivePlanMarker = marker;
+            if (_workshopPushPlanMarker != null)
+            {
+                _workshopPushPlanMarker.SetActive(
+                    marker == GaragePlanMarkerPresentation.WorkshopPush);
+            }
+
+            if (_civicBufferPlanMarker != null)
+            {
+                _civicBufferPlanMarker.SetActive(
+                    marker == GaragePlanMarkerPresentation.CivicBuffer);
             }
         }
 
@@ -350,6 +397,89 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                     signal,
                     _preparationGaugeRoot.transform);
             }
+        }
+
+        private void BuildPlanMarkers(
+            Material darkIron,
+            Material tungsten,
+            Material signal)
+        {
+            _workshopPushPlanMarker = CreatePlanMarker(
+                "PLAN_MARKER_WORKSHOP_PUSH",
+                new Vector3(-3.15f, 1.45f, -4.08f),
+                darkIron,
+                tungsten,
+                signal,
+                workshopPush: true);
+            _civicBufferPlanMarker = CreatePlanMarker(
+                "PLAN_MARKER_CIVIC_BUFFER",
+                new Vector3(-1.25f, 1.45f, -4.08f),
+                darkIron,
+                tungsten,
+                signal,
+                workshopPush: false);
+        }
+
+        private GameObject CreatePlanMarker(
+            string name,
+            Vector3 position,
+            Material darkIron,
+            Material tungsten,
+            Material signal,
+            bool workshopPush)
+        {
+            var marker = new GameObject(name);
+            marker.transform.SetParent(transform, false);
+            CreatePart(
+                name + "_TUNGSTEN_FRAME",
+                PrimitiveType.Cube,
+                position,
+                new Vector3(1.55f, 0.92f, 0.08f),
+                tungsten,
+                marker.transform);
+            CreatePart(
+                name + "_IRON_FACE",
+                PrimitiveType.Cube,
+                position + new Vector3(0f, 0f, 0.06f),
+                new Vector3(1.34f, 0.7f, 0.05f),
+                darkIron,
+                marker.transform);
+
+            if (workshopPush)
+            {
+                for (var index = -1; index <= 1; index++)
+                {
+                    CreatePart(
+                        name + "_WORK_BAR_" + (index + 2),
+                        PrimitiveType.Cube,
+                        position + new Vector3(
+                            0f,
+                            index * 0.2f,
+                            0.11f),
+                        new Vector3(0.94f, 0.08f, 0.03f),
+                        signal,
+                        marker.transform);
+                }
+            }
+            else
+            {
+                CreatePart(
+                    name + "_CIVIC_BAR_HORIZONTAL",
+                    PrimitiveType.Cube,
+                    position + new Vector3(0f, 0f, 0.11f),
+                    new Vector3(0.94f, 0.11f, 0.03f),
+                    signal,
+                    marker.transform);
+                CreatePart(
+                    name + "_CIVIC_BAR_VERTICAL",
+                    PrimitiveType.Cube,
+                    position + new Vector3(0f, 0f, 0.11f),
+                    new Vector3(0.11f, 0.5f, 0.03f),
+                    signal,
+                    marker.transform);
+            }
+
+            return marker;
         }
 
         private Transform CreateAnchor(string name, Vector3 localPosition)
