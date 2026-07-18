@@ -40,11 +40,27 @@ released as well. `WP-0002` is creator-accepted and activated under
 Implementation is authorized only within that reservation through protected
 `agent/*` pull requests. Governance, production content, dependency expansion,
 publishing, direct Unity invocation, and autonomy beyond A1 remain closed.
-The append-only WP-0002 local-operator amendment is non-executable until its
-receipt, authenticated online three-phase transaction, and separate protected
-three-report evidence-closure PR complete. All reports absent means pending and
-non-executable; any partial set fails closed. Only the validated closure merge
-permits visible Computer Use in the exact installed Hub and Editor bundles to
+The sealed v1 WP-0002 local-operator receipt
+`RR-WP0002-LOCAL-OPERATOR-20260717` and amendment remain append-only historical
+evidence with disposition `superseded-unclosed-never-effective`. Their absent
+`docs/evidence/WP-0002/local-operator-amendment/authority.json`,
+`docs/evidence/WP-0002/local-operator-amendment/pre-merge.json`, and
+`docs/evidence/WP-0002/local-operator-amendment/complete.json` paths are
+permanently forbidden. The only forward route is v2 successor amendment
+`A1B-WP-0002-LOCAL-OPERATOR-SUCCESSOR-20260718`, transaction
+`WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718`, and receipt
+`RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718`. The successor is non-executable
+until its authenticated online transaction and a separate protected closure PR
+containing exactly `docs/evidence/WP-0002/local-operator-successor/authority.json`,
+`docs/evidence/WP-0002/local-operator-successor/pre-merge.json`, and
+`docs/evidence/WP-0002/local-operator-successor/complete.json` both merge. Only for the exact
+successor control PR head and patch may `wp0002-policy` be temporarily
+nonrequired while `validate`, `wp0002-core`, and all non-status protections
+remain; exact-three protection must be restored within 600 seconds of the
+successor control squash, and the closure PR must pass all three checks. All successor reports absent means
+pending and non-executable; any partial set fails closed. Only that validated
+closure merge permits visible Computer Use in the exact installed Hub and
+Editor bundles to
 add/open/switch the exact canonical project, approve only the receipt-bound
 Codex Bridge client whose visible OS publisher/path and application
 version/build match, and inspect non-secret Unity state. The prior host

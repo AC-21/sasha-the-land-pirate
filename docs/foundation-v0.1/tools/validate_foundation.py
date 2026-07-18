@@ -10,6 +10,7 @@ import stat
 import subprocess
 import sys
 import tomllib
+import types
 from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -71,16 +72,27 @@ WP0002_WORKING_TREE_SCOPE_SCHEMA = (
     ROOT / "schemas" / "wp0002-working-tree-scope-capture.schema.json"
 )
 WP0002_LOCAL_OPERATOR_SCOPE_SCHEMA = (
+    ROOT
+    / "schemas"
+    / "wp0002-local-operator-successor-scope-capture.schema.json"
+)
+WP0002_V1_LOCAL_OPERATOR_SCOPE_SCHEMA = (
     ROOT / "schemas" / "wp0002-local-operator-scope-capture.schema.json"
 )
 WP0002_SCOPE_COLLECTOR = (
+    REPO_ROOT
+    / "Tools"
+    / "Validation"
+    / "collect_wp0002_scope_capture_successor.py"
+)
+WP0002_V1_SCOPE_COLLECTOR = (
     REPO_ROOT / "Tools" / "Validation" / "collect_wp0002_scope_capture.py"
 )
 WP0002_LOCAL_OPERATOR_ONLINE_VERIFIER = (
     REPO_ROOT
     / "Tools"
     / "Validation"
-    / "verify_wp0002_local_operator_transaction.py"
+    / "verify_wp0002_local_operator_transaction_v2.py"
 )
 WP0002_GITHUB_PROTECTION_SCHEMA = (
     ROOT / "schemas" / "wp0002-github-protection-capture.schema.json"
@@ -91,7 +103,7 @@ WP0002_EXTERNAL_POLICY_CAPTURE_SCHEMA = (
 WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_SCHEMA = (
     ROOT
     / "schemas"
-    / "wp0002-local-operator-transaction-evidence.schema.json"
+    / "wp0002-local-operator-successor-transaction-evidence.schema.json"
 )
 WP0001_A1_EVIDENCE_SCHEMA = (
     ROOT / "schemas" / "wp0001-a1-activation-evidence.schema.json"
@@ -297,9 +309,57 @@ WP0002_RUNCOMMAND_RESIDUAL_CAPABILITY = {
 WP0002_PREVIOUS_BOUNDARY_SHA256 = (
     "770f46788ab927bc18638851b220b33e89adb3ee4d5dcfd08b82fcb587dbff52"
 )
-WP0002_LOCAL_OPERATOR_RECEIPT_ID = "RR-WP0002-LOCAL-OPERATOR-20260717"
-WP0002_LOCAL_OPERATOR_CLAIM = (
+WP0002_V1_AMENDED_BOUNDARY_SHA256 = (
+    "e92e7276dc97478d7412307f43a5f90b60b99256b2a8a7cd5d00626c4f2e0962"
+)
+WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID = (
+    "A1B-WP-0002-LOCAL-OPERATOR-20260717"
+)
+WP0002_V1_LOCAL_OPERATOR_RECEIPT_ID = "RR-WP0002-LOCAL-OPERATOR-20260717"
+WP0002_V1_LOCAL_OPERATOR_CLAIM = (
     "AUTHORIZE-WP0002-DELEGATED-LOCAL-UNITY-OPERATOR"
+)
+WP0002_V1_LOCAL_OPERATOR_GOVERNANCE_PATH = (
+    "governance/WP-0002-DELEGATED-LOCAL-UNITY-OPERATOR-AMENDMENT.md"
+)
+WP0002_V1_LOCAL_OPERATOR_RECEIPT_SHA256 = (
+    "fb1df094bac7c4b944e1438eff4e761963e7076fb58b69f36ef497939eba8b8e"
+)
+WP0002_V1_LOCAL_OPERATOR_RECEIPT_PATH = (
+    "ledger/receipts/RR-WP0002-LOCAL-OPERATOR-20260717.json"
+)
+WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH = (
+    "docs/foundation-v0.1/"
+    f"{WP0002_V1_LOCAL_OPERATOR_RECEIPT_PATH}"
+)
+WP0002_V1_LOCAL_OPERATOR_EVIDENCE_PATHS = [
+    "docs/evidence/WP-0002/local-operator-amendment/authority.json",
+    "docs/evidence/WP-0002/local-operator-amendment/pre-merge.json",
+    "docs/evidence/WP-0002/local-operator-amendment/complete.json",
+]
+WP0002_LOCAL_OPERATOR_AMENDMENT_ID = (
+    "A1B-WP-0002-LOCAL-OPERATOR-SUCCESSOR-20260718"
+)
+WP0002_LOCAL_OPERATOR_RECEIPT_ID = (
+    "RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718"
+)
+WP0002_LOCAL_OPERATOR_CLAIM = (
+    "AUTHORIZE-WP0002-DELEGATED-LOCAL-UNITY-OPERATOR-SUCCESSOR"
+)
+WP0002_LOCAL_OPERATOR_SUPERSESSION_CLAIM = (
+    "SUPERSEDE-WP0002-LOCAL-OPERATOR-20260717-UNEXECUTED"
+)
+WP0002_LOCAL_OPERATOR_TRANSACTION_ID = (
+    "WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718"
+)
+WP0002_LOCAL_OPERATOR_PREDECESSOR_TRANSACTION_ID = (
+    "WP0002-LOCAL-OPERATOR-20260717"
+)
+WP0002_LOCAL_OPERATOR_COMPLETION_CLAIM = (
+    "COMPLETE-WP0002-LOCAL-OPERATOR-SUCCESSOR-CONTROL-TRANSACTION"
+)
+WP0002_LOCAL_OPERATOR_PREDECESSOR_DISPOSITION = (
+    "superseded-unclosed-never-effective"
 )
 WP0002_LOCAL_OPERATOR_MAX_RESTORE_DELAY_SECONDS = 600
 WP0002_LOCAL_OPERATOR_SOURCE_PATTERN = re.compile(
@@ -307,13 +367,17 @@ WP0002_LOCAL_OPERATOR_SOURCE_PATTERN = re.compile(
     r"(?:pull|issues)/[0-9]+#issuecomment-[0-9]+"
 )
 WP0002_LOCAL_OPERATOR_GOVERNANCE_PATH = (
-    "governance/WP-0002-DELEGATED-LOCAL-UNITY-OPERATOR-AMENDMENT.md"
+    "governance/WP-0002-DELEGATED-LOCAL-UNITY-OPERATOR-SUCCESSOR.md"
 )
 WP0002_CANONICAL_REPOSITORY_ROOT = (
     "/Users/sasha/Projects/sasha-the-land-pirate"
 )
 WP0002_CANONICAL_PROJECT_PATH = f"{WP0002_CANONICAL_REPOSITORY_ROOT}/Game"
 WP0002_LOCAL_OPERATOR_SCOPE_URI = (
+    "repo://docs/evidence/WP-0002/local-operator-successor/"
+    "scope-capture/working-tree-scope.json"
+)
+WP0002_V1_LOCAL_OPERATOR_SCOPE_URI = (
     "repo://docs/evidence/WP-0002/local-operator-amendment/"
     "scope-capture/working-tree-scope.json"
 )
@@ -347,13 +411,32 @@ WP0002_ACTIVATION_PROTECTED_PATHS = [
     "SimulationCore/package.json",
     "SaveContracts/package.json",
 ]
+WP0002_V1_AMENDMENT_PROTECTED_PATHS = [
+    *WP0002_ACTIVATION_PROTECTED_PATHS[:11],
+    "Tools/Validation/verify_wp0002_local_operator_transaction.py",
+    *WP0002_ACTIVATION_PROTECTED_PATHS[11:],
+]
+WP0002_SUCCESSOR_PROTECTED_PATHS = [
+    *WP0002_ACTIVATION_PROTECTED_PATHS[:11],
+    "Tools/Validation/collect_wp0002_scope_capture_successor.py",
+    "Tools/Validation/verify_wp0002_local_operator_transaction.py",
+    "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py",
+    *WP0002_ACTIVATION_PROTECTED_PATHS[11:],
+]
 WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT = {
     "schema_path": (
         "docs/foundation-v0.1/schemas/"
-        "wp0002-local-operator-transaction-evidence.schema.json"
+        "wp0002-local-operator-successor-transaction-evidence.schema.json"
     ),
     "online_verifier_path": (
-        "Tools/Validation/verify_wp0002_local_operator_transaction.py"
+        "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py"
+    ),
+    "transaction_id": WP0002_LOCAL_OPERATOR_TRANSACTION_ID,
+    "predecessor_transaction_id": (
+        WP0002_LOCAL_OPERATOR_PREDECESSOR_TRANSACTION_ID
+    ),
+    "predecessor_disposition": (
+        WP0002_LOCAL_OPERATOR_PREDECESSOR_DISPOSITION
     ),
     "online_authentication_required": True,
     "offline_validation_scope": (
@@ -366,16 +449,34 @@ WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT = {
     "normalized_extra_or_missing_keys_rejected": True,
     "raw_github_responses_hash_bound": True,
     "receipt_artifact_key_policy": (
-        "exact-stage1-changed-file-set-plus-authenticated-authority-comment"
+        "exact-stage1-changed-file-set-plus-authenticated-authority-comment-"
+        "and-retained-v1-receipt"
     ),
     "receipt_delta_policy": "exactly-one-added-regular-receipt-file",
     "protection_evidence_phases": ["before", "during", "after"],
+    "stage1_protection_before_path": (
+        "docs/evidence/WP-0002/local-operator-successor/control/"
+        "protection-before.json"
+    ),
+    "stage1_protection_before_policy": (
+        "v2-capture-protection-exact-three-before-stage1-bound-by-owner-"
+        "comment-tree-and-manifest"
+    ),
+    "maximum_protection_before_to_authority_seconds": 300,
     "repository_ruleset_policy": (
         "exact-empty-inventory-before-during-after"
     ),
     "pending_without_repository_evidence": (
         "valid-control-materialization-but-successor-non-executable"
     ),
+    "post_squash_pre_closure_main_state": (
+        "deliberate-red-fail-closed-quarantine-no-authority"
+    ),
+    "post_squash_closure_execution_policy": (
+        "continuous-controller-execution-restore-exact-three-then-merge-"
+        "exact-three-report-closure-only"
+    ),
+    "post_squash_unrelated_merge_policy": "forbidden",
     "partial_repository_evidence_rejected": True,
     "evidence_closure_policy": (
         "separate-protected-evidence-only-pr-after-control-squash-restoration-"
@@ -408,17 +509,23 @@ WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT = {
     ),
     "completion_required_before_successor_authority": True,
     "protected_transaction_paths": [
-        "Tools/Validation/verify_wp0002_local_operator_transaction.py"
+        "Tools/Validation/collect_wp0002_scope_capture.py",
+        "Tools/Validation/collect_wp0002_scope_capture_successor.py",
+        "Tools/Validation/verify_wp0002_local_operator_transaction.py",
+        "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py",
     ],
+    "forbidden_predecessor_evidence_paths": (
+        WP0002_V1_LOCAL_OPERATOR_EVIDENCE_PATHS
+    ),
     "repository_evidence_paths": {
         "authority": (
-            "docs/evidence/WP-0002/local-operator-amendment/authority.json"
+            "docs/evidence/WP-0002/local-operator-successor/authority.json"
         ),
         "pre-merge": (
-            "docs/evidence/WP-0002/local-operator-amendment/pre-merge.json"
+            "docs/evidence/WP-0002/local-operator-successor/pre-merge.json"
         ),
         "complete": (
-            "docs/evidence/WP-0002/local-operator-amendment/complete.json"
+            "docs/evidence/WP-0002/local-operator-successor/complete.json"
         ),
     },
 }
@@ -427,9 +534,9 @@ WP0002_BOUNDARY_AMENDMENTS = [
         "amendment_id": "A1B-WP-0002-LOCAL-OPERATOR-20260717",
         "amendment_kind": "append-only-delegated-local-operator",
         "previous_boundary_sha256": WP0002_PREVIOUS_BOUNDARY_SHA256,
-        "authorization_receipt_id": WP0002_LOCAL_OPERATOR_RECEIPT_ID,
-        "required_claim": WP0002_LOCAL_OPERATOR_CLAIM,
-        "governance_record": WP0002_LOCAL_OPERATOR_GOVERNANCE_PATH,
+        "authorization_receipt_id": WP0002_V1_LOCAL_OPERATOR_RECEIPT_ID,
+        "required_claim": WP0002_V1_LOCAL_OPERATOR_CLAIM,
+        "governance_record": WP0002_V1_LOCAL_OPERATOR_GOVERNANCE_PATH,
         "packet_contract_changed": False,
         "materialization_control": {
             "classification": (
@@ -455,10 +562,66 @@ WP0002_BOUNDARY_AMENDMENTS = [
             "fresh_canary_pr": "first-post-restoration-implementation-pr",
             "general_protection_bypass_authorized": False,
         },
-    }
+    },
+    {
+        "amendment_id": WP0002_LOCAL_OPERATOR_AMENDMENT_ID,
+        "amendment_kind": "append-only-delegated-local-operator-successor",
+        "supersedes_amendment_id": WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID,
+        "predecessor_disposition": (
+            WP0002_LOCAL_OPERATOR_PREDECESSOR_DISPOSITION
+        ),
+        "previous_boundary_sha256": WP0002_V1_AMENDED_BOUNDARY_SHA256,
+        "retained_predecessor_receipt": {
+            "receipt_id": WP0002_V1_LOCAL_OPERATOR_RECEIPT_ID,
+            "path": WP0002_V1_LOCAL_OPERATOR_RECEIPT_PATH,
+            "sha256": WP0002_V1_LOCAL_OPERATOR_RECEIPT_SHA256,
+        },
+        "forbidden_predecessor_evidence_paths": (
+            WP0002_V1_LOCAL_OPERATOR_EVIDENCE_PATHS
+        ),
+        "authorization_receipt_id": WP0002_LOCAL_OPERATOR_RECEIPT_ID,
+        "required_claims": [
+            WP0002_LOCAL_OPERATOR_SUPERSESSION_CLAIM,
+            WP0002_LOCAL_OPERATOR_CLAIM,
+        ],
+        "governance_record": WP0002_LOCAL_OPERATOR_GOVERNANCE_PATH,
+        "packet_contract_changed": False,
+        "materialization_control": {
+            "classification": (
+                "creator-controlled-control-plane-configuration-not-a1-"
+                "implementation-authority"
+            ),
+            "temporary_nonrequired_check": "wp0002-policy",
+            "exact_final_pr_head_and_patch_binding_required": True,
+            "retained_required_checks": ["validate", "wp0002-core"],
+            "retained_protections": [
+                "strict-up-to-date",
+                "pull-request-required",
+                "enforce-admins",
+                "conversation-resolution-required",
+                "linear-history-required",
+                "no-bypass-allowances",
+                "force-push-disabled",
+                "deletion-disabled",
+                "squash-only",
+            ],
+            "creator_delegated_squash_merge_only": True,
+            "restore_wp0002_policy_immediately_after_merge": True,
+            "fresh_canary_pr": (
+                "successor-evidence-closure-and-first-post-restoration-"
+                "implementation-pr"
+            ),
+            "general_protection_bypass_authorized": False,
+        },
+    },
 ]
 WP0002_DELEGATED_LOCAL_UNITY_OPERATOR = {
     "authorization_receipt_id": WP0002_LOCAL_OPERATOR_RECEIPT_ID,
+    "authority_version": "successor-20260718",
+    "supersedes_amendment_id": WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID,
+    "predecessor_disposition": (
+        WP0002_LOCAL_OPERATOR_PREDECESSOR_DISPOSITION
+    ),
     "effective_authority_condition": (
         "all-three-transaction-reports-validated-in-protected-main-after-"
         "evidence-closure-pr"
@@ -667,14 +830,36 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
     "Tools/Validation/collect_wp0002_scope_capture.py": (
         "68dfa2c5ce802b71a29717f530be63344d74c50cc8e5e5de4c1b26aa3dcde9f2"
     ),
+    "Tools/Validation/collect_wp0002_scope_capture_successor.py": (
+        "025fdadb1801c714e997a5a5d8827825e48d71d40257d1106ed1da4d22d8ef90"
+    ),
     "Tools/Validation/verify_wp0002_local_operator_transaction.py": (
         "16a3a5950e191f25b64d86977a64489eb77961ee8b8ca16673c7673e17779c51"
+    ),
+    "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py": (
+        "15ea81750bce5b5d3cee5a5711b8287f55238eb44343386c1d0f5ca88f484a19"
+    ),
+    "docs/foundation-v0.1/schemas/"
+    "wp0002-local-operator-successor-scope-capture.schema.json": (
+        "afabbccaa61731c70daf94399d518ef448c68c78d6d2cf5715cc56a713fa2247"
+    ),
+    "docs/foundation-v0.1/schemas/"
+    "wp0002-local-operator-successor-transaction-evidence.schema.json": (
+        "96380cf51d29088f2356b37b5d96a564bf04d8fe098f5b109781fc8710f59f16"
+    ),
+    "docs/foundation-v0.1/tools/"
+    "test_collect_wp0002_scope_capture_successor.py": (
+        "fca82cd1438b860267170435f6b97fc78698aa79df678b10adabe01667a90744"
+    ),
+    "docs/foundation-v0.1/tools/"
+    "test_verify_wp0002_local_operator_transaction_v2.py": (
+        "c77d2d2534972d1d510b54b0a75834d9f6fd7340beef773f710eb107a7d6bdff"
     ),
     ".github/workflows/wp0002-ci.yml": (
         "893cd3faacb887b2d9112c30e15a29b27fb8f3511001ef4091a04f1f88e2f0b9"
     ),
     ".github/workflows/wp0002-policy.yml": (
-        "9a72d80e80c482c462640c0e9fc7c7c1b47f2ebec4e01561bb259be083e1cd0b"
+        "13ea299f704e9e25a121933b1dfe3c4eb716c2a5bdb982242e4d520a07060670"
     ),
 }
 PACKET_TRANSITIONS = {
@@ -6539,7 +6724,7 @@ def validate_wp0002_working_tree_scope_capture(
     # read-only controls are proven by the separate append-only amendment
     # capture and must not rewrite the historical evidence contract.
     protected_paths = WP0002_ACTIVATION_PROTECTED_PATHS
-    collector, collector_errors = _load_wp0002_scope_collector()
+    collector, collector_errors = _load_wp0002_v1_scope_collector()
     errors.extend(collector_errors)
     if collector is not None:
         verifier = collector.get("verify_scope_capture")
@@ -6586,58 +6771,71 @@ def validate_wp0002_working_tree_scope_capture(
     return errors
 
 
-def _load_wp0002_scope_collector() -> tuple[dict[str, object] | None, list[str]]:
-    expected_hash = WP0002_PROTECTED_SELF_VERIFICATION.get(
-        "Tools/Validation/collect_wp0002_scope_capture.py"
-    )
+def _load_wp0002_pinned_module(
+    *,
+    relative_path: str,
+    path: Path,
+    label: str,
+    module_name: str,
+) -> tuple[dict[str, object] | None, list[str]]:
+    """Hash-check and execute a protected module with import-safe identity."""
+    expected_hash = WP0002_PROTECTED_SELF_VERIFICATION.get(relative_path)
     try:
-        metadata = WP0002_SCOPE_COLLECTOR.lstat()
-        source = WP0002_SCOPE_COLLECTOR.read_bytes()
+        metadata = path.lstat()
+        source = path.read_bytes()
     except OSError as exc:
-        return None, [f"WP-0002 protected scope collector is missing: {exc}"]
+        return None, [f"WP-0002 protected {label} is missing: {exc}"]
     if not stat.S_ISREG(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
-        return None, ["WP-0002 protected scope collector is not a regular file"]
+        return None, [f"WP-0002 protected {label} is not a regular file"]
     actual_hash = hashlib.sha256(source).hexdigest()
     if not isinstance(expected_hash, str) or actual_hash != expected_hash:
-        return None, ["WP-0002 protected scope collector hash mismatch"]
-    namespace: dict[str, object] = {"__name__": "wp0002_scope_collector_pinned"}
+        return None, [f"WP-0002 protected {label} hash mismatch"]
+    missing = object()
+    previous = sys.modules.get(module_name, missing)
+    module = types.ModuleType(module_name)
+    module.__file__ = str(path)
+    module.__package__ = ""
+    sys.modules[module_name] = module
     try:
-        exec(compile(source, str(WP0002_SCOPE_COLLECTOR), "exec"), namespace)
+        exec(compile(source, str(path), "exec"), module.__dict__)
     except Exception as exc:
-        return None, [f"WP-0002 protected scope collector cannot load: {exc}"]
-    return namespace, []
+        return None, [f"WP-0002 protected {label} cannot load: {exc}"]
+    finally:
+        if previous is missing:
+            sys.modules.pop(module_name, None)
+        else:
+            sys.modules[module_name] = previous  # type: ignore[assignment]
+    return module.__dict__, []
+
+
+def _load_wp0002_scope_collector() -> tuple[dict[str, object] | None, list[str]]:
+    return _load_wp0002_pinned_module(
+        relative_path="Tools/Validation/collect_wp0002_scope_capture_successor.py",
+        path=WP0002_SCOPE_COLLECTOR,
+        label="successor scope collector",
+        module_name="_foundation_wp0002_successor_scope_collector_pinned",
+    )
+
+
+def _load_wp0002_v1_scope_collector() -> tuple[dict[str, object] | None, list[str]]:
+    return _load_wp0002_pinned_module(
+        relative_path="Tools/Validation/collect_wp0002_scope_capture.py",
+        path=WP0002_V1_SCOPE_COLLECTOR,
+        label="retained v1 scope collector",
+        module_name="_foundation_wp0002_v1_scope_collector_pinned",
+    )
 
 
 def _load_wp0002_transaction_verifier() -> tuple[dict[str, object] | None, list[str]]:
-    """Load hash-pinned pure report validators for offline closure checks."""
-    expected_hash = WP0002_PROTECTED_SELF_VERIFICATION.get(
-        "Tools/Validation/verify_wp0002_local_operator_transaction.py"
+    """Load hash-pinned successor report validators for offline closure checks."""
+    return _load_wp0002_pinned_module(
+        relative_path=(
+            "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py"
+        ),
+        path=WP0002_LOCAL_OPERATOR_ONLINE_VERIFIER,
+        label="successor transaction verifier",
+        module_name="_foundation_wp0002_successor_transaction_verifier_pinned",
     )
-    try:
-        metadata = WP0002_LOCAL_OPERATOR_ONLINE_VERIFIER.lstat()
-        source = WP0002_LOCAL_OPERATOR_ONLINE_VERIFIER.read_bytes()
-    except OSError as exc:
-        return None, [f"WP-0002 protected transaction verifier is missing: {exc}"]
-    if not stat.S_ISREG(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
-        return None, ["WP-0002 protected transaction verifier is not a regular file"]
-    actual_hash = hashlib.sha256(source).hexdigest()
-    if not isinstance(expected_hash, str) or actual_hash != expected_hash:
-        return None, ["WP-0002 protected transaction verifier hash mismatch"]
-    namespace: dict[str, object] = {
-        "__name__": "wp0002_transaction_verifier_pinned"
-    }
-    try:
-        exec(
-            compile(
-                source,
-                str(WP0002_LOCAL_OPERATOR_ONLINE_VERIFIER),
-                "exec",
-            ),
-            namespace,
-        )
-    except Exception as exc:
-        return None, [f"WP-0002 protected transaction verifier cannot load: {exc}"]
-    return namespace, []
 
 
 def _load_wp0002_repo_evidence(
@@ -6673,14 +6871,22 @@ def _load_wp0002_repo_evidence(
     return evidence, relative, actual_hash, errors
 
 
-def validate_wp0002_local_operator_amendment_scope_capture(
+def _validate_wp0002_local_operator_scope_capture(
     manifest: dict,
     packet: dict,
     amendment_receipt: dict,
+    *,
+    reference_field: str,
+    expected_uri: str,
+    schema_path: Path,
+    scope_label: str,
+    collector_loader,
+    expected_protected_paths: list[str],
+    require_receipt_binding: bool = True,
 ) -> list[str]:
-    """Verify the append-only amendment's retained canonical-root snapshot."""
+    """Verify one versioned local-operator canonical-root snapshot."""
     errors: list[str] = []
-    reference = manifest.get("local_operator_amendment_scope_capture")
+    reference = manifest.get(reference_field)
     required_reference_keys = {
         "uri",
         "sha256",
@@ -6689,31 +6895,50 @@ def validate_wp0002_local_operator_amendment_scope_capture(
         "checkpoint_commit",
     }
     if not isinstance(reference, dict) or set(reference) != required_reference_keys:
-        return ["WP-0002 local operator amendment scope reference is not exact"]
+        return [f"WP-0002 local operator {scope_label} scope reference is not exact"]
     if (
-        reference.get("uri") != WP0002_LOCAL_OPERATOR_SCOPE_URI
+        reference.get("uri") != expected_uri
         or re.fullmatch(r"[0-9a-f]{64}", str(reference.get("sha256"))) is None
         or any(
             re.fullmatch(r"[0-9a-f]{40}", str(reference.get(field))) is None
             for field in ("base_commit", "head_commit", "checkpoint_commit")
         )
     ):
-        return ["WP-0002 local operator amendment scope reference is not exact"]
+        return [f"WP-0002 local operator {scope_label} scope reference is not exact"]
 
     capture, relative, actual_hash, load_errors = _load_wp0002_repo_evidence(
         reference,
-        expected_uri=WP0002_LOCAL_OPERATOR_SCOPE_URI,
-        schema_path=WP0002_LOCAL_OPERATOR_SCOPE_SCHEMA,
-        label="WP-0002 local operator amendment scope capture",
+        expected_uri=expected_uri,
+        schema_path=schema_path,
+        label=f"WP-0002 local operator {scope_label} scope capture",
     )
     errors.extend(load_errors)
     if not isinstance(capture, dict) or relative is None or actual_hash is None:
         return errors
 
+    if require_receipt_binding:
+        receipt_hashes = amendment_receipt.get("artifact_sha256", {})
+        if not isinstance(receipt_hashes, dict):
+            receipt_hashes = {}
+        if receipt_hashes.get(relative) != actual_hash:
+            errors.append(
+                f"WP-0002 local operator {scope_label} receipt does not bind capture bytes"
+            )
+        for artifact in capture.get("artifacts", {}).values():
+            if not isinstance(artifact, dict):
+                continue
+            artifact_path = artifact.get("path")
+            artifact_hash = artifact.get("sha256")
+            if receipt_hashes.get(artifact_path) != artifact_hash:
+                errors.append(
+                    f"WP-0002 local operator {scope_label} receipt does not bind "
+                    f"scope artifact {artifact_path}"
+                )
+
     for field in ("base_commit", "head_commit", "checkpoint_commit"):
         if capture.get(field) != reference.get(field):
             errors.append(
-                f"WP-0002 local operator amendment scope {field} is not bound"
+                f"WP-0002 local operator {scope_label} scope {field} is not bound"
             )
 
     dirty_paths = capture.get("dirty_paths", [])
@@ -6721,24 +6946,24 @@ def validate_wp0002_local_operator_amendment_scope_capture(
     dirty_owners: dict[str, str] = {}
     dirty_policies: dict[str, str] = {}
     if not isinstance(dirty_paths, list):
-        errors.append("WP-0002 local operator amendment dirty set is missing")
+        errors.append(f"WP-0002 local operator {scope_label} dirty set is missing")
     else:
         for item in dirty_paths:
             if not isinstance(item, dict) or not isinstance(item.get("path"), str):
                 errors.append(
-                    "WP-0002 local operator amendment dirty set is malformed"
+                    f"WP-0002 local operator {scope_label} dirty set is malformed"
                 )
                 continue
             path = item["path"]
             if path in expected_dirty_states:
                 errors.append(
-                    "WP-0002 local operator amendment dirty set repeats a path"
+                    f"WP-0002 local operator {scope_label} dirty set repeats a path"
                 )
                 continue
             expected_dirty_states[path] = item.get("normalized_git_state")
             dirty_owners[path] = item.get("owner")
             dirty_policies[path] = item.get("policy")
-    collector, collector_errors = _load_wp0002_scope_collector()
+    collector, collector_errors = collector_loader()
     errors.extend(collector_errors)
     if collector is not None:
         verifier = collector.get("verify_scope_capture")
@@ -6767,7 +6992,7 @@ def validate_wp0002_local_operator_amendment_scope_capture(
                 ) = classifier(expected_dirty_states)
             except ValueError as exc:
                 errors.append(
-                    "WP-0002 local operator amendment dirty classification "
+                    f"WP-0002 local operator {scope_label} dirty classification "
                     f"is invalid: {exc}"
                 )
             else:
@@ -6777,7 +7002,7 @@ def validate_wp0002_local_operator_amendment_scope_capture(
                     or dirty_policies != derived_policies
                 ):
                     errors.append(
-                        "WP-0002 local operator amendment dirty classification "
+                        f"WP-0002 local operator {scope_label} dirty classification "
                         "is not a derived exact match"
                     )
         if status_arguments == expected_status_arguments and callable(verifier):
@@ -6792,10 +7017,12 @@ def validate_wp0002_local_operator_amendment_scope_capture(
                     expected_reservation_paths=packet.get("reservation", {}).get(
                         "paths", []
                     ),
-                    expected_protected_paths=manifest.get(
-                        "permission_boundary", {}
-                    ).get("protected_paths_read_only", []),
-                    receipt_issued_at=amendment_receipt.get("issued_at"),
+                    expected_protected_paths=expected_protected_paths,
+                    receipt_issued_at=(
+                        amendment_receipt.get("issued_at")
+                        if require_receipt_binding
+                        else capture.get("captured_at")
+                    ),
                     mode="terminal-retained",
                     expected_repository_root=WP0002_CANONICAL_REPOSITORY_ROOT,
                     status_arguments=status_arguments,
@@ -6804,6 +7031,63 @@ def validate_wp0002_local_operator_amendment_scope_capture(
         elif not callable(verifier):
             errors.append("WP-0002 scope collector lacks its verifier")
     return errors
+
+
+def validate_wp0002_local_operator_amendment_scope_capture(
+    manifest: dict,
+    packet: dict,
+    amendment_receipt: dict,
+) -> list[str]:
+    """Retain and validate the never-effective v1 amendment capture."""
+    return _validate_wp0002_local_operator_scope_capture(
+        manifest,
+        packet,
+        amendment_receipt,
+        reference_field="local_operator_amendment_scope_capture",
+        expected_uri=WP0002_V1_LOCAL_OPERATOR_SCOPE_URI,
+        schema_path=WP0002_V1_LOCAL_OPERATOR_SCOPE_SCHEMA,
+        scope_label="amendment",
+        collector_loader=_load_wp0002_v1_scope_collector,
+        expected_protected_paths=WP0002_V1_AMENDMENT_PROTECTED_PATHS,
+    )
+
+
+def validate_wp0002_local_operator_successor_scope_capture(
+    manifest: dict,
+    packet: dict,
+    amendment_receipt: dict,
+) -> list[str]:
+    """Validate the forward-only successor capture under its new namespace."""
+    return _validate_wp0002_local_operator_scope_capture(
+        manifest,
+        packet,
+        amendment_receipt,
+        reference_field="local_operator_successor_scope_capture",
+        expected_uri=WP0002_LOCAL_OPERATOR_SCOPE_URI,
+        schema_path=WP0002_LOCAL_OPERATOR_SCOPE_SCHEMA,
+        scope_label="successor",
+        collector_loader=_load_wp0002_scope_collector,
+        expected_protected_paths=WP0002_SUCCESSOR_PROTECTED_PATHS,
+    )
+
+
+def validate_wp0002_local_operator_successor_scope_capture_unreceipted(
+    manifest: dict,
+    packet: dict,
+) -> list[str]:
+    """Validate the Stage-1 successor capture before receipt materialization."""
+    return _validate_wp0002_local_operator_scope_capture(
+        manifest,
+        packet,
+        {},
+        reference_field="local_operator_successor_scope_capture",
+        expected_uri=WP0002_LOCAL_OPERATOR_SCOPE_URI,
+        schema_path=WP0002_LOCAL_OPERATOR_SCOPE_SCHEMA,
+        scope_label="successor",
+        collector_loader=_load_wp0002_scope_collector,
+        expected_protected_paths=WP0002_SUCCESSOR_PROTECTED_PATHS,
+        require_receipt_binding=False,
+    )
 
 
 def _load_wp0002_raw_json_evidence(
@@ -7122,6 +7406,234 @@ def validate_wp0002_external_policy_and_github_capture(
     return errors
 
 
+def validate_wp0002_offline_transaction_report_shapes(
+    verifier: dict[str, object],
+    reports: dict[str, dict],
+) -> list[str]:
+    """Run durable pure report checks without requiring closed-PR Git objects.
+
+    Full historical-object and live-GitHub proof is intentionally exclusive to
+    the base-owned wp0002-policy closure workflow, which explicitly fetches the
+    report-bound commits.  Routine future foundation lint must remain viable if
+    the merged pull-request branch and its otherwise-unreachable commits vanish.
+    """
+    errors: list[str] = []
+    for phase, function_name in (
+        ("authority", "validate_authority_evidence"),
+        ("pre-merge", "validate_pre_merge_evidence"),
+        ("complete", "validate_complete_evidence"),
+    ):
+        validator = verifier.get(function_name)
+        if not callable(validator):
+            errors.append(
+                f"WP-0002 protected transaction verifier lacks {function_name}"
+            )
+            continue
+        try:
+            validator(reports[phase])
+        except Exception as exc:
+            errors.append(
+                f"WP-0002 local operator {phase} pure verifier rejected report: {exc}"
+            )
+    return errors
+
+
+def wp0002_offline_successor_stage1_paths(
+    verifier: dict[str, object],
+    manifest: dict | None,
+) -> tuple[set[str], set[str], list[str]]:
+    """Return fixed controls and the exact capture-referenced three-path set."""
+    errors: list[str] = []
+    control_value = verifier.get("STAGE1_CONTROL_PATHS")
+    capture_path = verifier.get("STAGE1_SCOPE_CAPTURE_PATH")
+    patterns = verifier.get("STAGE1_SCOPE_CAPTURE_ARTIFACT_PATTERNS")
+    if (
+        not isinstance(control_value, (set, frozenset))
+        or not all(isinstance(item, str) for item in control_value)
+        or capture_path != WP0002_LOCAL_OPERATOR_SCOPE_URI.removeprefix("repo://")
+        or not isinstance(patterns, dict)
+        or set(patterns) != {"raw_status", "observations"}
+        or not all(callable(getattr(item, "fullmatch", None)) for item in patterns.values())
+    ):
+        return set(), set(), [
+            "WP-0002 protected successor verifier control path contract is not exact"
+        ]
+    if not isinstance(manifest, dict):
+        return set(control_value), set(), [
+            "WP-0002 successor reports require the exact boundary manifest"
+        ]
+    capture, relative, _, capture_errors = _load_wp0002_raw_json_evidence(
+        manifest.get("local_operator_successor_scope_capture"),
+        expected_uri=WP0002_LOCAL_OPERATOR_SCOPE_URI,
+        label="WP-0002 successor Stage-1 scope capture",
+    )
+    errors.extend(capture_errors)
+    scope_paths = {capture_path}
+    artifacts = capture.get("artifacts") if isinstance(capture, dict) else None
+    if not isinstance(artifacts, dict) or set(artifacts) != {
+        "raw_status",
+        "observations",
+    }:
+        errors.append("WP-0002 successor Stage-1 scope artifacts are not exact")
+        return set(control_value), scope_paths, errors
+    for key in ("raw_status", "observations"):
+        artifact = artifacts.get(key)
+        pattern = patterns[key]
+        path = artifact.get("path") if isinstance(artifact, dict) else None
+        if not isinstance(path, str) or pattern.fullmatch(path) is None:
+            errors.append(
+                f"WP-0002 successor Stage-1 {key} artifact path is not exact"
+            )
+            continue
+        scope_paths.add(path)
+    if relative != capture_path or len(scope_paths) != 3:
+        errors.append("WP-0002 successor Stage-1 scope path set is not exact")
+    return set(control_value), scope_paths, errors
+
+
+def validate_wp0002_offline_protection_before(
+    verifier: dict[str, object],
+    authority: dict,
+    pre_merge: dict,
+    amendment_receipt: dict,
+    stage1_artifacts: dict[str, str],
+) -> list[str]:
+    """Validate the current protected protection-before blob without Git history."""
+    errors: list[str] = []
+    relative = WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT[
+        "stage1_protection_before_path"
+    ]
+    if (
+        verifier.get("PROTECTION_BEFORE_PATH") != relative
+        or verifier.get("MAX_BEFORE_TO_AUTHORITY_SECONDS")
+        != WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT[
+            "maximum_protection_before_to_authority_seconds"
+        ]
+    ):
+        return ["WP-0002 protected verifier protection-before contract differs"]
+    path, path_error = safe_repo_path(relative, "WP-0002 protection-before control")
+    if path_error is not None or path is None:
+        return [path_error or "WP-0002 protection-before path cannot be resolved"]
+    try:
+        metadata = path.lstat()
+        raw_file = path.read_bytes()
+        capture = json.loads(raw_file.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        return [f"WP-0002 protection-before control cannot be read: {exc}"]
+    if not stat.S_ISREG(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+        return ["WP-0002 protection-before control must be a regular non-symlink file"]
+    actual_hash = hashlib.sha256(raw_file).hexdigest()
+    if stage1_artifacts.get(relative) != actual_hash:
+        errors.append(
+            "WP-0002 protection-before bytes differ from Stage-1 evidence"
+        )
+    if amendment_receipt.get("artifact_sha256", {}).get(relative) != actual_hash:
+        errors.append(
+            "WP-0002 successor receipt does not bind protection-before bytes"
+        )
+    validator = verifier.get("validate_protection_before_capture")
+    if not callable(validator):
+        return errors + [
+            "WP-0002 protected verifier lacks protection-before validation"
+        ]
+    stage1 = authority.get("stage1", {})
+    comment = authority.get("authorization_comment")
+    try:
+        normalized, raw_capture = validator(
+            capture,
+            base_sha=stage1.get("base_sha"),
+            authorization_comment=comment,
+        )
+    except Exception as exc:
+        return errors + [f"WP-0002 protection-before control is invalid: {exc}"]
+    if pre_merge.get("protection_before") != normalized:
+        errors.append(
+            "WP-0002 pre-merge protection-before differs from committed control"
+        )
+    expected_raw_reference = {
+        "sha256": hashlib.sha256(raw_capture).hexdigest(),
+        "byte_size": len(raw_capture),
+    }
+    if pre_merge.get("raw_artifacts", {}).get(
+        "protection_before"
+    ) != expected_raw_reference:
+        errors.append(
+            "WP-0002 pre-merge protection-before raw reference differs from control"
+        )
+    return errors
+
+
+def validate_wp0002_pending_protection_before(
+    amendment_receipt: dict | None,
+    manifest: dict,
+) -> list[str]:
+    """Validate committed exact-three protection even before closure reports exist."""
+    errors: list[str] = []
+    verifier, verifier_errors = _load_wp0002_transaction_verifier()
+    errors.extend(verifier_errors)
+    if verifier is None:
+        return errors
+    relative = WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT[
+        "stage1_protection_before_path"
+    ]
+    if (
+        verifier.get("PROTECTION_BEFORE_PATH") != relative
+        or verifier.get("MAX_BEFORE_TO_AUTHORITY_SECONDS") != 300
+    ):
+        return errors + [
+            "WP-0002 protected verifier protection-before contract differs"
+        ]
+    path, path_error = safe_repo_path(relative, "WP-0002 protection-before control")
+    if path_error is not None or path is None:
+        return errors + [
+            path_error or "WP-0002 protection-before path cannot be resolved"
+        ]
+    try:
+        metadata = path.lstat()
+        raw_file = path.read_bytes()
+        capture = json.loads(raw_file.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        return errors + [f"WP-0002 protection-before control cannot be read: {exc}"]
+    if not stat.S_ISREG(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+        return errors + [
+            "WP-0002 protection-before control must be a regular non-symlink file"
+        ]
+    actual_hash = hashlib.sha256(raw_file).hexdigest()
+    if isinstance(amendment_receipt, dict):
+        if amendment_receipt.get("artifact_sha256", {}).get(relative) != actual_hash:
+            errors.append(
+                "WP-0002 successor receipt does not bind protection-before bytes"
+            )
+    validator = verifier.get("validate_protection_before_capture")
+    if not callable(validator):
+        return errors + [
+            "WP-0002 protected verifier lacks protection-before validation"
+        ]
+    scope_reference = manifest.get("local_operator_successor_scope_capture", {})
+    try:
+        normalized, _ = validator(
+            capture,
+            base_sha=scope_reference.get("base_commit"),
+            authorization_comment=None,
+        )
+    except Exception as exc:
+        return errors + [f"WP-0002 protection-before control is invalid: {exc}"]
+    observed_at = parse_datetime(normalized.get("observed_at"))
+    if isinstance(amendment_receipt, dict):
+        issued_at = parse_datetime(amendment_receipt.get("issued_at"))
+        if observed_at is None or issued_at is None:
+            errors.append(
+                "WP-0002 protection-before or successor receipt time is invalid"
+            )
+        else:
+            delta = (issued_at - observed_at).total_seconds()
+            if delta < 0 or delta > 300:
+                errors.append(
+                    "WP-0002 protection-before must precede receipt issuance by at most 300 seconds"
+                )
+    return errors
+
+
 def validate_wp0002_local_operator_transaction_evidence(
     amendment_receipt: dict,
     manifest: dict | None = None,
@@ -7130,6 +7642,21 @@ def validate_wp0002_local_operator_transaction_evidence(
     errors: list[str] = []
     reports: dict[str, dict] = {}
     report_hashes: dict[str, str] = {}
+    forbidden_present: list[str] = []
+    for relative in WP0002_V1_LOCAL_OPERATOR_EVIDENCE_PATHS:
+        path, path_error = safe_repo_path(
+            relative,
+            "WP-0002 forbidden predecessor evidence",
+        )
+        if path_error is not None:
+            errors.append(path_error)
+        elif path is not None and path.exists():
+            forbidden_present.append(relative)
+    if forbidden_present:
+        errors.append(
+            "WP-0002 predecessor closure evidence is permanently forbidden: "
+            f"{forbidden_present}"
+        )
     paths = WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT[
         "repository_evidence_paths"
     ]
@@ -7152,7 +7679,28 @@ def validate_wp0002_local_operator_transaction_evidence(
         # after Stage-1 and after merge.  All-absent is therefore a valid but
         # explicitly non-executable pending-evidence state; the separate
         # protected closure PR must add all three together.
-        return []
+        if amendment_receipt.get("receipt_id") == WP0002_LOCAL_OPERATOR_RECEIPT_ID:
+            verifier, verifier_errors = _load_wp0002_transaction_verifier()
+            errors.extend(verifier_errors)
+            if verifier is not None:
+                repository_type = verifier.get("GitRepository")
+                pending_validator = verifier.get("validate_pending_receipt_child")
+                if not callable(repository_type) or not callable(pending_validator):
+                    errors.append(
+                        "WP-0002 protected verifier lacks pending receipt-child validation"
+                    )
+                else:
+                    try:
+                        pending_validator(
+                            repository_type(REPO_ROOT),
+                            amendment_receipt,
+                        )
+                    except Exception as exc:
+                        errors.append(
+                            "WP-0002 pending receipt-only child validation failed: "
+                            f"{exc}"
+                        )
+        return errors
     if present_phases != {"authority", "pre-merge", "complete"}:
         return [
             "WP-0002 local operator repository evidence is partial; all three "
@@ -7203,23 +7751,9 @@ def validate_wp0002_local_operator_transaction_evidence(
     verifier, verifier_errors = _load_wp0002_transaction_verifier()
     errors.extend(verifier_errors)
     if verifier is not None:
-        for phase, function_name in (
-            ("authority", "validate_authority_evidence"),
-            ("pre-merge", "validate_pre_merge_evidence"),
-            ("complete", "validate_complete_evidence"),
-        ):
-            validator = verifier.get(function_name)
-            if not callable(validator):
-                errors.append(
-                    f"WP-0002 protected transaction verifier lacks {function_name}"
-                )
-                continue
-            try:
-                validator(reports[phase])
-            except Exception as exc:
-                errors.append(
-                    f"WP-0002 local operator {phase} pure verifier rejected report: {exc}"
-                )
+        errors.extend(
+            validate_wp0002_offline_transaction_report_shapes(verifier, reports)
+        )
 
     repositories = [
         authority.get("repository"),
@@ -7303,7 +7837,7 @@ def validate_wp0002_local_operator_transaction_evidence(
             "WP-0002 local operator receipt does not accept the exact Stage-1 commit"
         )
     if isinstance(manifest, dict):
-        scope_reference = manifest.get("local_operator_amendment_scope_capture")
+        scope_reference = manifest.get("local_operator_successor_scope_capture")
         if (
             not isinstance(scope_reference, dict)
             or scope_reference.get("base_commit") != stage1.get("base_sha")
@@ -7371,50 +7905,61 @@ def validate_wp0002_local_operator_transaction_evidence(
     duplicate_paths = False
     if isinstance(changed_files, list):
         for item in changed_files:
-            if not isinstance(item, dict) or not isinstance(item.get("path"), str):
+            if (
+                not isinstance(item, dict)
+                or not isinstance(item.get("path"), str)
+                or re.fullmatch(r"[0-9a-f]{64}", str(item.get("new_blob_sha256")))
+                is None
+            ):
                 duplicate_paths = True
                 continue
             path = item["path"]
             if path in expected_artifacts:
                 duplicate_paths = True
             expected_artifacts[path] = item.get("new_blob_sha256")
-            current_path, path_error = safe_repo_path(
-                path, "WP-0002 Stage-1 changed file"
-            )
-            if path_error is not None:
-                errors.append(path_error)
-                continue
-            try:
-                metadata = current_path.lstat() if current_path is not None else None
-            except OSError as exc:
-                errors.append(
-                    f"WP-0002 Stage-1 changed file cannot be inspected: {path}: {exc}"
-                )
-                continue
-            if (
-                current_path is None
-                or metadata is None
-                or not stat.S_ISREG(metadata.st_mode)
-                or stat.S_ISLNK(metadata.st_mode)
-            ):
-                errors.append(
-                    f"WP-0002 Stage-1 changed file is not a regular non-symlink file: {path}"
-                )
-                continue
-            if sha256_file(current_path) != item.get("new_blob_sha256"):
-                errors.append(
-                    f"WP-0002 Stage-1 changed file differs from authenticated bytes: {path}"
-                )
     else:
         duplicate_paths = True
+    changed_path_set = set(expected_artifacts)
+    if verifier is not None:
+        control_paths, scope_paths, path_errors = (
+            wp0002_offline_successor_stage1_paths(verifier, manifest)
+        )
+        errors.extend(path_errors)
+        missing_scope_paths = sorted(scope_paths - changed_path_set)
+        out_of_scope_paths = sorted(
+            changed_path_set - (control_paths | scope_paths)
+        )
+        if missing_scope_paths:
+            errors.append(
+                "WP-0002 Stage-1 evidence omits exact successor scope artifacts: "
+                f"{missing_scope_paths}"
+            )
+        if out_of_scope_paths:
+            errors.append(
+                "WP-0002 Stage-1 evidence exceeds the exact successor control scope: "
+                f"{out_of_scope_paths}"
+            )
     required_stage1_paths = {
         "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json",
         f"docs/foundation-v0.1/{WP0002_LOCAL_OPERATOR_GOVERNANCE_PATH}",
         "docs/foundation-v0.1/work-packets/proposed/WP-0002.json",
+        WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT[
+            "stage1_protection_before_path"
+        ],
     }
     if not required_stage1_paths.issubset(expected_artifacts):
         errors.append(
             "WP-0002 Stage-1 evidence omits a required amendment control file"
+        )
+    if verifier is not None:
+        errors.extend(
+            validate_wp0002_offline_protection_before(
+                verifier,
+                authority,
+                pre_merge,
+                amendment_receipt,
+                expected_artifacts,
+            )
         )
     external_source_key = (
         source_reference.removeprefix("https://")
@@ -7426,9 +7971,20 @@ def validate_wp0002_local_operator_transaction_evidence(
     expected_artifacts[external_source_key] = amendment_receipt.get(
         "approval_text_sha256"
     )
+    if WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH in {
+        item.get("path")
+        for item in changed_files
+        if isinstance(item, dict)
+    }:
+        duplicate_paths = True
+        errors.append("WP-0002 Stage-1 modifies the retained v1 receipt")
+    expected_artifacts[WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH] = (
+        WP0002_V1_LOCAL_OPERATOR_RECEIPT_SHA256
+    )
     if duplicate_paths or amendment_receipt.get("artifact_sha256") != expected_artifacts:
         errors.append(
-            "WP-0002 local operator receipt artifact keys are not the exact Stage-1 set plus authority comment"
+            "WP-0002 local operator receipt artifact keys are not the exact Stage-1 "
+            "set plus authority comment and retained v1 receipt"
         )
 
     check_runs = pre_merge.get("required_check_runs", [])
@@ -7510,8 +8066,8 @@ def validate_wp0002_local_operator_transaction_evidence(
         else {}
     )
     expected_completion_binding = {
-        "claim": "COMPLETE-WP0002-LOCAL-OPERATOR-CONTROL-TRANSACTION",
-        "transaction_id": "WP0002-LOCAL-OPERATOR-20260717",
+        "claim": WP0002_LOCAL_OPERATOR_COMPLETION_CLAIM,
+        "transaction_id": WP0002_LOCAL_OPERATOR_TRANSACTION_ID,
         "authority_evidence_sha256": pre_merge.get(
             "authority_evidence_sha256"
         ),
@@ -7591,6 +8147,11 @@ def validate_wp0002_local_operator_amendment(
         errors.append("WP-0002 allowed actions differ from the amended exact set")
     if permission_boundary.get("denied_actions") != WP0002_DENIED_ACTIONS:
         errors.append("WP-0002 denied actions differ from the retained exact set")
+    if (
+        permission_boundary.get("protected_paths_read_only")
+        != WP0002_SUCCESSOR_PROTECTED_PATHS
+    ):
+        errors.append("WP-0002 successor protected path set is not exact")
 
     repository = manifest.get("repository", {})
     unity = manifest.get("unity", {})
@@ -7616,13 +8177,77 @@ def validate_wp0002_local_operator_amendment(
         )
 
     amendment_receipt = receipts_by_id.get(WP0002_LOCAL_OPERATOR_RECEIPT_ID)
-    if not isinstance(amendment_receipt, dict):
-        return errors + [
-            "WP-0002 local operator amendment lacks its creator-authorization receipt"
-        ]
+    has_successor_receipt = isinstance(amendment_receipt, dict)
+    if not has_successor_receipt:
+        amendment_receipt = {}
+
+    predecessor_receipt = receipts_by_id.get(
+        WP0002_V1_LOCAL_OPERATOR_RECEIPT_ID
+    )
+    if not isinstance(predecessor_receipt, dict):
+        errors.append("WP-0002 successor lacks the retained sealed v1 receipt")
+        predecessor_receipt = {}
+    predecessor_receipt_path = ROOT / WP0002_V1_LOCAL_OPERATOR_RECEIPT_PATH
+    predecessor_receipt_on_disk: object | None = None
+    if predecessor_receipt_path.is_file():
+        try:
+            predecessor_receipt_on_disk = load_json(predecessor_receipt_path)
+        except (OSError, ValueError, json.JSONDecodeError):
+            predecessor_receipt_on_disk = None
+    if (
+        predecessor_receipt.get("receipt_id")
+        != WP0002_V1_LOCAL_OPERATOR_RECEIPT_ID
+        or predecessor_receipt.get("sealed") is not True
+        or not predecessor_receipt_path.is_file()
+        or sha256_file(predecessor_receipt_path)
+        != WP0002_V1_LOCAL_OPERATOR_RECEIPT_SHA256
+        or predecessor_receipt_on_disk != predecessor_receipt
+    ):
+        errors.append("WP-0002 retained v1 receipt identity or bytes differ")
+
+    if not has_successor_receipt:
+        errors.extend(
+            validate_wp0002_local_operator_amendment_scope_capture(
+                manifest,
+                packet,
+                predecessor_receipt,
+            )
+        )
+        errors.extend(
+            validate_wp0002_local_operator_successor_scope_capture_unreceipted(
+                manifest,
+                packet,
+            )
+        )
+        errors.extend(validate_wp0002_pending_protection_before(None, manifest))
+        errors.extend(
+            validate_wp0002_local_operator_transaction_evidence({}, manifest)
+        )
+        activation_receipt = receipts_by_id.get(
+            manifest.get("attestation_receipt_id")
+        )
+        if (
+            not isinstance(activation_receipt, dict)
+            or activation_receipt.get("artifact_sha256", {}).get(
+                "governance/a1-boundaries/WP-0002.json"
+            )
+            != WP0002_PREVIOUS_BOUNDARY_SHA256
+        ):
+            errors.append(
+                "WP-0002 local operator amendment does not retain the activated prior boundary hash"
+            )
+        errors.append(
+            "WP-0002 successor Stage-1 is pending its exact receipt-only child and is nonmergeable"
+        )
+        return errors
 
     resolver = amendment_receipt.get("artifact_resolver")
-    claims = subject_claims(amendment_receipt).get("WP-0002", set())
+    claims_by_subject = subject_claims(amendment_receipt)
+    claims = claims_by_subject.get("WP-0002", set())
+    supersession_claims = claims_by_subject.get(
+        WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID,
+        set(),
+    )
     source_reference = amendment_receipt.get("source_reference")
     signature_reference = amendment_receipt.get("signature_reference")
     if (
@@ -7638,20 +8263,40 @@ def validate_wp0002_local_operator_amendment(
         or WP0002_LOCAL_OPERATOR_SOURCE_PATTERN.fullmatch(source_reference) is None
         or source_reference != resolver.get("resolver_reference")
         or signature_reference != resolver.get("resolver_reference")
-        or set(amendment_receipt.get("subject_ids", [])) != {"WP-0002"}
+        or amendment_receipt.get("subject_ids")
+        != [WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID, "WP-0002"]
         or claims != {WP0002_LOCAL_OPERATOR_CLAIM}
+        or supersession_claims
+        != {WP0002_LOCAL_OPERATOR_SUPERSESSION_CLAIM}
     ):
         errors.append(
             "WP-0002 local operator amendment lacks exact protected creator authority"
         )
     if amendment_receipt.get("subject_contract_sha256") != {
-        "WP-0002": packet.get("contract_sha256")
+        WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID: (
+            WP0002_V1_AMENDED_BOUNDARY_SHA256
+        ),
+        "WP-0002": packet.get("contract_sha256"),
     }:
         errors.append("WP-0002 local operator receipt changes or misbinds the contract")
     if amendment_receipt.get("subject_event_sha256") != {}:
         errors.append("WP-0002 local operator receipt invents a decision event binding")
+    if amendment_receipt.get("artifact_sha256", {}).get(
+        WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH
+    ) != WP0002_V1_LOCAL_OPERATOR_RECEIPT_SHA256:
+        errors.append("WP-0002 successor receipt does not bind the retained v1 receipt")
+    errors.extend(
+        validate_wp0002_pending_protection_before(amendment_receipt, manifest)
+    )
     errors.extend(
         validate_wp0002_local_operator_amendment_scope_capture(
+            manifest,
+            packet,
+            predecessor_receipt,
+        )
+    )
+    errors.extend(
+        validate_wp0002_local_operator_successor_scope_capture(
             manifest,
             packet,
             amendment_receipt,
