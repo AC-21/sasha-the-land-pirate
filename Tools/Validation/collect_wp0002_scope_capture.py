@@ -22,12 +22,25 @@ from pathlib import Path, PurePosixPath
 
 
 CAPTURE_CONTRACT = "wp0002-working-tree-scope-capture-v2"
+AMENDMENT_CAPTURE_CONTRACT = (
+    "wp0002-local-operator-amendment-scope-capture-v1"
+)
 PACKET_ID = "WP-0002"
 BOUNDARY_MANIFEST_ID = "A1B-WP-0002-LOCAL-DEV"
 CANONICAL_COLLECTION_ROOT = "/Users/sasha/Documents/Codex/sasha-the-land-pirate"
+CANONICAL_AMENDMENT_ROOT = (
+    "/Users/sasha/Projects/sasha-the-land-pirate"
+)
+CANONICAL_REMOTE_URL = "https://github.com/AC-21/sasha-the-land-pirate.git"
 LOCAL_OUTPUT_ROOT = "BuildArtifacts/WP-0002/local-only/scope-capture"
 RETAINED_OUTPUT_ROOT = "docs/evidence/WP-0002/scope-capture"
 RETAINED_CAPTURE = f"{RETAINED_OUTPUT_ROOT}/working-tree-scope.json"
+AMENDMENT_OUTPUT_ROOT = (
+    "docs/evidence/WP-0002/local-operator-amendment/scope-capture"
+)
+AMENDMENT_RETAINED_CAPTURE = (
+    f"{AMENDMENT_OUTPUT_ROOT}/working-tree-scope.json"
+)
 OUTPUT_ROOT = LOCAL_OUTPUT_ROOT
 DEFAULT_OUTPUT = f"{LOCAL_OUTPUT_ROOT}/working-tree-scope.json"
 PACKET_PATH = "docs/foundation-v0.1/work-packets/proposed/WP-0002.json"
@@ -38,7 +51,30 @@ EXPECTED_DIRTY_STATES = {
     "Game/ProjectSettings/ProjectSettings.asset": "unstaged-modified",
     "Game/ProjectSettings/SceneTemplateSettings.json": "untracked",
 }
+GENERATED_EVIDENCE_POLICY = (
+    "preserve-observe-no-agent-modify-stage-commit-delete-revert-stash"
+)
+AMENDMENT_CREATOR_DIRTY_STATES = {
+    "Game/ProjectSettings/ProjectSettings.asset": "unstaged-modified",
+    "Game/ProjectSettings/SceneTemplateSettings.json": "untracked",
+}
+AMENDMENT_GATE_IDS = (
+    "asset-refresh-and-compile",
+    "wp0002-editmode-test-assembly",
+    "wp0002-playmode-test-assembly",
+)
+AMENDMENT_GATE_PATH_RE = re.compile(
+    r"^BuildArtifacts/WP-0002/unity-gates/("
+    + "|".join(re.escape(value) for value in AMENDMENT_GATE_IDS)
+    + r")-[0-9a-f]{32}\.json$"
+)
 STATUS_ARGUMENTS = ("status", "--porcelain=v2", "-z")
+AMENDMENT_STATUS_ARGUMENTS = (
+    "status",
+    "--porcelain=v2",
+    "-z",
+    "--untracked-files=all",
+)
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 MAX_RECEIPT_DELAY_SECONDS = 600
@@ -58,6 +94,93 @@ def _safe_relative(value: str) -> str:
     if path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts):
         raise ValueError(f"unsafe repository-relative path: {value!r}")
     return path.as_posix()
+
+
+def _scope_covers(scope_path: str, changed_path: str) -> bool:
+    """Return whether one exact file/directory reservation covers a path."""
+    scope = _safe_relative(scope_path).rstrip("/")
+    changed = _safe_relative(changed_path)
+    return changed == scope or changed.startswith(f"{scope}/")
+
+
+def _derive_scope_facts(
+    expected_dirty_states: dict[str, str],
+    dirty_owners: dict[str, str],
+    dirty_policies: dict[str, str],
+    reservation_paths: list[str],
+    protected_paths_read_only: list[str],
+) -> tuple[bool, bool, list[str]]:
+    """Derive cleanliness and overlap facts; callers cannot assert them."""
+    normalized_reservation = [_safe_relative(path) for path in reservation_paths]
+    normalized_protected = [
+        _safe_relative(path) for path in protected_paths_read_only
+    ]
+    non_excluded_dirty: list[str] = []
+    reserved_dirty: list[str] = []
+    reserved_protected_dirty: list[str] = []
+    for path in expected_dirty_states:
+        owner = dirty_owners.get(path, "creator")
+        policy = dirty_policies.get(path, POLICY)
+        protected = any(
+            _scope_covers(scope, path) for scope in normalized_protected
+        )
+        reserved = any(
+            _scope_covers(scope, path) for scope in normalized_reservation
+        )
+        excluded_creator_drift = (
+            owner == "creator" and policy == POLICY and protected
+        )
+        if not excluded_creator_drift:
+            non_excluded_dirty.append(path)
+        if reserved:
+            reserved_dirty.append(path)
+        if reserved and protected:
+            reserved_protected_dirty.append(path)
+    return (
+        not non_excluded_dirty,
+        not reserved_dirty,
+        sorted(reserved_protected_dirty),
+    )
+
+
+def amendment_dirty_profile(
+    dirty_states: dict[str, str],
+) -> tuple[dict[str, str], dict[str, str], dict[str, str]]:
+    """Classify one exact retained creator/gate dirty set without caller claims."""
+    normalized = {
+        _safe_relative(path): state
+        for path, state in sorted(dirty_states.items())
+    }
+    for path, state in AMENDMENT_CREATOR_DIRTY_STATES.items():
+        if normalized.get(path) != state:
+            raise ValueError(
+                f"amendment dirty set lacks exact creator drift {path}: {state}"
+            )
+    gate_counts = {gate_id: 0 for gate_id in AMENDMENT_GATE_IDS}
+    owners: dict[str, str] = {}
+    policies: dict[str, str] = {}
+    for path, state in normalized.items():
+        if path in AMENDMENT_CREATOR_DIRTY_STATES:
+            owners[path] = "creator"
+            policies[path] = POLICY
+            continue
+        match = AMENDMENT_GATE_PATH_RE.fullmatch(path)
+        if match is None or state != "untracked":
+            raise ValueError(
+                f"amendment dirty set contains an unclassified path: {path}"
+            )
+        gate_counts[match.group(1)] += 1
+        owners[path] = "packet-generated-evidence"
+        policies[path] = GENERATED_EVIDENCE_POLICY
+    missing_gate_ids = [
+        gate_id for gate_id, count in gate_counts.items() if count == 0
+    ]
+    if missing_gate_ids:
+        raise ValueError(
+            "amendment dirty set lacks one or more required gate report kinds: "
+            + ", ".join(missing_gate_ids)
+        )
+    return normalized, owners, policies
 
 
 def _require_real_root(repo_root: Path) -> Path:
@@ -100,10 +223,17 @@ def _artifact_relative(value: str) -> str:
         + r"(?:status\.[0-9a-f]{64}\.bin|observations\.[0-9a-f]{64}\.json)",
         relative,
     )
+    amendment_artifact = re.fullmatch(
+        re.escape(f"{AMENDMENT_OUTPUT_ROOT}/working-tree-scope.")
+        + r"(?:status\.[0-9a-f]{64}\.bin|observations\.[0-9a-f]{64}\.json)",
+        relative,
+    )
     if not (
         relative.startswith(f"{LOCAL_OUTPUT_ROOT}/")
         or relative == RETAINED_CAPTURE
         or retained_artifact is not None
+        or relative == AMENDMENT_RETAINED_CAPTURE
+        or amendment_artifact is not None
     ):
         raise ValueError(
             "scope evidence must use the local-only root or one exact retained WP-0002 filename"
@@ -376,7 +506,12 @@ def _submodule_paths(repo_root: Path) -> list[str]:
     return sorted(paths)
 
 
-def _git_facts(repo_root: Path, raw_status: bytes | None = None) -> dict:
+def _git_facts(
+    repo_root: Path,
+    raw_status: bytes | None = None,
+    *,
+    read_only_index: bool = False,
+) -> dict:
     status = (
         raw_status
         if raw_status is not None
@@ -390,17 +525,23 @@ def _git_facts(repo_root: Path, raw_status: bytes | None = None) -> dict:
     head_tree = _git_output(
         repo_root, ["rev-parse", "HEAD^{tree}"], "HEAD tree"
     ).decode("ascii").strip()
-    index_tree = _git_output(repo_root, ["write-tree"], "index tree").decode(
-        "ascii"
-    ).strip()
     index_result = _run_git(repo_root, ["diff", "--cached", "--quiet", "HEAD", "--"])
     if index_result.returncode not in {0, 1}:
         raise ValueError("cannot determine whether the Git index is clean")
+    index_clean = index_result.returncode == 0
+    if read_only_index:
+        # A clean staged diff proves the index is the immutable HEAD tree;
+        # never invoke write-tree against the creator's canonical checkout.
+        index_tree = head_tree if index_clean else ""
+    else:
+        index_tree = _git_output(repo_root, ["write-tree"], "index tree").decode(
+            "ascii"
+        ).strip()
     return {
         "head_commit": head_commit,
         "head_tree": head_tree,
         "index_tree": index_tree,
-        "index_clean": index_result.returncode == 0,
+        "index_clean": index_clean,
         "conflict_paths": sorted(
             entry["path"] for entry in entries if entry["record_kind"] == "u"
         ),
@@ -424,6 +565,8 @@ def _file_observation(
     relative: str,
     normalized_state: str,
     base_commit: str,
+    owner: str,
+    policy: str,
 ) -> tuple[dict, bytes]:
     content, metadata = _read_confined(repo_root, relative)
     observation = {
@@ -447,8 +590,8 @@ def _file_observation(
             "content_retained": False,
         },
         "base_blob": _base_blob(repo_root, base_commit, relative),
-        "owner": "creator",
-        "policy": POLICY,
+        "owner": owner,
+        "policy": policy,
     }
     return observation, content
 
@@ -461,7 +604,9 @@ def _artifact_reference(relative: str, data: bytes) -> dict:
     }
 
 
-def _assert_expected_status(entries: list[dict[str, str]]) -> list[str]:
+def _assert_expected_status(
+    entries: list[dict[str, str]], expected_dirty_states: dict[str, str]
+) -> list[str]:
     errors: list[str] = []
     actual: dict[str, str] = {}
     for entry in entries:
@@ -471,9 +616,10 @@ def _assert_expected_status(entries: list[dict[str, str]]) -> list[str]:
         actual[path] = entry["normalized_git_state"]
         if "original_path" in entry:
             errors.append(f"raw status contains rename/copy origin {entry['original_path']}")
-    if actual != EXPECTED_DIRTY_STATES:
+    if actual != expected_dirty_states:
         errors.append(
-            f"raw status dirty set differs: expected {EXPECTED_DIRTY_STATES}, found {actual}"
+            "raw status dirty set differs: expected "
+            f"{expected_dirty_states}, found {actual}"
         )
     return errors
 
@@ -487,33 +633,101 @@ def collect_scope_capture(
     protected_paths_read_only: list[str],
     output_relative: str = DEFAULT_OUTPUT,
     captured_at: datetime | None = None,
+    expected_repository_root: str | None = None,
+    expected_dirty_states: dict[str, str] | None = None,
+    dirty_owners: dict[str, str] | None = None,
+    dirty_policies: dict[str, str] | None = None,
+    evidence_root: Path | None = None,
+    status_arguments: tuple[str, ...] = STATUS_ARGUMENTS,
 ) -> dict:
     """Collect the exact metadata-only WP-0002 activation-scope proof."""
     output_relative = _artifact_relative(output_relative)
-    retained = output_relative == RETAINED_CAPTURE
-    if output_relative.startswith(f"{RETAINED_OUTPUT_ROOT}/") and not retained:
+    retained = output_relative in {RETAINED_CAPTURE, AMENDMENT_RETAINED_CAPTURE}
+    if (
+        output_relative.startswith(f"{RETAINED_OUTPUT_ROOT}/")
+        and output_relative != RETAINED_CAPTURE
+    ):
         raise ValueError(
             f"retained scope capture must use exact path {RETAINED_CAPTURE}"
         )
+    if (
+        output_relative.startswith(f"{AMENDMENT_OUTPUT_ROOT}/")
+        and output_relative != AMENDMENT_RETAINED_CAPTURE
+    ):
+        raise ValueError(
+            "amendment scope capture must use exact path "
+            f"{AMENDMENT_RETAINED_CAPTURE}"
+        )
     lexical_repo_root = Path(os.path.abspath(os.fspath(repo_root)))
-    if retained and str(lexical_repo_root) != CANONICAL_COLLECTION_ROOT:
+    expected_repository_root = expected_repository_root or (
+        CANONICAL_AMENDMENT_ROOT
+        if output_relative == AMENDMENT_RETAINED_CAPTURE
+        else CANONICAL_COLLECTION_ROOT
+    )
+    if retained and str(lexical_repo_root) != expected_repository_root:
         raise ValueError(
             "retained scope capture requires canonical collection root "
-            f"{CANONICAL_COLLECTION_ROOT}"
+            f"{expected_repository_root}"
         )
     repo_root = _require_real_root(lexical_repo_root)
+    evidence_root = _require_real_root(evidence_root or repo_root)
+    amendment_profile = output_relative == AMENDMENT_RETAINED_CAPTURE
+    if amendment_profile and any(
+        value is not None
+        for value in (expected_dirty_states, dirty_owners, dirty_policies)
+    ):
+        raise ValueError(
+            "amendment dirty classification must be derived from raw Git status"
+        )
+    if not amendment_profile:
+        expected_dirty_states = dict(expected_dirty_states or EXPECTED_DIRTY_STATES)
+        dirty_owners = dict(dirty_owners or {})
+        dirty_policies = dict(dirty_policies or {})
     if not COMMIT_RE.fullmatch(base_commit) or not COMMIT_RE.fullmatch(
         checkpoint_commit
     ):
         raise ValueError("base and checkpoint commits must be immutable 40-hex SHAs")
     raw_status = _git_output(
-        repo_root, list(STATUS_ARGUMENTS), "raw porcelain-v2 status"
+        repo_root, list(status_arguments), "raw porcelain-v2 status"
     )
     status_entries, status_errors = parse_porcelain_v2_z(raw_status)
-    status_errors.extend(_assert_expected_status(status_entries))
+    if amendment_profile:
+        actual_dirty_states = {
+            item["path"]: item["normalized_git_state"]
+            for item in status_entries
+        }
+        try:
+            (
+                expected_dirty_states,
+                dirty_owners,
+                dirty_policies,
+            ) = amendment_dirty_profile(actual_dirty_states)
+        except ValueError as exc:
+            status_errors.append(str(exc))
+    if expected_dirty_states is None:
+        raise ValueError("; ".join(status_errors))
+    assert expected_dirty_states is not None
+    assert dirty_owners is not None
+    assert dirty_policies is not None
+    status_errors.extend(_assert_expected_status(status_entries, expected_dirty_states))
     if status_errors:
         raise ValueError("; ".join(status_errors))
-    facts = _git_facts(repo_root, raw_status)
+    (
+        non_excluded_scope_clean,
+        reserved_scope_clean,
+        reserved_protected_overlaps,
+    ) = _derive_scope_facts(
+        expected_dirty_states,
+        dirty_owners,
+        dirty_policies,
+        reservation_paths,
+        protected_paths_read_only,
+    )
+    facts = _git_facts(
+        repo_root,
+        raw_status,
+        read_only_index=amendment_profile,
+    )
     if facts["head_commit"] != checkpoint_commit:
         raise ValueError("checkpoint commit must equal current HEAD at collection")
     if not facts["index_clean"]:
@@ -521,11 +735,53 @@ def collect_scope_capture(
     if facts["conflict_paths"] or facts["submodule_paths"]:
         raise ValueError("scope capture rejects conflicts and submodules")
 
+    canonical_main_binding: dict[str, str] | None = None
+    if amendment_profile:
+        top_level = _git_output(
+            repo_root, ["rev-parse", "--show-toplevel"], "Git top-level"
+        ).decode("utf-8").strip()
+        branch_ref = _git_output(
+            repo_root, ["symbolic-ref", "HEAD"], "current branch"
+        ).decode("utf-8").strip()
+        origin_url = _git_output(
+            repo_root, ["remote", "get-url", "origin"], "origin URL"
+        ).decode("utf-8").strip()
+        origin_main = _git_output(
+            repo_root,
+            ["rev-parse", "--verify", "refs/remotes/origin/main"],
+            "origin/main",
+        ).decode("ascii").strip()
+        if top_level != str(repo_root):
+            raise ValueError("amendment capture Git top-level differs from canonical root")
+        if branch_ref != "refs/heads/main":
+            raise ValueError("amendment capture requires exact local main branch")
+        if origin_url != CANONICAL_REMOTE_URL:
+            raise ValueError("amendment capture origin URL differs from canonical remote")
+        if not (
+            base_commit
+            == checkpoint_commit
+            == facts["head_commit"]
+            == origin_main
+        ):
+            raise ValueError(
+                "amendment capture requires base=head=checkpoint=origin/main"
+            )
+        if facts["index_tree"] != facts["head_tree"]:
+            raise ValueError("amendment capture index tree differs from protected main")
+        canonical_main_binding = {
+            "top_level": top_level,
+            "branch_ref": branch_ref,
+            "origin_url": origin_url,
+            "origin_main_commit": origin_main,
+        }
+
     observations: list[dict] = []
     creator_contents: list[bytes] = []
-    for relative, state in EXPECTED_DIRTY_STATES.items():
+    for relative, state in expected_dirty_states.items():
+        owner = dirty_owners.get(relative, "creator")
+        policy = dirty_policies.get(relative, POLICY)
         observation, content = _file_observation(
-            repo_root, relative, state, base_commit
+            repo_root, relative, state, base_commit, owner, policy
         )
         if state == "untracked" and observation["base_blob"]["exists"]:
             raise ValueError(f"untracked path exists in protected base: {relative}")
@@ -549,9 +805,12 @@ def collect_scope_capture(
     parent = PurePosixPath(output_relative).parent.as_posix()
     raw_hash = hashlib.sha256(raw_status).hexdigest()
     raw_relative = f"{parent}/{stem}.status.{raw_hash}.bin"
+    capture_contract = (
+        AMENDMENT_CAPTURE_CONTRACT if amendment_profile else CAPTURE_CONTRACT
+    )
     observations_document = {
         "schema_version": 1,
-        "capture_contract": CAPTURE_CONTRACT,
+        "capture_contract": capture_contract,
         "captured_at": timestamp,
         "content_policy": "metadata-only-no-creator-file-bytes",
         "observations": observations,
@@ -570,8 +829,8 @@ def collect_scope_capture(
                 item["lstat"]["regular_file"] is True
                 and item["lstat"]["symlink"] is False
             ),
-            "owner": "creator",
-            "policy": POLICY,
+            "owner": item["owner"],
+            "policy": item["policy"],
         }
         for item in observations
     ]
@@ -580,7 +839,7 @@ def collect_scope_capture(
     ).strip()
     capture = {
         "schema_version": 2,
-        "capture_contract": CAPTURE_CONTRACT,
+        "capture_contract": capture_contract,
         "packet_id": PACKET_ID,
         "boundary_manifest_id": BOUNDARY_MANIFEST_ID,
         "captured_at": timestamp,
@@ -599,11 +858,15 @@ def collect_scope_capture(
                 "core.hooksPath=/dev/null",
                 "-C",
                 str(repo_root),
-                *STATUS_ARGUMENTS,
+                *status_arguments,
             ],
             "head_command": ["git", "rev-parse", "--verify", "HEAD"],
             "head_tree_command": ["git", "rev-parse", "HEAD^{tree}"],
-            "index_tree_command": ["git", "write-tree"],
+            "index_tree_command": (
+                ["git", "diff", "--cached", "--quiet", "HEAD", "--"]
+                if amendment_profile
+                else ["git", "write-tree"]
+            ),
             "submodule_command": ["git", "ls-files", "-s", "-z"],
         },
         "artifacts": {
@@ -618,26 +881,28 @@ def collect_scope_capture(
         "complete_dirty_set": True,
         "dirty_path_count": len(derived_dirty),
         "dirty_paths": derived_dirty,
-        "non_excluded_scope_clean": True,
-        "reserved_scope_clean": True,
+        "non_excluded_scope_clean": non_excluded_scope_clean,
+        "reserved_scope_clean": reserved_scope_clean,
         "reservation_paths": list(reservation_paths),
         "protected_paths_read_only": list(protected_paths_read_only),
-        "reserved_protected_overlaps": [],
+        "reserved_protected_overlaps": reserved_protected_overlaps,
         "privacy": {
             "creator_file_content_retained": False,
             "secret_scan_method": "assert-no-creator-file-byte-sequence-in-artifacts-min-16-bytes",
             "secret_scan_result": "pass",
         },
     }
+    if canonical_main_binding is not None:
+        capture["canonical_main_binding"] = canonical_main_binding
     capture_bytes = _json_bytes(capture)
     evidence_without_creator_content = raw_status + observations_bytes + capture_bytes
     for content in creator_contents:
         if len(content) >= 16 and content in evidence_without_creator_content:
             raise ValueError("creator file bytes leaked into scope evidence")
 
-    _write_atomic_confined(repo_root, raw_relative, raw_status)
-    _write_atomic_confined(repo_root, observations_relative, observations_bytes)
-    _write_atomic_confined(repo_root, output_relative, capture_bytes)
+    _write_atomic_confined(evidence_root, raw_relative, raw_status)
+    _write_atomic_confined(evidence_root, observations_relative, observations_bytes)
+    _write_atomic_confined(evidence_root, output_relative, capture_bytes)
     return {
         "capture": capture,
         "path": output_relative,
@@ -702,6 +967,12 @@ def verify_scope_capture(
     receipt_issued_at: str,
     mode: str,
     now: datetime | None = None,
+    expected_repository_root: str | None = None,
+    expected_dirty_states: dict[str, str] | None = None,
+    dirty_owners: dict[str, str] | None = None,
+    dirty_policies: dict[str, str] | None = None,
+    observed_repo_root: Path | None = None,
+    status_arguments: tuple[str, ...] = STATUS_ARGUMENTS,
 ) -> list[str]:
     """Verify a capture in live-current or immutable terminal-retained mode."""
     errors: list[str] = []
@@ -729,16 +1000,78 @@ def verify_scope_capture(
     if not isinstance(capture, dict):
         return errors + ["scope capture must be an object"]
 
-    current_repository_root = str(_require_real_root(repo_root))
-    retained = capture_relative == RETAINED_CAPTURE
+    evidence_root = _require_real_root(repo_root)
+    current_observed_root = _require_real_root(observed_repo_root or repo_root)
+    current_repository_root = str(current_observed_root)
+    retained = capture_relative in {RETAINED_CAPTURE, AMENDMENT_RETAINED_CAPTURE}
+    amendment_profile = capture_relative == AMENDMENT_RETAINED_CAPTURE
+    if amendment_profile and any(
+        value is not None
+        for value in (expected_dirty_states, dirty_owners, dirty_policies)
+    ):
+        errors.append(
+            "amendment dirty classification must not be supplied by the caller"
+        )
+    if amendment_profile:
+        capture_dirty_paths = capture.get("dirty_paths")
+        captured_dirty_states: dict[str, str] = {}
+        malformed_dirty_projection = not isinstance(capture_dirty_paths, list)
+        if isinstance(capture_dirty_paths, list):
+            for item in capture_dirty_paths:
+                if (
+                    not isinstance(item, dict)
+                    or not isinstance(item.get("path"), str)
+                    or not isinstance(item.get("normalized_git_state"), str)
+                    or item["path"] in captured_dirty_states
+                ):
+                    malformed_dirty_projection = True
+                    continue
+                captured_dirty_states[item["path"]] = item[
+                    "normalized_git_state"
+                ]
+        if malformed_dirty_projection:
+            return errors + [
+                "amendment dirty projection is missing, malformed, or repetitive"
+            ]
+        try:
+            (
+                expected_dirty_states,
+                dirty_owners,
+                dirty_policies,
+            ) = amendment_dirty_profile(captured_dirty_states)
+        except ValueError as exc:
+            return errors + [f"amendment dirty projection is invalid: {exc}"]
+    else:
+        expected_dirty_states = dict(expected_dirty_states or EXPECTED_DIRTY_STATES)
+        dirty_owners = dict(dirty_owners or {})
+        dirty_policies = dict(dirty_policies or {})
+    assert expected_dirty_states is not None
+    assert dirty_owners is not None
+    assert dirty_policies is not None
+    (
+        expected_non_excluded_scope_clean,
+        expected_reserved_scope_clean,
+        expected_reserved_protected_overlaps,
+    ) = _derive_scope_facts(
+        expected_dirty_states,
+        dirty_owners,
+        dirty_policies,
+        expected_reservation_paths,
+        expected_protected_paths,
+    )
+    profile_repository_root = expected_repository_root or (
+        CANONICAL_AMENDMENT_ROOT
+        if capture_relative == AMENDMENT_RETAINED_CAPTURE
+        else CANONICAL_COLLECTION_ROOT
+    )
     if (
         retained
         and mode == "live-current"
-        and current_repository_root != CANONICAL_COLLECTION_ROOT
+        and current_repository_root != profile_repository_root
     ):
         return errors + [
             "retained live-current verification requires canonical collection root "
-            f"{CANONICAL_COLLECTION_ROOT}"
+            f"{profile_repository_root}"
         ]
     captured_repository_root, repository_root_errors = _captured_repository_root(
         capture.get("repository_root")
@@ -748,18 +1081,21 @@ def verify_scope_capture(
     # may be verified terminally from another clone. Local-only evidence keeps
     # arbitrary-root collection for tests and pre-retention inspection.
     if retained:
-        expected_repository_root = CANONICAL_COLLECTION_ROOT
+        exact_repository_root = profile_repository_root
     elif mode == "live-current":
-        expected_repository_root = current_repository_root
+        exact_repository_root = current_repository_root
     else:
-        expected_repository_root = captured_repository_root
+        exact_repository_root = captured_repository_root
 
+    expected_contract = (
+        AMENDMENT_CAPTURE_CONTRACT if amendment_profile else CAPTURE_CONTRACT
+    )
     exact_fields = {
         "schema_version": 2,
-        "capture_contract": CAPTURE_CONTRACT,
+        "capture_contract": expected_contract,
         "packet_id": PACKET_ID,
         "boundary_manifest_id": BOUNDARY_MANIFEST_ID,
-        "repository_root": expected_repository_root,
+        "repository_root": exact_repository_root,
         "base_commit": expected_base_commit,
         "head_commit": expected_head_commit,
         "checkpoint_commit": expected_checkpoint_commit,
@@ -768,12 +1104,12 @@ def verify_scope_capture(
         "conflict_paths": [],
         "submodule_paths": [],
         "complete_dirty_set": True,
-        "dirty_path_count": 3,
-        "non_excluded_scope_clean": True,
-        "reserved_scope_clean": True,
+        "dirty_path_count": len(expected_dirty_states),
+        "non_excluded_scope_clean": expected_non_excluded_scope_clean,
+        "reserved_scope_clean": expected_reserved_scope_clean,
         "reservation_paths": expected_reservation_paths,
         "protected_paths_read_only": expected_protected_paths,
-        "reserved_protected_overlaps": [],
+        "reserved_protected_overlaps": expected_reserved_protected_overlaps,
         "privacy": {
             "creator_file_content_retained": False,
             "secret_scan_method": "assert-no-creator-file-byte-sequence-in-artifacts-min-16-bytes",
@@ -783,14 +1119,35 @@ def verify_scope_capture(
     for field, expected in exact_fields.items():
         if capture.get(field) != expected:
             errors.append(f"scope capture {field} differs from the exact boundary")
+    if amendment_profile:
+        expected_main_binding = {
+            "top_level": profile_repository_root,
+            "branch_ref": "refs/heads/main",
+            "origin_url": CANONICAL_REMOTE_URL,
+            "origin_main_commit": expected_head_commit,
+        }
+        if capture.get("canonical_main_binding") != expected_main_binding:
+            errors.append(
+                "scope capture canonical-main binding differs from the exact boundary"
+            )
+        if not (
+            expected_base_commit
+            == expected_head_commit
+            == expected_checkpoint_commit
+        ):
+            errors.append(
+                "scope capture amendment commits are not one protected-main commit"
+            )
+    elif "canonical_main_binding" in capture:
+        errors.append("activation scope capture invents canonical-main binding")
     collector = capture.get("collector")
     expected_status_command = [
         "/usr/bin/git",
         "-c",
         "core.hooksPath=/dev/null",
         "-C",
-        expected_repository_root,
-        *STATUS_ARGUMENTS,
+        exact_repository_root,
+        *status_arguments,
     ]
     expected_collector_fields = {
         "git_version",
@@ -807,7 +1164,11 @@ def verify_scope_capture(
             "status_command": expected_status_command,
             "head_command": ["git", "rev-parse", "--verify", "HEAD"],
             "head_tree_command": ["git", "rev-parse", "HEAD^{tree}"],
-            "index_tree_command": ["git", "write-tree"],
+            "index_tree_command": (
+                ["git", "diff", "--cached", "--quiet", "HEAD", "--"]
+                if amendment_profile
+                else ["git", "write-tree"]
+            ),
             "submodule_command": ["git", "ls-files", "-s", "-z"],
         }
         for field, expected in expected_commands.items():
@@ -826,7 +1187,12 @@ def verify_scope_capture(
     if not isinstance(artifacts, dict):
         return errors + ["scope capture artifact map is missing"]
     capture_parent = PurePosixPath(capture_relative).parent.as_posix()
-    if capture_relative == RETAINED_CAPTURE:
+    if capture_relative in {RETAINED_CAPTURE, AMENDMENT_RETAINED_CAPTURE}:
+        retained_output_root = (
+            AMENDMENT_OUTPUT_ROOT
+            if capture_relative == AMENDMENT_RETAINED_CAPTURE
+            else RETAINED_OUTPUT_ROOT
+        )
         retained_suffixes = {
             "raw_status": ("status", "bin"),
             "observations": ("observations", "json"),
@@ -837,7 +1203,7 @@ def verify_scope_capture(
                 reference.get("sha256") if isinstance(reference, dict) else None
             )
             expected_path = (
-                f"{RETAINED_OUTPUT_ROOT}/working-tree-scope."
+                f"{retained_output_root}/working-tree-scope."
                 f"{kind}.{reference_hash}.{extension}"
             )
             if not isinstance(reference, dict) or reference.get("path") != expected_path:
@@ -864,7 +1230,7 @@ def verify_scope_capture(
         return errors
     entries, parse_errors = parse_porcelain_v2_z(raw_status)
     errors.extend(parse_errors)
-    errors.extend(_assert_expected_status(entries))
+    errors.extend(_assert_expected_status(entries, expected_dirty_states))
     try:
         observations_document = json.loads(observations_raw.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -880,7 +1246,7 @@ def verify_scope_capture(
     }:
         errors.append("file observations document contains unapproved fields")
     if (
-        observations_document.get("capture_contract") != CAPTURE_CONTRACT
+        observations_document.get("capture_contract") != expected_contract
         or observations_document.get("captured_at") != capture.get("captured_at")
         or observations_document.get("content_policy")
         != "metadata-only-no-creator-file-bytes"
@@ -892,11 +1258,13 @@ def verify_scope_capture(
     observations_by_path = {
         item.get("path"): item for item in observations if isinstance(item, dict)
     }
-    if set(observations_by_path) != set(EXPECTED_DIRTY_STATES):
+    if set(observations_by_path) != set(expected_dirty_states):
         errors.append("file observations omit or add creator-owned dirty paths")
 
     derived_dirty: list[dict] = []
-    for relative, expected_state in EXPECTED_DIRTY_STATES.items():
+    for relative, expected_state in expected_dirty_states.items():
+        expected_owner = dirty_owners.get(relative, "creator")
+        expected_policy = dirty_policies.get(relative, POLICY)
         observation = observations_by_path.get(relative)
         if not isinstance(observation, dict):
             continue
@@ -945,11 +1313,11 @@ def verify_scope_capture(
             or bytes_claim.get("content_retained") is not False
             or bytes_claim.get("read_method")
             != "openat-O_NOFOLLOW-fstat-before-after"
-            or observation.get("owner") != "creator"
-            or observation.get("policy") != POLICY
+            or observation.get("owner") != expected_owner
+            or observation.get("policy") != expected_policy
         ):
             errors.append(f"file observation safety facts are invalid for {relative}")
-        actual_base = _base_blob(repo_root, expected_base_commit, relative)
+        actual_base = _base_blob(evidence_root, expected_base_commit, relative)
         if base_claim != actual_base:
             errors.append(f"base blob observation differs for {relative}")
         if expected_state == "untracked" and actual_base["exists"]:
@@ -966,13 +1334,13 @@ def verify_scope_capture(
                     lstat_claim.get("regular_file") is True
                     and lstat_claim.get("symlink") is False
                 ),
-                "owner": "creator",
-                "policy": POLICY,
+                "owner": expected_owner,
+                "policy": expected_policy,
             }
         )
         if mode == "live-current":
             try:
-                current, metadata = _read_confined(repo_root, relative)
+                current, metadata = _read_confined(current_observed_root, relative)
             except (OSError, ValueError) as exc:
                 errors.append(f"cannot recompute live observation for {relative}: {exc}")
                 continue
@@ -1022,10 +1390,12 @@ def verify_scope_capture(
         (expected_checkpoint_commit, "checkpoint"),
     ):
         if not COMMIT_RE.fullmatch(commit) or _run_git(
-            repo_root, ["cat-file", "-e", f"{commit}^{{commit}}"]
+            evidence_root, ["cat-file", "-e", f"{commit}^{{commit}}"]
         ).returncode != 0:
             errors.append(f"captured {label} commit cannot be resolved")
-    head_tree = _run_git(repo_root, ["rev-parse", f"{expected_head_commit}^{{tree}}"])
+    head_tree = _run_git(
+        evidence_root, ["rev-parse", f"{expected_head_commit}^{{tree}}"]
+    )
     if (
         head_tree.returncode != 0
         or capture.get("head_tree") != head_tree.stdout.decode("ascii").strip()
@@ -1034,12 +1404,20 @@ def verify_scope_capture(
 
     if mode == "live-current":
         live_status = _git_output(
-            repo_root, list(STATUS_ARGUMENTS), "live raw porcelain-v2 status"
+            current_observed_root,
+            list(status_arguments),
+            "live raw porcelain-v2 status",
         )
         if live_status != raw_status:
             errors.append("live raw porcelain-v2 bytes differ from the capture")
-        live_facts = _git_facts(repo_root, live_status)
-        live_git_version = _git_output(repo_root, ["--version"], "live Git version").decode(
+        live_facts = _git_facts(
+            current_observed_root,
+            live_status,
+            read_only_index=amendment_profile,
+        )
+        live_git_version = _git_output(
+            current_observed_root, ["--version"], "live Git version"
+        ).decode(
             "ascii"
         ).strip()
         if isinstance(collector, dict) and collector.get("git_version") != live_git_version:
@@ -1071,11 +1449,28 @@ def main() -> int:
     parser.add_argument("--checkpoint", required=True)
     parser.add_argument("--output", default=DEFAULT_OUTPUT)
     parser.add_argument("--ack-local-pre-stage-c", action="store_true")
+    parser.add_argument(
+        "--profile",
+        choices=("activation", "local-operator-amendment"),
+        default="activation",
+    )
+    parser.add_argument(
+        "--ack-local-operator-amendment-capture", action="store_true"
+    )
     args = parser.parse_args()
     repo_root = Path(__file__).resolve().parents[2]
     try:
-        if not args.ack_local_pre_stage_c:
-            raise ValueError("collector requires explicit local pre-Stage-C acknowledgement")
+        if args.profile == "activation" and not args.ack_local_pre_stage_c:
+            raise ValueError(
+                "activation collector requires explicit local pre-Stage-C acknowledgement"
+            )
+        if (
+            args.profile == "local-operator-amendment"
+            and not args.ack_local_operator_amendment_capture
+        ):
+            raise ValueError(
+                "amendment collector requires explicit local-operator capture acknowledgement"
+            )
         if os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS"):
             raise ValueError("scope collector is forbidden in CI")
         branch = _git_output(
@@ -1083,12 +1478,21 @@ def main() -> int:
         ).decode("utf-8").strip()
         if not branch.startswith("agent/"):
             raise ValueError("scope collector requires an agent/* branch")
-        base_packet_raw = _git_output(
-            repo_root, ["show", f"HEAD:{PACKET_PATH}"], "protected-base WP-0002 packet"
-        )
-        base_packet = json.loads(base_packet_raw.decode("utf-8"))
-        if not isinstance(base_packet, dict) or base_packet.get("status") != "accepted":
-            raise ValueError("collector runs only from an accepted pre-Stage-C WP-0002 base")
+        if args.profile == "activation":
+            base_packet_raw = _git_output(
+                repo_root,
+                ["show", f"HEAD:{PACKET_PATH}"],
+                "protected-base WP-0002 packet",
+            )
+            base_packet = json.loads(base_packet_raw.decode("utf-8"))
+            if (
+                not isinstance(base_packet, dict)
+                or base_packet.get("status") != "accepted"
+            ):
+                raise ValueError(
+                    "activation collector runs only from an accepted pre-Stage-C "
+                    "WP-0002 base"
+                )
         packet = _load_json(repo_root / PACKET_PATH)
         boundary = _load_json(repo_root / BOUNDARY_PATH)
         reservation_paths = packet.get("reservation", {}).get("paths")
@@ -1099,14 +1503,29 @@ def main() -> int:
             protected_paths, list
         ):
             raise ValueError("packet or boundary paths are unavailable")
-        result = collect_scope_capture(
-            repo_root,
-            base_commit=args.base,
-            checkpoint_commit=args.checkpoint,
-            reservation_paths=reservation_paths,
-            protected_paths_read_only=protected_paths,
-            output_relative=args.output,
-        )
+        if args.profile == "local-operator-amendment":
+            observed_root = Path(CANONICAL_AMENDMENT_ROOT)
+            output_relative = AMENDMENT_RETAINED_CAPTURE
+            result = collect_scope_capture(
+                observed_root,
+                base_commit=args.base,
+                checkpoint_commit=args.checkpoint,
+                reservation_paths=reservation_paths,
+                protected_paths_read_only=protected_paths,
+                output_relative=output_relative,
+                expected_repository_root=CANONICAL_AMENDMENT_ROOT,
+                evidence_root=repo_root,
+                status_arguments=AMENDMENT_STATUS_ARGUMENTS,
+            )
+        else:
+            result = collect_scope_capture(
+                repo_root,
+                base_commit=args.base,
+                checkpoint_commit=args.checkpoint,
+                reservation_paths=reservation_paths,
+                protected_paths_read_only=protected_paths,
+                output_relative=args.output,
+            )
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"WP-0002 SCOPE CAPTURE: FAIL: {exc}", file=sys.stderr)
         return 1

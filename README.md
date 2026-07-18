@@ -6,11 +6,13 @@ An endearing, real-time, post-apocalyptic city-building and resource-management 
 
 **A1 — WP-0002 Last Bearing is the sole active packet.**
 
-The approved durable checkout is `/Users/sasha/Documents/Codex/sasha-the-land-pirate`, backed by `https://github.com/AC-21/sasha-the-land-pirate`. Protected `main` contains the canonical Unity project skeleton, deterministic plain-C# seams, non-persisting save boundary, tests, and the released WP-0003 technical foundation. `RR-WP0002-ACTIVATE-20260717` activates only the Last Bearing packet's exact held reservation: deterministic simulation, fixed-child atomic save/load, one playable Unity loop, scenario evidence, and its bounded playtest/evidence paths.
+The approved durable checkout is `/Users/sasha/Projects/sasha-the-land-pirate`, backed by `https://github.com/AC-21/sasha-the-land-pirate`; its exact Unity project is the `Game` child. Protected `main` contains the canonical Unity project skeleton, deterministic plain-C# seams, non-persisting save boundary, tests, and the released WP-0003 technical foundation. `RR-WP0002-ACTIVATE-20260717` activates only the Last Bearing packet's exact held reservation: deterministic simulation, fixed-child atomic save/load, one playable Unity loop, scenario evidence, and its bounded playtest/evidence paths.
 
 The creator expressed a Unity-first preference and reports a local license. Inspection found Hub 3.19.5, Rosetta 2, and Editor 6000.5.4f1 ARM64; full Xcode and a standalone .NET SDK were absent. The creator-approved WP-0001 installation candidate is Unity 6000.3.19f1 ARM64 with Mac Build Support (IL2CPP), Xcode 26.3, URP 17.3, and Unity Test Framework 1.6. Mono is the iteration backend; IL2CPP ARM64 is the acceptance-build authority. D-0051 supersedes D-0049 and selects `UNITY-MCP-EXTERNAL`—Codex through Unity's MCP Bridge and exact Unity-installed relay—while D-0050 permits only creator-operated pre-A1 setup; direct agent/CI Unity process invocation remains prohibited. The secret-free [`pre-A1 readiness snapshot`](docs/evidence/WP-0001/pre-a1-readiness-20260716.json) records the current stack, route, three preserved deviations, and thirteen blockers as point-in-time A0 evidence.
 
 The creator-ratified [`lean A1 local-development successor`](docs/foundation-v0.1/15-LEAN-A1-LOCAL-DEVELOPMENT.md) is the operating model. WP-0003 is released under `RR-WP0003-COMPLETE-20260717`; its reservation is released. WP-0002 is creator-accepted under `RR-WP0002-ACCEPT-20260717` and activated under `RR-WP0002-ACTIVATE-20260717`. Its reservation is held, creator-owned drift remains excluded/read-only, and every implementation change still travels through a fresh protected `agent/*` PR.
+
+The append-only [`delegated local Unity operator amendment`](docs/foundation-v0.1/governance/WP-0002-DELEGATED-LOCAL-UNITY-OPERATOR-AMENDMENT.md) is a non-executable candidate until its receipt, authenticated online three-phase transaction, and separate protected three-report evidence-closure PR complete. The control PR cannot contain reports generated after Stage 1 and after merge; all absent therefore means non-executable pending state, while a partial set fails closed. The closure PR must add exactly those three files and nothing else, and its base-owned policy run live-reverifies both owner comments and the complete transaction. GitHub's classic protection endpoint requires a separately provisioned single-repository, short-expiry Administration-read Actions secret; its absence fails closed, and it is exposed only to protected-base closure code, never candidate code or an agent. Only after closure merges does it permit visible Computer Use for exact-project Hub/Editor open/switch, approval of the receipt-bound Bridge client whose visible OS publisher/path and application version/build match, and non-secret inspection. The prior signature observation remains context-limited; the UI does not prove a CDHash. Implementation still uses only the exact five MCP tools; Bridge tool/configuration mutation, direct Unity process invocation, and every prior denial remain in force.
 
 Current creator-ratified facts:
 
@@ -39,7 +41,7 @@ Validate the bootstrap foundation from the repository root:
 python3 docs/foundation-v0.1/tools/validate_foundation.py
 ```
 
-Expected current result: the foundation lint passes with 64 decision records and 20 receipts, including five intentionally unsealed historical bootstrap captures.
+Expected current result after the protected amendment transaction and evidence closure complete: the foundation lint passes with 64 decision records and 21 receipts, including five intentionally unsealed historical bootstrap captures.
 
 ## Planned seams
 
