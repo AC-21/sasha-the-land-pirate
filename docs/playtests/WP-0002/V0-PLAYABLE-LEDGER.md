@@ -2,7 +2,7 @@
 
 Status: **provisional execution ledger**
 
-Baseline: `bea6dacaee95879f3f329d8faf478e8d0036fea2`
+Baseline: `8f2b973e10682a77339b28bde67eb7a9ff5679bf`
 
 Purpose: keep the next playable work vertically integrated, testable, and honest.
 
@@ -238,8 +238,7 @@ lots, dynamic pricing, a regional market, or the global caravan exchange.
 Objective: make the released city-road-manufacturing loop readable and
 finishable before adding another system.
 
-Status: current implementation candidate; not released until the applicable
-protected and Unity gates pass.
+Status: released on protected `main` in `8f2b973`.
 
 Scope:
 
@@ -268,6 +267,53 @@ kernel, city placement, composition mechanics, production art, or save change.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-06-THE-PERMIT-JOB-CONTRACT.md`.
+
+## VGR-07 — Home Before Horizon
+
+Objective: turn the D-0030 comparison into a small, playable city-building and
+local-logistics observation without selecting a grammar.
+
+Status: current implementation candidate; not released until independent,
+Unity, protected, and creator-delegated release gates pass.
+
+Scope:
+
+- Hold one service-cell task, three authored sockets, colony presentation, and
+  the exact provisional D-0022 camera constant.
+- Trial A places the recycler and workshop separately on distinct restrained
+  snap pads, then connects one physical service link.
+- Trial B places the complete recycler/workshop/shared-apron district stamp on
+  one authored anchor.
+- Move the same empty calibration sled from recycler to workshop in both
+  trials, then record only `clear` or `unclear` path legibility.
+- Retain A/B layouts and raw observations in memory for reversible comparison;
+  save and canonical state remain untouched.
+- After either observation, converge on the already-existing infrastructure
+  activation command without recording which presentation produced it.
+
+Acceptance:
+
+- both interactions complete, switch, reset, and clear exactly;
+- invalid layouts and premature/duplicate logistics actions fail closed;
+- trial verbs queue no command and preserve canonical hashes;
+- either observed trial yields the same canonical infrastructure bytes;
+- session boundaries clear transient trial state;
+- evidence contains no score, recommendation, winner, or persistence;
+- D-0030 remains open and all existing save/Unity/protected gates stay green.
+
+Exclude: canonical placement, inventory delivery, population/scale tests,
+NavMesh, production assets, retained UI, dependencies, save changes, or a
+city-grammar recommendation.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-07-HOME-BEFORE-HORIZON-CONTRACT.md`.
+
+## Queued after VGR-07 — Stay With Sasha
+
+The next bounded driving pass should integrate the existing tested chase camera
+into the one shared Last Bearing camera and add presentation-only rig recovery.
+It must not add core telemetry, save state, or a second camera. Exact scope and
+contract remain unimplemented until VGR-07 releases.
 
 ## Visual constitution
 

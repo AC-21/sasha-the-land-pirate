@@ -4,7 +4,9 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using AtomicLandPirate.Presentation.LastBearing.RoadFeel;
 using AtomicLandPirate.Presentation.LastBearing.Vehicle;
 using AtomicLandPirate.Save.LastBearing;
@@ -209,9 +211,26 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.SelectCityGrammarHypothesis(
                 LastBearingCityGrammarHypothesis.RestrainedSnapGrid);
             LastBearingCameraRig rig = controller.World!.CameraRig!;
+            LastBearingCityGrammarComparison comparison =
+                controller.World.CityGrammarComparison!;
             Vector3 fixedFocus = rig.CityFocus;
             float fixedYaw = rig.CityYaw;
             float fixedDistance = rig.CityDistance;
+
+            controller.ManipulateCityGrammarPrimary();
+            controller.ToggleCityGrammarTrialPiece();
+            controller.ManipulateCityGrammarPrimary();
+            controller.ManipulateCityGrammarPrimary();
+            controller.ConnectCityGrammarLogistics();
+            controller.AdvanceCityGrammarDelivery();
+            controller.AdvanceCityGrammarDelivery();
+            controller.RecordCityGrammarPathRead(clear: true);
+
+            Assert.That(comparison.TrialReady, Is.True);
+            Assert.That(
+                comparison.GetComponentsInChildren<Transform>(true)
+                    .Count(item => item.name == "Shared Empty Calibration Sled"),
+                Is.EqualTo(2));
 
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Press(keyboard.dKey);
@@ -220,6 +239,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             yield return null;
             controller.SelectCityGrammarHypothesis(
                 LastBearingCityGrammarHypothesis.DistrictStamp);
+            controller.ManipulateCityGrammarPrimary();
+            controller.AdvanceCityGrammarDelivery();
+            controller.AdvanceCityGrammarDelivery();
+            controller.RecordCityGrammarPathRead(clear: false);
 
             Assert.That(rig.IsComparisonMode, Is.True);
             Assert.That(rig.CityFocus, Is.EqualTo(fixedFocus));
@@ -227,6 +250,72 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(rig.CityDistance, Is.EqualTo(fixedDistance));
             Assert.That(controller.CanonicalHash, Is.EqualTo(originalHash));
             Assert.That(controller.CityGrammarEvidence, Does.Contain("selections=2"));
+            Assert.That(comparison.CompletedObservationCount, Is.EqualTo(2));
+            Assert.That(controller.CityGrammarEvidence, Does.Contain("path=Clear"));
+            Assert.That(controller.CityGrammarEvidence, Does.Contain("path=Unclear"));
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+        }
+
+        [UnityTest]
+        public IEnumerator CityGrammarTrialClearsOnLoadAndActualDepartureOnly()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            _ = InstallTemporarySaveAdapter(controller);
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            controller.InspectCityNeed();
+            CompleteDistrictObservation(controller, clear: true);
+            controller.Save();
+
+            Assert.That(controller.HasCompletedCityGrammarObservation, Is.True);
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"));
+
+            controller.Load();
+
+            Assert.That(controller.HasCompletedCityGrammarObservation, Is.False);
+            Assert.That(controller.CityGrammarEvidence, Does.Contain("observations=0"));
+
+            CompleteDistrictObservation(controller, clear: false);
+            controller.CommitExpedition();
+
+            Assert.That(
+                controller.HasCompletedCityGrammarObservation,
+                Is.True,
+                "queuing a departure attempt is not a canonical phase transition");
+            LogAssert.Expect(
+                LogType.Exception,
+                new Regex("LAST_BEARING_TRANSACTION_PREREQUISITES_MISSING"));
+            InvokeSimulationTick(controller);
+
+            Assert.That(
+                controller.ReadModel!.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.AtHome));
+            Assert.That(controller.HasCompletedCityGrammarObservation, Is.True);
+
+            InstallControllerState(
+                controller,
+                CreateAtHomeModuleState(VehicleModule.WinchAssembly));
+            controller.CommitExpedition();
+            InvokeSimulationTick(controller);
+
+            Assert.That(
+                controller.ReadModel!.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.Outbound));
+            Assert.That(controller.HasCompletedCityGrammarObservation, Is.False);
+            Assert.That(
+                controller.CityGrammarHypothesis,
+                Is.EqualTo(LastBearingCityGrammarHypothesis.Unselected));
+            Assert.That(controller.CityGrammarEvidence, Does.Contain("observations=0"));
         }
 
         [UnityTest]
@@ -1560,6 +1649,18 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             var pending = pendingField!.GetValue(controller) as ICollection;
             Assert.That(pending, Is.Not.Null);
             return pending!.Count;
+        }
+
+        private static void CompleteDistrictObservation(
+            LastBearingGameController controller,
+            bool clear)
+        {
+            controller.SelectCityGrammarHypothesis(
+                LastBearingCityGrammarHypothesis.DistrictStamp);
+            controller.ManipulateCityGrammarPrimary();
+            controller.AdvanceCityGrammarDelivery();
+            controller.AdvanceCityGrammarDelivery();
+            controller.RecordCityGrammarPathRead(clear);
         }
 
         private static void InvokeSimulationTick(

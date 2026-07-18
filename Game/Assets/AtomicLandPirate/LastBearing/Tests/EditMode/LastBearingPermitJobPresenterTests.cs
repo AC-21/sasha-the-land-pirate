@@ -54,7 +54,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             LastBearingPermitJobPresentation infrastructure =
                 LastBearingPermitJobPresenter.Present(assigned, true);
-            Assert.That(infrastructure.Headline, Does.Contain("civic machinery"));
+            Assert.That(infrastructure.Headline, Does.Contain("service-cell trial"));
 
             state = ApplyOne(
                 state,

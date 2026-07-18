@@ -219,7 +219,20 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 if (model.NextObjective == "activate-slice-infrastructure")
                 {
-                    if (GUILayout.Button("ACTIVATE RECYCLER + MACHINE SHOP", _buttonStyle))
+                    if (!_controller.HasCompletedCityGrammarObservation)
+                    {
+                        GUILayout.Label(
+                            "Complete either neutral service-cell trial above: stage the same recycler and workshop, move one empty calibration sled, and record whether the path reads clearly.",
+                            _bodyStyle);
+                        return;
+                    }
+
+                    GUILayout.Label(
+                        "A trial observation exists. Bringing the service cell online records only the existing infrastructure fact—never the tested layout or a D-0030 winner.",
+                        _mutedStyle);
+                    if (GUILayout.Button(
+                            "BRING THE SAME RECYCLER + MACHINE SHOP ONLINE",
+                            _buttonStyle))
                     {
                         _controller.ActivateInfrastructure();
                     }
@@ -600,7 +613,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void DrawCityNeedAndGrammar(LastBearingReadModel model)
         {
-            GUILayout.Label("CITY NEED + D-0030 COMPARISON", _headingStyle);
+            GUILayout.Label("HOME BEFORE HORIZON · CITY BUILDING LAB", _headingStyle);
             if (!_controller!.CityNeedInspected)
             {
                 GUILayout.Label(
@@ -630,11 +643,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             GUILayout.Label(
-                "Comparison only — neither hypothesis selects or ratifies D-0030. " +
-                "Both use the same locked provisional camera.",
+                "Stage the same recycler-to-workshop service cell two ways, then move the same empty calibration sled. Both trials hold function, camera, residents, and canonical state constant. Neither selects or ratifies D-0030.",
                 _mutedStyle);
             if (GUILayout.Button(
-                    "HYPOTHESIS A · INDIVIDUAL BUILDINGS ON RESTRAINED SNAP GRID",
+                    "TRIAL A · INDIVIDUAL BUILDINGS ON THREE SNAP PADS",
                     _buttonStyle))
             {
                 _controller.SelectCityGrammarHypothesis(
@@ -642,7 +654,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             if (GUILayout.Button(
-                    "HYPOTHESIS B · WHOLE CIVIC DISTRICT STAMP",
+                    "TRIAL B · WHOLE SERVICE-CELL DISTRICT STAMP",
                     _buttonStyle))
             {
                 _controller.SelectCityGrammarHypothesis(
@@ -652,22 +664,109 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_controller.CityGrammarHypothesis !=
                 LastBearingCityGrammarHypothesis.Unselected)
             {
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("MOVE / RESTAMP", _buttonStyle))
+                GUILayout.Label(
+                    "ACTIVE  " + _controller.CityGrammarHypothesis,
+                    _bodyStyle);
+                if (_controller.CityGrammarHypothesis ==
+                    LastBearingCityGrammarHypothesis.RestrainedSnapGrid)
+                {
+                    GUILayout.Label(
+                        "Active building  " + _controller.ActiveCityGrammarPiece +
+                        ". Place both buildings on different pads, then connect their service link.",
+                        _mutedStyle);
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("PLACE / MOVE ACTIVE", _buttonStyle))
+                    {
+                        _controller.ManipulateCityGrammarPrimary();
+                    }
+
+                    if (GUILayout.Button("SWITCH BUILDING", _buttonStyle))
+                    {
+                        _controller.ToggleCityGrammarTrialPiece();
+                    }
+
+                    GUILayout.EndHorizontal();
+                    if (!_controller.CityGrammarLogisticsConnected &&
+                        GUILayout.Button(
+                            "CONNECT RECYCLER OUTPUT → WORKSHOP INPUT",
+                            _buttonStyle))
+                    {
+                        _controller.ConnectCityGrammarLogistics();
+                    }
+                }
+                else if (GUILayout.Button("PLACE / RESTAMP SERVICE CELL", _buttonStyle))
                 {
                     _controller.ManipulateCityGrammarPrimary();
                 }
 
+                GUILayout.BeginHorizontal();
                 if (GUILayout.Button("ROTATE 90°", _buttonStyle))
                 {
                     _controller.RotateCityGrammarPrimary();
                 }
 
+                if (GUILayout.Button("RESET ACTIVE TRIAL", _buttonStyle))
+                {
+                    _controller.ResetActiveCityGrammarTrial();
+                }
+
                 GUILayout.EndHorizontal();
-                if (GUILayout.Button("CLEAR COMPARISON", _buttonStyle))
+
+                if (_controller.CityGrammarLogisticsConnected &&
+                    _controller.CityGrammarDeliveryStage !=
+                    LastBearingCityTrialDeliveryStage.DeliveredToWorkshop)
+                {
+                    string deliveryAction = _controller.CityGrammarDeliveryStage ==
+                                            LastBearingCityTrialDeliveryStage.AtRecycler
+                        ? "DISPATCH EMPTY CALIBRATION SLED"
+                        : "DELIVER EMPTY SLED TO WORKSHOP";
+                    if (GUILayout.Button(deliveryAction, _buttonStyle))
+                    {
+                        _controller.AdvanceCityGrammarDelivery();
+                    }
+                }
+
+                if (_controller.CityGrammarDeliveryStage ==
+                        LastBearingCityTrialDeliveryStage.DeliveredToWorkshop &&
+                    _controller.CityGrammarPathRead ==
+                        LastBearingCityTrialPathRead.Unrecorded)
+                {
+                    GUILayout.Label(
+                        "Record the raw observation. There is no score and no automatic winner.",
+                        _mutedStyle);
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("PATH READS CLEAR", _buttonStyle))
+                    {
+                        _controller.RecordCityGrammarPathRead(clear: true);
+                    }
+
+                    if (GUILayout.Button("PATH READS UNCLEAR", _buttonStyle))
+                    {
+                        _controller.RecordCityGrammarPathRead(clear: false);
+                    }
+
+                    GUILayout.EndHorizontal();
+                }
+
+                if (_controller.CityGrammarTrialReady)
+                {
+                    GUILayout.Label(
+                        "OBSERVATION COMPLETE · switch trials to compare under the same camera.",
+                        _bodyStyle);
+                }
+
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("LEAVE LAB", _buttonStyle))
+                {
+                    _controller.LeaveCityGrammarComparison();
+                }
+
+                if (GUILayout.Button("CLEAR BOTH TRIALS", _buttonStyle))
                 {
                     _controller.ResetCityGrammarComparison();
                 }
+
+                GUILayout.EndHorizontal();
             }
 
             GUILayout.Label(_controller.CityGrammarEvidence, _mutedStyle);
