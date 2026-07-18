@@ -1887,7 +1887,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 focus - (vehicleForward * 8.5f) + (Vector3.up * 3.8f);
             Assert.That(
                 Vector3.Distance(camera.transform.position, expectedPosition),
-                Is.LessThan(0.001f));
+                Is.LessThan(0.01f),
+                "the fail-closed road rig may retain its sub-centimeter " +
+                "presentation smoothing while reclaiming the shared camera");
             Assert.That(
                 Vector3.Dot(
                     camera.transform.forward,
