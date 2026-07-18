@@ -6,12 +6,30 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public sealed class LastBearingState
     {
-        public const int CurrentSchemaVersion = 2;
+        public const int CurrentSchemaVersion = 3;
         public const string SashaProtagonistId = "sasha";
         public const string LastBearingFactionId = "faction:last-bearing:caravaners";
         public const string AuxiliaryPumpSocketId =
             "city:last-bearing:socket:pump-hall-auxiliary";
         public const int AuxiliaryPumpOrientationQuarterTurns = 0;
+        public const string SpareBearingRecipeId =
+            "recipe:last-bearing:spare-bearing:0001";
+        public const string SpareBearingBatchId =
+            "world:last-bearing:manufacturing-job:0001";
+        public const string SpareBearingLotId =
+            "world:last-bearing:lot:0001";
+        public const string SpareBearingTradeContractId =
+            "world:last-bearing:trade-contract:0001";
+        public const string SpareBearingWorkshopOutputId =
+            "settlement:last-bearing:workshop-output";
+        public const string LastBearingClaimsCounterId =
+            "site:last-bearing-claims-counter";
+        public const string DepotCorridorRoutePermitId =
+            "world:last-bearing:promise:0001";
+        public const string DepotCorridorRouteBoardId =
+            "board:last-bearing:depot-corridor";
+        public const string OneGoodBatchPresentationContentId =
+            "bld_machine_shop_claims_wicket_a";
 
         internal LastBearingState(LastBearingStateBuilder builder)
         {
@@ -54,6 +72,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 builder.ActiveWaterModifierMilliPerSettlementTick;
             NextCityDecision = builder.NextCityDecision;
             InstalledCityImprovement = builder.InstalledCityImprovement;
+            SpareBearingRecipe = builder.SpareBearingRecipe;
+            SpareBearingBatchPhase = builder.SpareBearingBatchPhase;
+            SpareBearingElapsedTicks = builder.SpareBearingElapsedTicks;
+            SpareBearingRequiredTicks = builder.SpareBearingRequiredTicks;
+            SpareBearingLotQuantity = builder.SpareBearingLotQuantity;
+            SpareBearingLotCustody = builder.SpareBearingLotCustody;
 
             VehicleModule = builder.VehicleModule;
             ModuleInstallationState = builder.ModuleInstallationState;
@@ -181,6 +205,18 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public NextCityDecision NextCityDecision { get; }
 
         public CityImprovementKind InstalledCityImprovement { get; }
+
+        public SpareBearingRecipe SpareBearingRecipe { get; }
+
+        public SpareBearingBatchPhase SpareBearingBatchPhase { get; }
+
+        public long SpareBearingElapsedTicks { get; }
+
+        public long SpareBearingRequiredTicks { get; }
+
+        public long SpareBearingLotQuantity { get; }
+
+        public SpareBearingLotCustody SpareBearingLotCustody { get; }
 
         public VehicleModule VehicleModule { get; }
 
@@ -339,6 +375,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 state.ActiveWaterModifierMilliPerSettlementTick;
             NextCityDecision = state.NextCityDecision;
             InstalledCityImprovement = state.InstalledCityImprovement;
+            SpareBearingRecipe = state.SpareBearingRecipe;
+            SpareBearingBatchPhase = state.SpareBearingBatchPhase;
+            SpareBearingElapsedTicks = state.SpareBearingElapsedTicks;
+            SpareBearingRequiredTicks = state.SpareBearingRequiredTicks;
+            SpareBearingLotQuantity = state.SpareBearingLotQuantity;
+            SpareBearingLotCustody = state.SpareBearingLotCustody;
             VehicleModule = state.VehicleModule;
             ModuleInstallationState = state.ModuleInstallationState;
             RouteKind = state.RouteKind;
@@ -428,6 +470,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
         internal long ActiveWaterModifierMilliPerSettlementTick;
         internal NextCityDecision NextCityDecision;
         internal CityImprovementKind InstalledCityImprovement;
+        internal SpareBearingRecipe SpareBearingRecipe;
+        internal SpareBearingBatchPhase SpareBearingBatchPhase;
+        internal long SpareBearingElapsedTicks;
+        internal long SpareBearingRequiredTicks;
+        internal long SpareBearingLotQuantity;
+        internal SpareBearingLotCustody SpareBearingLotCustody;
         internal VehicleModule VehicleModule;
         internal ModuleInstallationState ModuleInstallationState;
         internal RouteKind RouteKind;

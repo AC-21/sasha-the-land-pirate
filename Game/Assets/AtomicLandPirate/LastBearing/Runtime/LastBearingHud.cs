@@ -113,6 +113,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             DrawPresentationMode(model);
             GUILayout.Space(10f);
 
+            DrawOneGoodBatch(model);
+            GUILayout.Space(10f);
+
             GUILayout.Label("CURRENT ACTION", _headingStyle);
             DrawContextActions(model);
             GUILayout.Space(10f);
@@ -376,6 +379,36 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            if (model.IsSpareBearingBatchStartAvailable)
+            {
+                GUILayout.Label(
+                    "The machine shop can commit exactly one bounded spare-bearing batch while preserving the civic parts reserve.",
+                    _bodyStyle);
+                if (GUILayout.Button(
+                        "START ONE SPARE-BEARING LOT",
+                        _buttonStyle))
+                {
+                    _controller!.StartSpareBearingBatch();
+                }
+
+                return;
+            }
+
+            if (model.IsSpareBearingBarterAvailable)
+            {
+                GUILayout.Label(
+                    "The completed physical lot can cross the claims wicket exactly once for the fixed depot corridor permit.",
+                    _bodyStyle);
+                if (GUILayout.Button(
+                        "BARTER LOT FOR DEPOT ROUTE PERMIT",
+                        _buttonStyle))
+                {
+                    _controller!.BarterSpareBearingLot();
+                }
+
+                return;
+            }
+
             if (model.MaintenanceDue)
             {
                 if (GUILayout.Button("SERVICE FIELD SLEEVE · 2 PARTS", _buttonStyle))
@@ -417,15 +450,58 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (GUILayout.Button("PUMP HALL", _buttonStyle))
             {
+                _controller.World?.SelectPumpHallCutaway();
                 _controller.OpenBuildingCutaway();
             }
 
+            if (GUILayout.Button("WORKSHOP / CLAIMS", _buttonStyle))
+            {
+                _controller.World?.SelectOneGoodBatchCutaway();
+                _controller.OpenBuildingCutaway();
+            }
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
             if (GUILayout.Button("GARAGE", _buttonStyle))
             {
                 _controller.OpenGarageBay();
             }
 
             GUILayout.EndHorizontal();
+        }
+
+        private void DrawOneGoodBatch(LastBearingReadModel model)
+        {
+            bool visible = model.IsSpareBearingBatchStartAvailable ||
+                           model.SpareBearingRecipe != SpareBearingRecipe.None ||
+                           model.RoutePermitGranted;
+            if (!visible)
+            {
+                return;
+            }
+
+            GUILayout.Label("ONE GOOD BATCH", _headingStyle);
+            string lot = model.SpareBearingLotQuantity > 0
+                ? LastBearingState.SpareBearingLotId +
+                  " · quantity " + model.SpareBearingLotQuantity
+                : "not yet created";
+            GUILayout.Label(
+                "Recipe  " + model.SpareBearingRecipe + "\n" +
+                "Phase  " + model.SpareBearingBatchPhase +
+                "  ·  elapsed " + model.SpareBearingElapsedTicks +
+                "/" + model.SpareBearingRequiredTicks +
+                "  ·  remaining " + model.SpareBearingRemainingTicks + "\n" +
+                "Lot  " + lot + "\n" +
+                "Custody  " + model.SpareBearingLotCustody + "\n" +
+                "Depot route permit  " +
+                (model.RoutePermitGranted ? "GRANTED" : "LOCKED") + "\n" +
+                "Future route toll  " + model.FutureRouteTollFuelUnits +
+                " fuel",
+                _bodyStyle);
+            GUILayout.Label(
+                "ONE-OFF BARTER · CARAVAN EXCHANGE CLOSED",
+                _mutedStyle);
         }
 
         private void DrawCityNeedAndGrammar(LastBearingReadModel model)

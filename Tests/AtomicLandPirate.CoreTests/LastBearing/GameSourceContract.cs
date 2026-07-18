@@ -38,6 +38,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(
                     runtimeRoot,
                     "LastBearingPumpHallCutawayView.cs"));
+            string oneGoodBatch = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "LastBearingOneGoodBatchCutawayView.cs"));
             string dispatcher = File.ReadAllText(
                 Path.Combine(
                     repoRoot,
@@ -62,6 +66,15 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "ApplyPresentationOnlyRoadControls");
             Require(controller, "OpenBuildingCutaway");
             Require(controller, "OpenGarageBay");
+            Require(controller, "public void StartSpareBearingBatch()");
+            Require(controller, "new StartSpareBearingBatchCommand(sequence)");
+            Require(controller, "public void BarterSpareBearingLot()");
+            Require(controller, "new BarterSpareBearingLotCommand(sequence)");
+            Require(controller, "LastBearingEventKind.SpareBearingBatchStarted");
+            Require(controller, "LastBearingEventKind.SpareBearingBatchCheckpointReached");
+            Require(controller, "LastBearingEventKind.SpareBearingBatchCompleted");
+            Require(controller, "LastBearingEventKind.SpareBearingLotBartered");
+            Require(controller, "LastBearingEventKind.RoutePermitGranted");
             string installationOperation = Segment(
                 controller,
                 "public void InstallCityImprovement()",
@@ -240,6 +253,12 @@ namespace AtomicLandPirate.LastBearingTests
                 "CityReturnCredited",
                 "TurbineRepaired",
                 "CityImprovementInstalled",
+                "SpareBearingBatchStarted",
+                "SpareBearingBatchCheckpointReached",
+                "SpareBearingBatchCompleted",
+                "SpareBearingLotCreated",
+                "SpareBearingLotBartered",
+                "RoutePermitGranted",
             })
             {
                 Require(autosave, "LastBearingEventKind." + criticalEvent);
@@ -469,6 +488,56 @@ namespace AtomicLandPirate.LastBearingTests
                     "pump-hall cutaway contains forbidden authority " +
                     forbidden);
             }
+
+            Require(oneGoodBatch, "C3-VGR-05-CANDIDATE");
+            Require(oneGoodBatch, "bld_machine_shop_claims_wicket_a");
+            Require(oneGoodBatch, "LOT_SPARE_BEARING_ONE_GOOD_BATCH");
+            Require(oneGoodBatch, "PHYSICAL_INPUT_PART_01");
+            Require(oneGoodBatch, "PHYSICAL_INPUT_PART_02");
+            Require(oneGoodBatch, "PERSISTENT_TWO_FUEL_TOLL_TERMS");
+            Require(oneGoodBatch, "FUTURE_TOLL_FUEL_UNIT_01");
+            Require(oneGoodBatch, "FUTURE_TOLL_FUEL_UNIT_02");
+            Require(oneGoodBatch, "_bearingLot.transform.SetParent(custodyAnchor!");
+            Require(oneGoodBatch, "SpareBearingLotCustody.WorkshopOutput");
+            Require(oneGoodBatch, "SpareBearingLotCustody.LastBearingClaimsCounter");
+            Require(oneGoodBatch, "HasRoof => false");
+            Require(oneGoodBatch, "HasNearWall => false");
+            Require(oneGoodBatch, "collider.enabled = false");
+            foreach (string forbidden in new[]
+            {
+                "Rigidbody",
+                "RoadFeelTelemetry",
+                "Physics.",
+                "OnTrigger",
+                "OnCollision",
+                "LastBearingKernel",
+                "LastBearingCommand",
+                "SaveContracts",
+                "System.IO",
+                "Application.persistentDataPath",
+                "Keyboard.current",
+                "Gamepad.current",
+                "price",
+                "currency",
+                "order book",
+            })
+            {
+                TestHarness.True(
+                    oneGoodBatch.IndexOf(forbidden, StringComparison.Ordinal) < 0,
+                    "One Good Batch cutaway contains forbidden authority or market grammar " +
+                    forbidden);
+            }
+
+            Require(world, "SelectPumpHallCutaway");
+            Require(world, "SelectOneGoodBatchCutaway");
+            Require(world, "ApplyOneGoodBatch(");
+            Require(hud, "ONE GOOD BATCH");
+            Require(hud, "ONE-OFF BARTER · CARAVAN EXCHANGE CLOSED");
+            Require(hud, "Future route toll  ");
+            Require(hud, "model.FutureRouteTollFuelUnits");
+            Require(recovery, "ApplyRoutePermit(bool granted)");
+            Require(recovery, "Permit Locked Horizontal Crossbar");
+            Require(recovery, "Permit Raised Vertical Arm");
 
             Require(dispatcher, "[assembly: TestRunCallback(");
             Require(dispatcher, "WP0002TestRunCallback : ITestRunCallback");

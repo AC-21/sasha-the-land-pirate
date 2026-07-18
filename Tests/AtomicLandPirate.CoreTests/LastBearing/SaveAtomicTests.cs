@@ -33,6 +33,19 @@ namespace AtomicLandPirate.LastBearingTests
                 ScratchRecoveryRejectsPublishedGeneration(repoRoot));
             harness.Run("load does not create a missing profile", () =>
                 MissingLoadIsReadOnly(repoRoot));
+            RunOneGoodBatch(harness, repoRoot);
+        }
+
+        internal static void RunOneGoodBatch(
+            TestHarness harness,
+            string repoRoot)
+        {
+            harness.Run(
+                "one good batch save checkpoints round trip exactly",
+                () => OneGoodBatchCheckpointsRoundTrip(repoRoot));
+            harness.Run(
+                "one good batch faulted publications recover and retry exactly",
+                () => OneGoodBatchFaultedPublicationsConverge(repoRoot));
         }
 
         private static void FrozenVector()
@@ -179,6 +192,448 @@ namespace AtomicLandPirate.LastBearingTests
                 LastBearingCanonicalCodec.ComputeMechanicalSha256(installed),
                 LastBearingCanonicalCodec.ComputeMechanicalSha256(decoded.State),
                 "restored installation mechanics");
+        }
+
+        private static void OneGoodBatchCheckpointsRoundTrip(string repoRoot)
+        {
+            LastBearingState started = RoundTripOneGoodBatchCheckpoint(
+                repoRoot,
+                "one-good-batch-started",
+                CreateOneGoodBatchState(elapsedTicks: 0, settle: false));
+            AssertOneGoodBatchCheckpoint(
+                started,
+                SpareBearingBatchPhase.InProgress,
+                0,
+                0,
+                SpareBearingLotCustody.None,
+                routePermitGranted: false,
+                "started");
+
+            long partsAfterStart = started.PartsUnits;
+            var startReplay = new CoreTestDriver(started);
+            startReplay.Apply(sequence =>
+                new StartSpareBearingBatchCommand(sequence));
+            TestHarness.Equal(
+                partsAfterStart,
+                startReplay.State.PartsUnits,
+                "loaded start replay debited parts");
+            TestHarness.Equal(
+                SpareBearingBatchPhase.InProgress,
+                startReplay.State.SpareBearingBatchPhase,
+                "loaded start replay changed phase");
+            TestHarness.Equal(
+                0L,
+                startReplay.State.SpareBearingLotQuantity,
+                "loaded start replay created a lot");
+
+            LastBearingState midpoint = RoundTripOneGoodBatchCheckpoint(
+                repoRoot,
+                "one-good-batch-midpoint",
+                CreateOneGoodBatchState(elapsedTicks: 60, settle: false));
+            AssertOneGoodBatchCheckpoint(
+                midpoint,
+                SpareBearingBatchPhase.InProgress,
+                60,
+                0,
+                SpareBearingLotCustody.None,
+                routePermitGranted: false,
+                "midpoint");
+
+            LastBearingState completed = RoundTripOneGoodBatchCheckpoint(
+                repoRoot,
+                "one-good-batch-completed",
+                CreateOneGoodBatchState(elapsedTicks: 120, settle: false));
+            AssertOneGoodBatchCheckpoint(
+                completed,
+                SpareBearingBatchPhase.Complete,
+                120,
+                1,
+                SpareBearingLotCustody.WorkshopOutput,
+                routePermitGranted: false,
+                "completed");
+            TestHarness.Equal(
+                NextCityDecision.None,
+                completed.NextCityDecision,
+                "completion did not consume the city decision");
+
+            LastBearingState settled = RoundTripOneGoodBatchCheckpoint(
+                repoRoot,
+                "one-good-batch-settled",
+                CreateOneGoodBatchState(elapsedTicks: 120, settle: true));
+            AssertOneGoodBatchCheckpoint(
+                settled,
+                SpareBearingBatchPhase.Settled,
+                120,
+                1,
+                SpareBearingLotCustody.LastBearingClaimsCounter,
+                routePermitGranted: true,
+                "settled");
+            TestHarness.Equal(
+                FactionAccessPolicy.PermitRequired,
+                settled.FactionAccessPolicy,
+                "settled permit access policy");
+            TestHarness.Equal(
+                2L,
+                settled.FutureRouteTollFuelUnits,
+                "settled future toll");
+
+            var barterReplay = new CoreTestDriver(settled);
+            long trustBeforeReplay = settled.FactionTrust;
+            long grievanceBeforeReplay = settled.FactionGrievance;
+            barterReplay.Apply(sequence =>
+                new BarterSpareBearingLotCommand(sequence));
+            TestHarness.Equal(
+                1L,
+                barterReplay.State.SpareBearingLotQuantity,
+                "loaded barter replay duplicated or consumed the lot");
+            TestHarness.Equal(
+                SpareBearingLotCustody.LastBearingClaimsCounter,
+                barterReplay.State.SpareBearingLotCustody,
+                "loaded barter replay changed custody");
+            TestHarness.Equal(
+                trustBeforeReplay,
+                barterReplay.State.FactionTrust,
+                "loaded barter replay changed trust");
+            TestHarness.Equal(
+                grievanceBeforeReplay,
+                barterReplay.State.FactionGrievance,
+                "loaded barter replay changed grievance");
+            TestHarness.Equal(
+                2L,
+                barterReplay.State.FutureRouteTollFuelUnits,
+                "loaded barter replay changed the future toll");
+        }
+
+        private static void OneGoodBatchFaultedPublicationsConverge(
+            string repoRoot)
+        {
+            LastBearingState initial = LastBearingScenarioFactory.CreateInitial(
+                ColonyComposition.HumanOnly,
+                2301);
+            LastBearingState started = CreateOneGoodBatchState(
+                elapsedTicks: 0,
+                settle: false);
+            LastBearingState midpoint = CreateOneGoodBatchState(
+                elapsedTicks: 60,
+                settle: false);
+            LastBearingState completed = CreateOneGoodBatchState(
+                elapsedTicks: 120,
+                settle: false);
+            LastBearingState settled = CreateOneGoodBatchState(
+                elapsedTicks: 120,
+                settle: true);
+            var transitions = new[]
+            {
+                new OneGoodBatchSaveTransition(
+                    "started",
+                    initial,
+                    started,
+                    SpareBearingBatchPhase.InProgress,
+                    0,
+                    0,
+                    SpareBearingLotCustody.None,
+                    false),
+                new OneGoodBatchSaveTransition(
+                    "midpoint",
+                    started,
+                    midpoint,
+                    SpareBearingBatchPhase.InProgress,
+                    60,
+                    0,
+                    SpareBearingLotCustody.None,
+                    false),
+                new OneGoodBatchSaveTransition(
+                    "completed",
+                    midpoint,
+                    completed,
+                    SpareBearingBatchPhase.Complete,
+                    120,
+                    1,
+                    SpareBearingLotCustody.WorkshopOutput,
+                    false),
+                new OneGoodBatchSaveTransition(
+                    "settled",
+                    completed,
+                    settled,
+                    SpareBearingBatchPhase.Settled,
+                    120,
+                    1,
+                    SpareBearingLotCustody.LastBearingClaimsCounter,
+                    true),
+            };
+
+            foreach (OneGoodBatchSaveTransition transition in transitions)
+            {
+                byte[] previous = LastBearingCanonicalCodec.Encode(
+                    transition.Previous);
+                byte[] attempted = LastBearingCanonicalCodec.Encode(
+                    transition.Attempted);
+                foreach (SaveFaultPoint point in new[]
+                {
+                    SaveFaultPoint.AfterGenerationStageDurableClose,
+                    SaveFaultPoint.AfterGenerationPublication,
+                    SaveFaultPoint.AfterLastGoodPublication,
+                    SaveFaultPoint.AfterCurrentPublication,
+                    SaveFaultPoint.PartialGenerationStage,
+                    SaveFaultPoint.PartialLastGoodPointerStage,
+                    SaveFaultPoint.PartialCurrentPointerStage,
+                })
+                {
+                    string profile = FreshProfile(
+                        repoRoot,
+                        "one-good-batch-fault-" + transition.Name + "-" + point);
+                    LastBearingProfileStore normal =
+                        LastBearingProfileStore.OpenFixedProfileDirectory(profile);
+                    Persist(normal, previous);
+
+                    var operations = new FaultInjectingFileOperations(
+                        LastBearingFileOperations.Instance,
+                        point);
+                    LastBearingProfileStore faulting =
+                        LastBearingProfileStore.OpenFixedProfileDirectoryForTests(
+                            profile,
+                            operations);
+                    LastBearingPersistResult interrupted =
+                        faulting.TryPersist(attempted);
+                    TestHarness.True(
+                        operations.Fired,
+                        transition.Name + " fault did not fire: " + point);
+                    TestHarness.True(
+                        !interrupted.Succeeded,
+                        transition.Name + " fault reported success: " + point);
+
+                    LastBearingLoadResult visible = normal.TryLoad(payload =>
+                        LastBearingCanonicalCodec.TryDecode(payload).Succeeded);
+                    TestHarness.True(
+                        visible.Succeeded && visible.CanonicalPayload != null,
+                        transition.Name + " fault left no decodable state: " + point);
+                    TestHarness.True(
+                        previous.SequenceEqual(visible.CanonicalPayload!) ||
+                        attempted.SequenceEqual(visible.CanonicalPayload!),
+                        transition.Name + " fault exposed partial state: " + point);
+
+                    LastBearingPersistResult retried = normal.TryPersist(attempted);
+                    TestHarness.True(
+                        retried.Succeeded,
+                        transition.Name + " retry failed: " + point);
+                    LastBearingLoadResult converged = normal.TryLoad(payload =>
+                        LastBearingCanonicalCodec.TryDecode(payload).Succeeded);
+                    TestHarness.True(
+                        converged.Succeeded && converged.CanonicalPayload != null &&
+                        attempted.SequenceEqual(converged.CanonicalPayload),
+                        transition.Name + " retry did not converge: " + point);
+                    LastBearingDecodeResult decoded =
+                        LastBearingCanonicalCodec.TryDecode(
+                            converged.CanonicalPayload!);
+                    TestHarness.True(
+                        decoded.Succeeded && decoded.State != null,
+                        transition.Name + " converged state did not decode: " + point);
+                    AssertOneGoodBatchCheckpoint(
+                        decoded.State!,
+                        transition.Phase,
+                        transition.ElapsedTicks,
+                        transition.LotQuantity,
+                        transition.Custody,
+                        transition.RoutePermitGranted,
+                        transition.Name + "/" + point);
+                }
+            }
+        }
+
+        private static LastBearingState CreateOneGoodBatchState(
+            int elapsedTicks,
+            bool settle)
+        {
+            if (elapsedTicks < 0 || elapsedTicks > 120)
+            {
+                throw new ArgumentOutOfRangeException(nameof(elapsedTicks));
+            }
+
+            var driver = new CoreTestDriver(
+                ColonyComposition.HumanOnly,
+                2301);
+            driver.StartPreparation(
+                ResidentRoster.HumanResidentId,
+                PreparationChoice.CivicBuffer,
+                VehicleModule.WinchAssembly);
+            while (driver.View.PreparationPhase != PreparationPhase.Ready)
+            {
+                driver.Advance(1);
+            }
+
+            const string transactionId = "tx:one-good-batch:2301";
+            const string fingerprint = "fp:one-good-batch:2301";
+            driver.Apply(sequence => new PrepareExpeditionTransactionCommand(
+                sequence,
+                transactionId,
+                fingerprint));
+            driver.Apply(sequence => new DebitCityManifestCommand(
+                sequence,
+                transactionId,
+                fingerprint));
+            while (!driver.View.IsDepotApproachRecoveryAvailable)
+            {
+                driver.OperateWreckLineIfAvailable();
+                driver.Apply(sequence =>
+                    new DriveVehicleCommand(sequence, 1000, 0));
+            }
+
+            driver.Apply(sequence =>
+                new OperateDepotRecoveryPointCommand(sequence));
+            driver.Apply(sequence => new ResolveDepotCommand(
+                sequence,
+                EncounterChoice.TakeBearing));
+            driver.Apply(sequence => new FreezeReturnPayloadCommand(
+                sequence,
+                transactionId,
+                fingerprint));
+            while (driver.View.ExpeditionPhase != ExpeditionPhase.Returned)
+            {
+                driver.Apply(sequence =>
+                    new DriveVehicleCommand(sequence, 1000, 0));
+            }
+
+            driver.Apply(sequence => new CreditCityReturnCommand(
+                sequence,
+                transactionId,
+                fingerprint));
+            driver.Apply(sequence => new FinalizeExpeditionTransactionCommand(
+                sequence,
+                transactionId,
+                fingerprint));
+            driver.Apply(sequence =>
+                new InstallTurbineRepairCommand(sequence));
+            TestHarness.True(
+                driver.View.IsSpareBearingBatchStartAvailable,
+                "one good batch save fixture did not reach eligibility");
+            driver.Apply(sequence =>
+                new StartSpareBearingBatchCommand(sequence));
+            driver.Advance(elapsedTicks);
+            if (settle)
+            {
+                TestHarness.True(
+                    driver.View.IsSpareBearingBarterAvailable,
+                    "one good batch save fixture did not reach barter");
+                driver.Apply(sequence =>
+                    new BarterSpareBearingLotCommand(sequence));
+            }
+
+            return driver.State;
+        }
+
+        private static LastBearingState RoundTripOneGoodBatchCheckpoint(
+            string repoRoot,
+            string caseName,
+            LastBearingState expected)
+        {
+            byte[] canonical = LastBearingCanonicalCodec.Encode(expected);
+            string profile = FreshProfile(repoRoot, caseName);
+            LastBearingProfileStore store =
+                LastBearingProfileStore.OpenFixedProfileDirectory(profile);
+            LastBearingPersistResult persisted = store.TryPersist(canonical);
+            TestHarness.True(
+                persisted.Succeeded,
+                caseName + " persist failed: " + persisted.Code);
+            LastBearingLoadResult loaded = store.TryLoad(payload =>
+                LastBearingCanonicalCodec.TryDecode(payload).Succeeded);
+            TestHarness.True(
+                loaded.Succeeded && loaded.CanonicalPayload != null,
+                caseName + " load failed: " + loaded.Code);
+            TestHarness.True(
+                canonical.SequenceEqual(loaded.CanonicalPayload!),
+                caseName + " canonical bytes changed");
+            LastBearingDecodeResult decoded =
+                LastBearingCanonicalCodec.TryDecode(loaded.CanonicalPayload!);
+            TestHarness.True(
+                decoded.Succeeded && decoded.State != null,
+                caseName + " decode failed: " + decoded.Code);
+            TestHarness.Equal(
+                LastBearingCanonicalCodec.ComputeMechanicalSha256(expected),
+                LastBearingCanonicalCodec.ComputeMechanicalSha256(decoded.State!),
+                caseName + " mechanical projection changed");
+            return decoded.State!;
+        }
+
+        private static void AssertOneGoodBatchCheckpoint(
+            LastBearingState state,
+            SpareBearingBatchPhase expectedPhase,
+            long expectedElapsedTicks,
+            long expectedLotQuantity,
+            SpareBearingLotCustody expectedCustody,
+            bool routePermitGranted,
+            string label)
+        {
+            TestHarness.Equal(
+                LastBearingState.CurrentSchemaVersion,
+                state.SchemaVersion,
+                label + " state schema");
+            TestHarness.Equal(
+                SpareBearingRecipe.SpareBearingOneGoodBatch,
+                state.SpareBearingRecipe,
+                label + " recipe");
+            TestHarness.Equal(
+                expectedPhase,
+                state.SpareBearingBatchPhase,
+                label + " phase");
+            TestHarness.Equal(
+                expectedElapsedTicks,
+                state.SpareBearingElapsedTicks,
+                label + " elapsed ticks");
+            TestHarness.Equal(
+                120L,
+                state.SpareBearingRequiredTicks,
+                label + " required ticks");
+            TestHarness.Equal(
+                expectedLotQuantity,
+                state.SpareBearingLotQuantity,
+                label + " lot quantity");
+            TestHarness.Equal(
+                expectedCustody,
+                state.SpareBearingLotCustody,
+                label + " lot custody");
+            TestHarness.Equal(
+                routePermitGranted,
+                state.RoutePermitGranted,
+                label + " route permit");
+        }
+
+        private sealed class OneGoodBatchSaveTransition
+        {
+            internal OneGoodBatchSaveTransition(
+                string name,
+                LastBearingState previous,
+                LastBearingState attempted,
+                SpareBearingBatchPhase phase,
+                long elapsedTicks,
+                long lotQuantity,
+                SpareBearingLotCustody custody,
+                bool routePermitGranted)
+            {
+                Name = name;
+                Previous = previous;
+                Attempted = attempted;
+                Phase = phase;
+                ElapsedTicks = elapsedTicks;
+                LotQuantity = lotQuantity;
+                Custody = custody;
+                RoutePermitGranted = routePermitGranted;
+            }
+
+            internal string Name { get; }
+
+            internal LastBearingState Previous { get; }
+
+            internal LastBearingState Attempted { get; }
+
+            internal SpareBearingBatchPhase Phase { get; }
+
+            internal long ElapsedTicks { get; }
+
+            internal long LotQuantity { get; }
+
+            internal SpareBearingLotCustody Custody { get; }
+
+            internal bool RoutePermitGranted { get; }
         }
 
         private static void CorruptCurrentRecovery(string repoRoot)

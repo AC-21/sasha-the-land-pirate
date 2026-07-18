@@ -325,6 +325,22 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public int OrientationQuarterTurns { get; }
     }
 
+    public sealed class StartSpareBearingBatchCommand : LastBearingCommand
+    {
+        public StartSpareBearingBatchCommand(long sequence)
+            : base(sequence)
+        {
+        }
+    }
+
+    public sealed class BarterSpareBearingLotCommand : LastBearingCommand
+    {
+        public BarterSpareBearingLotCommand(long sequence)
+            : base(sequence)
+        {
+        }
+    }
+
     public sealed class ServiceFieldSleeveCommand : LastBearingCommand
     {
         public ServiceFieldSleeveCommand(long sequence)
