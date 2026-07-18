@@ -1366,6 +1366,75 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator UncommittedGarageIntentSavesCanonicalBytesAndNeverReloads()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
+            controller.StartNewGame(ColonyComposition.Mixed);
+            controller.InspectCityNeed();
+            CompleteDistrictObservation(controller, clear: true);
+            controller.ActivateInfrastructure();
+            InvokeSimulationTick(controller);
+            byte[] canonicalBefore = LastBearingCanonicalCodec.Encode(
+                controller.State!);
+
+            controller.BeginGaragePlan(PreparationChoice.CivicBuffer);
+
+            Assert.That(controller.IsGaragePlanIntentActive, Is.True);
+            Assert.That(
+                controller.GaragePreparationIntent,
+                Is.EqualTo(PreparationChoice.CivicBuffer));
+            Assert.That(controller.IsGaragePlanCommitAvailable, Is.True);
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            CollectionAssert.AreEqual(
+                canonicalBefore,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            controller.Save();
+
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"),
+                controller.SaveStatus);
+            Assert.That(Directory.Exists(profileDirectory), Is.True);
+            CollectionAssert.AreEqual(
+                canonicalBefore,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            controller.ReturnToTitle();
+            Assert.That(controller.IsGaragePlanIntentActive, Is.False);
+            controller.Load();
+
+            Assert.That(controller.IsGaragePlanIntentActive, Is.False);
+            Assert.That(
+                controller.GaragePreparationIntent,
+                Is.EqualTo(PreparationChoice.Unselected));
+            Assert.That(controller.IsGaragePlanCommitAvailable, Is.False);
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.CityOverview));
+            Assert.That(
+                controller.ReadModel!.PreparationChoice,
+                Is.EqualTo(PreparationChoice.Unselected));
+            Assert.That(
+                controller.ReadModel.PlannedModule,
+                Is.EqualTo(VehicleModule.None));
+            CollectionAssert.AreEqual(
+                canonicalBefore,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+        }
+
+        [UnityTest]
         public IEnumerator PumpHallHomecomingInstallsAutosavesAndReloadsExactly()
         {
             AsyncOperation? load = SceneManager.LoadSceneAsync(

@@ -409,6 +409,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 requiredTicks);
         }
 
+        public void ApplyGaragePlanIntent(PreparationChoice preparation)
+        {
+            GaragePlanMarkerPresentation marker = preparation switch
+            {
+                PreparationChoice.WorkshopPush =>
+                    GaragePlanMarkerPresentation.WorkshopPush,
+                PreparationChoice.CivicBuffer =>
+                    GaragePlanMarkerPresentation.CivicBuffer,
+                _ => GaragePlanMarkerPresentation.None,
+            };
+            GarageBayView?.ApplyPlanMarker(marker);
+        }
+
         public void SelectPumpHallCutaway()
         {
             PumpHallCutawayView?.gameObject.SetActive(true);
@@ -436,6 +449,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (snapshot.Phase == LastBearingVisualPhase.Title)
             {
                 GarageBayView?.ApplyPreparationProgress(0, 0);
+                GarageBayView?.ApplyPlanMarker(
+                    GaragePlanMarkerPresentation.None);
             }
 
             if (_waterFill != null)

@@ -242,25 +242,60 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     return;
                 }
 
+                if (_controller.IsGaragePlanIntentActive)
+                {
+                    GUILayout.Label(
+                        "CITY POSTURE · " +
+                        _controller.GaragePreparationIntent +
+                        "\nThis is an uncommitted local note. No clock, cost, inventory, save, or vehicle state has changed.",
+                        _bodyStyle);
+
+                    if (!_controller.IsGaragePlanCommitAvailable)
+                    {
+                        GUILayout.Label(
+                            "Return to Sasha's fixed garage cutaway to choose the rig module.",
+                            _mutedStyle);
+                        if (GUILayout.Button(
+                                "RETURN TO SASHA'S GARAGE",
+                                _buttonStyle))
+                        {
+                            _controller.OpenGarageBay();
+                        }
+
+                        if (GUILayout.Button(
+                                "CANCEL UNCOMMITTED PLAN",
+                                _buttonStyle))
+                        {
+                            _controller.CancelGaragePlan();
+                        }
+
+                        return;
+                    }
+
+                    GUILayout.Label(
+                        "Both authored module stands are valid. Commit exactly one at Sasha's rig.",
+                        _mutedStyle);
+                    DrawGarageModuleButton(VehicleModule.WinchAssembly);
+                    DrawGarageModuleButton(VehicleModule.SealedRangeTank);
+                    if (GUILayout.Button(
+                            "CANCEL · RETURN TO CITY",
+                            _buttonStyle))
+                    {
+                        _controller.CancelGaragePlan();
+                    }
+
+                    return;
+                }
+
                 GUILayout.Label(
-                    "All four plans are valid. The marked first run reaches the complete Permit Job continuation.",
+                    "Choose the city's preparation posture first. This opens Sasha's garage without queuing a command; both rig modules remain valid.",
                     _mutedStyle);
-                DrawPlanButton(
-                    "WORKSHOP PUSH + WINCH\nAUXILIARY-PUMP BRANCH",
-                    PreparationChoice.WorkshopPush,
-                    VehicleModule.WinchAssembly);
-                DrawPlanButton(
-                    "WORKSHOP PUSH + RANGE TANK\nCISTERN BRANCH",
-                    PreparationChoice.WorkshopPush,
-                    VehicleModule.SealedRangeTank);
-                DrawPlanButton(
-                    "RECOMMENDED FIRST RUN · CIVIC BUFFER + WINCH\nONE GOOD BATCH + PERMIT JOB",
-                    PreparationChoice.CivicBuffer,
-                    VehicleModule.WinchAssembly);
-                DrawPlanButton(
-                    "CIVIC BUFFER + RANGE TANK\nDEPOT-ACCESS BRANCH",
-                    PreparationChoice.CivicBuffer,
-                    VehicleModule.SealedRangeTank);
+                DrawPreparationButton(
+                    "WORKSHOP PUSH\nLEAVE SOONER · ASK HOME TO RUN LEAN",
+                    PreparationChoice.WorkshopPush);
+                DrawPreparationButton(
+                    "CIVIC BUFFER\nPROTECT HOME · RISK A LATER CLAIM",
+                    PreparationChoice.CivicBuffer);
                 return;
             }
 
@@ -787,14 +822,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
             GUILayout.Label(_controller.CityGrammarEvidence, _mutedStyle);
         }
 
-        private void DrawPlanButton(
+        private void DrawPreparationButton(
             string label,
-            PreparationChoice preparation,
-            VehicleModule module)
+            PreparationChoice preparation)
         {
             if (GUILayout.Button(label, _buttonStyle))
             {
-                _controller!.ChoosePlan(preparation, module);
+                _controller!.BeginGaragePlan(preparation);
+            }
+        }
+
+        private void DrawGarageModuleButton(VehicleModule module)
+        {
+            bool recommended =
+                _controller!.GaragePreparationIntent ==
+                    PreparationChoice.CivicBuffer &&
+                module == VehicleModule.WinchAssembly;
+            string label = module == VehicleModule.WinchAssembly
+                ? (recommended ? "RECOMMENDED FIRST RUN · " : string.Empty) +
+                  "COMMIT WINCH ASSEMBLY\nAUXILIARY-PUMP BRANCH"
+                : "COMMIT SEALED RANGE TANK\nCISTERN / DEPOT-ACCESS BRANCH";
+            if (GUILayout.Button(label, _buttonStyle))
+            {
+                _controller.CommitGaragePlan(module);
             }
         }
 

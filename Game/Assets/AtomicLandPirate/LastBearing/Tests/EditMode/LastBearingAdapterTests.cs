@@ -663,6 +663,214 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
+        public void GaragePlanningIntentIsSwitchableCancelableAndCanonicalNoOp()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            PrepareControllerForGaragePlan(controller);
+            byte[] canonicalBefore = LastBearingCanonicalCodec.Encode(
+                controller.State!);
+            LastBearingState stateBefore = controller.State!;
+            long sequenceBefore = stateBefore.NextCommandSequence;
+
+            controller.BeginGaragePlan(PreparationChoice.WorkshopPush);
+
+            Assert.That(controller.IsGaragePlanIntentActive, Is.True);
+            Assert.That(
+                controller.GaragePreparationIntent,
+                Is.EqualTo(PreparationChoice.WorkshopPush));
+            Assert.That(controller.IsGaragePlanCommitAvailable, Is.True);
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.GarageBay));
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            Assert.That(controller.State, Is.SameAs(stateBefore));
+            Assert.That(controller.State!.NextCommandSequence, Is.EqualTo(sequenceBefore));
+            CollectionAssert.AreEqual(
+                canonicalBefore,
+                LastBearingCanonicalCodec.Encode(controller.State));
+
+            controller.BeginGaragePlan(PreparationChoice.CivicBuffer);
+
+            Assert.That(controller.IsGaragePlanIntentActive, Is.True);
+            Assert.That(
+                controller.GaragePreparationIntent,
+                Is.EqualTo(PreparationChoice.CivicBuffer));
+            Assert.That(controller.IsGaragePlanCommitAvailable, Is.True);
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            CollectionAssert.AreEqual(
+                canonicalBefore,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            controller.CancelGaragePlan();
+
+            Assert.That(controller.IsGaragePlanIntentActive, Is.False);
+            Assert.That(
+                controller.GaragePreparationIntent,
+                Is.EqualTo(PreparationChoice.Unselected));
+            Assert.That(controller.IsGaragePlanCommitAvailable, Is.False);
+            Assert.That(
+                controller.ModeCoordinator.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.CityOverview));
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            CollectionAssert.AreEqual(
+                canonicalBefore,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+        }
+
+        [TestCase(PreparationChoice.WorkshopPush, VehicleModule.WinchAssembly)]
+        [TestCase(PreparationChoice.WorkshopPush, VehicleModule.SealedRangeTank)]
+        [TestCase(PreparationChoice.CivicBuffer, VehicleModule.WinchAssembly)]
+        [TestCase(PreparationChoice.CivicBuffer, VehicleModule.SealedRangeTank)]
+        public void GarageCommitMatchesExistingCanonicalCommandPair(
+            PreparationChoice preparation,
+            VehicleModule module)
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            PrepareControllerForGaragePlan(controller);
+            LastBearingState baseline = controller.State!;
+            LastBearingState expected = ApplyPlanCommands(
+                baseline,
+                preparation,
+                module);
+
+            controller.BeginGaragePlan(preparation);
+            controller.CommitGaragePlan(module);
+
+            LastBearingCommand[] pending = PendingCommands(controller);
+            Assert.That(pending, Has.Length.EqualTo(2));
+            Assert.That(pending[0], Is.TypeOf<SelectPreparationCommand>());
+            Assert.That(pending[1], Is.TypeOf<InstallVehicleModuleCommand>());
+            var selected = (SelectPreparationCommand)pending[0];
+            var installed = (InstallVehicleModuleCommand)pending[1];
+            Assert.That(selected.Sequence, Is.EqualTo(baseline.NextCommandSequence));
+            Assert.That(selected.Choice, Is.EqualTo(preparation));
+            Assert.That(selected.PlannedModule, Is.EqualTo(module));
+            Assert.That(installed.Sequence, Is.EqualTo(baseline.NextCommandSequence + 1));
+            Assert.That(installed.Module, Is.EqualTo(module));
+            Assert.That(controller.IsGaragePlanIntentActive, Is.False);
+            Assert.That(
+                controller.GaragePreparationIntent,
+                Is.EqualTo(PreparationChoice.Unselected));
+
+            controller.CommitGaragePlan(module);
+            Assert.That(
+                PendingCommandCount(controller),
+                Is.EqualTo(2),
+                "a duplicate commitment must not append a second command pair");
+
+            SimulateOneTick(controller);
+
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            CollectionAssert.AreEqual(
+                LastBearingCanonicalCodec.Encode(expected),
+                LastBearingCanonicalCodec.Encode(controller.State!));
+        }
+
+        [Test]
+        public void GarageCommitGuardsFailClosedAcrossInvalidNonGarageStaleAndAwayStates()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+
+            controller.BeginGaragePlan(PreparationChoice.WorkshopPush);
+            controller.CommitGaragePlan(VehicleModule.WinchAssembly);
+            Assert.That(controller.IsGaragePlanIntentActive, Is.False);
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            byte[] earlyBytes = LastBearingCanonicalCodec.Encode(controller.State!);
+            controller.BeginGaragePlan(PreparationChoice.Unselected);
+            controller.BeginGaragePlan((PreparationChoice)99);
+            controller.CommitGaragePlan(VehicleModule.WinchAssembly);
+            Assert.That(controller.IsGaragePlanIntentActive, Is.False);
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            CollectionAssert.AreEqual(
+                earlyBytes,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            PrepareControllerForGaragePlan(controller);
+            byte[] readyBytes = LastBearingCanonicalCodec.Encode(controller.State!);
+            controller.BeginGaragePlan(PreparationChoice.WorkshopPush);
+            controller.CommitGaragePlan(VehicleModule.None);
+            controller.CommitGaragePlan((VehicleModule)99);
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            CollectionAssert.AreEqual(
+                readyBytes,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            Assert.That(
+                controller.ModeCoordinator!.TryShowCityMode(
+                    LastBearingPresentationMode.CityOverview,
+                    controller.ReadModel),
+                Is.True);
+            controller.CommitGaragePlan(VehicleModule.WinchAssembly);
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            CollectionAssert.AreEqual(
+                readyBytes,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            controller.BeginGaragePlan(PreparationChoice.CivicBuffer);
+            LastBearingState stale = ApplyPlanCommands(
+                controller.State!,
+                PreparationChoice.WorkshopPush,
+                VehicleModule.WinchAssembly);
+            SynchronizeControllerState(controller, stale);
+            byte[] staleBytes = LastBearingCanonicalCodec.Encode(stale);
+            controller.CommitGaragePlan(VehicleModule.SealedRangeTank);
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            CollectionAssert.AreEqual(
+                staleBytes,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            PrepareControllerForGaragePlan(controller);
+            controller.BeginGaragePlan(PreparationChoice.WorkshopPush);
+            LastBearingState outbound = CreateOutboundState(controller.State!);
+            SynchronizeControllerState(controller, outbound);
+            byte[] outboundBytes = LastBearingCanonicalCodec.Encode(outbound);
+
+            Assert.That(controller.IsGaragePlanIntentActive, Is.False);
+            Assert.That(controller.IsGaragePlanCommitAvailable, Is.False);
+            controller.CommitGaragePlan(VehicleModule.WinchAssembly);
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            CollectionAssert.AreEqual(
+                outboundBytes,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+        }
+
+        [Test]
+        public void GaragePlanningIntentClearsAtTitleAndNewGameBoundaries()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            PrepareControllerForGaragePlan(controller);
+            controller.BeginGaragePlan(PreparationChoice.WorkshopPush);
+
+            controller.ReturnToTitle();
+
+            Assert.That(controller.IsGaragePlanIntentActive, Is.False);
+            Assert.That(
+                controller.GaragePreparationIntent,
+                Is.EqualTo(PreparationChoice.Unselected));
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+
+            PrepareControllerForGaragePlan(controller);
+            controller.BeginGaragePlan(PreparationChoice.CivicBuffer);
+            controller.StartNewGame(ColonyComposition.RobotOnly);
+
+            Assert.That(controller.IsGaragePlanIntentActive, Is.False);
+            Assert.That(
+                controller.GaragePreparationIntent,
+                Is.EqualTo(PreparationChoice.Unselected));
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+        }
+
+        [Test]
         public void RoadFeelAdapterAcceptsOnlyQuantizedInputsAndReturnsNoOutcome()
         {
             _root = new GameObject("Road Feel Mode Adapter Test");
@@ -813,6 +1021,128 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             var pending = pendingField!.GetValue(controller) as ICollection;
             Assert.That(pending, Is.Not.Null);
             return pending!.Count;
+        }
+
+        private static LastBearingCommand[] PendingCommands(
+            LastBearingGameController controller)
+        {
+            FieldInfo? pendingField = typeof(LastBearingGameController).GetField(
+                "_pendingCommands",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.That(pendingField, Is.Not.Null);
+            var pending = pendingField!.GetValue(controller) as
+                IEnumerable<LastBearingCommand>;
+            Assert.That(pending, Is.Not.Null);
+            return pending!.ToArray();
+        }
+
+        private static void PrepareControllerForGaragePlan(
+            LastBearingGameController controller)
+        {
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            controller.InspectCityNeed();
+            CompleteDistrictObservation(controller, clear: true);
+            controller.ActivateInfrastructure();
+            SimulateOneTick(controller);
+
+            Assert.That(controller.ReadModel, Is.Not.Null);
+            Assert.That(controller.ReadModel!.SliceInfrastructureActive, Is.True);
+            Assert.That(
+                controller.ReadModel.PreparationChoice,
+                Is.EqualTo(PreparationChoice.Unselected));
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+        }
+
+        private static LastBearingState ApplyPlanCommands(
+            LastBearingState state,
+            PreparationChoice preparation,
+            VehicleModule module)
+        {
+            var kernel = new LastBearingKernel();
+            long sequence = state.NextCommandSequence;
+            return kernel.Step(
+                state,
+                new LastBearingCommand[]
+                {
+                    new SelectPreparationCommand(
+                        sequence,
+                        preparation,
+                        module),
+                    new InstallVehicleModuleCommand(sequence + 1, module),
+                }).State;
+        }
+
+        private static LastBearingState CreateOutboundState(
+            LastBearingState readyForPlan)
+        {
+            var kernel = new LastBearingKernel();
+            LastBearingState state = ApplyPlanCommands(
+                readyForPlan,
+                PreparationChoice.WorkshopPush,
+                VehicleModule.WinchAssembly);
+            var guard = 0;
+            while ((state.PreparationPhase != PreparationPhase.Ready ||
+                    state.ModuleInstallationState !=
+                    ModuleInstallationState.Installed) &&
+                   guard < 1000)
+            {
+                state = kernel.Step(
+                    state,
+                    Array.Empty<LastBearingCommand>()).State;
+                guard++;
+            }
+
+            Assert.That(state.PreparationPhase, Is.EqualTo(PreparationPhase.Ready));
+            Assert.That(
+                state.ModuleInstallationState,
+                Is.EqualTo(ModuleInstallationState.Installed));
+            long sequence = state.NextCommandSequence;
+            state = kernel.Step(
+                state,
+                new LastBearingCommand[]
+                {
+                    new PrepareExpeditionTransactionCommand(
+                        sequence,
+                        "tx:vgr09-away-guard",
+                        "fp:vgr09-away-guard"),
+                    new DebitCityManifestCommand(
+                        sequence + 1,
+                        "tx:vgr09-away-guard",
+                        "fp:vgr09-away-guard"),
+                    new DepartExpeditionCommand(sequence + 2),
+                }).State;
+            Assert.That(state.ExpeditionPhase, Is.EqualTo(ExpeditionPhase.Outbound));
+            return state;
+        }
+
+        private static void SynchronizeControllerState(
+            LastBearingGameController controller,
+            LastBearingState state)
+        {
+            const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
+            FieldInfo? stateField = typeof(LastBearingGameController).GetField(
+                "_state",
+                flags);
+            FieldInfo? readModelField = typeof(LastBearingGameController).GetField(
+                "_readModel",
+                flags);
+            FieldInfo? pendingField = typeof(LastBearingGameController).GetField(
+                "_pendingCommands",
+                flags);
+            MethodInfo? applyPresentation = typeof(LastBearingGameController).GetMethod(
+                "ApplyPresentation",
+                flags);
+            Assert.That(stateField, Is.Not.Null);
+            Assert.That(readModelField, Is.Not.Null);
+            Assert.That(pendingField, Is.Not.Null);
+            Assert.That(applyPresentation, Is.Not.Null);
+            stateField!.SetValue(controller, state);
+            readModelField!.SetValue(controller, LastBearingReadModel.FromState(state));
+            var pending = pendingField!.GetValue(controller) as
+                List<LastBearingCommand>;
+            Assert.That(pending, Is.Not.Null);
+            pending!.Clear();
+            applyPresentation!.Invoke(controller, null);
         }
 
         private static void CompleteSnapGridObservation(

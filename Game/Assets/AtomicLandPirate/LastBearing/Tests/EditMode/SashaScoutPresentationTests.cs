@@ -1,5 +1,6 @@
 #nullable enable
 
+using System.Reflection;
 using AtomicLandPirate.Presentation.LastBearing.Vehicle;
 using AtomicLandPirate.Simulation.LastBearing;
 using NUnit.Framework;
@@ -243,6 +244,84 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(garage.PreparationGaugeLitSegments, Is.Zero);
         }
 
+        [Test]
+        public void GaragePlanningMarkersKeepBothChoicesInTheSharedCameraFrame()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            PrepareControllerForGaragePlan(controller);
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingGarageBayView garage = world.GarageBayView!;
+            LastBearingCameraRig cameraRig = world.CameraRig!;
+            string canonicalBefore = controller.CanonicalHash;
+
+            Assert.That(garage.IsWinchStaged, Is.True);
+            Assert.That(garage.IsRangeTankStaged, Is.True);
+            Assert.That(
+                garage.ActivePlanMarker,
+                Is.EqualTo(GaragePlanMarkerPresentation.None));
+            Assert.That(garage.IsWorkshopPushPlanMarkerVisible, Is.False);
+            Assert.That(garage.IsCivicBufferPlanMarkerVisible, Is.False);
+            Assert.That(
+                _root.GetComponentsInChildren<Camera>(includeInactive: true),
+                Has.Length.EqualTo(1));
+            Assert.That(garage.GetComponentsInChildren<Camera>(true), Is.Empty);
+
+            controller.BeginGaragePlan(PreparationChoice.WorkshopPush);
+
+            Assert.That(garage.gameObject.activeInHierarchy, Is.True);
+            Assert.That(garage.IsWinchStaged, Is.True);
+            Assert.That(garage.IsRangeTankStaged, Is.True);
+            Assert.That(
+                garage.ActivePlanMarker,
+                Is.EqualTo(GaragePlanMarkerPresentation.WorkshopPush));
+            Assert.That(garage.IsWorkshopPushPlanMarkerVisible, Is.True);
+            Assert.That(garage.IsCivicBufferPlanMarkerVisible, Is.False);
+            Assert.That(cameraRig.IsInspectionMode, Is.True);
+            Assert.That(cameraRig.InspectionCameraAnchor, Is.SameAs(garage.CameraAnchor));
+            Assert.That(cameraRig.InspectionFocusAnchor, Is.SameAs(garage.FocusAnchor));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            controller.BeginGaragePlan(PreparationChoice.CivicBuffer);
+
+            Assert.That(garage.IsWinchStaged, Is.True);
+            Assert.That(garage.IsRangeTankStaged, Is.True);
+            Assert.That(
+                garage.ActivePlanMarker,
+                Is.EqualTo(GaragePlanMarkerPresentation.CivicBuffer));
+            Assert.That(garage.IsWorkshopPushPlanMarkerVisible, Is.False);
+            Assert.That(garage.IsCivicBufferPlanMarkerVisible, Is.True);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            controller.CancelGaragePlan();
+
+            Assert.That(
+                garage.ActivePlanMarker,
+                Is.EqualTo(GaragePlanMarkerPresentation.None));
+            Assert.That(garage.IsWorkshopPushPlanMarkerVisible, Is.False);
+            Assert.That(garage.IsCivicBufferPlanMarkerVisible, Is.False);
+            Assert.That(garage.gameObject.activeInHierarchy, Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            controller.BeginGaragePlan(PreparationChoice.WorkshopPush);
+            controller.CommitGaragePlan(VehicleModule.WinchAssembly);
+            InvokeSimulationTick(controller);
+
+            Assert.That(garage.gameObject.activeInHierarchy, Is.True);
+            Assert.That(garage.IsWinchStaged, Is.False);
+            Assert.That(garage.IsRangeTankStaged, Is.True);
+            Assert.That(
+                garage.ActivePlanMarker,
+                Is.EqualTo(GaragePlanMarkerPresentation.WorkshopPush));
+            Assert.That(garage.IsWorkshopPushPlanMarkerVisible, Is.True);
+            Assert.That(garage.IsCivicBufferPlanMarkerVisible, Is.False);
+            Assert.That(garage.IsPreparationGaugeVisible, Is.True);
+            Assert.That(
+                _root.GetComponentsInChildren<Camera>(includeInactive: true),
+                Has.Length.EqualTo(1));
+        }
+
         private static int CountActiveGaugeSegments(
             LastBearingGarageBayView garage)
         {
@@ -258,6 +337,37 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             }
 
             return count;
+        }
+
+        private static void PrepareControllerForGaragePlan(
+            LastBearingGameController controller)
+        {
+            controller.StartNewGame(ColonyComposition.Mixed);
+            controller.InspectCityNeed();
+            controller.SelectCityGrammarHypothesis(
+                LastBearingCityGrammarHypothesis.DistrictStamp);
+            controller.ManipulateCityGrammarPrimary();
+            controller.AdvanceCityGrammarDelivery();
+            controller.AdvanceCityGrammarDelivery();
+            controller.RecordCityGrammarPathRead(clear: true);
+            controller.ActivateInfrastructure();
+            InvokeSimulationTick(controller);
+
+            Assert.That(controller.ReadModel, Is.Not.Null);
+            Assert.That(controller.ReadModel!.SliceInfrastructureActive, Is.True);
+            Assert.That(
+                controller.ReadModel.PreparationChoice,
+                Is.EqualTo(PreparationChoice.Unselected));
+        }
+
+        private static void InvokeSimulationTick(
+            LastBearingGameController controller)
+        {
+            MethodInfo? simulate = typeof(LastBearingGameController).GetMethod(
+                "SimulateOneTick",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.That(simulate, Is.Not.Null);
+            simulate!.Invoke(controller, null);
         }
 
         private SashaScoutBlockoutMaterials CreateMaterials()

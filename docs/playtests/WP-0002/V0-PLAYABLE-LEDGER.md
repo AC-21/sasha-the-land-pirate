@@ -2,7 +2,7 @@
 
 Status: **provisional execution ledger**
 
-Baseline: `b35157a07a7442f6b02ed179201cd59e89368996`
+Baseline: `ab5da82ea51718227db775d99dacbac9cdf60256`
 
 Purpose: keep the next playable work vertically integrated, testable, and honest.
 
@@ -312,8 +312,9 @@ Detailed contract:
 Objective: make the released road leg feel attached to Sasha's physical rig by
 integrating the existing tested chase behavior and one explicit recovery verb.
 
-Status: current implementation candidate; not released until independent,
-Unity, protected, and creator-delegated release gates pass.
+Status: released on protected `main` in `ab5da82` after independent review,
+exact Unity dispatcher gates, protected checks, and transparent
+creator-delegated manual release.
 
 Scope:
 
@@ -348,6 +349,43 @@ telemetry, dependencies, assets, and any D-0030, D-0039, or D-0044 selection.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-08-STAY-WITH-SASHA-CONTRACT.md`.
+
+## VGR-09 — Rig the Scout
+
+Objective: move the existing preparation/module commitment into Sasha's fixed
+garage cutaway so the expedition begins around the physical rig rather than a
+global four-button plan panel.
+
+Status: current implementation candidate; not released until independent,
+Unity, protected, and creator-delegated release gates pass.
+
+Scope:
+
+- Choose Workshop Push or Civic Buffer as an uncommitted presentation intent,
+  then open the existing garage cutaway.
+- Commit Winch Assembly or Sealed Range Tank only from the garage and queue the
+  existing preparation/install command pair unchanged.
+- Keep both module stands, a physical preparation marker, the scout sockets,
+  and the existing assembly gauge readable in the sole shared-camera frame.
+- Clear the transient intent on cancel, title, new game, load, or successful
+  commit; never save or infer it.
+- Preserve all four canonical preparation/module outcomes and all composition
+  parity.
+
+Acceptance:
+
+- the player-facing flow is city posture -> garage inspection -> module commit;
+- intent-only actions queue no command and preserve canonical/save bytes;
+- valid garage commitment is byte-equivalent to the existing composite action;
+- early, stale, non-garage, away, duplicate, and invalid commits fail closed;
+- no canonical, save, dependency, scene, asset, or open-decision change exists;
+- deterministic, Unity, visual, save, and protected gates remain green.
+
+Exclude: a generalized upgrade system, free-form hardpoints, a third module,
+crafting, on-foot interaction, production assets, or physics-authored state.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-09-RIG-THE-SCOUT-CONTRACT.md`.
 
 ## Visual constitution
 

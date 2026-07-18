@@ -50,6 +50,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(
                     runtimeRoot,
                     "LastBearingOneGoodBatchCutawayView.cs"));
+            string garage = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "Vehicle/LastBearingGarageBayView.cs"));
             string dispatcher = File.ReadAllText(
                 Path.Combine(
                     repoRoot,
@@ -74,6 +78,12 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "ApplyPresentationOnlyRoadControls");
             Require(controller, "OpenBuildingCutaway");
             Require(controller, "OpenGarageBay");
+            Require(controller, "public PreparationChoice GaragePreparationIntent");
+            Require(controller, "public bool IsGaragePlanIntentActive");
+            Require(controller, "public bool IsGaragePlanCommitAvailable");
+            Require(controller, "public void BeginGaragePlan(");
+            Require(controller, "public void CommitGaragePlan(");
+            Require(controller, "public void CancelGaragePlan()");
             Require(controller, "public void StartSpareBearingBatch()");
             Require(controller, "new StartSpareBearingBatchCommand(sequence)");
             Require(controller, "public void BarterSpareBearingLot()");
@@ -420,7 +430,7 @@ namespace AtomicLandPirate.LastBearingTests
             string infrastructureActivation = Segment(
                 controller,
                 "public void ActivateInfrastructure()",
-                "public void ChoosePlan(");
+                "public void BeginGaragePlan(");
             Require(
                 infrastructureActivation,
                 "HasCompletedCityGrammarObservation");
@@ -430,6 +440,114 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 infrastructureActivation,
                 "records no layout and D-0030 remains open");
+
+            string beginGaragePlan = Segment(
+                controller,
+                "public void BeginGaragePlan(",
+                "public void CommitGaragePlan(");
+            Require(beginGaragePlan, "PreparationChoice.WorkshopPush");
+            Require(beginGaragePlan, "PreparationChoice.CivicBuffer");
+            Require(
+                beginGaragePlan,
+                "_readModel.NextObjective != \"select-preparation-and-module\"");
+            Require(
+                beginGaragePlan,
+                "LastBearingPresentationMode.GarageBay");
+            Require(beginGaragePlan, "_world?.ApplyGaragePlanIntent(");
+            foreach (string forbidden in new[]
+            {
+                "Queue(",
+                "LastBearingCommand",
+                "SelectPreparationCommand",
+                "InstallVehicleModuleCommand",
+                "Save();",
+                "_saveAdapter",
+                "_state =",
+            })
+            {
+                TestHarness.True(
+                    beginGaragePlan.IndexOf(forbidden, StringComparison.Ordinal) < 0,
+                    "beginning a garage plan crosses transient intent boundary " +
+                    forbidden);
+            }
+
+            string commitGaragePlan = Segment(
+                controller,
+                "public void CommitGaragePlan(",
+                "public void CancelGaragePlan()");
+            Require(commitGaragePlan, "IsGaragePlanIntentActive");
+            Require(commitGaragePlan, "VehicleModule.WinchAssembly");
+            Require(commitGaragePlan, "VehicleModule.SealedRangeTank");
+            Require(commitGaragePlan, "IsGaragePlanCommitAvailable");
+            Require(commitGaragePlan, "new SelectPreparationCommand(");
+            Require(commitGaragePlan, "new InstallVehicleModuleCommand(");
+            Require(commitGaragePlan, "ClearGaragePlanIntent();");
+            TestHarness.Equal(
+                1,
+                CountOccurrences(
+                    commitGaragePlan,
+                    "new SelectPreparationCommand("),
+                "garage commit must queue the existing preparation command once");
+            TestHarness.Equal(
+                1,
+                CountOccurrences(
+                    commitGaragePlan,
+                    "new InstallVehicleModuleCommand("),
+                "garage commit must queue the existing module command once");
+
+            string cancelGaragePlan = Segment(
+                controller,
+                "public void CancelGaragePlan()",
+                "public void ChoosePlan(");
+            Require(cancelGaragePlan, "ClearGaragePlanIntent();");
+            Require(
+                cancelGaragePlan,
+                "LastBearingPresentationMode.CityOverview");
+            TestHarness.True(
+                cancelGaragePlan.IndexOf("Queue(", StringComparison.Ordinal) < 0,
+                "canceling a garage plan must not queue a canonical command");
+            TestHarness.True(
+                hud.IndexOf(".ChoosePlan(", StringComparison.Ordinal) < 0,
+                "the HUD must not retain a global composite planning action");
+            Require(hud, ".BeginGaragePlan(");
+            Require(hud, ".CommitGaragePlan(");
+            Require(hud, ".CancelGaragePlan();");
+            Require(world, "ApplyGaragePlanIntent(PreparationChoice preparation)");
+            Require(controller, "_world.ApplyGaragePlanIntent(");
+
+            Require(garage, "GaragePlanMarkerPresentation");
+            Require(garage, "PLAN_MARKER_WORKSHOP_PUSH");
+            Require(garage, "PLAN_MARKER_CIVIC_BUFFER");
+            Require(garage, "public GaragePlanMarkerPresentation ActivePlanMarker");
+            Require(garage, "public void ApplyPlanMarker(");
+            Require(garage, "IsWorkshopPushPlanMarkerVisible");
+            Require(garage, "IsCivicBufferPlanMarkerVisible");
+            foreach (string forbidden in new[]
+            {
+                "AtomicLandPirate.Simulation",
+                "LastBearingState",
+                "LastBearingReadModel",
+                "LastBearingKernel",
+                "LastBearingCommand",
+                "SaveContracts",
+                "PlayerPrefs",
+                "System.IO",
+                "File.",
+                "Rigidbody",
+                "Physics.",
+                "OnTrigger",
+                "OnCollision",
+                "Keyboard.current",
+                "Gamepad.current",
+                "AddComponent<Camera>",
+                "CharacterController",
+            })
+            {
+                TestHarness.True(
+                    garage.IndexOf(forbidden, StringComparison.Ordinal) < 0,
+                    "garage planning view contains forbidden authority " +
+                    forbidden);
+            }
 
             Require(modeCoordinator, "LastBearingPresentationMode.CityOverview");
             Require(modeCoordinator, "LastBearingPresentationMode.BuildingCutaway");
