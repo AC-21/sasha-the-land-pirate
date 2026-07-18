@@ -6,7 +6,10 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
+  checks: read
   contents: read
+  issues: read
+  pull-requests: read
 
 jobs:
   policy:
@@ -52,10 +55,48 @@ jobs:
             --policy-source-sha "$BASE_SHA" \
             --report-root "$REPORT_ROOT" \
             --report BuildArtifacts/WP-0002/wp0002-policy-report.json
+      - name: Live-authenticate an exact local-operator evidence closure
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          WP0002_PROTECTION_TOKEN: ${{ secrets.WP0002_PROTECTION_READ_TOKEN }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          OBJECT_STORE="$RUNNER_TEMP/wp0002-policy.git"
+          REPORT_ROOT="$RUNNER_TEMP/wp0002-policy-report"
+          closure_paths=(
+            "docs/evidence/WP-0002/local-operator-amendment/authority.json"
+            "docs/evidence/WP-0002/local-operator-amendment/pre-merge.json"
+            "docs/evidence/WP-0002/local-operator-amendment/complete.json"
+          )
+          if /usr/bin/git -C "$OBJECT_STORE" diff --quiet "$BASE_SHA" "$HEAD_SHA" -- "${closure_paths[@]}"; then
+            echo "Candidate does not modify local-operator closure reports."
+            exit 0
+          fi
+          stage1_sha="$(/usr/bin/git -C "$OBJECT_STORE" show "$HEAD_SHA:${closure_paths[0]}" | python3 -c 'import json,sys; print(json.load(sys.stdin)["stage1"]["commit_sha"])')"
+          control_final_head="$(/usr/bin/git -C "$OBJECT_STORE" show "$HEAD_SHA:${closure_paths[1]}" | python3 -c 'import json,sys; print(json.load(sys.stdin)["final_pull_request"]["head_sha"])')"
+          AUTH_HEADER="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w 0)"
+          for required_object in "$stage1_sha" "$control_final_head"; do
+            [[ "$required_object" =~ ^[0-9a-f]{40}$ ]]
+            /usr/bin/git -C "$OBJECT_STORE" -c http.extraHeader="AUTHORIZATION: basic $AUTH_HEADER" fetch \
+              --no-tags --no-write-fetch-head \
+              "https://github.com/AC-21/sasha-the-land-pirate.git" \
+              "$required_object"
+          done
+          verifier="Tools/Validation/verify_wp0002_local_operator_transaction.py"
+          expected_verifier_sha256="16a3a5950e191f25b64d86977a64489eb77961ee8b8ca16673c7673e17779c51"
+          actual_verifier_sha256="$(shasum -a 256 "$verifier" | cut -d ' ' -f 1)"
+          [[ "$actual_verifier_sha256" == "$expected_verifier_sha256" ]]
+          env PYTHONDONTWRITEBYTECODE=1 python3 -B "$verifier" \
+            verify-evidence-closure \
+            --repository-path "$OBJECT_STORE" \
+            --base "$BASE_SHA" \
+            --head "$HEAD_SHA" \
+            --output "$REPORT_ROOT/wp0002-local-operator-closure-verification.json"
       - name: Retain content-addressed policy report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: wp0002-policy-report-${{ github.event.pull_request.head.sha }}
-          path: ${{ runner.temp }}/wp0002-policy-report/BuildArtifacts/WP-0002/wp0002-policy-report.json
+          path: ${{ runner.temp }}/wp0002-policy-report/
           if-no-files-found: error
