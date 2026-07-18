@@ -19,6 +19,7 @@ namespace AtomicLandPirate.LastBearingTests
             WreckLineTests.Run(harness);
             DepotApproachRecoveryTests.Run(harness);
             CityImprovementTests.Run(harness);
+            OneGoodBatchTests.Run(harness);
             CompositionTests.Run(harness);
             OwnershipTests.Run(harness);
         }

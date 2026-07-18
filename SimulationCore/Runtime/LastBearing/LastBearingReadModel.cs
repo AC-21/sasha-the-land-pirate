@@ -61,6 +61,22 @@ namespace AtomicLandPirate.Simulation.LastBearing
             InstalledCityImprovement = state.InstalledCityImprovement;
             IsCityImprovementInstallationAvailable =
                 ComputeCityImprovementInstallationAvailable(state);
+            SpareBearingRecipe = state.SpareBearingRecipe;
+            SpareBearingBatchPhase = state.SpareBearingBatchPhase;
+            SpareBearingElapsedTicks = state.SpareBearingElapsedTicks;
+            SpareBearingRequiredTicks = state.SpareBearingRequiredTicks;
+            SpareBearingLotQuantity = state.SpareBearingLotQuantity;
+            SpareBearingLotCustody = state.SpareBearingLotCustody;
+            RoutePermitGranted = state.RoutePermitGranted;
+            FutureRouteTollFuelUnits = state.FutureRouteTollFuelUnits;
+            IsSpareBearingBatchStartAvailable =
+                ComputeSpareBearingBatchStartAvailable(state);
+            IsSpareBearingBarterAvailable =
+                ComputeSpareBearingBarterAvailable(state);
+            SpareBearingRemainingTicks = Math.Max(
+                0,
+                state.SpareBearingRequiredTicks
+                    - state.SpareBearingElapsedTicks);
             PauseCause = state.PauseCause;
             IsDepotApproachRecoveryAvailable =
                 ComputeDepotApproachRecoveryAvailable(state);
@@ -153,6 +169,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public NextCityDecision NextCityDecision { get; }
         public CityImprovementKind InstalledCityImprovement { get; }
         public bool IsCityImprovementInstallationAvailable { get; }
+        public SpareBearingRecipe SpareBearingRecipe { get; }
+        public SpareBearingBatchPhase SpareBearingBatchPhase { get; }
+        public long SpareBearingElapsedTicks { get; }
+        public long SpareBearingRequiredTicks { get; }
+        public long SpareBearingLotQuantity { get; }
+        public SpareBearingLotCustody SpareBearingLotCustody { get; }
+        public bool RoutePermitGranted { get; }
+        public long FutureRouteTollFuelUnits { get; }
+        public bool IsSpareBearingBatchStartAvailable { get; }
+        public bool IsSpareBearingBarterAvailable { get; }
+        public long SpareBearingRemainingTicks { get; }
         public PauseCause PauseCause { get; }
         public bool IsDepotApproachRecoveryAvailable { get; }
         public bool IsWreckLineModulePointAvailable { get; }
@@ -315,6 +342,28 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return "install-refurbished-auxiliary-pump";
             }
 
+            if (ComputeSpareBearingBatchStartAvailable(state))
+            {
+                return "start-one-good-batch";
+            }
+
+            if (state.SpareBearingBatchPhase
+                == SpareBearingBatchPhase.InProgress)
+            {
+                return "machine-one-good-batch";
+            }
+
+            if (ComputeSpareBearingBarterAvailable(state))
+            {
+                return "barter-spare-bearing-at-claims-counter";
+            }
+
+            if (state.SpareBearingBatchPhase
+                == SpareBearingBatchPhase.Settled)
+            {
+                return "route-permit-recorded";
+            }
+
             if (state.NextCityDecision != NextCityDecision.None)
             {
                 return "await-next-city-decision-authority";
@@ -342,6 +391,59 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.HeavyCargoCustody == HeavyCargoCustody.Settlement
                 && state.TowSlotsUsed == 1
                 && state.PartsUnits >= requiredParts;
+        }
+
+        private static bool ComputeSpareBearingBatchStartAvailable(
+            LastBearingState state)
+        {
+            return state.SpareBearingBatchPhase == SpareBearingBatchPhase.None
+                && state.SpareBearingRecipe == SpareBearingRecipe.None
+                && state.SpareBearingElapsedTicks == 0
+                && state.SpareBearingRequiredTicks == 0
+                && state.SpareBearingLotQuantity == 0
+                && state.SpareBearingLotCustody == SpareBearingLotCustody.None
+                && state.DepotResolution == EncounterChoice.TakeBearing
+                && state.PreparationChoice == PreparationChoice.CivicBuffer
+                && state.VehicleModule == VehicleModule.WinchAssembly
+                && state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.Finalized
+                && state.TurbineCondition
+                    == TurbineCondition.BearingRepaired
+                && state.NextCityDecision
+                    == NextCityDecision.MachineSpareBearing
+                && state.DepotControl == DepotControl.Depleted
+                && state.FactionClaimState == FactionClaimState.Aggrieved
+                && state.FactionAccessPolicy == FactionAccessPolicy.Closed
+                && state.FactionAidPolicy == FactionAidPolicy.Withheld
+                && state.PendingFactionOutcome == FactionOutcomeKind.Adverse
+                && state.FutureRouteTollFuelUnits
+                    == LastBearingBalanceV1.TakeFutureRouteTollFuelUnits
+                && !state.RoutePermitGranted
+                && state.PartsUnits
+                    >= LastBearingBalanceV1
+                        .SpareBearingBatchMinimumPreStartPartsUnits;
+        }
+
+        private static bool ComputeSpareBearingBarterAvailable(
+            LastBearingState state)
+        {
+            return state.SpareBearingRecipe
+                    == SpareBearingRecipe.SpareBearingOneGoodBatch
+                && state.SpareBearingBatchPhase
+                    == SpareBearingBatchPhase.Complete
+                && state.SpareBearingElapsedTicks
+                    == LastBearingBalanceV1
+                        .SpareBearingBatchRequiredSettlementTicks
+                && state.SpareBearingRequiredTicks
+                    == LastBearingBalanceV1
+                        .SpareBearingBatchRequiredSettlementTicks
+                && state.SpareBearingLotQuantity
+                    == LastBearingBalanceV1.SpareBearingBatchOutputQuantity
+                && state.SpareBearingLotCustody
+                    == SpareBearingLotCustody.WorkshopOutput
+                && state.FactionClaimState == FactionClaimState.Aggrieved
+                && state.FactionAccessPolicy == FactionAccessPolicy.Closed
+                && !state.RoutePermitGranted;
         }
 
         private static bool ComputeDepotApproachRecoveryAvailable(

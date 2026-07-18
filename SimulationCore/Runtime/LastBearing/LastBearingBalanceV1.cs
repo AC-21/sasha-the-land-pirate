@@ -78,6 +78,15 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const long AuxiliaryPumpWaterModifierMilliPerSettlementTick =
             CivicBufferWaterModifierMilliPerSettlementTick;
 
+        // VGR-05 is one authored proof, not a reusable manufacturing balance
+        // surface. These values apply only to the fixed One Good Batch recipe.
+        public const long SpareBearingBatchPartsCostUnits = 2;
+        public const long SpareBearingBatchMinimumPreStartPartsUnits = 4;
+        public const long SpareBearingBatchRetainedReservePartsUnits = 2;
+        public const long SpareBearingBatchOutputQuantity = 1;
+        public const long SpareBearingBatchRequiredSettlementTicks = 120;
+        public const long SpareBearingBatchCheckpointSettlementTick = 60;
+
         internal static long CityImprovementPartsCost(
             CityImprovementKind improvement)
         {

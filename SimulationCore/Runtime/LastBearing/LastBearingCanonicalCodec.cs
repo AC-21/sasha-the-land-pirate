@@ -34,7 +34,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const string DecodeUnknownVersionCode =
             "LB_CORE_DECODE_UNKNOWN_VERSION";
 
-        private const ushort CodecVersion = 2;
+        private const ushort CodecVersion = 3;
         private const int MaximumCanonicalBytes = 1_048_576;
         private static readonly byte[] Magic =
             Encoding.ASCII.GetBytes("ALPLBC01");
@@ -125,6 +125,15 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 builder.NextCityDecision = reader.ReadEnum<NextCityDecision>();
                 builder.InstalledCityImprovement =
                     reader.ReadEnum<CityImprovementKind>();
+                builder.SpareBearingRecipe =
+                    reader.ReadEnum<SpareBearingRecipe>();
+                builder.SpareBearingBatchPhase =
+                    reader.ReadEnum<SpareBearingBatchPhase>();
+                builder.SpareBearingElapsedTicks = reader.ReadInt64();
+                builder.SpareBearingRequiredTicks = reader.ReadInt64();
+                builder.SpareBearingLotQuantity = reader.ReadInt64();
+                builder.SpareBearingLotCustody =
+                    reader.ReadEnum<SpareBearingLotCustody>();
 
                 builder.VehicleModule = reader.ReadEnum<VehicleModule>();
                 builder.ModuleInstallationState =
@@ -293,6 +302,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
             writer.WriteInt64(state.ActiveWaterModifierMilliPerSettlementTick);
             writer.WriteEnum(state.NextCityDecision);
             writer.WriteEnum(state.InstalledCityImprovement);
+            writer.WriteEnum(state.SpareBearingRecipe);
+            writer.WriteEnum(state.SpareBearingBatchPhase);
+            writer.WriteInt64(state.SpareBearingElapsedTicks);
+            writer.WriteInt64(state.SpareBearingRequiredTicks);
+            writer.WriteInt64(state.SpareBearingLotQuantity);
+            writer.WriteEnum(state.SpareBearingLotCustody);
 
             writer.WriteEnum(state.VehicleModule);
             writer.WriteEnum(state.ModuleInstallationState);

@@ -71,6 +71,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             ValidateCargo(state);
             ValidateFaction(state);
             ValidateCityImprovement(state);
+            ValidateSpareBearingBatch(state);
         }
 
         private static void ValidatePreparation(LastBearingState state)
@@ -564,6 +565,148 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.PartsUnits
                     >= LastBearingBalanceV1.MinimumPostReturnPartsUnits,
                 "LAST_BEARING_CITY_IMPROVEMENT_STATE_INVALID");
+        }
+
+        private static void ValidateSpareBearingBatch(LastBearingState state)
+        {
+            RequireEnum(state.SpareBearingRecipe, "SPARE_BEARING_RECIPE");
+            RequireEnum(
+                state.SpareBearingBatchPhase,
+                "SPARE_BEARING_BATCH_PHASE");
+            RequireEnum(
+                state.SpareBearingLotCustody,
+                "SPARE_BEARING_LOT_CUSTODY");
+            RequireNonnegative(
+                state.SpareBearingElapsedTicks,
+                "SPARE_BEARING_ELAPSED_TICKS");
+            RequireNonnegative(
+                state.SpareBearingRequiredTicks,
+                "SPARE_BEARING_REQUIRED_TICKS");
+            RequireNonnegative(
+                state.SpareBearingLotQuantity,
+                "SPARE_BEARING_LOT_QUANTITY");
+
+            if (state.SpareBearingBatchPhase == SpareBearingBatchPhase.None)
+            {
+                Require(
+                    state.SpareBearingRecipe == SpareBearingRecipe.None
+                    && state.SpareBearingElapsedTicks == 0
+                    && state.SpareBearingRequiredTicks == 0
+                    && state.SpareBearingLotQuantity == 0
+                    && state.SpareBearingLotCustody
+                        == SpareBearingLotCustody.None,
+                    "LAST_BEARING_EMPTY_SPARE_BEARING_BATCH_INVALID");
+                return;
+            }
+
+            Require(
+                state.SpareBearingRecipe
+                    == SpareBearingRecipe.SpareBearingOneGoodBatch
+                && state.DepotResolution == EncounterChoice.TakeBearing
+                && state.PreparationChoice == PreparationChoice.CivicBuffer
+                && state.VehicleModule == VehicleModule.WinchAssembly
+                && state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.Finalized
+                && state.TurbineCondition
+                    == TurbineCondition.BearingRepaired
+                && state.DepotControl == DepotControl.Depleted
+                && state.DepotBearingDisposition
+                    == DepotBearingDisposition.InstalledAtTurbine
+                && state.FactionClaimState == FactionClaimState.Aggrieved
+                && state.PendingFactionOutcome == FactionOutcomeKind.Adverse
+                && state.FactionMemory != null
+                && string.Equals(
+                    state.FactionMemory.StableId,
+                    "memory:last-bearing:take:0001",
+                    StringComparison.Ordinal)
+                && string.Equals(
+                    state.FactionMemory.WitnessedAction,
+                    "TakeClaimedBearing",
+                    StringComparison.Ordinal)
+                && string.Equals(
+                    state.FactionMemory.AffectedFactionId,
+                    LastBearingState.LastBearingFactionId,
+                    StringComparison.Ordinal)
+                && state.FactionMemory.Magnitude
+                    == LastBearingBalanceV1.TakeGrievanceDelta
+                && string.Equals(
+                    state.FactionMemory.DoctrineTag,
+                    "custody-breach",
+                    StringComparison.Ordinal)
+                && state.FactionMemory.EncounterTick <= state.GlobalTick
+                && string.Equals(
+                    state.FactionMemory.ConsequenceCode,
+                    "DEPOT_ACCESS_CLOSED",
+                    StringComparison.Ordinal)
+                && state.FactionTrust == LastBearingBalanceV1.TakeTrustDelta
+                && state.FactionGrievance
+                    == LastBearingBalanceV1.TakeGrievanceDelta
+                && state.FactionAidPolicy == FactionAidPolicy.Withheld
+                && state.EmergencyAidWaterMilli == 0
+                && state.DepotAccessFeePartsUnits
+                    == (state.FactionClaimProgressMilli
+                            == LastBearingBalanceV1.FactionClaimThresholdMilli
+                        ? LastBearingBalanceV1
+                            .ClaimedDepotAccessFeePartsUnits
+                        : 0)
+                && state.FutureRouteTollFuelUnits
+                    == LastBearingBalanceV1.TakeFutureRouteTollFuelUnits
+                && state.SpareBearingRequiredTicks
+                    == LastBearingBalanceV1
+                        .SpareBearingBatchRequiredSettlementTicks
+                && state.PartsUnits
+                    >= LastBearingBalanceV1
+                        .SpareBearingBatchRetainedReservePartsUnits,
+                "LAST_BEARING_SPARE_BEARING_LINEAGE_INVALID");
+
+            if (state.SpareBearingBatchPhase
+                == SpareBearingBatchPhase.InProgress)
+            {
+                Require(
+                    state.SpareBearingElapsedTicks
+                        < state.SpareBearingRequiredTicks
+                    && state.SpareBearingLotQuantity == 0
+                    && state.SpareBearingLotCustody
+                        == SpareBearingLotCustody.None
+                    && state.NextCityDecision
+                        == NextCityDecision.MachineSpareBearing
+                    && !state.RoutePermitGranted
+                    && state.FactionAccessPolicy
+                        == FactionAccessPolicy.Closed,
+                    "LAST_BEARING_SPARE_BEARING_BATCH_PROGRESS_INVALID");
+                return;
+            }
+
+            Require(
+                state.SpareBearingElapsedTicks
+                    == state.SpareBearingRequiredTicks
+                && state.SpareBearingLotQuantity
+                    == LastBearingBalanceV1.SpareBearingBatchOutputQuantity
+                && state.NextCityDecision == NextCityDecision.None,
+                "LAST_BEARING_SPARE_BEARING_BATCH_COMPLETION_INVALID");
+
+            if (state.SpareBearingBatchPhase
+                == SpareBearingBatchPhase.Complete)
+            {
+                Require(
+                    state.SpareBearingLotCustody
+                        == SpareBearingLotCustody.WorkshopOutput
+                    && !state.RoutePermitGranted
+                    && state.FactionAccessPolicy
+                        == FactionAccessPolicy.Closed,
+                    "LAST_BEARING_SPARE_BEARING_LOT_OUTPUT_INVALID");
+                return;
+            }
+
+            Require(
+                state.SpareBearingBatchPhase
+                    == SpareBearingBatchPhase.Settled
+                && state.SpareBearingLotCustody
+                    == SpareBearingLotCustody.LastBearingClaimsCounter
+                && state.RoutePermitGranted
+                && state.FactionAccessPolicy
+                    == FactionAccessPolicy.PermitRequired,
+                "LAST_BEARING_SPARE_BEARING_SETTLEMENT_INVALID");
         }
 
         private static void Require(bool condition, string code)

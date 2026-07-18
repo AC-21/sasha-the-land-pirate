@@ -62,6 +62,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
             private set;
         }
 
+        public LastBearingOneGoodBatchCutawayView? OneGoodBatchCutawayView
+        {
+            get;
+            private set;
+        }
+
+        public Transform? SelectedBuildingCutawayCameraAnchor { get; private set; }
+
+        public Transform? SelectedBuildingCutawayFocusAnchor { get; private set; }
+
         public LastBearingCityGrammarComparison? CityGrammarComparison { get; private set; }
 
         public LastBearingDepotApproachRecoveryView? DepotApproachRecoveryView
@@ -160,6 +170,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     bone,
                     tungsten,
                     signal);
+                BuildOneGoodBatchCutaway(
+                    buildingCutawayModeRoot,
+                    concrete,
+                    iron,
+                    oxide,
+                    bone,
+                    tungsten,
+                    signal);
+                SelectPumpHallCutaway();
             }
 
             if (drivingModeRoot != null)
@@ -322,6 +341,48 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 improvement,
                 humanVisible,
                 robotVisible);
+        }
+
+        public void ApplyOneGoodBatch(
+            bool batchStartAvailable,
+            SpareBearingBatchPhase phase,
+            SpareBearingLotCustody custody,
+            long lotQuantity,
+            bool routePermitGranted,
+            long futureRouteTollFuelUnits,
+            bool humanVisible,
+            bool robotVisible)
+        {
+            OneGoodBatchCutawayView?.Apply(
+                batchStartAvailable,
+                phase,
+                custody,
+                lotQuantity,
+                routePermitGranted,
+                futureRouteTollFuelUnits,
+                humanVisible,
+                robotVisible);
+            DepotApproachRecoveryView?.ApplyRoutePermit(routePermitGranted);
+        }
+
+        public void SelectPumpHallCutaway()
+        {
+            PumpHallCutawayView?.gameObject.SetActive(true);
+            OneGoodBatchCutawayView?.gameObject.SetActive(false);
+            SelectedBuildingCutawayCameraAnchor =
+                PumpHallCutawayView?.CameraAnchor;
+            SelectedBuildingCutawayFocusAnchor =
+                PumpHallCutawayView?.FocusAnchor;
+        }
+
+        public void SelectOneGoodBatchCutaway()
+        {
+            PumpHallCutawayView?.gameObject.SetActive(false);
+            OneGoodBatchCutawayView?.gameObject.SetActive(true);
+            SelectedBuildingCutawayCameraAnchor =
+                OneGoodBatchCutawayView?.CameraAnchor;
+            SelectedBuildingCutawayFocusAnchor =
+                OneGoodBatchCutawayView?.FocusAnchor;
         }
 
         internal void Apply(LastBearingVisualSnapshot snapshot)
@@ -745,6 +806,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 tungsten,
                 signal,
                 _waterMaterial!);
+        }
+
+        private void BuildOneGoodBatchCutaway(
+            Transform buildingCutawayModeRoot,
+            Material concrete,
+            Material darkIron,
+            Material oxide,
+            Material bone,
+            Material tungsten,
+            Material signal)
+        {
+            var workshop = new GameObject(
+                LastBearingOneGoodBatchCutawayView.RootName);
+            workshop.transform.SetParent(buildingCutawayModeRoot, false);
+            OneGoodBatchCutawayView =
+                workshop.AddComponent<LastBearingOneGoodBatchCutawayView>();
+            OneGoodBatchCutawayView.Build(
+                concrete,
+                darkIron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
         }
 
         private void BuildCityGrammarComparison(

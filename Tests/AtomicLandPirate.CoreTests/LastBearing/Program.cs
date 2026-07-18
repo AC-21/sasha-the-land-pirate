@@ -100,6 +100,9 @@ namespace AtomicLandPirate.LastBearingTests
                 case "dev-save-boundary":
                     SaveBoundaryTests.Run(harness, repoRoot);
                     break;
+                case "vgr05-one-good-batch":
+                    SaveAtomicTests.RunOneGoodBatch(harness, repoRoot);
+                    break;
                 default:
                     Console.Error.WriteLine("unknown protected test: " + id);
                     return 2;

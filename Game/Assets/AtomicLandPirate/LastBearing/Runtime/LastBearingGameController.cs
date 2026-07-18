@@ -124,6 +124,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _saveStatus = "Unsaved local development state.";
             _world?.SetCityNeedInspected(false);
             _world?.BeginCityGrammarComparisonSession();
+            _world?.SelectPumpHallCutaway();
             _modeCoordinator?.ClearSession();
 
             AssignDefaultLeadResident();
@@ -167,6 +168,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _status = "Choose who calls Last Bearing home.";
             _world?.SetCityNeedInspected(false);
             _world?.BeginCityGrammarComparisonSession();
+            _world?.SelectPumpHallCutaway();
             _modeCoordinator?.ClearSession();
             _world?.Apply(new LastBearingVisualSnapshot(
                 LastBearingVisualPhase.Title,
@@ -194,6 +196,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ApplyCityImprovement(
                 HeavyCargoCustody.Depot,
                 CityImprovementKind.None,
+                humanVisible: true,
+                robotVisible: true);
+            _world?.ApplyOneGoodBatch(
+                batchStartAvailable: false,
+                SpareBearingBatchPhase.None,
+                SpareBearingLotCustody.None,
+                lotQuantity: 0,
+                routePermitGranted: false,
+                futureRouteTollFuelUnits: 0,
                 humanVisible: true,
                 robotVisible: true);
         }
@@ -295,6 +306,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void OpenBuildingCutaway()
         {
+            ApplySelectedBuildingCutawayPose();
             TryShowCityMode(
                 LastBearingPresentationMode.BuildingCutaway,
                 "Building cutaway routing scaffold active; the city state is unchanged.");
@@ -441,6 +453,41 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 "The returned rotor is committed to the auxiliary pump hall.";
         }
 
+        public void StartSpareBearingBatch()
+        {
+            if (_readModel == null ||
+                !_readModel.IsSpareBearingBatchStartAvailable)
+            {
+                _status =
+                    "The one approved spare-bearing batch is not ready to start.";
+                return;
+            }
+
+            Queue(sequence => new StartSpareBearingBatchCommand(sequence));
+            _world?.SelectOneGoodBatchCutaway();
+            ApplySelectedBuildingCutawayPose();
+            TryShowCityMode(
+                LastBearingPresentationMode.BuildingCutaway,
+                "One Good Batch is on the machine. Inputs transfer exactly once.");
+        }
+
+        public void BarterSpareBearingLot()
+        {
+            if (_readModel == null || !_readModel.IsSpareBearingBarterAvailable)
+            {
+                _status =
+                    "The claims wicket cannot accept this lot or grant the route permit.";
+                return;
+            }
+
+            Queue(sequence => new BarterSpareBearingLotCommand(sequence));
+            _world?.SelectOneGoodBatchCutaway();
+            ApplySelectedBuildingCutawayPose();
+            TryShowCityMode(
+                LastBearingPresentationMode.BuildingCutaway,
+                "The physical lot is at the claims wicket for one bounded route-permit barter.");
+        }
+
         public void ServiceFieldSleeve()
         {
             Queue(sequence => new ServiceFieldSleeveCommand(sequence));
@@ -533,6 +580,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _cityNeedInspected = true;
                 _world?.SetCityNeedInspected(true);
                 _world?.BeginCityGrammarComparisonSession();
+                _world?.SelectPumpHallCutaway();
                 _saveStatus = result.Code + " · " + CanonicalHash.Substring(0, 12);
                 _status = "Exact city, vehicle, custody, crisis, and faction state restored.";
                 ApplyPresentation();
@@ -816,6 +864,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _readModel.InstalledCityImprovement,
                 humanVisible,
                 robotVisible);
+            _world.ApplyOneGoodBatch(
+                _readModel.IsSpareBearingBatchStartAvailable,
+                _readModel.SpareBearingBatchPhase,
+                _readModel.SpareBearingLotCustody,
+                _readModel.SpareBearingLotQuantity,
+                _readModel.RoutePermitGranted,
+                _readModel.FutureRouteTollFuelUnits,
+                humanVisible,
+                robotVisible);
             _modeCoordinator?.ApplyCanonical(_readModel);
         }
 
@@ -833,11 +890,31 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     || kind == LastBearingEventKind.VehicleReturned
                     || kind == LastBearingEventKind.CityReturnCredited
                     || kind == LastBearingEventKind.TurbineRepaired
-                    || kind == LastBearingEventKind.CityImprovementInstalled)
+                    || kind == LastBearingEventKind.CityImprovementInstalled
+                    || kind == LastBearingEventKind.SpareBearingBatchStarted
+                    || kind == LastBearingEventKind.SpareBearingBatchCheckpointReached
+                    || kind == LastBearingEventKind.SpareBearingBatchCompleted
+                    || kind == LastBearingEventKind.SpareBearingLotCreated
+                    || kind == LastBearingEventKind.SpareBearingLotBartered
+                    || kind == LastBearingEventKind.RoutePermitGranted)
                 {
                     Save();
                     return;
                 }
+            }
+        }
+
+        private void ApplySelectedBuildingCutawayPose()
+        {
+            Transform? cameraAnchor =
+                _world?.SelectedBuildingCutawayCameraAnchor;
+            Transform? focusAnchor =
+                _world?.SelectedBuildingCutawayFocusAnchor;
+            if (cameraAnchor != null && focusAnchor != null)
+            {
+                _modeCoordinator?.SetBuildingCutawayInspectionPose(
+                    cameraAnchor,
+                    focusAnchor);
             }
         }
 

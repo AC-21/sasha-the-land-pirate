@@ -205,6 +205,27 @@ namespace AtomicLandPirate.Simulation.LastBearing
         FieldSleeveService = 1,
     }
 
+    public enum SpareBearingRecipe
+    {
+        None = 0,
+        SpareBearingOneGoodBatch = 1,
+    }
+
+    public enum SpareBearingBatchPhase
+    {
+        None = 0,
+        InProgress = 1,
+        Complete = 2,
+        Settled = 3,
+    }
+
+    public enum SpareBearingLotCustody
+    {
+        None = 0,
+        WorkshopOutput = 1,
+        LastBearingClaimsCounter = 2,
+    }
+
     public enum NextCityDecision
     {
         None = 0,
@@ -261,6 +282,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
         DepotRecoveryPointOperated = 37,
         CityResourcesCommitted = 38,
         CityImprovementInstalled = 39,
+        SpareBearingBatchStarted = 40,
+        SpareBearingBatchCheckpointReached = 41,
+        SpareBearingBatchCompleted = 42,
+        SpareBearingLotCreated = 43,
+        SpareBearingLotBartered = 44,
+        RoutePermitGranted = 45,
     }
 
     public enum LastBearingEventCause

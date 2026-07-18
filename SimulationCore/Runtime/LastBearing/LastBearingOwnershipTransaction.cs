@@ -165,6 +165,62 @@ namespace AtomicLandPirate.Simulation.LastBearing
             builder.LiquidCargoCustody = LiquidCargoCustody.Settlement;
         }
 
+        internal static void CreateSpareBearingLotAtWorkshopOutput(
+            LastBearingStateBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            if (builder.SpareBearingRecipe
+                    != SpareBearingRecipe.SpareBearingOneGoodBatch
+                || builder.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.InProgress
+                || builder.SpareBearingElapsedTicks
+                    != builder.SpareBearingRequiredTicks
+                || builder.SpareBearingRequiredTicks
+                    != LastBearingBalanceV1
+                        .SpareBearingBatchRequiredSettlementTicks
+                || builder.SpareBearingLotQuantity != 0
+                || builder.SpareBearingLotCustody
+                    != SpareBearingLotCustody.None)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_SPARE_BEARING_LOT_CREATE_INVALID");
+            }
+
+            builder.SpareBearingLotQuantity =
+                LastBearingBalanceV1.SpareBearingBatchOutputQuantity;
+            builder.SpareBearingLotCustody =
+                SpareBearingLotCustody.WorkshopOutput;
+        }
+
+        internal static void TransferSpareBearingLotToClaimsCounter(
+            LastBearingStateBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            if (builder.SpareBearingRecipe
+                    != SpareBearingRecipe.SpareBearingOneGoodBatch
+                || builder.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.Complete
+                || builder.SpareBearingLotQuantity
+                    != LastBearingBalanceV1.SpareBearingBatchOutputQuantity
+                || builder.SpareBearingLotCustody
+                    != SpareBearingLotCustody.WorkshopOutput)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_SPARE_BEARING_LOT_TRANSFER_INVALID");
+            }
+
+            builder.SpareBearingLotCustody =
+                SpareBearingLotCustody.LastBearingClaimsCounter;
+        }
+
         private static void RequireLegalRepairCustody(
             RepairCargoKind kind,
             RepairCargoCustody custody)

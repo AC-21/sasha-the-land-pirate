@@ -181,6 +181,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ApplyPresentationOwnership();
         }
 
+        public void SetBuildingCutawayInspectionPose(
+            Transform cameraAnchor,
+            Transform focusAnchor)
+        {
+            _pumpHallCameraAnchor = cameraAnchor ??
+                throw new ArgumentNullException(nameof(cameraAnchor));
+            _pumpHallFocusAnchor = focusAnchor ??
+                throw new ArgumentNullException(nameof(focusAnchor));
+            ApplyPresentationOwnership();
+        }
+
         public void AttachRoadModeAdapter(ILastBearingRoadModeAdapter adapter)
         {
             if (adapter == null)

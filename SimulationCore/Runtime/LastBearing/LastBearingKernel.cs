@@ -25,6 +25,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
             RejectMultipleDriveCommands(commands);
             var expeditionWasAwayAtTickStart = IsAwayFromSettlement(
                 state.ExpeditionPhase);
+            var spareBearingBatchWasInProgressAtTickStart =
+                state.SpareBearingBatchPhase
+                    == SpareBearingBatchPhase.InProgress;
             var builder = new LastBearingStateBuilder(state);
             var events = new List<LastBearingDomainEvent>();
             var expectedSequence = builder.NextCommandSequence;
@@ -58,7 +61,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     ? LastBearingBalanceV1.FullClockScaleMilli
                     : 0;
 
-                AdvanceSettlementClock(builder, homeScale, events);
+                AdvanceSettlementClock(
+                    builder,
+                    homeScale,
+                    spareBearingBatchWasInProgressAtTickStart,
+                    events);
                 AdvanceFactionClock(builder, homeScale, events);
                 AdvanceCrisisClock(builder, homeScale);
                 AdvanceRoadClock(builder, roadScale);
@@ -174,6 +181,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     builder,
                     installImprovement,
                     events);
+            }
+            else if (command is StartSpareBearingBatchCommand startBatch)
+            {
+                ApplyStartSpareBearingBatch(builder, startBatch, events);
+            }
+            else if (command is BarterSpareBearingLotCommand barterLot)
+            {
+                ApplyBarterSpareBearingLot(builder, barterLot, events);
             }
             else if (command is ServiceFieldSleeveCommand service)
             {
@@ -1192,6 +1207,156 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 (long)builder.InstalledCityImprovement);
         }
 
+        private static void ApplyStartSpareBearingBatch(
+            LastBearingStateBuilder builder,
+            StartSpareBearingBatchCommand command,
+            List<LastBearingDomainEvent> events)
+        {
+            if (builder.SpareBearingBatchPhase
+                != SpareBearingBatchPhase.None)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (builder.DepotResolution != EncounterChoice.TakeBearing
+                || builder.PreparationChoice
+                    != PreparationChoice.CivicBuffer
+                || builder.VehicleModule != VehicleModule.WinchAssembly
+                || builder.ExpeditionPhase != ExpeditionPhase.AtHome
+                || builder.TransactionPhase != TransactionPhase.Finalized
+                || builder.TurbineCondition
+                    != TurbineCondition.BearingRepaired
+                || builder.NextCityDecision
+                    != NextCityDecision.MachineSpareBearing
+                || builder.DepotControl != DepotControl.Depleted
+                || builder.FactionClaimState != FactionClaimState.Aggrieved
+                || builder.FactionAccessPolicy != FactionAccessPolicy.Closed
+                || builder.FactionAidPolicy != FactionAidPolicy.Withheld
+                || builder.PendingFactionOutcome != FactionOutcomeKind.Adverse
+                || builder.FutureRouteTollFuelUnits
+                    != LastBearingBalanceV1.TakeFutureRouteTollFuelUnits
+                || builder.RoutePermitGranted)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_SPARE_BEARING_BATCH_NOT_ELIGIBLE");
+            }
+
+            if (builder.PartsUnits
+                < LastBearingBalanceV1
+                    .SpareBearingBatchMinimumPreStartPartsUnits)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_SPARE_BEARING_BATCH_PARTS_INSUFFICIENT");
+            }
+
+            var previousParts = builder.PartsUnits;
+            builder.PartsUnits = checked(
+                builder.PartsUnits
+                - LastBearingBalanceV1.SpareBearingBatchPartsCostUnits);
+            builder.SpareBearingRecipe =
+                SpareBearingRecipe.SpareBearingOneGoodBatch;
+            builder.SpareBearingBatchPhase =
+                SpareBearingBatchPhase.InProgress;
+            builder.SpareBearingElapsedTicks = 0;
+            builder.SpareBearingRequiredTicks =
+                LastBearingBalanceV1
+                    .SpareBearingBatchRequiredSettlementTicks;
+            builder.SpareBearingLotQuantity = 0;
+            builder.SpareBearingLotCustody = SpareBearingLotCustody.None;
+
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityResourcesCommitted,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                "settlement:last-bearing:parts",
+                previousParts,
+                builder.PartsUnits);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.SpareBearingBatchStarted,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.SpareBearingBatchId,
+                (long)SpareBearingBatchPhase.None,
+                (long)builder.SpareBearingBatchPhase);
+        }
+
+        private static void ApplyBarterSpareBearingLot(
+            LastBearingStateBuilder builder,
+            BarterSpareBearingLotCommand command,
+            List<LastBearingDomainEvent> events)
+        {
+            if (builder.SpareBearingBatchPhase
+                == SpareBearingBatchPhase.Settled)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (builder.SpareBearingRecipe
+                    != SpareBearingRecipe.SpareBearingOneGoodBatch
+                || builder.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.Complete
+                || builder.SpareBearingLotQuantity
+                    != LastBearingBalanceV1
+                        .SpareBearingBatchOutputQuantity
+                || builder.SpareBearingLotCustody
+                    != SpareBearingLotCustody.WorkshopOutput
+                || builder.FactionClaimState != FactionClaimState.Aggrieved
+                || builder.FactionAccessPolicy != FactionAccessPolicy.Closed
+                || builder.RoutePermitGranted)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_SPARE_BEARING_LOT_NOT_AVAILABLE");
+            }
+
+            var previousCustody = builder.SpareBearingLotCustody;
+            var previousAccessPolicy = builder.FactionAccessPolicy;
+            LastBearingOwnershipTransaction
+                .TransferSpareBearingLotToClaimsCounter(builder);
+            builder.SpareBearingBatchPhase = SpareBearingBatchPhase.Settled;
+            builder.RoutePermitGranted = true;
+            builder.FactionAccessPolicy =
+                FactionAccessPolicy.PermitRequired;
+
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.SpareBearingLotBartered,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.SpareBearingLotId,
+                (long)previousCustody,
+                (long)builder.SpareBearingLotCustody);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.DepotAccessTermsChanged,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.DepotCorridorRoutePermitId,
+                (long)previousAccessPolicy,
+                (long)builder.FactionAccessPolicy);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.RoutePermitGranted,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.DepotCorridorRoutePermitId,
+                0,
+                1);
+        }
+
         private static void ApplyServiceSleeve(
             LastBearingStateBuilder builder,
             ServiceFieldSleeveCommand command,
@@ -1614,6 +1779,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void AdvanceSettlementClock(
             LastBearingStateBuilder builder,
             int scaleMilli,
+            bool spareBearingBatchWasInProgressAtTickStart,
             List<LastBearingDomainEvent> events)
         {
             builder.SettlementAccumulatorMilli = checked(
@@ -1683,12 +1849,86 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 }
             }
 
+            if (spareBearingBatchWasInProgressAtTickStart
+                && builder.SpareBearingBatchPhase
+                    == SpareBearingBatchPhase.InProgress)
+            {
+                AdvanceSpareBearingBatch(builder, events);
+            }
+
             if (builder.MaintenanceObligationActive
                 && builder.SettlementTick
                     >= builder.NextMaintenanceDueSettlementTick)
             {
                 builder.MaintenanceDue = true;
             }
+        }
+
+        private static void AdvanceSpareBearingBatch(
+            LastBearingStateBuilder builder,
+            List<LastBearingDomainEvent> events)
+        {
+            var previousElapsedTicks = builder.SpareBearingElapsedTicks;
+            builder.SpareBearingElapsedTicks = checked(
+                builder.SpareBearingElapsedTicks + 1);
+
+            if (builder.SpareBearingElapsedTicks
+                == LastBearingBalanceV1
+                    .SpareBearingBatchCheckpointSettlementTick)
+            {
+                Emit(
+                    builder,
+                    events,
+                    LastBearingEventKind.SpareBearingBatchCheckpointReached,
+                    LastBearingEventCause.AutonomousSettlementTick,
+                    builder.SettlementTick,
+                    LastBearingDomainEvent.AutonomousCommandSequence,
+                    LastBearingState.SpareBearingBatchId,
+                    previousElapsedTicks,
+                    builder.SpareBearingElapsedTicks);
+            }
+
+            if (builder.SpareBearingElapsedTicks
+                != builder.SpareBearingRequiredTicks)
+            {
+                return;
+            }
+
+            var previousDecision = builder.NextCityDecision;
+            LastBearingOwnershipTransaction
+                .CreateSpareBearingLotAtWorkshopOutput(builder);
+            builder.SpareBearingBatchPhase = SpareBearingBatchPhase.Complete;
+            builder.NextCityDecision = NextCityDecision.None;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.SpareBearingBatchCompleted,
+                LastBearingEventCause.AutonomousSettlementTick,
+                builder.SettlementTick,
+                LastBearingDomainEvent.AutonomousCommandSequence,
+                LastBearingState.SpareBearingBatchId,
+                (long)SpareBearingBatchPhase.InProgress,
+                (long)builder.SpareBearingBatchPhase);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.SpareBearingLotCreated,
+                LastBearingEventCause.AutonomousSettlementTick,
+                builder.SettlementTick,
+                LastBearingDomainEvent.AutonomousCommandSequence,
+                LastBearingState.SpareBearingLotId,
+                0,
+                builder.SpareBearingLotQuantity);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.NextCityDecisionSet,
+                LastBearingEventCause.AutonomousSettlementTick,
+                builder.SettlementTick,
+                LastBearingDomainEvent.AutonomousCommandSequence,
+                "settlement:last-bearing:next-decision",
+                (long)previousDecision,
+                (long)builder.NextCityDecision);
         }
 
         private static void AdvanceFactionClock(

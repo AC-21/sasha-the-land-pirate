@@ -43,6 +43,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 ActiveWaterModifierMilliPerSettlementTick = 0,
                 NextCityDecision = NextCityDecision.None,
                 InstalledCityImprovement = CityImprovementKind.None,
+                SpareBearingRecipe = SpareBearingRecipe.None,
+                SpareBearingBatchPhase = SpareBearingBatchPhase.None,
+                SpareBearingElapsedTicks = 0,
+                SpareBearingRequiredTicks = 0,
+                SpareBearingLotQuantity = 0,
+                SpareBearingLotCustody = SpareBearingLotCustody.None,
 
                 VehicleModule = VehicleModule.None,
                 ModuleInstallationState = ModuleInstallationState.None,

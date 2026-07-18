@@ -20,14 +20,14 @@ namespace AtomicLandPirate.LastBearingTests
                 "unsupported city decisions remain pending",
                 UnsupportedDecisionRemainsPending);
             harness.Run(
-                "city improvement survives v2 canonical round trip",
-                ImprovementRoundTripsInV2);
+                "city improvement survives v3 canonical round trip",
+                ImprovementRoundTripsInV3);
             harness.Run(
                 "forged city improvement states fail invariants",
                 ForgedImprovementStatesFailInvariants);
             harness.Run(
-                "v1 canonical payload refuses reinterpretation",
-                V1PayloadRefusesReinterpretation);
+                "prior canonical payloads refuse reinterpretation",
+                PriorPayloadsRefuseReinterpretation);
             harness.Run(
                 "all colony compositions install the same improvement",
                 CompositionsShareExactInstallationMechanics);
@@ -281,7 +281,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "installed improvement outside home phase");
         }
 
-        private static void ImprovementRoundTripsInV2()
+        private static void ImprovementRoundTripsInV3()
         {
             CoreTestDriver driver = ReachInstallationReady(
                 ColonyComposition.Mixed,
@@ -293,37 +293,44 @@ namespace AtomicLandPirate.LastBearingTests
                 LastBearingCanonicalCodec.TryDecode(encoded);
             TestHarness.True(
                 decoded.Succeeded && decoded.State != null,
-                "v2 improvement decode");
+                "v3 improvement decode");
             TestHarness.True(
                 encoded.SequenceEqual(
                     LastBearingCanonicalCodec.Encode(decoded.State!)),
-                "v2 improvement canonical bytes");
+                "v3 improvement canonical bytes");
             TestHarness.Equal(
                 CityImprovementKind.RefurbishedAuxiliaryPump,
                 decoded.State!.InstalledCityImprovement,
-                "v2 improvement field");
+                "v3 improvement field");
             TestHarness.Equal(
                 HeavyCargoCustody.InstalledAtAuxiliaryPump,
                 decoded.State.HeavyCargoCustody,
-                "v2 installed custody");
+                "v3 installed custody");
         }
 
-        private static void V1PayloadRefusesReinterpretation()
+        private static void PriorPayloadsRefuseReinterpretation()
         {
-            byte[] encoded = LastBearingCanonicalCodec.Encode(
-                LastBearingScenarioFactory.CreateInitial(
-                    ColonyComposition.HumanOnly,
-                    2206));
-            encoded[8] = 1;
-            encoded[9] = 0;
-            LastBearingDecodeResult decoded =
-                LastBearingCanonicalCodec.TryDecode(encoded);
-            TestHarness.True(!decoded.Succeeded, "v1 payload was reinterpreted");
-            TestHarness.Equal(
-                LastBearingCanonicalCodec.DecodeUnknownVersionCode,
-                decoded.Code,
-                "v1 refusal code");
-            TestHarness.True(decoded.State == null, "v1 refusal returned state");
+            foreach (byte priorVersion in new byte[] { 1, 2 })
+            {
+                byte[] encoded = LastBearingCanonicalCodec.Encode(
+                    LastBearingScenarioFactory.CreateInitial(
+                        ColonyComposition.HumanOnly,
+                        2206));
+                encoded[8] = priorVersion;
+                encoded[9] = 0;
+                LastBearingDecodeResult decoded =
+                    LastBearingCanonicalCodec.TryDecode(encoded);
+                TestHarness.True(
+                    !decoded.Succeeded,
+                    "v" + priorVersion + " payload was reinterpreted");
+                TestHarness.Equal(
+                    LastBearingCanonicalCodec.DecodeUnknownVersionCode,
+                    decoded.Code,
+                    "v" + priorVersion + " refusal code");
+                TestHarness.True(
+                    decoded.State == null,
+                    "v" + priorVersion + " refusal returned state");
+            }
         }
 
         private static void CompositionsShareExactInstallationMechanics()
