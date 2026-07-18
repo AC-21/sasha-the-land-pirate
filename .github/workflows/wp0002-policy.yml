@@ -68,15 +68,18 @@ jobs:
             "docs/evidence/WP-0002/local-operator-amendment/authority.json"
             "docs/evidence/WP-0002/local-operator-amendment/pre-merge.json"
             "docs/evidence/WP-0002/local-operator-amendment/complete.json"
+            "docs/evidence/WP-0002/local-operator-successor/authority.json"
+            "docs/evidence/WP-0002/local-operator-successor/pre-merge.json"
+            "docs/evidence/WP-0002/local-operator-successor/complete.json"
           )
           if ! /usr/bin/git -C "$OBJECT_STORE" diff --quiet "$BASE_SHA" "$HEAD_SHA" -- "${forbidden_predecessor_paths[@]}"; then
             echo "Candidate modifies forbidden predecessor local-operator reports." >&2
             exit 1
           fi
           closure_paths=(
-            "docs/evidence/WP-0002/local-operator-successor/authority.json"
-            "docs/evidence/WP-0002/local-operator-successor/pre-merge.json"
-            "docs/evidence/WP-0002/local-operator-successor/complete.json"
+            "docs/evidence/WP-0002/local-operator-recovery/authority.json"
+            "docs/evidence/WP-0002/local-operator-recovery/pre-merge.json"
+            "docs/evidence/WP-0002/local-operator-recovery/complete.json"
           )
           if /usr/bin/git -C "$OBJECT_STORE" diff --quiet "$BASE_SHA" "$HEAD_SHA" -- "${closure_paths[@]}"; then
             echo "Candidate does not modify local-operator closure reports."
@@ -92,8 +95,8 @@ jobs:
               "https://github.com/AC-21/sasha-the-land-pirate.git" \
               "$required_object"
           done
-          verifier="Tools/Validation/verify_wp0002_local_operator_transaction_v2.py"
-          expected_verifier_sha256="15ea81750bce5b5d3cee5a5711b8287f55238eb44343386c1d0f5ca88f484a19"
+          verifier="Tools/Validation/verify_wp0002_local_operator_transaction_v3.py"
+          expected_verifier_sha256="2d8cd873f0a8ee357848d18e2cb57f440f6fd28fb5817e7454f816d07dc8e52d"
           actual_verifier_sha256="$(shasum -a 256 "$verifier" | cut -d ' ' -f 1)"
           [[ "$actual_verifier_sha256" == "$expected_verifier_sha256" ]]
           env PYTHONDONTWRITEBYTECODE=1 python3 -B "$verifier" \
@@ -101,7 +104,7 @@ jobs:
             --repository-path "$OBJECT_STORE" \
             --base "$BASE_SHA" \
             --head "$HEAD_SHA" \
-            --output "$REPORT_ROOT/wp0002-local-operator-successor-closure-verification.json"
+            --output "$REPORT_ROOT/wp0002-local-operator-recovery-closure-verification.json"
       - name: Retain content-addressed policy report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
