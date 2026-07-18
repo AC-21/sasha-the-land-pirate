@@ -1488,8 +1488,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             var kernel = new LastBearingKernel();
             LastBearingState state = DriveUntilWreckLineAvailable(
                 CreateOutboundState());
+            RouteActionKind action =
+                LastBearingReadModel.FromState(state).RouteActionKind;
             state = Apply(kernel, state, sequence =>
-                new OperateWreckLineModuleCommand(sequence));
+                new OperateWreckLineModuleCommand(sequence, action));
             for (var steer = 0; steer < 20; steer++)
             {
                 state = Apply(kernel, state, sequence =>
