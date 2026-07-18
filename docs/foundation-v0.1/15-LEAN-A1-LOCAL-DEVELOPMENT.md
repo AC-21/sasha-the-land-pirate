@@ -41,10 +41,11 @@ local-development authority; they do not generalize to another packet.
   screenshots, and create or modify project objects through Unity MCP;
 - create branches, checkpoints, commits, pushes, and protected pull requests.
 
-For active WP-0002 only, append-only amendment
-`A1B-WP-0002-LOCAL-OPERATOR-20260717`, after its receipt, authenticated
-online three-phase transaction, and separate protected three-report evidence
-closure complete, delegates visible Computer Use in
+For active WP-0002 only, append-only successor amendment
+`A1B-WP-0002-LOCAL-OPERATOR-SUCCESSOR-20260718`, after successor receipt
+`RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718`, authenticated online transaction
+`WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718`, and a separate protected
+exact-three-report evidence closure complete, delegates visible Computer Use in
 the exact installed Unity Hub and Editor bundles to add/open/switch the exact
 canonical `Game` project, approve only the receipt-bound Codex Bridge client
 whose visible OS publisher/path and application version/build match, and
@@ -52,7 +53,11 @@ inspect non-secret Unity state. The prior host signature observation is
 context-limited and the UI does not prove a CDHash. It cannot mutate Bridge tools
 or configuration. This is local operation with creator attribution, not
 identity impersonation or a general UI, process, account, or external
-communication authority.
+communication authority. The sealed v1 receipt
+`RR-WP0002-LOCAL-OPERATOR-20260717` and amendment remain byte-preserved,
+append-only historical evidence with disposition
+`superseded-unclosed-never-effective`; they grant no current or retroactive
+authority.
 
 The initial Unity project/CI change was creator-merged. Autonomous auto-merge
 remains unauthorized; later implementation requires the packet's protected
@@ -163,8 +168,9 @@ Agents may not:
 
 The first bullet retains shell, CLI, batchmode, headless, executable, and CI
 meaning. It does not prohibit the exact visible Computer Use actions separately
-bound by `RR-WP0002-LOCAL-OPERATOR-20260717`; those actions add no other
-authority and do not alter the remaining denials.
+bound by `RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718` after its protected
+evidence closure; those actions add no other authority and do not alter the
+remaining denials.
 
 ## Git and rollback
 
@@ -201,22 +207,41 @@ report for later implementation release. Autonomous
 auto-merge is not authorized without a separate governance upgrade. Direct or
 agent-selected merge remains denied.
 
-The delegated local-operator amendment itself requires one bounded
+The v2 delegated local-operator successor itself requires one bounded
 creator-controlled control-plane materialization because the base-owned policy
-correctly rejects active-to-active governance mutations. For that exact final
-PR head and patch only, `wp0002-policy` may be temporarily nonrequired while
+correctly rejects active-to-active governance mutations. The predecessor
+amendment and receipt remain append-only with disposition
+`superseded-unclosed-never-effective`; its absent
+`docs/evidence/WP-0002/local-operator-amendment/authority.json`,
+`docs/evidence/WP-0002/local-operator-amendment/pre-merge.json`, and
+`docs/evidence/WP-0002/local-operator-amendment/complete.json` paths are
+permanently forbidden. For the exact successor control PR final head and patch
+only, `wp0002-policy` may be temporarily nonrequired while
 `validate`, `wp0002-core`, strict PR/admin/conversation/linear enforcement,
 empty bypass allowances, disabled force push/deletion, and squash-only merging
 remain, and each protection snapshot must prove an exact empty inherited and
-repository ruleset inventory. The final head and patch must be reverified before creator-delegated
-squash merge; restored protection must be captured within 600 seconds. The
-three verifier reports are then added as the only three regular files in a
-separate evidence-only PR under the ordinary full three-check protection set.
+repository ruleset inventory. The final head and patch must be reverified
+before creator-delegated squash merge; restored exact-three protection must be
+captured within 600 seconds of that squash. The
+successor verifier reports are then added as the only three regular files in a
+separate evidence-only PR under the ordinary `validate`, `wp0002-core`, and
+`wp0002-policy` protection set:
+
+- `docs/evidence/WP-0002/local-operator-successor/authority.json`;
+- `docs/evidence/WP-0002/local-operator-successor/pre-merge.json`;
+- `docs/evidence/WP-0002/local-operator-successor/complete.json`.
+
 Its base-owned policy run hash-checks protected verifier bytes and live-refetches
 both owner comments, the control PR, main, checks, protection, and rulesets.
 The control merge alone is
 non-executable; all reports absent is pending, any partial set fails closed,
 and only the protected evidence-closure merge makes the successor effective.
+The control squash deliberately leaves protected `main` red/fail-closed until
+that exact closure lands because the pre-squash receipt-child topology is no
+longer `HEAD`. The controller must continue without pause: restore exact-three
+protection, admit no unrelated merge or implementation PR, and merge only the
+three-report closure. This quarantine is not a reusable red-main exception and
+grants no development authority.
 The first implementation PR opened after restoration remains the fresh
 latest-head canary.
 
@@ -249,7 +274,7 @@ mechanics remain conditional on a later D-0039 receipt.
 
 The canonical active target is
 `/Users/sasha/Projects/sasha-the-land-pirate/Game`.
-The local UI amendment binds Hub `com.unity3d.unityhub` at
+The local UI successor binds Hub `com.unity3d.unityhub` at
 `/Applications/Unity Hub.app` and Editor `com.unity3d.UnityEditor5.x` at
 `/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app`. Its recorded cloud
 project and organization identifiers are non-secret identity checks only; it
@@ -282,4 +307,9 @@ packet when PR #20 entered protected `main`. The later sealed
 authority. `RR-WP0002-ACCEPT-20260717` accepts WP-0002 without activating it;
 the distinct `RR-WP0002-ACTIVATE-20260717` receipt binds its Stage C evidence,
 boundary, reservation, and activation claims; canonical autonomy is A1 solely
-for WP-0002.
+for WP-0002. The later sealed v1 local-operator receipt
+`RR-WP0002-LOCAL-OPERATOR-20260717` remains append-only but never became
+effective because its protected three-report closure did not occur. Successor
+receipt `RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718` may govern only after its
+new authenticated online transaction and separate exact-three-report protected
+closure complete.

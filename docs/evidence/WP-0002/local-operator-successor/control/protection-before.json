@@ -1,0 +1,370 @@
+{
+  "kind": "wp0002-local-operator-protection-capture",
+  "normalized": {
+    "bypass_allowances_empty": true,
+    "conversation_resolution": true,
+    "deletion_disabled": true,
+    "dismiss_stale_reviews": false,
+    "enforce_admins": true,
+    "force_push_disabled": true,
+    "linear_history": true,
+    "main_sha": "96002331dc069db5a7bab36baaf359d1b46cc64c",
+    "observed_at": "2026-07-18T08:36:54Z",
+    "pull_request_required": true,
+    "push_restrictions_empty": true,
+    "raw_response_sha256": {
+      "branch": "8152164d86a01bff72e0ac5eb5fd99ca59450f7e603a921758461804881df02e",
+      "protection": "8f279972688ecd9b8dedc28672f697cd2bc798c43d178361cc42f17bc75ac95c",
+      "repository": "8c49261cd3a1ca1ebabf493dabd628577d55fa40a57aa1293f0f408918d70192",
+      "rulesets": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "raw_sha256": "e7ea008aef45951d11bc18eb624229e997b751a3a155f56338e91bd1cf384d64",
+    "required_checks": [
+      {
+        "app_id": 15368,
+        "context": "validate"
+      },
+      {
+        "app_id": 15368,
+        "context": "wp0002-core"
+      },
+      {
+        "app_id": 15368,
+        "context": "wp0002-policy"
+      }
+    ],
+    "rulesets_empty": true,
+    "squash_only": true,
+    "strict": true
+  },
+  "raw": {
+    "branch": {
+      "_links": {
+        "html": "https://github.com/AC-21/sasha-the-land-pirate/tree/main",
+        "self": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/branches/main"
+      },
+      "commit": {
+        "author": {
+          "avatar_url": "https://avatars.githubusercontent.com/u/65501994?v=4",
+          "events_url": "https://api.github.com/users/AC-21/events{/privacy}",
+          "followers_url": "https://api.github.com/users/AC-21/followers",
+          "following_url": "https://api.github.com/users/AC-21/following{/other_user}",
+          "gists_url": "https://api.github.com/users/AC-21/gists{/gist_id}",
+          "gravatar_id": "",
+          "html_url": "https://github.com/AC-21",
+          "id": 65501994,
+          "login": "AC-21",
+          "node_id": "MDQ6VXNlcjY1NTAxOTk0",
+          "organizations_url": "https://api.github.com/users/AC-21/orgs",
+          "received_events_url": "https://api.github.com/users/AC-21/received_events",
+          "repos_url": "https://api.github.com/users/AC-21/repos",
+          "site_admin": false,
+          "starred_url": "https://api.github.com/users/AC-21/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/AC-21/subscriptions",
+          "type": "User",
+          "url": "https://api.github.com/users/AC-21",
+          "user_view_type": "public"
+        },
+        "comments_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/commits/96002331dc069db5a7bab36baaf359d1b46cc64c/comments",
+        "commit": {
+          "author": {
+            "date": "2026-07-18T04:24:02Z",
+            "email": "65501994+AC-21@users.noreply.github.com",
+            "name": "AC-21"
+          },
+          "comment_count": 0,
+          "committer": {
+            "date": "2026-07-18T04:24:02Z",
+            "email": "noreply@github.com",
+            "name": "GitHub"
+          },
+          "message": "Materialize WP-0002 delegated local Unity operator amendment (#60)\n\n* materialize WP-0002 local Unity operator amendment\n\n* seal WP-0002 local operator authority receipt",
+          "tree": {
+            "sha": "2be14c3d2e3af202083fb4254230ed9835d1a3f8",
+            "url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/git/trees/2be14c3d2e3af202083fb4254230ed9835d1a3f8"
+          },
+          "url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/git/commits/96002331dc069db5a7bab36baaf359d1b46cc64c",
+          "verification": {
+            "payload": "tree 2be14c3d2e3af202083fb4254230ed9835d1a3f8\nparent 375416c0dd7f60c2a36f9a7d8f7df819d74b60eb\nauthor AC-21 <65501994+AC-21@users.noreply.github.com> 1784348642 -0700\ncommitter GitHub <noreply@github.com> 1784348642 -0700\n\nMaterialize WP-0002 delegated local Unity operator amendment (#60)\n\n* materialize WP-0002 local Unity operator amendment\n\n* seal WP-0002 local operator authority receipt",
+            "reason": "valid",
+            "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJqWv/iCRC1aQ7uu5UhlAAApr0QAHJQIMiqhCNqzSMTav7dlob0\nZRDe6A3jj1T5c2ry5PutVvyswNaz75RGPpa992ebZdCh7l5x3eU6rgVBRC/iDXBQ\nr57a+du6zhHqT1CeRFmPGs3VkZplpbx4QD0GivL0fMm/3WayuiN5D8ZG5wNw/YUs\no/t7lzjw6+2KZjh5VN9n2v2qJfMZw3SE+kHrYGIEU0T/OwJ1ioN0qeC3OLNvXVop\n8AbZWJfHsnNPrw9RnCQ9JSxFNnU7WFHjTb0+6u4mXkuEVXwOk9YkfY3yNW7RvnXj\nCdgZxGcJk4y6qAbhH4uWofKinc27Ssoa9IEh40yHnXnEIDZx4g7sHK1wViS8HcrR\nhZYoPRHLeDgW+TkI2zmZkgE2v5+RNduKO6vFuYyUSTTSOGVTJ1uDK5E4gWjp3G+J\neyLhrJnJQE1IoPuW9e+RpIRkj93/PU29idVrDOYNQWY117HN5rnOgfgTfCVp1jAw\n3mZcTutDGfHPKT8uRKHG0IOOm5t8JlZrAuh33EguO+ZEqoFxgkdyuQCIFoXvJd45\nMvQolgzMS5srypcCOqfFK6kH8DlmzmKo0OxoAnThHvSj8bIyj6rVQrhW04oODBH/\n/EfXnpQ0Y7VviaZsm43hD1oV6zZexHKraIOafFW9zlctsvNk0Uopp8VYHZ5M2err\ng/F/jCArJ0Lh/c1yg0l2\n=ZmWL\n-----END PGP SIGNATURE-----\n",
+            "verified": true,
+            "verified_at": "2026-07-18T04:24:03Z"
+          }
+        },
+        "committer": {
+          "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+          "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+          "followers_url": "https://api.github.com/users/web-flow/followers",
+          "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+          "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+          "gravatar_id": "",
+          "html_url": "https://github.com/web-flow",
+          "id": 19864447,
+          "login": "web-flow",
+          "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+          "organizations_url": "https://api.github.com/users/web-flow/orgs",
+          "received_events_url": "https://api.github.com/users/web-flow/received_events",
+          "repos_url": "https://api.github.com/users/web-flow/repos",
+          "site_admin": false,
+          "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+          "type": "User",
+          "url": "https://api.github.com/users/web-flow",
+          "user_view_type": "public"
+        },
+        "html_url": "https://github.com/AC-21/sasha-the-land-pirate/commit/96002331dc069db5a7bab36baaf359d1b46cc64c",
+        "node_id": "C_kwDOTZ3pzNoAKDk2MDAyMzMxZGMwNjlkYjVhN2JhYjM2YmFhZjM1OWQxYjQ2Y2M2NGM",
+        "parents": [
+          {
+            "html_url": "https://github.com/AC-21/sasha-the-land-pirate/commit/375416c0dd7f60c2a36f9a7d8f7df819d74b60eb",
+            "sha": "375416c0dd7f60c2a36f9a7d8f7df819d74b60eb",
+            "url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/commits/375416c0dd7f60c2a36f9a7d8f7df819d74b60eb"
+          }
+        ],
+        "sha": "96002331dc069db5a7bab36baaf359d1b46cc64c",
+        "url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/commits/96002331dc069db5a7bab36baaf359d1b46cc64c"
+      },
+      "name": "main",
+      "protected": true,
+      "protection": {
+        "enabled": true,
+        "required_status_checks": {
+          "checks": [
+            {
+              "app_id": 15368,
+              "context": "validate"
+            },
+            {
+              "app_id": 15368,
+              "context": "wp0002-core"
+            },
+            {
+              "app_id": 15368,
+              "context": "wp0002-policy"
+            }
+          ],
+          "contexts": [
+            "validate",
+            "wp0002-core",
+            "wp0002-policy"
+          ],
+          "enforcement_level": "everyone"
+        }
+      },
+      "protection_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/branches/main/protection"
+    },
+    "protection": {
+      "allow_deletions": {
+        "enabled": false
+      },
+      "allow_force_pushes": {
+        "enabled": false
+      },
+      "allow_fork_syncing": {
+        "enabled": false
+      },
+      "block_creations": {
+        "enabled": false
+      },
+      "enforce_admins": {
+        "enabled": true,
+        "url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/branches/main/protection/enforce_admins"
+      },
+      "lock_branch": {
+        "enabled": false
+      },
+      "required_conversation_resolution": {
+        "enabled": true
+      },
+      "required_linear_history": {
+        "enabled": true
+      },
+      "required_pull_request_reviews": {
+        "dismiss_stale_reviews": false,
+        "require_code_owner_reviews": false,
+        "require_last_push_approval": false,
+        "required_approving_review_count": 0,
+        "url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/branches/main/protection/required_pull_request_reviews"
+      },
+      "required_signatures": {
+        "enabled": false,
+        "url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/branches/main/protection/required_signatures"
+      },
+      "required_status_checks": {
+        "checks": [
+          {
+            "app_id": 15368,
+            "context": "validate"
+          },
+          {
+            "app_id": 15368,
+            "context": "wp0002-core"
+          },
+          {
+            "app_id": 15368,
+            "context": "wp0002-policy"
+          }
+        ],
+        "contexts": [
+          "validate",
+          "wp0002-core",
+          "wp0002-policy"
+        ],
+        "contexts_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/branches/main/protection/required_status_checks/contexts",
+        "strict": true,
+        "url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/branches/main/protection/required_status_checks"
+      },
+      "url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/branches/main/protection"
+    },
+    "raw_response_sha256": {
+      "branch": "8152164d86a01bff72e0ac5eb5fd99ca59450f7e603a921758461804881df02e",
+      "protection": "8f279972688ecd9b8dedc28672f697cd2bc798c43d178361cc42f17bc75ac95c",
+      "repository": "8c49261cd3a1ca1ebabf493dabd628577d55fa40a57aa1293f0f408918d70192",
+      "rulesets": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "repository": {
+      "allow_auto_merge": true,
+      "allow_forking": true,
+      "allow_merge_commit": false,
+      "allow_rebase_merge": false,
+      "allow_squash_merge": true,
+      "allow_update_branch": false,
+      "archive_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/{archive_format}{/ref}",
+      "archived": false,
+      "assignees_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/assignees{/user}",
+      "blobs_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/git/blobs{/sha}",
+      "branches_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/branches{/branch}",
+      "clone_url": "https://github.com/AC-21/sasha-the-land-pirate.git",
+      "collaborators_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/collaborators{/collaborator}",
+      "comments_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/comments{/number}",
+      "commits_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/commits{/sha}",
+      "compare_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/compare/{base}...{head}",
+      "contents_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/contents/{+path}",
+      "contributors_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/contributors",
+      "created_at": "2026-07-16T01:41:00Z",
+      "default_branch": "main",
+      "delete_branch_on_merge": true,
+      "deployments_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/deployments",
+      "description": null,
+      "disabled": false,
+      "downloads_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/downloads",
+      "events_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/events",
+      "fork": false,
+      "forks": 0,
+      "forks_count": 0,
+      "forks_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/forks",
+      "full_name": "AC-21/sasha-the-land-pirate",
+      "git_commits_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/git/commits{/sha}",
+      "git_refs_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/git/refs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/git/tags{/sha}",
+      "git_url": "git://github.com/AC-21/sasha-the-land-pirate.git",
+      "has_discussions": false,
+      "has_downloads": true,
+      "has_issues": true,
+      "has_pages": false,
+      "has_projects": true,
+      "has_pull_requests": true,
+      "has_wiki": true,
+      "homepage": null,
+      "hooks_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/hooks",
+      "html_url": "https://github.com/AC-21/sasha-the-land-pirate",
+      "id": 1302194636,
+      "is_template": false,
+      "issue_comment_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/issues/comments{/number}",
+      "issue_events_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/issues/events{/number}",
+      "issues_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/issues{/number}",
+      "keys_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/keys{/key_id}",
+      "labels_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/labels{/name}",
+      "language": "C#",
+      "languages_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/languages",
+      "license": null,
+      "merge_commit_message": "PR_TITLE",
+      "merge_commit_title": "MERGE_MESSAGE",
+      "merges_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/merges",
+      "milestones_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/milestones{/number}",
+      "mirror_url": null,
+      "name": "sasha-the-land-pirate",
+      "network_count": 0,
+      "node_id": "R_kgDOTZ3pzA",
+      "notifications_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/notifications{?since,all,participating}",
+      "open_issues": 18,
+      "open_issues_count": 18,
+      "owner": {
+        "avatar_url": "https://avatars.githubusercontent.com/u/65501994?v=4",
+        "events_url": "https://api.github.com/users/AC-21/events{/privacy}",
+        "followers_url": "https://api.github.com/users/AC-21/followers",
+        "following_url": "https://api.github.com/users/AC-21/following{/other_user}",
+        "gists_url": "https://api.github.com/users/AC-21/gists{/gist_id}",
+        "gravatar_id": "",
+        "html_url": "https://github.com/AC-21",
+        "id": 65501994,
+        "login": "AC-21",
+        "node_id": "MDQ6VXNlcjY1NTAxOTk0",
+        "organizations_url": "https://api.github.com/users/AC-21/orgs",
+        "received_events_url": "https://api.github.com/users/AC-21/received_events",
+        "repos_url": "https://api.github.com/users/AC-21/repos",
+        "site_admin": false,
+        "starred_url": "https://api.github.com/users/AC-21/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/AC-21/subscriptions",
+        "type": "User",
+        "url": "https://api.github.com/users/AC-21",
+        "user_view_type": "public"
+      },
+      "permissions": {
+        "admin": true,
+        "maintain": true,
+        "pull": true,
+        "push": true,
+        "triage": true
+      },
+      "private": false,
+      "pull_request_creation_policy": "all",
+      "pulls_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/pulls{/number}",
+      "pushed_at": "2026-07-18T04:53:40Z",
+      "releases_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/releases{/id}",
+      "security_and_analysis": {
+        "dependabot_security_updates": {
+          "status": "enabled"
+        },
+        "secret_scanning": {
+          "status": "enabled"
+        },
+        "secret_scanning_non_provider_patterns": {
+          "status": "disabled"
+        },
+        "secret_scanning_push_protection": {
+          "status": "enabled"
+        },
+        "secret_scanning_validity_checks": {
+          "status": "disabled"
+        }
+      },
+      "size": 2202,
+      "squash_merge_commit_message": "COMMIT_MESSAGES",
+      "squash_merge_commit_title": "COMMIT_OR_PR_TITLE",
+      "ssh_url": "git@github.com:AC-21/sasha-the-land-pirate.git",
+      "stargazers_count": 0,
+      "stargazers_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/stargazers",
+      "statuses_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/statuses/{sha}",
+      "subscribers_count": 0,
+      "subscribers_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/subscribers",
+      "subscription_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/subscription",
+      "svn_url": "https://github.com/AC-21/sasha-the-land-pirate",
+      "tags_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/tags",
+      "teams_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/teams",
+      "temp_clone_token": "",
+      "topics": [],
+      "trees_url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate/git/trees{/sha}",
+      "updated_at": "2026-07-18T04:24:06Z",
+      "url": "https://api.github.com/repos/AC-21/sasha-the-land-pirate",
+      "use_squash_pr_title_as_default": false,
+      "visibility": "public",
+      "watchers": 0,
+      "watchers_count": 0,
+      "web_commit_signoff_required": false
+    },
+    "rulesets": []
+  },
+  "schema_version": 1
+}

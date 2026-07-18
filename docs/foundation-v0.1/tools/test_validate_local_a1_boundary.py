@@ -4,6 +4,7 @@ import copy
 import hashlib
 import json
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -17,6 +18,7 @@ CONSTITUTION_SHA256 = "cd" * 32
 LEDGER_SHA256 = "ef" * 32
 BASE_COMMIT = "1" * 40
 ACTIVATION_COMMIT = "2" * 40
+SUCCESSOR_BASE_COMMIT = "96002331dc069db5a7bab36baaf359d1b46cc64c"
 CONFIG_BASE = b"base config\n"
 PROJECT_BASE = b"base project settings\n"
 
@@ -272,6 +274,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
         ]
         manifest["working_tree_scope_capture"] = None
         manifest["local_operator_amendment_scope_capture"] = None
+        manifest["local_operator_successor_scope_capture"] = None
         manifest["github_protection_capture"] = {
             "required_schema": "wp0002-github-protection-v1",
             "artifact": None,
@@ -346,26 +349,9 @@ class LocalA1BoundaryTests(unittest.TestCase):
         manifest["permission_boundary"]["denied_actions"] = copy.deepcopy(
             foundation.WP0002_DENIED_ACTIONS
         )
-        manifest["permission_boundary"]["protected_paths_read_only"] = [
-            "AGENTS.md",
-            ".codex/config.toml",
-            "Game/ProjectSettings/ProjectSettings.asset",
-            "Game/ProjectSettings/SceneTemplateSettings.json",
-            "docs/foundation-v0.1/",
-            "docs/foundation-v0.1/governance/",
-            "docs/foundation-v0.1/ledger/receipts/",
-            "Tools/Validation/validate_wp0002_package_graph.py",
-            "Tools/Validation/validate_wp0002_entry_gate.py",
-            "Tools/Validation/validate_wp0002_policy.py",
-            "Tools/Validation/collect_wp0002_scope_capture.py",
-            "Tools/Validation/verify_wp0002_local_operator_transaction.py",
-            ".github/workflows/wp0002-ci.yml",
-            ".github/workflows/wp0002-policy.yml",
-            "SimulationCore/README.md",
-            "SaveContracts/README.md",
-            "SimulationCore/package.json",
-            "SaveContracts/package.json",
-        ]
+        manifest["permission_boundary"]["protected_paths_read_only"] = copy.deepcopy(
+            foundation.WP0002_SUCCESSOR_PROTECTED_PATHS
+        )
         manifest["local_observation_exceptions"] = []
         if lifecycle_state == "proposed":
             manifest["attested_by"] = None
@@ -394,6 +380,13 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 "base_commit": BASE_COMMIT,
                 "head_commit": BASE_COMMIT,
                 "checkpoint_commit": BASE_COMMIT,
+            }
+            manifest["local_operator_successor_scope_capture"] = {
+                "uri": foundation.WP0002_LOCAL_OPERATOR_SCOPE_URI,
+                "sha256": "82" * 32,
+                "base_commit": SUCCESSOR_BASE_COMMIT,
+                "head_commit": SUCCESSOR_BASE_COMMIT,
+                "checkpoint_commit": SUCCESSOR_BASE_COMMIT,
             }
             manifest["external_cursor_review_control"]["policy_source_sha"] = BASE_COMMIT
             manifest["external_cursor_review_control"]["configuration_capture"] = {
@@ -847,8 +840,12 @@ class LocalA1BoundaryTests(unittest.TestCase):
         receipt: dict,
         *,
         observed_scope_modes: list[object] | None = None,
+        observed_operator_scope_receipts: list[tuple[str, str | None]] | None = None,
         include_operator_receipt: bool = True,
+        include_predecessor_receipt: bool = True,
+        corrupt_predecessor_receipt_file: bool = False,
         operator_receipt_mutator: object | None = None,
+        predecessor_receipt_mutator: object | None = None,
     ) -> list[str]:
         base_bytes = {
             ".codex/config.toml": CONFIG_BASE,
@@ -867,6 +864,23 @@ class LocalA1BoundaryTests(unittest.TestCase):
         governance_path = root / governance_relative
         packet_relative = "work-packets/proposed/WP-0002.json"
         packet_path = root / packet_relative
+        repository_root = Path(__file__).resolve().parents[3]
+        predecessor_receipt_source = (
+            repository_root / foundation.WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH
+        )
+        predecessor_receipt_bytes = predecessor_receipt_source.read_bytes()
+        predecessor_receipt_path = (
+            root / foundation.WP0002_V1_LOCAL_OPERATOR_RECEIPT_PATH
+        )
+        predecessor_receipt_path.parent.mkdir(parents=True, exist_ok=True)
+        predecessor_receipt_path.write_bytes(predecessor_receipt_bytes)
+        predecessor_receipt = json.loads(
+            predecessor_receipt_bytes.decode("utf-8")
+        )
+        if callable(predecessor_receipt_mutator):
+            predecessor_receipt_mutator(predecessor_receipt)
+        if corrupt_predecessor_receipt_file:
+            predecessor_receipt_path.write_bytes(predecessor_receipt_bytes + b" ")
         operator_receipt = {
             "receipt_id": foundation.WP0002_LOCAL_OPERATOR_RECEIPT_ID,
             "issued_at": "2026-07-17T23:59:00Z",
@@ -884,8 +898,17 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 "https://github.com/AC-21/sasha-the-land-pirate/"
                 "pull/99#issuecomment-123"
             ),
-            "subject_ids": ["WP-0002"],
+            "subject_ids": [
+                foundation.WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID,
+                "WP-0002",
+            ],
             "subject_claims": [
+                {
+                    "subject_id": foundation.WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID,
+                    "claims": [
+                        foundation.WP0002_LOCAL_OPERATOR_SUPERSESSION_CLAIM
+                    ],
+                },
                 {
                     "subject_id": "WP-0002",
                     "claims": [foundation.WP0002_LOCAL_OPERATOR_CLAIM],
@@ -902,8 +925,16 @@ class LocalA1BoundaryTests(unittest.TestCase):
                     governance_path.read_bytes()
                 ).hexdigest(),
                 packet_relative: hashlib.sha256(packet_path.read_bytes()).hexdigest(),
+                foundation.WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH: (
+                    foundation.WP0002_V1_LOCAL_OPERATOR_RECEIPT_SHA256
+                ),
             },
-            "subject_contract_sha256": {"WP-0002": CONTRACT_SHA256},
+            "subject_contract_sha256": {
+                foundation.WP0002_V1_LOCAL_OPERATOR_AMENDMENT_ID: (
+                    foundation.WP0002_V1_AMENDED_BOUNDARY_SHA256
+                ),
+                "WP-0002": CONTRACT_SHA256,
+            },
             "subject_event_sha256": {},
             "foundation_binding": None,
             "signature_reference": (
@@ -962,6 +993,28 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 errors.append("scope capture dirty set is not a faithful projection")
             return errors
 
+        def retained_operator_scope(
+            _manifest: dict,
+            _packet: dict,
+            scope_receipt: dict,
+        ) -> list[str]:
+            if observed_operator_scope_receipts is not None:
+                observed_operator_scope_receipts.append(
+                    ("v1", scope_receipt.get("receipt_id"))
+                )
+            return []
+
+        def successor_operator_scope(
+            _manifest: dict,
+            _packet: dict,
+            scope_receipt: dict,
+        ) -> list[str]:
+            if observed_operator_scope_receipts is not None:
+                observed_operator_scope_receipts.append(
+                    ("successor", scope_receipt.get("receipt_id"))
+                )
+            return []
+
         receipts = {
             "RR-PRIOR": {
                 "receipt_id": "RR-PRIOR",
@@ -970,6 +1023,10 @@ class LocalA1BoundaryTests(unittest.TestCase):
             },
             receipt["receipt_id"]: receipt,
         }
+        if include_predecessor_receipt:
+            receipts[foundation.WP0002_V1_LOCAL_OPERATOR_RECEIPT_ID] = (
+                predecessor_receipt
+            )
         if include_operator_receipt:
             receipts[operator_receipt["receipt_id"]] = operator_receipt
         schemas = Path(__file__).resolve().parents[1] / "schemas"
@@ -1026,12 +1083,32 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 "_load_wp0002_scope_collector",
                 return_value=({"verify_scope_capture": scope_verifier}, []),
             ),
+            mock.patch.object(
+                foundation,
+                "_load_wp0002_v1_scope_collector",
+                return_value=({"verify_scope_capture": scope_verifier}, []),
+            ),
             # Transaction evidence has focused tests of its own.  These local
             # boundary fixtures intentionally exercise the surrounding
             # manifest and activation rules without fabricating online proof.
             mock.patch.object(
                 foundation,
                 "validate_wp0002_local_operator_amendment_scope_capture",
+                side_effect=retained_operator_scope,
+            ),
+            mock.patch.object(
+                foundation,
+                "validate_wp0002_local_operator_successor_scope_capture",
+                side_effect=successor_operator_scope,
+            ),
+            mock.patch.object(
+                foundation,
+                "validate_wp0002_local_operator_successor_scope_capture_unreceipted",
+                return_value=[],
+            ),
+            mock.patch.object(
+                foundation,
+                "validate_wp0002_pending_protection_before",
                 return_value=[],
             ),
             mock.patch.object(
@@ -1167,6 +1244,174 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 ],
             )
 
+    def test_receipted_pending_state_invokes_exact_receipt_child_gate(self) -> None:
+        calls: list[tuple[object, dict]] = []
+
+        class Repository:
+            def __init__(self, root: Path) -> None:
+                self.root = root
+
+        def pending(repository: object, receipt: dict) -> None:
+            calls.append((repository, receipt))
+
+        receipt = {
+            "receipt_id": foundation.WP0002_LOCAL_OPERATOR_RECEIPT_ID,
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with (
+                mock.patch.object(foundation, "REPO_ROOT", root),
+                mock.patch.object(
+                    foundation,
+                    "_load_wp0002_transaction_verifier",
+                    return_value=(
+                        {
+                            "GitRepository": Repository,
+                            "validate_pending_receipt_child": pending,
+                        },
+                        [],
+                    ),
+                ),
+            ):
+                self.assertEqual(
+                    foundation.validate_wp0002_local_operator_transaction_evidence(
+                        receipt
+                    ),
+                    [],
+                )
+        self.assertEqual(len(calls), 1)
+        self.assertIsInstance(calls[0][0], Repository)
+        self.assertIs(calls[0][1], receipt)
+
+    def test_offline_report_shapes_do_not_require_unreachable_git_objects(self) -> None:
+        calls: list[str] = []
+
+        def validator(phase: str):
+            def validate(report: dict) -> None:
+                self.assertEqual(report, {"phase": phase})
+                calls.append(phase)
+
+            return validate
+
+        def poison(*_args: object, **_kwargs: object) -> object:
+            raise AssertionError("offline foundation lint touched historical Git objects")
+
+        verifier = {
+            "validate_authority_evidence": validator("authority"),
+            "validate_pre_merge_evidence": validator("pre-merge"),
+            "validate_complete_evidence": validator("complete"),
+            "GitRepository": poison,
+            "validate_historical_git_objects": poison,
+        }
+        reports = {
+            phase: {"phase": phase}
+            for phase in ("authority", "pre-merge", "complete")
+        }
+        self.assertEqual(
+            foundation.validate_wp0002_offline_transaction_report_shapes(
+                verifier,
+                reports,
+            ),
+            [],
+        )
+        self.assertEqual(calls, ["authority", "pre-merge", "complete"])
+
+    def test_pending_successor_requires_exact_fresh_protection_before(self) -> None:
+        relative = foundation.WP0002_LOCAL_OPERATOR_TRANSACTION_EVIDENCE_CONTRACT[
+            "stage1_protection_before_path"
+        ]
+        capture = {"capture": "exact-three"}
+        raw = json_bytes(capture)
+        digest = hashlib.sha256(raw).hexdigest()
+        receipt = {
+            "issued_at": "2026-07-18T00:04:00Z",
+            "artifact_sha256": {relative: digest},
+        }
+        manifest = {
+            "local_operator_successor_scope_capture": {
+                "base_commit": SUCCESSOR_BASE_COMMIT,
+            }
+        }
+        observed_at = "2026-07-18T00:00:00Z"
+
+        def validator(
+            value: object,
+            *,
+            base_sha: str,
+            authorization_comment: object,
+        ) -> tuple[dict[str, object], bytes]:
+            self.assertEqual(value, capture)
+            self.assertEqual(base_sha, SUCCESSOR_BASE_COMMIT)
+            self.assertIsNone(authorization_comment)
+            return {"observed_at": observed_at}, b"raw-protection"
+
+        verifier = {
+            "PROTECTION_BEFORE_PATH": relative,
+            "MAX_BEFORE_TO_AUTHORITY_SECONDS": 300,
+            "validate_protection_before_capture": validator,
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path = root / relative
+            path.parent.mkdir(parents=True)
+            path.write_bytes(raw)
+            with (
+                mock.patch.object(foundation, "REPO_ROOT", root),
+                mock.patch.object(
+                    foundation,
+                    "_load_wp0002_transaction_verifier",
+                    return_value=(verifier, []),
+                ),
+            ):
+                self.assertEqual(
+                    foundation.validate_wp0002_pending_protection_before(
+                        receipt,
+                        manifest,
+                    ),
+                    [],
+                )
+                wrong_receipt = copy.deepcopy(receipt)
+                wrong_receipt["artifact_sha256"][relative] = "0" * 64
+                self.assertTrue(
+                    any(
+                        "does not bind protection-before" in error
+                        for error in foundation.validate_wp0002_pending_protection_before(
+                            wrong_receipt,
+                            manifest,
+                        )
+                    )
+                )
+                observed_at = "2026-07-17T23:58:59Z"
+                self.assertTrue(
+                    any(
+                        "at most 300 seconds" in error
+                        for error in foundation.validate_wp0002_pending_protection_before(
+                            receipt,
+                            manifest,
+                        )
+                    )
+                )
+                observed_at = "2026-07-18T00:05:00Z"
+                self.assertTrue(
+                    any(
+                        "at most 300 seconds" in error
+                        for error in foundation.validate_wp0002_pending_protection_before(
+                            receipt,
+                            manifest,
+                        )
+                    )
+                )
+                path.unlink()
+                self.assertTrue(
+                    any(
+                        "cannot be read" in error
+                        for error in foundation.validate_wp0002_pending_protection_before(
+                            receipt,
+                            manifest,
+                        )
+                    )
+                )
+
     def test_local_operator_amendment_requires_exact_scope_reference(self) -> None:
         self.assertEqual(
             foundation.validate_wp0002_local_operator_amendment_scope_capture(
@@ -1176,6 +1421,184 @@ class LocalA1BoundaryTests(unittest.TestCase):
             ),
             ["WP-0002 local operator amendment scope reference is not exact"],
         )
+
+    def test_versioned_scope_capture_requires_receipt_bound_capture_and_artifacts(self) -> None:
+        relative = foundation.WP0002_LOCAL_OPERATOR_SCOPE_URI.removeprefix(
+            "repo://"
+        )
+        raw_path = f"{relative}.status.{'1' * 64}.bin"
+        observations_path = f"{relative}.observations.{'2' * 64}.json"
+        capture = {
+            "captured_at": "2026-07-18T00:00:00Z",
+            "dirty_paths": [],
+            "artifacts": {
+                "raw_status": {"path": raw_path, "sha256": "1" * 64},
+                "observations": {
+                    "path": observations_path,
+                    "sha256": "2" * 64,
+                },
+            },
+            "base_commit": SUCCESSOR_BASE_COMMIT,
+            "head_commit": SUCCESSOR_BASE_COMMIT,
+            "checkpoint_commit": SUCCESSOR_BASE_COMMIT,
+        }
+        manifest = {
+            "local_operator_successor_scope_capture": {
+                "uri": foundation.WP0002_LOCAL_OPERATOR_SCOPE_URI,
+                "sha256": "3" * 64,
+                "base_commit": SUCCESSOR_BASE_COMMIT,
+                "head_commit": SUCCESSOR_BASE_COMMIT,
+                "checkpoint_commit": SUCCESSOR_BASE_COMMIT,
+            }
+        }
+        packet = {"reservation": {"paths": []}}
+        receipt = {
+            "issued_at": "2026-07-18T00:01:00Z",
+            "artifact_sha256": {
+                relative: "3" * 64,
+                raw_path: "1" * 64,
+                observations_path: "2" * 64,
+            },
+        }
+
+        def classifier(states: dict[str, str]):
+            self.assertEqual(states, {})
+            return {}, {}, {}
+
+        collector = {
+            "AMENDMENT_STATUS_ARGUMENTS": (
+                "status",
+                "--porcelain=v2",
+                "-z",
+                "--untracked-files=all",
+            ),
+            "amendment_dirty_profile": classifier,
+            "verify_scope_capture": lambda *_args, **_kwargs: [],
+        }
+        with mock.patch.object(
+            foundation,
+            "_load_wp0002_repo_evidence",
+            return_value=(capture, relative, "3" * 64, []),
+        ):
+            self.assertEqual(
+                foundation._validate_wp0002_local_operator_scope_capture(
+                    manifest,
+                    packet,
+                    receipt,
+                    reference_field="local_operator_successor_scope_capture",
+                    expected_uri=foundation.WP0002_LOCAL_OPERATOR_SCOPE_URI,
+                    schema_path=foundation.WP0002_LOCAL_OPERATOR_SCOPE_SCHEMA,
+                    scope_label="successor",
+                    collector_loader=lambda: (collector, []),
+                    expected_protected_paths=foundation.WP0002_SUCCESSOR_PROTECTED_PATHS,
+                ),
+                [],
+            )
+            drifted = copy.deepcopy(receipt)
+            drifted["artifact_sha256"].pop(observations_path)
+            errors = foundation._validate_wp0002_local_operator_scope_capture(
+                manifest,
+                packet,
+                drifted,
+                reference_field="local_operator_successor_scope_capture",
+                expected_uri=foundation.WP0002_LOCAL_OPERATOR_SCOPE_URI,
+                schema_path=foundation.WP0002_LOCAL_OPERATOR_SCOPE_SCHEMA,
+                scope_label="successor",
+                collector_loader=lambda: (collector, []),
+                expected_protected_paths=foundation.WP0002_SUCCESSOR_PROTECTED_PATHS,
+            )
+            self.assertTrue(
+                any("does not bind scope artifact" in error for error in errors),
+                errors,
+            )
+
+    def test_foundation_pinned_module_loader_restores_sys_modules(self) -> None:
+        states: tuple[tuple[str, object], ...] = (
+            ("absent", object()),
+            ("none", None),
+            ("object", object()),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "pinned.py"
+            source = b"VALUE = 7\n"
+            path.write_bytes(source)
+            relative = "test/pinned.py"
+            digest = hashlib.sha256(source).hexdigest()
+            for label, previous in states:
+                module_name = f"_foundation_pinned_success_{label}"
+                if label == "absent":
+                    sys.modules.pop(module_name, None)
+                else:
+                    sys.modules[module_name] = previous  # type: ignore[assignment]
+                with mock.patch.dict(
+                    foundation.WP0002_PROTECTED_SELF_VERIFICATION,
+                    {relative: digest},
+                    clear=False,
+                ):
+                    namespace, errors = foundation._load_wp0002_pinned_module(
+                        relative_path=relative,
+                        path=path,
+                        label="test module",
+                        module_name=module_name,
+                    )
+                self.assertEqual(errors, [])
+                self.assertEqual(namespace["VALUE"], 7)  # type: ignore[index]
+                if label == "absent":
+                    self.assertNotIn(module_name, sys.modules)
+                else:
+                    self.assertIs(sys.modules[module_name], previous)
+                    sys.modules.pop(module_name, None)
+
+    def test_foundation_pinned_module_loader_hashes_before_exec_and_cleans_exceptions(self) -> None:
+        states: tuple[tuple[str, object], ...] = (
+            ("absent", object()),
+            ("none", None),
+            ("object", object()),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "broken.py"
+            source = b"raise RuntimeError('must-not-survive')\n"
+            path.write_bytes(source)
+            relative = "test/broken.py"
+            digest = hashlib.sha256(source).hexdigest()
+            module_name = "_foundation_pinned_hash_first"
+            with mock.patch.dict(
+                foundation.WP0002_PROTECTED_SELF_VERIFICATION,
+                {relative: "0" * 64},
+                clear=False,
+            ):
+                namespace, errors = foundation._load_wp0002_pinned_module(
+                    relative_path=relative,
+                    path=path,
+                    label="broken module",
+                    module_name=module_name,
+                )
+            self.assertIsNone(namespace)
+            self.assertEqual(errors, ["WP-0002 protected broken module hash mismatch"])
+            for label, previous in states:
+                module_name = f"_foundation_pinned_exception_{label}"
+                if label == "absent":
+                    sys.modules.pop(module_name, None)
+                else:
+                    sys.modules[module_name] = previous  # type: ignore[assignment]
+                with mock.patch.dict(
+                    foundation.WP0002_PROTECTED_SELF_VERIFICATION,
+                    {relative: digest},
+                    clear=False,
+                ):
+                    namespace, errors = foundation._load_wp0002_pinned_module(
+                        relative_path=relative,
+                        path=path,
+                        label="broken module",
+                        module_name=module_name,
+                    )
+                self.assertIsNone(namespace)
+                self.assertTrue(any("cannot load" in error for error in errors))
+                if label == "absent":
+                    self.assertNotIn(module_name, sys.modules)
+                else:
+                    self.assertIs(sys.modules[module_name], previous)
+                    sys.modules.pop(module_name, None)
 
     def test_wp0002_local_operator_schema_rejects_path_bundle_or_scope_drift(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -1221,6 +1644,15 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 lambda item: item["local_operator_transaction_evidence_contract"].__setitem__(
                     "repository_ruleset_policy", "allow-unreviewed-rulesets"
                 ),
+                lambda item: item["local_operator_transaction_evidence_contract"].__setitem__(
+                    "post_squash_pre_closure_main_state", "green-authorized"
+                ),
+                lambda item: item["local_operator_transaction_evidence_contract"].__setitem__(
+                    "post_squash_closure_execution_policy", "deferred"
+                ),
+                lambda item: item["local_operator_transaction_evidence_contract"].__setitem__(
+                    "post_squash_unrelated_merge_policy", "allowed"
+                ),
                 lambda item: item["local_operator_amendment_scope_capture"].__setitem__(
                     "base_commit", "00" * 19
                 ),
@@ -1240,28 +1672,63 @@ class LocalA1BoundaryTests(unittest.TestCase):
                     mutate(candidate)
                     self.assertTrue(self.schema_errors(candidate))
 
+    def test_wp0002_versioned_protected_path_sets_are_exact(self) -> None:
+        activation = [
+            "AGENTS.md",
+            ".codex/config.toml",
+            "Game/ProjectSettings/ProjectSettings.asset",
+            "Game/ProjectSettings/SceneTemplateSettings.json",
+            "docs/foundation-v0.1/",
+            "docs/foundation-v0.1/governance/",
+            "docs/foundation-v0.1/ledger/receipts/",
+            "Tools/Validation/validate_wp0002_package_graph.py",
+            "Tools/Validation/validate_wp0002_entry_gate.py",
+            "Tools/Validation/validate_wp0002_policy.py",
+            "Tools/Validation/collect_wp0002_scope_capture.py",
+            ".github/workflows/wp0002-ci.yml",
+            ".github/workflows/wp0002-policy.yml",
+            "SimulationCore/README.md",
+            "SaveContracts/README.md",
+            "SimulationCore/package.json",
+            "SaveContracts/package.json",
+        ]
+        retained_v1 = [
+            *activation[:11],
+            "Tools/Validation/verify_wp0002_local_operator_transaction.py",
+            *activation[11:],
+        ]
+        successor = [
+            *activation[:11],
+            "Tools/Validation/collect_wp0002_scope_capture_successor.py",
+            "Tools/Validation/verify_wp0002_local_operator_transaction.py",
+            "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py",
+            *activation[11:],
+        ]
+        self.assertEqual(foundation.WP0002_ACTIVATION_PROTECTED_PATHS, activation)
+        self.assertEqual(foundation.WP0002_V1_AMENDMENT_PROTECTED_PATHS, retained_v1)
+        self.assertEqual(foundation.WP0002_SUCCESSOR_PROTECTED_PATHS, successor)
+        self.assertEqual((len(activation), len(retained_v1), len(successor)), (17, 18, 20))
+        self.assertNotEqual(retained_v1, successor)
+
     def test_wp0002_amendment_root_is_identical_across_collector_schema_and_validator(self) -> None:
-        namespace = {"__name__": "wp0002_scope_collector_root_test"}
-        source = foundation.WP0002_SCOPE_COLLECTOR.read_bytes()
-        exec(
-            compile(source, str(foundation.WP0002_SCOPE_COLLECTOR), "exec"),
-            namespace,
-        )
+        namespace, errors = foundation._load_wp0002_scope_collector()
+        self.assertEqual(errors, [])
+        self.assertIsNotNone(namespace)
         schema = json.loads(
             foundation.WP0002_LOCAL_OPERATOR_SCOPE_SCHEMA.read_text(
                 encoding="utf-8"
             )
         )
         self.assertEqual(
-            namespace["CANONICAL_AMENDMENT_ROOT"],
+            namespace["CANONICAL_AMENDMENT_ROOT"],  # type: ignore[index]
             schema["properties"]["repository_root"]["const"],
         )
         self.assertEqual(
-            namespace["CANONICAL_AMENDMENT_ROOT"],
+            namespace["CANONICAL_AMENDMENT_ROOT"],  # type: ignore[index]
             foundation.WP0002_CANONICAL_REPOSITORY_ROOT,
         )
 
-    def test_wp0002_local_operator_requires_exact_sealed_creator_receipt(self) -> None:
+    def test_wp0002_local_operator_keeps_unreceipted_stage1_nonmergeable(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             packet, state, _, receipt, _, _ = self.wp0002_attested_documents(root)
@@ -1272,7 +1739,15 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 receipt,
                 include_operator_receipt=False,
             )
-            self.assertTrue(any("lacks its creator-authorization receipt" in e for e in errors))
+            self.assertEqual(
+                [error for error in errors if "Stage-1" in error],
+                [
+                    "WP-0002 successor Stage-1 is pending its exact receipt-only "
+                    "child and is nonmergeable"
+                ],
+            )
+
+    def test_wp0002_local_operator_requires_exact_sealed_creator_receipt(self) -> None:
 
         receipt_mutations = [
             lambda item: item.__setitem__("sealed", False),
@@ -1294,6 +1769,12 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 "claims", ["AUTHORIZE-EVERYTHING"]
             ),
             lambda item: item.__setitem__(
+                "subject_ids", list(reversed(item["subject_ids"]))
+            ),
+            lambda item: item["artifact_sha256"].pop(
+                foundation.WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH
+            ),
+            lambda item: item.__setitem__(
                 "subject_contract_sha256", {"WP-0002": "00" * 32}
             ),
         ]
@@ -1309,6 +1790,59 @@ class LocalA1BoundaryTests(unittest.TestCase):
                     operator_receipt_mutator=mutate,
                 )
                 self.assertTrue(errors)
+
+    def test_wp0002_scope_receipts_route_to_their_own_versioned_captures(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            packet, state, _, receipt, _, _ = self.wp0002_attested_documents(root)
+            observed: list[tuple[str, str | None]] = []
+            self.assertEqual(
+                self.validate_wp0002(
+                    root,
+                    packet,
+                    state,
+                    receipt,
+                    observed_operator_scope_receipts=observed,
+                ),
+                [],
+            )
+            self.assertEqual(
+                observed,
+                [
+                    ("v1", foundation.WP0002_V1_LOCAL_OPERATOR_RECEIPT_ID),
+                    ("successor", foundation.WP0002_LOCAL_OPERATOR_RECEIPT_ID),
+                ],
+            )
+
+    def test_wp0002_rejects_missing_mutated_or_byte_drifted_v1_receipt(self) -> None:
+        cases = (
+            {"include_predecessor_receipt": False},
+            {
+                "predecessor_receipt_mutator": lambda item: item.__setitem__(
+                    "sealed", False
+                )
+            },
+            {"corrupt_predecessor_receipt_file": True},
+        )
+        for options in cases:
+            with self.subTest(options=options), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                packet, state, _, receipt, _, _ = self.wp0002_attested_documents(root)
+                errors = self.validate_wp0002(
+                    root,
+                    packet,
+                    state,
+                    receipt,
+                    **options,
+                )
+                self.assertTrue(
+                    any(
+                        "retained sealed v1 receipt" in error
+                        or "retained v1 receipt identity or bytes differ" in error
+                        for error in errors
+                    ),
+                    errors,
+                )
 
     def test_wp0002_local_operator_retains_prior_boundary(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

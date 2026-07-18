@@ -41,6 +41,54 @@
         "fresh_canary_pr": "first-post-restoration-implementation-pr",
         "general_protection_bypass_authorized": false
       }
+    },
+    {
+      "amendment_id": "A1B-WP-0002-LOCAL-OPERATOR-SUCCESSOR-20260718",
+      "amendment_kind": "append-only-delegated-local-operator-successor",
+      "supersedes_amendment_id": "A1B-WP-0002-LOCAL-OPERATOR-20260717",
+      "predecessor_disposition": "superseded-unclosed-never-effective",
+      "previous_boundary_sha256": "e92e7276dc97478d7412307f43a5f90b60b99256b2a8a7cd5d00626c4f2e0962",
+      "retained_predecessor_receipt": {
+        "receipt_id": "RR-WP0002-LOCAL-OPERATOR-20260717",
+        "path": "ledger/receipts/RR-WP0002-LOCAL-OPERATOR-20260717.json",
+        "sha256": "fb1df094bac7c4b944e1438eff4e761963e7076fb58b69f36ef497939eba8b8e"
+      },
+      "forbidden_predecessor_evidence_paths": [
+        "docs/evidence/WP-0002/local-operator-amendment/authority.json",
+        "docs/evidence/WP-0002/local-operator-amendment/pre-merge.json",
+        "docs/evidence/WP-0002/local-operator-amendment/complete.json"
+      ],
+      "authorization_receipt_id": "RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718",
+      "required_claims": [
+        "SUPERSEDE-WP0002-LOCAL-OPERATOR-20260717-UNEXECUTED",
+        "AUTHORIZE-WP0002-DELEGATED-LOCAL-UNITY-OPERATOR-SUCCESSOR"
+      ],
+      "governance_record": "governance/WP-0002-DELEGATED-LOCAL-UNITY-OPERATOR-SUCCESSOR.md",
+      "packet_contract_changed": false,
+      "materialization_control": {
+        "classification": "creator-controlled-control-plane-configuration-not-a1-implementation-authority",
+        "temporary_nonrequired_check": "wp0002-policy",
+        "exact_final_pr_head_and_patch_binding_required": true,
+        "retained_required_checks": [
+          "validate",
+          "wp0002-core"
+        ],
+        "retained_protections": [
+          "strict-up-to-date",
+          "pull-request-required",
+          "enforce-admins",
+          "conversation-resolution-required",
+          "linear-history-required",
+          "no-bypass-allowances",
+          "force-push-disabled",
+          "deletion-disabled",
+          "squash-only"
+        ],
+        "creator_delegated_squash_merge_only": true,
+        "restore_wp0002_policy_immediately_after_merge": true,
+        "fresh_canary_pr": "successor-evidence-closure-and-first-post-restoration-implementation-pr",
+        "general_protection_bypass_authorized": false
+      }
     }
   ],
   "repository": {
@@ -118,7 +166,10 @@
     ]
   },
   "delegated_local_unity_operator": {
-    "authorization_receipt_id": "RR-WP0002-LOCAL-OPERATOR-20260717",
+    "authorization_receipt_id": "RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718",
+    "authority_version": "successor-20260718",
+    "supersedes_amendment_id": "A1B-WP-0002-LOCAL-OPERATOR-20260717",
+    "predecessor_disposition": "superseded-unclosed-never-effective",
     "effective_authority_condition": "all-three-transaction-reports-validated-in-protected-main-after-evidence-closure-pr",
     "control_pr_merge_alone_authorizes_actions": false,
     "interaction_route": "computer-use-visible-ui-only",
@@ -191,8 +242,11 @@
     "shell-cli-batchmode-or-headless-unity-authorized": false
   },
   "local_operator_transaction_evidence_contract": {
-    "schema_path": "docs/foundation-v0.1/schemas/wp0002-local-operator-transaction-evidence.schema.json",
-    "online_verifier_path": "Tools/Validation/verify_wp0002_local_operator_transaction.py",
+    "schema_path": "docs/foundation-v0.1/schemas/wp0002-local-operator-successor-transaction-evidence.schema.json",
+    "online_verifier_path": "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py",
+    "transaction_id": "WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718",
+    "predecessor_transaction_id": "WP0002-LOCAL-OPERATOR-20260717",
+    "predecessor_disposition": "superseded-unclosed-never-effective",
     "online_authentication_required": true,
     "offline_validation_scope": "structural-and-content-consistency-only-not-live-github-authentication",
     "phases": [
@@ -203,15 +257,21 @@
     "authority_comment_policy": "refetch-and-reject-id-actor-association-updated-at-or-body-hash-drift",
     "normalized_extra_or_missing_keys_rejected": true,
     "raw_github_responses_hash_bound": true,
-    "receipt_artifact_key_policy": "exact-stage1-changed-file-set-plus-authenticated-authority-comment",
+    "receipt_artifact_key_policy": "exact-stage1-changed-file-set-plus-authenticated-authority-comment-and-retained-v1-receipt",
     "receipt_delta_policy": "exactly-one-added-regular-receipt-file",
     "protection_evidence_phases": [
       "before",
       "during",
       "after"
     ],
+    "stage1_protection_before_path": "docs/evidence/WP-0002/local-operator-successor/control/protection-before.json",
+    "stage1_protection_before_policy": "v2-capture-protection-exact-three-before-stage1-bound-by-owner-comment-tree-and-manifest",
+    "maximum_protection_before_to_authority_seconds": 300,
     "repository_ruleset_policy": "exact-empty-inventory-before-during-after",
     "pending_without_repository_evidence": "valid-control-materialization-but-successor-non-executable",
+    "post_squash_pre_closure_main_state": "deliberate-red-fail-closed-quarantine-no-authority",
+    "post_squash_closure_execution_policy": "continuous-controller-execution-restore-exact-three-then-merge-exact-three-report-closure-only",
+    "post_squash_unrelated_merge_policy": "forbidden",
     "partial_repository_evidence_rejected": true,
     "evidence_closure_policy": "separate-protected-evidence-only-pr-after-control-squash-restoration-and-completion-comment",
     "evidence_closure_delta_policy": "exact-three-regular-added-report-files-and-no-other-delta",
@@ -227,12 +287,20 @@
     "successor_authority_condition": "all-three-reports-validated-and-evidence-closure-merged-to-protected-main",
     "completion_required_before_successor_authority": true,
     "protected_transaction_paths": [
-      "Tools/Validation/verify_wp0002_local_operator_transaction.py"
+      "Tools/Validation/collect_wp0002_scope_capture.py",
+      "Tools/Validation/collect_wp0002_scope_capture_successor.py",
+      "Tools/Validation/verify_wp0002_local_operator_transaction.py",
+      "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py"
+    ],
+    "forbidden_predecessor_evidence_paths": [
+      "docs/evidence/WP-0002/local-operator-amendment/authority.json",
+      "docs/evidence/WP-0002/local-operator-amendment/pre-merge.json",
+      "docs/evidence/WP-0002/local-operator-amendment/complete.json"
     ],
     "repository_evidence_paths": {
-      "authority": "docs/evidence/WP-0002/local-operator-amendment/authority.json",
-      "pre-merge": "docs/evidence/WP-0002/local-operator-amendment/pre-merge.json",
-      "complete": "docs/evidence/WP-0002/local-operator-amendment/complete.json"
+      "authority": "docs/evidence/WP-0002/local-operator-successor/authority.json",
+      "pre-merge": "docs/evidence/WP-0002/local-operator-successor/pre-merge.json",
+      "complete": "docs/evidence/WP-0002/local-operator-successor/complete.json"
     }
   },
   "allowed_mcp_tools": [
@@ -302,6 +370,13 @@
     "base_commit": "375416c0dd7f60c2a36f9a7d8f7df819d74b60eb",
     "head_commit": "375416c0dd7f60c2a36f9a7d8f7df819d74b60eb",
     "checkpoint_commit": "375416c0dd7f60c2a36f9a7d8f7df819d74b60eb"
+  },
+  "local_operator_successor_scope_capture": {
+    "uri": "repo://docs/evidence/WP-0002/local-operator-successor/scope-capture/working-tree-scope.json",
+    "sha256": "6ccf55ee24bdaa3570100cd6b608b1dbb47e7d7d05eef3a328aace04f02571d1",
+    "base_commit": "96002331dc069db5a7bab36baaf359d1b46cc64c",
+    "head_commit": "96002331dc069db5a7bab36baaf359d1b46cc64c",
+    "checkpoint_commit": "96002331dc069db5a7bab36baaf359d1b46cc64c"
   },
   "github_protection_capture": {
     "required_schema": "wp0002-github-protection-v1",
@@ -449,7 +524,9 @@
       "Tools/Validation/validate_wp0002_entry_gate.py",
       "Tools/Validation/validate_wp0002_policy.py",
       "Tools/Validation/collect_wp0002_scope_capture.py",
+      "Tools/Validation/collect_wp0002_scope_capture_successor.py",
       "Tools/Validation/verify_wp0002_local_operator_transaction.py",
+      "Tools/Validation/verify_wp0002_local_operator_transaction_v2.py",
       ".github/workflows/wp0002-ci.yml",
       ".github/workflows/wp0002-policy.yml",
       "SimulationCore/README.md",
