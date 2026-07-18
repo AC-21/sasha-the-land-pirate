@@ -48,6 +48,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public LastBearingModeCoordinator? ModeCoordinator => _modeCoordinator;
 
+        public bool CanRecoverRoadPresentation =>
+            _modeCoordinator?.CanRecoverRoadPresentation ?? false;
+
         public string Status => _status;
 
         public string SaveStatus => _saveStatus;
@@ -458,6 +461,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _modeCoordinator?.AttachRoadModeAdapter(adapter);
         }
 
+        public bool RecoverRoadPresentation()
+        {
+            if (_modeCoordinator?.TryRecoverRoadPresentation() != true)
+            {
+                return false;
+            }
+
+            _status =
+                "Presentation rig recovered to Sasha's current canonical road marker.";
+            return true;
+        }
+
         public void CommitExpedition()
         {
             Queue(
@@ -762,6 +777,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (keyboard != null && keyboard.f9Key.wasPressedThisFrame)
             {
                 Load();
+            }
+
+            if ((keyboard != null && keyboard.rKey.wasPressedThisFrame) ||
+                (gamepad != null && gamepad.buttonNorth.wasPressedThisFrame))
+            {
+                RecoverRoadPresentation();
             }
 
             if (_readModel != null &&

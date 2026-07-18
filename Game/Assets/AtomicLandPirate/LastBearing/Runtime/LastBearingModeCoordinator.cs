@@ -103,6 +103,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool IsRoadPresentationActive => _roadPresentationActive;
 
+        public bool CanRecoverRoadPresentation =>
+            HasActiveMode &&
+            CurrentMode == LastBearingPresentationMode.Driving &&
+            _roadPresentationActive &&
+            !RoadAdapterFaulted &&
+            _roadAdapter != null &&
+            _canonicalVehicle != null &&
+            _roadTarget != null &&
+            _cameraRig?.HasConfiguredRoadChase == true;
+
         public bool IsRoadPresentationHeldAtRecovery { get; private set; }
 
         public bool IsRoadPresentationHeldAtModulePoint { get; private set; }
@@ -360,6 +370,46 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     handbrakeMilli));
         }
 
+        public bool TryRecoverRoadPresentation()
+        {
+            if (!CanRecoverRoadPresentation)
+            {
+                return false;
+            }
+
+            LastBearingVehicleView canonicalVehicle = _canonicalVehicle!;
+
+            if (!TryInvokeRoadAdapter(
+                    "manual-recovery-suspend",
+                    adapter => adapter.SetRoadModeActive(false)))
+            {
+                return false;
+            }
+
+            _roadPresentationActive = false;
+            ApplyPresentationOwnership();
+            canonicalVehicle.SnapToCanonicalRoadPose();
+            if (!TryInvokeRoadAdapter(
+                    "manual-recovery-synchronize",
+                    adapter => adapter.SynchronizePresentationPose(
+                        canonicalVehicle.transform.position,
+                        canonicalVehicle.transform.rotation)))
+            {
+                return false;
+            }
+
+            if (!TryInvokeRoadAdapter(
+                    "manual-recovery-reactivate",
+                    adapter => adapter.SetRoadModeActive(true)))
+            {
+                return false;
+            }
+
+            _roadPresentationActive = true;
+            ApplyPresentationOwnership();
+            return true;
+        }
+
         public static LastBearingPresentationMode ResolveMode(
             LastBearingReadModel readModel,
             LastBearingPresentationMode requestedCityMode)
@@ -597,6 +647,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                             : _garageFocusAnchor,
                         garageInspectionSelected || pumpHallInspectionSelected);
                 }
+
+                _cameraRig.SetRoadChaseActive(
+                    roadPresentationAvailable && _roadPresentationActive);
             }
         }
 
