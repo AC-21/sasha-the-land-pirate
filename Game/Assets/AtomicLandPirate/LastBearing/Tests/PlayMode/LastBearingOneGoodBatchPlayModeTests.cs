@@ -43,7 +43,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             world.SelectOneGoodBatchCutaway();
             controller.OpenBuildingCutaway();
-            yield return new WaitForSecondsRealtime(1f);
+            float cameraDeadline = Time.realtimeSinceStartup + 3f;
+            while (Vector3.Distance(
+                       world.MainCamera!.transform.position,
+                       view.CameraAnchor!.position) >= 0.15f &&
+                   Time.realtimeSinceStartup < cameraDeadline)
+            {
+                yield return null;
+            }
 
             Assert.That(
                 controller.ModeCoordinator!.CurrentMode,
