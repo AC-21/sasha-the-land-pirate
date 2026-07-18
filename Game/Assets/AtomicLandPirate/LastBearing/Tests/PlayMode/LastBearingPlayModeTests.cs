@@ -1410,8 +1410,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 canonicalBefore,
                 LastBearingCanonicalCodec.Encode(controller.State!));
 
-            controller.ReturnToTitle();
-            Assert.That(controller.IsGaragePlanIntentActive, Is.False);
             controller.Load();
 
             Assert.That(controller.IsGaragePlanIntentActive, Is.False);
@@ -1429,6 +1427,24 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.ReadModel.PlannedModule,
                 Is.EqualTo(VehicleModule.None));
+            CollectionAssert.AreEqual(
+                canonicalBefore,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            controller.BeginGaragePlan(PreparationChoice.WorkshopPush);
+            Assert.That(controller.IsGaragePlanIntentActive, Is.True);
+            Directory.Delete(profileDirectory, recursive: true);
+
+            controller.Load();
+
+            Assert.That(controller.IsGaragePlanIntentActive, Is.False);
+            Assert.That(
+                controller.GaragePreparationIntent,
+                Is.EqualTo(PreparationChoice.Unselected));
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            Assert.That(
+                controller.SaveStatus,
+                Is.EqualTo("Load refused: " + LastBearingSaveCodes.NoProfile));
             CollectionAssert.AreEqual(
                 canonicalBefore,
                 LastBearingCanonicalCodec.Encode(controller.State!));

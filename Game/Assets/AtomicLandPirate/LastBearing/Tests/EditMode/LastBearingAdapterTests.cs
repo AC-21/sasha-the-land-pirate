@@ -720,18 +720,27 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 LastBearingCanonicalCodec.Encode(controller.State!));
         }
 
-        [TestCase(PreparationChoice.WorkshopPush, VehicleModule.WinchAssembly)]
-        [TestCase(PreparationChoice.WorkshopPush, VehicleModule.SealedRangeTank)]
-        [TestCase(PreparationChoice.CivicBuffer, VehicleModule.WinchAssembly)]
-        [TestCase(PreparationChoice.CivicBuffer, VehicleModule.SealedRangeTank)]
+        [TestCase(ColonyComposition.HumanOnly, PreparationChoice.WorkshopPush, VehicleModule.WinchAssembly)]
+        [TestCase(ColonyComposition.HumanOnly, PreparationChoice.WorkshopPush, VehicleModule.SealedRangeTank)]
+        [TestCase(ColonyComposition.HumanOnly, PreparationChoice.CivicBuffer, VehicleModule.WinchAssembly)]
+        [TestCase(ColonyComposition.HumanOnly, PreparationChoice.CivicBuffer, VehicleModule.SealedRangeTank)]
+        [TestCase(ColonyComposition.RobotOnly, PreparationChoice.WorkshopPush, VehicleModule.WinchAssembly)]
+        [TestCase(ColonyComposition.RobotOnly, PreparationChoice.WorkshopPush, VehicleModule.SealedRangeTank)]
+        [TestCase(ColonyComposition.RobotOnly, PreparationChoice.CivicBuffer, VehicleModule.WinchAssembly)]
+        [TestCase(ColonyComposition.RobotOnly, PreparationChoice.CivicBuffer, VehicleModule.SealedRangeTank)]
+        [TestCase(ColonyComposition.Mixed, PreparationChoice.WorkshopPush, VehicleModule.WinchAssembly)]
+        [TestCase(ColonyComposition.Mixed, PreparationChoice.WorkshopPush, VehicleModule.SealedRangeTank)]
+        [TestCase(ColonyComposition.Mixed, PreparationChoice.CivicBuffer, VehicleModule.WinchAssembly)]
+        [TestCase(ColonyComposition.Mixed, PreparationChoice.CivicBuffer, VehicleModule.SealedRangeTank)]
         public void GarageCommitMatchesExistingCanonicalCommandPair(
+            ColonyComposition composition,
             PreparationChoice preparation,
             VehicleModule module)
         {
             _root = new GameObject(LastBearingGameController.RuntimeRootName);
             var controller = _root.AddComponent<LastBearingGameController>();
             controller.Initialize();
-            PrepareControllerForGaragePlan(controller);
+            PrepareControllerForGaragePlan(controller, composition);
             LastBearingState baseline = controller.State!;
             LastBearingState expected = ApplyPlanCommands(
                 baseline,
@@ -1038,9 +1047,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         private static void PrepareControllerForGaragePlan(
-            LastBearingGameController controller)
+            LastBearingGameController controller,
+            ColonyComposition composition = ColonyComposition.HumanOnly)
         {
-            controller.StartNewGame(ColonyComposition.HumanOnly);
+            controller.StartNewGame(composition);
             controller.InspectCityNeed();
             CompleteDistrictObservation(controller, clear: true);
             controller.ActivateInfrastructure();
