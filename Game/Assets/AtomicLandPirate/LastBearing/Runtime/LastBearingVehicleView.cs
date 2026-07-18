@@ -37,6 +37,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool civicBuffer,
             bool factionClaimed,
             bool turbineRepaired,
+            bool auxiliaryPumpInstalled,
             bool humanVisible,
             bool robotVisible)
         {
@@ -52,6 +53,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             CivicBuffer = civicBuffer;
             FactionClaimed = factionClaimed;
             TurbineRepaired = turbineRepaired;
+            AuxiliaryPumpInstalled = auxiliaryPumpInstalled;
             HumanVisible = humanVisible;
             RobotVisible = robotVisible;
         }
@@ -65,6 +67,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool CivicBuffer { get; }
         public bool FactionClaimed { get; }
         public bool TurbineRepaired { get; }
+        public bool AuxiliaryPumpInstalled { get; }
         public bool HumanVisible { get; }
         public bool RobotVisible { get; }
 

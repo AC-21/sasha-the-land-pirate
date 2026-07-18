@@ -42,6 +42,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 WorkshopServiceSlotsReserved = 0,
                 ActiveWaterModifierMilliPerSettlementTick = 0,
                 NextCityDecision = NextCityDecision.None,
+                InstalledCityImprovement = CityImprovementKind.None,
 
                 VehicleModule = VehicleModule.None,
                 ModuleInstallationState = ModuleInstallationState.None,

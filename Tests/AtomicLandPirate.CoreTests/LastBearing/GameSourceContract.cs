@@ -34,6 +34,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(
                     runtimeRoot,
                     "LastBearingRouteModulePointView.cs"));
+            string pumpHall = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "LastBearingPumpHallCutawayView.cs"));
             string dispatcher = File.ReadAllText(
                 Path.Combine(
                     repoRoot,
@@ -58,6 +62,25 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "ApplyPresentationOnlyRoadControls");
             Require(controller, "OpenBuildingCutaway");
             Require(controller, "OpenGarageBay");
+            string installationOperation = Segment(
+                controller,
+                "public void InstallCityImprovement()",
+                "public void ServiceFieldSleeve()");
+            Require(
+                installationOperation,
+                "_readModel.IsCityImprovementInstallationAvailable");
+            Require(
+                installationOperation,
+                "new InstallCityImprovementCommand");
+            Require(
+                installationOperation,
+                "NextCityDecision.RefurbishAuxiliaryPump");
+            Require(
+                installationOperation,
+                "LastBearingState.AuxiliaryPumpSocketId");
+            Require(
+                installationOperation,
+                "LastBearingState.AuxiliaryPumpOrientationQuarterTurns");
             string wreckLineOperation = Segment(
                 controller,
                 "public void OperateWreckLineModulePoint()",
@@ -170,6 +193,7 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "_world.ApplyDepotApproachRecovery(");
             Require(controller, "_world.ApplyRouteModulePoint(");
             Require(controller, "_world.ApplyRoadCargoPresentation(");
+            Require(controller, "_world.ApplyCityImprovement(");
             Require(controller, "_modeCoordinator?.ApplyCanonical(_readModel);");
             TestHarness.True(
                 controller.IndexOf(
@@ -179,6 +203,55 @@ namespace AtomicLandPirate.LastBearingTests
                     "_modeCoordinator?.ApplyCanonical(_readModel);",
                     StringComparison.Ordinal),
                 "canonical world pose must render before road activation and synchronization");
+            string simulationTick = Segment(
+                controller,
+                "private void SimulateOneTick()",
+                "private void QueueDriveInputIfApplicable()");
+            Require(simulationTick, "TryAutosave(result.DomainEvents);");
+            Require(simulationTick, "ApplyPresentation();");
+            TestHarness.True(
+                simulationTick.IndexOf(
+                    "_state = result.State;",
+                    StringComparison.Ordinal) <
+                simulationTick.IndexOf(
+                    "TryAutosave(result.DomainEvents);",
+                    StringComparison.Ordinal),
+                "critical autosave must follow the committed canonical state");
+            TestHarness.True(
+                simulationTick.IndexOf(
+                    "TryAutosave(result.DomainEvents);",
+                    StringComparison.Ordinal) <
+                simulationTick.IndexOf(
+                    "ApplyPresentation();",
+                    StringComparison.Ordinal),
+                "critical autosave must precede fallible derived presentation");
+            string autosave = Segment(
+                controller,
+                "private void TryAutosave(",
+                "private void Queue(");
+            foreach (string criticalEvent in new[]
+            {
+                "ExpeditionDeparted",
+                "RouteActionUsed",
+                "DepotRecoveryPointOperated",
+                "DepotResolved",
+                "ReturnPayloadFrozen",
+                "VehicleReturned",
+                "CityReturnCredited",
+                "TurbineRepaired",
+                "CityImprovementInstalled",
+            })
+            {
+                Require(autosave, "LastBearingEventKind." + criticalEvent);
+            }
+
+            Require(autosave, "Save();");
+            Require(autosave, "return;");
+            TestHarness.True(
+                autosave.IndexOf(
+                    "IdempotentReplayAccepted",
+                    StringComparison.Ordinal) < 0,
+                "idempotent replay alone must not trigger autosave");
             Require(vehicle, "snapshot.VehicleLateralNormalized");
             Require(vehicle, "VisibleLateralOffset");
             Require(vehicle, "FrontWheelSteerDegrees");
@@ -196,6 +269,14 @@ namespace AtomicLandPirate.LastBearingTests
             Require(world, "DepotApproachRecoveryView.Build(");
             Require(world, "LastBearingRouteModulePointView");
             Require(world, "RouteModulePointView.Build(");
+            string pumpHallBuild = Segment(
+                world,
+                "private void BuildPumpHallCutaway(",
+                "private void BuildCityGrammarComparison(");
+            Require(
+                pumpHallBuild,
+                "PumpHallCutawayView.Build(\n" +
+                "                LastBearingState.AuxiliaryPumpSocketId,");
             Require(comparison, "RestrainedSnapGrid");
             Require(comparison, "DistrictStamp");
             Require(comparison, "ResetComparison");
@@ -291,6 +372,14 @@ namespace AtomicLandPirate.LastBearingTests
             Require(hud, "OperateWreckLineModulePoint");
             Require(hud, "DEPLOY WINCH · RECOVER PUMP ROTOR");
             Require(hud, "CROSS SEALED DUST EXPOSURE");
+            Require(hud, "IsCityImprovementInstallationAvailable");
+            Require(hud, "INSTALL REFURBISHED AUXILIARY PUMP");
+            TestHarness.True(
+                hud.IndexOf(
+                    "model.IsCityImprovementInstallationAvailable",
+                    StringComparison.Ordinal) <
+                hud.IndexOf("model.MaintenanceDue", StringComparison.Ordinal),
+                "available fixed-socket installation must not be hidden by maintenance");
 
             Require(recovery, "C0-VGR-02");
             Require(recovery, "Revision = \"R1\"");
@@ -347,6 +436,37 @@ namespace AtomicLandPirate.LastBearingTests
                 TestHarness.True(
                     wreckLine.IndexOf(forbidden, StringComparison.Ordinal) < 0,
                     "Wreck Line view contains forbidden authority " +
+                    forbidden);
+            }
+
+            Require(pumpHall, "C0-VGR-04");
+            Require(pumpHall, "Revision = \"R1\"");
+            Require(pumpHall, "bld_pump_hall_cutaway_a");
+            Require(pumpHall, "string fixedCivicSocketId");
+            Require(pumpHall, "CreateAnchor(\n                fixedCivicSocketId,");
+            Require(pumpHall, "HasRoof => false");
+            Require(pumpHall, "HasNearWall => false");
+            Require(pumpHall, "collider.enabled = false");
+            foreach (string forbidden in new[]
+            {
+                "Rigidbody",
+                "RoadFeelTelemetry",
+                "Physics.",
+                "OnTrigger",
+                "OnCollision",
+                "LastBearingKernel",
+                "LastBearingCommand",
+                "LastBearingState",
+                "SaveContracts",
+                "System.IO",
+                "Application.persistentDataPath",
+                "Keyboard.current",
+                "Gamepad.current",
+            })
+            {
+                TestHarness.True(
+                    pumpHall.IndexOf(forbidden, StringComparison.Ordinal) < 0,
+                    "pump-hall cutaway contains forbidden authority " +
                     forbidden);
             }
 

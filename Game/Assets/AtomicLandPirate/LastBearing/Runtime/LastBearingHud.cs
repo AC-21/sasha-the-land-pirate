@@ -358,6 +358,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            if (model.IsCityImprovementInstallationAvailable)
+            {
+                GUILayout.Label(
+                    "The returned pump rotor is staged at the exact civic socket. " +
+                    "This one-shot installation costs " +
+                    LastBearingBalanceV1.AuxiliaryPumpInstallationPartsUnits +
+                    " parts and preserves the minimum reserve.",
+                    _bodyStyle);
+                if (GUILayout.Button(
+                        "INSTALL REFURBISHED AUXILIARY PUMP",
+                        _buttonStyle))
+                {
+                    _controller!.InstallCityImprovement();
+                }
+
+                return;
+            }
+
             if (model.MaintenanceDue)
             {
                 if (GUILayout.Button("SERVICE FIELD SLEEVE · 2 PARTS", _buttonStyle))
@@ -397,7 +415,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _controller.ShowCityOverview();
             }
 
-            if (GUILayout.Button("CUTAWAY", _buttonStyle))
+            if (GUILayout.Button("PUMP HALL", _buttonStyle))
             {
                 _controller.OpenBuildingCutaway();
             }
@@ -524,6 +542,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 .Append("  ·  Wreck Line ").Append(model.WreckLineGateTicks)
                 .AppendLine();
             text.Append("Pump rotor  ").Append(model.HeavyCargoCustody)
+                .AppendLine();
+            text.Append("City improvement  ")
+                .Append(model.InstalledCityImprovement)
                 .AppendLine();
             text.Append("Faction  ").Append(model.FactionClaimState)
                 .Append("  ").Append(model.FactionClaimProgressMilli)

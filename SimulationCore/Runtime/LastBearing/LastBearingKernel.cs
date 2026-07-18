@@ -168,6 +168,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 ApplyInstallRepair(builder, installRepair, events);
             }
+            else if (command is InstallCityImprovementCommand installImprovement)
+            {
+                ApplyInstallCityImprovement(
+                    builder,
+                    installImprovement,
+                    events);
+            }
             else if (command is ServiceFieldSleeveCommand service)
             {
                 ApplyServiceSleeve(builder, service, events);
@@ -1062,6 +1069,129 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 ComputeWaterTrend(builder));
         }
 
+        private static void ApplyInstallCityImprovement(
+            LastBearingStateBuilder builder,
+            InstallCityImprovementCommand command,
+            List<LastBearingDomainEvent> events)
+        {
+            bool exactAuxiliaryPumpRequest =
+                command.Decision == NextCityDecision.RefurbishAuxiliaryPump
+                && string.Equals(
+                    command.SocketId,
+                    LastBearingState.AuxiliaryPumpSocketId,
+                    StringComparison.Ordinal)
+                && command.OrientationQuarterTurns
+                    == LastBearingState.AuxiliaryPumpOrientationQuarterTurns;
+            if (builder.InstalledCityImprovement != CityImprovementKind.None)
+            {
+                if (builder.InstalledCityImprovement
+                        == CityImprovementKind.RefurbishedAuxiliaryPump
+                    && exactAuxiliaryPumpRequest)
+                {
+                    EmitReplay(builder, command.Sequence, events);
+                    return;
+                }
+
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_ALREADY_INSTALLED");
+            }
+
+            if (command.Decision != builder.NextCityDecision)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_DECISION_MISMATCH");
+            }
+
+            if (command.Decision != NextCityDecision.RefurbishAuxiliaryPump)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_UNSUPPORTED");
+            }
+
+            if (!string.Equals(
+                    command.SocketId,
+                    LastBearingState.AuxiliaryPumpSocketId,
+                    StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_SOCKET_INVALID");
+            }
+
+            if (command.OrientationQuarterTurns
+                != LastBearingState.AuxiliaryPumpOrientationQuarterTurns)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_ORIENTATION_INVALID");
+            }
+
+            if (builder.ExpeditionPhase != ExpeditionPhase.AtHome
+                || builder.TransactionPhase != TransactionPhase.Finalized
+                || builder.TurbineCondition == TurbineCondition.Failing)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_PHASE_INVALID");
+            }
+
+            if (builder.PreparationChoice != PreparationChoice.WorkshopPush
+                || builder.VehicleModule != VehicleModule.WinchAssembly
+                || !builder.RouteActionUsed
+                || builder.HeavyCargoKind != HeavyCargoKind.PumpRotor
+                || builder.HeavyCargoCustody != HeavyCargoCustody.Settlement
+                || builder.TowSlotsUsed != 1)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_CARGO_INVALID");
+            }
+
+            long partsCost = LastBearingBalanceV1.CityImprovementPartsCost(
+                CityImprovementKind.RefurbishedAuxiliaryPump);
+            long requiredParts = checked(
+                partsCost + LastBearingBalanceV1.MinimumPostReturnPartsUnits);
+            if (builder.PartsUnits < requiredParts)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_PARTS_INSUFFICIENT");
+            }
+
+            long previousParts = builder.PartsUnits;
+            builder.PartsUnits = checked(builder.PartsUnits - partsCost);
+            LastBearingOwnershipTransaction.InstallHeavyCargoAtAuxiliaryPump(
+                builder);
+            builder.InstalledCityImprovement =
+                CityImprovementKind.RefurbishedAuxiliaryPump;
+            builder.NextCityDecision = NextCityDecision.None;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityResourcesCommitted,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                "settlement:last-bearing:parts",
+                previousParts,
+                builder.PartsUnits);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.HeavyCargoTransferred,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                "cargo:last-bearing:pump-rotor",
+                (long)HeavyCargoCustody.Settlement,
+                (long)HeavyCargoCustody.InstalledAtAuxiliaryPump);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityImprovementInstalled,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.AuxiliaryPumpSocketId,
+                (long)CityImprovementKind.None,
+                (long)builder.InstalledCityImprovement);
+        }
+
         private static void ApplyServiceSleeve(
             LastBearingStateBuilder builder,
             ServiceFieldSleeveCommand command,
@@ -1807,7 +1937,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             return checked(
-                baseRate + builder.ActiveWaterModifierMilliPerSettlementTick);
+                baseRate
+                + builder.ActiveWaterModifierMilliPerSettlementTick
+                + LastBearingBalanceV1.CityImprovementWaterModifier(
+                    builder.InstalledCityImprovement));
         }
 
         private static void EnsureTransactionIdentity(

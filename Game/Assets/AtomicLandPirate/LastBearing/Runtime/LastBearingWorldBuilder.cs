@@ -28,17 +28,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private readonly List<Material> _ownedMaterials = new List<Material>();
         private Transform? _turbineRotor;
         private Transform? _waterFill;
+        private Transform? _auxiliaryPumpRotor;
         private Material? _stopGlass;
         private Material? _waterMaterial;
         private Material? _workshopWindow;
         private Material? _civicWindow;
         private Material? _claimMaterial;
         private Light? _pumpHallLight;
+        private Light? _auxiliaryPumpLight;
         private Light? _workshopLight;
         private Light? _canopyLight;
         private GameObject? _humanResident;
         private GameObject? _robotResident;
         private GameObject? _needInspectionMarker;
+        private GameObject? _cityStagedPumpRotor;
+        private GameObject? _cityInstalledAuxiliaryPump;
         private LastBearingVisualSnapshot _snapshot;
         private bool _built;
 
@@ -51,6 +55,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public RoadFeelRigInstance? RoadFeelRig { get; private set; }
 
         public LastBearingGarageBayView? GarageBayView { get; private set; }
+
+        public LastBearingPumpHallCutawayView? PumpHallCutawayView
+        {
+            get;
+            private set;
+        }
 
         public LastBearingCityGrammarComparison? CityGrammarComparison { get; private set; }
 
@@ -74,6 +84,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void Build(
             Transform? drivingModeRoot = null,
+            Transform? buildingCutawayModeRoot = null,
             Transform? garageModeRoot = null)
         {
             if (_built)
@@ -102,7 +113,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 SignalCyan * 1.5f);
 
             BuildGround(darkConcrete, concrete, oxide);
-            BuildWaterworks(concrete, darkConcrete, iron, bone);
+            BuildWaterworks(
+                concrete,
+                darkConcrete,
+                iron,
+                oxide,
+                bone,
+                tungsten);
             BuildSettlement(concrete, iron, oxide, bone);
             BuildRoadAndDepot(
                 concrete,
@@ -125,6 +142,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 BuildGarageBay(
                     garageModeRoot,
+                    concrete,
+                    darkConcrete,
+                    oxide,
+                    bone,
+                    tungsten,
+                    signal);
+            }
+
+            if (buildingCutawayModeRoot != null)
+            {
+                BuildPumpHallCutaway(
+                    buildingCutawayModeRoot,
                     concrete,
                     darkConcrete,
                     oxide,
@@ -164,6 +193,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 civicBuffer: false,
                 factionClaimed: false,
                 turbineRepaired: false,
+                auxiliaryPumpInstalled: false,
                 humanVisible: true,
                 robotVisible: true));
         }
@@ -262,6 +292,38 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
         }
 
+        public void ApplyCityImprovement(
+            HeavyCargoCustody heavyCargoCustody,
+            CityImprovementKind improvement,
+            bool humanVisible,
+            bool robotVisible)
+        {
+            bool installed = improvement
+                == CityImprovementKind.RefurbishedAuxiliaryPump;
+            if (_cityStagedPumpRotor != null)
+            {
+                _cityStagedPumpRotor.SetActive(
+                    !installed
+                    && heavyCargoCustody == HeavyCargoCustody.Settlement);
+            }
+
+            if (_cityInstalledAuxiliaryPump != null)
+            {
+                _cityInstalledAuxiliaryPump.SetActive(installed);
+            }
+
+            if (_auxiliaryPumpLight != null)
+            {
+                _auxiliaryPumpLight.intensity = installed ? 680f : 90f;
+            }
+
+            PumpHallCutawayView?.Apply(
+                heavyCargoCustody,
+                improvement,
+                humanVisible,
+                robotVisible);
+        }
+
         internal void Apply(LastBearingVisualSnapshot snapshot)
         {
             _snapshot = snapshot;
@@ -317,16 +379,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_humanResident != null)
             {
                 _humanResident.SetActive(snapshot.HumanVisible);
+                _humanResident.transform.localPosition =
+                    snapshot.AuxiliaryPumpInstalled
+                        ? new Vector3(-2.7f, 0f, 0.1f)
+                        : new Vector3(-2.2f, 0f, -7.5f);
             }
 
             if (_robotResident != null)
             {
                 _robotResident.SetActive(snapshot.RobotVisible);
+                _robotResident.transform.localPosition =
+                    snapshot.AuxiliaryPumpInstalled
+                        ? new Vector3(2.7f, 0f, 0.1f)
+                        : new Vector3(0.2f, 0f, -7.5f);
             }
 
             VehicleView?.Apply(snapshot);
             RoadFeelRig?.ScoutVisual.ApplyModule(snapshot.Module);
             GarageBayView?.ApplyModule(snapshot.Module);
+            if (_cityInstalledAuxiliaryPump != null)
+            {
+                _cityInstalledAuxiliaryPump.SetActive(
+                    snapshot.AuxiliaryPumpInstalled);
+            }
             CameraRig?.SetRoadMode(snapshot.IsRoadMode);
         }
 
@@ -335,6 +410,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_snapshot.TurbineRepaired && _turbineRotor != null)
             {
                 _turbineRotor.Rotate(Vector3.right, 85f * Time.deltaTime, Space.Self);
+            }
+
+            if (_snapshot.AuxiliaryPumpInstalled && _auxiliaryPumpRotor != null)
+            {
+                _auxiliaryPumpRotor.Rotate(
+                    Vector3.forward,
+                    125f * Time.deltaTime,
+                    Space.Self);
             }
 
             if (_waterMaterial != null && _snapshot.TurbineRepaired)
@@ -388,7 +471,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Material concrete,
             Material darkConcrete,
             Material iron,
-            Material bone)
+            Material oxide,
+            Material bone,
+            Material tungsten)
         {
             var root = new GameObject("Monumental Waterworks").transform;
             root.SetParent(transform, false);
@@ -423,6 +508,71 @@ namespace AtomicLandPirate.Presentation.LastBearing
             CreateBlock("Painted Safe Line", root, new Vector3(0f, 0.1f, -12.05f), new Vector3(7.2f, 0.18f, 0.12f), bone);
 
             _pumpHallLight = CreatePointLight("Pump Hall Practical", root, new Vector3(0f, 5.2f, 0f), StopRed, 360f, 13f);
+
+            _cityStagedPumpRotor = new GameObject(
+                "Fixed Civic Socket · Staged Pump Rotor");
+            _cityStagedPumpRotor.transform.SetParent(root, false);
+            _cityStagedPumpRotor.transform.localPosition =
+                new Vector3(3.85f, 0f, 4.5f);
+            CreateBlock(
+                "Rotor Shipping Cradle",
+                _cityStagedPumpRotor.transform,
+                new Vector3(0f, 0.32f, 0f),
+                new Vector3(2.5f, 0.42f, 1.7f),
+                oxide);
+            Transform stagedRotor = CreateCylinder(
+                "Returned Pump Rotor",
+                _cityStagedPumpRotor.transform,
+                new Vector3(0f, 1.05f, 0f),
+                new Vector3(0.76f, 1.05f, 0.76f),
+                iron).transform;
+            stagedRotor.localRotation = Quaternion.Euler(0f, 0f, 90f);
+
+            _cityInstalledAuxiliaryPump = new GameObject(
+                "Fixed Civic Socket · Refurbished Auxiliary Pump");
+            _cityInstalledAuxiliaryPump.transform.SetParent(root, false);
+            _cityInstalledAuxiliaryPump.transform.localPosition =
+                new Vector3(3.85f, 0f, 4.5f);
+            CreateBlock(
+                "Auxiliary Pump Plinth",
+                _cityInstalledAuxiliaryPump.transform,
+                new Vector3(0f, 0.48f, 0f),
+                new Vector3(3.4f, 0.96f, 2.7f),
+                concrete);
+            CreateCylinder(
+                "Auxiliary Pump Housing",
+                _cityInstalledAuxiliaryPump.transform,
+                new Vector3(0f, 1.6f, 0f),
+                new Vector3(1.2f, 1.35f, 1.2f),
+                oxide).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+            _auxiliaryPumpRotor = CreateCylinder(
+                "Installed Auxiliary Pump Rotor",
+                _cityInstalledAuxiliaryPump.transform,
+                new Vector3(0f, 1.6f, -1.25f),
+                new Vector3(0.82f, 0.22f, 0.82f),
+                tungsten).transform;
+            _auxiliaryPumpRotor.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            CreateCylinder(
+                "Auxiliary Pump Rising Main",
+                _cityInstalledAuxiliaryPump.transform,
+                new Vector3(0f, 4.35f, 0f),
+                new Vector3(0.42f, 2.25f, 0.42f),
+                iron);
+            CreateBlock(
+                "Auxiliary Pump Water Rill",
+                _cityInstalledAuxiliaryPump.transform,
+                new Vector3(-2.8f, 0.35f, 0f),
+                new Vector3(3.2f, 0.18f, 0.7f),
+                _waterMaterial!);
+            _auxiliaryPumpLight = CreatePointLight(
+                "Auxiliary Pump Tungsten Practical",
+                _cityInstalledAuxiliaryPump.transform,
+                new Vector3(0f, 4.7f, -0.7f),
+                Tungsten,
+                680f,
+                10f);
+            _cityStagedPumpRotor.SetActive(false);
+            _cityInstalledAuxiliaryPump.SetActive(false);
         }
 
         private void BuildSettlement(
@@ -570,6 +720,31 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 bone,
                 tungsten,
                 signal);
+        }
+
+        private void BuildPumpHallCutaway(
+            Transform buildingCutawayModeRoot,
+            Material concrete,
+            Material darkIron,
+            Material oxide,
+            Material bone,
+            Material tungsten,
+            Material signal)
+        {
+            var pumpHall = new GameObject(
+                LastBearingPumpHallCutawayView.RootName);
+            pumpHall.transform.SetParent(buildingCutawayModeRoot, false);
+            PumpHallCutawayView =
+                pumpHall.AddComponent<LastBearingPumpHallCutawayView>();
+            PumpHallCutawayView.Build(
+                LastBearingState.AuxiliaryPumpSocketId,
+                concrete,
+                darkIron,
+                oxide,
+                bone,
+                tungsten,
+                signal,
+                _waterMaterial!);
         }
 
         private void BuildCityGrammarComparison(

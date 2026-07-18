@@ -71,6 +71,39 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const long MinimumPostReturnPartsUnits = 2;
         public const long MinimumReturnVehicleConditionMilli = 500;
 
+        // VGR-04 deliberately aliases already-authorized prototype values. These
+        // names document the improvement semantics without introducing new tune.
+        public const long AuxiliaryPumpInstallationPartsUnits =
+            MinimumPostReturnPartsUnits;
+        public const long AuxiliaryPumpWaterModifierMilliPerSettlementTick =
+            CivicBufferWaterModifierMilliPerSettlementTick;
+
+        internal static long CityImprovementPartsCost(
+            CityImprovementKind improvement)
+        {
+            switch (improvement)
+            {
+                case CityImprovementKind.RefurbishedAuxiliaryPump:
+                    return AuxiliaryPumpInstallationPartsUnits;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(improvement));
+            }
+        }
+
+        internal static long CityImprovementWaterModifier(
+            CityImprovementKind improvement)
+        {
+            switch (improvement)
+            {
+                case CityImprovementKind.None:
+                    return 0;
+                case CityImprovementKind.RefurbishedAuxiliaryPump:
+                    return AuxiliaryPumpWaterModifierMilliPerSettlementTick;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(improvement));
+            }
+        }
+
         internal static long PreparationFuelCost(PreparationChoice choice)
         {
             switch (choice)

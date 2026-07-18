@@ -21,6 +21,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
     {
         private const string SceneName = "LastBearing";
         private readonly List<string> _temporarySaveRoots = new List<string>();
+        private readonly Dictionary<LastBearingGameController, string>
+            _temporaryProfilesByController =
+                new Dictionary<LastBearingGameController, string>();
 
         [UnityTearDown]
         public IEnumerator TearDownScene()
@@ -46,6 +49,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             }
 
             _temporarySaveRoots.Clear();
+            _temporaryProfilesByController.Clear();
 
             yield return null;
         }
@@ -954,6 +958,105 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator PumpHallHomecomingInstallsAutosavesAndReloadsExactly()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
+            LastBearingState ready = CreateInstallationReadyState();
+            InstallControllerState(controller, ready);
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingPumpHallCutawayView pumpHall = world.PumpHallCutawayView!;
+            LastBearingCameraRig cameraRig = world.CameraRig!;
+            string readyHash = controller.CanonicalHash;
+
+            Assert.That(
+                controller.ReadModel!.IsCityImprovementInstallationAvailable,
+                Is.True);
+            Assert.That(pumpHall.IsStagedRotorVisible, Is.True);
+            Assert.That(pumpHall.IsInstalledPumpVisible, Is.False);
+            Assert.That(
+                Directory.Exists(profileDirectory),
+                Is.False,
+                "opening the fixed store must not create a profile before persist");
+
+            controller.OpenBuildingCutaway();
+            yield return new WaitForSecondsRealtime(1f);
+
+            AssertMode(
+                controller.ModeCoordinator!,
+                LastBearingPresentationMode.BuildingCutaway);
+            Assert.That(cameraRig.IsInspectionMode, Is.True);
+            Assert.That(
+                Vector3.Distance(
+                    world.MainCamera!.transform.position,
+                    pumpHall.CameraAnchor!.position),
+                Is.LessThan(0.15f));
+            Vector3 focusDirection =
+                (pumpHall.FocusAnchor!.position - world.MainCamera.transform.position)
+                .normalized;
+            Assert.That(
+                Vector3.Dot(world.MainCamera.transform.forward, focusDirection),
+                Is.GreaterThan(0.998f));
+            Assert.That(
+                UnityEngine.Object.FindObjectsByType<Camera>(
+                    FindObjectsInactive.Include),
+                Has.Length.EqualTo(1));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(readyHash));
+
+            controller.InstallCityImprovement();
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            InvokeSimulationTick(controller);
+
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+            Assert.That(controller.CanonicalHash, Is.Not.EqualTo(readyHash));
+            Assert.That(
+                controller.ReadModel!.InstalledCityImprovement,
+                Is.EqualTo(CityImprovementKind.RefurbishedAuxiliaryPump));
+            Assert.That(
+                controller.ReadModel.HeavyCargoCustody,
+                Is.EqualTo(HeavyCargoCustody.InstalledAtAuxiliaryPump));
+            Assert.That(controller.State!.TowSlotsUsed, Is.EqualTo(0));
+            Assert.That(pumpHall.IsStagedRotorVisible, Is.False);
+            Assert.That(pumpHall.IsInstalledPumpVisible, Is.True);
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"),
+                controller.SaveStatus);
+            Assert.That(
+                Directory.GetFiles(profileDirectory, "gen-*.lbg").Length,
+                Is.EqualTo(1),
+                "one critical installation tick must publish one generation");
+            string installedHash = controller.CanonicalHash;
+
+            controller.ReturnToTitle();
+            Assert.That(pumpHall.IsStagedRotorVisible, Is.False);
+            Assert.That(pumpHall.IsInstalledPumpVisible, Is.False);
+            controller.Load();
+
+            Assert.That(controller.CanonicalHash, Is.EqualTo(installedHash));
+            Assert.That(
+                controller.ReadModel!.InstalledCityImprovement,
+                Is.EqualTo(CityImprovementKind.RefurbishedAuxiliaryPump));
+            Assert.That(
+                controller.ReadModel.HeavyCargoCustody,
+                Is.EqualTo(HeavyCargoCustody.InstalledAtAuxiliaryPump));
+            Assert.That(pumpHall.IsStagedRotorVisible, Is.False);
+            Assert.That(pumpHall.IsInstalledPumpVisible, Is.True);
+            Assert.That(
+                Directory.GetFiles(profileDirectory, "gen-*.lbg").Length,
+                Is.EqualTo(1));
+        }
+
+        [UnityTest]
         public IEnumerator InstalledModuleStaysExclusiveAndSynchronizedAcrossAllViews()
         {
             AsyncOperation? load = SceneManager.LoadSceneAsync(
@@ -1080,6 +1183,42 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 "module installation did not complete within 1000 deterministic ticks");
             Assert.That(state.VehicleModule, Is.EqualTo(module));
             Assert.That(state.ExpeditionPhase, Is.EqualTo(ExpeditionPhase.AtHome));
+            return state;
+        }
+
+        private static LastBearingState CreateInstallationReadyState()
+        {
+            var kernel = new LastBearingKernel();
+            LastBearingState state = DriveUntilDepotRecoveryAvailable(
+                CreateOutboundState());
+            state = Apply(kernel, state, sequence =>
+                new OperateDepotRecoveryPointCommand(sequence));
+            state = Apply(kernel, state, sequence =>
+                new ResolveDepotCommand(sequence, EncounterChoice.TakeBearing));
+            string transactionId = state.TransactionId!;
+            string fingerprint = state.TransactionFingerprint!;
+            state = Apply(kernel, state, sequence =>
+                new FreezeReturnPayloadCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            state = DriveUntilPhase(state, ExpeditionPhase.Returned);
+            state = Apply(kernel, state, sequence =>
+                new CreditCityReturnCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            state = Apply(kernel, state, sequence =>
+                new FinalizeExpeditionTransactionCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            state = Apply(kernel, state, sequence =>
+                new InstallTurbineRepairCommand(sequence));
+            Assert.That(
+                LastBearingReadModel.FromState(state)
+                    .IsCityImprovementInstallationAvailable,
+                Is.True);
             return state;
         }
 
@@ -1441,9 +1580,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         private string InstallTemporarySaveAdapter(
             LastBearingGameController controller)
         {
+            if (_temporaryProfilesByController.TryGetValue(
+                    controller,
+                    out string existingProfile))
+            {
+                return existingProfile;
+            }
+
             string root = Path.Combine(
                 GetConfinementSafeTemporaryRoot(),
-                "wp0002-last-bearing-load-pose-" + Guid.NewGuid().ToString("N"));
+                "wp0002-last-bearing-tests-" + Guid.NewGuid().ToString("N"));
             string profileDirectory = Path.Combine(
                 root,
                 LastBearingProfileContract.ProfileName);
@@ -1465,6 +1611,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 LastBearingSaveAdapter;
             Assert.That(adapter, Is.Not.Null);
             adapterField!.SetValue(controller, adapter);
+            _temporaryProfilesByController.Add(controller, profileDirectory);
             return profileDirectory;
         }
 
@@ -1482,10 +1629,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             return temporaryRoot;
         }
 
-        private static void InstallControllerState(
+        private void InstallControllerState(
             LastBearingGameController controller,
             LastBearingState state)
         {
+            _ = InstallTemporarySaveAdapter(controller);
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
             FieldInfo? stateField = typeof(LastBearingGameController).GetField(
                 "_state",

@@ -6,9 +6,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public sealed class LastBearingState
     {
-        public const int CurrentSchemaVersion = 1;
+        public const int CurrentSchemaVersion = 2;
         public const string SashaProtagonistId = "sasha";
         public const string LastBearingFactionId = "faction:last-bearing:caravaners";
+        public const string AuxiliaryPumpSocketId =
+            "city:last-bearing:socket:pump-hall-auxiliary";
+        public const int AuxiliaryPumpOrientationQuarterTurns = 0;
 
         internal LastBearingState(LastBearingStateBuilder builder)
         {
@@ -50,6 +53,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             ActiveWaterModifierMilliPerSettlementTick =
                 builder.ActiveWaterModifierMilliPerSettlementTick;
             NextCityDecision = builder.NextCityDecision;
+            InstalledCityImprovement = builder.InstalledCityImprovement;
 
             VehicleModule = builder.VehicleModule;
             ModuleInstallationState = builder.ModuleInstallationState;
@@ -175,6 +179,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long ActiveWaterModifierMilliPerSettlementTick { get; }
 
         public NextCityDecision NextCityDecision { get; }
+
+        public CityImprovementKind InstalledCityImprovement { get; }
 
         public VehicleModule VehicleModule { get; }
 
@@ -332,6 +338,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             ActiveWaterModifierMilliPerSettlementTick =
                 state.ActiveWaterModifierMilliPerSettlementTick;
             NextCityDecision = state.NextCityDecision;
+            InstalledCityImprovement = state.InstalledCityImprovement;
             VehicleModule = state.VehicleModule;
             ModuleInstallationState = state.ModuleInstallationState;
             RouteKind = state.RouteKind;
@@ -420,6 +427,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         internal int WorkshopServiceSlotsReserved;
         internal long ActiveWaterModifierMilliPerSettlementTick;
         internal NextCityDecision NextCityDecision;
+        internal CityImprovementKind InstalledCityImprovement;
         internal VehicleModule VehicleModule;
         internal ModuleInstallationState ModuleInstallationState;
         internal RouteKind RouteKind;

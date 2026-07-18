@@ -83,6 +83,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private Transform? _roadTarget;
         private Transform? _garageCameraAnchor;
         private Transform? _garageFocusAnchor;
+        private Transform? _pumpHallCameraAnchor;
+        private Transform? _pumpHallFocusAnchor;
         private Transform? _modeRoot;
         private bool _roadRunRequested;
         private bool _roadRecoveryHoldRequested;
@@ -160,7 +162,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingVehicleView canonicalVehicle,
             Transform roadTarget,
             Transform garageCameraAnchor,
-            Transform garageFocusAnchor)
+            Transform garageFocusAnchor,
+            Transform pumpHallCameraAnchor,
+            Transform pumpHallFocusAnchor)
         {
             _cameraRig = cameraRig ?? throw new ArgumentNullException(nameof(cameraRig));
             _canonicalVehicle = canonicalVehicle ??
@@ -170,6 +174,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                                   throw new ArgumentNullException(nameof(garageCameraAnchor));
             _garageFocusAnchor = garageFocusAnchor ??
                                  throw new ArgumentNullException(nameof(garageFocusAnchor));
+            _pumpHallCameraAnchor = pumpHallCameraAnchor ??
+                                    throw new ArgumentNullException(nameof(pumpHallCameraAnchor));
+            _pumpHallFocusAnchor = pumpHallFocusAnchor ??
+                                   throw new ArgumentNullException(nameof(pumpHallFocusAnchor));
             ApplyPresentationOwnership();
         }
 
@@ -547,6 +555,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool garageInspectionSelected =
                 HasActiveMode &&
                 CurrentMode == LastBearingPresentationMode.GarageBay;
+            bool pumpHallInspectionSelected =
+                HasActiveMode &&
+                CurrentMode == LastBearingPresentationMode.BuildingCutaway;
 
             if (_roadTarget != null)
             {
@@ -567,9 +578,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 if (_garageCameraAnchor != null && _garageFocusAnchor != null)
                 {
                     _cameraRig.SetInspectionPose(
-                        _garageCameraAnchor,
-                        _garageFocusAnchor,
-                        garageInspectionSelected);
+                        pumpHallInspectionSelected
+                            ? _pumpHallCameraAnchor!
+                            : _garageCameraAnchor,
+                        pumpHallInspectionSelected
+                            ? _pumpHallFocusAnchor!
+                            : _garageFocusAnchor,
+                        garageInspectionSelected || pumpHallInspectionSelected);
                 }
             }
         }

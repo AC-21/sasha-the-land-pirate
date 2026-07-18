@@ -110,6 +110,22 @@ namespace AtomicLandPirate.Simulation.LastBearing
             builder.HeavyCargoCustody = HeavyCargoCustody.Settlement;
         }
 
+        internal static void InstallHeavyCargoAtAuxiliaryPump(
+            LastBearingStateBuilder builder)
+        {
+            if (builder.HeavyCargoKind != HeavyCargoKind.PumpRotor
+                || builder.HeavyCargoCustody != HeavyCargoCustody.Settlement
+                || builder.TowSlotsUsed != 1)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_AUXILIARY_PUMP_CARGO_INVALID");
+            }
+
+            builder.HeavyCargoCustody =
+                HeavyCargoCustody.InstalledAtAuxiliaryPump;
+            builder.TowSlotsUsed = 0;
+        }
+
         internal static void CreateLiquidCargo(
             LastBearingStateBuilder builder,
             LiquidCargoKind kind,

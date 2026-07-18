@@ -75,6 +75,75 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
+        public void PumpHallCutawayIsOneFixedPhysicsFreeDerivedDollhouse()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.Mixed);
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingPumpHallCutawayView view = world.PumpHallCutawayView!;
+            string canonicalBefore = controller.CanonicalHash;
+
+            Assert.That(
+                _root.GetComponentsInChildren<LastBearingPumpHallCutawayView>(true),
+                Has.Length.EqualTo(1));
+            Assert.That(
+                view.transform.IsChildOf(controller.ModeCoordinator!.GetModeRoot(
+                    LastBearingPresentationMode.BuildingCutaway)),
+                Is.True);
+            Assert.That(
+                LastBearingPumpHallCutawayView.DirectionPackageId,
+                Is.EqualTo("C0-VGR-04"));
+            Assert.That(
+                LastBearingPumpHallCutawayView.ContentId,
+                Is.EqualTo("bld_pump_hall_cutaway_a"));
+            Assert.That(view.IsDollhouseCutaway, Is.True);
+            Assert.That(view.HasRoof, Is.False);
+            Assert.That(view.HasNearWall, Is.False);
+            Assert.That(view.CameraAnchor, Is.Not.Null);
+            Assert.That(view.FocusAnchor, Is.Not.Null);
+            Assert.That(view.FixedCivicSocket, Is.Not.Null);
+            Assert.That(
+                view.FixedCivicSocket!.name,
+                Is.EqualTo(LastBearingState.AuxiliaryPumpSocketId));
+            Assert.That(
+                view.FixedCivicSocket.localRotation,
+                Is.EqualTo(Quaternion.identity));
+            Assert.That(view.GetComponentsInChildren<Rigidbody>(true), Is.Empty);
+            Assert.That(view.GetComponentsInChildren<Camera>(true), Is.Empty);
+            Assert.That(
+                view.GetComponentsInChildren<CharacterController>(true),
+                Is.Empty);
+            foreach (Collider collider in view.GetComponentsInChildren<Collider>(true))
+            {
+                Assert.That(collider.enabled, Is.False, collider.name);
+            }
+
+            view.Apply(
+                HeavyCargoCustody.Settlement,
+                CityImprovementKind.None,
+                humanVisible: true,
+                robotVisible: false);
+            Assert.That(view.IsStagedRotorVisible, Is.True);
+            Assert.That(view.IsInstalledPumpVisible, Is.False);
+            Assert.That(view.IsHumanWorkerVisible, Is.True);
+            Assert.That(view.IsRobotWorkerVisible, Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            view.Apply(
+                HeavyCargoCustody.InstalledAtAuxiliaryPump,
+                CityImprovementKind.RefurbishedAuxiliaryPump,
+                humanVisible: true,
+                robotVisible: true);
+            Assert.That(view.IsStagedRotorVisible, Is.False);
+            Assert.That(view.IsInstalledPumpVisible, Is.True);
+            Assert.That(view.IsHumanWorkerVisible, Is.True);
+            Assert.That(view.IsRobotWorkerVisible, Is.True);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+        }
+
+        [Test]
         public void WreckLineViewIsOnePhysicsFreeCoreIsolatedModulePoint()
         {
             _root = new GameObject(LastBearingGameController.RuntimeRootName);

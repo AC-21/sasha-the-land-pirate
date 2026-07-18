@@ -299,6 +299,32 @@ namespace AtomicLandPirate.Simulation.LastBearing
         }
     }
 
+    public sealed class InstallCityImprovementCommand : LastBearingCommand
+    {
+        public InstallCityImprovementCommand(
+            long sequence,
+            NextCityDecision decision,
+            string socketId,
+            int orientationQuarterTurns)
+            : base(sequence)
+        {
+            if (decision == NextCityDecision.None)
+            {
+                throw new ArgumentOutOfRangeException(nameof(decision));
+            }
+
+            Decision = decision;
+            SocketId = RequireToken(socketId, nameof(socketId));
+            OrientationQuarterTurns = orientationQuarterTurns;
+        }
+
+        public NextCityDecision Decision { get; }
+
+        public string SocketId { get; }
+
+        public int OrientationQuarterTurns { get; }
+    }
+
     public sealed class ServiceFieldSleeveCommand : LastBearingCommand
     {
         public ServiceFieldSleeveCommand(long sequence)

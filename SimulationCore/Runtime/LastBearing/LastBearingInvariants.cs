@@ -62,11 +62,15 @@ namespace AtomicLandPirate.Simulation.LastBearing
             RequireRange(state.VehicleConditionMilli, 0, 1000, "VEHICLE_CONDITION");
             RequireEnum(state.TurbineCondition, "TURBINE_CONDITION");
             RequireEnum(state.NextCityDecision, "NEXT_CITY_DECISION");
+            RequireEnum(
+                state.InstalledCityImprovement,
+                "INSTALLED_CITY_IMPROVEMENT");
 
             ValidatePreparation(state);
             ValidateVehicleAndTransaction(state);
             ValidateCargo(state);
             ValidateFaction(state);
+            ValidateCityImprovement(state);
         }
 
         private static void ValidatePreparation(LastBearingState state)
@@ -396,7 +400,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
             Require(
                 state.HeavyCargoCustody == HeavyCargoCustody.Depot
                 || state.HeavyCargoCustody == HeavyCargoCustody.Vehicle
-                || state.HeavyCargoCustody == HeavyCargoCustody.Settlement,
+                || state.HeavyCargoCustody == HeavyCargoCustody.Settlement
+                || state.HeavyCargoCustody
+                    == HeavyCargoCustody.InstalledAtAuxiliaryPump,
                 "LAST_BEARING_HEAVY_CUSTODY_INVALID");
             Require(
                 state.HeavyCargoCustody != HeavyCargoCustody.Settlement
@@ -406,9 +412,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.RouteActionUsed)
             {
                 HeavyCargoCustody expectedCustody =
-                    state.TransactionPhase >= TransactionPhase.CityCredited
-                        ? HeavyCargoCustody.Settlement
-                        : HeavyCargoCustody.Vehicle;
+                    state.InstalledCityImprovement
+                        == CityImprovementKind.RefurbishedAuxiliaryPump
+                        ? HeavyCargoCustody.InstalledAtAuxiliaryPump
+                        : state.TransactionPhase >= TransactionPhase.CityCredited
+                            ? HeavyCargoCustody.Settlement
+                            : HeavyCargoCustody.Vehicle;
                 Require(
                     state.HeavyCargoCustody == expectedCustody,
                     "LAST_BEARING_WINCH_ACTION_ROTOR_CUSTODY_INVALID");
@@ -420,13 +429,22 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     state.TowSlotsUsed == 0,
                     "LAST_BEARING_DEPOT_ROTOR_TOW_SLOT_INVALID");
             }
-            else
+            else if (state.HeavyCargoCustody
+                != HeavyCargoCustody.InstalledAtAuxiliaryPump)
             {
                 Require(
                     state.VehicleModule == VehicleModule.WinchAssembly
                     && state.RouteActionUsed
                     && state.TowSlotsUsed == 1,
                     "LAST_BEARING_RECOVERED_ROTOR_STATE_INVALID");
+            }
+            else
+            {
+                Require(
+                    state.VehicleModule == VehicleModule.WinchAssembly
+                    && state.RouteActionUsed
+                    && state.TowSlotsUsed == 0,
+                    "LAST_BEARING_INSTALLED_ROTOR_STATE_INVALID");
             }
 
             if (state.LiquidCargoKind == LiquidCargoKind.None)
@@ -518,6 +536,34 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         && state.NextMaintenanceDueSettlementTick == 0
                         && !state.MaintenanceDue,
                 "LAST_BEARING_MAINTENANCE_STATE_INVALID");
+        }
+
+        private static void ValidateCityImprovement(LastBearingState state)
+        {
+            bool rotorInstalled = state.HeavyCargoCustody
+                == HeavyCargoCustody.InstalledAtAuxiliaryPump;
+            Require(
+                (state.InstalledCityImprovement
+                    == CityImprovementKind.RefurbishedAuxiliaryPump)
+                    == rotorInstalled,
+                "LAST_BEARING_CITY_IMPROVEMENT_CUSTODY_INVALID");
+            if (state.InstalledCityImprovement == CityImprovementKind.None)
+            {
+                return;
+            }
+
+            Require(
+                state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.Finalized
+                && state.TurbineCondition != TurbineCondition.Failing
+                && state.NextCityDecision == NextCityDecision.None
+                && state.PreparationChoice == PreparationChoice.WorkshopPush
+                && state.VehicleModule == VehicleModule.WinchAssembly
+                && state.RouteActionUsed
+                && state.TowSlotsUsed == 0
+                && state.PartsUnits
+                    >= LastBearingBalanceV1.MinimumPostReturnPartsUnits,
+                "LAST_BEARING_CITY_IMPROVEMENT_STATE_INVALID");
         }
 
         private static void Require(bool condition, string code)

@@ -58,6 +58,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
             MaintenanceObligationActive = state.MaintenanceObligationActive;
             MaintenanceDue = state.MaintenanceDue;
             NextCityDecision = state.NextCityDecision;
+            InstalledCityImprovement = state.InstalledCityImprovement;
+            IsCityImprovementInstallationAvailable =
+                ComputeCityImprovementInstallationAvailable(state);
             PauseCause = state.PauseCause;
             IsDepotApproachRecoveryAvailable =
                 ComputeDepotApproachRecoveryAvailable(state);
@@ -148,6 +151,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public bool MaintenanceObligationActive { get; }
         public bool MaintenanceDue { get; }
         public NextCityDecision NextCityDecision { get; }
+        public CityImprovementKind InstalledCityImprovement { get; }
+        public bool IsCityImprovementInstallationAvailable { get; }
         public PauseCause PauseCause { get; }
         public bool IsDepotApproachRecoveryAvailable { get; }
         public bool IsWreckLineModulePointAvailable { get; }
@@ -193,7 +198,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             return checked(
-                baseRate + state.ActiveWaterModifierMilliPerSettlementTick);
+                baseRate
+                + state.ActiveWaterModifierMilliPerSettlementTick
+                + LastBearingBalanceV1.CityImprovementWaterModifier(
+                    state.InstalledCityImprovement));
         }
 
         private static long ThresholdTicks(
@@ -302,7 +310,38 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return "install-turbine-repair";
             }
 
+            if (ComputeCityImprovementInstallationAvailable(state))
+            {
+                return "install-refurbished-auxiliary-pump";
+            }
+
+            if (state.NextCityDecision != NextCityDecision.None)
+            {
+                return "await-next-city-decision-authority";
+            }
+
             return "observe-recovering-waterworks";
+        }
+
+        private static bool ComputeCityImprovementInstallationAvailable(
+            LastBearingState state)
+        {
+            long requiredParts = checked(
+                LastBearingBalanceV1.AuxiliaryPumpInstallationPartsUnits
+                + LastBearingBalanceV1.MinimumPostReturnPartsUnits);
+            return state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.Finalized
+                && state.TurbineCondition != TurbineCondition.Failing
+                && state.NextCityDecision
+                    == NextCityDecision.RefurbishAuxiliaryPump
+                && state.InstalledCityImprovement == CityImprovementKind.None
+                && state.PreparationChoice == PreparationChoice.WorkshopPush
+                && state.VehicleModule == VehicleModule.WinchAssembly
+                && state.RouteActionUsed
+                && state.HeavyCargoKind == HeavyCargoKind.PumpRotor
+                && state.HeavyCargoCustody == HeavyCargoCustody.Settlement
+                && state.TowSlotsUsed == 1
+                && state.PartsUnits >= requiredParts;
         }
 
         private static bool ComputeDepotApproachRecoveryAvailable(

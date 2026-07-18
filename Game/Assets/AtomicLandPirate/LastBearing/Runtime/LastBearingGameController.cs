@@ -87,13 +87,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _modeCoordinator.GetModeRoot(
                     LastBearingPresentationMode.Driving),
                 _modeCoordinator.GetModeRoot(
+                    LastBearingPresentationMode.BuildingCutaway),
+                _modeCoordinator.GetModeRoot(
                     LastBearingPresentationMode.GarageBay));
             _modeCoordinator.ConfigurePresentationOwners(
                 _world.CameraRig!,
                 _world.VehicleView!,
                 _world.RoadFeelRig!.Root.transform,
                 _world.GarageBayView!.CameraAnchor!,
-                _world.GarageBayView.FocusAnchor!);
+                _world.GarageBayView.FocusAnchor!,
+                _world.PumpHallCutawayView!.CameraAnchor!,
+                _world.PumpHallCutawayView.FocusAnchor!);
             _modeCoordinator.AttachRoadModeAdapter(
                 _world.RoadFeelRig.Adapter);
             _hud = gameObject.AddComponent<LastBearingHud>();
@@ -174,6 +178,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 civicBuffer: false,
                 factionClaimed: false,
                 turbineRepaired: false,
+                auxiliaryPumpInstalled: false,
                 humanVisible: true,
                 robotVisible: true));
             _world?.ApplyDepotApproachRecovery(
@@ -186,6 +191,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ApplyRoadCargoPresentation(
                 HeavyCargoKind.PumpRotor,
                 HeavyCargoCustody.Depot);
+            _world?.ApplyCityImprovement(
+                HeavyCargoCustody.Depot,
+                CityImprovementKind.None,
+                humanVisible: true,
+                robotVisible: true);
         }
 
         public void ActivateInfrastructure()
@@ -412,6 +422,25 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _status = "The civic organ is turning again.";
         }
 
+        public void InstallCityImprovement()
+        {
+            if (_readModel == null
+                || !_readModel.IsCityImprovementInstallationAvailable)
+            {
+                _status =
+                    "The fixed pump-hall civic socket is not canonically ready.";
+                return;
+            }
+
+            Queue(sequence => new InstallCityImprovementCommand(
+                sequence,
+                NextCityDecision.RefurbishAuxiliaryPump,
+                LastBearingState.AuxiliaryPumpSocketId,
+                LastBearingState.AuxiliaryPumpOrientationQuarterTurns));
+            _status =
+                "The returned rotor is committed to the auxiliary pump hall.";
+        }
+
         public void ServiceFieldSleeve()
         {
             Queue(sequence => new ServiceFieldSleeveCommand(sequence));
@@ -585,6 +614,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 LastBearingTickResult result = _kernel.Step(_state, commands);
                 _state = result.State;
                 _readModel = result.ReadModel;
+                TryAutosave(result.DomainEvents);
                 ApplyPresentation();
             }
             catch (Exception exception)
@@ -767,6 +797,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _readModel.PreparationChoice == PreparationChoice.CivicBuffer,
                 factionClaimed,
                 repaired,
+                _readModel.InstalledCityImprovement
+                    == CityImprovementKind.RefurbishedAuxiliaryPump,
                 humanVisible,
                 robotVisible));
             _world.ApplyDepotApproachRecovery(
@@ -779,7 +811,34 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ApplyRoadCargoPresentation(
                 _readModel.HeavyCargoKind,
                 _readModel.HeavyCargoCustody);
+            _world.ApplyCityImprovement(
+                _readModel.HeavyCargoCustody,
+                _readModel.InstalledCityImprovement,
+                humanVisible,
+                robotVisible);
             _modeCoordinator?.ApplyCanonical(_readModel);
+        }
+
+        private void TryAutosave(
+            IReadOnlyList<LastBearingDomainEvent> domainEvents)
+        {
+            for (var index = 0; index < domainEvents.Count; index++)
+            {
+                LastBearingEventKind kind = domainEvents[index].Kind;
+                if (kind == LastBearingEventKind.ExpeditionDeparted
+                    || kind == LastBearingEventKind.RouteActionUsed
+                    || kind == LastBearingEventKind.DepotRecoveryPointOperated
+                    || kind == LastBearingEventKind.DepotResolved
+                    || kind == LastBearingEventKind.ReturnPayloadFrozen
+                    || kind == LastBearingEventKind.VehicleReturned
+                    || kind == LastBearingEventKind.CityReturnCredited
+                    || kind == LastBearingEventKind.TurbineRepaired
+                    || kind == LastBearingEventKind.CityImprovementInstalled)
+                {
+                    Save();
+                    return;
+                }
+            }
         }
 
         private void Queue(params Func<long, LastBearingCommand>[] factories)
