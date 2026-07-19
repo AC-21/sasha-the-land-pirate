@@ -147,19 +147,19 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 unity_reported_display_height = _unityReportedDisplayHeight,
                 observed_editor_backbuffer_width = EditorBackbufferWidth,
                 observed_editor_backbuffer_height = EditorBackbufferHeight,
-                unity_reported_display_resolution_capture_reached =
-                    EditorBackbufferWidth == _unityReportedDisplayWidth &&
-                    EditorBackbufferHeight == _unityReportedDisplayHeight,
+                unity_reported_display_resolution_capture_reached = false,
                 provisional_architecture_target_width = CreatorTargetWidth,
                 provisional_architecture_target_height = CreatorTargetHeight,
                 provisional_architecture_target_reached =
-                    EditorBackbufferWidth == CreatorTargetWidth &&
-                    EditorBackbufferHeight == CreatorTargetHeight,
+                    _unityReportedDisplayWidth == CreatorTargetWidth &&
+                    _unityReportedDisplayHeight == CreatorTargetHeight,
                 native_target_semantics =
                     "Screen.currentResolution records Unity's current reported display resolution. " +
-                    "The exact editor Game-view backbuffer observed by a prior " +
-                    "fail-closed run is captured separately; this packet does not " +
-                    "claim physical-native or provisional-target coverage.",
+                    "The city-trial-a-top-unity-reported-display capture uses an exact " +
+                    "editor Game-view backbuffer at those dimensions. This proves layout " +
+                    "and rendering at the reported pixel size, not physical panel sampling, " +
+                    "operating-system scaling, or the provisional architecture target unless " +
+                    "the dimensions match.",
                 game_view_size_control =
                     "Reflection-only selection of transient fixed GameViewSize entries; " +
                     "the prior selection and custom-size count are restored before evidence is written.",
@@ -188,9 +188,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     "Unity reported a current display resolution of " +
                     _unityReportedDisplayWidth + "x" +
                     _unityReportedDisplayHeight +
-                    "; exact observed editor backbuffer was " +
+                    "; the exact observed editor backbuffer was " +
                     EditorBackbufferWidth + "x" + EditorBackbufferHeight + ".",
-                    "Physical-native layout and the provisional 2560x1600 architecture target remain unproven."
+                    "An exact editor backbuffer matching Unity's reported display pixel " +
+                    "dimensions is included; physical panel sampling and operating-system " +
+                    "scaling remain outside this packet."
                 },
                 state_sequence = new[]
                 {
@@ -272,6 +274,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     EditorBackbufferHeight,
                     ScrollPosition.Top,
                     makeGrayscale: false);
+                yield return CaptureFrame(
+                    controller,
+                    "city-trial-a-top-unity-reported-display",
+                    "city-trial-a",
+                    _unityReportedDisplayWidth,
+                    _unityReportedDisplayHeight,
+                    ScrollPosition.Top,
+                    makeGrayscale: false);
 
                 Assert.That(controller.CanonicalHash, Is.EqualTo(cityCanonicalHash));
                 manifest.city_canonical_sha256_after = controller.CanonicalHash;
@@ -290,6 +300,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     makeGrayscale: false);
 
                 AssertExactCaptureMatrix();
+                manifest.unity_reported_display_resolution_capture_reached = true;
                 manifest.artifacts = BuildArtifactRecords();
                 RestoreGameViewSelectionAndRemoveCaptureSizes();
                 yield return WaitForExactPresentedResolution(
@@ -908,6 +919,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 "city-trial-a-top-1920x1200-grayscale|grayscale|1920x1200",
                 "city-trial-a-top-observed-editor-backbuffer|color|" +
                 EditorBackbufferWidth + "x" + EditorBackbufferHeight,
+                "city-trial-a-top-unity-reported-display|color|" +
+                _unityReportedDisplayWidth + "x" +
+                _unityReportedDisplayHeight,
                 "legacy-garage-observed-editor-backbuffer|color|" +
                 EditorBackbufferWidth + "x" + EditorBackbufferHeight
             };
@@ -922,7 +936,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Assert.That(artifact.actual_height, Is.EqualTo(artifact.target_height));
             }
 
-            Assert.That(_pending, Has.Count.EqualTo(7));
+            Assert.That(_pending, Has.Count.EqualTo(8));
             Assert.That(actual.SetEquals(expected), Is.True);
 
             PendingArtifact? grayscale = _pending.Find(
