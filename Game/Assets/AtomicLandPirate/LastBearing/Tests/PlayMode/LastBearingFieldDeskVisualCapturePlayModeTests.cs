@@ -39,14 +39,26 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         private int _originalWidth;
         private int _originalHeight;
         private FullScreenMode _originalFullScreenMode;
-        private int _physicalDisplayWidth;
-        private int _physicalDisplayHeight;
+        private int _unityReportedDisplayWidth;
+        private int _unityReportedDisplayHeight;
+        private object? _gameView;
+        private object? _gameViewSizeGroup;
+        private int _originalGameViewSizeIndex;
+        private int _originalGameViewCustomSizeCount;
+        private bool _gameViewSnapshotTaken;
+        private readonly Dictionary<string, int> _captureGameViewSizeIndices =
+            new Dictionary<string, int>(StringComparer.Ordinal);
         private bool _resolutionSnapshotTaken;
         private bool _sceneLoadedByCapture;
 
         [UnityTearDown]
         public IEnumerator TearDownSceneAndResolution()
         {
+            if (_gameViewSnapshotTaken)
+            {
+                RestoreGameViewSelectionAndRemoveCaptureSizes();
+            }
+
             if (_resolutionSnapshotTaken)
             {
                 Screen.SetResolution(
@@ -79,10 +91,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             }
 
             _pending.Clear();
+            _captureGameViewSizeIndices.Clear();
+            _gameView = null;
+            _gameViewSizeGroup = null;
+            _gameViewSnapshotTaken = false;
             _resolutionSnapshotTaken = false;
             _sceneLoadedByCapture = false;
-            _physicalDisplayWidth = 0;
-            _physicalDisplayHeight = 0;
+            _unityReportedDisplayWidth = 0;
+            _unityReportedDisplayHeight = 0;
             yield return null;
         }
 
@@ -106,11 +122,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             _originalHeight = Screen.height;
             _originalFullScreenMode = Screen.fullScreenMode;
             _resolutionSnapshotTaken = true;
+            SnapshotGameViewSelection();
             Resolution currentResolution = Screen.currentResolution;
-            _physicalDisplayWidth = currentResolution.width;
-            _physicalDisplayHeight = currentResolution.height;
-            Assert.That(_physicalDisplayWidth, Is.GreaterThan(0));
-            Assert.That(_physicalDisplayHeight, Is.GreaterThan(0));
+            _unityReportedDisplayWidth = currentResolution.width;
+            _unityReportedDisplayHeight = currentResolution.height;
+            Assert.That(_unityReportedDisplayWidth, Is.GreaterThan(0));
+            Assert.That(_unityReportedDisplayHeight, Is.GreaterThan(0));
 
             var manifest = new CaptureManifest
             {
@@ -133,23 +150,29 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 original_width = _originalWidth,
                 original_height = _originalHeight,
                 original_full_screen_mode = _originalFullScreenMode.ToString(),
-                physical_display_width = _physicalDisplayWidth,
-                physical_display_height = _physicalDisplayHeight,
+                unity_reported_display_width = _unityReportedDisplayWidth,
+                unity_reported_display_height = _unityReportedDisplayHeight,
                 observed_editor_backbuffer_width = EditorBackbufferWidth,
                 observed_editor_backbuffer_height = EditorBackbufferHeight,
-                physical_native_capture_reached =
-                    EditorBackbufferWidth == _physicalDisplayWidth &&
-                    EditorBackbufferHeight == _physicalDisplayHeight,
+                unity_reported_display_resolution_capture_reached =
+                    EditorBackbufferWidth == _unityReportedDisplayWidth &&
+                    EditorBackbufferHeight == _unityReportedDisplayHeight,
                 provisional_architecture_target_width = CreatorTargetWidth,
                 provisional_architecture_target_height = CreatorTargetHeight,
                 provisional_architecture_target_reached =
                     EditorBackbufferWidth == CreatorTargetWidth &&
                     EditorBackbufferHeight == CreatorTargetHeight,
                 native_target_semantics =
-                    "Screen.currentResolution records the physical display. " +
+                    "Screen.currentResolution records Unity's current reported display resolution. " +
                     "The exact editor Game-view backbuffer observed by a prior " +
                     "fail-closed run is captured separately; this packet does not " +
                     "claim physical-native or provisional-target coverage.",
+                game_view_size_control =
+                    "Reflection-only selection of transient fixed GameViewSize entries; " +
+                    "the prior selection and custom-size count are restored before evidence is written.",
+                original_game_view_size_index = _originalGameViewSizeIndex,
+                original_game_view_custom_size_count =
+                    _originalGameViewCustomSizeCount,
                 quality_level = QualitySettings.names[QualitySettings.GetQualityLevel()],
                 color_space = QualitySettings.activeColorSpace.ToString(),
                 render_scale_width = ScalableBufferManager.widthScaleFactor,
@@ -169,8 +192,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     "Captures do not prove interaction, allocation, memory, or target-Mac performance.",
                     "Title and garage are representative legacy-surface checks, not exhaustive mode coverage.",
                     "The source head and tree are request-bound; this harness does not inspect Git metadata.",
-                    "Physical display was " + _physicalDisplayWidth + "x" +
-                    _physicalDisplayHeight + "; exact observed editor backbuffer was " +
+                    "Unity reported a current display resolution of " +
+                    _unityReportedDisplayWidth + "x" +
+                    _unityReportedDisplayHeight +
+                    "; exact observed editor backbuffer was " +
                     EditorBackbufferWidth + "x" + EditorBackbufferHeight + ".",
                     "Physical-native layout and the provisional 2560x1600 architecture target remain unproven."
                 },
@@ -273,10 +298,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
                 AssertExactCaptureMatrix();
                 manifest.artifacts = BuildArtifactRecords();
+                RestoreGameViewSelectionAndRemoveCaptureSizes();
+                manifest.game_view_custom_sizes_restored = true;
                 WriteEvidence(repositoryRoot, manifest);
             }
             finally
             {
+                RestoreGameViewSelectionAndRemoveCaptureSizes();
                 Screen.SetResolution(
                     _originalWidth,
                     _originalHeight,
@@ -295,7 +323,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             ScrollPosition scrollPosition,
             bool makeGrayscale)
         {
-            Screen.SetResolution(width, height, FullScreenMode.Windowed);
+            SelectExactGameViewSize(width, height);
             for (var frame = 0; frame < ResolutionWaitFrames; frame++)
             {
                 if (Screen.width == width && Screen.height == height)
@@ -418,6 +446,239 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     UnityEngine.Object.DestroyImmediate(texture);
                 }
             }
+        }
+
+        private void SnapshotGameViewSelection()
+        {
+            Type gameViewType = RequireEditorType("UnityEditor.GameView");
+            UnityEngine.Object[] gameViews =
+                Resources.FindObjectsOfTypeAll(gameViewType);
+            Assert.That(
+                gameViews,
+                Has.Length.EqualTo(1),
+                "Visual capture requires exactly one existing Unity Game view.");
+            _gameView = gameViews[0];
+
+            Type sizesType = RequireEditorType("UnityEditor.GameViewSizes");
+            Type? singletonType = sizesType.BaseType;
+            Assert.That(singletonType, Is.Not.Null);
+            PropertyInfo? instanceProperty = singletonType!.GetProperty(
+                "instance",
+                BindingFlags.Static | BindingFlags.Public |
+                BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+            Assert.That(instanceProperty, Is.Not.Null);
+            object? sizes = instanceProperty!.GetValue(null);
+            Assert.That(sizes, Is.Not.Null);
+            _gameViewSizeGroup = GetRequiredProperty(
+                sizes!,
+                "currentGroup");
+
+            _originalGameViewSizeIndex = GetRequiredIntProperty(
+                _gameView,
+                "selectedSizeIndex");
+            _originalGameViewCustomSizeCount = InvokeRequiredInt(
+                _gameViewSizeGroup,
+                "GetCustomCount");
+            int totalCount = InvokeRequiredInt(
+                _gameViewSizeGroup,
+                "GetTotalCount");
+            Assert.That(
+                _originalGameViewSizeIndex,
+                Is.InRange(0, totalCount - 1));
+            _gameViewSnapshotTaken = true;
+        }
+
+        private void SelectExactGameViewSize(int width, int height)
+        {
+            Assert.That(_gameViewSnapshotTaken, Is.True);
+            Assert.That(_gameView, Is.Not.Null);
+            Assert.That(_gameViewSizeGroup, Is.Not.Null);
+            string key = width + "x" + height;
+            if (!_captureGameViewSizeIndices.TryGetValue(key, out int totalIndex))
+            {
+                Type sizeType = RequireEditorType("UnityEditor.GameViewSize");
+                Type sizeKindType = RequireEditorType(
+                    "UnityEditor.GameViewSizeType");
+                ConstructorInfo? constructor = sizeType.GetConstructor(
+                    BindingFlags.Instance | BindingFlags.Public |
+                    BindingFlags.NonPublic,
+                    binder: null,
+                    types: new[]
+                    {
+                        sizeKindType,
+                        typeof(int),
+                        typeof(int),
+                        typeof(string)
+                    },
+                    modifiers: null);
+                Assert.That(constructor, Is.Not.Null);
+                object fixedResolution = Enum.ToObject(sizeKindType, 1);
+                object size = constructor!.Invoke(new object[]
+                {
+                    fixedResolution,
+                    width,
+                    height,
+                    "WP0002 VGR13 " + key
+                });
+                int builtinCount = InvokeRequiredInt(
+                    _gameViewSizeGroup!,
+                    "GetBuiltinCount");
+                int beforeCustomCount = InvokeRequiredInt(
+                    _gameViewSizeGroup!,
+                    "GetCustomCount");
+                InvokeRequired(
+                    _gameViewSizeGroup!,
+                    "AddCustomSize",
+                    new[] { sizeType },
+                    new[] { size });
+                int afterCustomCount = InvokeRequiredInt(
+                    _gameViewSizeGroup!,
+                    "GetCustomCount");
+                Assert.That(
+                    afterCustomCount,
+                    Is.EqualTo(beforeCustomCount + 1));
+                totalIndex = builtinCount + afterCustomCount - 1;
+                _captureGameViewSizeIndices.Add(key, totalIndex);
+            }
+
+            SetRequiredProperty(_gameView!, "selectedSizeIndex", totalIndex);
+            Assert.That(
+                GetRequiredIntProperty(_gameView!, "selectedSizeIndex"),
+                Is.EqualTo(totalIndex));
+            object selectedSize = GetRequiredProperty(
+                _gameView!,
+                "currentGameViewSize");
+            Assert.That(
+                GetRequiredIntProperty(selectedSize, "width"),
+                Is.EqualTo(width));
+            Assert.That(
+                GetRequiredIntProperty(selectedSize, "height"),
+                Is.EqualTo(height));
+            InvokeRequired(
+                _gameView!,
+                "Repaint",
+                Type.EmptyTypes,
+                Array.Empty<object>());
+        }
+
+        private void RestoreGameViewSelectionAndRemoveCaptureSizes()
+        {
+            if (!_gameViewSnapshotTaken ||
+                _gameView == null ||
+                _gameViewSizeGroup == null)
+            {
+                return;
+            }
+
+            SetRequiredProperty(
+                _gameView,
+                "selectedSizeIndex",
+                _originalGameViewSizeIndex);
+            while (InvokeRequiredInt(
+                       _gameViewSizeGroup,
+                       "GetCustomCount") >
+                   _originalGameViewCustomSizeCount)
+            {
+                int customCount = InvokeRequiredInt(
+                    _gameViewSizeGroup,
+                    "GetCustomCount");
+                InvokeRequired(
+                    _gameViewSizeGroup,
+                    "RemoveCustomSize",
+                    new[] { typeof(int) },
+                    new object[] { customCount - 1 });
+            }
+
+            Assert.That(
+                InvokeRequiredInt(
+                    _gameViewSizeGroup,
+                    "GetCustomCount"),
+                Is.EqualTo(_originalGameViewCustomSizeCount));
+            Assert.That(
+                GetRequiredIntProperty(_gameView, "selectedSizeIndex"),
+                Is.EqualTo(_originalGameViewSizeIndex));
+            _captureGameViewSizeIndices.Clear();
+            InvokeRequired(
+                _gameView,
+                "Repaint",
+                Type.EmptyTypes,
+                Array.Empty<object>());
+        }
+
+        private static Type RequireEditorType(string fullName)
+        {
+            Type? type = Type.GetType(
+                fullName + ", UnityEditor",
+                throwOnError: false);
+            Assert.That(type, Is.Not.Null, "Missing Editor type: " + fullName);
+            return type!;
+        }
+
+        private static object GetRequiredProperty(
+            object target,
+            string propertyName)
+        {
+            PropertyInfo? property = target.GetType().GetProperty(
+                propertyName,
+                BindingFlags.Instance | BindingFlags.Public |
+                BindingFlags.NonPublic);
+            Assert.That(property, Is.Not.Null);
+            object? value = property!.GetValue(target);
+            Assert.That(value, Is.Not.Null);
+            return value!;
+        }
+
+        private static int GetRequiredIntProperty(
+            object target,
+            string propertyName)
+        {
+            object value = GetRequiredProperty(target, propertyName);
+            Assert.That(value, Is.TypeOf<int>());
+            return (int)value;
+        }
+
+        private static void SetRequiredProperty(
+            object target,
+            string propertyName,
+            object value)
+        {
+            PropertyInfo? property = target.GetType().GetProperty(
+                propertyName,
+                BindingFlags.Instance | BindingFlags.Public |
+                BindingFlags.NonPublic);
+            Assert.That(property, Is.Not.Null);
+            Assert.That(property!.CanWrite, Is.True);
+            property.SetValue(target, value);
+        }
+
+        private static int InvokeRequiredInt(
+            object target,
+            string methodName)
+        {
+            object? value = InvokeRequired(
+                target,
+                methodName,
+                Type.EmptyTypes,
+                Array.Empty<object>());
+            Assert.That(value, Is.TypeOf<int>());
+            return (int)value!;
+        }
+
+        private static object? InvokeRequired(
+            object target,
+            string methodName,
+            Type[] parameterTypes,
+            object[] parameters)
+        {
+            MethodInfo? method = target.GetType().GetMethod(
+                methodName,
+                BindingFlags.Instance | BindingFlags.Public |
+                BindingFlags.NonPublic,
+                binder: null,
+                types: parameterTypes,
+                modifiers: null);
+            Assert.That(method, Is.Not.Null);
+            return method!.Invoke(target, parameters);
         }
 
         private static void StageTrialA(LastBearingGameController controller)
@@ -958,15 +1219,19 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             public int original_width;
             public int original_height;
             public string original_full_screen_mode = string.Empty;
-            public int physical_display_width;
-            public int physical_display_height;
+            public int unity_reported_display_width;
+            public int unity_reported_display_height;
             public int observed_editor_backbuffer_width;
             public int observed_editor_backbuffer_height;
-            public bool physical_native_capture_reached;
+            public bool unity_reported_display_resolution_capture_reached;
             public int provisional_architecture_target_width;
             public int provisional_architecture_target_height;
             public bool provisional_architecture_target_reached;
             public string native_target_semantics = string.Empty;
+            public string game_view_size_control = string.Empty;
+            public int original_game_view_size_index;
+            public int original_game_view_custom_size_count;
+            public bool game_view_custom_sizes_restored;
             public string quality_level = string.Empty;
             public string color_space = string.Empty;
             public float render_scale_width;
