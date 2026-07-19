@@ -177,6 +177,27 @@
         "Unity_Camera_Capture"
       ]
     },
+    "active_checkout_successor": {
+      "const": {
+        "amendment_id": "A1B-WP-0002-DURABLE-CHECKOUT-SUCCESSOR-20260719",
+        "authorization_receipt_id": "RR-WP0002-DURABLE-CHECKOUT-SUCCESSOR-20260719",
+        "previous_boundary_sha256": "3bdd2fa06334dfe525071e376924a0d702bff1241effc33bff44dc42783aeaa8",
+        "predecessor_repository_root": "/Users/sasha/Projects/sasha-the-land-pirate",
+        "predecessor_project_path": "/Users/sasha/Projects/sasha-the-land-pirate/Game",
+        "repository_root": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate",
+        "project_path": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game",
+        "remote_url": "https://github.com/AC-21/sasha-the-land-pirate",
+        "identity_policy": "same-protected-remote-fresh-protected-main-agent-branch",
+        "delegated_operator_target_override": true,
+        "scope_capture": {
+          "path": "docs/evidence/WP-0002/checkout-successor/scope-capture.json",
+          "sha256": "b79784b5e2cca5ba8c405b8e550cbd8d0f6dbb4d1c591bc3a1de9421eb1f1483"
+        },
+        "historical_activation_paths_retained": true,
+        "effective_authority_condition": "receipt-bound-control-squash-on-protected-main",
+        "packet_contract_changed": false
+      }
+    },
     "boundary_amendments": {
       "const": [
         {
@@ -295,6 +316,42 @@
             "restore_wp0002_policy_immediately_after_merge": true,
             "fresh_closure_pr_required": true,
             "modify_failed_pr_64": false,
+            "general_protection_bypass_authorized": false
+          }
+        },
+        {
+          "amendment_id": "A1B-WP-0002-DURABLE-CHECKOUT-SUCCESSOR-20260719",
+          "amendment_kind": "append-only-durable-checkout-successor",
+          "previous_boundary_sha256": "3bdd2fa06334dfe525071e376924a0d702bff1241effc33bff44dc42783aeaa8",
+          "authorization_receipt_id": "RR-WP0002-DURABLE-CHECKOUT-SUCCESSOR-20260719",
+          "required_claims": [
+            "SUPERSEDE-WP0002-ACTIVE-CHECKOUT-PATH-ONLY",
+            "AUTHORIZE-WP0002-DURABLE-CHECKOUT-SUCCESSOR"
+          ],
+          "governance_record": "governance/WP-0002-DURABLE-CHECKOUT-SUCCESSOR.md",
+          "packet_contract_changed": false,
+          "authority_expansion": false,
+          "materialization_control": {
+            "classification": "creator-controlled-checkout-correction-not-a1-implementation-authority",
+            "temporary_nonrequired_check": "wp0002-policy",
+            "exact_final_pr_head_and_patch_binding_required": true,
+            "retained_required_checks": ["validate", "wp0002-core"],
+            "retained_protections": [
+              "strict-up-to-date",
+              "pull-request-required",
+              "enforce-admins",
+              "conversation-resolution-required",
+              "linear-history-required",
+              "no-bypass-allowances",
+              "no-push-restrictions",
+              "force-push-disabled",
+              "deletion-disabled",
+              "squash-only"
+            ],
+            "creator_delegated_squash_merge_only": true,
+            "restore_wp0002_policy_immediately_after_merge": true,
+            "restoration_deadline_seconds": 600,
+            "first_implementation_pr_is_restored_policy_canary": true,
             "general_protection_bypass_authorized": false
           }
         }
@@ -777,6 +834,7 @@
           "external_cursor_review_control",
           "unity_runcommand_residual_capability",
           "creator_delegated_manual_authority",
+          "active_checkout_successor",
           "boundary_amendments",
           "delegated_local_unity_operator"
         ],

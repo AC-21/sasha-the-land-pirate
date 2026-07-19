@@ -19,7 +19,7 @@
   "a1_boundary_manifest": {
     "manifest_id": "A1B-WP-0002-LOCAL-DEV",
     "path": "governance/a1-boundaries/WP-0002.json",
-    "sha256": "3bdd2fa06334dfe525071e376924a0d702bff1241effc33bff44dc42783aeaa8"
+    "sha256": "c77a564f7476307fee0195aeeef3f6479c07ae26164fcaf566dcb5b6346d7282"
   },
   "implementer": null,
   "verifier": null,

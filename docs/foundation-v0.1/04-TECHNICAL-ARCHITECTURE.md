@@ -15,7 +15,7 @@ for its completed bounded local bootstrap under an exact sealed local boundary
 and conditional first-use gate. WP-0003 is now `released` and its reservation
 is released. WP-0002 is the sole active A1 packet under its protected Stage C
 boundary. Its canonical durable checkout is
-`/Users/sasha/Projects/sasha-the-land-pirate`
+`/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate`
 and its exact Unity project is the `Game` child. The sealed v1 local-operator
 receipt `RR-WP0002-LOCAL-OPERATOR-20260717` and amendment remain append-only
 historical evidence with disposition `superseded-unclosed-never-effective`.

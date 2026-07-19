@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "capture_kind": "wp0002-durable-checkout-successor-local-scope",
+  "captured_at": "2026-07-19T03:44:03Z",
+  "capture_phase": "stage1-local-proof-before-capture-file-creation",
+  "repository_root": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate",
+  "project_path": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game",
+  "repository_root_realpath": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate",
+  "git_toplevel": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate",
+  "remote_url_observed": "https://github.com/AC-21/sasha-the-land-pirate.git",
+  "remote_url_normalized": "https://github.com/AC-21/sasha-the-land-pirate",
+  "root_is_symlink": false,
+  "game_is_symlink": false,
+  "independent_git_directory": true,
+  "index_clean": true,
+  "head_commit": "3812bbecd96ec0db0d8a893fbdc2534565f0fbc3",
+  "head_tree": "381c77251b7f6d4cef93db12fa2b078cf77b9605",
+  "origin_main_commit": "3812bbecd96ec0db0d8a893fbdc2534565f0fbc3",
+  "origin_main_tree": "381c77251b7f6d4cef93db12fa2b078cf77b9605",
+  "head_matches_origin_main": true,
+  "candidate_branch": "agent/wp0002-checkout-successor-20260719",
+  "pre_capture_porcelain_v2_z_sha256": "f276802a2bf26ff4d883ab373569ed95029cdd9da77a31e4e2d9e87add9375b2",
+  "pre_capture_porcelain_v2_z_bytes": 3157,
+  "excluded_creator_owned_drift": [
+    {
+      "path": "Game/ProjectSettings/ProjectSettings.asset",
+      "sha256": "54bce2108b4d2faf2ab61ebcc759cd1d0199ff71152c979b5cdc5b7c3c5e997a",
+      "bytes_retained": false
+    },
+    {
+      "path": "Game/ProjectSettings/SceneTemplateSettings.json",
+      "sha256": "bb9098b3bfcde78d93e264b96f7b77b5430e64e8c57a7aad7f5a5d9c3945e16a",
+      "bytes_retained": false
+    }
+  ],
+  "retained_gate_json_count": 21,
+  "retained_untracked_gate_report_count": 14,
+  "retained_untracked_technical_capture_file_count": 2,
+  "retained_untracked_technical_capture_path_listing_sha256": "72109a5882b7ccedcf69a1c2afa40b4f15cbdf7d16e7f532958521955a7d4861",
+  "unity_editor_version": "6000.5.4f1",
+  "unity_editor_ready": true,
+  "unity_mcp_project_root": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game",
+  "unity_mcp_project_root_matches": true,
+  "secrets_or_creator_file_bytes_retained": false
+}

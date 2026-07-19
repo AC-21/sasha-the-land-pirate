@@ -422,6 +422,104 @@ WP0002_CANONICAL_REPOSITORY_ROOT = (
     "/Users/sasha/Projects/sasha-the-land-pirate"
 )
 WP0002_CANONICAL_PROJECT_PATH = f"{WP0002_CANONICAL_REPOSITORY_ROOT}/Game"
+WP0002_CHECKOUT_SUCCESSOR_PREVIOUS_BOUNDARY_SHA256 = (
+    "3bdd2fa06334dfe525071e376924a0d702bff1241effc33bff44dc42783aeaa8"
+)
+WP0002_CHECKOUT_SUCCESSOR_AMENDMENT_ID = (
+    "A1B-WP-0002-DURABLE-CHECKOUT-SUCCESSOR-20260719"
+)
+WP0002_CHECKOUT_SUCCESSOR_RECEIPT_ID = (
+    "RR-WP0002-DURABLE-CHECKOUT-SUCCESSOR-20260719"
+)
+WP0002_CHECKOUT_SUCCESSOR_CLAIM = (
+    "AUTHORIZE-WP0002-DURABLE-CHECKOUT-SUCCESSOR"
+)
+WP0002_CHECKOUT_SUCCESSOR_SUPERSESSION_CLAIM = (
+    "SUPERSEDE-WP0002-ACTIVE-CHECKOUT-PATH-ONLY"
+)
+WP0002_CHECKOUT_SUCCESSOR_PREDECESSOR_SUBJECT_ID = (
+    "A1B-WP-0002-LOCAL-DEV"
+)
+WP0002_CHECKOUT_SUCCESSOR_GOVERNANCE_PATH = (
+    "governance/WP-0002-DURABLE-CHECKOUT-SUCCESSOR.md"
+)
+WP0002_CHECKOUT_SUCCESSOR_RECEIPT_PATH = (
+    "ledger/receipts/RR-WP0002-DURABLE-CHECKOUT-SUCCESSOR-20260719.json"
+)
+WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH = (
+    "docs/foundation-v0.1/" + WP0002_CHECKOUT_SUCCESSOR_RECEIPT_PATH
+)
+WP0002_CHECKOUT_SUCCESSOR_PR_NUMBER = 79
+WP0002_CHECKOUT_SUCCESSOR_BASE_SHA = (
+    "3812bbecd96ec0db0d8a893fbdc2534565f0fbc3"
+)
+WP0002_CHECKOUT_SUCCESSOR_REMOTE = (
+    "https://github.com/AC-21/sasha-the-land-pirate"
+)
+WP0002_CHECKOUT_SUCCESSOR_SOURCE_PATTERN = re.compile(
+    r"https://github\.com/AC-21/sasha-the-land-pirate/"
+    r"pull/79#issuecomment-[0-9]+"
+)
+WP0002_CHECKOUT_SUCCESSOR_SCOPE_CAPTURE_PATH = (
+    "docs/evidence/WP-0002/checkout-successor/scope-capture.json"
+)
+WP0002_CHECKOUT_SUCCESSOR_SCOPE_CAPTURE_SHA256 = (
+    "b79784b5e2cca5ba8c405b8e550cbd8d0f6dbb4d1c591bc3a1de9421eb1f1483"
+)
+WP0002_ACTIVE_REPOSITORY_ROOT = (
+    "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/"
+    "sasha-the-land-pirate"
+)
+WP0002_ACTIVE_PROJECT_PATH = f"{WP0002_ACTIVE_REPOSITORY_ROOT}/Game"
+WP0002_CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS = (
+    "AGENTS.md",
+    "README.md",
+    "docs/foundation-v0.1/README.md",
+    "docs/foundation-v0.1/04-TECHNICAL-ARCHITECTURE.md",
+    "docs/foundation-v0.1/15-LEAN-A1-LOCAL-DEVELOPMENT.md",
+    WP0002_CHECKOUT_SUCCESSOR_SCOPE_CAPTURE_PATH,
+    "docs/foundation-v0.1/" + WP0002_CHECKOUT_SUCCESSOR_GOVERNANCE_PATH,
+    "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json",
+    "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
+    "docs/foundation-v0.1/schemas/ratification-receipt.schema.json",
+    "docs/foundation-v0.1/tools/test_validate_local_a1_boundary.py",
+    "docs/foundation-v0.1/tools/validate_foundation.py",
+    "docs/foundation-v0.1/work-packets/proposed/WP-0002.json",
+)
+WP0002_CHECKOUT_SUCCESSOR_RETAINED_REQUIRED_CHECKS = (
+    "validate@15368",
+    "wp0002-core@15368",
+)
+WP0002_CHECKOUT_SUCCESSOR_RESTORED_REQUIRED_CHECKS = (
+    "validate@15368",
+    "wp0002-core@15368",
+    "wp0002-policy@15368",
+)
+WP0002_ACTIVE_CHECKOUT_SUCCESSOR = {
+    "amendment_id": WP0002_CHECKOUT_SUCCESSOR_AMENDMENT_ID,
+    "authorization_receipt_id": WP0002_CHECKOUT_SUCCESSOR_RECEIPT_ID,
+    "previous_boundary_sha256": (
+        WP0002_CHECKOUT_SUCCESSOR_PREVIOUS_BOUNDARY_SHA256
+    ),
+    "predecessor_repository_root": WP0002_CANONICAL_REPOSITORY_ROOT,
+    "predecessor_project_path": WP0002_CANONICAL_PROJECT_PATH,
+    "repository_root": WP0002_ACTIVE_REPOSITORY_ROOT,
+    "project_path": WP0002_ACTIVE_PROJECT_PATH,
+    "remote_url": WP0002_CHECKOUT_SUCCESSOR_REMOTE,
+    "identity_policy": (
+        "same-protected-remote-fresh-protected-main-agent-branch"
+    ),
+    "delegated_operator_target_override": True,
+    "scope_capture": {
+        "path": WP0002_CHECKOUT_SUCCESSOR_SCOPE_CAPTURE_PATH,
+        "sha256": WP0002_CHECKOUT_SUCCESSOR_SCOPE_CAPTURE_SHA256,
+    },
+    "historical_activation_paths_retained": True,
+    "effective_authority_condition": (
+        "receipt-bound-control-squash-on-protected-main"
+    ),
+    "packet_contract_changed": False,
+}
 WP0002_LOCAL_OPERATOR_SCOPE_URI = (
     "repo://docs/evidence/WP-0002/local-operator-successor/"
     "scope-capture/working-tree-scope.json"
@@ -815,6 +913,47 @@ WP0002_BOUNDARY_AMENDMENTS = [
             "general_protection_bypass_authorized": False,
         },
     },
+    {
+        "amendment_id": WP0002_CHECKOUT_SUCCESSOR_AMENDMENT_ID,
+        "amendment_kind": "append-only-durable-checkout-successor",
+        "previous_boundary_sha256": (
+            WP0002_CHECKOUT_SUCCESSOR_PREVIOUS_BOUNDARY_SHA256
+        ),
+        "authorization_receipt_id": WP0002_CHECKOUT_SUCCESSOR_RECEIPT_ID,
+        "required_claims": [
+            WP0002_CHECKOUT_SUCCESSOR_SUPERSESSION_CLAIM,
+            WP0002_CHECKOUT_SUCCESSOR_CLAIM,
+        ],
+        "governance_record": WP0002_CHECKOUT_SUCCESSOR_GOVERNANCE_PATH,
+        "packet_contract_changed": False,
+        "authority_expansion": False,
+        "materialization_control": {
+            "classification": (
+                "creator-controlled-checkout-correction-not-a1-"
+                "implementation-authority"
+            ),
+            "temporary_nonrequired_check": "wp0002-policy",
+            "exact_final_pr_head_and_patch_binding_required": True,
+            "retained_required_checks": ["validate", "wp0002-core"],
+            "retained_protections": [
+                "strict-up-to-date",
+                "pull-request-required",
+                "enforce-admins",
+                "conversation-resolution-required",
+                "linear-history-required",
+                "no-bypass-allowances",
+                "no-push-restrictions",
+                "force-push-disabled",
+                "deletion-disabled",
+                "squash-only",
+            ],
+            "creator_delegated_squash_merge_only": True,
+            "restore_wp0002_policy_immediately_after_merge": True,
+            "restoration_deadline_seconds": 600,
+            "first_implementation_pr_is_restored_policy_canary": True,
+            "general_protection_bypass_authorized": False,
+        },
+    },
 ]
 WP0002_DELEGATED_LOCAL_UNITY_OPERATOR = {
     "authorization_receipt_id": WP0002_LOCAL_OPERATOR_RECEIPT_ID,
@@ -1047,7 +1186,10 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
         "5f02ee7fd59bb0a6eea5cac3ba26cbb7c82d59ae8ae1008ab58cb3b72c541d19"
     ),
     "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json": (
-        "ec95d5da2d9b216f9bbda23b94bb3c4b6214db65a46c627f1efa31c3b2d8468e"
+        "6958d0cc6e521dbe619150ed417c579196af490bbfd7a78745f211030db36435"
+    ),
+    "docs/foundation-v0.1/schemas/ratification-receipt.schema.json": (
+        "a6317b22edb1cf184f3fb74ad6dcadaa0bd188e781b4ad2dfc0c5d77ff4b800c"
     ),
     "docs/foundation-v0.1/schemas/"
     "wp0002-local-operator-successor-scope-capture.schema.json": (
@@ -1074,7 +1216,7 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
         "c77d2d2534972d1d510b54b0a75834d9f6fd7340beef773f710eb107a7d6bdff"
     ),
     "docs/foundation-v0.1/tools/test_validate_local_a1_boundary.py": (
-        "8541569ddc179c48d8592236d27758da849dc9180669c7774edad07472962043"
+        "a3933f167fb1ff8375b6dc25419224eeabb0f64e92e05353e4d523d405265b91"
     ),
     "docs/foundation-v0.1/tools/"
     "test_verify_wp0002_local_operator_transaction_v3.py": (
@@ -1422,6 +1564,45 @@ def git_repo_tree_listing(commit: str, repo_relative: str) -> bytes | None:
         ]
     )
     return result.stdout if result.returncode == 0 else None
+
+
+def git_rev_parse_commit(reference: str) -> str | None:
+    result = run_foundation_git(
+        ["rev-parse", "--verify", "--quiet", f"{reference}^{{commit}}"]
+    )
+    if result.returncode != 0:
+        return None
+    try:
+        commit = result.stdout.decode("ascii").strip()
+    except UnicodeDecodeError:
+        return None
+    return commit if re.fullmatch(r"[0-9a-f]{40}", commit) else None
+
+
+def git_first_parent_path_additions(
+    reference: str,
+    repo_relative: str,
+) -> list[str] | None:
+    result = run_foundation_git(
+        [
+            "log",
+            "--first-parent",
+            "--diff-filter=A",
+            "--format=%H",
+            reference,
+            "--",
+            repo_relative,
+        ]
+    )
+    if result.returncode != 0:
+        return None
+    try:
+        commits = result.stdout.decode("ascii").splitlines()
+    except UnicodeDecodeError:
+        return None
+    if any(re.fullmatch(r"[0-9a-f]{40}", commit) is None for commit in commits):
+        return None
+    return commits
 
 
 def git_foundation_blob(commit: str, relative: str) -> bytes | None:
@@ -8399,6 +8580,506 @@ def validate_wp0002_local_operator_transaction_evidence(
     return errors
 
 
+def _wp0002_checkout_blob(
+    repository: object,
+    commit: str,
+    repo_relative: str,
+) -> bytes | None:
+    try:
+        return repository.blob_at(commit, repo_relative)
+    except Exception:
+        return None
+
+
+def _wp0002_checkout_expected_comment_binding(
+    repository: object,
+    packet: dict,
+    base_commit: str,
+    accepted_commit: str,
+    stage1: dict[str, object],
+    changed_files: list[dict[str, object]],
+) -> dict[str, object] | None:
+    try:
+        patch = repository.deterministic_patch(base_commit, accepted_commit)
+    except Exception:
+        return None
+    return {
+        "claim": WP0002_CHECKOUT_SUCCESSOR_CLAIM,
+        "supersession_claim": WP0002_CHECKOUT_SUCCESSOR_SUPERSESSION_CLAIM,
+        "amendment_id": WP0002_CHECKOUT_SUCCESSOR_AMENDMENT_ID,
+        "receipt_id": WP0002_CHECKOUT_SUCCESSOR_RECEIPT_ID,
+        "pr_number": WP0002_CHECKOUT_SUCCESSOR_PR_NUMBER,
+        "packet_contract_sha256": packet.get("contract_sha256"),
+        "previous_boundary_sha256": (
+            WP0002_CHECKOUT_SUCCESSOR_PREVIOUS_BOUNDARY_SHA256
+        ),
+        "repository_remote": WP0002_CHECKOUT_SUCCESSOR_REMOTE,
+        "predecessor_repository_root": WP0002_CANONICAL_REPOSITORY_ROOT,
+        "successor_repository_root": WP0002_ACTIVE_REPOSITORY_ROOT,
+        "predecessor_project_path": WP0002_CANONICAL_PROJECT_PATH,
+        "successor_project_path": WP0002_ACTIVE_PROJECT_PATH,
+        "stage1_base": base_commit,
+        "stage1_commit": accepted_commit,
+        "stage1_tree": stage1.get("tree"),
+        "stage1_patch_sha256": hashlib.sha256(patch).hexdigest(),
+        "changed_files_manifest_sha256": sha256_canonical_json(changed_files),
+        "changed_paths": sorted(
+            str(item.get("path")) for item in changed_files
+        ),
+        "receipt_path": WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "retained_required_checks": list(
+            WP0002_CHECKOUT_SUCCESSOR_RETAINED_REQUIRED_CHECKS
+        ),
+        "restored_required_checks": list(
+            WP0002_CHECKOUT_SUCCESSOR_RESTORED_REQUIRED_CHECKS
+        ),
+    }
+
+
+def _validate_wp0002_checkout_stored_authority_binding(
+    packet: dict,
+    checkout_receipt: dict,
+) -> list[str]:
+    binding = checkout_receipt.get("materialization_authority_binding")
+    if not isinstance(binding, dict):
+        return [
+            "WP-0002 checkout successor receipt lacks its durable authority binding"
+        ]
+    expected = {
+        "claim": WP0002_CHECKOUT_SUCCESSOR_CLAIM,
+        "supersession_claim": WP0002_CHECKOUT_SUCCESSOR_SUPERSESSION_CLAIM,
+        "amendment_id": WP0002_CHECKOUT_SUCCESSOR_AMENDMENT_ID,
+        "receipt_id": WP0002_CHECKOUT_SUCCESSOR_RECEIPT_ID,
+        "pr_number": WP0002_CHECKOUT_SUCCESSOR_PR_NUMBER,
+        "packet_contract_sha256": packet.get("contract_sha256"),
+        "previous_boundary_sha256": (
+            WP0002_CHECKOUT_SUCCESSOR_PREVIOUS_BOUNDARY_SHA256
+        ),
+        "repository_remote": WP0002_CHECKOUT_SUCCESSOR_REMOTE,
+        "predecessor_repository_root": WP0002_CANONICAL_REPOSITORY_ROOT,
+        "successor_repository_root": WP0002_ACTIVE_REPOSITORY_ROOT,
+        "predecessor_project_path": WP0002_CANONICAL_PROJECT_PATH,
+        "successor_project_path": WP0002_ACTIVE_PROJECT_PATH,
+        "stage1_base": WP0002_CHECKOUT_SUCCESSOR_BASE_SHA,
+        "stage1_commit": checkout_receipt.get("accepted_commit"),
+        "stage1_tree": binding.get("stage1_tree"),
+        "stage1_patch_sha256": binding.get("stage1_patch_sha256"),
+        "changed_files_manifest_sha256": binding.get(
+            "changed_files_manifest_sha256"
+        ),
+        "changed_paths": sorted(
+            WP0002_CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS
+        ),
+        "receipt_path": WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "retained_required_checks": list(
+            WP0002_CHECKOUT_SUCCESSOR_RETAINED_REQUIRED_CHECKS
+        ),
+        "restored_required_checks": list(
+            WP0002_CHECKOUT_SUCCESSOR_RESTORED_REQUIRED_CHECKS
+        ),
+    }
+    errors: list[str] = []
+    if binding != expected:
+        errors.append(
+            "WP-0002 checkout successor durable authority binding is not exact"
+        )
+    if (
+        re.fullmatch(r"[0-9a-f]{40}", str(binding.get("stage1_tree"))) is None
+        or re.fullmatch(
+            r"[0-9a-f]{64}", str(binding.get("stage1_patch_sha256"))
+        )
+        is None
+        or re.fullmatch(
+            r"[0-9a-f]{64}",
+            str(binding.get("changed_files_manifest_sha256")),
+        )
+        is None
+    ):
+        errors.append(
+            "WP-0002 checkout successor durable authority Git hashes are malformed"
+        )
+    if checkout_receipt.get("approval_text_sha256") != sha256_canonical_json(
+        binding
+    ):
+        errors.append(
+            "WP-0002 checkout successor owner comment hash differs from its durable binding"
+        )
+    return errors
+
+
+def _validate_wp0002_checkout_stage1(
+    repository: object,
+    packet: dict,
+    checkout_receipt: dict,
+    base_commit: str,
+    accepted_commit: str,
+) -> list[str]:
+    errors: list[str] = []
+    try:
+        stage1 = repository.commit(accepted_commit)
+        changed_files = repository.changed_files(base_commit, accepted_commit)
+    except Exception:
+        return [
+            "WP-0002 checkout successor Stage-1 Git facts are unavailable or invalid"
+        ]
+    if stage1.get("parents") != [base_commit]:
+        errors.append(
+            "WP-0002 checkout successor Stage-1 is not the direct child of its exact base"
+        )
+    expected_paths = set(WP0002_CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS)
+    actual_paths = {
+        item.get("path") for item in changed_files if isinstance(item, dict)
+    }
+    if actual_paths != expected_paths or len(changed_files) != len(expected_paths):
+        errors.append(
+            "WP-0002 checkout successor Stage-1 changed-path set is not exact"
+        )
+    artifact_hashes = checkout_receipt.get("artifact_sha256", {})
+    for item in changed_files:
+        if not isinstance(item, dict) or not isinstance(item.get("path"), str):
+            errors.append(
+                "WP-0002 checkout successor Stage-1 changed-file record is malformed"
+            )
+            continue
+        path = item["path"]
+        base_blob = _wp0002_checkout_blob(repository, base_commit, path)
+        expected_status = "A" if base_blob is None else "M"
+        if item.get("status") != expected_status or item.get("new_mode") != "100644":
+            errors.append(
+                "WP-0002 checkout successor Stage-1 mode or status differs: "
+                + path
+            )
+        stage1_blob = _wp0002_checkout_blob(repository, accepted_commit, path)
+        if (
+            stage1_blob is None
+            or not isinstance(artifact_hashes, dict)
+            or artifact_hashes.get(path)
+            != hashlib.sha256(stage1_blob).hexdigest()
+            or artifact_hashes.get(path) != item.get("new_blob_sha256")
+        ):
+            errors.append(
+                "WP-0002 checkout successor receipt does not bind Stage-1 blob: "
+                + path
+            )
+    if _wp0002_checkout_blob(
+        repository,
+        accepted_commit,
+        WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH,
+    ) is not None:
+        errors.append("WP-0002 checkout successor receipt already exists in Stage-1")
+    authority_binding = _wp0002_checkout_expected_comment_binding(
+        repository,
+        packet,
+        base_commit,
+        accepted_commit,
+        stage1,
+        changed_files,
+    )
+    if (
+        authority_binding is None
+        or checkout_receipt.get("materialization_authority_binding")
+        != authority_binding
+    ):
+        errors.append(
+            "WP-0002 checkout successor owner comment does not bind exact Stage-1 Git facts"
+        )
+    return errors
+
+
+def validate_wp0002_checkout_successor_git_materialization(
+    packet: dict,
+    checkout_receipt: dict,
+    receipt_bytes: bytes,
+) -> list[str]:
+    """Validate the exact two-commit candidate or retained squash introduction."""
+    errors: list[str] = []
+    replacement_refs = run_foundation_git(
+        ["for-each-ref", "--format=%(refname)", "refs/replace"]
+    )
+    if replacement_refs.returncode != 0 or replacement_refs.stdout:
+        return [
+            "WP-0002 checkout successor refuses Git replacement objects"
+        ]
+    git_directory = run_foundation_git(["rev-parse", "--absolute-git-dir"])
+    if git_directory.returncode != 0:
+        return ["WP-0002 checkout successor cannot resolve the exact Git directory"]
+    try:
+        graft_path = Path(git_directory.stdout.decode("utf-8").strip()) / "info" / "grafts"
+        if graft_path.exists():
+            graft_metadata = graft_path.lstat()
+            if (
+                not stat.S_ISREG(graft_metadata.st_mode)
+                or stat.S_ISLNK(graft_metadata.st_mode)
+                or graft_path.read_bytes()
+            ):
+                return ["WP-0002 checkout successor refuses legacy Git grafts"]
+    except (OSError, UnicodeDecodeError):
+        return ["WP-0002 checkout successor cannot inspect legacy Git grafts"]
+    verifier, verifier_errors = _load_wp0002_transaction_verifier()
+    errors.extend(verifier_errors)
+    repository_type = verifier.get("GitRepository") if verifier is not None else None
+    if not callable(repository_type):
+        return errors + [
+            "WP-0002 checkout successor lacks its hash-pinned Git verifier"
+        ]
+    try:
+        repository = repository_type(REPO_ROOT)
+    except Exception:
+        return errors + [
+            "WP-0002 checkout successor Git verifier cannot inspect the repository"
+        ]
+    origin_main = git_rev_parse_commit("refs/remotes/origin/main")
+    if origin_main is None:
+        return errors + [
+            "WP-0002 checkout successor cannot resolve protected origin/main"
+        ]
+    accepted_commit = checkout_receipt.get("accepted_commit")
+    if (
+        not isinstance(accepted_commit, str)
+        or re.fullmatch(r"[0-9a-f]{40}", accepted_commit) is None
+    ):
+        return errors + [
+            "WP-0002 checkout successor receipt accepted_commit is not an exact Git SHA"
+        ]
+    protected_receipt = _wp0002_checkout_blob(
+        repository,
+        origin_main,
+        WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH,
+    )
+    if protected_receipt is None:
+        if origin_main != WP0002_CHECKOUT_SUCCESSOR_BASE_SHA:
+            errors.append(
+                "WP-0002 checkout successor candidate base is not the exact protected main"
+            )
+        errors.extend(
+            _validate_wp0002_checkout_stage1(
+                repository,
+                packet,
+                checkout_receipt,
+                origin_main,
+                accepted_commit,
+            )
+        )
+        head_sha = git_rev_parse_commit("HEAD")
+        if head_sha is None:
+            return errors + [
+                "WP-0002 checkout successor candidate HEAD cannot be resolved"
+            ]
+        try:
+            head = repository.commit(head_sha)
+        except Exception:
+            return errors + [
+                "WP-0002 checkout successor candidate HEAD is invalid"
+            ]
+        final_head: str | None = None
+        if head.get("parents") == [accepted_commit]:
+            final_head = head_sha
+        else:
+            parents = head.get("parents")
+            if (
+                isinstance(parents, list)
+                and len(parents) == 2
+                and parents[0] == origin_main
+            ):
+                pull_head_sha = parents[1]
+                try:
+                    pull_head = repository.commit(pull_head_sha)
+                except Exception:
+                    pull_head = {}
+                if (
+                    pull_head.get("parents") == [accepted_commit]
+                    and pull_head.get("tree") == head.get("tree")
+                ):
+                    final_head = pull_head_sha
+        if final_head is None:
+            return errors + [
+                "WP-0002 checkout successor final candidate is not the exact receipt-only child"
+            ]
+        try:
+            receipt_delta = repository.changed_files(accepted_commit, final_head)
+        except Exception:
+            return errors + [
+                "WP-0002 checkout successor receipt-only delta is invalid"
+            ]
+        if (
+            len(receipt_delta) != 1
+            or receipt_delta[0].get("path")
+            != WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH
+            or receipt_delta[0].get("status") != "A"
+            or receipt_delta[0].get("new_mode") != "100644"
+        ):
+            errors.append(
+                "WP-0002 checkout successor Stage-2 is not the exact one-file receipt addition"
+            )
+        if _wp0002_checkout_blob(
+            repository,
+            final_head,
+            WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH,
+        ) != receipt_bytes:
+            errors.append(
+                "WP-0002 checkout successor committed Stage-2 receipt bytes differ"
+            )
+        return errors
+
+    additions = git_first_parent_path_additions(
+        "refs/remotes/origin/main",
+        WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH,
+    )
+    if additions is None or len(additions) != 1:
+        return errors + [
+            "WP-0002 checkout successor receipt has no unique protected-main introduction"
+        ]
+    introduction = additions[0]
+    try:
+        introduction_record = repository.commit(introduction)
+    except Exception:
+        return errors + [
+            "WP-0002 checkout successor protected squash commit is invalid"
+        ]
+    parents = introduction_record.get("parents")
+    if not isinstance(parents, list) or len(parents) != 1:
+        return errors + [
+            "WP-0002 checkout successor was not introduced by one linear squash"
+        ]
+    squash_base = parents[0]
+    if squash_base != WP0002_CHECKOUT_SUCCESSOR_BASE_SHA:
+        errors.append(
+            "WP-0002 checkout successor protected squash has the wrong base"
+        )
+    try:
+        squash_delta = repository.changed_files(squash_base, introduction)
+    except Exception:
+        return errors + [
+            "WP-0002 checkout successor protected squash delta is invalid"
+        ]
+    expected_final_paths = set(WP0002_CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS) | {
+        WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH
+    }
+    actual_final_paths = {
+        item.get("path") for item in squash_delta if isinstance(item, dict)
+    }
+    if actual_final_paths != expected_final_paths or len(squash_delta) != len(
+        expected_final_paths
+    ):
+        errors.append(
+            "WP-0002 checkout successor protected squash changed-path set is not exact"
+        )
+    artifact_hashes = checkout_receipt.get("artifact_sha256", {})
+    for item in squash_delta:
+        if not isinstance(item, dict) or not isinstance(item.get("path"), str):
+            errors.append(
+                "WP-0002 checkout successor protected squash record is malformed"
+            )
+            continue
+        path = item["path"]
+        base_blob = _wp0002_checkout_blob(repository, squash_base, path)
+        expected_status = "A" if base_blob is None else "M"
+        if item.get("status") != expected_status or item.get("new_mode") != "100644":
+            errors.append(
+                "WP-0002 checkout successor protected squash mode or status differs: "
+                + path
+            )
+        intro_blob = _wp0002_checkout_blob(repository, introduction, path)
+        if path == WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH:
+            if intro_blob != receipt_bytes or item.get("status") != "A":
+                errors.append(
+                    "WP-0002 checkout successor protected receipt bytes differ"
+                )
+        elif (
+            intro_blob is None
+            or not isinstance(artifact_hashes, dict)
+            or artifact_hashes.get(path)
+            != hashlib.sha256(intro_blob).hexdigest()
+            or artifact_hashes.get(path) != item.get("new_blob_sha256")
+        ):
+            errors.append(
+                "WP-0002 checkout successor receipt does not bind protected squash blob: "
+                + path
+            )
+    if protected_receipt != receipt_bytes:
+        errors.append(
+            "WP-0002 checkout successor protected-main receipt bytes drifted"
+        )
+    if git_commit_exists(accepted_commit):
+        errors.extend(
+            _validate_wp0002_checkout_stage1(
+                repository,
+                packet,
+                checkout_receipt,
+                squash_base,
+                accepted_commit,
+            )
+        )
+    return errors
+
+
+def validate_wp0002_checkout_successor_receipt(
+    packet: dict,
+    checkout_receipt: dict,
+) -> list[str]:
+    """Bind the named receipt file, Git transaction, and protected owner comment."""
+    receipt_path = ROOT / WP0002_CHECKOUT_SUCCESSOR_RECEIPT_PATH
+    try:
+        metadata = receipt_path.lstat()
+        receipt_bytes = receipt_path.read_bytes()
+        exact_receipt = json.loads(receipt_bytes.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return ["WP-0002 checkout successor exact named receipt file is missing"]
+    errors: list[str] = []
+    if not stat.S_ISREG(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+        errors.append(
+            "WP-0002 checkout successor exact receipt path is not a regular file"
+        )
+    if exact_receipt != checkout_receipt:
+        errors.append(
+            "WP-0002 checkout successor receipt ID resolves outside its exact named file"
+        )
+    if checkout_receipt.get("foundation_binding") is not None:
+        errors.append(
+            "WP-0002 checkout successor receipt invents a foundation binding"
+        )
+    errors.extend(
+        _validate_wp0002_checkout_stored_authority_binding(
+            packet,
+            checkout_receipt,
+        )
+    )
+    source_reference = checkout_receipt.get("source_reference")
+    artifact_hashes = checkout_receipt.get("artifact_sha256")
+    expected_artifact_keys = set(
+        WP0002_CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS
+    )
+    if isinstance(source_reference, str):
+        expected_artifact_keys.add(source_reference)
+    if (
+        not isinstance(source_reference, str)
+        or WP0002_CHECKOUT_SUCCESSOR_SOURCE_PATTERN.fullmatch(source_reference)
+        is None
+        or not isinstance(artifact_hashes, dict)
+        or set(artifact_hashes) != expected_artifact_keys
+    ):
+        errors.append(
+            "WP-0002 checkout successor receipt artifact set or owner source is not exact"
+        )
+    elif (
+        artifact_hashes.get(source_reference)
+        != checkout_receipt.get("approval_text_sha256")
+    ):
+        errors.append(
+            "WP-0002 checkout successor receipt does not bind its owner comment"
+        )
+    errors.extend(
+        validate_wp0002_checkout_successor_git_materialization(
+            packet,
+            checkout_receipt,
+            receipt_bytes,
+        )
+    )
+    return errors
+
+
 def validate_wp0002_local_operator_amendment(
     manifest: dict,
     packet: dict,
@@ -8409,6 +9090,22 @@ def validate_wp0002_local_operator_amendment(
     errors: list[str] = []
     if manifest.get("boundary_amendments") != WP0002_BOUNDARY_AMENDMENTS:
         errors.append("WP-0002 local operator boundary amendment chain is not exact")
+    if (
+        manifest.get("active_checkout_successor")
+        != WP0002_ACTIVE_CHECKOUT_SUCCESSOR
+    ):
+        errors.append("WP-0002 active durable checkout successor is not exact")
+    checkout_scope_capture = REPO_ROOT / (
+        WP0002_CHECKOUT_SUCCESSOR_SCOPE_CAPTURE_PATH
+    )
+    if (
+        not checkout_scope_capture.is_file()
+        or sha256_file(checkout_scope_capture)
+        != WP0002_CHECKOUT_SUCCESSOR_SCOPE_CAPTURE_SHA256
+    ):
+        errors.append(
+            "WP-0002 durable checkout successor scope capture differs"
+        )
     if (
         manifest.get("delegated_local_unity_operator")
         != WP0002_DELEGATED_LOCAL_UNITY_OPERATOR
@@ -8433,7 +9130,10 @@ def validate_wp0002_local_operator_amendment(
         or repository.get("game_project_path") != WP0002_CANONICAL_PROJECT_PATH
         or unity.get("project_path") != WP0002_CANONICAL_PROJECT_PATH
     ):
-        errors.append("WP-0002 local operator amendment does not bind canonical paths")
+        errors.append(
+            "WP-0002 local operator amendment does not retain historical "
+            "activation paths"
+        )
     if (
         unity.get("successor_first_use_preconditions")
         != WP0002_SUCCESSOR_FIRST_USE_PRECONDITIONS
@@ -8631,6 +9331,67 @@ def validate_wp0002_local_operator_amendment(
             validate_wp0002_local_operator_transaction_evidence(
                 recovery_receipt,
                 manifest,
+            )
+        )
+
+    checkout_receipt = receipts_by_id.get(
+        WP0002_CHECKOUT_SUCCESSOR_RECEIPT_ID
+    )
+    if not isinstance(checkout_receipt, dict):
+        errors.append(
+            "WP-0002 checkout successor is pending its exact receipt-only "
+            "child and is nonmergeable"
+        )
+    else:
+        resolver = checkout_receipt.get("artifact_resolver")
+        claims_by_subject = subject_claims(checkout_receipt)
+        successor_claims = claims_by_subject.get(
+            WP0002_CHECKOUT_SUCCESSOR_PREDECESSOR_SUBJECT_ID,
+            set(),
+        )
+        packet_claims = claims_by_subject.get("WP-0002", set())
+        source_reference = checkout_receipt.get("source_reference")
+        signature_reference = checkout_receipt.get("signature_reference")
+        if (
+            checkout_receipt.get("receipt_kind") != "creator-authorization"
+            or checkout_receipt.get("issued_by") != "AC-21"
+            or checkout_receipt.get("issuer_role") != "creator"
+            or checkout_receipt.get("sealed") is not True
+            or not isinstance(resolver, dict)
+            or resolver.get("type") != "external-protected"
+            or not isinstance(source_reference, str)
+            or WP0002_CHECKOUT_SUCCESSOR_SOURCE_PATTERN.fullmatch(source_reference)
+            is None
+            or resolver.get("resolver_reference") != source_reference
+            or signature_reference != source_reference
+            or checkout_receipt.get("subject_ids")
+            != [WP0002_CHECKOUT_SUCCESSOR_PREDECESSOR_SUBJECT_ID, "WP-0002"]
+            or successor_claims
+            != {WP0002_CHECKOUT_SUCCESSOR_SUPERSESSION_CLAIM}
+            or packet_claims != {WP0002_CHECKOUT_SUCCESSOR_CLAIM}
+        ):
+            errors.append(
+                "WP-0002 checkout successor receipt lacks exact protected "
+                "creator authority"
+            )
+        if checkout_receipt.get("subject_contract_sha256") != {
+            WP0002_CHECKOUT_SUCCESSOR_PREDECESSOR_SUBJECT_ID: (
+                WP0002_CHECKOUT_SUCCESSOR_PREVIOUS_BOUNDARY_SHA256
+            ),
+            "WP-0002": packet.get("contract_sha256"),
+        }:
+            errors.append(
+                "WP-0002 checkout successor receipt changes or misbinds the "
+                "packet contract"
+            )
+        if checkout_receipt.get("subject_event_sha256") != {}:
+            errors.append(
+                "WP-0002 checkout successor receipt invents an event binding"
+            )
+        errors.extend(
+            validate_wp0002_checkout_successor_receipt(
+                packet,
+                checkout_receipt,
             )
         )
 
