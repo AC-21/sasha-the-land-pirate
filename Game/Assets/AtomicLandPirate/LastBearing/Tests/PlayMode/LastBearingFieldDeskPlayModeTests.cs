@@ -33,6 +33,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             yield return null;
             LastBearingFieldDesk desk = RequireDesk(controller);
             UIDocument document = RequireDocument(controller);
+            Assert.That(document.panelSettings.themeStyleSheet, Is.Not.Null);
             VisualElement overlay = document.rootVisualElement.Q<VisualElement>(
                 "field-desk-overlay");
             Assert.That(overlay, Is.Not.Null);

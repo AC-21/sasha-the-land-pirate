@@ -1183,8 +1183,11 @@ namespace AtomicLandPirate.LastBearingTests
             Require(fieldDesk, "PanelSettings");
             Require(fieldDesk, "Resources.Load<VisualTreeAsset>");
             Require(fieldDesk, "Resources.Load<StyleSheet>");
+            Require(fieldDesk, "Resources.Load<ThemeStyleSheet>");
+            Require(fieldDesk, ".themeStyleSheet = theme;");
             Require(fieldDesk, "LastBearingFieldDeskLayout");
             Require(fieldDesk, "LastBearingFieldDeskStyles");
+            Require(fieldDesk, "LastBearingFieldDeskTheme");
             Require(fieldDesk, "CloneTree(");
             Require(fieldDesk, ".Q<");
             Require(fieldDesk, "RegisterCallbacks");

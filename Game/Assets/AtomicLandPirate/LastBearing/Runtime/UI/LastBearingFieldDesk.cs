@@ -12,6 +12,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
     {
         private const string LayoutResource = "LastBearingFieldDeskLayout";
         private const string StylesResource = "LastBearingFieldDeskStyles";
+        private const string ThemeResource = "LastBearingFieldDeskTheme";
         private const float RefreshIntervalSeconds = 1f;
 
         private LastBearingGameController? _controller;
@@ -150,7 +151,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             VisualTreeAsset? layout =
                 Resources.Load<VisualTreeAsset>(LayoutResource);
             StyleSheet? styles = Resources.Load<StyleSheet>(StylesResource);
-            if (layout == null || styles == null)
+            ThemeStyleSheet? theme =
+                Resources.Load<ThemeStyleSheet>(ThemeResource);
+            if (layout == null || styles == null || theme == null)
             {
                 throw new InvalidOperationException("Field Desk resources are missing.");
             }
@@ -158,6 +161,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _panelSettings = ScriptableObject.CreateInstance<PanelSettings>();
             _panelSettings.name = "Last Bearing Field Desk Panel";
             _panelSettings.hideFlags = HideFlags.DontSave;
+            _panelSettings.themeStyleSheet = theme;
             _panelSettings.renderMode = PanelRenderMode.ScreenSpaceOverlay;
             _panelSettings.clearColor = false;
             _panelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
