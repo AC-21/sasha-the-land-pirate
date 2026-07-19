@@ -37,6 +37,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         private int _originalWidth;
         private int _originalHeight;
         private FullScreenMode _originalFullScreenMode;
+        private int _observedNativeWidth;
+        private int _observedNativeHeight;
         private bool _resolutionSnapshotTaken;
         private bool _sceneLoadedByCapture;
 
@@ -77,6 +79,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             _pending.Clear();
             _resolutionSnapshotTaken = false;
             _sceneLoadedByCapture = false;
+            _observedNativeWidth = 0;
+            _observedNativeHeight = 0;
             yield return null;
         }
 
@@ -101,6 +105,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             _originalFullScreenMode = Screen.fullScreenMode;
             _resolutionSnapshotTaken = true;
             Resolution currentResolution = Screen.currentResolution;
+            _observedNativeWidth = currentResolution.width;
+            _observedNativeHeight = currentResolution.height;
+            Assert.That(_observedNativeWidth, Is.GreaterThan(0));
+            Assert.That(_observedNativeHeight, Is.GreaterThan(0));
 
             var manifest = new CaptureManifest
             {
@@ -125,10 +133,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 original_full_screen_mode = _originalFullScreenMode.ToString(),
                 display_resolution_width = currentResolution.width,
                 display_resolution_height = currentResolution.height,
-                creator_target_width = CreatorTargetWidth,
-                creator_target_height = CreatorTargetHeight,
-                creator_target_semantics =
-                    "2560x1600 render target fixed by Technical Architecture",
+                observed_native_width = _observedNativeWidth,
+                observed_native_height = _observedNativeHeight,
+                provisional_architecture_target_width = CreatorTargetWidth,
+                provisional_architecture_target_height = CreatorTargetHeight,
+                provisional_architecture_target_reached =
+                    _observedNativeWidth == CreatorTargetWidth &&
+                    _observedNativeHeight == CreatorTargetHeight,
+                native_target_semantics =
+                    "Observed Screen.currentResolution before any capture resize; " +
+                    "the provisional architecture target remains 2560x1600.",
                 quality_level = QualitySettings.names[QualitySettings.GetQualityLevel()],
                 color_space = QualitySettings.activeColorSpace.ToString(),
                 render_scale_width = ScalableBufferManager.widthScaleFactor,
@@ -147,7 +161,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 {
                     "Captures do not prove interaction, allocation, memory, or target-Mac performance.",
                     "Title and garage are representative legacy-surface checks, not exhaustive mode coverage.",
-                    "The source head and tree are request-bound; this harness does not inspect Git metadata."
+                    "The source head and tree are request-bound; this harness does not inspect Git metadata.",
+                    "Observed native target was " + _observedNativeWidth + "x" +
+                    _observedNativeHeight + "; provisional architecture target is 2560x1600."
                 },
                 state_sequence = new[]
                 {
@@ -184,10 +200,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Assert.That(controller.FieldDesk?.OwnsCityOverview, Is.False);
                 yield return CaptureFrame(
                     controller,
-                    "legacy-title-creator-target",
+                    "legacy-title-observed-native",
                     "title",
-                    CreatorTargetWidth,
-                    CreatorTargetHeight,
+                    _observedNativeWidth,
+                    _observedNativeHeight,
                     ScrollPosition.None,
                     makeGrayscale: false);
 
@@ -223,10 +239,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     makeGrayscale: true);
                 yield return CaptureFrame(
                     controller,
-                    "city-trial-a-top-creator-target-2560x1600",
+                    "city-trial-a-top-observed-native",
                     "city-trial-a",
-                    CreatorTargetWidth,
-                    CreatorTargetHeight,
+                    _observedNativeWidth,
+                    _observedNativeHeight,
                     ScrollPosition.Top,
                     makeGrayscale: false);
 
@@ -239,10 +255,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 yield return WaitForGarageCamera(controller);
                 yield return CaptureFrame(
                     controller,
-                    "legacy-garage-creator-target",
+                    "legacy-garage-observed-native",
                     "garage",
-                    CreatorTargetWidth,
-                    CreatorTargetHeight,
+                    _observedNativeWidth,
+                    _observedNativeHeight,
                     ScrollPosition.None,
                     makeGrayscale: false);
 
@@ -545,13 +561,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         {
             var expected = new HashSet<string>(StringComparer.Ordinal)
             {
-                "legacy-title-creator-target|color|2560x1600",
+                "legacy-title-observed-native|color|" +
+                _observedNativeWidth + "x" + _observedNativeHeight,
                 "city-trial-a-top-1280x720|color|1280x720",
                 "city-trial-a-bottom-1280x720|color|1280x720",
                 "city-trial-a-top-1920x1200|color|1920x1200",
                 "city-trial-a-top-1920x1200-grayscale|grayscale|1920x1200",
-                "city-trial-a-top-creator-target-2560x1600|color|2560x1600",
-                "legacy-garage-creator-target|color|2560x1600"
+                "city-trial-a-top-observed-native|color|" +
+                _observedNativeWidth + "x" + _observedNativeHeight,
+                "legacy-garage-observed-native|color|" +
+                _observedNativeWidth + "x" + _observedNativeHeight
             };
             var actual = new HashSet<string>(StringComparer.Ordinal);
             for (var index = 0; index < _pending.Count; index++)
@@ -932,9 +951,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             public string original_full_screen_mode = string.Empty;
             public int display_resolution_width;
             public int display_resolution_height;
-            public int creator_target_width;
-            public int creator_target_height;
-            public string creator_target_semantics = string.Empty;
+            public int observed_native_width;
+            public int observed_native_height;
+            public int provisional_architecture_target_width;
+            public int provisional_architecture_target_height;
+            public bool provisional_architecture_target_reached;
+            public string native_target_semantics = string.Empty;
             public string quality_level = string.Empty;
             public string color_space = string.Empty;
             public float render_scale_width;
