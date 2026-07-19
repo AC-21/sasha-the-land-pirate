@@ -1,5 +1,6 @@
 #nullable enable
 
+using System;
 using AtomicLandPirate.Simulation.LastBearing;
 
 namespace AtomicLandPirate.Presentation.LastBearing
@@ -803,10 +804,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return whole + "." + tenths + " WATER";
         }
 
-        private static string FormatTrend(long trend)
+        private static string FormatTrend(long trendMilli)
         {
-            string sign = trend > 0 ? "+" : string.Empty;
-            return sign + trend + " / SETTLEMENT TICK";
+            string sign = trendMilli > 0 ? "+" : trendMilli < 0 ? "-" : string.Empty;
+            long magnitude = Math.Abs(trendMilli);
+            return sign +
+                   magnitude / 1000 +
+                   "." +
+                   (magnitude % 1000).ToString("D3") +
+                   " WATER / SETTLEMENT TICK";
         }
 
         private static string FormatTurbine(TurbineCondition condition)

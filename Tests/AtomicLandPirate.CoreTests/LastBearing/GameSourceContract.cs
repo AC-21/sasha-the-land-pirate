@@ -1185,9 +1185,12 @@ namespace AtomicLandPirate.LastBearingTests
             Require(fieldDesk, "Resources.Load<StyleSheet>");
             Require(fieldDesk, "Resources.Load<ThemeStyleSheet>");
             Require(fieldDesk, ".themeStyleSheet = theme;");
+            Require(fieldDesk, "PanelScaleMode.ConstantPixelSize");
+            Require(fieldDesk, ".focusedElement?.Blur();");
             Require(fieldDesk, "LastBearingFieldDeskLayout");
             Require(fieldDesk, "LastBearingFieldDeskStyles");
             Require(fieldDesk, "LastBearingFieldDeskTheme");
+            Require(fieldDesk, "secondary-action-detail");
             Require(fieldDesk, "CloneTree(");
             Require(fieldDesk, ".Q<");
             Require(fieldDesk, "RegisterCallbacks");

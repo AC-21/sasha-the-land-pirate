@@ -57,6 +57,8 @@ namespace AtomicLandPirate.LastBearingTests
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/Resources/LastBearingFieldDeskLayout.uxml.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/Resources/LastBearingFieldDeskStyles.uss",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/Resources/LastBearingFieldDeskStyles.uss.meta",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/Resources/LastBearingFieldDeskTheme.tss",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/Resources/LastBearingFieldDeskTheme.tss.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelContracts.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelSurface.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelVehicleController.cs",

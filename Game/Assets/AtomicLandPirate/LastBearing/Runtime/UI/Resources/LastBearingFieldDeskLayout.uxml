@@ -78,6 +78,7 @@
                 <ui:Label text="CURRENT ORDER" class="section-kicker" />
                 <ui:Label name="current-action-detail" class="order-detail" />
                 <ui:Button name="primary-action-button" class="desk-button order-button" />
+                <ui:Label name="secondary-action-detail" class="order-detail secondary-order-detail" />
                 <ui:Button name="secondary-action-button" class="desk-button order-button secondary-button" />
                 <ui:Label name="status-label" class="status-copy" />
             </ui:VisualElement>

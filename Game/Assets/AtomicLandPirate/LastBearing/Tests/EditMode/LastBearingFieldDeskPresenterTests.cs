@@ -41,7 +41,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(projection.Composition, Is.EqualTo(expectedComposition));
             Assert.That(projection.PauseState, Is.EqualTo("CLOCKS RUNNING"));
             Assert.That(projection.WaterAmount, Does.EndWith(" WATER"));
-            Assert.That(projection.WaterTrend, Does.Contain("SETTLEMENT TICK"));
+            Assert.That(
+                projection.WaterTrend,
+                Is.EqualTo("-0.010 WATER / SETTLEMENT TICK"));
             Assert.That(projection.Parts, Is.EqualTo(model.PartsUnits + " UNITS"));
             Assert.That(projection.Fuel, Is.EqualTo(model.FuelUnits + " UNITS"));
             Assert.That(projection.Turbine, Does.Contain("FAILING"));
@@ -82,6 +84,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 inspection.SecondaryAction.Intent,
                 Is.EqualTo(LastBearingFieldDeskIntent.SelectTrialB));
+            Assert.That(inspection.PrimaryAction.Detail, Is.Not.Empty);
+            Assert.That(inspection.SecondaryAction.Detail, Is.Not.Empty);
+            Assert.That(
+                inspection.SecondaryAction.Detail,
+                Is.Not.EqualTo(inspection.PrimaryAction.Detail));
             AssertAvailable(controller, LastBearingFieldDeskIntent.SelectTrialA, true);
             AssertAvailable(controller, LastBearingFieldDeskIntent.SelectTrialB, true);
 

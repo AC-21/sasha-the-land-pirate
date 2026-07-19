@@ -34,6 +34,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingFieldDesk desk = RequireDesk(controller);
             UIDocument document = RequireDocument(controller);
             Assert.That(document.panelSettings.themeStyleSheet, Is.Not.Null);
+            Assert.That(
+                document.panelSettings.scaleMode,
+                Is.EqualTo(PanelScaleMode.ConstantPixelSize));
+            Assert.That(document.panelSettings.scale, Is.EqualTo(1f));
             VisualElement overlay = document.rootVisualElement.Q<VisualElement>(
                 "field-desk-overlay");
             Assert.That(overlay, Is.Not.Null);
@@ -69,6 +73,45 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.GetComponentsInChildren<UIDocument>(true),
                 Has.Length.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator DeskRendersBothOrderExplanationsAndClearsFocusOnExit()
+        {
+            LastBearingGameController controller = BuildController();
+            yield return null;
+            LastBearingFieldDesk desk = RequireDesk(controller);
+            UIDocument document = RequireDocument(controller);
+
+            controller.InspectCityNeed();
+            desk.Refresh(force: true);
+            LastBearingFieldDeskProjection projection =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Label primaryDetail = document.rootVisualElement.Q<Label>(
+                "current-action-detail");
+            Label secondaryDetail = document.rootVisualElement.Q<Label>(
+                "secondary-action-detail");
+            Button secondary = document.rootVisualElement.Q<Button>(
+                "secondary-action-button");
+
+            Assert.That(primaryDetail.text, Is.EqualTo(projection.PrimaryAction.Detail));
+            Assert.That(
+                secondaryDetail.text,
+                Is.EqualTo(projection.SecondaryAction.Detail));
+            Assert.That(
+                secondaryDetail.style.display.value,
+                Is.EqualTo(DisplayStyle.Flex));
+
+            secondary.Focus();
+            yield return null;
+            Assert.That(
+                document.rootVisualElement.panel.focusController.focusedElement,
+                Is.SameAs(secondary));
+            controller.OpenGarageBay();
+            desk.Refresh(force: true);
+            Assert.That(
+                document.rootVisualElement.panel.focusController.focusedElement,
+                Is.Not.SameAs(secondary));
         }
 
         [UnityTest]

@@ -39,6 +39,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private ProgressBar? _permitProgress;
         private Label? _permitCue;
         private Label? _currentDetail;
+        private Label? _secondaryDetail;
         private VisualElement? _survey;
         private Label? _surveyHypothesis;
         private Label? _surveyEvidence;
@@ -164,11 +165,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _panelSettings.themeStyleSheet = theme;
             _panelSettings.renderMode = PanelRenderMode.ScreenSpaceOverlay;
             _panelSettings.clearColor = false;
-            _panelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
-            _panelSettings.referenceResolution = new Vector2Int(1920, 1200);
-            _panelSettings.screenMatchMode =
-                PanelScreenMatchMode.MatchWidthOrHeight;
-            _panelSettings.match = 0.5f;
+            _panelSettings.scaleMode = PanelScaleMode.ConstantPixelSize;
+            _panelSettings.scale = 1f;
             _panelSettings.sortingOrder = 100f;
 
             _documentObject = new GameObject("Last Bearing Field Desk Document");
@@ -209,6 +207,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _permitProgress = Require<ProgressBar>(root, "permit-progress-bar");
             _permitCue = Require<Label>(root, "permit-cue-label");
             _currentDetail = Require<Label>(root, "current-action-detail");
+            _secondaryDetail = Require<Label>(
+                root,
+                "secondary-action-detail");
             _survey = Require<VisualElement>(root, "survey-section");
             _surveyHypothesis = Require<Label>(root, "survey-hypothesis-label");
             _surveyEvidence = Require<Label>(root, "survey-evidence-label");
@@ -286,8 +287,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             SetText(_permitCue!, job.RecommendedFirstRunCue);
-            SetVisible(_permitCue, job.ShowRecommendedFirstRunCue);
+            SetVisible(_permitCue!, job.ShowRecommendedFirstRunCue);
             SetText(_currentDetail!, projection.PrimaryAction.Detail);
+            SetVisible(_currentDetail!, projection.PrimaryAction.IsVisible);
+            SetText(_secondaryDetail!, projection.SecondaryAction.Detail);
+            SetVisible(_secondaryDetail!, projection.SecondaryAction.IsVisible);
             _primary!.Apply(projection.PrimaryAction);
             _secondary!.Apply(projection.SecondaryAction);
 
@@ -393,8 +397,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            _document?.rootVisualElement.panel?.focusController
+                .focusedElement?.Blur();
             SetDeskVisible(false);
-            _overlay?.Blur();
             if (_scroll != null)
             {
                 _scroll.scrollOffset = Vector2.zero;
