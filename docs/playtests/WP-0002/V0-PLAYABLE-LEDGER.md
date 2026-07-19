@@ -2,7 +2,7 @@
 
 Status: **provisional execution ledger**
 
-Baseline: `b87a3530c733d959a5b57849105784a46494e314`
+Baseline: `ba39285cd722a8ec95a4bd7d63f00cf4b8df7f2f`
 
 Purpose: keep the next playable work vertically integrated, testable, and honest.
 
@@ -47,14 +47,14 @@ The current experience is still a constitutional toy:
 
 | Area | Current state | V0 gap |
 |---|---|---|
-| City | Water need, camera, reversible D-0030 comparison, turbine repair, and one fixed-socket auxiliary-pump improvement | Return check-in and turbine installation are still global HUD actions; no authoritative placement or logistics path |
+| City | Water need, camera, reversible D-0030 comparison, physical return check-in and pump-hall repair, and one fixed-socket auxiliary-pump improvement | Auxiliary-pump installation remains HUD-led; no authoritative placement or logistics path |
 | Driving | Real local physics shadowing deterministic progress/lateral commands, with explicit Wreck Line and depot-recovery verbs | Brake/reverse remain presentation-only; one corridor and two interactions are still thin |
 | Garage | Stable C0 scout sockets, fixed dollhouse bay, and garage-local module commitment | Module assembly remains one authored operation; no generalized rig-upgrade path |
 | Depot/scavenging | Recovery gate, faction choice, heavy/liquid cargo fields, exact custody, and one operated repair-cargo handoff | Range-tank liquid selection and return sealing remain HUD-led; one depot and its interactions are still thin |
 | Colony | Exact typed rosters and visible human/robot primitives | No lived work feedback; mechanical differentiation remains forbidden while D-0039 is open |
-| Manufacturing/trade | One conserved spare-bearing batch, physical lot, one-off caravaner barter, and persistent corridor permit | No broader exchange by design; D-0044 remains open |
+| Manufacturing/trade | One conserved spare-bearing batch, physical lot, one-off caravaner barter, and persistent corridor permit | Batch start and barter remain global HUD actions; no broader exchange by design while D-0044 remains open |
 | Save | Exact disposable profile, fault-tested atomic store, and critical-transition autosaves | One dev slot; no production compatibility promise |
-| Presentation | Temporary IMGUI, procedural primitives, and fixed cutaways | The released baseline still lacks a readable job arc, retained HUD, sound language, accepted meshes, textures, LODs, or audio |
+| Presentation | Temporary IMGUI, procedural primitives, fixed cutaways, and a readable Permit Job rail | The released baseline still lacks retained UI, sound language, accepted meshes, textures, LODs, or audio |
 | Mac proof | Lightweight URP project on the selected Editor | No clean native build or target-Mac thermal/frame/memory soak evidence |
 
 ## View and interaction constitution
@@ -434,8 +434,9 @@ Detailed contract:
 Objective: make the loaded homecoming and turbine repair one physical city-road
 handoff instead of two global HUD actions.
 
-Status: current implementation target; not released until independent, Unity,
-protected, and creator-delegated release gates pass.
+Status: released on protected `main` in `ba39285` after independent review,
+exact Unity dispatcher gates, protected checks, and transparent
+creator-delegated manual release.
 
 Scope:
 
@@ -487,6 +488,67 @@ caravan exchange.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-11-SEAT-THE-REPAIR-CONTRACT.md`.
+
+## VGR-12 — Work the Wicket
+
+Objective: finish the implemented Permit Job through the physical machine-shop
+and claims-wicket cutaway instead of two global HUD actions.
+
+Status: current implementation target; not released until independent, Unity,
+protected, and creator-delegated release gates pass.
+
+Scope:
+
+- Open or route to the existing One Good Batch cutaway without queuing a
+  command, mutating canonical state, or writing a save.
+- Start the batch only from the selected active workshop with `E`, gamepad
+  south, or the equivalent semantic HUD action, and queue exactly the existing
+  `StartSpareBearingBatchCommand`.
+- Preserve the existing two-part cost, retained reserve, fixed recipe, one-lot
+  output, and 120 unpaused settlement ticks unchanged.
+- Show the existing canonical sequence at the fixed anchors: two input parts,
+  machine workpiece, one workshop-output lot, then the same lot at the claims
+  counter.
+- Barter only from the selected active workshop/claims cutaway and queue exactly
+  the existing `BarterSpareBearingLotCommand`.
+- Preserve the depot grievance, future two-fuel toll, one-off contract, and
+  fixed route permit exactly; do not imply that the caravan exchange is open.
+- Re-derive view guidance, markers, motion, custody, permit state, and action
+  availability after save, load, title, new game, and cutaway changes without a
+  saved transient intent.
+- Keep all three colony compositions mechanically identical and show only the
+  exact resident kinds present in the canonical roster.
+
+Acceptance:
+
+- batch start and barter are available only in the selected active One Good
+  Batch cutaway with their exact canonical eligibility and no pending command;
+- each valid contextual request queues one unchanged existing command, while
+  early, stale, wrong-mode, wrong-cutaway, duplicate, and lifecycle requests
+  queue nothing and preserve canonical and save bytes;
+- accepted start debits inputs once, advances only on the existing canonical
+  clock, and creates exactly one lot in `WorkshopOutput` custody;
+- accepted barter transfers that lot once to `LastBearingClaimsCounter`, grants
+  only the existing depot-corridor permit, and preserves adverse history and
+  toll;
+- ready, in-progress, complete, and settled checkpoints round-trip byte-exactly
+  and restore truthful physical stock, machine motion, custody, permit,
+  guidance, and contextual availability;
+- a Unity golden-path smoke runs from title through `Civic Buffer + Winch +
+  Take Bearing`, return check-in, pump-hall repair, manufacture, barter, manual
+  save, title, and exact load without direct state injection or manual view
+  staging;
+- human-only, robot-only, and mixed parity, one shared camera/listener, and all
+  deterministic, Unity, visual, save, and protected gates remain green.
+
+Exclude: a second recipe or lot, arbitrary inventory or logistics, generalized
+interaction or quest frameworks, retained-UI redesign, currency, prices, order
+books, matching, population gates, global or regional exchange, production
+assets, dependencies, scenes, packages, project settings, save or codec
+changes, and any D-0030, D-0039, or D-0044 selection.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-12-WORK-THE-WICKET-CONTRACT.md`.
 
 ## Visual constitution
 

@@ -80,6 +80,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             PumpHallCutawayView?.gameObject.activeSelf == true &&
             OneGoodBatchCutawayView?.gameObject.activeSelf != true;
 
+        public bool IsOneGoodBatchCutawaySelected =>
+            OneGoodBatchCutawayView?.gameObject.activeSelf == true &&
+            PumpHallCutawayView?.gameObject.activeSelf != true;
+
         public LastBearingCityGrammarComparison? CityGrammarComparison { get; private set; }
 
         public LastBearingDepotApproachRecoveryView? DepotApproachRecoveryView
@@ -459,7 +463,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool routePermitGranted,
             long futureRouteTollFuelUnits,
             bool humanVisible,
-            bool robotVisible)
+            bool robotVisible,
+            bool simulationPaused = false)
         {
             OneGoodBatchCutawayView?.Apply(
                 batchStartAvailable,
@@ -469,7 +474,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 routePermitGranted,
                 futureRouteTollFuelUnits,
                 humanVisible,
-                robotVisible);
+                robotVisible,
+                simulationPaused);
             DepotApproachRecoveryView?.ApplyRoutePermit(routePermitGranted);
         }
 

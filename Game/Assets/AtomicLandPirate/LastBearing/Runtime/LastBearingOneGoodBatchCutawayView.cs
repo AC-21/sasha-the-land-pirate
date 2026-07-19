@@ -208,12 +208,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool routePermitGranted,
             long futureRouteTollFuelUnits,
             bool humanVisible,
-            bool robotVisible)
+            bool robotVisible,
+            bool simulationPaused = false)
         {
-            _machineRunning = phase == SpareBearingBatchPhase.InProgress;
+            _machineRunning =
+                phase == SpareBearingBatchPhase.InProgress &&
+                !simulationPaused;
             _inputStock?.SetActive(
                 batchStartAvailable && phase == SpareBearingBatchPhase.None);
-            _workpiece?.SetActive(_machineRunning);
+            _workpiece?.SetActive(
+                phase == SpareBearingBatchPhase.InProgress);
 
             Transform? custodyAnchor = custody switch
             {
