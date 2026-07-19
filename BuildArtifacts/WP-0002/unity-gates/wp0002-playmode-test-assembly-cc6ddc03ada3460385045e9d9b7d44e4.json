@@ -1,0 +1,12 @@
+{
+    "schema_version": 1,
+    "invocation_id": "cc6ddc03ada3460385045e9d9b7d44e4",
+    "gate_id": "wp0002-playmode-test-assembly",
+    "source_sha256": "1551a39e04703c70df8d2472ad879726d2ae57cfef8b4652f51ff1d8de22071b",
+    "command": "TestRunnerApi:AC21.Sasha.LastBearing.PlayModeTests",
+    "result": "success:run=0de2c4b5-2ffa-4363-b36f-bb3e6f963f55;discovered=39;passed=39;failed=0;inconclusive=0;skipped=0",
+    "started_at": "2026-07-19T20:25:02.8317090Z",
+    "completed_at": "2026-07-19T20:25:43.8520840Z",
+    "project_root": "Game",
+    "runtime_assembly": "AC21.Sasha.LastBearing.Runtime"
+}
