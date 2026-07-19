@@ -5,9 +5,15 @@ using System.Collections.Generic;
 using AtomicLandPirate.Simulation.LastBearing;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Stopwatch = System.Diagnostics.Stopwatch;
 
 namespace AtomicLandPirate.Presentation.LastBearing
 {
+    public interface ILastBearingSimulationTickPerformanceObserver
+    {
+        void RecordSimulationTick(long stopwatchTicks);
+    }
+
     /// <summary>
     /// Thin Unity adapter around the deterministic Last Bearing kernel.
     /// Quantized commands enter the core at 10 Hz; Unity objects only render
@@ -33,6 +39,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private LastBearingFieldDesk? _fieldDesk;
         private LastBearingModeCoordinator? _modeCoordinator;
         private LastBearingSaveAdapter? _saveAdapter;
+        private ILastBearingSimulationTickPerformanceObserver?
+            _simulationTickPerformanceObserver;
         private float _accumulator;
         private bool _initialized;
         private bool _cityNeedInspected;
@@ -60,6 +68,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 LastBearingPresentationMode.CityOverview;
 
         public bool HasPendingPlayerCommands => _pendingCommands.Count != 0;
+
+        internal int PendingPlayerCommandCountForPerformance =>
+            _pendingCommands.Count;
 
         public bool CanRecoverRoadPresentation =>
             _modeCoordinator?.CanRecoverRoadPresentation ?? false;
@@ -174,6 +185,33 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public string CanonicalHash =>
             _state == null ? "none" : LastBearingCanonicalCodec.ComputeSha256(_state);
+
+        public void AttachSimulationTickPerformanceObserver(
+            ILastBearingSimulationTickPerformanceObserver observer)
+        {
+            if (observer == null)
+            {
+                throw new ArgumentNullException(nameof(observer));
+            }
+
+            if (_simulationTickPerformanceObserver != null &&
+                !ReferenceEquals(_simulationTickPerformanceObserver, observer))
+            {
+                throw new InvalidOperationException(
+                    "a simulation-tick performance observer is already attached");
+            }
+
+            _simulationTickPerformanceObserver = observer;
+        }
+
+        public void DetachSimulationTickPerformanceObserver(
+            ILastBearingSimulationTickPerformanceObserver observer)
+        {
+            if (ReferenceEquals(_simulationTickPerformanceObserver, observer))
+            {
+                _simulationTickPerformanceObserver = null;
+            }
+        }
 
         private void Awake()
         {
@@ -1125,7 +1163,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
             try
             {
                 ExpeditionPhase previousPhase = _readModel.ExpeditionPhase;
+                ILastBearingSimulationTickPerformanceObserver? observer =
+                    _simulationTickPerformanceObserver;
+                long simulationStartedAt =
+                    observer == null ? 0L : Stopwatch.GetTimestamp();
                 LastBearingTickResult result = _kernel.Step(_state, commands);
+                if (observer != null)
+                {
+                    observer.RecordSimulationTick(
+                        Stopwatch.GetTimestamp() - simulationStartedAt);
+                }
                 bool returnCheckInAccepted =
                     ContainsEvent(
                         result.DomainEvents,

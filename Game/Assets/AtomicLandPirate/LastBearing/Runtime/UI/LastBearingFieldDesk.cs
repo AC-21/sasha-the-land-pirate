@@ -7,6 +7,55 @@ using UnityEngine.UIElements;
 
 namespace AtomicLandPirate.Presentation.LastBearing
 {
+    public sealed class LastBearingFieldDeskPerformanceTopology
+    {
+        private readonly object? _documentObjectIdentity;
+        private readonly object? _documentIdentity;
+        private readonly object? _panelSettingsIdentity;
+        private readonly object? _visualRootIdentity;
+        private readonly object[] _bindingIdentities;
+
+        internal LastBearingFieldDeskPerformanceTopology(
+            object? documentObjectIdentity,
+            object? documentIdentity,
+            object? panelSettingsIdentity,
+            object? visualRootIdentity,
+            object[] bindingIdentities,
+            int ownedUnityObjectCount,
+            int visualElementCount,
+            int bindingCount,
+            int registeredCallbackCount)
+        {
+            _documentObjectIdentity = documentObjectIdentity;
+            _documentIdentity = documentIdentity;
+            _panelSettingsIdentity = panelSettingsIdentity;
+            _visualRootIdentity = visualRootIdentity;
+            _bindingIdentities = bindingIdentities;
+            OwnedUnityObjectCount = ownedUnityObjectCount;
+            VisualElementCount = visualElementCount;
+            BindingCount = bindingCount;
+            RegisteredCallbackCount = registeredCallbackCount;
+        }
+
+        public int OwnedUnityObjectCount { get; }
+
+        public int VisualElementCount { get; }
+
+        public int BindingCount { get; }
+
+        public int RegisteredCallbackCount { get; }
+
+        internal object? DocumentObjectIdentity => _documentObjectIdentity;
+
+        internal object? DocumentIdentity => _documentIdentity;
+
+        internal object? PanelSettingsIdentity => _panelSettingsIdentity;
+
+        internal object? VisualRootIdentity => _visualRootIdentity;
+
+        internal object[] BindingIdentities => _bindingIdentities;
+    }
+
     [DisallowMultipleComponent]
     public sealed class LastBearingFieldDesk : MonoBehaviour
     {
@@ -53,6 +102,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private ulong _lastStamp;
         private bool _hasStamp;
         private bool _visible;
+        private bool _auditCallbackRegistered;
 
         public bool IsOperational { get; private set; }
 
@@ -61,6 +111,105 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _visible &&
             _overlay != null &&
             _controller?.IsExactFieldDeskCityOverview == true;
+
+        public LastBearingFieldDeskPerformanceTopology
+            CapturePerformanceTopology()
+        {
+            var bindingIdentities = new object[_bindings.Length];
+            for (var index = 0; index < _bindings.Length; index++)
+            {
+                bindingIdentities[index] = _bindings[index];
+            }
+
+            int ownedUnityObjectCount = 0;
+            if (_documentObject != null) ownedUnityObjectCount++;
+            if (_document != null) ownedUnityObjectCount++;
+            if (_panelSettings != null) ownedUnityObjectCount++;
+
+            return new LastBearingFieldDeskPerformanceTopology(
+                _documentObject,
+                _document,
+                _panelSettings,
+                _document?.rootVisualElement,
+                bindingIdentities,
+                ownedUnityObjectCount,
+                CountVisualElements(_document?.rootVisualElement),
+                _bindings.Length,
+                CountRegisteredCallbacks());
+        }
+
+        public bool MatchesPerformanceTopology(
+            LastBearingFieldDeskPerformanceTopology baseline)
+        {
+            if (baseline == null)
+            {
+                throw new ArgumentNullException(nameof(baseline));
+            }
+
+            if (!ReferenceEquals(
+                    baseline.DocumentObjectIdentity,
+                    _documentObject) ||
+                !ReferenceEquals(baseline.DocumentIdentity, _document) ||
+                !ReferenceEquals(
+                    baseline.PanelSettingsIdentity,
+                    _panelSettings) ||
+                !ReferenceEquals(
+                    baseline.VisualRootIdentity,
+                    _document?.rootVisualElement) ||
+                baseline.BindingIdentities.Length != _bindings.Length ||
+                baseline.OwnedUnityObjectCount !=
+                    ((_documentObject == null ? 0 : 1) +
+                     (_document == null ? 0 : 1) +
+                     (_panelSettings == null ? 0 : 1)) ||
+                baseline.VisualElementCount !=
+                    CountVisualElements(_document?.rootVisualElement) ||
+                baseline.RegisteredCallbackCount != CountRegisteredCallbacks())
+            {
+                return false;
+            }
+
+            for (var index = 0; index < _bindings.Length; index++)
+            {
+                if (!ReferenceEquals(
+                        baseline.BindingIdentities[index],
+                        _bindings[index]) ||
+                    !_bindings[index].IsRegistered)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        internal bool TrySubmitPauseTwiceForNativePerformanceGate(
+            out int firstSubmitCommandDelta,
+            out int duplicateSubmitCommandDelta)
+        {
+            firstSubmitCommandDelta = 0;
+            duplicateSubmitCommandDelta = 0;
+            if (_controller == null ||
+                !OwnsCityOverview ||
+                _bindings.Length != 18 ||
+                !_bindings[14].IsRegistered ||
+                _bindings[14].Intent != LastBearingFieldDeskIntent.TogglePause)
+            {
+                return false;
+            }
+
+            int before =
+                _controller.PendingPlayerCommandCountForPerformance;
+            _bindings[14].SubmitForNativePerformanceGate();
+            int afterFirst =
+                _controller.PendingPlayerCommandCountForPerformance;
+            _bindings[14].SubmitForNativePerformanceGate();
+            int afterDuplicate =
+                _controller.PendingPlayerCommandCountForPerformance;
+            firstSubmitCommandDelta = afterFirst - before;
+            duplicateSubmitCommandDelta = afterDuplicate - afterFirst;
+            return firstSubmitCommandDelta == 1 &&
+                   duplicateSubmitCommandDelta == 0;
+        }
 
         public void Configure(LastBearingGameController controller)
         {
@@ -248,7 +397,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _bindings[index].Register();
             }
 
-            _audit!.RegisterValueChangedCallback(OnAuditChanged);
+            if (!_auditCallbackRegistered)
+            {
+                _audit!.RegisterValueChangedCallback(OnAuditChanged);
+                _auditCallbackRegistered = true;
+            }
         }
 
         private void UnregisterCallbacks()
@@ -258,7 +411,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _bindings[index].Unregister();
             }
 
-            _audit?.UnregisterValueChangedCallback(OnAuditChanged);
+            if (_auditCallbackRegistered)
+            {
+                _audit?.UnregisterValueChangedCallback(OnAuditChanged);
+                _auditCallbackRegistered = false;
+            }
         }
 
         private void ApplyProjection(LastBearingFieldDeskProjection projection)
@@ -458,6 +615,36 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
         }
 
+        private int CountRegisteredCallbacks()
+        {
+            int count = _auditCallbackRegistered ? 1 : 0;
+            for (var index = 0; index < _bindings.Length; index++)
+            {
+                if (_bindings[index].IsRegistered)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private static int CountVisualElements(VisualElement? element)
+        {
+            if (element == null)
+            {
+                return 0;
+            }
+
+            var count = 1;
+            for (var index = 0; index < element.childCount; index++)
+            {
+                count = checked(count + CountVisualElements(element[index]));
+            }
+
+            return count;
+        }
+
         private void FailOpenCleanup()
         {
             UnregisterCallbacks();
@@ -504,6 +691,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             internal LastBearingFieldDeskIntent Intent { get; private set; }
 
+            internal bool IsRegistered => _registered;
+
             internal void Register()
             {
                 if (_registered) return;
@@ -536,6 +725,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
             internal void DisableForDispatch()
             {
                 _button.SetEnabled(false);
+            }
+
+            internal void SubmitForNativePerformanceGate()
+            {
+                using (NavigationSubmitEvent submit =
+                       NavigationSubmitEvent.GetPooled())
+                {
+                    submit.target = _button;
+                    _button.SendEvent(submit);
+                }
             }
 
             private void OnClicked()
