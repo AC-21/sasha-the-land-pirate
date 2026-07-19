@@ -273,7 +273,7 @@ promise. All colony compositions run the same golden path, while differentiated
 mechanics remain conditional on a later D-0039 receipt.
 
 The canonical active target is
-`/Users/sasha/Projects/sasha-the-land-pirate/Game`.
+`/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game`.
 The local UI successor binds Hub `com.unity3d.unityhub` at
 `/Applications/Unity Hub.app` and Editor `com.unity3d.UnityEditor5.x` at
 `/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app`. Its recorded cloud

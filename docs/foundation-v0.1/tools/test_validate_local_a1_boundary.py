@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import ExitStack
 from pathlib import Path
 from unittest import mock
 
@@ -24,10 +25,54 @@ ACTIVATION_COMMIT = "2" * 40
 SUCCESSOR_BASE_COMMIT = "96002331dc069db5a7bab36baaf359d1b46cc64c"
 CONFIG_BASE = b"base config\n"
 PROJECT_BASE = b"base project settings\n"
+CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS = tuple(
+    foundation.WP0002_CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS
+)
 
 
 def json_bytes(value: object) -> bytes:
     return json.dumps(value, indent=2, sort_keys=True).encode("utf-8") + b"\n"
+
+
+def synthetic_checkout_authority_binding(
+    accepted_commit: str,
+    *,
+    stage1_tree: str = "3" * 40,
+    stage1_patch_sha256: str = "95" * 32,
+    changed_files_manifest_sha256: str = "96" * 32,
+) -> dict[str, object]:
+    return {
+        "claim": foundation.WP0002_CHECKOUT_SUCCESSOR_CLAIM,
+        "supersession_claim": (
+            foundation.WP0002_CHECKOUT_SUCCESSOR_SUPERSESSION_CLAIM
+        ),
+        "amendment_id": foundation.WP0002_CHECKOUT_SUCCESSOR_AMENDMENT_ID,
+        "receipt_id": foundation.WP0002_CHECKOUT_SUCCESSOR_RECEIPT_ID,
+        "pr_number": foundation.WP0002_CHECKOUT_SUCCESSOR_PR_NUMBER,
+        "packet_contract_sha256": WP0002_CONTRACT_SHA256,
+        "previous_boundary_sha256": (
+            foundation.WP0002_CHECKOUT_SUCCESSOR_PREVIOUS_BOUNDARY_SHA256
+        ),
+        "repository_remote": foundation.WP0002_CHECKOUT_SUCCESSOR_REMOTE,
+        "predecessor_repository_root": foundation.WP0002_CANONICAL_REPOSITORY_ROOT,
+        "successor_repository_root": foundation.WP0002_ACTIVE_REPOSITORY_ROOT,
+        "predecessor_project_path": foundation.WP0002_CANONICAL_PROJECT_PATH,
+        "successor_project_path": foundation.WP0002_ACTIVE_PROJECT_PATH,
+        "stage1_base": foundation.WP0002_CHECKOUT_SUCCESSOR_BASE_SHA,
+        "stage1_commit": accepted_commit,
+        "stage1_tree": stage1_tree,
+        "stage1_patch_sha256": stage1_patch_sha256,
+        "changed_files_manifest_sha256": changed_files_manifest_sha256,
+        "changed_paths": sorted(CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS),
+        "receipt_path": foundation.WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "retained_required_checks": list(
+            foundation.WP0002_CHECKOUT_SUCCESSOR_RETAINED_REQUIRED_CHECKS
+        ),
+        "restored_required_checks": list(
+            foundation.WP0002_CHECKOUT_SUCCESSOR_RESTORED_REQUIRED_CHECKS
+        ),
+    }
 
 
 class LocalA1BoundaryTests(unittest.TestCase):
@@ -214,6 +259,9 @@ class LocalA1BoundaryTests(unittest.TestCase):
         )
         manifest["boundary_amendments"] = copy.deepcopy(
             foundation.WP0002_BOUNDARY_AMENDMENTS
+        )
+        manifest["active_checkout_successor"] = copy.deepcopy(
+            foundation.WP0002_ACTIVE_CHECKOUT_SUCCESSOR
         )
         manifest["delegated_local_unity_operator"] = copy.deepcopy(
             foundation.WP0002_DELEGATED_LOCAL_UNITY_OPERATOR
@@ -853,6 +901,7 @@ class LocalA1BoundaryTests(unittest.TestCase):
         observed_operator_scope_receipts: list[tuple[str, str | None]] | None = None,
         include_operator_receipt: bool = True,
         include_predecessor_receipt: bool = True,
+        include_checkout_receipt: bool = True,
         corrupt_predecessor_receipt_file: bool = False,
         operator_receipt_mutator: object | None = None,
         predecessor_receipt_mutator: object | None = None,
@@ -868,13 +917,22 @@ class LocalA1BoundaryTests(unittest.TestCase):
             / "validate_wp0002_policy.py"
         )
         policy_bytes = policy_path.read_bytes()
+        repository_root = Path(__file__).resolve().parents[3]
+        checkout_artifact_hashes: dict[str, str] = {}
+        for relative in CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS:
+            source = repository_root / relative
+            destination = root / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(source.read_bytes())
+            checkout_artifact_hashes[relative] = hashlib.sha256(
+                destination.read_bytes()
+            ).hexdigest()
         boundary_relative = packet["a1_boundary_manifest"]["path"]
         boundary_path = root / boundary_relative
         governance_relative = foundation.WP0002_LOCAL_OPERATOR_GOVERNANCE_PATH
         governance_path = root / governance_relative
         packet_relative = "work-packets/proposed/WP-0002.json"
         packet_path = root / packet_relative
-        repository_root = Path(__file__).resolve().parents[3]
         predecessor_receipt_source = (
             repository_root / foundation.WP0002_V1_LOCAL_OPERATOR_RECEIPT_REPO_PATH
         )
@@ -967,6 +1025,64 @@ class LocalA1BoundaryTests(unittest.TestCase):
         if callable(operator_receipt_mutator):
             operator_receipt_mutator(operator_receipt)
 
+        checkout_source_reference = (
+            "https://github.com/AC-21/sasha-the-land-pirate/"
+            "pull/79#issuecomment-456"
+        )
+        checkout_authority_binding = synthetic_checkout_authority_binding(
+            ACTIVATION_COMMIT
+        )
+        checkout_approval_sha256 = foundation.sha256_canonical_json(
+            checkout_authority_binding
+        )
+        checkout_receipt = {
+            "receipt_id": foundation.WP0002_CHECKOUT_SUCCESSOR_RECEIPT_ID,
+            "issued_at": "2026-07-19T00:01:00Z",
+            "issued_by": "AC-21",
+            "issuer_role": "creator",
+            "receipt_kind": "creator-authorization",
+            "artifact_resolver": {
+                "type": "external-protected",
+                "resolver_reference": checkout_source_reference,
+            },
+            "source_reference": checkout_source_reference,
+            "subject_ids": [
+                foundation.WP0002_CHECKOUT_SUCCESSOR_PREDECESSOR_SUBJECT_ID,
+                "WP-0002",
+            ],
+            "subject_claims": [
+                {
+                    "subject_id": (
+                        foundation.WP0002_CHECKOUT_SUCCESSOR_PREDECESSOR_SUBJECT_ID
+                    ),
+                    "claims": [
+                        foundation.WP0002_CHECKOUT_SUCCESSOR_SUPERSESSION_CLAIM
+                    ],
+                },
+                {
+                    "subject_id": "WP-0002",
+                    "claims": [foundation.WP0002_CHECKOUT_SUCCESSOR_CLAIM],
+                },
+            ],
+            "approval_text_sha256": checkout_approval_sha256,
+            "accepted_commit": ACTIVATION_COMMIT,
+            "materialization_authority_binding": checkout_authority_binding,
+            "artifact_sha256": {
+                **checkout_artifact_hashes,
+                checkout_source_reference: checkout_approval_sha256,
+            },
+            "subject_contract_sha256": {
+                foundation.WP0002_CHECKOUT_SUCCESSOR_PREDECESSOR_SUBJECT_ID: (
+                    foundation.WP0002_CHECKOUT_SUCCESSOR_PREVIOUS_BOUNDARY_SHA256
+                ),
+                "WP-0002": packet["contract_sha256"],
+            },
+            "subject_event_sha256": {},
+            "foundation_binding": None,
+            "signature_reference": checkout_source_reference,
+            "sealed": True,
+        }
+
         def git_runner(args: list[str]) -> subprocess.CompletedProcess[bytes]:
             if args[:1] == ["show"]:
                 path = args[1].split(":", 1)[1]
@@ -1051,8 +1167,15 @@ class LocalA1BoundaryTests(unittest.TestCase):
         receipts[foundation.WP0002_LOCAL_OPERATOR_RECEIPT_ID] = successor_receipt
         if include_operator_receipt:
             receipts[operator_receipt["receipt_id"]] = operator_receipt
+        if include_checkout_receipt:
+            receipts[checkout_receipt["receipt_id"]] = checkout_receipt
+            checkout_receipt_path = (
+                root / foundation.WP0002_CHECKOUT_SUCCESSOR_RECEIPT_PATH
+            )
+            checkout_receipt_path.parent.mkdir(parents=True, exist_ok=True)
+            checkout_receipt_path.write_bytes(json_bytes(checkout_receipt))
         schemas = Path(__file__).resolve().parents[1] / "schemas"
-        with (
+        patchers = (
             mock.patch.object(foundation, "ROOT", root),
             mock.patch.object(foundation, "REPO_ROOT", root),
             mock.patch.object(
@@ -1138,7 +1261,15 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 "validate_wp0002_local_operator_transaction_evidence",
                 return_value=[],
             ),
-        ):
+            mock.patch.object(
+                foundation,
+                "validate_wp0002_checkout_successor_git_materialization",
+                return_value=[],
+            ),
+        )
+        with ExitStack() as stack:
+            for patcher in patchers:
+                stack.enter_context(patcher)
             _, errors = foundation.validate_local_a1_boundary_manifest(
                 packet, state, receipt, receipts
             )
@@ -1629,6 +1760,28 @@ class LocalA1BoundaryTests(unittest.TestCase):
                     mutate(candidate)
                     self.assertTrue(self.schema_errors(candidate))
 
+    def test_wp0002_active_checkout_successor_schema_rejects_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            _, _, source, _ = self.base_documents(Path(temporary))
+            manifest = self.wp0002_manifest(source, "attested")
+            self.assertEqual(self.schema_errors(manifest), [])
+            mutations = [
+                lambda item: item["active_checkout_successor"].__setitem__(
+                    "repository_root", "/Users/sasha/Projects/sasha-the-land-pirate"
+                ),
+                lambda item: item["active_checkout_successor"].__setitem__(
+                    "delegated_operator_target_override", False
+                ),
+                lambda item: item["active_checkout_successor"][
+                    "scope_capture"
+                ].__setitem__("sha256", "00" * 32),
+            ]
+            for mutate in mutations:
+                with self.subTest(mutation=mutate):
+                    candidate = copy.deepcopy(manifest)
+                    mutate(candidate)
+                    self.assertTrue(self.schema_errors(candidate))
+
     def test_wp0002_versioned_protected_path_sets_are_exact(self) -> None:
         activation = [
             "AGENTS.md",
@@ -1755,6 +1908,376 @@ class LocalA1BoundaryTests(unittest.TestCase):
                     "WP-0002 recovery Stage-1 is pending its exact receipt-only "
                     "child and is nonmergeable"
                 ],
+            )
+
+    def test_wp0002_checkout_successor_requires_receipt_only_child(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            packet, state, _, receipt, _, _ = self.wp0002_attested_documents(root)
+            errors = self.validate_wp0002(
+                root,
+                packet,
+                state,
+                receipt,
+                include_checkout_receipt=False,
+            )
+            self.assertEqual(
+                [error for error in errors if "checkout successor" in error],
+                [
+                    "WP-0002 checkout successor is pending its exact receipt-only "
+                    "child and is nonmergeable"
+                ],
+            )
+
+    def test_wp0002_checkout_successor_receipt_requires_exact_named_path(self) -> None:
+        source_reference = (
+            "https://github.com/AC-21/sasha-the-land-pirate/"
+            "pull/79#issuecomment-789"
+        )
+        accepted_commit = "a" * 40
+        authority_binding = synthetic_checkout_authority_binding(accepted_commit)
+        approval_sha256 = foundation.sha256_canonical_json(authority_binding)
+        receipt = {
+            "receipt_id": foundation.WP0002_CHECKOUT_SUCCESSOR_RECEIPT_ID,
+            "foundation_binding": None,
+            "source_reference": source_reference,
+            "approval_text_sha256": approval_sha256,
+            "accepted_commit": accepted_commit,
+            "materialization_authority_binding": authority_binding,
+            "artifact_sha256": {
+                **{
+                    path: "94" * 32
+                    for path in CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS
+                },
+                source_reference: approval_sha256,
+            },
+        }
+        packet = {"contract_sha256": WP0002_CONTRACT_SHA256}
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            wrong_path = root / "ledger" / "receipts" / "wrong-name.json"
+            wrong_path.parent.mkdir(parents=True, exist_ok=True)
+            wrong_path.write_bytes(json_bytes(receipt))
+            with (
+                mock.patch.object(foundation, "ROOT", root),
+                mock.patch.object(
+                    foundation,
+                    "validate_wp0002_checkout_successor_git_materialization",
+                    return_value=[],
+                ),
+            ):
+                self.assertEqual(
+                    foundation.validate_wp0002_checkout_successor_receipt(
+                        packet,
+                        receipt,
+                    ),
+                    [
+                        "WP-0002 checkout successor exact named receipt file "
+                        "is missing"
+                    ],
+                )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            exact_path = root / foundation.WP0002_CHECKOUT_SUCCESSOR_RECEIPT_PATH
+            exact_path.parent.mkdir(parents=True, exist_ok=True)
+            different_receipt = copy.deepcopy(receipt)
+            different_receipt["receipt_id"] = "RR-WRONG-NAMED-RECEIPT"
+            exact_path.write_bytes(json_bytes(different_receipt))
+            with (
+                mock.patch.object(foundation, "ROOT", root),
+                mock.patch.object(
+                    foundation,
+                    "validate_wp0002_checkout_successor_git_materialization",
+                    return_value=[],
+                ),
+            ):
+                self.assertEqual(
+                    foundation.validate_wp0002_checkout_successor_receipt(
+                        packet,
+                        receipt,
+                    ),
+                    [
+                        "WP-0002 checkout successor receipt ID resolves outside "
+                        "its exact named file"
+                    ],
+                )
+
+    def test_wp0002_checkout_successor_github_merge_wrapper_is_exact(self) -> None:
+        base_commit = foundation.WP0002_CHECKOUT_SUCCESSOR_BASE_SHA
+        accepted_commit = "a" * 40
+        pull_head = "b" * 40
+        merge_head = "e" * 40
+        bad_tree_merge_head = "f" * 40
+        extra_commit = "7" * 40
+        extra_pull_head = "8" * 40
+        extra_merge_head = "9" * 40
+        stage1_tree = "c" * 40
+        final_tree = "d" * 40
+        packet = {"contract_sha256": WP0002_CONTRACT_SHA256}
+        stage1_blobs = {
+            path: f"stage1:{path}\n".encode("utf-8")
+            for path in CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS
+        }
+        stage1_delta = [
+            {
+                "path": path,
+                "status": "M",
+                "new_mode": "100644",
+                "new_blob_sha256": hashlib.sha256(stage1_blobs[path]).hexdigest(),
+            }
+            for path in CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS
+        ]
+        receipt_delta = [
+            {
+                "path": foundation.WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH,
+                "status": "A",
+                "new_mode": "100644",
+            }
+        ]
+        receipt_bytes_holder: list[bytes] = []
+
+        class Repository:
+            def __init__(self, _root: Path) -> None:
+                pass
+
+            def commit(self, commit: str) -> dict[str, object]:
+                if commit == accepted_commit:
+                    return {"parents": [base_commit], "tree": stage1_tree}
+                if commit == pull_head:
+                    return {"parents": [accepted_commit], "tree": final_tree}
+                if commit == merge_head:
+                    return {"parents": [base_commit, pull_head], "tree": final_tree}
+                if commit == bad_tree_merge_head:
+                    return {"parents": [base_commit, pull_head], "tree": "6" * 40}
+                if commit == extra_commit:
+                    return {"parents": [accepted_commit], "tree": "1" * 40}
+                if commit == extra_pull_head:
+                    return {"parents": [extra_commit], "tree": "2" * 40}
+                if commit == extra_merge_head:
+                    return {
+                        "parents": [base_commit, extra_pull_head],
+                        "tree": "2" * 40,
+                    }
+                raise ValueError(commit)
+
+            def changed_files(
+                self,
+                base: str,
+                head: str,
+            ) -> list[dict[str, object]]:
+                if (base, head) == (base_commit, accepted_commit):
+                    return copy.deepcopy(stage1_delta)
+                if (base, head) == (accepted_commit, pull_head):
+                    return copy.deepcopy(receipt_delta)
+                raise ValueError((base, head))
+
+            def blob_at(self, commit: str, path: str) -> bytes | None:
+                receipt_path = (
+                    foundation.WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH
+                )
+                if path == receipt_path:
+                    if commit == pull_head:
+                        return receipt_bytes_holder[0]
+                    return None
+                if commit == base_commit:
+                    return f"base:{path}\n".encode("utf-8")
+                if commit == accepted_commit:
+                    return stage1_blobs.get(path)
+                return None
+
+            def deterministic_patch(self, base: str, head: str) -> bytes:
+                if (base, head) != (base_commit, accepted_commit):
+                    raise ValueError((base, head))
+                return b"exact stage1 patch\n"
+
+        repository = Repository(Path("."))
+        receipt = {
+            "accepted_commit": accepted_commit,
+            "artifact_sha256": {
+                path: hashlib.sha256(blob).hexdigest()
+                for path, blob in stage1_blobs.items()
+            },
+        }
+        binding = foundation._wp0002_checkout_expected_comment_binding(
+            repository,
+            packet,
+            base_commit,
+            accepted_commit,
+            repository.commit(accepted_commit),
+            stage1_delta,
+        )
+        self.assertIsNotNone(binding)
+        receipt["materialization_authority_binding"] = binding
+        receipt["approval_text_sha256"] = foundation.sha256_canonical_json(binding)
+        receipt_bytes_holder.append(json_bytes(receipt))
+
+        resolved_head = [merge_head]
+
+        def resolve(reference: str) -> str | None:
+            if reference == "refs/remotes/origin/main":
+                return base_commit
+            if reference == "HEAD":
+                return resolved_head[0]
+            return None
+
+        with (
+            mock.patch.object(
+                foundation,
+                "_load_wp0002_transaction_verifier",
+                return_value=({"GitRepository": Repository}, []),
+            ),
+            mock.patch.object(
+                foundation,
+                "git_rev_parse_commit",
+                side_effect=resolve,
+            ),
+        ):
+            with self.subTest(shape="exact-github-merge-wrapper"):
+                self.assertEqual(
+                    foundation.validate_wp0002_checkout_successor_git_materialization(
+                        packet,
+                        receipt,
+                        receipt_bytes_holder[0],
+                    ),
+                    [],
+                )
+
+            for shape, head in (
+                ("wrapper-tree-drift", bad_tree_merge_head),
+                ("extra-commit-between-stage1-and-receipt", extra_merge_head),
+            ):
+                with self.subTest(shape=shape):
+                    resolved_head[0] = head
+                    errors = (
+                        foundation.validate_wp0002_checkout_successor_git_materialization(
+                            packet,
+                            receipt,
+                            receipt_bytes_holder[0],
+                        )
+                    )
+                    self.assertIn(
+                        "WP-0002 checkout successor final candidate is not the "
+                        "exact receipt-only child",
+                        errors,
+                    )
+
+    def test_wp0002_checkout_successor_historical_materialization_is_exact(self) -> None:
+        base_commit = foundation.WP0002_CHECKOUT_SUCCESSOR_BASE_SHA
+        accepted_commit = "a" * 40
+        introduction = "d" * 40
+        stage1_tree = "f" * 40
+        stage1_patch = b"exact historical stage1 patch\n"
+        packet = {"contract_sha256": WP0002_CONTRACT_SHA256}
+        stage1_blobs = {
+            path: f"squash:{path}\n".encode("utf-8")
+            for path in CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS
+        }
+        stage1_delta = [
+            {
+                "path": path,
+                "status": "M",
+                "new_mode": "100644",
+                "new_blob_sha256": hashlib.sha256(stage1_blobs[path]).hexdigest(),
+            }
+            for path in CHECKOUT_SUCCESSOR_STAGE1_ARTIFACT_PATHS
+        ]
+        authority_binding = synthetic_checkout_authority_binding(
+            accepted_commit,
+            stage1_tree=stage1_tree,
+            stage1_patch_sha256=hashlib.sha256(stage1_patch).hexdigest(),
+            changed_files_manifest_sha256=foundation.sha256_canonical_json(
+                stage1_delta
+            ),
+        )
+        receipt = {
+            "accepted_commit": accepted_commit,
+            "materialization_authority_binding": authority_binding,
+            "approval_text_sha256": foundation.sha256_canonical_json(
+                authority_binding
+            ),
+            "artifact_sha256": {
+                path: hashlib.sha256(blob).hexdigest()
+                for path, blob in stage1_blobs.items()
+            },
+        }
+        receipt_bytes = json_bytes(receipt)
+        squash_delta = copy.deepcopy(stage1_delta) + [
+            {
+                "path": foundation.WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH,
+                "status": "A",
+                "new_mode": "100644",
+                "new_blob_sha256": hashlib.sha256(receipt_bytes).hexdigest(),
+            }
+        ]
+
+        class Repository:
+            def __init__(self, _root: Path) -> None:
+                pass
+
+            def commit(self, commit: str) -> dict[str, object]:
+                if commit == accepted_commit:
+                    return {"parents": [base_commit], "tree": stage1_tree}
+                if commit == introduction:
+                    return {"parents": [base_commit], "tree": "e" * 40}
+                raise ValueError(commit)
+
+            def changed_files(
+                self,
+                base: str,
+                head: str,
+            ) -> list[dict[str, object]]:
+                if (base, head) == (base_commit, accepted_commit):
+                    return copy.deepcopy(stage1_delta)
+                if (base, head) == (base_commit, introduction):
+                    return copy.deepcopy(squash_delta)
+                raise ValueError((base, head))
+
+            def blob_at(self, commit: str, path: str) -> bytes | None:
+                receipt_path = (
+                    foundation.WP0002_CHECKOUT_SUCCESSOR_RECEIPT_REPO_PATH
+                )
+                if commit == introduction and path == receipt_path:
+                    return receipt_bytes
+                if commit == base_commit and path == receipt_path:
+                    return None
+                if commit == base_commit:
+                    return f"base:{path}\n".encode("utf-8")
+                if commit in {accepted_commit, introduction}:
+                    return stage1_blobs.get(path)
+                return None
+
+            def deterministic_patch(self, base: str, head: str) -> bytes:
+                if (base, head) != (base_commit, accepted_commit):
+                    raise ValueError((base, head))
+                return stage1_patch
+
+        with (
+            mock.patch.object(
+                foundation,
+                "_load_wp0002_transaction_verifier",
+                return_value=({"GitRepository": Repository}, []),
+            ),
+            mock.patch.object(
+                foundation,
+                "git_rev_parse_commit",
+                return_value=introduction,
+            ),
+            mock.patch.object(
+                foundation,
+                "git_first_parent_path_additions",
+                return_value=[introduction],
+            ),
+            mock.patch.object(foundation, "git_commit_exists", return_value=False),
+        ):
+            self.assertEqual(
+                foundation.validate_wp0002_checkout_successor_git_materialization(
+                    packet,
+                    receipt,
+                    receipt_bytes,
+                ),
+                [],
             )
 
     def test_wp0002_local_operator_requires_exact_sealed_creator_receipt(self) -> None:
