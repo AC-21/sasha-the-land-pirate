@@ -206,6 +206,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world.CameraRig!,
                 _world.VehicleView!,
                 _world.RoadFeelRig!.Root.transform,
+                _world.CityScaffoldRoot!,
                 _world.GarageBayView!.CameraAnchor!,
                 _world.GarageBayView.FocusAnchor!,
                 _world.PumpHallCutawayView!.CameraAnchor!,

@@ -15,6 +15,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
     [DisallowMultipleComponent]
     public sealed class LastBearingWorldBuilder : MonoBehaviour
     {
+        public const string CityScaffoldRootName =
+            "City Scaffold [Derived Only]";
+
         private static readonly Color Bone = new Color32(216, 199, 161, 255);
         private static readonly Color Concrete = new Color32(119, 113, 104, 255);
         private static readonly Color ConcreteDark = new Color32(52, 51, 50, 255);
@@ -57,6 +60,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public RoadFeelRigInstance? RoadFeelRig { get; private set; }
 
         public LastBearingGarageBayView? GarageBayView { get; private set; }
+
+        public Transform? CityScaffoldRoot { get; private set; }
 
         public LastBearingReturnServiceView? ReturnServiceView { get; private set; }
 
@@ -141,16 +146,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 SignalCyan * 0.5f,
                 SignalCyan * 1.5f);
 
-            BuildGround(darkConcrete, concrete, oxide);
+            var cityScaffold = new GameObject(CityScaffoldRootName);
+            cityScaffold.transform.SetParent(transform, false);
+            CityScaffoldRoot = cityScaffold.transform;
+
+            BuildGround(CityScaffoldRoot, darkConcrete, concrete, oxide);
             BuildWaterworks(
+                CityScaffoldRoot,
                 concrete,
                 darkConcrete,
                 iron,
                 oxide,
                 bone,
                 tungsten);
-            BuildSettlement(concrete, iron, oxide, bone);
+            BuildSettlement(CityScaffoldRoot, concrete, iron, oxide, bone);
             BuildRoadAndDepot(
+                CityScaffoldRoot,
                 concrete,
                 darkConcrete,
                 iron,
@@ -158,8 +169,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 bone,
                 tungsten,
                 signal);
-            BuildResidents(oxide, bone, iron, concrete);
-            BuildCityGrammarComparison(concrete, iron, oxide, bone);
+            BuildResidents(CityScaffoldRoot, oxide, bone, iron, concrete);
+            BuildCityGrammarComparison(
+                CityScaffoldRoot,
+                concrete,
+                iron,
+                oxide,
+                bone);
             BuildVehicle(
                 iron,
                 oxide,
@@ -649,29 +665,34 @@ namespace AtomicLandPirate.Presentation.LastBearing
             light.shadows = LightShadows.Soft;
         }
 
-        private void BuildGround(Material darkConcrete, Material concrete, Material oxide)
+        private void BuildGround(
+            Transform cityScaffoldRoot,
+            Material darkConcrete,
+            Material concrete,
+            Material oxide)
         {
             CreateBlock(
                 "Bleached Basin",
-                transform,
+                cityScaffoldRoot,
                 new Vector3(2f, -0.55f, 13f),
                 new Vector3(68f, 1f, 64f),
                 darkConcrete);
             CreateBlock(
                 "Inherited Spillway",
-                transform,
+                cityScaffoldRoot,
                 new Vector3(-4f, -0.02f, 3f),
                 new Vector3(25f, 0.38f, 20f),
                 concrete);
             CreateBlock(
                 "Oxide Service Yard",
-                transform,
+                cityScaffoldRoot,
                 new Vector3(-10f, 0.2f, -7f),
                 new Vector3(18f, 0.22f, 10f),
                 oxide);
         }
 
         private void BuildWaterworks(
+            Transform cityScaffoldRoot,
             Material concrete,
             Material darkConcrete,
             Material iron,
@@ -680,7 +701,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Material tungsten)
         {
             var root = new GameObject("Monumental Waterworks").transform;
-            root.SetParent(transform, false);
+            root.SetParent(cityScaffoldRoot, false);
 
             CreateBlock("Pump Hall Left", root, new Vector3(-6f, 3.4f, 2f), new Vector3(3.5f, 7f, 11f), concrete);
             CreateBlock("Pump Hall Right", root, new Vector3(6f, 3.4f, 2f), new Vector3(3.5f, 7f, 11f), concrete);
@@ -780,13 +801,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
         }
 
         private void BuildSettlement(
+            Transform cityScaffoldRoot,
             Material concrete,
             Material iron,
             Material oxide,
             Material bone)
         {
             var root = new GameObject("Last Bearing Settlement").transform;
-            root.SetParent(transform, false);
+            root.SetParent(cityScaffoldRoot, false);
 
             CreateBlock("Recycler Body", root, new Vector3(-11f, 1.3f, -2.5f), new Vector3(5f, 2.6f, 4f), oxide);
             CreateCylinder("Recycler Drum", root, new Vector3(-11f, 2.7f, -2.5f), new Vector3(1.2f, 2.2f, 1.2f), iron).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
@@ -808,6 +830,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         }
 
         private void BuildRoadAndDepot(
+            Transform cityScaffoldRoot,
             Material concrete,
             Material darkConcrete,
             Material iron,
@@ -817,7 +840,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Material signal)
         {
             var root = new GameObject("Two Path Road Corridor").transform;
-            root.SetParent(transform, false);
+            root.SetParent(cityScaffoldRoot, false);
 
             CreateBlock("Route Apron", root, new Vector3(-6f, -0.01f, 3f), new Vector3(5f, 0.25f, 17f), iron).transform.localRotation = Quaternion.Euler(0f, -24f, 0f);
             CreateBlock("Collapsed Short Branch", root, new Vector3(1f, 0f, 17f), new Vector3(4f, 0.24f, 22f), iron).transform.localRotation = Quaternion.Euler(0f, -18f, 0f);
@@ -878,18 +901,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
         }
 
-        private void BuildResidents(Material humanMaterial, Material cloth, Material robotMaterial, Material token)
+        private void BuildResidents(
+            Transform cityScaffoldRoot,
+            Material humanMaterial,
+            Material cloth,
+            Material robotMaterial,
+            Material token)
         {
             _humanResident = new GameObject(
                 "Resident " + ResidentRoster.HumanResidentId);
-            _humanResident.transform.SetParent(transform, false);
+            _humanResident.transform.SetParent(cityScaffoldRoot, false);
             _humanResident.transform.localPosition = new Vector3(-2.2f, 0f, -7.5f);
             CreateCylinder("Human Workwear", _humanResident.transform, new Vector3(0f, 0.9f, 0f), new Vector3(0.45f, 0.75f, 0.45f), humanMaterial);
             CreateCylinder("Human Sun Hood", _humanResident.transform, new Vector3(0f, 1.8f, 0f), new Vector3(0.42f, 0.32f, 0.42f), cloth);
 
             _robotResident = new GameObject(
                 "Resident " + ResidentRoster.RobotResidentId);
-            _robotResident.transform.SetParent(transform, false);
+            _robotResident.transform.SetParent(cityScaffoldRoot, false);
             _robotResident.transform.localPosition = new Vector3(0.2f, 0f, -7.5f);
             CreateBlock("Utility Robot Torso", _robotResident.transform, new Vector3(0f, 1.05f, 0f), new Vector3(0.9f, 1.25f, 0.65f), robotMaterial);
             CreateCylinder("Utility Robot Head", _robotResident.transform, new Vector3(0f, 1.92f, 0f), new Vector3(0.35f, 0.35f, 0.35f), token);
@@ -1010,6 +1038,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         }
 
         private void BuildCityGrammarComparison(
+            Transform cityScaffoldRoot,
             Material concrete,
             Material iron,
             Material oxide,
@@ -1017,7 +1046,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             var comparison = new GameObject(
                 "D-0030 Reversible City Grammar Comparison");
-            comparison.transform.SetParent(transform, false);
+            comparison.transform.SetParent(cityScaffoldRoot, false);
             CityGrammarComparison =
                 comparison.AddComponent<LastBearingCityGrammarComparison>();
             CityGrammarComparison.Build(concrete, iron, oxide, bone);
