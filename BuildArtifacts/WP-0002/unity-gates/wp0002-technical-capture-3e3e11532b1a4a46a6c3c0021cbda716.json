@@ -1,0 +1,12 @@
+{
+    "schema_version": 1,
+    "invocation_id": "3e3e11532b1a4a46a6c3c0021cbda716",
+    "gate_id": "wp0002-technical-capture",
+    "source_sha256": "1551a39e04703c70df8d2472ad879726d2ae57cfef8b4652f51ff1d8de22071b",
+    "command": "validate-runtime-root-camera-controller",
+    "result": "success:capture-ready;artifact=BuildArtifacts/WP-0002/technical-captures/last-bearing-1551a39e0470-67a567da941d426a95f144090637e09f.png",
+    "started_at": "2026-07-19T07:25:18.1703970Z",
+    "completed_at": "2026-07-19T07:25:18.2433320Z",
+    "project_root": "Game",
+    "runtime_assembly": "AC21.Sasha.LastBearing.Runtime"
+}
