@@ -30,6 +30,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private LastBearingReadModel? _readModel;
         private LastBearingWorldBuilder? _world;
         private LastBearingHud? _hud;
+        private LastBearingFieldDesk? _fieldDesk;
         private LastBearingModeCoordinator? _modeCoordinator;
         private LastBearingSaveAdapter? _saveAdapter;
         private float _accumulator;
@@ -49,6 +50,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public LastBearingWorldBuilder? World => _world;
 
         public LastBearingModeCoordinator? ModeCoordinator => _modeCoordinator;
+
+        public LastBearingFieldDesk? FieldDesk => _fieldDesk;
+
+        public bool IsExactFieldDeskCityOverview =>
+            HasActiveGame &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.CityOverview;
+
+        public bool HasPendingPlayerCommands => _pendingCommands.Count != 0;
 
         public bool CanRecoverRoadPresentation =>
             _modeCoordinator?.CanRecoverRoadPresentation ?? false;
@@ -149,6 +160,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool CityGrammarLogisticsConnected =>
             _world?.CityGrammarComparison?.IsLogisticsConnected ?? false;
 
+        public int CityGrammarInteractionCount =>
+            _world?.CityGrammarComparison?.InteractionCount ?? 0;
+
+        public bool CanConnectCityGrammarLogistics =>
+            _world?.CityGrammarComparison is
+            {
+                SelectedHypothesis:
+                    LastBearingCityGrammarHypothesis.RestrainedSnapGrid,
+                HasValidSnapGridLayout: true,
+                IsLogisticsConnected: false
+            };
+
         public string CanonicalHash =>
             _state == null ? "none" : LastBearingCanonicalCodec.ComputeSha256(_state);
 
@@ -191,8 +214,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world.ReturnServiceView.FocusAnchor!);
             _modeCoordinator.AttachRoadModeAdapter(
                 _world.RoadFeelRig.Adapter);
+            try
+            {
+                _fieldDesk = gameObject.AddComponent<LastBearingFieldDesk>();
+                _fieldDesk.Configure(this);
+            }
+            catch (Exception exception)
+            {
+                _fieldDesk = null;
+                Debug.LogException(exception, this);
+            }
+
             _hud = gameObject.AddComponent<LastBearingHud>();
-            _hud.Configure(this);
+            _hud.Configure(this, _fieldDesk);
 
             try
             {
@@ -207,6 +241,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void StartNewGame(ColonyComposition composition)
         {
+            _fieldDesk?.ResetForLifecycle();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
             _accumulator = 0f;
@@ -310,6 +345,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 futureRouteTollFuelUnits: 0,
                 humanVisible: true,
                 robotVisible: true);
+            _fieldDesk?.ResetForLifecycle();
         }
 
         public void ActivateInfrastructure()
@@ -937,6 +973,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void Load()
         {
+            _fieldDesk?.ResetForLifecycle();
             ClearGaragePlanIntent();
             if (_saveAdapter == null)
             {
@@ -983,6 +1020,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             if (!HasActiveGame)
             {
+                _fieldDesk?.Refresh();
                 return;
             }
 
@@ -995,6 +1033,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _accumulator -= TickSeconds;
                 ticks++;
             }
+
+            _fieldDesk?.Refresh();
         }
 
         private void HandleGlobalShortcuts()
@@ -1380,6 +1420,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _readModel.RepairCargoCustody,
                 humanVisible,
                 robotVisible);
+            _fieldDesk?.Refresh();
         }
 
         private void TryAutosave(
@@ -1552,6 +1593,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_modeCoordinator?.TryShowCityMode(mode, _readModel) == true)
             {
                 _status = successStatus;
+                _fieldDesk?.Refresh(force: true);
                 return;
             }
 
