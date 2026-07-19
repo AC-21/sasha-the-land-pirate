@@ -32,7 +32,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         private const int EditorBackbufferWidth = 2560;
         private const int EditorBackbufferHeight = 1440;
         private const int ResolutionWaitFrames = 120;
-        private const int CameraSettleFrames = 240;
+        private const float CameraSettleTimeoutSeconds = 2f;
+        private const int CameraSettleFrameLimit = 4096;
 
         private readonly List<PendingArtifact> _pending =
             new List<PendingArtifact>();
@@ -824,7 +825,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Quaternion targetRotation,
             string label)
         {
-            for (var frame = 0; frame < CameraSettleFrames; frame++)
+            float elapsed = 0f;
+            var frame = 0;
+            while (elapsed < CameraSettleTimeoutSeconds &&
+                   frame < CameraSettleFrameLimit)
             {
                 if (Vector3.Distance(camera.transform.position, targetPosition) <= 0.02f &&
                     Quaternion.Angle(camera.transform.rotation, targetRotation) <= 0.2f)
@@ -832,6 +836,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     yield break;
                 }
 
+                elapsed += Time.unscaledDeltaTime;
+                frame++;
                 yield return null;
             }
 
