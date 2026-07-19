@@ -29,6 +29,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             "BuildArtifacts/WP-0002/visual-captures/vgr-13";
         private const int CreatorTargetWidth = 2560;
         private const int CreatorTargetHeight = 1600;
+        private const int EditorBackbufferWidth = 2560;
+        private const int EditorBackbufferHeight = 1440;
         private const int ResolutionWaitFrames = 120;
         private const int CameraSettleFrames = 240;
 
@@ -37,8 +39,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         private int _originalWidth;
         private int _originalHeight;
         private FullScreenMode _originalFullScreenMode;
-        private int _observedNativeWidth;
-        private int _observedNativeHeight;
+        private int _physicalDisplayWidth;
+        private int _physicalDisplayHeight;
         private bool _resolutionSnapshotTaken;
         private bool _sceneLoadedByCapture;
 
@@ -79,8 +81,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             _pending.Clear();
             _resolutionSnapshotTaken = false;
             _sceneLoadedByCapture = false;
-            _observedNativeWidth = 0;
-            _observedNativeHeight = 0;
+            _physicalDisplayWidth = 0;
+            _physicalDisplayHeight = 0;
             yield return null;
         }
 
@@ -105,10 +107,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             _originalFullScreenMode = Screen.fullScreenMode;
             _resolutionSnapshotTaken = true;
             Resolution currentResolution = Screen.currentResolution;
-            _observedNativeWidth = currentResolution.width;
-            _observedNativeHeight = currentResolution.height;
-            Assert.That(_observedNativeWidth, Is.GreaterThan(0));
-            Assert.That(_observedNativeHeight, Is.GreaterThan(0));
+            _physicalDisplayWidth = currentResolution.width;
+            _physicalDisplayHeight = currentResolution.height;
+            Assert.That(_physicalDisplayWidth, Is.GreaterThan(0));
+            Assert.That(_physicalDisplayHeight, Is.GreaterThan(0));
 
             var manifest = new CaptureManifest
             {
@@ -131,18 +133,23 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 original_width = _originalWidth,
                 original_height = _originalHeight,
                 original_full_screen_mode = _originalFullScreenMode.ToString(),
-                display_resolution_width = currentResolution.width,
-                display_resolution_height = currentResolution.height,
-                observed_native_width = _observedNativeWidth,
-                observed_native_height = _observedNativeHeight,
+                physical_display_width = _physicalDisplayWidth,
+                physical_display_height = _physicalDisplayHeight,
+                observed_editor_backbuffer_width = EditorBackbufferWidth,
+                observed_editor_backbuffer_height = EditorBackbufferHeight,
+                physical_native_capture_reached =
+                    EditorBackbufferWidth == _physicalDisplayWidth &&
+                    EditorBackbufferHeight == _physicalDisplayHeight,
                 provisional_architecture_target_width = CreatorTargetWidth,
                 provisional_architecture_target_height = CreatorTargetHeight,
                 provisional_architecture_target_reached =
-                    _observedNativeWidth == CreatorTargetWidth &&
-                    _observedNativeHeight == CreatorTargetHeight,
+                    EditorBackbufferWidth == CreatorTargetWidth &&
+                    EditorBackbufferHeight == CreatorTargetHeight,
                 native_target_semantics =
-                    "Observed Screen.currentResolution before any capture resize; " +
-                    "the provisional architecture target remains 2560x1600.",
+                    "Screen.currentResolution records the physical display. " +
+                    "The exact editor Game-view backbuffer observed by a prior " +
+                    "fail-closed run is captured separately; this packet does not " +
+                    "claim physical-native or provisional-target coverage.",
                 quality_level = QualitySettings.names[QualitySettings.GetQualityLevel()],
                 color_space = QualitySettings.activeColorSpace.ToString(),
                 render_scale_width = ScalableBufferManager.widthScaleFactor,
@@ -162,8 +169,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     "Captures do not prove interaction, allocation, memory, or target-Mac performance.",
                     "Title and garage are representative legacy-surface checks, not exhaustive mode coverage.",
                     "The source head and tree are request-bound; this harness does not inspect Git metadata.",
-                    "Observed native target was " + _observedNativeWidth + "x" +
-                    _observedNativeHeight + "; provisional architecture target is 2560x1600."
+                    "Physical display was " + _physicalDisplayWidth + "x" +
+                    _physicalDisplayHeight + "; exact observed editor backbuffer was " +
+                    EditorBackbufferWidth + "x" + EditorBackbufferHeight + ".",
+                    "Physical-native layout and the provisional 2560x1600 architecture target remain unproven."
                 },
                 state_sequence = new[]
                 {
@@ -200,10 +209,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Assert.That(controller.FieldDesk?.OwnsCityOverview, Is.False);
                 yield return CaptureFrame(
                     controller,
-                    "legacy-title-observed-native",
+                    "legacy-title-observed-editor-backbuffer",
                     "title",
-                    _observedNativeWidth,
-                    _observedNativeHeight,
+                    EditorBackbufferWidth,
+                    EditorBackbufferHeight,
                     ScrollPosition.None,
                     makeGrayscale: false);
 
@@ -239,10 +248,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     makeGrayscale: true);
                 yield return CaptureFrame(
                     controller,
-                    "city-trial-a-top-observed-native",
+                    "city-trial-a-top-observed-editor-backbuffer",
                     "city-trial-a",
-                    _observedNativeWidth,
-                    _observedNativeHeight,
+                    EditorBackbufferWidth,
+                    EditorBackbufferHeight,
                     ScrollPosition.Top,
                     makeGrayscale: false);
 
@@ -255,10 +264,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 yield return WaitForGarageCamera(controller);
                 yield return CaptureFrame(
                     controller,
-                    "legacy-garage-observed-native",
+                    "legacy-garage-observed-editor-backbuffer",
                     "garage",
-                    _observedNativeWidth,
-                    _observedNativeHeight,
+                    EditorBackbufferWidth,
+                    EditorBackbufferHeight,
                     ScrollPosition.None,
                     makeGrayscale: false);
 
@@ -561,16 +570,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         {
             var expected = new HashSet<string>(StringComparer.Ordinal)
             {
-                "legacy-title-observed-native|color|" +
-                _observedNativeWidth + "x" + _observedNativeHeight,
+                "legacy-title-observed-editor-backbuffer|color|" +
+                EditorBackbufferWidth + "x" + EditorBackbufferHeight,
                 "city-trial-a-top-1280x720|color|1280x720",
                 "city-trial-a-bottom-1280x720|color|1280x720",
                 "city-trial-a-top-1920x1200|color|1920x1200",
                 "city-trial-a-top-1920x1200-grayscale|grayscale|1920x1200",
-                "city-trial-a-top-observed-native|color|" +
-                _observedNativeWidth + "x" + _observedNativeHeight,
-                "legacy-garage-observed-native|color|" +
-                _observedNativeWidth + "x" + _observedNativeHeight
+                "city-trial-a-top-observed-editor-backbuffer|color|" +
+                EditorBackbufferWidth + "x" + EditorBackbufferHeight,
+                "legacy-garage-observed-editor-backbuffer|color|" +
+                EditorBackbufferWidth + "x" + EditorBackbufferHeight
             };
             var actual = new HashSet<string>(StringComparer.Ordinal);
             for (var index = 0; index < _pending.Count; index++)
@@ -949,10 +958,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             public int original_width;
             public int original_height;
             public string original_full_screen_mode = string.Empty;
-            public int display_resolution_width;
-            public int display_resolution_height;
-            public int observed_native_width;
-            public int observed_native_height;
+            public int physical_display_width;
+            public int physical_display_height;
+            public int observed_editor_backbuffer_width;
+            public int observed_editor_backbuffer_height;
+            public bool physical_native_capture_reached;
             public int provisional_architecture_target_width;
             public int provisional_architecture_target_height;
             public bool provisional_architecture_target_reached;
