@@ -143,6 +143,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? "E or gamepad south · check in loaded return\nP · pause  F5 · save  F9 · load"
                     : _controller.IsPumpHallRepairAvailable
                     ? "E or gamepad south · seat turbine repair\nP · pause  F5 · save  F9 · load"
+                    : _controller.IsWorkshopBatchStartAvailable
+                    ? "E or gamepad south · start One Good Batch\nP · pause  F5 · save  F9 · load"
+                    : _controller.IsWorkshopBarterAvailable
+                    ? "E or gamepad south · barter physical lot\nP · pause  F5 · save  F9 · load"
                     : model.ExpeditionPhase == ExpeditionPhase.Outbound ||
                 model.ExpeditionPhase == ExpeditionPhase.Returning
                     ? _controller!.CanRecoverRoadPresentation
@@ -532,14 +536,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (model.IsSpareBearingBatchStartAvailable)
             {
-                GUILayout.Label(
-                    "The machine shop can commit exactly one bounded spare-bearing batch while preserving the civic parts reserve.",
-                    _bodyStyle);
-                if (GUILayout.Button(
-                        "START ONE SPARE-BEARING LOT",
-                        _buttonStyle))
+                if (!_controller.IsWorkshopBatchStartAvailable)
                 {
-                    _controller!.StartSpareBearingBatch();
+                    GUILayout.Label(
+                        "The machine shop can commit exactly one bounded spare-bearing batch while preserving the civic parts reserve. Open the fixed workshop line before committing it.",
+                        _bodyStyle);
+                    if (GUILayout.Button(
+                            "OPEN MACHINE SHOP · ONE GOOD BATCH",
+                            _buttonStyle))
+                    {
+                        _controller.OpenOneGoodBatchWorkshop();
+                    }
+                }
+                else
+                {
+                    GUILayout.Label(
+                        "Two approved input parts are staged at the selected machine. Press E or gamepad south to commit them to One Good Batch.",
+                        _bodyStyle);
+                    if (GUILayout.Button(
+                            "START ONE SPARE-BEARING LOT",
+                            _buttonStyle))
+                    {
+                        _controller.StartSpareBearingBatch();
+                    }
                 }
 
                 return;
@@ -547,14 +566,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (model.IsSpareBearingBarterAvailable)
             {
-                GUILayout.Label(
-                    "The completed physical lot can cross the claims wicket exactly once for the fixed depot corridor permit.",
-                    _bodyStyle);
-                if (GUILayout.Button(
-                        "BARTER LOT FOR DEPOT ROUTE PERMIT",
-                        _buttonStyle))
+                if (!_controller.IsWorkshopBarterAvailable)
                 {
-                    _controller!.BarterSpareBearingLot();
+                    GUILayout.Label(
+                        "The completed physical lot can cross the claims wicket exactly once for the fixed depot corridor permit. Open the fixed workshop line before handing it over.",
+                        _bodyStyle);
+                    if (GUILayout.Button(
+                            "OPEN CLAIMS WICKET · PHYSICAL LOT",
+                            _buttonStyle))
+                    {
+                        _controller.OpenOneGoodBatchWorkshop();
+                    }
+                }
+                else
+                {
+                    GUILayout.Label(
+                        "The physical lot remains at workshop output. Press E or gamepad south to hand it across the selected claims wicket.",
+                        _bodyStyle);
+                    if (GUILayout.Button(
+                            "BARTER LOT FOR DEPOT ROUTE PERMIT",
+                            _buttonStyle))
+                    {
+                        _controller.BarterSpareBearingLot();
+                    }
                 }
 
                 return;

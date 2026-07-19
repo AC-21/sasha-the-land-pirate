@@ -83,6 +83,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 LastBearingPresentationMode.BuildingCutaway &&
             _world?.IsPumpHallCutawaySelected == true;
 
+        public bool IsWorkshopBatchStartAvailable =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsSpareBearingBatchStartAvailable == true &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.BuildingCutaway &&
+            _world?.IsOneGoodBatchCutawaySelected == true;
+
+        public bool IsWorkshopBarterAvailable =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsSpareBearingBarterAvailable == true &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.BuildingCutaway &&
+            _world?.IsOneGoodBatchCutawaySelected == true;
+
         public string Status => _status;
 
         public string SaveStatus => _saveStatus;
@@ -816,37 +832,40 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void StartSpareBearingBatch()
         {
-            if (_readModel == null ||
-                !_readModel.IsSpareBearingBatchStartAvailable)
+            if (!IsWorkshopBatchStartAvailable)
             {
                 _status =
-                    "The one approved spare-bearing batch is not ready to start.";
+                    "Start the one approved spare-bearing batch only from the selected machine-shop cutaway.";
                 return;
             }
 
             Queue(sequence => new StartSpareBearingBatchCommand(sequence));
-            _world?.SelectOneGoodBatchCutaway();
-            ApplySelectedBuildingCutawayPose();
-            TryShowCityMode(
-                LastBearingPresentationMode.BuildingCutaway,
-                "One Good Batch is on the machine. Inputs transfer exactly once.");
+            _status =
+                "One Good Batch start queued. Inputs remain staged until canonical acceptance.";
         }
 
         public void BarterSpareBearingLot()
         {
-            if (_readModel == null || !_readModel.IsSpareBearingBarterAvailable)
+            if (!IsWorkshopBarterAvailable)
             {
                 _status =
-                    "The claims wicket cannot accept this lot or grant the route permit.";
+                    "Barter the physical lot only from the selected claims-wicket cutaway.";
                 return;
             }
 
             Queue(sequence => new BarterSpareBearingLotCommand(sequence));
-            _world?.SelectOneGoodBatchCutaway();
-            ApplySelectedBuildingCutawayPose();
-            TryShowCityMode(
-                LastBearingPresentationMode.BuildingCutaway,
-                "The physical lot is at the claims wicket for one bounded route-permit barter.");
+            _status =
+                "Claims-wicket handoff queued. The lot remains at workshop output until canonical acceptance.";
+        }
+
+        public void OpenOneGoodBatchWorkshop()
+        {
+            if (!TryRouteToOneGoodBatchWorkshop(
+                    "The machine shop and claims wicket are framed for the next physical handoff."))
+            {
+                _status =
+                    "The workshop action line is available only for the active batch or physical-lot handoff.";
+            }
         }
 
         public void ServiceFieldSleeve()
@@ -946,8 +965,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _saveStatus = result.Code + " · " + CanonicalHash.Substring(0, 12);
                 _status = "Exact city, vehicle, custody, crisis, and faction state restored.";
                 ApplyPresentation();
-                TryRouteToPumpHallRepair(
-                    "Exact finalized return restored at the pump-hall service line.");
+                if (!TryRouteToPumpHallRepair(
+                        "Exact finalized return restored at the pump-hall service line."))
+                {
+                    TryRouteToOneGoodBatchWorkshop(
+                        "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                }
             }
             catch (Exception exception)
             {
@@ -1033,6 +1056,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 RepairTurbine();
             }
+            else if (IsWorkshopBatchStartAvailable &&
+                ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
+                 (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
+            {
+                StartSpareBearingBatch();
+            }
+            else if (IsWorkshopBarterAvailable &&
+                ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
+                 (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
+            {
+                BarterSpareBearingLot();
+            }
         }
 
         private void SimulateOneTick()
@@ -1057,6 +1092,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ContainsEvent(
                         result.DomainEvents,
                         LastBearingEventKind.ExpeditionTransactionFinalized);
+                bool turbineRepairAccepted = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.TurbineRepaired);
+                bool spareBearingBatchCompleted = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.SpareBearingBatchCompleted);
+                bool spareBearingBatchStarted = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.SpareBearingBatchStarted);
+                bool spareBearingLotBartered = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.SpareBearingLotBartered);
                 _state = result.State;
                 _readModel = result.ReadModel;
                 if (previousPhase == ExpeditionPhase.AtHome &&
@@ -1072,6 +1119,31 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 {
                     TryRouteToPumpHallRepair(
                         "Return checked in. Seat the loaded repair at the pump hall.");
+                }
+
+                if (turbineRepairAccepted &&
+                    _readModel.IsSpareBearingBatchStartAvailable)
+                {
+                    _status =
+                        "The turbine turns again. One Good Batch is ready when you open the machine shop.";
+                }
+
+                if (spareBearingBatchCompleted)
+                {
+                    TryRouteToOneGoodBatchWorkshop(
+                        "The physical lot is complete. Carry it across the workshop to the claims wicket.");
+                }
+
+                if (spareBearingBatchStarted)
+                {
+                    _status =
+                        "One Good Batch accepted. Two staged inputs are now on the machine.";
+                }
+
+                if (spareBearingLotBartered)
+                {
+                    _status =
+                        "Barter accepted. The physical lot crossed the claims wicket and the route permit is recorded.";
                 }
             }
             catch (Exception exception)
@@ -1292,7 +1364,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _readModel.RoutePermitGranted,
                 _readModel.FutureRouteTollFuelUnits,
                 humanVisible,
-                robotVisible);
+                robotVisible,
+                simulationPaused: _readModel.PauseCause != PauseCause.None);
             _world.ApplyGaragePreparationProgress(
                 _readModel.PreparationElapsedTicks,
                 _readModel.PreparationRequiredTicks);
@@ -1372,6 +1445,40 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _status = successStatus;
             return true;
+        }
+
+        private bool TryRouteToOneGoodBatchWorkshop(string successStatus)
+        {
+            if (!IsOneGoodBatchWorkshopRelevant() ||
+                _world == null ||
+                _modeCoordinator == null)
+            {
+                return false;
+            }
+
+            _world.SelectOneGoodBatchCutaway();
+            ApplySelectedBuildingCutawayPose();
+            if (!_modeCoordinator.TryShowCityMode(
+                    LastBearingPresentationMode.BuildingCutaway,
+                    _readModel))
+            {
+                return false;
+            }
+
+            _status = successStatus;
+            return true;
+        }
+
+        private bool IsOneGoodBatchWorkshopRelevant()
+        {
+            return _pendingCommands.Count == 0 &&
+                   _readModel != null &&
+                   (_readModel.IsSpareBearingBatchStartAvailable ||
+                    _readModel.SpareBearingBatchPhase ==
+                        SpareBearingBatchPhase.InProgress ||
+                    _readModel.IsSpareBearingBarterAvailable ||
+                    _readModel.SpareBearingBatchPhase ==
+                        SpareBearingBatchPhase.Settled);
         }
 
         private static bool ContainsEvent(
