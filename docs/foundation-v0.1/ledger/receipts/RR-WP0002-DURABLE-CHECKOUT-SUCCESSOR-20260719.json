@@ -1,0 +1,101 @@
+{
+  "accepted_commit": "90ea2c20b45d3a09848e12a10965fd87dfa7a289",
+  "approval_text_sha256": "d2e91db4ac2cb6ed1d3da3678fbe15445eaca8433a3d4a69b192e2364f105bdb",
+  "artifact_resolver": {
+    "resolver_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/79#issuecomment-5014408730",
+    "type": "external-protected"
+  },
+  "artifact_sha256": {
+    "AGENTS.md": "8d908b42ef4bcfe62c26c0c492dd3e0df2f40568b60b03e2a262303199f6a367",
+    "README.md": "7743219113c55397d75a7f2021bf9747986c2d5c28cb1300050132627b610428",
+    "docs/evidence/WP-0002/checkout-successor/scope-capture.json": "b79784b5e2cca5ba8c405b8e550cbd8d0f6dbb4d1c591bc3a1de9421eb1f1483",
+    "docs/foundation-v0.1/04-TECHNICAL-ARCHITECTURE.md": "5c52b91c5f58de4ae0bee8b0f0115763844d5c503dc8391dab53dabfe1378d3b",
+    "docs/foundation-v0.1/15-LEAN-A1-LOCAL-DEVELOPMENT.md": "cd01caddaf72e6af7d38b0a48b962e8afad9fbda6551525157681195d8f4c03f",
+    "docs/foundation-v0.1/README.md": "5ec0794f7a8da30fd894103f6bc77dc809de69e9b53222967285d77a04244906",
+    "docs/foundation-v0.1/governance/WP-0002-DURABLE-CHECKOUT-SUCCESSOR.md": "c6a9a447d3dcfa839b24c0a941c7ab9f118f7e49c140fbccb0b103d625e49a65",
+    "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json": "c77a564f7476307fee0195aeeef3f6479c07ae26164fcaf566dcb5b6346d7282",
+    "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json": "6958d0cc6e521dbe619150ed417c579196af490bbfd7a78745f211030db36435",
+    "docs/foundation-v0.1/schemas/ratification-receipt.schema.json": "a6317b22edb1cf184f3fb74ad6dcadaa0bd188e781b4ad2dfc0c5d77ff4b800c",
+    "docs/foundation-v0.1/tools/test_validate_local_a1_boundary.py": "a3933f167fb1ff8375b6dc25419224eeabb0f64e92e05353e4d523d405265b91",
+    "docs/foundation-v0.1/tools/validate_foundation.py": "f3cc4c8dca09499564ac23bec77f174312995b7f1f4275df8eb61697f559fb33",
+    "docs/foundation-v0.1/work-packets/proposed/WP-0002.json": "ee19e3dd2e57f7f0f55c34358b0f333a48c1bcb3f3338ae99de7c5a956df1d3c",
+    "https://github.com/AC-21/sasha-the-land-pirate/pull/79#issuecomment-5014408730": "d2e91db4ac2cb6ed1d3da3678fbe15445eaca8433a3d4a69b192e2364f105bdb"
+  },
+  "foundation_binding": null,
+  "issued_at": "2026-07-19T04:54:20Z",
+  "issued_by": "AC-21",
+  "issuer_role": "creator",
+  "materialization_authority_binding": {
+    "amendment_id": "A1B-WP-0002-DURABLE-CHECKOUT-SUCCESSOR-20260719",
+    "changed_files_manifest_sha256": "31f96e271a0c8fae62b3be611c457a39237c3c52fa4b704c132b3403d78eeef8",
+    "changed_paths": [
+      "AGENTS.md",
+      "README.md",
+      "docs/evidence/WP-0002/checkout-successor/scope-capture.json",
+      "docs/foundation-v0.1/04-TECHNICAL-ARCHITECTURE.md",
+      "docs/foundation-v0.1/15-LEAN-A1-LOCAL-DEVELOPMENT.md",
+      "docs/foundation-v0.1/README.md",
+      "docs/foundation-v0.1/governance/WP-0002-DURABLE-CHECKOUT-SUCCESSOR.md",
+      "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json",
+      "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
+      "docs/foundation-v0.1/schemas/ratification-receipt.schema.json",
+      "docs/foundation-v0.1/tools/test_validate_local_a1_boundary.py",
+      "docs/foundation-v0.1/tools/validate_foundation.py",
+      "docs/foundation-v0.1/work-packets/proposed/WP-0002.json"
+    ],
+    "claim": "AUTHORIZE-WP0002-DURABLE-CHECKOUT-SUCCESSOR",
+    "packet_contract_sha256": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
+    "pr_number": 79,
+    "predecessor_project_path": "/Users/sasha/Projects/sasha-the-land-pirate/Game",
+    "predecessor_repository_root": "/Users/sasha/Projects/sasha-the-land-pirate",
+    "previous_boundary_sha256": "3bdd2fa06334dfe525071e376924a0d702bff1241effc33bff44dc42783aeaa8",
+    "receipt_id": "RR-WP0002-DURABLE-CHECKOUT-SUCCESSOR-20260719",
+    "receipt_path": "docs/foundation-v0.1/ledger/receipts/RR-WP0002-DURABLE-CHECKOUT-SUCCESSOR-20260719.json",
+    "repository_remote": "https://github.com/AC-21/sasha-the-land-pirate",
+    "restored_required_checks": [
+      "validate@15368",
+      "wp0002-core@15368",
+      "wp0002-policy@15368"
+    ],
+    "retained_required_checks": [
+      "validate@15368",
+      "wp0002-core@15368"
+    ],
+    "stage1_base": "3812bbecd96ec0db0d8a893fbdc2534565f0fbc3",
+    "stage1_commit": "90ea2c20b45d3a09848e12a10965fd87dfa7a289",
+    "stage1_patch_sha256": "f9bde4429232f6ecfde1016390fb27b3c18040051785386e49a11fd1b268dfba",
+    "stage1_tree": "b42a4cad94c5f55f3d3d19b486abc3b70ead74a9",
+    "successor_project_path": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game",
+    "successor_repository_root": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate",
+    "supersession_claim": "SUPERSEDE-WP0002-ACTIVE-CHECKOUT-PATH-ONLY",
+    "temporary_nonrequired_check": "wp0002-policy"
+  },
+  "receipt_id": "RR-WP0002-DURABLE-CHECKOUT-SUCCESSOR-20260719",
+  "receipt_kind": "creator-authorization",
+  "sealed": true,
+  "signature_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/79#issuecomment-5014408730",
+  "source_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/79#issuecomment-5014408730",
+  "subject_claims": [
+    {
+      "claims": [
+        "SUPERSEDE-WP0002-ACTIVE-CHECKOUT-PATH-ONLY"
+      ],
+      "subject_id": "A1B-WP-0002-LOCAL-DEV"
+    },
+    {
+      "claims": [
+        "AUTHORIZE-WP0002-DURABLE-CHECKOUT-SUCCESSOR"
+      ],
+      "subject_id": "WP-0002"
+    }
+  ],
+  "subject_contract_sha256": {
+    "A1B-WP-0002-LOCAL-DEV": "3bdd2fa06334dfe525071e376924a0d702bff1241effc33bff44dc42783aeaa8",
+    "WP-0002": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"
+  },
+  "subject_event_sha256": {},
+  "subject_ids": [
+    "A1B-WP-0002-LOCAL-DEV",
+    "WP-0002"
+  ]
+}
