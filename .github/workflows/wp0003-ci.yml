@@ -1,10 +1,6 @@
 name: WP-0003 Core
 
 on:
-  pull_request:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
@@ -24,6 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          ref: b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5
           fetch-depth: 0
           persist-credentials: false
 

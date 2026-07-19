@@ -19,7 +19,7 @@
   "a1_boundary_manifest": {
     "manifest_id": "A1B-WP-0002-LOCAL-DEV",
     "path": "governance/a1-boundaries/WP-0002.json",
-    "sha256": "c77a564f7476307fee0195aeeef3f6479c07ae26164fcaf566dcb5b6346d7282"
+    "sha256": "3a157b115ba52a51b198fa0f0df1fa36b587bae55e3ab824e5af5f4b0b9c97d1"
   },
   "implementer": null,
   "verifier": null,
@@ -155,7 +155,7 @@
   ],
   "reservation": {
     "status": "held",
-    "lease_id": "lease-20260717t160516z-c92f112705a1-b8c98c1cf9915678",
+    "lease_id": "lease-20260719t204800z-wp0002-renewal-2f5d7e91b3c8408a",
     "base_commit": "f83ef8aa4d2bac7d0c8817180feebc24c0c1e835",
     "paths": [
       "SimulationCore/Runtime/LastBearing.meta",
@@ -187,8 +187,8 @@
       "presentation",
       "save"
     ],
-    "expires_at": "2026-07-19T16:06:11Z",
-    "fencing_token": "fence-20260717t160516z-c92f112705a1-4bc68814cdbcabe3"
+    "expires_at": "2026-08-19T16:06:11Z",
+    "fencing_token": "fence-20260719t204800z-wp0002-renewal-9a73c1e4d6b8f205"
   },
   "declared_paths": [
     "SimulationCore/Runtime/LastBearing.meta",

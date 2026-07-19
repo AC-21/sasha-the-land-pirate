@@ -460,6 +460,84 @@ WP0002_CHECKOUT_SUCCESSOR_SOURCE_PATTERN = re.compile(
     r"https://github\.com/AC-21/sasha-the-land-pirate/"
     r"pull/79#issuecomment-[0-9]+"
 )
+WP0002_RESERVATION_RENEWAL_ID = (
+    "A1B-WP-0002-RESERVATION-RENEWAL-20260719"
+)
+WP0002_RESERVATION_RENEWAL_RECEIPT_ID = (
+    "RR-WP0002-RESERVATION-RENEWAL-20260719"
+)
+WP0002_RESERVATION_RENEWAL_CLAIM = (
+    "AUTHORIZE-WP0002-RESERVATION-RENEWAL"
+)
+WP0002_RESERVATION_RENEWAL_GOVERNANCE_PATH = (
+    "governance/WP-0002-RESERVATION-RENEWAL-20260719.md"
+)
+WP0002_RESERVATION_RENEWAL_RECEIPT_PATH = (
+    "ledger/receipts/RR-WP0002-RESERVATION-RENEWAL-20260719.json"
+)
+WP0002_RESERVATION_RENEWAL_RECEIPT_REPO_PATH = (
+    "docs/foundation-v0.1/" + WP0002_RESERVATION_RENEWAL_RECEIPT_PATH
+)
+WP0002_RESERVATION_RENEWAL_PREVIOUS_BOUNDARY_SHA256 = (
+    "c77a564f7476307fee0195aeeef3f6479c07ae26164fcaf566dcb5b6346d7282"
+)
+WP0002_RESERVATION_RENEWAL_PREVIOUS = {
+    "lease_id": "lease-20260717t160516z-c92f112705a1-b8c98c1cf9915678",
+    "fencing_token": "fence-20260717t160516z-c92f112705a1-4bc68814cdbcabe3",
+    "expires_at": "2026-07-19T16:06:11Z",
+}
+WP0002_RESERVATION_RENEWAL_CURRENT = {
+    "lease_id": "lease-20260719t204800z-wp0002-renewal-2f5d7e91b3c8408a",
+    "fencing_token": "fence-20260719t204800z-wp0002-renewal-9a73c1e4d6b8f205",
+    "expires_at": "2026-08-19T16:06:11Z",
+}
+WP0002_RESERVATION_RENEWAL_SOURCE_PATTERN = re.compile(
+    r"https://github\.com/AC-21/sasha-the-land-pirate/"
+    r"pull/[0-9]+#issuecomment-[0-9]+"
+)
+WP0002_RESERVATION_RENEWAL_ARTIFACT_PATHS = (
+    ".github/workflows/wp0003-ci.yml",
+    "docs/foundation-v0.1/governance/WP-0002-RESERVATION-RENEWAL-20260719.md",
+    "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json",
+    "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
+    "docs/foundation-v0.1/tools/test_validate_wp0002_reservation_renewal.py",
+    "docs/foundation-v0.1/tools/validate_foundation.py",
+    "docs/foundation-v0.1/work-packets/proposed/WP-0002.json",
+)
+WP0002_ACTIVE_RESERVATION_RENEWAL = {
+    "renewal_id": WP0002_RESERVATION_RENEWAL_ID,
+    "authorization_receipt_id": WP0002_RESERVATION_RENEWAL_RECEIPT_ID,
+    "governance_record": WP0002_RESERVATION_RENEWAL_GOVERNANCE_PATH,
+    "previous_boundary_sha256": (
+        WP0002_RESERVATION_RENEWAL_PREVIOUS_BOUNDARY_SHA256
+    ),
+    "packet_contract_sha256": (
+        "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"
+    ),
+    "previous_reservation": WP0002_RESERVATION_RENEWAL_PREVIOUS,
+    "renewed_reservation": WP0002_RESERVATION_RENEWAL_CURRENT,
+    "paths_changed": False,
+    "domains_changed": False,
+    "packet_contract_changed": False,
+    "authority_expansion": "time-only",
+    "materialization_control": {
+        "classification": "creator-controlled-time-only-reservation-renewal",
+        "temporary_nonrequired_check": "wp0002-policy",
+        "retained_required_checks": ["validate", "wp0002-core"],
+        "restored_required_checks": [
+            "validate",
+            "wp0002-core",
+            "wp0002-policy",
+        ],
+        "strict_protection_retained": True,
+        "no_bypass_allowances": True,
+        "force_push_disabled": True,
+        "deletion_disabled": True,
+        "squash_only": True,
+        "restore_wp0002_policy_immediately_after_merge": True,
+        "general_protection_bypass_authorized": False,
+    },
+}
 WP0002_CHECKOUT_SUCCESSOR_SCOPE_CAPTURE_PATH = (
     "docs/evidence/WP-0002/checkout-successor/scope-capture.json"
 )
@@ -1186,7 +1264,7 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
         "5f02ee7fd59bb0a6eea5cac3ba26cbb7c82d59ae8ae1008ab58cb3b72c541d19"
     ),
     "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json": (
-        "6958d0cc6e521dbe619150ed417c579196af490bbfd7a78745f211030db36435"
+        "9828f30741d992ba7086fc9de39492b915f83ec2f88c47d19c534a08c1f4586e"
     ),
     "docs/foundation-v0.1/schemas/ratification-receipt.schema.json": (
         "a6317b22edb1cf184f3fb74ad6dcadaa0bd188e781b4ad2dfc0c5d77ff4b800c"
@@ -9409,6 +9487,118 @@ def validate_wp0002_local_operator_amendment(
     return errors
 
 
+def validate_wp0002_reservation_renewal(
+    packet: dict,
+    manifest: dict | None,
+    receipts_by_id: dict[str, dict],
+) -> list[str]:
+    """Require exact creator authority for the time-only WP-0002 renewal."""
+    errors: list[str] = []
+    if not isinstance(manifest, dict):
+        return ["WP-0002 reservation renewal lacks its boundary manifest"]
+    if (
+        manifest.get("active_reservation_renewal")
+        != WP0002_ACTIVE_RESERVATION_RENEWAL
+    ):
+        errors.append("WP-0002 active reservation renewal is not exact")
+
+    reservation = packet.get("reservation", {})
+    current_projection = {
+        field: reservation.get(field)
+        for field in ("lease_id", "fencing_token", "expires_at")
+    }
+    if current_projection != WP0002_RESERVATION_RENEWAL_CURRENT:
+        errors.append("WP-0002 packet does not bind the renewed reservation")
+    if packet.get("contract_sha256") != WP0002_ACTIVE_RESERVATION_RENEWAL[
+        "packet_contract_sha256"
+    ]:
+        errors.append("WP-0002 renewal changes or misbinds the packet contract")
+
+    receipt = receipts_by_id.get(WP0002_RESERVATION_RENEWAL_RECEIPT_ID)
+    if not isinstance(receipt, dict):
+        return errors + [
+            "WP-0002 reservation renewal lacks its exact sealed creator receipt"
+        ]
+    source_reference = receipt.get("source_reference")
+    resolver = receipt.get("artifact_resolver")
+    claims = subject_claims(receipt).get("WP-0002", set())
+    if (
+        receipt.get("receipt_kind") != "creator-authorization"
+        or receipt.get("issued_by") != "AC-21"
+        or receipt.get("issuer_role") != "creator"
+        or receipt.get("sealed") is not True
+        or receipt.get("foundation_binding") is not None
+        or receipt.get("subject_ids") != ["WP-0002"]
+        or claims != {WP0002_RESERVATION_RENEWAL_CLAIM}
+        or receipt.get("subject_contract_sha256")
+        != {"WP-0002": packet.get("contract_sha256")}
+        or receipt.get("subject_event_sha256") != {}
+        or not isinstance(source_reference, str)
+        or WP0002_RESERVATION_RENEWAL_SOURCE_PATTERN.fullmatch(source_reference)
+        is None
+        or not isinstance(resolver, dict)
+        or resolver.get("type") != "external-protected"
+        or resolver.get("resolver_reference") != source_reference
+        or receipt.get("signature_reference") != source_reference
+    ):
+        errors.append(
+            "WP-0002 reservation renewal receipt lacks exact protected creator authority"
+        )
+
+    artifact_hashes = receipt.get("artifact_sha256")
+    expected_artifacts = set(WP0002_RESERVATION_RENEWAL_ARTIFACT_PATHS)
+    if isinstance(source_reference, str):
+        expected_artifacts.add(source_reference)
+    if (
+        not isinstance(artifact_hashes, dict)
+        or set(artifact_hashes) != expected_artifacts
+    ):
+        errors.append("WP-0002 reservation renewal artifact set is not exact")
+        artifact_hashes = {}
+    elif artifact_hashes.get(source_reference) != receipt.get(
+        "approval_text_sha256"
+    ):
+        errors.append("WP-0002 reservation renewal does not bind its creator comment")
+
+    accepted_commit = receipt.get("accepted_commit")
+    stage1_available = (
+        isinstance(accepted_commit, str)
+        and re.fullmatch(r"[0-9a-f]{40}", accepted_commit) is not None
+        and git_commit_exists(accepted_commit)
+    )
+    protected_introductions = git_first_parent_path_additions(
+        "refs/remotes/origin/main",
+        WP0002_RESERVATION_RENEWAL_RECEIPT_REPO_PATH,
+    )
+    if not stage1_available and not protected_introductions:
+        errors.append(
+            "WP-0002 reservation renewal Stage-1 commit is unavailable before protected introduction"
+        )
+
+    for relative in WP0002_RESERVATION_RENEWAL_ARTIFACT_PATHS:
+        current_path = REPO_ROOT / relative
+        if (
+            not current_path.is_file()
+            or current_path.is_symlink()
+            or artifact_hashes.get(relative) != sha256_file(current_path)
+        ):
+            errors.append(
+                f"WP-0002 reservation renewal artifact drifted: {relative}"
+            )
+            continue
+        if stage1_available:
+            stage1_blob = git_repo_blob(accepted_commit, relative)
+            if (
+                stage1_blob is None
+                or hashlib.sha256(stage1_blob).hexdigest()
+                != artifact_hashes.get(relative)
+            ):
+                errors.append(
+                    f"WP-0002 reservation renewal Stage-1 blob drifted: {relative}"
+                )
+    return errors
+
+
 def validate_local_a1_boundary_manifest(
     packet: dict,
     state: dict,
@@ -12124,6 +12314,14 @@ def main() -> int:
             )
 
         reservation = packet.get("reservation", {})
+        if packet_id == "WP-0002":
+            errors.extend(
+                validate_wp0002_reservation_renewal(
+                    packet,
+                    boundary_manifest,
+                    receipts_by_id,
+                )
+            )
         if reservation.get("status") != "held":
             errors.append(f"active A1 packet {packet_id} reservation is not held")
         base_commit = reservation.get("base_commit")

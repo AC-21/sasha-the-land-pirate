@@ -1,0 +1,42 @@
+{
+  "receipt_id": "RR-WP0002-RESERVATION-RENEWAL-20260719",
+  "issued_at": "2026-07-19T20:59:25Z",
+  "issued_by": "AC-21",
+  "issuer_role": "creator",
+  "receipt_kind": "creator-authorization",
+  "artifact_resolver": {
+    "type": "external-protected",
+    "resolver_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/81#issuecomment-5017354693"
+  },
+  "source_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/81#issuecomment-5017354693",
+  "subject_ids": [
+    "WP-0002"
+  ],
+  "subject_claims": [
+    {
+      "subject_id": "WP-0002",
+      "claims": [
+        "AUTHORIZE-WP0002-RESERVATION-RENEWAL"
+      ]
+    }
+  ],
+  "approval_text_sha256": "1520f9bfde9c5dcfa09bebe3fb1f6e4569a0935e31495cab76deca83f344e764",
+  "accepted_commit": "7a6724571355d5f2bd8897470d101d21bb316dcd",
+  "artifact_sha256": {
+    ".github/workflows/wp0003-ci.yml": "8f42f0ade7b395ad361a887908fd8b49e74e61199db16a73834aa1d221642fea",
+    "docs/foundation-v0.1/governance/WP-0002-RESERVATION-RENEWAL-20260719.md": "553b00bbb08df6ba8365bd01163987fde280e6910394c11b8077fe0693a5f8ed",
+    "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json": "3a157b115ba52a51b198fa0f0df1fa36b587bae55e3ab824e5af5f4b0b9c97d1",
+    "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json": "9828f30741d992ba7086fc9de39492b915f83ec2f88c47d19c534a08c1f4586e",
+    "docs/foundation-v0.1/tools/test_validate_wp0002_reservation_renewal.py": "9c4635501f7e875157c6dde07d2dff692ca6d5b8fd9e0af1ca2f052f973fc096",
+    "docs/foundation-v0.1/tools/validate_foundation.py": "5746c1778237f65d53a029a223d2683080116180fbf2d799c7d5b6a0551d56dc",
+    "docs/foundation-v0.1/work-packets/proposed/WP-0002.json": "da75436ff1c947915619fc80bcd93db7d554276dcb707aac1bb880f9948f15b9",
+    "https://github.com/AC-21/sasha-the-land-pirate/pull/81#issuecomment-5017354693": "1520f9bfde9c5dcfa09bebe3fb1f6e4569a0935e31495cab76deca83f344e764"
+  },
+  "subject_contract_sha256": {
+    "WP-0002": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"
+  },
+  "subject_event_sha256": {},
+  "foundation_binding": null,
+  "signature_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/81#issuecomment-5017354693",
+  "sealed": true
+}
