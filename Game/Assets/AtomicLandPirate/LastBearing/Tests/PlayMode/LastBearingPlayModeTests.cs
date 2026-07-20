@@ -995,6 +995,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             HeavyCargoCustody custodyBefore = stateBefore.HeavyCargoCustody;
             Vector3 expectedPosition = canonicalVehicle.position;
             Quaternion expectedRotation = canonicalVehicle.rotation;
+            Vector3 expectedRecoveredCameraPosition = camera.transform.position;
 
             coordinator.ApplyQuantizedRoadCommandShadow(875, -625);
             coordinator.ApplyPresentationOnlyRoadControls(450, 700);
@@ -1004,7 +1005,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             body.angularVelocity = new Vector3(2f, -1.5f, 0.75f);
             Physics.SyncTransforms();
             yield return null;
-            Vector3 displacedCameraPosition = camera.transform.position;
 
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Press(keyboard.rKey);
@@ -1037,8 +1037,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(roadRig.Vehicle.Telemetry.DamageBand, Is.EqualTo(RoadFeelDamageBand.Worn));
             AssertCameraOwnership(controller, chaseActive: true);
             Assert.That(
-                Vector3.Distance(camera.transform.position, displacedCameraPosition),
-                Is.GreaterThan(1f));
+                Vector3.Distance(camera.transform.position, expectedRecoveredCameraPosition),
+                Is.LessThan(0.025f));
             AssertChaseCameraLooksBehindSasha(world, roadRig);
 
             Assert.That(controller.CanonicalHash, Is.EqualTo(hashBefore));
