@@ -293,7 +293,7 @@ WP0002_RUNCOMMAND_RESIDUAL_CAPABILITY = {
     "denied_actions_enforcement": "creator-authority-policy-only-not-os-enforcement",
     "direct_runcommand_prohibited_until_dispatcher_materialized_and_hash_bound": True,
     "dispatcher": {
-        "contract": "wp0002-gate-dispatcher-v2",
+        "contract": "wp0002-gate-dispatcher-v3",
         "repository_path": (
             "Game/Assets/AtomicLandPirate/LastBearing/Editor/"
             "WP0002GateDispatcher.cs"
@@ -607,9 +607,6 @@ WP0002_NATIVE_GATE_STAGE1_PATHS = (
     "docs/foundation-v0.1/work-packets/proposed/WP-0002.json",
 )
 WP0002_NATIVE_GATE_EDITABLE_ARTIFACT_SHA256 = {
-    "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs": (
-        "2aa5b1351e808d6c38819581c637bf171896ec2888633acbd8102ce6f1662392"
-    ),
     "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles.meta": (
         "3d9a7fff93aadfa6aacc3cd48f1e2bcedec87ebb6ff3566b3f1db9391e8f1543"
     ),
@@ -621,13 +618,6 @@ WP0002_NATIVE_GATE_EDITABLE_ARTIFACT_SHA256 = {
         "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/"
         "WP0002NativeIl2CppArm64Performance.asset.meta"
     ): "d5da1087e58226c58db22dc458fac7da12a715e4fda2544715fa173b5bd906c1",
-    (
-        "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/"
-        "LastBearingAdapterTests.cs"
-    ): "b278db4a77eb0c3dfa39d54fba578d821abc21340791f593f1e76cb98ef77dc5",
-    "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs": (
-        "b06b78f2df79704f3f717a76d590cac255707d9f3a22b7ce03e98c5a3f1e0dbc"
-    ),
 }
 WP0002_NATIVE_GATE_SUCCESSOR = {
     "amendment_id": WP0002_NATIVE_GATE_AMENDMENT_ID,
@@ -639,7 +629,7 @@ WP0002_NATIVE_GATE_SUCCESSOR = {
     ),
     "packet_contract_sha256": WP0002_NATIVE_GATE_PACKET_CONTRACT_SHA256,
     "authorized_dispatcher_sha256": (
-        "2aa5b1351e808d6c38819581c637bf171896ec2888633acbd8102ce6f1662392"
+        "bd0764bebc486ac6f20354582ddfee1dfd3c1d95541f1be25def60a281783dfc"
     ),
     "build_profile_path": (
         "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/"
@@ -697,6 +687,220 @@ WP0002_NATIVE_GATE_SUCCESSOR = {
             "build-and-run-manifest-sha256",
             "runtime-report-sha256",
         ],
+    },
+    "editor_path_correction": {
+        "amendment_id": (
+            "A1B-WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719"
+        ),
+        "receipt_id": (
+            "RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719"
+        ),
+        "path_correction_state": "receipt-required-fail-closed",
+        "governance_record": (
+            "governance/"
+            "WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.md"
+        ),
+        "previous_boundary_sha256": (
+            "e0de86facc529e6dc1d6be38244408c8463083b27bd45e41034496e382954d4b"
+        ),
+        "packet_contract_sha256": (
+            "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"
+        ),
+        "retained_predecessor_receipt": {
+            "receipt_id": (
+                "RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719"
+            ),
+            "path": (
+                "ledger/receipts/"
+                "RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.json"
+            ),
+            "sha256": (
+                "832348ad6c772a95dd5e98a4dc569de170707e8ffe4cb35c69f079dac7ecc484"
+            ),
+        },
+        "superseded_dispatcher_sha256": (
+            "2aa5b1351e808d6c38819581c637bf171896ec2888633acbd8102ce6f1662392"
+        ),
+        "dispatcher_sha256": (
+            "bd0764bebc486ac6f20354582ddfee1dfd3c1d95541f1be25def60a281783dfc"
+        ),
+        "editor_application_bundle_path": (
+            "/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app"
+        ),
+        "editor_executable_relative_path": "Contents/MacOS/Unity",
+        "editor_binary_sha256": (
+            "5dcf81c5df5a9ff35006ee05832a1a6194c60fc4a386df652b9f49ea3a2a238b"
+        ),
+        "editor_bundle_identity_policy": (
+            "exact-full-path-ordinal-regular-directory-no-reparse-components"
+        ),
+        "editor_executable_identity_policy": (
+            "fixed-relative-derivation-regular-file-no-reparse-components-"
+            "and-exact-sha256"
+        ),
+        "correction_scope": "editor-path-check-only",
+        "gate_surface_changed": False,
+        "build_profile_changed": False,
+        "native_protocol_changed": False,
+        "packet_contract_changed": False,
+        "authority_expansion": False,
+    },
+}
+WP0002_NATIVE_PATH_FIX_AMENDMENT_ID = (
+    "A1B-WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719"
+)
+WP0002_NATIVE_PATH_FIX_RECEIPT_ID = (
+    "RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719"
+)
+WP0002_NATIVE_PATH_FIX_SUPERSESSION_SUBJECT = "wp0002-gate-dispatcher-v2"
+WP0002_NATIVE_PATH_FIX_SUPERSESSION_CLAIM = (
+    "SUPERSEDE-WP0002-GATE-DISPATCHER-V2-EDITOR-PATH-CHECK-ONLY"
+)
+WP0002_NATIVE_PATH_FIX_CLAIM = (
+    "AUTHORIZE-WP0002-NATIVE-EDITOR-BUNDLE-EXECUTABLE-IDENTITY-CORRECTION"
+)
+WP0002_NATIVE_PATH_FIX_GOVERNANCE_PATH = (
+    "governance/WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.md"
+)
+WP0002_NATIVE_PATH_FIX_RECEIPT_PATH = (
+    "ledger/receipts/"
+    "RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.json"
+)
+WP0002_NATIVE_PATH_FIX_RECEIPT_REPO_PATH = (
+    "docs/foundation-v0.1/" + WP0002_NATIVE_PATH_FIX_RECEIPT_PATH
+)
+WP0002_NATIVE_PATH_FIX_PREVIOUS_BOUNDARY_SHA256 = (
+    "e0de86facc529e6dc1d6be38244408c8463083b27bd45e41034496e382954d4b"
+)
+WP0002_NATIVE_PATH_FIX_PREVIOUS_DISPATCHER_SHA256 = (
+    "2aa5b1351e808d6c38819581c637bf171896ec2888633acbd8102ce6f1662392"
+)
+WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_ID = (
+    "RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719"
+)
+WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_PATH = (
+    "ledger/receipts/"
+    "RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.json"
+)
+WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_SHA256 = (
+    "832348ad6c772a95dd5e98a4dc569de170707e8ffe4cb35c69f079dac7ecc484"
+)
+WP0002_NATIVE_PATH_FIX_RETAINED_BUILD_PROFILE_PATH = (
+    "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/"
+    "WP0002NativeIl2CppArm64Performance.asset"
+)
+WP0002_NATIVE_PATH_FIX_RETAINED_BUILD_PROFILE_SHA256 = (
+    "6763b9edcb6ade391b132242c518796eebda444f883917768252a3314bda9249"
+)
+WP0002_NATIVE_PATH_FIX_STAGE1_BASE = (
+    "f6e6e18cce7483db7d120c1e4b8e64f185f707ba"
+)
+WP0002_NATIVE_PATH_FIX_REMOTE = (
+    "https://github.com/AC-21/sasha-the-land-pirate"
+)
+WP0002_NATIVE_PATH_FIX_SOURCE_PATTERN = re.compile(
+    r"https://github\.com/AC-21/sasha-the-land-pirate/"
+    r"pull/([0-9]+)#issuecomment-[0-9]+"
+)
+WP0002_NATIVE_PATH_FIX_RETAINED_REQUIRED_CHECKS = (
+    "validate@15368",
+    "wp0002-core@15368",
+)
+WP0002_NATIVE_PATH_FIX_RESTORED_REQUIRED_CHECKS = (
+    "validate@15368",
+    "wp0002-core@15368",
+    "wp0002-policy@15368",
+)
+WP0002_NATIVE_PATH_FIX_STAGE1_PATHS = (
+    "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
+    "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/"
+    "LastBearingAdapterTests.cs",
+    "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs",
+    "docs/foundation-v0.1/governance/"
+    "WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.md",
+    "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json",
+    "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
+    "docs/foundation-v0.1/tools/validate_foundation.py",
+    "docs/foundation-v0.1/tools/"
+    "test_validate_wp0002_native_editor_path_correction.py",
+)
+WP0002_NATIVE_PATH_FIX_DISPATCHER_SHA256 = (
+    "bd0764bebc486ac6f20354582ddfee1dfd3c1d95541f1be25def60a281783dfc"
+)
+WP0002_NATIVE_PATH_FIX_ARTIFACT_SHA256 = {
+    "Game/Assets/AtomicLandPirate/LastBearing/Editor/"
+    "WP0002GateDispatcher.cs": (
+        "bd0764bebc486ac6f20354582ddfee1dfd3c1d95541f1be25def60a281783dfc"
+    ),
+    "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/"
+    "LastBearingAdapterTests.cs": (
+        "6c0087bce97d6eab7e477a4afba932e567d1a291c77eb2cd76f5597208fffefa"
+    ),
+    "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs": (
+        "68ef64e161485e1e4f48beee94e26f3b190b9e739583942eb828c8e36bcadd42"
+    ),
+    "docs/foundation-v0.1/governance/"
+    "WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.md": (
+        "1fcf87485138952b1298df39bb9808a1fd8fabf5bc9bc97019ab19cd9ee9f9d2"
+    ),
+    "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json": (
+        "cdeb0000873ce27c257e4aeea1ba9c573ca9b90ad50a8a93a4a52d10c5c36959"
+    ),
+    "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json": (
+        "f93c1653381e6f042319bb4e3c17ff3c901e8d3f53a58674392aeaf42b33a0c0"
+    ),
+    "docs/foundation-v0.1/tools/"
+    "test_validate_wp0002_native_editor_path_correction.py": (
+        "567ee0c8f7f1b3bd87db74ed2ecb0465e2b454ca0fb0a2435a6179eb5c0c32ee"
+    ),
+}
+WP0002_NATIVE_PATH_FIX_BOUNDARY_AMENDMENT = {
+    "amendment_id": WP0002_NATIVE_PATH_FIX_AMENDMENT_ID,
+    "amendment_kind": "append-only-native-editor-path-correction",
+    "previous_boundary_sha256": (
+        WP0002_NATIVE_PATH_FIX_PREVIOUS_BOUNDARY_SHA256
+    ),
+    "predecessor_dispatcher_sha256": (
+        WP0002_NATIVE_PATH_FIX_PREVIOUS_DISPATCHER_SHA256
+    ),
+    "predecessor_receipt": {
+        "receipt_id": WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_ID,
+        "path": WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_PATH,
+        "sha256": WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_SHA256,
+    },
+    "authorization_receipt_id": WP0002_NATIVE_PATH_FIX_RECEIPT_ID,
+    "required_claims": [
+        WP0002_NATIVE_PATH_FIX_SUPERSESSION_CLAIM,
+        WP0002_NATIVE_PATH_FIX_CLAIM,
+    ],
+    "governance_record": WP0002_NATIVE_PATH_FIX_GOVERNANCE_PATH,
+    "packet_contract_changed": False,
+    "authority_expansion": False,
+    "materialization_control": {
+        "classification": (
+            "creator-controlled-native-editor-identity-correction-not-"
+            "general-process-authority"
+        ),
+        "stage1_state": "proposed-unratified-non-executable",
+        "stage2_delta_policy": (
+            "exactly-one-added-regular-sealed-path-correction-receipt-file"
+        ),
+        "corrected_gates_may_validate_their_own_control_pr": False,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "retained_required_checks": ["validate", "wp0002-core"],
+        "restored_required_checks": [
+            "validate",
+            "wp0002-core",
+            "wp0002-policy",
+        ],
+        "strict_protection_retained": True,
+        "no_bypass_allowances": True,
+        "force_push_disabled": True,
+        "deletion_disabled": True,
+        "squash_only": True,
+        "restore_wp0002_policy_immediately_after_merge": True,
+        "restoration_deadline_seconds": 600,
+        "general_process_or_argument_authority": False,
     },
 }
 WP0002_CHECKOUT_SUCCESSOR_SCOPE_CAPTURE_PATH = (
@@ -1235,6 +1439,7 @@ WP0002_BOUNDARY_AMENDMENTS = [
             "general_process_or_argument_authority": False,
         },
     },
+    WP0002_NATIVE_PATH_FIX_BOUNDARY_AMENDMENT,
 ]
 WP0002_DELEGATED_LOCAL_UNITY_OPERATOR = {
     "authorization_receipt_id": WP0002_LOCAL_OPERATOR_RECEIPT_ID,
@@ -9910,6 +10115,14 @@ def validate_wp0002_native_performance_gate_successor(
                 + relative
             )
 
+    errors.extend(
+        validate_wp0002_native_editor_path_correction(
+            packet,
+            manifest,
+            receipts_by_id,
+        )
+    )
+
     receipt = receipts_by_id.get(WP0002_NATIVE_GATE_RECEIPT_ID)
     if not isinstance(receipt, dict):
         return errors
@@ -9948,6 +10161,678 @@ def validate_wp0002_native_performance_gate_successor(
         )
     errors.extend(
         validate_wp0002_native_performance_gate_receipt(packet, receipt)
+    )
+    return errors
+
+
+def _wp0002_native_path_fix_pr_number(
+    source_reference: object,
+) -> int | None:
+    if not isinstance(source_reference, str):
+        return None
+    match = WP0002_NATIVE_PATH_FIX_SOURCE_PATTERN.fullmatch(source_reference)
+    return int(match.group(1)) if match is not None else None
+
+
+def _wp0002_native_path_fix_expected_authority_binding(
+    repository: object,
+    packet: dict,
+    accepted_commit: str,
+    stage1: dict[str, object],
+    changed_files: list[dict[str, object]],
+    pr_number: int,
+) -> dict[str, object] | None:
+    try:
+        patch = repository.deterministic_patch(
+            WP0002_NATIVE_PATH_FIX_STAGE1_BASE,
+            accepted_commit,
+        )
+    except Exception:
+        return None
+    return {
+        "claim": WP0002_NATIVE_PATH_FIX_CLAIM,
+        "supersession_claim": WP0002_NATIVE_PATH_FIX_SUPERSESSION_CLAIM,
+        "amendment_id": WP0002_NATIVE_PATH_FIX_AMENDMENT_ID,
+        "receipt_id": WP0002_NATIVE_PATH_FIX_RECEIPT_ID,
+        "pr_number": pr_number,
+        "packet_contract_sha256": packet.get("contract_sha256"),
+        "previous_boundary_sha256": (
+            WP0002_NATIVE_PATH_FIX_PREVIOUS_BOUNDARY_SHA256
+        ),
+        "repository_remote": WP0002_NATIVE_PATH_FIX_REMOTE,
+        "predecessor_repository_root": WP0002_ACTIVE_REPOSITORY_ROOT,
+        "successor_repository_root": WP0002_ACTIVE_REPOSITORY_ROOT,
+        "predecessor_project_path": WP0002_ACTIVE_PROJECT_PATH,
+        "successor_project_path": WP0002_ACTIVE_PROJECT_PATH,
+        "stage1_base": WP0002_NATIVE_PATH_FIX_STAGE1_BASE,
+        "stage1_commit": accepted_commit,
+        "stage1_tree": stage1.get("tree"),
+        "stage1_patch_sha256": hashlib.sha256(patch).hexdigest(),
+        "changed_files_manifest_sha256": sha256_canonical_json(changed_files),
+        "changed_paths": sorted(WP0002_NATIVE_PATH_FIX_STAGE1_PATHS),
+        "receipt_path": WP0002_NATIVE_PATH_FIX_RECEIPT_REPO_PATH,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "retained_required_checks": list(
+            WP0002_NATIVE_PATH_FIX_RETAINED_REQUIRED_CHECKS
+        ),
+        "restored_required_checks": list(
+            WP0002_NATIVE_PATH_FIX_RESTORED_REQUIRED_CHECKS
+        ),
+    }
+
+
+def _validate_wp0002_native_path_fix_stored_authority_binding(
+    packet: dict,
+    receipt: dict,
+) -> list[str]:
+    binding = receipt.get("materialization_authority_binding")
+    if not isinstance(binding, dict):
+        return [
+            "WP-0002 native Editor path correction lacks its exact Stage-1 "
+            "authority binding"
+        ]
+    pr_number = _wp0002_native_path_fix_pr_number(
+        receipt.get("source_reference")
+    )
+    expected = {
+        "claim": WP0002_NATIVE_PATH_FIX_CLAIM,
+        "supersession_claim": WP0002_NATIVE_PATH_FIX_SUPERSESSION_CLAIM,
+        "amendment_id": WP0002_NATIVE_PATH_FIX_AMENDMENT_ID,
+        "receipt_id": WP0002_NATIVE_PATH_FIX_RECEIPT_ID,
+        "pr_number": pr_number,
+        "packet_contract_sha256": packet.get("contract_sha256"),
+        "previous_boundary_sha256": (
+            WP0002_NATIVE_PATH_FIX_PREVIOUS_BOUNDARY_SHA256
+        ),
+        "repository_remote": WP0002_NATIVE_PATH_FIX_REMOTE,
+        "predecessor_repository_root": WP0002_ACTIVE_REPOSITORY_ROOT,
+        "successor_repository_root": WP0002_ACTIVE_REPOSITORY_ROOT,
+        "predecessor_project_path": WP0002_ACTIVE_PROJECT_PATH,
+        "successor_project_path": WP0002_ACTIVE_PROJECT_PATH,
+        "stage1_base": WP0002_NATIVE_PATH_FIX_STAGE1_BASE,
+        "stage1_commit": receipt.get("accepted_commit"),
+        "stage1_tree": binding.get("stage1_tree"),
+        "stage1_patch_sha256": binding.get("stage1_patch_sha256"),
+        "changed_files_manifest_sha256": binding.get(
+            "changed_files_manifest_sha256"
+        ),
+        "changed_paths": sorted(WP0002_NATIVE_PATH_FIX_STAGE1_PATHS),
+        "receipt_path": WP0002_NATIVE_PATH_FIX_RECEIPT_REPO_PATH,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "retained_required_checks": list(
+            WP0002_NATIVE_PATH_FIX_RETAINED_REQUIRED_CHECKS
+        ),
+        "restored_required_checks": list(
+            WP0002_NATIVE_PATH_FIX_RESTORED_REQUIRED_CHECKS
+        ),
+    }
+    errors: list[str] = []
+    if binding != expected or pr_number is None:
+        errors.append(
+            "WP-0002 native Editor path correction authority binding is not exact"
+        )
+    for field, length in (
+        ("stage1_tree", 40),
+        ("stage1_patch_sha256", 64),
+        ("changed_files_manifest_sha256", 64),
+    ):
+        if re.fullmatch(
+            rf"[0-9a-f]{{{length}}}",
+            str(binding.get(field)),
+        ) is None:
+            errors.append(
+                "WP-0002 native Editor path correction Stage-1 Git hashes "
+                "are malformed"
+            )
+            break
+    if receipt.get("approval_text_sha256") != sha256_canonical_json(binding):
+        errors.append(
+            "WP-0002 native Editor path correction creator comment hash "
+            "differs from its authority binding"
+        )
+    return errors
+
+
+def _wp0002_native_path_fix_previous_receipt_bytes() -> bytes | None:
+    path = ROOT / WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_PATH
+    try:
+        metadata = path.lstat()
+        payload = path.read_bytes()
+    except OSError:
+        return None
+    if (
+        not stat.S_ISREG(metadata.st_mode)
+        or stat.S_ISLNK(metadata.st_mode)
+        or hashlib.sha256(payload).hexdigest()
+        != WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_SHA256
+    ):
+        return None
+    return payload
+
+
+def _validate_wp0002_native_path_fix_stage1(
+    repository: object,
+    packet: dict,
+    receipt: dict,
+    accepted_commit: str,
+    previous_receipt_bytes: bytes,
+) -> list[str]:
+    errors: list[str] = []
+    try:
+        stage1 = repository.commit(accepted_commit)
+        changed_files = repository.changed_files(
+            WP0002_NATIVE_PATH_FIX_STAGE1_BASE,
+            accepted_commit,
+        )
+    except Exception:
+        return [
+            "WP-0002 native Editor path correction Stage-1 Git facts are unavailable"
+        ]
+    if stage1.get("parents") != [WP0002_NATIVE_PATH_FIX_STAGE1_BASE]:
+        errors.append(
+            "WP-0002 native Editor path correction Stage-1 is not the direct "
+            "child of its protected base"
+        )
+    expected_paths = set(WP0002_NATIVE_PATH_FIX_STAGE1_PATHS)
+    actual_paths = {
+        item.get("path") for item in changed_files if isinstance(item, dict)
+    }
+    if actual_paths != expected_paths or len(changed_files) != len(expected_paths):
+        errors.append(
+            "WP-0002 native Editor path correction Stage-1 path set is not exact"
+        )
+    added_paths = {
+        "docs/foundation-v0.1/governance/"
+        "WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.md",
+        "docs/foundation-v0.1/tools/"
+        "test_validate_wp0002_native_editor_path_correction.py",
+    }
+    artifact_hashes = receipt.get("artifact_sha256", {})
+    for item in changed_files:
+        if not isinstance(item, dict) or not isinstance(item.get("path"), str):
+            errors.append(
+                "WP-0002 native Editor path correction file record is malformed"
+            )
+            continue
+        path = item["path"]
+        expected_status = "A" if path in added_paths else "M"
+        if item.get("status") != expected_status or item.get("new_mode") != "100644":
+            errors.append(
+                "WP-0002 native Editor path correction mode or status differs: "
+                + path
+            )
+        stage1_blob = _wp0002_native_gate_blob(repository, accepted_commit, path)
+        if (
+            stage1_blob is None
+            or not isinstance(artifact_hashes, dict)
+            or artifact_hashes.get(path)
+            != hashlib.sha256(stage1_blob).hexdigest()
+            or artifact_hashes.get(path) != item.get("new_blob_sha256")
+        ):
+            errors.append(
+                "WP-0002 native Editor path correction receipt does not bind "
+                "Stage-1 blob: " + path
+            )
+    if _wp0002_native_gate_blob(
+        repository,
+        accepted_commit,
+        WP0002_NATIVE_PATH_FIX_RECEIPT_REPO_PATH,
+    ) is not None:
+        errors.append(
+            "WP-0002 native Editor path correction receipt exists in Stage-1"
+        )
+    for commit in (WP0002_NATIVE_PATH_FIX_STAGE1_BASE, accepted_commit):
+        if _wp0002_native_gate_blob(
+            repository,
+            commit,
+            "docs/foundation-v0.1/" +
+            WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_PATH,
+        ) != previous_receipt_bytes:
+            errors.append(
+                "WP-0002 native Editor path correction predecessor receipt "
+                "drifted in Stage-1"
+            )
+            break
+    pr_number = _wp0002_native_path_fix_pr_number(
+        receipt.get("source_reference")
+    )
+    authority_binding = (
+        _wp0002_native_path_fix_expected_authority_binding(
+            repository,
+            packet,
+            accepted_commit,
+            stage1,
+            changed_files,
+            pr_number,
+        )
+        if pr_number is not None
+        else None
+    )
+    if (
+        authority_binding is None
+        or receipt.get("materialization_authority_binding") != authority_binding
+    ):
+        errors.append(
+            "WP-0002 native Editor path correction creator authority does not "
+            "bind exact Stage-1 Git facts"
+        )
+    return errors
+
+
+def validate_wp0002_native_editor_path_correction_git_materialization(
+    packet: dict,
+    receipt: dict,
+    receipt_bytes: bytes,
+) -> list[str]:
+    verifier, verifier_errors = _load_wp0002_transaction_verifier()
+    errors = list(verifier_errors)
+    repository_type = verifier.get("GitRepository") if verifier is not None else None
+    if not callable(repository_type):
+        return errors + [
+            "WP-0002 native Editor path correction lacks its Git verifier"
+        ]
+    try:
+        repository = repository_type(REPO_ROOT)
+    except Exception:
+        return errors + [
+            "WP-0002 native Editor path correction cannot inspect the repository"
+        ]
+    previous_receipt_bytes = _wp0002_native_path_fix_previous_receipt_bytes()
+    if previous_receipt_bytes is None:
+        return errors + [
+            "WP-0002 native Editor path correction predecessor receipt drifted"
+        ]
+    origin_main = git_rev_parse_commit("refs/remotes/origin/main")
+    if origin_main is None:
+        return errors + [
+            "WP-0002 native Editor path correction cannot resolve origin/main"
+        ]
+    accepted_commit = receipt.get("accepted_commit")
+    if (
+        not isinstance(accepted_commit, str)
+        or re.fullmatch(r"[0-9a-f]{40}", accepted_commit) is None
+    ):
+        return errors + [
+            "WP-0002 native Editor path correction accepted_commit is not exact"
+        ]
+
+    protected_receipt = _wp0002_native_gate_blob(
+        repository,
+        origin_main,
+        WP0002_NATIVE_PATH_FIX_RECEIPT_REPO_PATH,
+    )
+    if protected_receipt is None:
+        if origin_main != WP0002_NATIVE_PATH_FIX_STAGE1_BASE:
+            errors.append(
+                "WP-0002 native Editor path correction base is not exact "
+                "protected main"
+            )
+        errors.extend(
+            _validate_wp0002_native_path_fix_stage1(
+                repository,
+                packet,
+                receipt,
+                accepted_commit,
+                previous_receipt_bytes,
+            )
+        )
+        head_sha = git_rev_parse_commit("HEAD")
+        if head_sha is None:
+            return errors + [
+                "WP-0002 native Editor path correction Stage-2 HEAD is unavailable"
+            ]
+        try:
+            head = repository.commit(head_sha)
+        except Exception:
+            return errors + [
+                "WP-0002 native Editor path correction Stage-2 facts are invalid"
+            ]
+        final_head: str | None = None
+        if head.get("parents") == [accepted_commit]:
+            final_head = head_sha
+        else:
+            parents = head.get("parents")
+            if isinstance(parents, list) and len(parents) == 2 and parents[0] == origin_main:
+                pull_head_sha = parents[1]
+                try:
+                    pull_head = repository.commit(pull_head_sha)
+                except Exception:
+                    pull_head = {}
+                if (
+                    pull_head.get("parents") == [accepted_commit]
+                    and pull_head.get("tree") == head.get("tree")
+                ):
+                    final_head = pull_head_sha
+        if final_head is None:
+            return errors + [
+                "WP-0002 native Editor path correction Stage-2 is not the "
+                "receipt-only child"
+            ]
+        try:
+            receipt_delta = repository.changed_files(accepted_commit, final_head)
+        except Exception:
+            return errors + [
+                "WP-0002 native Editor path correction Stage-2 delta is invalid"
+            ]
+        if (
+            len(receipt_delta) != 1
+            or receipt_delta[0].get("path")
+            != WP0002_NATIVE_PATH_FIX_RECEIPT_REPO_PATH
+            or receipt_delta[0].get("status") != "A"
+            or receipt_delta[0].get("new_mode") != "100644"
+        ):
+            errors.append(
+                "WP-0002 native Editor path correction Stage-2 is not the "
+                "one-file receipt addition"
+            )
+        if _wp0002_native_gate_blob(
+            repository,
+            final_head,
+            WP0002_NATIVE_PATH_FIX_RECEIPT_REPO_PATH,
+        ) != receipt_bytes:
+            errors.append(
+                "WP-0002 native Editor path correction Stage-2 receipt bytes differ"
+            )
+        return errors
+
+    additions = git_first_parent_path_additions(
+        "refs/remotes/origin/main",
+        WP0002_NATIVE_PATH_FIX_RECEIPT_REPO_PATH,
+    )
+    if additions is None or len(additions) != 1:
+        return errors + [
+            "WP-0002 native Editor path correction receipt lacks one protected "
+            "first-parent introduction"
+        ]
+    introduction = additions[0]
+    try:
+        introduction_record = repository.commit(introduction)
+    except Exception:
+        return errors + [
+            "WP-0002 native Editor path correction introduction is invalid"
+        ]
+    if introduction_record.get("parents") != [WP0002_NATIVE_PATH_FIX_STAGE1_BASE]:
+        errors.append(
+            "WP-0002 native Editor path correction squash has the wrong base"
+        )
+    try:
+        squash_delta = repository.changed_files(
+            WP0002_NATIVE_PATH_FIX_STAGE1_BASE,
+            introduction,
+        )
+    except Exception:
+        return errors + [
+            "WP-0002 native Editor path correction squash delta is invalid"
+        ]
+    expected_paths = set(WP0002_NATIVE_PATH_FIX_STAGE1_PATHS) | {
+        WP0002_NATIVE_PATH_FIX_RECEIPT_REPO_PATH
+    }
+    actual_paths = {
+        item.get("path") for item in squash_delta if isinstance(item, dict)
+    }
+    if actual_paths != expected_paths or len(squash_delta) != len(expected_paths):
+        errors.append(
+            "WP-0002 native Editor path correction squash path set is not exact"
+        )
+    added_paths = {
+        "docs/foundation-v0.1/governance/"
+        "WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.md",
+        "docs/foundation-v0.1/tools/"
+        "test_validate_wp0002_native_editor_path_correction.py",
+        WP0002_NATIVE_PATH_FIX_RECEIPT_REPO_PATH,
+    }
+    artifact_hashes = receipt.get("artifact_sha256", {})
+    for item in squash_delta:
+        if not isinstance(item, dict) or not isinstance(item.get("path"), str):
+            errors.append(
+                "WP-0002 native Editor path correction protected record is malformed"
+            )
+            continue
+        path = item["path"]
+        blob = _wp0002_native_gate_blob(repository, introduction, path)
+        expected_status = "A" if path in added_paths else "M"
+        if item.get("status") != expected_status or item.get("new_mode") != "100644":
+            errors.append(
+                "WP-0002 native Editor path correction protected mode or status "
+                "differs: " + path
+            )
+        if path == WP0002_NATIVE_PATH_FIX_RECEIPT_REPO_PATH:
+            if blob != receipt_bytes:
+                errors.append(
+                    "WP-0002 native Editor path correction protected receipt differs"
+                )
+        elif (
+            blob is None
+            or not isinstance(artifact_hashes, dict)
+            or artifact_hashes.get(path) != hashlib.sha256(blob).hexdigest()
+            or artifact_hashes.get(path) != item.get("new_blob_sha256")
+        ):
+            errors.append(
+                "WP-0002 native Editor path correction receipt does not bind "
+                "protected blob: " + path
+            )
+    predecessor_repo_path = (
+        "docs/foundation-v0.1/" +
+        WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_PATH
+    )
+    for commit in (
+        WP0002_NATIVE_PATH_FIX_STAGE1_BASE,
+        introduction,
+        origin_main,
+    ):
+        if _wp0002_native_gate_blob(
+            repository,
+            commit,
+            predecessor_repo_path,
+        ) != previous_receipt_bytes:
+            errors.append(
+                "WP-0002 native Editor path correction predecessor receipt "
+                "differs on protected main"
+            )
+            break
+    if protected_receipt != receipt_bytes:
+        errors.append(
+            "WP-0002 native Editor path correction protected receipt drifted"
+        )
+    if git_commit_exists(accepted_commit):
+        errors.extend(
+            _validate_wp0002_native_path_fix_stage1(
+                repository,
+                packet,
+                receipt,
+                accepted_commit,
+                previous_receipt_bytes,
+            )
+        )
+    return errors
+
+
+def validate_wp0002_native_editor_path_correction_receipt(
+    packet: dict,
+    receipt: dict,
+) -> list[str]:
+    receipt_path = ROOT / WP0002_NATIVE_PATH_FIX_RECEIPT_PATH
+    try:
+        metadata = receipt_path.lstat()
+        receipt_bytes = receipt_path.read_bytes()
+        exact_receipt = json.loads(receipt_bytes.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return [
+            "WP-0002 native Editor path correction exact receipt is missing"
+        ]
+    errors: list[str] = []
+    if not stat.S_ISREG(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+        errors.append(
+            "WP-0002 native Editor path correction receipt is not regular"
+        )
+    if exact_receipt != receipt:
+        errors.append(
+            "WP-0002 native Editor path correction receipt resolves outside "
+            "its exact file"
+        )
+    if receipt.get("foundation_binding") is not None:
+        errors.append(
+            "WP-0002 native Editor path correction invents a foundation binding"
+        )
+    errors.extend(
+        _validate_wp0002_native_path_fix_stored_authority_binding(
+            packet,
+            receipt,
+        )
+    )
+    source_reference = receipt.get("source_reference")
+    artifact_hashes = receipt.get("artifact_sha256")
+    expected_keys = set(WP0002_NATIVE_PATH_FIX_STAGE1_PATHS) | {
+        "docs/foundation-v0.1/" +
+        WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_PATH,
+        WP0002_NATIVE_PATH_FIX_RETAINED_BUILD_PROFILE_PATH,
+    }
+    if isinstance(source_reference, str):
+        expected_keys.add(source_reference)
+    if (
+        _wp0002_native_path_fix_pr_number(source_reference) is None
+        or not isinstance(artifact_hashes, dict)
+        or set(artifact_hashes) != expected_keys
+    ):
+        errors.append(
+            "WP-0002 native Editor path correction artifact set is not exact"
+        )
+    else:
+        predecessor_key = (
+            "docs/foundation-v0.1/" +
+            WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_PATH
+        )
+        if (
+            artifact_hashes.get(predecessor_key)
+            != WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_SHA256
+        ):
+            errors.append(
+                "WP-0002 native Editor path correction does not bind its "
+                "predecessor receipt"
+            )
+        if (
+            artifact_hashes.get(
+                WP0002_NATIVE_PATH_FIX_RETAINED_BUILD_PROFILE_PATH
+            ) != WP0002_NATIVE_PATH_FIX_RETAINED_BUILD_PROFILE_SHA256
+        ):
+            errors.append(
+                "WP-0002 native Editor path correction does not bind its "
+                "unchanged build profile"
+            )
+        if artifact_hashes.get(source_reference) != receipt.get(
+            "approval_text_sha256"
+        ):
+            errors.append(
+                "WP-0002 native Editor path correction does not bind its "
+                "creator comment"
+            )
+    errors.extend(
+        validate_wp0002_native_editor_path_correction_git_materialization(
+            packet,
+            receipt,
+            receipt_bytes,
+        )
+    )
+    return errors
+
+
+def validate_wp0002_native_editor_path_correction(
+    packet: dict,
+    manifest: dict,
+    receipts_by_id: dict[str, dict],
+) -> list[str]:
+    """Keep Stage-1 inert; activate only through its exact receipt-only child."""
+    errors: list[str] = []
+    if packet.get("contract_sha256") != WP0002_NATIVE_GATE_PACKET_CONTRACT_SHA256:
+        errors.append(
+            "WP-0002 native Editor path correction changes the packet contract"
+        )
+    if manifest.get("native_performance_gate_successor") != (
+        WP0002_NATIVE_GATE_SUCCESSOR
+    ):
+        errors.append(
+            "WP-0002 native Editor path correction projection is not exact"
+        )
+    if manifest.get("unity_runcommand_residual_capability") != (
+        WP0002_RUNCOMMAND_RESIDUAL_CAPABILITY
+    ):
+        errors.append(
+            "WP-0002 native Editor path correction changes the gate surface"
+        )
+    amendments = manifest.get("boundary_amendments")
+    if (
+        not isinstance(amendments, list)
+        or not amendments
+        or amendments[-1] != WP0002_NATIVE_PATH_FIX_BOUNDARY_AMENDMENT
+    ):
+        errors.append(
+            "WP-0002 native Editor path correction amendment is not exact"
+        )
+    governance = ROOT / WP0002_NATIVE_PATH_FIX_GOVERNANCE_PATH
+    if not governance.is_file() or governance.is_symlink():
+        errors.append(
+            "WP-0002 native Editor path correction governance is unavailable"
+        )
+    if _wp0002_native_path_fix_previous_receipt_bytes() is None:
+        errors.append(
+            "WP-0002 native Editor path correction predecessor receipt drifted"
+        )
+    for relative, expected_hash in (
+        WP0002_NATIVE_PATH_FIX_ARTIFACT_SHA256.items()
+    ):
+        if expected_hash.startswith("PLACEHOLDER_"):
+            continue
+        artifact = REPO_ROOT / relative
+        if (
+            not artifact.is_file()
+            or artifact.is_symlink()
+            or sha256_file(artifact) != expected_hash
+        ):
+            errors.append(
+                "WP-0002 native Editor path correction artifact differs: "
+                + relative
+            )
+
+    receipt = receipts_by_id.get(WP0002_NATIVE_PATH_FIX_RECEIPT_ID)
+    if not isinstance(receipt, dict):
+        return errors
+    source_reference = receipt.get("source_reference")
+    resolver = receipt.get("artifact_resolver")
+    claims_by_subject = subject_claims(receipt)
+    if (
+        receipt.get("receipt_id") != WP0002_NATIVE_PATH_FIX_RECEIPT_ID
+        or receipt.get("receipt_kind") != "creator-authorization"
+        or receipt.get("issued_by") != "AC-21"
+        or receipt.get("issuer_role") != "creator"
+        or receipt.get("sealed") is not True
+        or receipt.get("subject_ids")
+        != [WP0002_NATIVE_PATH_FIX_SUPERSESSION_SUBJECT, "WP-0002"]
+        or claims_by_subject.get(
+            WP0002_NATIVE_PATH_FIX_SUPERSESSION_SUBJECT,
+            set(),
+        ) != {WP0002_NATIVE_PATH_FIX_SUPERSESSION_CLAIM}
+        or claims_by_subject.get("WP-0002", set())
+        != {WP0002_NATIVE_PATH_FIX_CLAIM}
+        or receipt.get("subject_contract_sha256")
+        != {
+            WP0002_NATIVE_PATH_FIX_SUPERSESSION_SUBJECT: (
+                WP0002_NATIVE_PATH_FIX_PREVIOUS_DISPATCHER_SHA256
+            ),
+            "WP-0002": packet.get("contract_sha256"),
+        }
+        or receipt.get("subject_event_sha256") != {}
+        or _wp0002_native_path_fix_pr_number(source_reference) is None
+        or not isinstance(resolver, dict)
+        or resolver.get("type") != "external-protected"
+        or resolver.get("resolver_reference") != source_reference
+        or receipt.get("signature_reference") != source_reference
+    ):
+        errors.append(
+            "WP-0002 native Editor path correction receipt lacks exact "
+            "protected creator authority"
+        )
+    errors.extend(
+        validate_wp0002_native_editor_path_correction_receipt(packet, receipt)
     )
     return errors
 
@@ -10439,11 +11324,24 @@ def validate_local_a1_boundary_manifest(
     if manifest_path is None or not manifest_path.is_file():
         return None, errors + [f"{packet_id} local boundary manifest is missing"]
 
+    manifest = load_json(manifest_path)
     actual_hash = sha256_file(manifest_path)
-    if reference.get("sha256") != actual_hash:
+    path_fix_boundary_hash = WP0002_NATIVE_PATH_FIX_ARTIFACT_SHA256.get(
+        "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json"
+    )
+    exact_path_fix_successor = (
+        packet_id == "WP-0002"
+        and reference.get("sha256")
+        == WP0002_NATIVE_PATH_FIX_PREVIOUS_BOUNDARY_SHA256
+        and actual_hash == path_fix_boundary_hash
+        and manifest.get("native_performance_gate_successor")
+        == WP0002_NATIVE_GATE_SUCCESSOR
+        and manifest.get("boundary_amendments")
+        == WP0002_BOUNDARY_AMENDMENTS
+    )
+    if reference.get("sha256") != actual_hash and not exact_path_fix_successor:
         errors.append(f"{packet_id} local boundary raw hash mismatch")
     errors.extend(validate_instance_shape(manifest_path, LOCAL_A1_BOUNDARY_SCHEMA))
-    manifest = load_json(manifest_path)
 
     if manifest.get("manifest_id") != reference.get("manifest_id"):
         errors.append(f"{packet_id} local boundary ID differs from packet reference")
@@ -12293,7 +13191,13 @@ def validate_wp0002_self_verification_contract(packet: dict) -> list[str]:
             errors.append(path_error or f"WP-0002 protected control is missing: {relative}")
             continue
         actual_hash = sha256_file(path)
-        if actual_hash != expected_hash:
+        path_fix_hash = WP0002_NATIVE_PATH_FIX_ARTIFACT_SHA256.get(relative)
+        exact_path_fix_control = (
+            relative
+            == "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json"
+            and actual_hash == path_fix_hash
+        )
+        if actual_hash != expected_hash and not exact_path_fix_control:
             errors.append(
                 f"WP-0002 protected control hash mismatch for {relative}: "
                 f"expected {expected_hash}, found {actual_hash}"
