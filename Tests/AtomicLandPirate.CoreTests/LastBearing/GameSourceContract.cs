@@ -1092,7 +1092,7 @@ namespace AtomicLandPirate.LastBearingTests
             Require(dispatcher, "TestRunnerApi.UnregisterTestCallback(callbacks)");
             Require(dispatcher, "gateId + \"-\" + invocationId + \".json\"");
             Require(dispatcher, "VerifyExactFile(path, payload)");
-            Require(dispatcher, "wp0002-gate-dispatcher-v2");
+            Require(dispatcher, "wp0002-gate-dispatcher-v3");
             Require(dispatcher, "wp0002-native-il2cpp-arm64-build");
             Require(
                 dispatcher,
@@ -1120,6 +1120,35 @@ namespace AtomicLandPirate.LastBearingTests
                 "5dcf81c5df5a9ff35006ee05832a1a6194c60fc4a386df652b9f49ea3a2a238b");
             Require(
                 dispatcher,
+                "/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app");
+            Require(dispatcher, "Contents/MacOS/Unity");
+            Require(
+                dispatcher,
+                "IsExpectedUnityEditorApplicationPath(");
+            Require(
+                dispatcher,
+                "unity-editor-application-bundle-path-mismatch");
+            string nativeIdentity = Segment(
+                dispatcher,
+                "private static NativeSourceIdentity VerifyNativeGateContract(",
+                "private static bool IsExpectedUnityEditorApplicationPath(");
+            Require(
+                nativeIdentity,
+                "RequireRegularDirectory(\n                unityApplicationBundle,");
+            Require(
+                nativeIdentity,
+                "Path.Combine(\n                    unityApplicationBundle,\n" +
+                "                    UnityEditorExecutableRelativePath)");
+            Require(nativeIdentity, "RequireRegularFile(\n                unityExecutable,");
+            Require(nativeIdentity, "ComputeSha256(unityExecutable)");
+            TestHarness.True(
+                nativeIdentity.IndexOf(
+                    "Path.GetFullPath(EditorApplication.applicationPath)",
+                    StringComparison.Ordinal) < 0,
+                "native identity must not compare the reported application " +
+                "bundle with the nested executable");
+            Require(
+                dispatcher,
                 "8910e7a24ef01bb0c2d4e66c07b14c321cd150a8017ca17cfa335bd888182ec1");
             Require(dispatcher, "private const int NativeWarmupSeconds = 300");
             Require(dispatcher, "public double requested_warmup_seconds;");
@@ -1141,7 +1170,13 @@ namespace AtomicLandPirate.LastBearingTests
                 "native-gate-authorization-receipt-missing");
             Require(
                 dispatcher,
-                "SUPERSEDE-WP0002-GATE-DISPATCHER-V1-ONLY");
+                "SUPERSEDE-WP0002-GATE-DISPATCHER-V2-EDITOR-PATH-CHECK-ONLY");
+            Require(
+                dispatcher,
+                "AUTHORIZE-WP0002-NATIVE-EDITOR-BUNDLE-EXECUTABLE-IDENTITY-");
+            Require(
+                dispatcher,
+                "NativePreviousAuthorizationReceiptSha256");
             Require(
                 dispatcher,
                 "native-gate-receipt-does-not-match-protected-main");
