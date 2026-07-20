@@ -101,6 +101,7 @@ namespace AtomicLandPirate.LastBearingTests
             VerifyBuildScene(repoRoot);
             VerifyGameMetadata(repoRoot);
             GameSourceContract.Verify(repoRoot);
+            FieldDeskSourceContract.Verify(repoRoot);
             RoadFeelSourceContract.Verify(repoRoot);
             SashaScoutSourceContract.Verify(repoRoot);
         }

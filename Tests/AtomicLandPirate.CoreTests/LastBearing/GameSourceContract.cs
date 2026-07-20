@@ -2,7 +2,6 @@
 
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
 
 namespace AtomicLandPirate.LastBearingTests
 {
@@ -21,12 +20,6 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(runtimeRoot, "LastBearingWorldBuilder.cs"));
             string hud = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingHud.cs"));
-            string fieldDesk = File.ReadAllText(
-                Path.Combine(runtimeRoot, "UI/LastBearingFieldDesk.cs"));
-            string fieldDeskPresenter = File.ReadAllText(
-                Path.Combine(
-                    runtimeRoot,
-                    "UI/LastBearingFieldDeskPresenter.cs"));
             string permitJobPresenter = File.ReadAllText(
                 Path.Combine(
                     runtimeRoot,
@@ -80,12 +73,6 @@ namespace AtomicLandPirate.LastBearingTests
                     repoRoot,
                     "Game/Assets/AtomicLandPirate/LastBearing/Editor/" +
                     "AC21.Sasha.LastBearing.Editor.asmdef"));
-
-            VerifyFieldDeskContract(
-                controller,
-                hud,
-                fieldDesk,
-                fieldDeskPresenter);
 
             TestHarness.True(
                 controller.IndexOf("new ReturnHomeCommand", StringComparison.Ordinal) < 0,
@@ -1292,197 +1279,6 @@ namespace AtomicLandPirate.LastBearingTests
             Require(nativeBuildProfile, "m_Architecture: 1");
             Require(nativeBuildProfile, "m_CreateXcodeProject: 0");
             Require(editorAssembly, "\"UnityEngine.TestRunner\"");
-        }
-
-        private static void VerifyFieldDeskContract(
-            string controller,
-            string hud,
-            string fieldDesk,
-            string fieldDeskPresenter)
-        {
-            Require(controller, "private LastBearingFieldDesk? _fieldDesk;");
-            Require(controller, "public LastBearingFieldDesk? FieldDesk => _fieldDesk;");
-            Require(controller, "public bool IsExactFieldDeskCityOverview");
-            Require(controller, "public bool HasPendingPlayerCommands");
-
-            const string addDesk =
-                "gameObject.AddComponent<LastBearingFieldDesk>()";
-            const string configureDesk = "_fieldDesk.Configure(this);";
-            const string addHud = "gameObject.AddComponent<LastBearingHud>()";
-            const string configureHud = "_hud.Configure(this, _fieldDesk);";
-            int addDeskAt = controller.IndexOf(addDesk, StringComparison.Ordinal);
-            int configureDeskAt = controller.IndexOf(
-                configureDesk,
-                StringComparison.Ordinal);
-            int addHudAt = controller.IndexOf(addHud, StringComparison.Ordinal);
-            int configureHudAt = controller.IndexOf(
-                configureHud,
-                StringComparison.Ordinal);
-            TestHarness.True(
-                addDeskAt >= 0 && configureDeskAt > addDeskAt &&
-                addHudAt > configureDeskAt && configureHudAt > addHudAt,
-                "the controller must configure one Field Desk before the legacy HUD");
-            TestHarness.Equal(
-                1,
-                CountOccurrences(controller, addDesk),
-                "the controller must own exactly one Field Desk component");
-            string failOpenSetup = controller.Substring(
-                addDeskAt,
-                addHudAt - addDeskAt);
-            Require(failOpenSetup, "catch (Exception");
-            Require(failOpenSetup, "_fieldDesk = null;");
-
-            string hudConfiguration = Segment(
-                hud,
-                "public void Configure(",
-                "private void OnGUI()");
-            Require(
-                hudConfiguration,
-                "LastBearingFieldDesk? fieldDesk = null");
-            Require(hudConfiguration, "_fieldDesk = fieldDesk;");
-            string hudEntry = Segment(
-                hud,
-                "private void OnGUI()",
-                "private void DrawHeader()");
-            Require(
-                hudEntry,
-                "if (_fieldDesk?.OwnsCityOverview == true)");
-            TestHarness.Equal(
-                1,
-                CountOccurrences(hudEntry, "OwnsCityOverview"),
-                "the legacy HUD may suppress only for Field Desk city ownership");
-            TestHarness.True(
-                hud.IndexOf(
-                    "IsExactFieldDeskCityOverview",
-                    StringComparison.Ordinal) < 0,
-                "the legacy HUD must not duplicate the city-ownership predicate");
-            Require(hudEntry, "DrawActiveGame(_controller.ReadModel);");
-            Require(hudEntry, "DrawTitle();");
-
-            Require(fieldDesk, "using UnityEngine.UIElements;");
-            Require(fieldDesk, "public sealed class LastBearingFieldDesk");
-            Require(fieldDesk, "public bool IsOperational");
-            Require(fieldDesk, "public bool OwnsCityOverview");
-            Require(fieldDesk, "IsExactFieldDeskCityOverview");
-            Require(fieldDesk, "public void Configure(");
-            Require(fieldDesk, "public void Refresh(");
-            Require(fieldDesk, "public void ResetForLifecycle()");
-            Require(fieldDesk, "LastBearingFieldDeskPresenter.Present(");
-            Require(fieldDesk, "LastBearingFieldDeskPresenter.IsIntentAvailable(");
-
-            Require(fieldDesk, "UIDocument");
-            Require(fieldDesk, "PanelSettings");
-            Require(fieldDesk, "Resources.Load<VisualTreeAsset>");
-            Require(fieldDesk, "Resources.Load<StyleSheet>");
-            Require(fieldDesk, "Resources.Load<ThemeStyleSheet>");
-            Require(fieldDesk, ".themeStyleSheet = theme;");
-            Require(fieldDesk, "PanelScaleMode.ConstantPixelSize");
-            Require(fieldDesk, ".focusedElement?.Blur();");
-            Require(fieldDesk, "LastBearingFieldDeskLayout");
-            Require(fieldDesk, "LastBearingFieldDeskStyles");
-            Require(fieldDesk, "LastBearingFieldDeskTheme");
-            Require(fieldDesk, "secondary-action-detail");
-            Require(fieldDesk, "CloneTree(");
-            Require(fieldDesk, ".Q<");
-            Require(fieldDesk, "RegisterCallbacks");
-            Require(fieldDesk, "UnregisterCallbacks");
-            Require(fieldDesk, "OnDestroy");
-            TestHarness.Equal(
-                1,
-                CountOccurrences(fieldDesk, "CloneTree("),
-                "the Field Desk must clone its retained element tree exactly once");
-            TestHarness.Equal(
-                1,
-                CountOccurrences(
-                    fieldDesk,
-                    "Resources.Load<VisualTreeAsset>"),
-                "the Field Desk must load its layout exactly once");
-            TestHarness.Equal(
-                1,
-                CountOccurrences(fieldDesk, "Resources.Load<StyleSheet>"),
-                "the Field Desk must load its style sheet exactly once");
-
-            Require(
-                fieldDeskPresenter,
-                "public static class LastBearingFieldDeskPresenter");
-            Require(
-                fieldDeskPresenter,
-                "public static LastBearingFieldDeskProjection Present(");
-            Require(
-                fieldDeskPresenter,
-                "public static bool IsIntentAvailable(");
-            Require(
-                fieldDeskPresenter,
-                "LastBearingPermitJobPresenter.Present(");
-
-            foreach (string delegation in new[]
-            {
-                ".AssignDefaultLeadResident(",
-                ".InspectCityNeed(",
-                ".SelectCityGrammarHypothesis(",
-                ".ManipulateCityGrammarPrimary(",
-                ".RotateCityGrammarPrimary(",
-                ".ToggleCityGrammarTrialPiece(",
-                ".ConnectCityGrammarLogistics(",
-                ".AdvanceCityGrammarDelivery(",
-                ".RecordCityGrammarPathRead(",
-                ".ResetActiveCityGrammarTrial(",
-                ".LeaveCityGrammarComparison(",
-                ".ResetCityGrammarComparison(",
-                ".ActivateInfrastructure(",
-                ".BeginGaragePlan(",
-                ".OpenGarageBay(",
-                ".CommitExpedition(",
-                ".OpenPumpHallRepair(",
-                ".OpenOneGoodBatchWorkshop(",
-                ".InstallCityImprovement(",
-                ".ServiceFieldSleeve(",
-                ".TogglePause(",
-                ".Save(",
-                ".Load(",
-                ".ReturnToTitle(",
-            })
-            {
-                Require(fieldDesk, delegation);
-            }
-
-            foreach (string source in new[] { fieldDesk, fieldDeskPresenter })
-            {
-                foreach (string forbidden in new[]
-                {
-                    "Queue(",
-                    "LastBearingKernel",
-                    "LastBearingState",
-                    "LastBearingCommand",
-                    ".World",
-                    "ModeCoordinator",
-                    "LastBearingSaveAdapter",
-                    "LastBearingProfileStore",
-                    "OpenFixedProfileDirectory",
-                    "TryPersist(",
-                    "AtomicLandPirate.Save",
-                    "Application.persistentDataPath",
-                    "PlayerPrefs",
-                })
-                {
-                    TestHarness.True(
-                        source.IndexOf(forbidden, StringComparison.Ordinal) < 0,
-                        "Field Desk source contains forbidden authority " +
-                        forbidden);
-                }
-
-                TestHarness.True(
-                    !Regex.IsMatch(
-                        source,
-                        @"\bnew\s+[A-Za-z_][A-Za-z0-9_]*Command\s*\("),
-                    "Field Desk source constructs a canonical command");
-                TestHarness.True(
-                    !Regex.IsMatch(
-                        source,
-                        @"\b(?:model|readModel)\s*\.\s*[A-Za-z_]" +
-                        @"[A-Za-z0-9_]*\s*=(?!=)"),
-                    "Field Desk source writes into a SimulationCore read model");
-            }
         }
 
         private static void Require(string source, string token)
