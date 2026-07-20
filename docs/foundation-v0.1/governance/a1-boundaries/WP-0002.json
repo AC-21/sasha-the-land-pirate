@@ -172,6 +172,35 @@
         "first_implementation_pr_is_restored_policy_canary": true,
         "general_protection_bypass_authorized": false
       }
+    },
+    {
+      "amendment_id": "A1B-WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719",
+      "amendment_kind": "append-only-native-il2cpp-arm64-performance-gate-successor",
+      "previous_boundary_sha256": "3a157b115ba52a51b198fa0f0df1fa36b587bae55e3ab824e5af5f4b0b9c97d1",
+      "authorization_receipt_id": "RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719",
+      "required_claims": [
+        "SUPERSEDE-WP0002-GATE-DISPATCHER-V1-ONLY",
+        "AUTHORIZE-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES"
+      ],
+      "governance_record": "governance/WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.md",
+      "packet_contract_changed": false,
+      "authority_expansion": "fixed-native-performance-gates-only",
+      "materialization_control": {
+        "classification": "creator-controlled-fixed-native-performance-gate-control-not-general-process-authority",
+        "stage1_state": "proposed-unratified-non-executable",
+        "stage2_delta_policy": "exactly-one-added-regular-sealed-creator-receipt-file",
+        "new_gates_may_validate_their_own_control_pr": false,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "retained_required_checks": ["validate", "wp0002-core"],
+        "restored_required_checks": ["validate", "wp0002-core", "wp0002-policy"],
+        "strict_protection_retained": true,
+        "no_bypass_allowances": true,
+        "force_push_disabled": true,
+        "deletion_disabled": true,
+        "squash_only": true,
+        "restore_wp0002_policy_immediately_after_merge": true,
+        "general_process_or_argument_authority": false
+      }
     }
   ],
   "active_checkout_successor": {
@@ -225,6 +254,61 @@
       "squash_only": true,
       "restore_wp0002_policy_immediately_after_merge": true,
       "general_protection_bypass_authorized": false
+    }
+  },
+  "native_performance_gate_successor": {
+    "amendment_id": "A1B-WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719",
+    "receipt_id": "RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719",
+    "authorization_state": "receipt-required-fail-closed",
+    "governance_record": "governance/WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.md",
+    "previous_boundary_sha256": "3a157b115ba52a51b198fa0f0df1fa36b587bae55e3ab824e5af5f4b0b9c97d1",
+    "packet_contract_sha256": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
+    "authorized_dispatcher_sha256": "2aa5b1351e808d6c38819581c637bf171896ec2888633acbd8102ce6f1662392",
+    "build_profile_path": "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/WP0002NativeIl2CppArm64Performance.asset",
+    "build_profile_sha256": "6763b9edcb6ade391b132242c518796eebda444f883917768252a3314bda9249",
+    "scene_path": "Game/Assets/AtomicLandPirate/LastBearing/Scenes/LastBearing.unity",
+    "editor_binary_sha256": "5dcf81c5df5a9ff35006ee05832a1a6194c60fc4a386df652b9f49ea3a2a238b",
+    "xcodebuild_binary_sha256": "8910e7a24ef01bb0c2d4e66c07b14c321cd150a8017ca17cfa335bd888182ec1",
+    "toolchain": {
+      "required_editor_version": "6000.5.4f1",
+      "build_target": "StandaloneOSX",
+      "architecture": "arm64-only",
+      "scripting_backend": "IL2CPP",
+      "development_build": true,
+      "developer_dir": "/Applications/Xcode.app/Contents/Developer",
+      "xcode_version": "26.3",
+      "xcode_build_version": "17C529",
+      "macos_sdk_version": "26.2"
+    },
+    "gate_ids": [
+      "wp0002-native-il2cpp-arm64-build",
+      "wp0002-native-il2cpp-arm64-performance-start",
+      "wp0002-native-il2cpp-arm64-performance-collect"
+    ],
+    "output_root": "BuildArtifacts/WP-0002/local-only/native-il2cpp-arm64",
+    "protocol": {
+      "report_kind": "WP0002_VGR13_NATIVE_PERFORMANCE_REPORT_V1",
+      "width": 2560,
+      "height": 1600,
+      "warmup_seconds": 300,
+      "paused_unchanged_city_seconds": 300,
+      "representative_unpaused_city_seconds": 300,
+      "city_garage_cycles": 100,
+      "future_full_v0_measurement_seconds": null,
+      "representative_v0_claim_allowed": false,
+      "runtime_identity_claim_scope": "request-runtime-identity-match-only",
+      "collector_independent_proofs": [
+        "current-source-tree-sha256",
+        "build-profile-sha256",
+        "dispatcher-sha256",
+        "app-bundle-tree-sha256",
+        "executable-sha256",
+        "arm64-mach-o-executable-and-gameassembly",
+        "build-identity-sha256",
+        "request-sha256",
+        "build-and-run-manifest-sha256",
+        "runtime-report-sha256"
+      ]
     }
   },
   "repository": {
@@ -631,13 +715,16 @@
     "denied_actions_enforcement": "creator-authority-policy-only-not-os-enforcement",
     "direct_runcommand_prohibited_until_dispatcher_materialized_and_hash_bound": true,
     "dispatcher": {
-      "contract": "wp0002-gate-dispatcher-v1",
+      "contract": "wp0002-gate-dispatcher-v2",
       "repository_path": "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
       "allowed_gate_ids": [
         "asset-refresh-and-compile",
         "wp0002-editmode-test-assembly",
         "wp0002-playmode-test-assembly",
-        "wp0002-technical-capture"
+        "wp0002-technical-capture",
+        "wp0002-native-il2cpp-arm64-build",
+        "wp0002-native-il2cpp-arm64-performance-start",
+        "wp0002-native-il2cpp-arm64-performance-collect"
       ],
       "content_addressed_source_required_per_call": true,
       "required_log_fields": [

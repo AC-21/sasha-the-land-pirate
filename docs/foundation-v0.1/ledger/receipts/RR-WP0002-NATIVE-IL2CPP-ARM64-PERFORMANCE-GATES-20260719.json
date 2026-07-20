@@ -1,0 +1,103 @@
+{
+  "accepted_commit": "ce7f8fe868e16c1c9d5d80b47962f8db2460c72c",
+  "approval_text_sha256": "8d65f984b30560e20377f9f3a2a08c78b99a6bf8d055cc2f4197e04a8fd03f09",
+  "artifact_resolver": {
+    "resolver_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/82#issuecomment-5017997375",
+    "type": "external-protected"
+  },
+  "artifact_sha256": {
+    "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles.meta": "3d9a7fff93aadfa6aacc3cd48f1e2bcedec87ebb6ff3566b3f1db9391e8f1543",
+    "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/WP0002NativeIl2CppArm64Performance.asset": "6763b9edcb6ade391b132242c518796eebda444f883917768252a3314bda9249",
+    "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/WP0002NativeIl2CppArm64Performance.asset.meta": "d5da1087e58226c58db22dc458fac7da12a715e4fda2544715fa173b5bd906c1",
+    "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs": "2aa5b1351e808d6c38819581c637bf171896ec2888633acbd8102ce6f1662392",
+    "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/LastBearingAdapterTests.cs": "b278db4a77eb0c3dfa39d54fba578d821abc21340791f593f1e76cb98ef77dc5",
+    "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs": "b06b78f2df79704f3f717a76d590cac255707d9f3a22b7ce03e98c5a3f1e0dbc",
+    "docs/foundation-v0.1/governance/WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.md": "9acfa957fceb35e6fcb552a9efa6721fab96d1e4f0ade197c5c99b8a29ce1c2d",
+    "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json": "e0de86facc529e6dc1d6be38244408c8463083b27bd45e41034496e382954d4b",
+    "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json": "75b59ceed7cc248f3c1f39eb0d28421fe1f7809d91d0746df4b655d63104a2d7",
+    "docs/foundation-v0.1/tools/test_validate_local_a1_boundary.py": "4a3a52be280a60962973697c48023d92e6e0074b58d2f7776adabc8da65dcc76",
+    "docs/foundation-v0.1/tools/test_validate_wp0002_native_performance_gate_successor.py": "9f3e6d3fc488e1afb7a874989699f8d036007d4d58f4c2f1ff8cc0f4e050da1d",
+    "docs/foundation-v0.1/tools/test_validate_wp0002_reservation_renewal.py": "cd0fa2d4c7ca5d78db1fcd46516ba172ae9d0aac0929858356aab773328d26d0",
+    "docs/foundation-v0.1/tools/validate_foundation.py": "aadf24f1f46a9a3b3584efe4778b69eb3a779159a499475a8ce7f9535d660727",
+    "docs/foundation-v0.1/work-packets/proposed/WP-0002.json": "bfeee6ca870a7e67b99dd05521aa560096ea29e531a964f69696f39f058237d0",
+    "https://github.com/AC-21/sasha-the-land-pirate/pull/82#issuecomment-5017997375": "8d65f984b30560e20377f9f3a2a08c78b99a6bf8d055cc2f4197e04a8fd03f09"
+  },
+  "foundation_binding": null,
+  "issued_at": "2026-07-20T01:13:08Z",
+  "issued_by": "AC-21",
+  "issuer_role": "creator",
+  "materialization_authority_binding": {
+    "amendment_id": "A1B-WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719",
+    "changed_files_manifest_sha256": "b24a801c59e3a1c5d9b588fc3769763405163bc5972ce82852aac045ba926371",
+    "changed_paths": [
+      "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles.meta",
+      "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/WP0002NativeIl2CppArm64Performance.asset",
+      "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/WP0002NativeIl2CppArm64Performance.asset.meta",
+      "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
+      "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/LastBearingAdapterTests.cs",
+      "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs",
+      "docs/foundation-v0.1/governance/WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.md",
+      "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json",
+      "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
+      "docs/foundation-v0.1/tools/test_validate_local_a1_boundary.py",
+      "docs/foundation-v0.1/tools/test_validate_wp0002_native_performance_gate_successor.py",
+      "docs/foundation-v0.1/tools/test_validate_wp0002_reservation_renewal.py",
+      "docs/foundation-v0.1/tools/validate_foundation.py",
+      "docs/foundation-v0.1/work-packets/proposed/WP-0002.json"
+    ],
+    "claim": "AUTHORIZE-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES",
+    "packet_contract_sha256": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
+    "pr_number": 82,
+    "predecessor_project_path": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game",
+    "predecessor_repository_root": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate",
+    "previous_boundary_sha256": "3a157b115ba52a51b198fa0f0df1fa36b587bae55e3ab824e5af5f4b0b9c97d1",
+    "receipt_id": "RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719",
+    "receipt_path": "docs/foundation-v0.1/ledger/receipts/RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.json",
+    "repository_remote": "https://github.com/AC-21/sasha-the-land-pirate",
+    "restored_required_checks": [
+      "validate@15368",
+      "wp0002-core@15368",
+      "wp0002-policy@15368"
+    ],
+    "retained_required_checks": [
+      "validate@15368",
+      "wp0002-core@15368"
+    ],
+    "stage1_base": "c42c87bff2779da0246b4e5b1fe622f51b373f1b",
+    "stage1_commit": "ce7f8fe868e16c1c9d5d80b47962f8db2460c72c",
+    "stage1_patch_sha256": "d313154d3c2cbe8886e1b905e4ed276d17e7e549fb1e3e1ab88d1e8dc052420d",
+    "stage1_tree": "89116f8ac1eb23379132ac20a55183dbda980afc",
+    "successor_project_path": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game",
+    "successor_repository_root": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate",
+    "supersession_claim": "SUPERSEDE-WP0002-GATE-DISPATCHER-V1-ONLY",
+    "temporary_nonrequired_check": "wp0002-policy"
+  },
+  "receipt_id": "RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719",
+  "receipt_kind": "creator-authorization",
+  "sealed": true,
+  "signature_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/82#issuecomment-5017997375",
+  "source_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/82#issuecomment-5017997375",
+  "subject_claims": [
+    {
+      "claims": [
+        "SUPERSEDE-WP0002-GATE-DISPATCHER-V1-ONLY"
+      ],
+      "subject_id": "wp0002-gate-dispatcher-v1"
+    },
+    {
+      "claims": [
+        "AUTHORIZE-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES"
+      ],
+      "subject_id": "WP-0002"
+    }
+  ],
+  "subject_contract_sha256": {
+    "WP-0002": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
+    "wp0002-gate-dispatcher-v1": "3a157b115ba52a51b198fa0f0df1fa36b587bae55e3ab824e5af5f4b0b9c97d1"
+  },
+  "subject_event_sha256": {},
+  "subject_ids": [
+    "wp0002-gate-dispatcher-v1",
+    "WP-0002"
+  ]
+}
