@@ -70,6 +70,11 @@ namespace AtomicLandPirate.LastBearingTests
                     repoRoot,
                     "Game/Assets/AtomicLandPirate/LastBearing/Editor/" +
                     "WP0002GateDispatcher.cs"));
+            string nativeBuildProfile = File.ReadAllText(
+                Path.Combine(
+                    repoRoot,
+                    "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/" +
+                    "WP0002NativeIl2CppArm64Performance.asset"));
             string editorAssembly = File.ReadAllText(
                 Path.Combine(
                     repoRoot,
@@ -1100,6 +1105,192 @@ namespace AtomicLandPirate.LastBearingTests
             Require(dispatcher, "TestRunnerApi.UnregisterTestCallback(callbacks)");
             Require(dispatcher, "gateId + \"-\" + invocationId + \".json\"");
             Require(dispatcher, "VerifyExactFile(path, payload)");
+            Require(dispatcher, "wp0002-gate-dispatcher-v2");
+            Require(dispatcher, "wp0002-native-il2cpp-arm64-build");
+            Require(
+                dispatcher,
+                "wp0002-native-il2cpp-arm64-performance-start");
+            Require(
+                dispatcher,
+                "wp0002-native-il2cpp-arm64-performance-collect");
+            Require(dispatcher, "Arguments = NativeRuntimeFlag,");
+            Require(dispatcher, "UseShellExecute = false");
+            Require(
+                dispatcher,
+                "DEVELOPER_DIR\"] =\n                XcodeDeveloperDirectory");
+            Require(
+                dispatcher,
+                "/Applications/Xcode.app/Contents/Developer");
+            Require(dispatcher, "private const string RequiredXcodeVersion = \"26.3\"");
+            Require(
+                dispatcher,
+                "private const string RequiredXcodeBuildVersion = \"17C529\"");
+            Require(
+                dispatcher,
+                "private const string RequiredMacOsSdkVersion = \"26.2\"");
+            Require(
+                dispatcher,
+                "5dcf81c5df5a9ff35006ee05832a1a6194c60fc4a386df652b9f49ea3a2a238b");
+            Require(
+                dispatcher,
+                "8910e7a24ef01bb0c2d4e66c07b14c321cd150a8017ca17cfa335bd888182ec1");
+            Require(dispatcher, "private const int NativeWarmupSeconds = 300");
+            Require(dispatcher, "public double requested_warmup_seconds;");
+            Require(dispatcher, "private const int NativePausedSeconds = 300");
+            Require(dispatcher, "private const int NativeUnpausedSeconds = 300");
+            Require(dispatcher, "private const int NativeCityGarageCycles = 100");
+            Require(dispatcher, "private const int NativeScreenWidth = 2560");
+            Require(dispatcher, "private const int NativeScreenHeight = 1600");
+            Require(dispatcher, "request_runtime_identity_matched");
+            Require(dispatcher, "ComputeNativeSourceTreeSha256(");
+            Require(dispatcher, "ComputeDirectoryTreeSha256(playerPath)");
+            Require(dispatcher, "ComputeSha256(executablePath)");
+            Require(dispatcher, "ComputeSha256(identityPayload)");
+            Require(dispatcher, "ComputeSha256(requestPayload)");
+            Require(dispatcher, "ComputeSha256(runPayload)");
+            Require(dispatcher, "ComputeSha256(reportPayload)");
+            Require(
+                dispatcher,
+                "native-gate-authorization-receipt-missing");
+            Require(
+                dispatcher,
+                "SUPERSEDE-WP0002-GATE-DISPATCHER-V1-ONLY");
+            Require(
+                dispatcher,
+                "native-gate-receipt-does-not-match-protected-main");
+            Require(
+                dispatcher,
+                "native-gate-control-squash-path-set-mismatch");
+            Require(
+                dispatcher,
+                "native-build-lacks-same-editor-attestation");
+            Require(
+                dispatcher,
+                "native-run-lacks-same-editor-attestation");
+            Require(
+                dispatcher,
+                "RequirePathComponentsNotReparse(");
+            Require(
+                dispatcher,
+                "EditorApplication.delayCall += ExecuteScheduledNativeBuild");
+            Require(
+                dispatcher,
+                "EditorApplication.wantsToQuit +=");
+            Require(
+                dispatcher,
+                "EditorApplication.LockReloadAssemblies();");
+            Require(
+                dispatcher,
+                "EditorApplication.UnlockReloadAssemblies();");
+            Require(dispatcher, "_quarantinedNativeProcesses");
+            Require(dispatcher, "private sealed class NativeProcessCleanup");
+            Require(dispatcher, "private static bool TerminateProcess(");
+            Require(dispatcher, "out string failure");
+            Require(dispatcher, "native-player-termination-timeout");
+            Require(dispatcher, "native-player-termination-unconfirmed");
+            Require(dispatcher, "native-player-cleanup-quarantined:");
+            Require(
+                dispatcher,
+                "native-player-quarantine-cleared-retry-gate");
+            Require(dispatcher, "QuarantineNativeProcess(");
+            Require(
+                dispatcher,
+                "AttemptQuarantinedNativeProcessCleanup()");
+            string nativeStartOperation = Segment(
+                dispatcher,
+                "private static string StartNativePerformance(",
+                "private static string CollectNativePerformance(");
+            string nativeStartFailure = Segment(
+                nativeStartOperation,
+                "catch (Exception exception)",
+                "return CompleteNativeGate(");
+            Require(nativeStartFailure, "if (TerminateProcess(");
+            Require(nativeStartFailure, "QuarantineNativeProcess(");
+            TestHarness.True(
+                nativeStartFailure.IndexOf(
+                    "QuarantineNativeProcess(",
+                    StringComparison.Ordinal) <
+                nativeStartFailure.IndexOf(
+                    "launchedProcess = null;",
+                    StringComparison.Ordinal),
+                "a failed native start must retain the exact process handle before clearing the local reference");
+            string nativeInvalidation = Segment(
+                dispatcher,
+                "private static void InvalidateTrustedNativeRun()",
+                "private static bool AllowEditorQuitAfterNativeCleanup()");
+            TestHarness.True(
+                nativeInvalidation.IndexOf(
+                    "if (TerminateProcess(",
+                    StringComparison.Ordinal) <
+                nativeInvalidation.IndexOf(
+                    "_trustedNativeRun = null;",
+                    StringComparison.Ordinal),
+                "trusted native run cleanup must verify termination before clearing trust");
+            Require(nativeInvalidation, "QuarantineNativeProcess(");
+            string nativeTermination = Segment(
+                dispatcher,
+                "private static bool TerminateProcess(",
+                "private static string ResolveGitHead(");
+            Require(nativeTermination, "if (!process.WaitForExit(");
+            Require(nativeTermination, "if (!process.HasExited)");
+            Require(dispatcher, "process.StandardOutput.ReadToEndAsync()");
+            Require(
+                dispatcher,
+                "process.StandardOutput.BaseStream.CopyToAsync(output)");
+            Require(dispatcher, "process.StandardError.ReadToEndAsync()");
+            Require(dispatcher, "Task.WaitAll(");
+            Require(dispatcher, "FixedChildProcessTimeoutMilliseconds");
+            Require(dispatcher, "FixedChildCaptureTimeoutMilliseconds");
+            Require(dispatcher, "CreateFixedChildFailure(");
+            Require(
+                dispatcher,
+                "native-fixed-child-cleanup-quarantined:");
+            TestHarness.True(
+                dispatcher.IndexOf(
+                    "process.StandardOutput.ReadToEnd()",
+                    StringComparison.Ordinal) < 0 &&
+                dispatcher.IndexOf(
+                    "process.StandardError.ReadToEnd()",
+                    StringComparison.Ordinal) < 0 &&
+                dispatcher.IndexOf(
+                    "process.StandardOutput.BaseStream.CopyTo(output)",
+                    StringComparison.Ordinal) < 0,
+                "fixed subprocess capture must not synchronously block before its timeout");
+            TestHarness.True(
+                nativeTermination.IndexOf(
+                    "best-effort cleanup",
+                    StringComparison.Ordinal) < 0,
+                "native player cleanup must not swallow an unverified termination");
+            Require(
+                dispatcher,
+                "receipt-required-fail-closed");
+            Require(
+                dispatcher,
+                "BuildArtifacts/WP-0002/local-only/native-il2cpp-arm64");
+            TestHarness.True(
+                dispatcher.IndexOf(
+                    "private const int NativeMeasurementSeconds = 1800",
+                    StringComparison.Ordinal) < 0,
+                "the VGR-13 control must not invent the future full-V0 phase");
+
+            Require(
+                nativeBuildProfile,
+                "m_Name: WP0002 Native IL2CPP ARM64 Performance");
+            Require(nativeBuildProfile, "m_BuildTarget: 2");
+            Require(nativeBuildProfile, "m_Subtarget: 2");
+            Require(nativeBuildProfile, "m_OverrideGlobalSceneList: 1");
+            Require(
+                nativeBuildProfile,
+                "m_path: Assets/AtomicLandPirate/LastBearing/Scenes/LastBearing.unity");
+            Require(nativeBuildProfile, "|   defaultScreenWidth: 2560");
+            Require(nativeBuildProfile, "|   defaultScreenHeight: 1600");
+            Require(nativeBuildProfile, "|     Standalone: 1");
+            Require(nativeBuildProfile, "m_Development: 1");
+            Require(nativeBuildProfile, "m_ConnectProfiler: 0");
+            Require(nativeBuildProfile, "m_BuildWithDeepProfilingSupport: 0");
+            Require(nativeBuildProfile, "m_AllowDebugging: 0");
+            Require(nativeBuildProfile, "m_Architecture: 1");
+            Require(nativeBuildProfile, "m_CreateXcodeProject: 0");
             Require(editorAssembly, "\"UnityEngine.TestRunner\"");
         }
 

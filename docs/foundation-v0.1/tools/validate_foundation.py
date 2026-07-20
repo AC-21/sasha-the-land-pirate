@@ -293,7 +293,7 @@ WP0002_RUNCOMMAND_RESIDUAL_CAPABILITY = {
     "denied_actions_enforcement": "creator-authority-policy-only-not-os-enforcement",
     "direct_runcommand_prohibited_until_dispatcher_materialized_and_hash_bound": True,
     "dispatcher": {
-        "contract": "wp0002-gate-dispatcher-v1",
+        "contract": "wp0002-gate-dispatcher-v2",
         "repository_path": (
             "Game/Assets/AtomicLandPirate/LastBearing/Editor/"
             "WP0002GateDispatcher.cs"
@@ -303,6 +303,9 @@ WP0002_RUNCOMMAND_RESIDUAL_CAPABILITY = {
             "wp0002-editmode-test-assembly",
             "wp0002-playmode-test-assembly",
             "wp0002-technical-capture",
+            "wp0002-native-il2cpp-arm64-build",
+            "wp0002-native-il2cpp-arm64-performance-start",
+            "wp0002-native-il2cpp-arm64-performance-collect",
         ],
         "content_addressed_source_required_per_call": True,
         "required_log_fields": [
@@ -536,6 +539,164 @@ WP0002_ACTIVE_RESERVATION_RENEWAL = {
         "squash_only": True,
         "restore_wp0002_policy_immediately_after_merge": True,
         "general_protection_bypass_authorized": False,
+    },
+}
+WP0002_NATIVE_GATE_AMENDMENT_ID = (
+    "A1B-WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719"
+)
+WP0002_NATIVE_GATE_RECEIPT_ID = (
+    "RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719"
+)
+WP0002_NATIVE_GATE_SUPERSESSION_SUBJECT = "wp0002-gate-dispatcher-v1"
+WP0002_NATIVE_GATE_SUPERSESSION_CLAIM = (
+    "SUPERSEDE-WP0002-GATE-DISPATCHER-V1-ONLY"
+)
+WP0002_NATIVE_GATE_CLAIM = (
+    "AUTHORIZE-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES"
+)
+WP0002_NATIVE_GATE_GOVERNANCE_PATH = (
+    "governance/WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.md"
+)
+WP0002_NATIVE_GATE_RECEIPT_PATH = (
+    "ledger/receipts/"
+    "RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.json"
+)
+WP0002_NATIVE_GATE_RECEIPT_REPO_PATH = (
+    "docs/foundation-v0.1/" + WP0002_NATIVE_GATE_RECEIPT_PATH
+)
+WP0002_NATIVE_GATE_PREVIOUS_BOUNDARY_SHA256 = (
+    "3a157b115ba52a51b198fa0f0df1fa36b587bae55e3ab824e5af5f4b0b9c97d1"
+)
+WP0002_NATIVE_GATE_PACKET_CONTRACT_SHA256 = (
+    "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa"
+)
+WP0002_NATIVE_GATE_STAGE1_BASE = "c42c87bff2779da0246b4e5b1fe622f51b373f1b"
+WP0002_NATIVE_GATE_REMOTE = "https://github.com/AC-21/sasha-the-land-pirate"
+WP0002_NATIVE_GATE_SOURCE_PATTERN = re.compile(
+    r"https://github\.com/AC-21/sasha-the-land-pirate/"
+    r"pull/([0-9]+)#issuecomment-[0-9]+"
+)
+WP0002_NATIVE_GATE_RETAINED_REQUIRED_CHECKS = (
+    "validate@15368",
+    "wp0002-core@15368",
+)
+WP0002_NATIVE_GATE_RESTORED_REQUIRED_CHECKS = (
+    "validate@15368",
+    "wp0002-core@15368",
+    "wp0002-policy@15368",
+)
+WP0002_NATIVE_GATE_STAGE1_PATHS = (
+    "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
+    "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles.meta",
+    "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/"
+    "WP0002NativeIl2CppArm64Performance.asset",
+    "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/"
+    "WP0002NativeIl2CppArm64Performance.asset.meta",
+    "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/"
+    "LastBearingAdapterTests.cs",
+    "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs",
+    "docs/foundation-v0.1/governance/"
+    "WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.md",
+    "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json",
+    "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
+    "docs/foundation-v0.1/tools/validate_foundation.py",
+    "docs/foundation-v0.1/tools/test_validate_local_a1_boundary.py",
+    "docs/foundation-v0.1/tools/test_validate_wp0002_reservation_renewal.py",
+    "docs/foundation-v0.1/tools/"
+    "test_validate_wp0002_native_performance_gate_successor.py",
+    "docs/foundation-v0.1/work-packets/proposed/WP-0002.json",
+)
+WP0002_NATIVE_GATE_EDITABLE_ARTIFACT_SHA256 = {
+    "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs": (
+        "2aa5b1351e808d6c38819581c637bf171896ec2888633acbd8102ce6f1662392"
+    ),
+    "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles.meta": (
+        "3d9a7fff93aadfa6aacc3cd48f1e2bcedec87ebb6ff3566b3f1db9391e8f1543"
+    ),
+    (
+        "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/"
+        "WP0002NativeIl2CppArm64Performance.asset"
+    ): "6763b9edcb6ade391b132242c518796eebda444f883917768252a3314bda9249",
+    (
+        "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/"
+        "WP0002NativeIl2CppArm64Performance.asset.meta"
+    ): "d5da1087e58226c58db22dc458fac7da12a715e4fda2544715fa173b5bd906c1",
+    (
+        "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/"
+        "LastBearingAdapterTests.cs"
+    ): "b278db4a77eb0c3dfa39d54fba578d821abc21340791f593f1e76cb98ef77dc5",
+    "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs": (
+        "b06b78f2df79704f3f717a76d590cac255707d9f3a22b7ce03e98c5a3f1e0dbc"
+    ),
+}
+WP0002_NATIVE_GATE_SUCCESSOR = {
+    "amendment_id": WP0002_NATIVE_GATE_AMENDMENT_ID,
+    "receipt_id": WP0002_NATIVE_GATE_RECEIPT_ID,
+    "authorization_state": "receipt-required-fail-closed",
+    "governance_record": WP0002_NATIVE_GATE_GOVERNANCE_PATH,
+    "previous_boundary_sha256": (
+        WP0002_NATIVE_GATE_PREVIOUS_BOUNDARY_SHA256
+    ),
+    "packet_contract_sha256": WP0002_NATIVE_GATE_PACKET_CONTRACT_SHA256,
+    "authorized_dispatcher_sha256": (
+        "2aa5b1351e808d6c38819581c637bf171896ec2888633acbd8102ce6f1662392"
+    ),
+    "build_profile_path": (
+        "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/"
+        "WP0002NativeIl2CppArm64Performance.asset"
+    ),
+    "build_profile_sha256": (
+        "6763b9edcb6ade391b132242c518796eebda444f883917768252a3314bda9249"
+    ),
+    "scene_path": (
+        "Game/Assets/AtomicLandPirate/LastBearing/Scenes/LastBearing.unity"
+    ),
+    "editor_binary_sha256": (
+        "5dcf81c5df5a9ff35006ee05832a1a6194c60fc4a386df652b9f49ea3a2a238b"
+    ),
+    "xcodebuild_binary_sha256": (
+        "8910e7a24ef01bb0c2d4e66c07b14c321cd150a8017ca17cfa335bd888182ec1"
+    ),
+    "toolchain": {
+        "required_editor_version": "6000.5.4f1",
+        "build_target": "StandaloneOSX",
+        "architecture": "arm64-only",
+        "scripting_backend": "IL2CPP",
+        "development_build": True,
+        "developer_dir": "/Applications/Xcode.app/Contents/Developer",
+        "xcode_version": "26.3",
+        "xcode_build_version": "17C529",
+        "macos_sdk_version": "26.2",
+    },
+    "gate_ids": [
+        "wp0002-native-il2cpp-arm64-build",
+        "wp0002-native-il2cpp-arm64-performance-start",
+        "wp0002-native-il2cpp-arm64-performance-collect",
+    ],
+    "output_root": "BuildArtifacts/WP-0002/local-only/native-il2cpp-arm64",
+    "protocol": {
+        "report_kind": "WP0002_VGR13_NATIVE_PERFORMANCE_REPORT_V1",
+        "width": 2560,
+        "height": 1600,
+        "warmup_seconds": 300,
+        "paused_unchanged_city_seconds": 300,
+        "representative_unpaused_city_seconds": 300,
+        "city_garage_cycles": 100,
+        "future_full_v0_measurement_seconds": None,
+        "representative_v0_claim_allowed": False,
+        "runtime_identity_claim_scope": "request-runtime-identity-match-only",
+        "collector_independent_proofs": [
+            "current-source-tree-sha256",
+            "build-profile-sha256",
+            "dispatcher-sha256",
+            "app-bundle-tree-sha256",
+            "executable-sha256",
+            "arm64-mach-o-executable-and-gameassembly",
+            "build-identity-sha256",
+            "request-sha256",
+            "build-and-run-manifest-sha256",
+            "runtime-report-sha256",
+        ],
     },
 }
 WP0002_CHECKOUT_SUCCESSOR_SCOPE_CAPTURE_PATH = (
@@ -1032,6 +1193,48 @@ WP0002_BOUNDARY_AMENDMENTS = [
             "general_protection_bypass_authorized": False,
         },
     },
+    {
+        "amendment_id": WP0002_NATIVE_GATE_AMENDMENT_ID,
+        "amendment_kind": (
+            "append-only-native-il2cpp-arm64-performance-gate-successor"
+        ),
+        "previous_boundary_sha256": (
+            WP0002_NATIVE_GATE_PREVIOUS_BOUNDARY_SHA256
+        ),
+        "authorization_receipt_id": WP0002_NATIVE_GATE_RECEIPT_ID,
+        "required_claims": [
+            WP0002_NATIVE_GATE_SUPERSESSION_CLAIM,
+            WP0002_NATIVE_GATE_CLAIM,
+        ],
+        "governance_record": WP0002_NATIVE_GATE_GOVERNANCE_PATH,
+        "packet_contract_changed": False,
+        "authority_expansion": "fixed-native-performance-gates-only",
+        "materialization_control": {
+            "classification": (
+                "creator-controlled-fixed-native-performance-gate-control-not-"
+                "general-process-authority"
+            ),
+            "stage1_state": "proposed-unratified-non-executable",
+            "stage2_delta_policy": (
+                "exactly-one-added-regular-sealed-creator-receipt-file"
+            ),
+            "new_gates_may_validate_their_own_control_pr": False,
+            "temporary_nonrequired_check": "wp0002-policy",
+            "retained_required_checks": ["validate", "wp0002-core"],
+            "restored_required_checks": [
+                "validate",
+                "wp0002-core",
+                "wp0002-policy",
+            ],
+            "strict_protection_retained": True,
+            "no_bypass_allowances": True,
+            "force_push_disabled": True,
+            "deletion_disabled": True,
+            "squash_only": True,
+            "restore_wp0002_policy_immediately_after_merge": True,
+            "general_process_or_argument_authority": False,
+        },
+    },
 ]
 WP0002_DELEGATED_LOCAL_UNITY_OPERATOR = {
     "authorization_receipt_id": WP0002_LOCAL_OPERATOR_RECEIPT_ID,
@@ -1264,7 +1467,7 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
         "5f02ee7fd59bb0a6eea5cac3ba26cbb7c82d59ae8ae1008ab58cb3b72c541d19"
     ),
     "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json": (
-        "9828f30741d992ba7086fc9de39492b915f83ec2f88c47d19c534a08c1f4586e"
+        "75b59ceed7cc248f3c1f39eb0d28421fe1f7809d91d0746df4b655d63104a2d7"
     ),
     "docs/foundation-v0.1/schemas/ratification-receipt.schema.json": (
         "a6317b22edb1cf184f3fb74ad6dcadaa0bd188e781b4ad2dfc0c5d77ff4b800c"
@@ -1294,7 +1497,7 @@ WP0002_PROTECTED_SELF_VERIFICATION = {
         "c77d2d2534972d1d510b54b0a75834d9f6fd7340beef773f710eb107a7d6bdff"
     ),
     "docs/foundation-v0.1/tools/test_validate_local_a1_boundary.py": (
-        "a3933f167fb1ff8375b6dc25419224eeabb0f64e92e05353e4d523d405265b91"
+        "4a3a52be280a60962973697c48023d92e6e0074b58d2f7776adabc8da65dcc76"
     ),
     "docs/foundation-v0.1/tools/"
     "test_verify_wp0002_local_operator_transaction_v3.py": (
@@ -9158,6 +9361,597 @@ def validate_wp0002_checkout_successor_receipt(
     return errors
 
 
+def _wp0002_native_gate_blob(
+    repository: object,
+    commit: str,
+    repo_relative: str,
+) -> bytes | None:
+    try:
+        return repository.blob_at(commit, repo_relative)
+    except Exception:
+        return None
+
+
+def _wp0002_native_gate_pr_number(source_reference: object) -> int | None:
+    if not isinstance(source_reference, str):
+        return None
+    match = WP0002_NATIVE_GATE_SOURCE_PATTERN.fullmatch(source_reference)
+    return int(match.group(1)) if match is not None else None
+
+
+def _wp0002_native_gate_expected_authority_binding(
+    repository: object,
+    packet: dict,
+    accepted_commit: str,
+    stage1: dict[str, object],
+    changed_files: list[dict[str, object]],
+    pr_number: int,
+) -> dict[str, object] | None:
+    try:
+        patch = repository.deterministic_patch(
+            WP0002_NATIVE_GATE_STAGE1_BASE,
+            accepted_commit,
+        )
+    except Exception:
+        return None
+    return {
+        "claim": WP0002_NATIVE_GATE_CLAIM,
+        "supersession_claim": WP0002_NATIVE_GATE_SUPERSESSION_CLAIM,
+        "amendment_id": WP0002_NATIVE_GATE_AMENDMENT_ID,
+        "receipt_id": WP0002_NATIVE_GATE_RECEIPT_ID,
+        "pr_number": pr_number,
+        "packet_contract_sha256": packet.get("contract_sha256"),
+        "previous_boundary_sha256": (
+            WP0002_NATIVE_GATE_PREVIOUS_BOUNDARY_SHA256
+        ),
+        "repository_remote": WP0002_NATIVE_GATE_REMOTE,
+        "predecessor_repository_root": WP0002_ACTIVE_REPOSITORY_ROOT,
+        "successor_repository_root": WP0002_ACTIVE_REPOSITORY_ROOT,
+        "predecessor_project_path": WP0002_ACTIVE_PROJECT_PATH,
+        "successor_project_path": WP0002_ACTIVE_PROJECT_PATH,
+        "stage1_base": WP0002_NATIVE_GATE_STAGE1_BASE,
+        "stage1_commit": accepted_commit,
+        "stage1_tree": stage1.get("tree"),
+        "stage1_patch_sha256": hashlib.sha256(patch).hexdigest(),
+        "changed_files_manifest_sha256": sha256_canonical_json(changed_files),
+        "changed_paths": sorted(WP0002_NATIVE_GATE_STAGE1_PATHS),
+        "receipt_path": WP0002_NATIVE_GATE_RECEIPT_REPO_PATH,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "retained_required_checks": list(
+            WP0002_NATIVE_GATE_RETAINED_REQUIRED_CHECKS
+        ),
+        "restored_required_checks": list(
+            WP0002_NATIVE_GATE_RESTORED_REQUIRED_CHECKS
+        ),
+    }
+
+
+def _validate_wp0002_native_gate_stored_authority_binding(
+    packet: dict,
+    receipt: dict,
+) -> list[str]:
+    binding = receipt.get("materialization_authority_binding")
+    if not isinstance(binding, dict):
+        return [
+            "WP-0002 native performance gate receipt lacks its exact Stage-1 "
+            "authority binding"
+        ]
+    pr_number = _wp0002_native_gate_pr_number(receipt.get("source_reference"))
+    expected = {
+        "claim": WP0002_NATIVE_GATE_CLAIM,
+        "supersession_claim": WP0002_NATIVE_GATE_SUPERSESSION_CLAIM,
+        "amendment_id": WP0002_NATIVE_GATE_AMENDMENT_ID,
+        "receipt_id": WP0002_NATIVE_GATE_RECEIPT_ID,
+        "pr_number": pr_number,
+        "packet_contract_sha256": packet.get("contract_sha256"),
+        "previous_boundary_sha256": (
+            WP0002_NATIVE_GATE_PREVIOUS_BOUNDARY_SHA256
+        ),
+        "repository_remote": WP0002_NATIVE_GATE_REMOTE,
+        "predecessor_repository_root": WP0002_ACTIVE_REPOSITORY_ROOT,
+        "successor_repository_root": WP0002_ACTIVE_REPOSITORY_ROOT,
+        "predecessor_project_path": WP0002_ACTIVE_PROJECT_PATH,
+        "successor_project_path": WP0002_ACTIVE_PROJECT_PATH,
+        "stage1_base": WP0002_NATIVE_GATE_STAGE1_BASE,
+        "stage1_commit": receipt.get("accepted_commit"),
+        "stage1_tree": binding.get("stage1_tree"),
+        "stage1_patch_sha256": binding.get("stage1_patch_sha256"),
+        "changed_files_manifest_sha256": binding.get(
+            "changed_files_manifest_sha256"
+        ),
+        "changed_paths": sorted(WP0002_NATIVE_GATE_STAGE1_PATHS),
+        "receipt_path": WP0002_NATIVE_GATE_RECEIPT_REPO_PATH,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "retained_required_checks": list(
+            WP0002_NATIVE_GATE_RETAINED_REQUIRED_CHECKS
+        ),
+        "restored_required_checks": list(
+            WP0002_NATIVE_GATE_RESTORED_REQUIRED_CHECKS
+        ),
+    }
+    errors: list[str] = []
+    if binding != expected or pr_number is None:
+        errors.append(
+            "WP-0002 native performance gate durable authority binding is not exact"
+        )
+    for field, length in (
+        ("stage1_tree", 40),
+        ("stage1_patch_sha256", 64),
+        ("changed_files_manifest_sha256", 64),
+    ):
+        if re.fullmatch(
+            rf"[0-9a-f]{{{length}}}",
+            str(binding.get(field)),
+        ) is None:
+            errors.append(
+                "WP-0002 native performance gate Stage-1 Git hashes are malformed"
+            )
+            break
+    if receipt.get("approval_text_sha256") != sha256_canonical_json(binding):
+        errors.append(
+            "WP-0002 native performance gate creator comment hash differs from "
+            "its durable authority binding"
+        )
+    return errors
+
+
+def _validate_wp0002_native_gate_stage1(
+    repository: object,
+    packet: dict,
+    receipt: dict,
+    accepted_commit: str,
+) -> list[str]:
+    errors: list[str] = []
+    try:
+        stage1 = repository.commit(accepted_commit)
+        changed_files = repository.changed_files(
+            WP0002_NATIVE_GATE_STAGE1_BASE,
+            accepted_commit,
+        )
+    except Exception:
+        return [
+            "WP-0002 native performance gate Stage-1 Git facts are unavailable"
+        ]
+    if stage1.get("parents") != [WP0002_NATIVE_GATE_STAGE1_BASE]:
+        errors.append(
+            "WP-0002 native performance gate Stage-1 is not the direct child "
+            "of its exact protected base"
+        )
+    expected_paths = set(WP0002_NATIVE_GATE_STAGE1_PATHS)
+    actual_paths = {
+        item.get("path") for item in changed_files if isinstance(item, dict)
+    }
+    if actual_paths != expected_paths or len(changed_files) != len(expected_paths):
+        errors.append(
+            "WP-0002 native performance gate Stage-1 changed-path set is not exact"
+        )
+    artifact_hashes = receipt.get("artifact_sha256", {})
+    for item in changed_files:
+        if not isinstance(item, dict) or not isinstance(item.get("path"), str):
+            errors.append(
+                "WP-0002 native performance gate Stage-1 file record is malformed"
+            )
+            continue
+        path = item["path"]
+        base_blob = _wp0002_native_gate_blob(
+            repository,
+            WP0002_NATIVE_GATE_STAGE1_BASE,
+            path,
+        )
+        expected_status = "A" if base_blob is None else "M"
+        if item.get("status") != expected_status or item.get("new_mode") != "100644":
+            errors.append(
+                "WP-0002 native performance gate Stage-1 mode or status differs: "
+                + path
+            )
+        stage1_blob = _wp0002_native_gate_blob(repository, accepted_commit, path)
+        if (
+            stage1_blob is None
+            or not isinstance(artifact_hashes, dict)
+            or artifact_hashes.get(path)
+            != hashlib.sha256(stage1_blob).hexdigest()
+            or artifact_hashes.get(path) != item.get("new_blob_sha256")
+        ):
+            errors.append(
+                "WP-0002 native performance gate receipt does not bind Stage-1 "
+                "blob: " + path
+            )
+    if _wp0002_native_gate_blob(
+        repository,
+        accepted_commit,
+        WP0002_NATIVE_GATE_RECEIPT_REPO_PATH,
+    ) is not None:
+        errors.append(
+            "WP-0002 native performance gate receipt already exists in Stage-1"
+        )
+    pr_number = _wp0002_native_gate_pr_number(receipt.get("source_reference"))
+    authority_binding = (
+        _wp0002_native_gate_expected_authority_binding(
+            repository,
+            packet,
+            accepted_commit,
+            stage1,
+            changed_files,
+            pr_number,
+        )
+        if pr_number is not None
+        else None
+    )
+    if (
+        authority_binding is None
+        or receipt.get("materialization_authority_binding") != authority_binding
+    ):
+        errors.append(
+            "WP-0002 native performance gate creator authority does not bind "
+            "exact Stage-1 Git facts"
+        )
+    return errors
+
+
+def validate_wp0002_native_performance_gate_git_materialization(
+    packet: dict,
+    receipt: dict,
+    receipt_bytes: bytes,
+) -> list[str]:
+    """Validate the receipt-only child or its one protected linear squash."""
+    verifier, verifier_errors = _load_wp0002_transaction_verifier()
+    errors = list(verifier_errors)
+    repository_type = verifier.get("GitRepository") if verifier is not None else None
+    if not callable(repository_type):
+        return errors + [
+            "WP-0002 native performance gate lacks its hash-pinned Git verifier"
+        ]
+    try:
+        repository = repository_type(REPO_ROOT)
+    except Exception:
+        return errors + [
+            "WP-0002 native performance gate Git verifier cannot inspect the repository"
+        ]
+    origin_main = git_rev_parse_commit("refs/remotes/origin/main")
+    if origin_main is None:
+        return errors + [
+            "WP-0002 native performance gate cannot resolve protected origin/main"
+        ]
+    accepted_commit = receipt.get("accepted_commit")
+    if (
+        not isinstance(accepted_commit, str)
+        or re.fullmatch(r"[0-9a-f]{40}", accepted_commit) is None
+    ):
+        return errors + [
+            "WP-0002 native performance gate accepted_commit is not exact"
+        ]
+
+    protected_receipt = _wp0002_native_gate_blob(
+        repository,
+        origin_main,
+        WP0002_NATIVE_GATE_RECEIPT_REPO_PATH,
+    )
+    if protected_receipt is None:
+        if origin_main != WP0002_NATIVE_GATE_STAGE1_BASE:
+            errors.append(
+                "WP-0002 native performance gate candidate base is not exact "
+                "protected main"
+            )
+        errors.extend(
+            _validate_wp0002_native_gate_stage1(
+                repository,
+                packet,
+                receipt,
+                accepted_commit,
+            )
+        )
+        head_sha = git_rev_parse_commit("HEAD")
+        if head_sha is None:
+            return errors + [
+                "WP-0002 native performance gate Stage-2 HEAD is unavailable"
+            ]
+        try:
+            head = repository.commit(head_sha)
+        except Exception:
+            return errors + [
+                "WP-0002 native performance gate Stage-2 Git facts are invalid"
+            ]
+        final_head: str | None = None
+        if head.get("parents") == [accepted_commit]:
+            final_head = head_sha
+        else:
+            parents = head.get("parents")
+            if (
+                isinstance(parents, list)
+                and len(parents) == 2
+                and parents[0] == origin_main
+            ):
+                pull_head_sha = parents[1]
+                try:
+                    pull_head = repository.commit(pull_head_sha)
+                except Exception:
+                    pull_head = {}
+                if (
+                    pull_head.get("parents") == [accepted_commit]
+                    and pull_head.get("tree") == head.get("tree")
+                ):
+                    final_head = pull_head_sha
+        if final_head is None:
+            return errors + [
+                "WP-0002 native performance gate Stage-2 is not the exact "
+                "receipt-only child"
+            ]
+        try:
+            receipt_delta = repository.changed_files(
+                accepted_commit,
+                final_head,
+            )
+        except Exception:
+            return errors + [
+                "WP-0002 native performance gate Stage-2 Git facts are invalid"
+            ]
+        if (
+            len(receipt_delta) != 1
+            or receipt_delta[0].get("path")
+            != WP0002_NATIVE_GATE_RECEIPT_REPO_PATH
+            or receipt_delta[0].get("status") != "A"
+            or receipt_delta[0].get("new_mode") != "100644"
+        ):
+            errors.append(
+                "WP-0002 native performance gate Stage-2 is not the exact "
+                "one-file receipt addition"
+            )
+        if _wp0002_native_gate_blob(
+            repository,
+            final_head,
+            WP0002_NATIVE_GATE_RECEIPT_REPO_PATH,
+        ) != receipt_bytes:
+            errors.append(
+                "WP-0002 native performance gate Stage-2 receipt bytes differ"
+            )
+        return errors
+
+    additions = git_first_parent_path_additions(
+        "refs/remotes/origin/main",
+        WP0002_NATIVE_GATE_RECEIPT_REPO_PATH,
+    )
+    if additions is None or len(additions) != 1:
+        return errors + [
+            "WP-0002 native performance gate receipt has no unique protected-main "
+            "first-parent introduction"
+        ]
+    introduction = additions[0]
+    try:
+        introduction_record = repository.commit(introduction)
+    except Exception:
+        return errors + [
+            "WP-0002 native performance gate protected introduction is invalid"
+        ]
+    parents = introduction_record.get("parents")
+    if parents != [WP0002_NATIVE_GATE_STAGE1_BASE]:
+        errors.append(
+            "WP-0002 native performance gate protected squash has the wrong "
+            "linear base"
+        )
+    try:
+        squash_delta = repository.changed_files(
+            WP0002_NATIVE_GATE_STAGE1_BASE,
+            introduction,
+        )
+    except Exception:
+        return errors + [
+            "WP-0002 native performance gate protected squash delta is invalid"
+        ]
+    expected_paths = set(WP0002_NATIVE_GATE_STAGE1_PATHS) | {
+        WP0002_NATIVE_GATE_RECEIPT_REPO_PATH
+    }
+    actual_paths = {
+        item.get("path") for item in squash_delta if isinstance(item, dict)
+    }
+    if actual_paths != expected_paths or len(squash_delta) != len(expected_paths):
+        errors.append(
+            "WP-0002 native performance gate protected squash path set is not exact"
+        )
+    artifact_hashes = receipt.get("artifact_sha256", {})
+    for item in squash_delta:
+        if not isinstance(item, dict) or not isinstance(item.get("path"), str):
+            errors.append(
+                "WP-0002 native performance gate protected file record is malformed"
+            )
+            continue
+        path = item["path"]
+        intro_blob = _wp0002_native_gate_blob(repository, introduction, path)
+        if path == WP0002_NATIVE_GATE_RECEIPT_REPO_PATH:
+            if (
+                item.get("status") != "A"
+                or item.get("new_mode") != "100644"
+                or intro_blob != receipt_bytes
+            ):
+                errors.append(
+                    "WP-0002 native performance gate protected receipt bytes differ"
+                )
+        else:
+            base_blob = _wp0002_native_gate_blob(
+                repository,
+                WP0002_NATIVE_GATE_STAGE1_BASE,
+                path,
+            )
+            expected_status = "A" if base_blob is None else "M"
+            if (
+                item.get("status") != expected_status
+                or item.get("new_mode") != "100644"
+            ):
+                errors.append(
+                    "WP-0002 native performance gate protected introduction "
+                    "mode or status differs: " + path
+                )
+            if (
+                intro_blob is None
+                or not isinstance(artifact_hashes, dict)
+                or artifact_hashes.get(path)
+                != hashlib.sha256(intro_blob).hexdigest()
+                or artifact_hashes.get(path) != item.get("new_blob_sha256")
+            ):
+                errors.append(
+                    "WP-0002 native performance gate receipt does not bind protected "
+                    "introduction blob: " + path
+                )
+    if protected_receipt != receipt_bytes:
+        errors.append(
+            "WP-0002 native performance gate protected-main receipt bytes drifted"
+        )
+    if git_commit_exists(accepted_commit):
+        errors.extend(
+            _validate_wp0002_native_gate_stage1(
+                repository,
+                packet,
+                receipt,
+                accepted_commit,
+            )
+        )
+    return errors
+
+
+def validate_wp0002_native_performance_gate_receipt(
+    packet: dict,
+    receipt: dict,
+) -> list[str]:
+    receipt_path = ROOT / WP0002_NATIVE_GATE_RECEIPT_PATH
+    try:
+        metadata = receipt_path.lstat()
+        receipt_bytes = receipt_path.read_bytes()
+        exact_receipt = json.loads(receipt_bytes.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return [
+            "WP-0002 native performance gate exact named receipt file is missing"
+        ]
+    errors: list[str] = []
+    if not stat.S_ISREG(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+        errors.append(
+            "WP-0002 native performance gate receipt is not a regular file"
+        )
+    if exact_receipt != receipt:
+        errors.append(
+            "WP-0002 native performance gate receipt ID resolves outside its "
+            "exact named file"
+        )
+    if receipt.get("foundation_binding") is not None:
+        errors.append(
+            "WP-0002 native performance gate receipt invents a foundation binding"
+        )
+    errors.extend(
+        _validate_wp0002_native_gate_stored_authority_binding(packet, receipt)
+    )
+    source_reference = receipt.get("source_reference")
+    artifact_hashes = receipt.get("artifact_sha256")
+    expected_keys = set(WP0002_NATIVE_GATE_STAGE1_PATHS)
+    if isinstance(source_reference, str):
+        expected_keys.add(source_reference)
+    if (
+        _wp0002_native_gate_pr_number(source_reference) is None
+        or not isinstance(artifact_hashes, dict)
+        or set(artifact_hashes) != expected_keys
+    ):
+        errors.append(
+            "WP-0002 native performance gate receipt artifact set is not exact"
+        )
+    elif artifact_hashes.get(source_reference) != receipt.get(
+        "approval_text_sha256"
+    ):
+        errors.append(
+            "WP-0002 native performance gate receipt does not bind its creator comment"
+        )
+    errors.extend(
+        validate_wp0002_native_performance_gate_git_materialization(
+            packet,
+            receipt,
+            receipt_bytes,
+        )
+    )
+    return errors
+
+
+def validate_wp0002_native_performance_gate_successor(
+    packet: dict,
+    manifest: dict,
+    receipts_by_id: dict[str, dict],
+) -> list[str]:
+    """Validate exact Stage-1 structure; activate only through the Stage-2 receipt."""
+    errors: list[str] = []
+    if manifest.get("native_performance_gate_successor") != (
+        WP0002_NATIVE_GATE_SUCCESSOR
+    ):
+        errors.append(
+            "WP-0002 native performance gate successor boundary is not exact"
+        )
+    if packet.get("contract_sha256") != WP0002_NATIVE_GATE_PACKET_CONTRACT_SHA256:
+        errors.append(
+            "WP-0002 native performance gate successor changes the packet contract"
+        )
+    if manifest.get("unity_runcommand_residual_capability") != (
+        WP0002_RUNCOMMAND_RESIDUAL_CAPABILITY
+    ):
+        errors.append(
+            "WP-0002 native performance gate dispatcher contract is not exact"
+        )
+    governance = ROOT / WP0002_NATIVE_GATE_GOVERNANCE_PATH
+    if not governance.is_file() or governance.is_symlink():
+        errors.append(
+            "WP-0002 native performance gate governance record is unavailable"
+        )
+    for relative, expected_hash in (
+        WP0002_NATIVE_GATE_EDITABLE_ARTIFACT_SHA256.items()
+    ):
+        artifact = REPO_ROOT / relative
+        if expected_hash.startswith("PLACEHOLDER_"):
+            continue
+        if (
+            not artifact.is_file()
+            or artifact.is_symlink()
+            or sha256_file(artifact) != expected_hash
+        ):
+            errors.append(
+                "WP-0002 native performance gate protected artifact differs: "
+                + relative
+            )
+
+    receipt = receipts_by_id.get(WP0002_NATIVE_GATE_RECEIPT_ID)
+    if not isinstance(receipt, dict):
+        return errors
+    source_reference = receipt.get("source_reference")
+    resolver = receipt.get("artifact_resolver")
+    claims_by_subject = subject_claims(receipt)
+    if (
+        receipt.get("receipt_id") != WP0002_NATIVE_GATE_RECEIPT_ID
+        or receipt.get("receipt_kind") != "creator-authorization"
+        or receipt.get("issued_by") != "AC-21"
+        or receipt.get("issuer_role") != "creator"
+        or receipt.get("sealed") is not True
+        or receipt.get("subject_ids")
+        != [WP0002_NATIVE_GATE_SUPERSESSION_SUBJECT, "WP-0002"]
+        or claims_by_subject.get(WP0002_NATIVE_GATE_SUPERSESSION_SUBJECT, set())
+        != {WP0002_NATIVE_GATE_SUPERSESSION_CLAIM}
+        or claims_by_subject.get("WP-0002", set())
+        != {WP0002_NATIVE_GATE_CLAIM}
+        or receipt.get("subject_contract_sha256")
+        != {
+            WP0002_NATIVE_GATE_SUPERSESSION_SUBJECT: (
+                WP0002_NATIVE_GATE_PREVIOUS_BOUNDARY_SHA256
+            ),
+            "WP-0002": packet.get("contract_sha256"),
+        }
+        or receipt.get("subject_event_sha256") != {}
+        or _wp0002_native_gate_pr_number(source_reference) is None
+        or not isinstance(resolver, dict)
+        or resolver.get("type") != "external-protected"
+        or resolver.get("resolver_reference") != source_reference
+        or receipt.get("signature_reference") != source_reference
+    ):
+        errors.append(
+            "WP-0002 native performance gate receipt lacks exact protected "
+            "creator authority"
+        )
+    errors.extend(
+        validate_wp0002_native_performance_gate_receipt(packet, receipt)
+    )
+    return errors
+
+
 def validate_wp0002_local_operator_amendment(
     manifest: dict,
     packet: dict,
@@ -9473,6 +10267,14 @@ def validate_wp0002_local_operator_amendment(
             )
         )
 
+    errors.extend(
+        validate_wp0002_native_performance_gate_successor(
+            packet,
+            manifest,
+            receipts_by_id,
+        )
+    )
+
     activation_receipt = receipts_by_id.get(manifest.get("attestation_receipt_id"))
     if (
         not isinstance(activation_receipt, dict)
@@ -9570,31 +10372,43 @@ def validate_wp0002_reservation_renewal(
         "refs/remotes/origin/main",
         WP0002_RESERVATION_RENEWAL_RECEIPT_REPO_PATH,
     )
-    if not stage1_available and not protected_introductions:
+    protected_introduction = (
+        protected_introductions[0]
+        if isinstance(protected_introductions, list)
+        and len(protected_introductions) == 1
+        else None
+    )
+    if protected_introduction is None:
         errors.append(
-            "WP-0002 reservation renewal Stage-1 commit is unavailable before protected introduction"
+            "WP-0002 reservation renewal receipt has no unique protected-main "
+            "first-parent introduction"
         )
 
     for relative in WP0002_RESERVATION_RENEWAL_ARTIFACT_PATHS:
-        current_path = REPO_ROOT / relative
+        protected_blob = (
+            git_repo_blob(protected_introduction, relative)
+            if protected_introduction is not None
+            else None
+        )
         if (
-            not current_path.is_file()
-            or current_path.is_symlink()
-            or artifact_hashes.get(relative) != sha256_file(current_path)
+            protected_blob is None
+            or artifact_hashes.get(relative)
+            != hashlib.sha256(protected_blob).hexdigest()
         ):
             errors.append(
-                f"WP-0002 reservation renewal artifact drifted: {relative}"
+                "WP-0002 reservation renewal protected introduction blob "
+                f"drifted: {relative}"
             )
             continue
         if stage1_available:
             stage1_blob = git_repo_blob(accepted_commit, relative)
             if (
                 stage1_blob is None
-                or hashlib.sha256(stage1_blob).hexdigest()
-                != artifact_hashes.get(relative)
+                or stage1_blob != protected_blob
             ):
                 errors.append(
-                    f"WP-0002 reservation renewal Stage-1 blob drifted: {relative}"
+                    "WP-0002 reservation renewal Stage-1 blob differs from its "
+                    f"protected introduction: {relative}"
                 )
     return errors
 

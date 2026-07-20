@@ -263,6 +263,9 @@ class LocalA1BoundaryTests(unittest.TestCase):
         manifest["active_checkout_successor"] = copy.deepcopy(
             foundation.WP0002_ACTIVE_CHECKOUT_SUCCESSOR
         )
+        manifest["native_performance_gate_successor"] = copy.deepcopy(
+            foundation.WP0002_NATIVE_GATE_SUCCESSOR
+        )
         manifest["delegated_local_unity_operator"] = copy.deepcopy(
             foundation.WP0002_DELEGATED_LOCAL_UNITY_OPERATOR
         )
@@ -1266,6 +1269,11 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 "validate_wp0002_checkout_successor_git_materialization",
                 return_value=[],
             ),
+            mock.patch.object(
+                foundation,
+                "validate_wp0002_native_performance_gate_successor",
+                return_value=[],
+            ),
         )
         with ExitStack() as stack:
             for patcher in patchers:
@@ -1775,6 +1783,49 @@ class LocalA1BoundaryTests(unittest.TestCase):
                 lambda item: item["active_checkout_successor"][
                     "scope_capture"
                 ].__setitem__("sha256", "00" * 32),
+            ]
+            for mutate in mutations:
+                with self.subTest(mutation=mutate):
+                    candidate = copy.deepcopy(manifest)
+                    mutate(candidate)
+                    self.assertTrue(self.schema_errors(candidate))
+
+    def test_wp0002_native_performance_gate_schema_rejects_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            _, _, source, _ = self.base_documents(Path(temporary))
+            manifest = self.wp0002_manifest(source, "attested")
+            self.assertEqual(self.schema_errors(manifest), [])
+            mutations = [
+                lambda item: item["native_performance_gate_successor"].__setitem__(
+                    "authorization_state", "authorized-without-receipt"
+                ),
+                lambda item: item["native_performance_gate_successor"].__setitem__(
+                    "authorized_dispatcher_sha256", "00" * 32
+                ),
+                lambda item: item["native_performance_gate_successor"].__setitem__(
+                    "build_profile_sha256", "00" * 32
+                ),
+                lambda item: item["native_performance_gate_successor"][
+                    "toolchain"
+                ].__setitem__("architecture", "universal"),
+                lambda item: item["native_performance_gate_successor"][
+                    "toolchain"
+                ].__setitem__("developer_dir", "/tmp/another-xcode"),
+                lambda item: item["native_performance_gate_successor"][
+                    "protocol"
+                ].__setitem__("warmup_seconds", 1800),
+                lambda item: item["native_performance_gate_successor"][
+                    "protocol"
+                ].__setitem__("width", 1920),
+                lambda item: item["native_performance_gate_successor"][
+                    "protocol"
+                ].__setitem__("representative_v0_claim_allowed", True),
+                lambda item: item["native_performance_gate_successor"][
+                    "gate_ids"
+                ].append("arbitrary-native-process"),
+                lambda item: item["unity_runcommand_residual_capability"][
+                    "dispatcher"
+                ].__setitem__("contract", "wp0002-gate-dispatcher-v1"),
             ]
             for mutate in mutations:
                 with self.subTest(mutation=mutate):
