@@ -1032,6 +1032,51 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             }
         }
 
+        [TestCase(
+            "/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app",
+            true)]
+        [TestCase(
+            "/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app/" +
+            "Contents/MacOS/Unity",
+            false)]
+        [TestCase(
+            "/Applications/Unity/Hub/Editor/6000.5.4f1",
+            false)]
+        [TestCase(
+            "/Applications/Unity/Hub/Editor/6000.5.3f1/Unity.app",
+            false)]
+        [TestCase("", false)]
+        public void NativeEditorIdentityRequiresExactApplicationBundle(
+            string candidate,
+            bool expected)
+        {
+            const BindingFlags staticFlags =
+                BindingFlags.NonPublic | BindingFlags.Static;
+            MethodInfo? method = typeof(WP0002GateDispatcher).GetMethod(
+                "IsExpectedUnityEditorApplicationPath",
+                staticFlags);
+            Assert.That(method, Is.Not.Null);
+            Assert.That(
+                method!.Invoke(null, new object[] { candidate }),
+                Is.EqualTo(expected));
+
+            FieldInfo? bundle = typeof(WP0002GateDispatcher).GetField(
+                "UnityEditorApplicationBundlePath",
+                staticFlags);
+            FieldInfo? executable = typeof(WP0002GateDispatcher).GetField(
+                "UnityEditorExecutableRelativePath",
+                staticFlags);
+            Assert.That(bundle, Is.Not.Null);
+            Assert.That(executable, Is.Not.Null);
+            Assert.That(
+                bundle!.GetRawConstantValue(),
+                Is.EqualTo(
+                    "/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app"));
+            Assert.That(
+                executable!.GetRawConstantValue(),
+                Is.EqualTo("Contents/MacOS/Unity"));
+        }
+
         [TestCase("0123456789ab-0123456789abcdef0123456789abcdef", true)]
         [TestCase("0123456789AB-0123456789abcdef0123456789abcdef", false)]
         [TestCase("0123456789ab_0123456789abcdef0123456789abcdef", false)]

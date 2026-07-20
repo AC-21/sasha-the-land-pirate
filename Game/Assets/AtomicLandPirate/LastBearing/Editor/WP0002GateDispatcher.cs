@@ -78,7 +78,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
         private const string NativeRuntimeFlag =
             "--wp0002-native-performance";
         private const string NativeDispatcherContract =
-            "wp0002-gate-dispatcher-v2";
+            "wp0002-gate-dispatcher-v3";
         private const string NativeBuildManifestContract =
             "WP0002_NATIVE_IL2CPP_ARM64_BUILD_MANIFEST_V1";
         private const string NativeBuildPointerContract =
@@ -94,29 +94,38 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
         private const string NativeRuntimeReportContract =
             "WP0002_VGR13_NATIVE_PERFORMANCE_REPORT_V1";
         private const string NativeAuthorizationReceiptId =
-            "RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719";
+            "RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719";
         private const string NativeAuthorizationClaim =
-            "AUTHORIZE-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES";
+            "AUTHORIZE-WP0002-NATIVE-EDITOR-BUNDLE-EXECUTABLE-IDENTITY-" +
+            "CORRECTION";
         private const string NativeAuthorizationSupersessionClaim =
-            "SUPERSEDE-WP0002-GATE-DISPATCHER-V1-ONLY";
+            "SUPERSEDE-WP0002-GATE-DISPATCHER-V2-EDITOR-PATH-CHECK-ONLY";
         private const string NativeAuthorizationReceiptRelativePath =
             "docs/foundation-v0.1/ledger/receipts/" +
             NativeAuthorizationReceiptId + ".json";
         private const string NativeGovernanceRecordRelativePath =
             "docs/foundation-v0.1/governance/" +
-            "WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.md";
+            "WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.md";
+        private const string NativePreviousAuthorizationReceiptRelativePath =
+            "docs/foundation-v0.1/ledger/receipts/" +
+            "RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.json";
+        private const string NativePreviousAuthorizationReceiptSha256 =
+            "832348ad6c772a95dd5e98a4dc569de170707e8ffe4cb35c69f079dac7ecc484";
+        private const string NativePreviousDispatcherSha256 =
+            "2aa5b1351e808d6c38819581c637bf171896ec2888633acbd8102ce6f1662392";
         private const string PacketContractSha256 =
             "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa";
         private const string NativeControlBaseCommit =
-            "c42c87bff2779da0246b4e5b1fe622f51b373f1b";
+            "f6e6e18cce7483db7d120c1e4b8e64f185f707ba";
         private const string GitExecutablePath = "/usr/bin/git";
         private const string RequiredGitBinarySha256 =
             "7f30f076d0e9c38f772a76449fca9da8cf97f6a3d43b94c90a00e4f9ce7ad39e";
         private const string RequiredUnityVersion = "6000.5.4f1";
         private const string RequiredUnityBinarySha256 =
             "5dcf81c5df5a9ff35006ee05832a1a6194c60fc4a386df652b9f49ea3a2a238b";
-        private const string UnityEditorExecutablePath =
-            "/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app/" +
+        private const string UnityEditorApplicationBundlePath =
+            "/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app";
+        private const string UnityEditorExecutableRelativePath =
             "Contents/MacOS/Unity";
         private const string RequiredXcodeVersion = "26.3";
         private const string RequiredXcodeBuildVersion = "17C529";
@@ -204,25 +213,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
         private static readonly string[] NativeControlStage1Paths =
         {
             "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
-            "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles.meta",
-            "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/" +
-            "WP0002NativeIl2CppArm64Performance.asset",
-            "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/" +
-            "WP0002NativeIl2CppArm64Performance.asset.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/" +
             "LastBearingAdapterTests.cs",
             "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs",
             "docs/foundation-v0.1/governance/" +
-            "WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.md",
+            "WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.md",
             BoundaryRelativePath,
             "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
             "docs/foundation-v0.1/tools/validate_foundation.py",
-            "docs/foundation-v0.1/tools/test_validate_local_a1_boundary.py",
             "docs/foundation-v0.1/tools/" +
-            "test_validate_wp0002_reservation_renewal.py",
-            "docs/foundation-v0.1/tools/" +
-            "test_validate_wp0002_native_performance_gate_successor.py",
-            "docs/foundation-v0.1/work-packets/proposed/WP-0002.json"
+            "test_validate_wp0002_native_editor_path_correction.py"
         };
 
         static WP0002GateDispatcher()
@@ -1286,16 +1286,21 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                     "unity-version-mismatch");
             }
 
-            string unityExecutable = Path.GetFullPath(
-                UnityEditorExecutablePath);
-            if (!string.Equals(
-                    Path.GetFullPath(EditorApplication.applicationPath),
-                    unityExecutable,
-                    StringComparison.Ordinal))
+            string unityApplicationBundle = Path.GetFullPath(
+                UnityEditorApplicationBundlePath);
+            if (!IsExpectedUnityEditorApplicationPath(
+                    EditorApplication.applicationPath))
             {
                 throw new InvalidOperationException(
-                    "unity-editor-executable-path-mismatch");
+                    "unity-editor-application-bundle-path-mismatch");
             }
+            RequireRegularDirectory(
+                unityApplicationBundle,
+                "unity-editor-application-bundle-missing");
+            string unityExecutable = Path.GetFullPath(
+                Path.Combine(
+                    unityApplicationBundle,
+                    UnityEditorExecutableRelativePath));
             RequireRegularFile(
                 unityExecutable,
                 "unity-editor-executable-missing");
@@ -1360,7 +1365,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                 NativeAuthorizationReceiptId + "\"");
             RequireBoundaryBinding(
                 boundaryText,
-                "\"authorization_state\": " +
+                "\"path_correction_state\": " +
                 "\"receipt-required-fail-closed\"");
 
             string sourceCommit = ResolveGitHead(boundary.RepositoryRoot);
@@ -1377,6 +1382,27 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                 sceneSha256,
                 sourceCommit,
                 ComputeNativeSourceTreeSha256(boundary.RepositoryRoot));
+        }
+
+        private static bool IsExpectedUnityEditorApplicationPath(
+            string candidate)
+        {
+            if (string.IsNullOrEmpty(candidate))
+            {
+                return false;
+            }
+
+            try
+            {
+                return string.Equals(
+                    Path.GetFullPath(candidate),
+                    Path.GetFullPath(UnityEditorApplicationBundlePath),
+                    StringComparison.Ordinal);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         private static void RequireBoundaryBinding(
@@ -2308,6 +2334,25 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             string boundaryText,
             string sourceCommit)
         {
+            string previousReceiptPath = Path.Combine(
+                boundary.RepositoryRoot,
+                NativePreviousAuthorizationReceiptRelativePath.Replace(
+                    '/',
+                    Path.DirectorySeparatorChar));
+            RequireRegularFile(
+                previousReceiptPath,
+                "native-gate-predecessor-receipt-missing");
+            byte[] previousReceiptBytes = File.ReadAllBytes(
+                previousReceiptPath);
+            if (!string.Equals(
+                    ComputeSha256(previousReceiptBytes),
+                    NativePreviousAuthorizationReceiptSha256,
+                    StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "native-gate-predecessor-receipt-hash-mismatch");
+            }
+
             string receiptPath = Path.Combine(
                 boundary.RepositoryRoot,
                 NativeAuthorizationReceiptRelativePath.Replace(
@@ -2326,6 +2371,18 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                 protectedMain,
                 40,
                 "native-protected-main-commit-invalid");
+            byte[] protectedPreviousReceipt = ReadNativeGitBytes(
+                boundary,
+                NativeGitRead.PredecessorReceiptAtOriginMain,
+                protectedMain);
+            if (!ByteArraysEqual(
+                    previousReceiptBytes,
+                    protectedPreviousReceipt))
+            {
+                throw new InvalidOperationException(
+                    "native-gate-predecessor-receipt-does-not-match-" +
+                    "protected-main");
+            }
             string[] introductions = ReadNativeGitText(
                     boundary,
                     NativeGitRead.ReceiptIntroductions)
@@ -2443,6 +2500,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             {
                 "\"" + NativeAuthorizationClaim + "\"",
                 "\"" + NativeAuthorizationSupersessionClaim + "\"",
+                "\"wp0002-gate-dispatcher-v2\": \"" +
+                    NativePreviousDispatcherSha256 + "\"",
+                "\"" + NativePreviousAuthorizationReceiptRelativePath +
+                    "\": \"" +
+                    NativePreviousAuthorizationReceiptSha256 + "\"",
                 "\"WP-0002\": \"" + PacketContractSha256 + "\"",
                 "\"" + DispatcherAssetPath.Replace(
                     "Assets/",
@@ -2466,14 +2528,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             RequireBoundaryBinding(
                 boundaryText,
                 "\"amendment_id\": " +
-                "\"A1B-WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719\"");
+                "\"A1B-WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719\"");
             RequireBoundaryBinding(
                 boundaryText,
                 "\"stage2_delta_policy\": " +
-                "\"exactly-one-added-regular-sealed-creator-receipt-file\"");
+                "\"exactly-one-added-regular-sealed-path-correction-" +
+                "receipt-file\"");
             RequireBoundaryBinding(
                 boundaryText,
-                "\"new_gates_may_validate_their_own_control_pr\": false");
+                "\"corrected_gates_may_validate_their_own_control_pr\": false");
         }
 
         private static string ReadNativeGitText(
@@ -2577,6 +2640,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                     arguments =
                         "--no-replace-objects cat-file blob " + commit + ":" +
                         NativeAuthorizationReceiptRelativePath;
+                    break;
+                case NativeGitRead.PredecessorReceiptAtOriginMain:
+                    arguments =
+                        "--no-replace-objects cat-file blob " + commit + ":" +
+                        NativePreviousAuthorizationReceiptRelativePath;
                     break;
                 case NativeGitRead.IntroductionAncestorOfSource:
                     arguments =
@@ -4806,6 +4874,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             ControlChangedPaths,
             ReceiptAtIntroduction,
             ReceiptAtOriginMain,
+            PredecessorReceiptAtOriginMain,
             IntroductionAncestorOfSource
         }
 
