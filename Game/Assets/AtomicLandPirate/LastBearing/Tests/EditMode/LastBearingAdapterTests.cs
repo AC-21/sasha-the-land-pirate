@@ -1005,6 +1005,156 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(result, Is.EqualTo(expected));
         }
 
+        [Test]
+        public void NativePerformanceGateIdsAreFixedAndNonPathValued()
+        {
+            Assert.That(
+                WP0002GateDispatcher.NativeBuildGate,
+                Is.EqualTo("wp0002-native-il2cpp-arm64-build"));
+            Assert.That(
+                WP0002GateDispatcher.NativePerformanceStartGate,
+                Is.EqualTo(
+                    "wp0002-native-il2cpp-arm64-performance-start"));
+            Assert.That(
+                WP0002GateDispatcher.NativePerformanceCollectGate,
+                Is.EqualTo(
+                    "wp0002-native-il2cpp-arm64-performance-collect"));
+            foreach (string gateId in new[]
+            {
+                WP0002GateDispatcher.NativeBuildGate,
+                WP0002GateDispatcher.NativePerformanceStartGate,
+                WP0002GateDispatcher.NativePerformanceCollectGate
+            })
+            {
+                Assert.That(gateId, Does.Not.Contain("/"));
+                Assert.That(gateId, Does.Not.Contain("\\"));
+                Assert.That(gateId, Does.Not.Contain(".."));
+            }
+        }
+
+        [TestCase("0123456789ab-0123456789abcdef0123456789abcdef", true)]
+        [TestCase("0123456789AB-0123456789abcdef0123456789abcdef", false)]
+        [TestCase("0123456789ab_0123456789abcdef0123456789abcdef", false)]
+        [TestCase("0123456789ab-0123456789abcdef0123456789abcdeg", false)]
+        [TestCase("runs/0123456789ab-0123456789abcdef0123456789abcdef", false)]
+        public void NativeRunDirectoryNameIsExactLowerHexIdentity(
+            string value,
+            bool expectedValid)
+        {
+            MethodInfo? method = typeof(WP0002GateDispatcher).GetMethod(
+                "ValidateNativeRunDirectoryName",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            Assert.That(method, Is.Not.Null);
+
+            if (expectedValid)
+            {
+                Assert.DoesNotThrow(() =>
+                    method!.Invoke(null, new object[] { value }));
+            }
+            else
+            {
+                TargetInvocationException? exception = Assert.Throws<
+                    TargetInvocationException>(() =>
+                        method!.Invoke(null, new object[] { value }));
+                Assert.That(
+                    exception!.InnerException,
+                    Is.TypeOf<InvalidOperationException>());
+            }
+        }
+
+        [Test]
+        public void NativePerformanceReportUsesDoubleDurationFields()
+        {
+            Type? reportType = typeof(WP0002GateDispatcher).GetNestedType(
+                "NativePerformanceReport",
+                BindingFlags.NonPublic);
+            Assert.That(reportType, Is.Not.Null);
+            FieldInfo? requested = reportType!.GetField(
+                "requested_warmup_seconds",
+                BindingFlags.Public | BindingFlags.Instance);
+            FieldInfo? actual = reportType.GetField(
+                "actual_warmup_seconds",
+                BindingFlags.Public | BindingFlags.Instance);
+            Assert.That(requested, Is.Not.Null);
+            Assert.That(actual, Is.Not.Null);
+            Assert.That(requested!.FieldType, Is.EqualTo(typeof(double)));
+            Assert.That(actual!.FieldType, Is.EqualTo(typeof(double)));
+        }
+
+        [Test]
+        public void NativeGateKeepsBuildAndRunTrustOnlyInStaticEditorMemory()
+        {
+            foreach (string fieldName in new[]
+            {
+                "_trustedNativeBuild",
+                "_trustedNativeRun",
+                "_scheduledNativeBuild",
+                "_quarantinedNativeProcesses",
+                "_nativePlayerReloadLockHeld"
+            })
+            {
+                FieldInfo? field = typeof(WP0002GateDispatcher).GetField(
+                    fieldName,
+                    BindingFlags.NonPublic | BindingFlags.Static);
+                Assert.That(field, Is.Not.Null, fieldName);
+                Assert.That(field!.IsStatic, Is.True, fieldName);
+                Assert.That(
+                    Attribute.IsDefined(
+                        field,
+                        typeof(SerializeField)),
+                    Is.False,
+                    fieldName);
+            }
+        }
+
+        [Test]
+        public void NativePlayerCleanupRetainsAnExactFailClosedProcessHandle()
+        {
+            const BindingFlags staticFlags =
+                BindingFlags.NonPublic | BindingFlags.Static;
+            FieldInfo? quarantine = typeof(WP0002GateDispatcher).GetField(
+                "_quarantinedNativeProcesses",
+                staticFlags);
+            Assert.That(quarantine, Is.Not.Null);
+            Assert.That(quarantine!.IsStatic, Is.True);
+            Assert.That(quarantine.IsInitOnly, Is.True);
+
+            Type? cleanupType = typeof(WP0002GateDispatcher).GetNestedType(
+                "NativeProcessCleanup",
+                BindingFlags.NonPublic);
+            Assert.That(cleanupType, Is.Not.Null);
+            PropertyInfo? process = cleanupType!.GetProperty(
+                "Process",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.That(process, Is.Not.Null);
+            Assert.That(
+                process!.PropertyType,
+                Is.EqualTo(typeof(System.Diagnostics.Process)));
+
+            MethodInfo? terminate = typeof(WP0002GateDispatcher).GetMethod(
+                "TerminateProcess",
+                staticFlags,
+                null,
+                new[]
+                {
+                    typeof(System.Diagnostics.Process),
+                    typeof(string).MakeByRefType()
+                },
+                null);
+            Assert.That(terminate, Is.Not.Null);
+            Assert.That(terminate!.ReturnType, Is.EqualTo(typeof(bool)));
+
+            MethodInfo? reject = typeof(WP0002GateDispatcher).GetMethod(
+                "RejectNativeGateWhileCleanupQuarantined",
+                staticFlags);
+            Assert.That(reject, Is.Not.Null);
+            MethodInfo? allowQuit = typeof(WP0002GateDispatcher).GetMethod(
+                "AllowEditorQuitAfterNativeCleanup",
+                staticFlags);
+            Assert.That(allowQuit, Is.Not.Null);
+            Assert.That(allowQuit!.ReturnType, Is.EqualTo(typeof(bool)));
+        }
+
         private static void InstallControllerState(
             LastBearingGameController controller,
             LastBearingState state)
