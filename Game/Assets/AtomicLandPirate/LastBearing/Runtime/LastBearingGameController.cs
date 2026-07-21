@@ -987,9 +987,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             HandleGlobalShortcuts();
-            _accumulator += Mathf.Min(Time.unscaledDeltaTime, TickSeconds * MaximumCatchUpTicks);
+            AdvanceSimulation(Time.unscaledDeltaTime);
+        }
+
+        private void AdvanceSimulation(float elapsedSeconds)
+        {
+            _accumulator += Mathf.Min(
+                Mathf.Max(0f, elapsedSeconds),
+                TickSeconds * MaximumCatchUpTicks);
             int ticks = 0;
-            while (_accumulator >= TickSeconds && ticks < MaximumCatchUpTicks)
+            while (_accumulator >= TickSeconds &&
+                   ticks < MaximumCatchUpTicks)
             {
                 SimulateOneTick();
                 _accumulator -= TickSeconds;
@@ -1077,8 +1085,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            if (_readModel.PauseCause != PauseCause.None &&
+                _pendingCommands.Count == 0)
+            {
+                return;
+            }
+
             QueueDriveInputIfApplicable();
-            var commands = _pendingCommands.ToArray();
+            LastBearingCommand[] commands = _pendingCommands.Count == 0
+                ? Array.Empty<LastBearingCommand>()
+                : _pendingCommands.ToArray();
             _pendingCommands.Clear();
 
             try

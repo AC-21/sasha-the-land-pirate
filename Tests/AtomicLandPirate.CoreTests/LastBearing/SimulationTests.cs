@@ -12,6 +12,12 @@ namespace AtomicLandPirate.LastBearingTests
         {
             harness.Run("identical command schedules are byte deterministic", DeterministicSchedule);
             harness.Run("one step advances one fixed tick", OneStepOneTick);
+            harness.Run(
+                "valid invariant checks allocate no managed memory after warmup",
+                ValidInvariantChecksAllocateNoManagedMemoryAfterWarmup);
+            harness.Run(
+                "invariant hot path retains exact failure codes",
+                InvariantHotPathRetainsExactFailureCodes);
             harness.Run("command sequence mismatch fails closed", SequenceMismatch);
             harness.Run("drive input is bounded and quantized", InputBounds);
             harness.Run("duplicate drive commands fail before tick mutation", DuplicateDriveCommandsFailAtomically);
@@ -46,6 +52,79 @@ namespace AtomicLandPirate.LastBearingTests
             long before = driver.View.GlobalTick;
             driver.Advance(1);
             TestHarness.Equal(before + 1, driver.View.GlobalTick, "global tick");
+        }
+
+        private static void
+            ValidInvariantChecksAllocateNoManagedMemoryAfterWarmup()
+        {
+            LastBearingState state = LastBearingScenarioFactory.CreateInitial(
+                ColonyComposition.Mixed,
+                2011);
+            for (var index = 0; index < 32; index++)
+            {
+                LastBearingInvariants.Validate(state);
+            }
+
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            for (var index = 0; index < 10000; index++)
+            {
+                LastBearingInvariants.Validate(state);
+            }
+
+            long allocated = checked(
+                GC.GetAllocatedBytesForCurrentThread() - before);
+            TestHarness.Equal(
+                0L,
+                allocated,
+                "warmed valid invariant allocation bytes");
+        }
+
+        private static void InvariantHotPathRetainsExactFailureCodes()
+        {
+            LastBearingState initial =
+                LastBearingScenarioFactory.CreateInitial(
+                    ColonyComposition.Mixed,
+                    2011);
+            AssertInvariantCode(
+                new LastBearingStateBuilder(initial)
+                {
+                    GlobalTick = -1,
+                },
+                "LAST_BEARING_GLOBAL_TICK_NEGATIVE");
+            AssertInvariantCode(
+                new LastBearingStateBuilder(initial)
+                {
+                    SettlementAccumulatorMilli =
+                        LastBearingBalanceV1.FullClockScaleMilli,
+                },
+                "LAST_BEARING_SETTLEMENT_ACCUMULATOR_INVALID");
+            AssertInvariantCode(
+                new LastBearingStateBuilder(initial)
+                {
+                    WaterMilli = -1,
+                },
+                "LAST_BEARING_WATER_OUT_OF_RANGE");
+            AssertInvariantCode(
+                new LastBearingStateBuilder(initial)
+                {
+                    PauseCause = (PauseCause)int.MaxValue,
+                },
+                "LAST_BEARING_PAUSE_CAUSE_INVALID");
+        }
+
+        private static void AssertInvariantCode(
+            LastBearingStateBuilder builder,
+            string expectedCode)
+        {
+            var state = new LastBearingState(builder);
+            InvalidOperationException error =
+                TestHarness.Throws<InvalidOperationException>(
+                    () => LastBearingInvariants.Validate(state),
+                    expectedCode + " state was accepted");
+            TestHarness.Equal(
+                expectedCode,
+                error.Message,
+                expectedCode + " error code");
         }
 
         private static void SequenceMismatch()
