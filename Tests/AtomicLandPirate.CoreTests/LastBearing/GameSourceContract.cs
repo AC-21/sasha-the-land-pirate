@@ -1124,6 +1124,16 @@ namespace AtomicLandPirate.LastBearingTests
             Require(dispatcher, "Contents/MacOS/Unity");
             Require(
                 dispatcher,
+                "SashaAtomicLandPirateVGR13.app/Contents/MacOS/Game");
+            TestHarness.True(
+                dispatcher.IndexOf(
+                    "SashaAtomicLandPirateVGR13.app/Contents/MacOS/\" +\n" +
+                    "            \"Sasha the Atomic Land Pirate",
+                    StringComparison.Ordinal) < 0,
+                "native player executable identity must not fall back to the " +
+                "title-derived path");
+            Require(
+                dispatcher,
                 "IsExpectedUnityEditorApplicationPath(");
             Require(
                 dispatcher,
@@ -1170,10 +1180,10 @@ namespace AtomicLandPirate.LastBearingTests
                 "native-gate-authorization-receipt-missing");
             Require(
                 dispatcher,
-                "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-BOUNDARY-DUPLICATE-");
+                "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-PLAYER-EXECUTABLE-");
             Require(
                 dispatcher,
-                "AUTHORIZE-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-");
+                "AUTHORIZE-WP0002-NATIVE-PLAYER-EXECUTABLE-PATH-");
             Require(
                 dispatcher,
                 "NativePreviousAuthorizationReceiptSha256");

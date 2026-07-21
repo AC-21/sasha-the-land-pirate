@@ -1,0 +1,93 @@
+{
+  "accepted_commit": "4562cb6276ff9f3d497590bb491b429e4eed5262",
+  "approval_text_sha256": "73bb48f1e2f9f2801c6224b79b73cb302d6f620734e90198f75f247862cdf4cb",
+  "artifact_resolver": {
+    "resolver_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/86#issuecomment-5029474855",
+    "type": "external-protected"
+  },
+  "artifact_sha256": {
+    "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/WP0002NativeIl2CppArm64Performance.asset": "6763b9edcb6ade391b132242c518796eebda444f883917768252a3314bda9249",
+    "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs": "309216986a1fe3f9f0de4fe3e40f605bafb4a24c3f93ad90e7e4dbe6f4462f5f",
+    "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/LastBearingAdapterTests.cs": "0767adff10a584912240f655d8b367afc2e8a57624a9d4023434d68b129e3fdd",
+    "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs": "e5b8bff5b8e7927a08fdb60e62720607e6be9457a0baad1c295098823fefa5c3",
+    "docs/foundation-v0.1/governance/WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720.md": "c39d14444d51cbbbd00dc4d989ad5111b42d60768a4522eaf3d5183068e3d139",
+    "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json": "8c4bc90adb850e4d05edbd3b0c7fb5ce7cd6b4d65281f60f5c9f1a4283b1d7fb",
+    "docs/foundation-v0.1/ledger/receipts/RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.json": "11bf6d2bd90881fdfcae427c3532694614533089bab16c0353860d4747958dff",
+    "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json": "01a53288881b3b01e5e37e37e26c8b92842a4f80096a638fa8c4f25d793c4e48",
+    "docs/foundation-v0.1/tools/test_validate_wp0002_native_editor_path_correction.py": "f25ea041297bbdc5ce4f98d96a60189867e7b1a47bf406f2d3d53c518989b24d",
+    "docs/foundation-v0.1/tools/validate_foundation.py": "011ab7a1634b8b2271e279f9adaf60be8cf334aa703ac44cd675c6d19fa3d278",
+    "https://github.com/AC-21/sasha-the-land-pirate/pull/86#issuecomment-5029474855": "73bb48f1e2f9f2801c6224b79b73cb302d6f620734e90198f75f247862cdf4cb"
+  },
+  "foundation_binding": null,
+  "issued_at": "2026-07-21T02:20:07Z",
+  "issued_by": "AC-21",
+  "issuer_role": "creator",
+  "materialization_authority_binding": {
+    "amendment_id": "A1B-WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720",
+    "changed_files_manifest_sha256": "87574da5bf59282a8c9c63227dc161ff4cb55881d29e29cc798350547e6c7c9e",
+    "changed_paths": [
+      "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
+      "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/LastBearingAdapterTests.cs",
+      "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs",
+      "docs/foundation-v0.1/governance/WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720.md",
+      "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json",
+      "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
+      "docs/foundation-v0.1/tools/test_validate_wp0002_native_editor_path_correction.py",
+      "docs/foundation-v0.1/tools/validate_foundation.py"
+    ],
+    "claim": "AUTHORIZE-WP0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION",
+    "packet_contract_sha256": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
+    "pr_number": 86,
+    "predecessor_project_path": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game",
+    "predecessor_repository_root": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate",
+    "previous_boundary_sha256": "640bdbf33ccccd06b04e0ae5b1bf12554e325c36d09101531f23d5f9b9eeba18",
+    "receipt_id": "RR-WP0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720",
+    "receipt_path": "docs/foundation-v0.1/ledger/receipts/RR-WP0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720.json",
+    "repository_remote": "https://github.com/AC-21/sasha-the-land-pirate",
+    "restored_required_checks": [
+      "validate@15368",
+      "wp0002-core@15368",
+      "wp0002-policy@15368"
+    ],
+    "retained_required_checks": [
+      "validate@15368",
+      "wp0002-core@15368"
+    ],
+    "stage1_base": "c5cfa463bf2b5ff9714be9483f67287f8180ec05",
+    "stage1_commit": "4562cb6276ff9f3d497590bb491b429e4eed5262",
+    "stage1_patch_sha256": "c06a9ae9df5ff0a29d9003c0ca639070bb8576de32862813c36c3ec43b389638",
+    "stage1_tree": "90eec4767fd15b087fc832731117457ae1e2d334",
+    "successor_project_path": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game",
+    "successor_repository_root": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate",
+    "supersession_claim": "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-PLAYER-EXECUTABLE-PATH-ONLY",
+    "temporary_nonrequired_check": "wp0002-policy"
+  },
+  "receipt_id": "RR-WP0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720",
+  "receipt_kind": "creator-authorization",
+  "sealed": true,
+  "signature_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/86#issuecomment-5029474855",
+  "source_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/86#issuecomment-5029474855",
+  "subject_claims": [
+    {
+      "claims": [
+        "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-PLAYER-EXECUTABLE-PATH-ONLY"
+      ],
+      "subject_id": "wp0002-gate-dispatcher-v3"
+    },
+    {
+      "claims": [
+        "AUTHORIZE-WP0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION"
+      ],
+      "subject_id": "WP-0002"
+    }
+  ],
+  "subject_contract_sha256": {
+    "WP-0002": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
+    "wp0002-gate-dispatcher-v3": "aafa9b87455ff8658a82226e57b207be3a8907f7590ec163f144e52e2e50abd0"
+  },
+  "subject_event_sha256": {},
+  "subject_ids": [
+    "wp0002-gate-dispatcher-v3",
+    "WP-0002"
+  ]
+}

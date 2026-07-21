@@ -63,8 +63,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
         private const string NativePlayerName =
             "SashaAtomicLandPirateVGR13.app";
         private const string NativeExecutableRelativePath =
-            "SashaAtomicLandPirateVGR13.app/Contents/MacOS/" +
-            "Sasha the Atomic Land Pirate";
+            "SashaAtomicLandPirateVGR13.app/Contents/MacOS/Game";
         private const string NativeBuildManifestName =
             "wp0002-native-performance-build-manifest.json";
         private const string NativeBuildIdentityName =
@@ -94,32 +93,33 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
         private const string NativeRuntimeReportContract =
             "WP0002_VGR13_NATIVE_PERFORMANCE_REPORT_V1";
         private const string NativeAuthorizationReceiptId =
-            "RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-" +
+            "RR-WP0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-" +
             "20260720";
         private const string NativeAuthorizationClaim =
-            "AUTHORIZE-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-" +
+            "AUTHORIZE-WP0002-NATIVE-PLAYER-EXECUTABLE-PATH-" +
             "CORRECTION";
         private const string NativeAuthorizationSupersessionClaim =
-            "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-BOUNDARY-DUPLICATE-" +
-            "COUNT-CHECK-ONLY";
+            "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-PLAYER-EXECUTABLE-" +
+            "PATH-ONLY";
         private const string NativeAuthorizationReceiptRelativePath =
             "docs/foundation-v0.1/ledger/receipts/" +
             NativeAuthorizationReceiptId + ".json";
         private const string NativeGovernanceRecordRelativePath =
             "docs/foundation-v0.1/governance/" +
-            "WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-" +
+            "WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-" +
             "20260720.md";
         private const string NativePreviousAuthorizationReceiptRelativePath =
             "docs/foundation-v0.1/ledger/receipts/" +
-            "RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.json";
+            "RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-" +
+            "20260720.json";
         private const string NativePreviousAuthorizationReceiptSha256 =
-            "703bd05d1454c548d43f9d745ae3d0723dcb38f48428dc139b87140f7d273e97";
+            "11bf6d2bd90881fdfcae427c3532694614533089bab16c0353860d4747958dff";
         private const string NativePreviousDispatcherSha256 =
-            "bd0764bebc486ac6f20354582ddfee1dfd3c1d95541f1be25def60a281783dfc";
+            "aafa9b87455ff8658a82226e57b207be3a8907f7590ec163f144e52e2e50abd0";
         private const string PacketContractSha256 =
             "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa";
         private const string NativeControlBaseCommit =
-            "efff7181f4ece24bb2101bad30921b072ee3ab90";
+            "c5cfa463bf2b5ff9714be9483f67287f8180ec05";
         private const string GitExecutablePath = "/usr/bin/git";
         private const string RequiredGitBinarySha256 =
             "7f30f076d0e9c38f772a76449fca9da8cf97f6a3d43b94c90a00e4f9ce7ad39e";
@@ -220,7 +220,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                 "LastBearingAdapterTests.cs",
             "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs",
             "docs/foundation-v0.1/governance/" +
-                "WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-" +
+                "WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-" +
                 "20260720.md",
             BoundaryRelativePath,
             "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
@@ -2572,6 +2572,27 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                 boundaryText,
                 "\"duplicate_count_corrected_gates_may_validate_their_own_" +
                 "control_pr\": false");
+            RequireBoundaryBinding(
+                boundaryText,
+                "\"amendment_id\": \"A1B-WP-0002-NATIVE-PLAYER-" +
+                "EXECUTABLE-PATH-CORRECTION-20260720\"");
+            RequireBoundaryBinding(
+                boundaryText,
+                "\"player_executable_relative_path\": \"" +
+                NativeExecutableRelativePath + "\"");
+            RequireBoundaryBinding(
+                boundaryText,
+                "\"accepted_player_executable_path_count\": 1");
+            RequireBoundaryBinding(
+                boundaryText,
+                "\"fallback_player_executable_paths_allowed\": false");
+            RequireBoundaryBinding(
+                boundaryText,
+                "\"hash_or_signature_checks_changed\": false");
+            RequireBoundaryBinding(
+                boundaryText,
+                "\"stage2_delta_policy\": \"exactly-one-added-regular-" +
+                "sealed-player-executable-path-correction-receipt-file\"");
         }
 
         private static string ReadNativeGitText(
