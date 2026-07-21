@@ -271,6 +271,48 @@
         "squash_only": true,
         "general_process_or_argument_authority": false
       }
+    },
+    {
+      "amendment_id": "A1B-WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720",
+      "amendment_kind": "append-only-native-player-executable-path-correction",
+      "previous_boundary_sha256": "640bdbf33ccccd06b04e0ae5b1bf12554e325c36d09101531f23d5f9b9eeba18",
+      "predecessor_dispatcher_sha256": "aafa9b87455ff8658a82226e57b207be3a8907f7590ec163f144e52e2e50abd0",
+      "predecessor_receipt": {
+        "receipt_id": "RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720",
+        "path": "ledger/receipts/RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.json",
+        "sha256": "11bf6d2bd90881fdfcae427c3532694614533089bab16c0353860d4747958dff"
+      },
+      "authorization_receipt_id": "RR-WP0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720",
+      "required_claims": [
+        "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-PLAYER-EXECUTABLE-PATH-ONLY",
+        "AUTHORIZE-WP0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION"
+      ],
+      "governance_record": "governance/WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720.md",
+      "previous_player_executable_relative_path": "SashaAtomicLandPirateVGR13.app/Contents/MacOS/Sasha the Atomic Land Pirate",
+      "player_executable_relative_path": "SashaAtomicLandPirateVGR13.app/Contents/MacOS/Game",
+      "accepted_player_executable_path_count": 1,
+      "fallback_player_executable_paths_allowed": false,
+      "hash_or_signature_checks_changed": false,
+      "build_profile_changed": false,
+      "project_settings_changed": false,
+      "gate_surface_changed": false,
+      "packet_contract_changed": false,
+      "authority_expansion": false,
+      "materialization_control": {
+        "classification": "creator-controlled-native-player-executable-path-correction-not-general-process-authority",
+        "stage1_state": "proposed-unratified-non-executable",
+        "stage2_delta_policy": "exactly-one-added-regular-sealed-player-executable-path-correction-receipt-file",
+        "player_executable_path_corrected_gates_may_validate_their_own_control_pr": false,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "retained_required_checks": ["validate", "wp0002-core"],
+        "restored_required_checks": ["validate", "wp0002-core", "wp0002-policy"],
+        "strict_protection_retained": true,
+        "no_bypass_allowances": true,
+        "force_push_disabled": true,
+        "deletion_disabled": true,
+        "squash_only": true,
+        "general_process_or_argument_authority": false
+      }
     }
   ],
   "active_checkout_successor": {
@@ -333,7 +375,7 @@
     "governance_record": "governance/WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.md",
     "previous_boundary_sha256": "3a157b115ba52a51b198fa0f0df1fa36b587bae55e3ab824e5af5f4b0b9c97d1",
     "packet_contract_sha256": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
-    "authorized_dispatcher_sha256": "aafa9b87455ff8658a82226e57b207be3a8907f7590ec163f144e52e2e50abd0",
+    "authorized_dispatcher_sha256": "309216986a1fe3f9f0de4fe3e40f605bafb4a24c3f93ad90e7e4dbe6f4462f5f",
     "build_profile_path": "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/WP0002NativeIl2CppArm64Performance.asset",
     "build_profile_sha256": "6763b9edcb6ade391b132242c518796eebda444f883917768252a3314bda9249",
     "scene_path": "Game/Assets/AtomicLandPirate/LastBearing/Scenes/LastBearing.unity",
@@ -393,7 +435,7 @@
         "sha256": "832348ad6c772a95dd5e98a4dc569de170707e8ffe4cb35c69f079dac7ecc484"
       },
       "superseded_dispatcher_sha256": "2aa5b1351e808d6c38819581c637bf171896ec2888633acbd8102ce6f1662392",
-      "dispatcher_sha256": "aafa9b87455ff8658a82226e57b207be3a8907f7590ec163f144e52e2e50abd0",
+      "dispatcher_sha256": "309216986a1fe3f9f0de4fe3e40f605bafb4a24c3f93ad90e7e4dbe6f4462f5f",
       "editor_application_bundle_path": "/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app",
       "editor_executable_relative_path": "Contents/MacOS/Unity",
       "editor_binary_sha256": "5dcf81c5df5a9ff35006ee05832a1a6194c60fc4a386df652b9f49ea3a2a238b",

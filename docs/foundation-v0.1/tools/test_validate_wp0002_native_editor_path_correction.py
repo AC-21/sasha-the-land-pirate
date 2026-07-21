@@ -14,7 +14,7 @@ import validate_foundation as foundation
 PATHS = tuple(foundation.WP0002_NATIVE_PATH_FIX_STAGE1_PATHS)
 ADDED = {
     "docs/foundation-v0.1/governance/"
-    "WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.md",
+    "WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720.md",
 }
 
 
@@ -118,7 +118,7 @@ class SyntheticRepository:
             or child != "a" * 40
         ):
             raise ValueError((parent, child))
-        return b"exact native boundary duplicate-count correction Stage-1 patch\n"
+        return b"exact native player executable-path correction Stage-1 patch\n"
 
 
 def synthetic_receipt(
@@ -261,6 +261,48 @@ class NativeEditorPathCorrectionTests(unittest.TestCase):
                 errors,
             )
 
+    def test_player_executable_projection_is_one_exact_path(self) -> None:
+        packet, boundary = documents()
+        correction = boundary["boundary_amendments"][-1]
+        self.assertEqual(
+            correction["previous_player_executable_relative_path"],
+            "SashaAtomicLandPirateVGR13.app/Contents/MacOS/"
+            "Sasha the Atomic Land Pirate",
+        )
+        self.assertEqual(
+            correction["player_executable_relative_path"],
+            "SashaAtomicLandPirateVGR13.app/Contents/MacOS/Game",
+        )
+        self.assertEqual(correction["accepted_player_executable_path_count"], 1)
+        self.assertFalse(correction["fallback_player_executable_paths_allowed"])
+        self.assertFalse(correction["hash_or_signature_checks_changed"])
+
+        for field, value in (
+            (
+                "player_executable_relative_path",
+                "SashaAtomicLandPirateVGR13.app/Contents/MacOS/"
+                "Sasha the Atomic Land Pirate",
+            ),
+            ("accepted_player_executable_path_count", 2),
+            ("fallback_player_executable_paths_allowed", True),
+            ("hash_or_signature_checks_changed", True),
+            ("build_profile_changed", True),
+            ("project_settings_changed", True),
+            ("gate_surface_changed", True),
+            ("authority_expansion", True),
+        ):
+            changed = copy.deepcopy(boundary)
+            changed["boundary_amendments"][-1][field] = value
+            errors = foundation.validate_wp0002_native_editor_path_correction(
+                packet,
+                changed,
+                {},
+            )
+            self.assertIn(
+                "WP-0002 native Editor path correction amendment is not exact",
+                errors,
+            )
+
     def test_partial_receipt_lacks_exact_creator_authority(self) -> None:
         packet, boundary = documents()
         partial = {
@@ -287,7 +329,7 @@ class NativeEditorPathCorrectionTests(unittest.TestCase):
     def test_exact_receipt_only_stage2_validates(self) -> None:
         packet, _ = documents()
         stage1_blobs = {
-            path: ("duplicate-count-fix:" + path + "\n").encode("utf-8")
+            path: ("player-executable-path-fix:" + path + "\n").encode("utf-8")
             for path in PATHS
         }
         previous = b"sealed predecessor receipt\n"
@@ -350,7 +392,7 @@ class NativeEditorPathCorrectionTests(unittest.TestCase):
     def test_receipt_retains_exact_unchanged_build_profile(self) -> None:
         packet, _ = documents()
         stage1_blobs = {
-            path: ("duplicate-count-fix:" + path + "\n").encode("utf-8")
+            path: ("player-executable-path-fix:" + path + "\n").encode("utf-8")
             for path in PATHS
         }
         previous = b"sealed predecessor receipt\n"
@@ -407,7 +449,7 @@ class NativeEditorPathCorrectionTests(unittest.TestCase):
     def test_stage1_wrong_mode_and_predecessor_drift_fail_closed(self) -> None:
         packet, _ = documents()
         stage1_blobs = {
-            path: ("duplicate-count-fix:" + path + "\n").encode("utf-8")
+            path: ("player-executable-path-fix:" + path + "\n").encode("utf-8")
             for path in PATHS
         }
         previous = b"sealed predecessor receipt\n"

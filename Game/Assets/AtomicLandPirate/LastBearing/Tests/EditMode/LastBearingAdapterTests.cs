@@ -1078,6 +1078,28 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
+        public void NativePlayerExecutablePathMatchesExactUnityBuildOutput()
+        {
+            const BindingFlags staticFlags =
+                BindingFlags.NonPublic | BindingFlags.Static;
+            FieldInfo? executable = typeof(WP0002GateDispatcher).GetField(
+                "NativeExecutableRelativePath",
+                staticFlags);
+            Assert.That(executable, Is.Not.Null);
+
+            object? value = executable!.GetRawConstantValue();
+            Assert.That(
+                value,
+                Is.EqualTo(
+                    "SashaAtomicLandPirateVGR13.app/Contents/MacOS/Game"));
+            Assert.That(
+                value,
+                Is.Not.EqualTo(
+                    "SashaAtomicLandPirateVGR13.app/Contents/MacOS/" +
+                    "Sasha the Atomic Land Pirate"));
+        }
+
+        [Test]
         public void NativeBoundaryBindingDefaultsToOneExactOccurrence()
         {
             MethodInfo method = RequireBoundaryBindingMethod();
