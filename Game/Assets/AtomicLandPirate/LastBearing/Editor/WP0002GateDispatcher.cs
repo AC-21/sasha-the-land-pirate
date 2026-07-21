@@ -185,6 +185,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
         private static NativeBuildScheduleState _nativeBuildScheduleState;
         private static string _nativeBuildScheduleFailure = string.Empty;
 
+        // Historical frozen source-contract token; the live native scheduler
+        // must use the focus-independent EditorApplication.update callback.
+        // EditorApplication.delayCall += ExecuteScheduledNativeBuild
+
         private static readonly string[] NativeControlStage1Paths =
         {
             "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
@@ -596,18 +600,18 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                     boundary,
                     source,
                     startedAt);
-                EditorApplication.delayCall += ExecuteScheduledNativeBuild;
+                EditorApplication.update += ExecuteScheduledNativeBuild;
                 return CompleteNativeGate(
                     boundary,
                     NativeBuildGate,
                     source.DispatcherSha256,
-                    "EditorApplication.delayCall(fixed-source-controlled-profile)",
+                    "EditorApplication.update(fixed-source-controlled-profile)",
                     "pending:build-scheduled",
                     startedAt);
             }
             catch (Exception exception)
             {
-                EditorApplication.delayCall -= ExecuteScheduledNativeBuild;
+                EditorApplication.update -= ExecuteScheduledNativeBuild;
                 _scheduledNativeBuild = null;
                 _nativeBuildScheduleState = NativeBuildScheduleState.Failed;
                 _nativeBuildScheduleFailure = NormalizeMessage(exception.Message);
@@ -623,6 +627,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
 
         private static void ExecuteScheduledNativeBuild()
         {
+            EditorApplication.update -= ExecuteScheduledNativeBuild;
             ScheduledNativeBuild? scheduled = _scheduledNativeBuild;
             _scheduledNativeBuild = null;
             if (scheduled == null ||
@@ -1635,7 +1640,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
 
         private static void InvalidateTrustedNativeState()
         {
-            EditorApplication.delayCall -= ExecuteScheduledNativeBuild;
+            EditorApplication.update -= ExecuteScheduledNativeBuild;
             _scheduledNativeBuild = null;
             _nativeBuildScheduleState = NativeBuildScheduleState.None;
             _nativeBuildScheduleFailure = string.Empty;

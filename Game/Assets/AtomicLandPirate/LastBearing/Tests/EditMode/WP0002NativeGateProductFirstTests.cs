@@ -1,9 +1,11 @@
 #nullable enable
 
 using System;
+using System.IO;
 using System.Reflection;
 using AtomicLandPirate.Presentation.LastBearing.Editor;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace AtomicLandPirate.Presentation.LastBearing.Tests
 {
@@ -47,6 +49,59 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 exception!.Message,
                 Is.EqualTo("WP0002_DISPATCHER_HASH_MISMATCH"));
+        }
+
+        [Test]
+        public void NativeBuildSchedulerUsesFocusIndependentOneShotEditorUpdate()
+        {
+            string dispatcherPath = Path.Combine(
+                Application.dataPath,
+                "AtomicLandPirate",
+                "LastBearing",
+                "Editor",
+                "WP0002GateDispatcher.cs");
+            string source = File.ReadAllText(dispatcherPath);
+            string runNativeBuild = Segment(
+                source,
+                "private static string RunNativeBuild(",
+                "private static void ExecuteScheduledNativeBuild()");
+            string scheduledCallback = Segment(
+                source,
+                "private static void ExecuteScheduledNativeBuild()",
+                "private static string ExecuteNativeBuild(");
+            string invalidation = Segment(
+                source,
+                "private static void InvalidateTrustedNativeState()",
+                "private static void InvalidateTrustedNativeRun()");
+
+            Assert.That(
+                runNativeBuild,
+                Does.Contain(
+                    "EditorApplication.update += ExecuteScheduledNativeBuild"));
+            Assert.That(
+                runNativeBuild,
+                Does.Not.Contain(
+                    "EditorApplication.delayCall += ExecuteScheduledNativeBuild"));
+            Assert.That(
+                scheduledCallback,
+                Does.Contain(
+                    "EditorApplication.update -= ExecuteScheduledNativeBuild"));
+            Assert.That(
+                invalidation,
+                Does.Contain(
+                    "EditorApplication.update -= ExecuteScheduledNativeBuild"));
+        }
+
+        private static string Segment(
+            string source,
+            string startToken,
+            string endToken)
+        {
+            int start = source.IndexOf(startToken, StringComparison.Ordinal);
+            Assert.That(start, Is.GreaterThanOrEqualTo(0));
+            int end = source.IndexOf(endToken, start, StringComparison.Ordinal);
+            Assert.That(end, Is.GreaterThan(start));
+            return source.Substring(start, end - start);
         }
     }
 }
