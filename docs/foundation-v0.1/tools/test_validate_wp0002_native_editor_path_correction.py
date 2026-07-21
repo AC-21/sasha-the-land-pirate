@@ -14,9 +14,7 @@ import validate_foundation as foundation
 PATHS = tuple(foundation.WP0002_NATIVE_PATH_FIX_STAGE1_PATHS)
 ADDED = {
     "docs/foundation-v0.1/governance/"
-    "WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.md",
-    "docs/foundation-v0.1/tools/"
-    "test_validate_wp0002_native_editor_path_correction.py",
+    "WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.md",
 }
 
 
@@ -120,7 +118,7 @@ class SyntheticRepository:
             or child != "a" * 40
         ):
             raise ValueError((parent, child))
-        return b"exact native Editor path correction Stage-1 patch\n"
+        return b"exact native boundary duplicate-count correction Stage-1 patch\n"
 
 
 def synthetic_receipt(
@@ -234,12 +232,10 @@ class NativeEditorPathCorrectionTests(unittest.TestCase):
             ),
             [],
         )
-        correction = boundary["native_performance_gate_successor"][
-            "editor_path_correction"
-        ]
+        correction = boundary["boundary_amendments"][-1]
         self.assertEqual(
-            correction["path_correction_state"],
-            "receipt-required-fail-closed",
+            correction["amendment_id"],
+            foundation.WP0002_NATIVE_PATH_FIX_AMENDMENT_ID,
         )
         self.assertFalse(correction["authority_expansion"])
 
@@ -291,7 +287,7 @@ class NativeEditorPathCorrectionTests(unittest.TestCase):
     def test_exact_receipt_only_stage2_validates(self) -> None:
         packet, _ = documents()
         stage1_blobs = {
-            path: ("path-fix:" + path + "\n").encode("utf-8")
+            path: ("duplicate-count-fix:" + path + "\n").encode("utf-8")
             for path in PATHS
         }
         previous = b"sealed predecessor receipt\n"
@@ -354,7 +350,7 @@ class NativeEditorPathCorrectionTests(unittest.TestCase):
     def test_receipt_retains_exact_unchanged_build_profile(self) -> None:
         packet, _ = documents()
         stage1_blobs = {
-            path: ("path-fix:" + path + "\n").encode("utf-8")
+            path: ("duplicate-count-fix:" + path + "\n").encode("utf-8")
             for path in PATHS
         }
         previous = b"sealed predecessor receipt\n"
@@ -411,7 +407,7 @@ class NativeEditorPathCorrectionTests(unittest.TestCase):
     def test_stage1_wrong_mode_and_predecessor_drift_fail_closed(self) -> None:
         packet, _ = documents()
         stage1_blobs = {
-            path: ("path-fix:" + path + "\n").encode("utf-8")
+            path: ("duplicate-count-fix:" + path + "\n").encode("utf-8")
             for path in PATHS
         }
         previous = b"sealed predecessor receipt\n"

@@ -1,0 +1,93 @@
+{
+  "accepted_commit": "03a4c068abaf8793dd816899eeaeabfeb66a5105",
+  "approval_text_sha256": "788173d92f3f70c95f777d4436f24a34a062b4e447462b234c8e46364815f195",
+  "artifact_resolver": {
+    "resolver_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/85#issuecomment-5029134768",
+    "type": "external-protected"
+  },
+  "artifact_sha256": {
+    "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/WP0002NativeIl2CppArm64Performance.asset": "6763b9edcb6ade391b132242c518796eebda444f883917768252a3314bda9249",
+    "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs": "aafa9b87455ff8658a82226e57b207be3a8907f7590ec163f144e52e2e50abd0",
+    "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/LastBearingAdapterTests.cs": "81fcd9209ec0e9ed112ade00b773f609b10c8090fbf7eca23519d207d9d037bc",
+    "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs": "7d462c0ea632da1ba253aa917bd6a459f6fa2052ec709271bd953875f8432373",
+    "docs/foundation-v0.1/governance/WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.md": "990f3aa801e0386d4fbf53d6bc9fc0744ec4991de36ba38b5548c52146464ae5",
+    "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json": "640bdbf33ccccd06b04e0ae5b1bf12554e325c36d09101531f23d5f9b9eeba18",
+    "docs/foundation-v0.1/ledger/receipts/RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.json": "703bd05d1454c548d43f9d745ae3d0723dcb38f48428dc139b87140f7d273e97",
+    "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json": "3d75b93474f5d10ba6131054b5e2e2de3980b14d74bf471a8663745c07ef885b",
+    "docs/foundation-v0.1/tools/test_validate_wp0002_native_editor_path_correction.py": "f7ee6645389d8b85ca41ecda6d41ad86a83f45b4547286ba6acd4f10134f1d61",
+    "docs/foundation-v0.1/tools/validate_foundation.py": "3f519c49c4dca72042d4f2234eebc90d2f7dbd49c979770cb0ee474ee6a11f39",
+    "https://github.com/AC-21/sasha-the-land-pirate/pull/85#issuecomment-5029134768": "788173d92f3f70c95f777d4436f24a34a062b4e447462b234c8e46364815f195"
+  },
+  "foundation_binding": null,
+  "issued_at": "2026-07-21T01:23:18Z",
+  "issued_by": "AC-21",
+  "issuer_role": "creator",
+  "materialization_authority_binding": {
+    "amendment_id": "A1B-WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720",
+    "changed_files_manifest_sha256": "f4a50bb81793f2fa5c445c472ca35435b11a5dce2afff43f1eda8972ac877bf2",
+    "changed_paths": [
+      "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
+      "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/LastBearingAdapterTests.cs",
+      "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs",
+      "docs/foundation-v0.1/governance/WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.md",
+      "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json",
+      "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
+      "docs/foundation-v0.1/tools/test_validate_wp0002_native_editor_path_correction.py",
+      "docs/foundation-v0.1/tools/validate_foundation.py"
+    ],
+    "claim": "AUTHORIZE-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION",
+    "packet_contract_sha256": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
+    "pr_number": 85,
+    "predecessor_project_path": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game",
+    "predecessor_repository_root": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate",
+    "previous_boundary_sha256": "cdeb0000873ce27c257e4aeea1ba9c573ca9b90ad50a8a93a4a52d10c5c36959",
+    "receipt_id": "RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720",
+    "receipt_path": "docs/foundation-v0.1/ledger/receipts/RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.json",
+    "repository_remote": "https://github.com/AC-21/sasha-the-land-pirate",
+    "restored_required_checks": [
+      "validate@15368",
+      "wp0002-core@15368",
+      "wp0002-policy@15368"
+    ],
+    "retained_required_checks": [
+      "validate@15368",
+      "wp0002-core@15368"
+    ],
+    "stage1_base": "efff7181f4ece24bb2101bad30921b072ee3ab90",
+    "stage1_commit": "03a4c068abaf8793dd816899eeaeabfeb66a5105",
+    "stage1_patch_sha256": "24270cc1155f2f8ee83579bfe39845b8a81c3287fef78a054a9995fa4f245499",
+    "stage1_tree": "ad6e60589c2a28d94b9d20089f4f82682f0958c3",
+    "successor_project_path": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game",
+    "successor_repository_root": "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate",
+    "supersession_claim": "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-BOUNDARY-DUPLICATE-COUNT-CHECK-ONLY",
+    "temporary_nonrequired_check": "wp0002-policy"
+  },
+  "receipt_id": "RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720",
+  "receipt_kind": "creator-authorization",
+  "sealed": true,
+  "signature_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/85#issuecomment-5029134768",
+  "source_reference": "https://github.com/AC-21/sasha-the-land-pirate/pull/85#issuecomment-5029134768",
+  "subject_claims": [
+    {
+      "claims": [
+        "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-BOUNDARY-DUPLICATE-COUNT-CHECK-ONLY"
+      ],
+      "subject_id": "wp0002-gate-dispatcher-v3"
+    },
+    {
+      "claims": [
+        "AUTHORIZE-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION"
+      ],
+      "subject_id": "WP-0002"
+    }
+  ],
+  "subject_contract_sha256": {
+    "WP-0002": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
+    "wp0002-gate-dispatcher-v3": "bd0764bebc486ac6f20354582ddfee1dfd3c1d95541f1be25def60a281783dfc"
+  },
+  "subject_event_sha256": {},
+  "subject_ids": [
+    "wp0002-gate-dispatcher-v3",
+    "WP-0002"
+  ]
+}
