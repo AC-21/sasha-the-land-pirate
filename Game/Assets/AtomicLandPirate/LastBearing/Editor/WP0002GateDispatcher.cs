@@ -94,29 +94,32 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
         private const string NativeRuntimeReportContract =
             "WP0002_VGR13_NATIVE_PERFORMANCE_REPORT_V1";
         private const string NativeAuthorizationReceiptId =
-            "RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719";
+            "RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-" +
+            "20260720";
         private const string NativeAuthorizationClaim =
-            "AUTHORIZE-WP0002-NATIVE-EDITOR-BUNDLE-EXECUTABLE-IDENTITY-" +
+            "AUTHORIZE-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-" +
             "CORRECTION";
         private const string NativeAuthorizationSupersessionClaim =
-            "SUPERSEDE-WP0002-GATE-DISPATCHER-V2-EDITOR-PATH-CHECK-ONLY";
+            "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-BOUNDARY-DUPLICATE-" +
+            "COUNT-CHECK-ONLY";
         private const string NativeAuthorizationReceiptRelativePath =
             "docs/foundation-v0.1/ledger/receipts/" +
             NativeAuthorizationReceiptId + ".json";
         private const string NativeGovernanceRecordRelativePath =
             "docs/foundation-v0.1/governance/" +
-            "WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.md";
+            "WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-" +
+            "20260720.md";
         private const string NativePreviousAuthorizationReceiptRelativePath =
             "docs/foundation-v0.1/ledger/receipts/" +
-            "RR-WP0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.json";
+            "RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.json";
         private const string NativePreviousAuthorizationReceiptSha256 =
-            "832348ad6c772a95dd5e98a4dc569de170707e8ffe4cb35c69f079dac7ecc484";
+            "703bd05d1454c548d43f9d745ae3d0723dcb38f48428dc139b87140f7d273e97";
         private const string NativePreviousDispatcherSha256 =
-            "2aa5b1351e808d6c38819581c637bf171896ec2888633acbd8102ce6f1662392";
+            "bd0764bebc486ac6f20354582ddfee1dfd3c1d95541f1be25def60a281783dfc";
         private const string PacketContractSha256 =
             "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa";
         private const string NativeControlBaseCommit =
-            "f6e6e18cce7483db7d120c1e4b8e64f185f707ba";
+            "efff7181f4ece24bb2101bad30921b072ee3ab90";
         private const string GitExecutablePath = "/usr/bin/git";
         private const string RequiredGitBinarySha256 =
             "7f30f076d0e9c38f772a76449fca9da8cf97f6a3d43b94c90a00e4f9ce7ad39e";
@@ -214,10 +217,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
         {
             "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/" +
-            "LastBearingAdapterTests.cs",
+                "LastBearingAdapterTests.cs",
             "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs",
             "docs/foundation-v0.1/governance/" +
-            "WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.md",
+                "WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-" +
+                "20260720.md",
             BoundaryRelativePath,
             "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
             "docs/foundation-v0.1/tools/validate_foundation.py",
@@ -1354,7 +1358,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             RequireBoundaryBinding(
                 boundaryText,
                 "\"editor_binary_sha256\": \"" +
-                RequiredUnityBinarySha256 + "\"");
+                RequiredUnityBinarySha256 + "\"",
+                expectedOccurrences: 2);
             RequireBoundaryBinding(
                 boundaryText,
                 "\"xcodebuild_binary_sha256\": \"" +
@@ -1407,16 +1412,39 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
 
         private static void RequireBoundaryBinding(
             string boundaryText,
-            string exactToken)
+            string exactToken,
+            int expectedOccurrences = 1)
         {
-            int first = boundaryText.IndexOf(
-                exactToken,
-                StringComparison.Ordinal);
-            if (first < 0 ||
-                boundaryText.IndexOf(
+            if (string.IsNullOrEmpty(exactToken) || expectedOccurrences < 1)
+            {
+                throw new InvalidOperationException(
+                    "native-boundary-binding-missing-or-ambiguous");
+            }
+
+            int actualOccurrences = 0;
+            int offset = 0;
+            while (offset <= boundaryText.Length - exactToken.Length)
+            {
+                int match = boundaryText.IndexOf(
                     exactToken,
-                    first + exactToken.Length,
-                    StringComparison.Ordinal) >= 0)
+                    offset,
+                    StringComparison.Ordinal);
+                if (match < 0)
+                {
+                    break;
+                }
+
+                actualOccurrences++;
+                if (actualOccurrences > expectedOccurrences)
+                {
+                    throw new InvalidOperationException(
+                        "native-boundary-binding-missing-or-ambiguous");
+                }
+
+                offset = match + exactToken.Length;
+            }
+
+            if (actualOccurrences != expectedOccurrences)
             {
                 throw new InvalidOperationException(
                     "native-boundary-binding-missing-or-ambiguous");
@@ -2500,7 +2528,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             {
                 "\"" + NativeAuthorizationClaim + "\"",
                 "\"" + NativeAuthorizationSupersessionClaim + "\"",
-                "\"wp0002-gate-dispatcher-v2\": \"" +
+                "\"wp0002-gate-dispatcher-v3\": \"" +
                     NativePreviousDispatcherSha256 + "\"",
                 "\"" + NativePreviousAuthorizationReceiptRelativePath +
                     "\": \"" +
@@ -2528,15 +2556,22 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             RequireBoundaryBinding(
                 boundaryText,
                 "\"amendment_id\": " +
-                "\"A1B-WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719\"");
+                "\"A1B-WP-0002-NATIVE-EDITOR-PATH-CORRECTION-20260719\"",
+                expectedOccurrences: 2);
+            RequireBoundaryBinding(
+                boundaryText,
+                "\"amendment_id\": " +
+                "\"A1B-WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-" +
+                "CORRECTION-20260720\"");
             RequireBoundaryBinding(
                 boundaryText,
                 "\"stage2_delta_policy\": " +
-                "\"exactly-one-added-regular-sealed-path-correction-" +
+                "\"exactly-one-added-regular-sealed-duplicate-count-" +
                 "receipt-file\"");
             RequireBoundaryBinding(
                 boundaryText,
-                "\"corrected_gates_may_validate_their_own_control_pr\": false");
+                "\"duplicate_count_corrected_gates_may_validate_their_own_" +
+                "control_pr\": false");
         }
 
         private static string ReadNativeGitText(

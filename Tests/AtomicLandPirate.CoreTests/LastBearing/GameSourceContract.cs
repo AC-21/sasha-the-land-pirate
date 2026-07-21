@@ -1170,10 +1170,10 @@ namespace AtomicLandPirate.LastBearingTests
                 "native-gate-authorization-receipt-missing");
             Require(
                 dispatcher,
-                "SUPERSEDE-WP0002-GATE-DISPATCHER-V2-EDITOR-PATH-CHECK-ONLY");
+                "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-BOUNDARY-DUPLICATE-");
             Require(
                 dispatcher,
-                "AUTHORIZE-WP0002-NATIVE-EDITOR-BUNDLE-EXECUTABLE-IDENTITY-");
+                "AUTHORIZE-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-");
             Require(
                 dispatcher,
                 "NativePreviousAuthorizationReceiptSha256");
