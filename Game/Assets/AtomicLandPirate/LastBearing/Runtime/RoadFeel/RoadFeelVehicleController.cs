@@ -205,10 +205,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
                 body.isKinematic = false;
             }
 
-            body.linearVelocity = Vector3.zero;
-            body.angularVelocity = Vector3.zero;
             if (!wasKinematic)
             {
+                body.linearVelocity = Vector3.zero;
+                body.angularVelocity = Vector3.zero;
                 body.WakeUp();
             }
 
