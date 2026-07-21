@@ -629,7 +629,7 @@ WP0002_NATIVE_GATE_SUCCESSOR = {
     ),
     "packet_contract_sha256": WP0002_NATIVE_GATE_PACKET_CONTRACT_SHA256,
     "authorized_dispatcher_sha256": (
-        "aafa9b87455ff8658a82226e57b207be3a8907f7590ec163f144e52e2e50abd0"
+        "309216986a1fe3f9f0de4fe3e40f605bafb4a24c3f93ad90e7e4dbe6f4462f5f"
     ),
     "build_profile_path": (
         "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/"
@@ -722,7 +722,7 @@ WP0002_NATIVE_GATE_SUCCESSOR = {
             "2aa5b1351e808d6c38819581c637bf171896ec2888633acbd8102ce6f1662392"
         ),
         "dispatcher_sha256": (
-            "aafa9b87455ff8658a82226e57b207be3a8907f7590ec163f144e52e2e50abd0"
+            "309216986a1fe3f9f0de4fe3e40f605bafb4a24c3f93ad90e7e4dbe6f4462f5f"
         ),
         "editor_application_bundle_path": (
             "/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app"
@@ -806,49 +806,110 @@ WP0002_NATIVE_EDITOR_PATH_FIX_BOUNDARY_AMENDMENT = {
         "general_process_or_argument_authority": False,
     },
 }
+WP0002_NATIVE_DUPLICATE_COUNT_FIX_BOUNDARY_AMENDMENT = {
+    "amendment_id": (
+        "A1B-WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720"
+    ),
+    "amendment_kind": "append-only-native-boundary-duplicate-count-correction",
+    "previous_boundary_sha256": (
+        "cdeb0000873ce27c257e4aeea1ba9c573ca9b90ad50a8a93a4a52d10c5c36959"
+    ),
+    "predecessor_dispatcher_sha256": (
+        "bd0764bebc486ac6f20354582ddfee1dfd3c1d95541f1be25def60a281783dfc"
+    ),
+    "predecessor_receipt": {
+        "receipt_id": "RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719",
+        "path": (
+            "ledger/receipts/"
+            "RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.json"
+        ),
+        "sha256": (
+            "703bd05d1454c548d43f9d745ae3d0723dcb38f48428dc139b87140f7d273e97"
+        ),
+    },
+    "authorization_receipt_id": (
+        "RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720"
+    ),
+    "required_claims": [
+        (
+            "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-BOUNDARY-DUPLICATE-"
+            "COUNT-CHECK-ONLY"
+        ),
+        "AUTHORIZE-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION",
+    ],
+    "governance_record": (
+        "governance/"
+        "WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.md"
+    ),
+    "packet_contract_changed": False,
+    "authority_expansion": False,
+    "materialization_control": {
+        "classification": (
+            "creator-controlled-native-boundary-duplicate-count-correction-"
+            "not-general-process-authority"
+        ),
+        "stage1_state": "proposed-unratified-non-executable",
+        "stage2_delta_policy": (
+            "exactly-one-added-regular-sealed-duplicate-count-receipt-file"
+        ),
+        "duplicate_count_corrected_gates_may_validate_their_own_control_pr": False,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "retained_required_checks": ["validate", "wp0002-core"],
+        "restored_required_checks": [
+            "validate",
+            "wp0002-core",
+            "wp0002-policy",
+        ],
+        "strict_protection_retained": True,
+        "no_bypass_allowances": True,
+        "force_push_disabled": True,
+        "deletion_disabled": True,
+        "squash_only": True,
+        "general_process_or_argument_authority": False,
+    },
+}
 WP0002_NATIVE_PATH_FIX_AMENDMENT_ID = (
-    "A1B-WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720"
+    "A1B-WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720"
 )
 WP0002_NATIVE_PATH_FIX_RECEIPT_ID = (
-    "RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720"
+    "RR-WP0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720"
 )
 WP0002_NATIVE_PATH_FIX_SUPERSESSION_SUBJECT = "wp0002-gate-dispatcher-v3"
 WP0002_NATIVE_PATH_FIX_SUPERSESSION_CLAIM = (
-    "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-BOUNDARY-DUPLICATE-COUNT-"
-    "CHECK-ONLY"
+    "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-PLAYER-EXECUTABLE-PATH-ONLY"
 )
 WP0002_NATIVE_PATH_FIX_CLAIM = (
-    "AUTHORIZE-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION"
+    "AUTHORIZE-WP0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION"
 )
 WP0002_NATIVE_PATH_FIX_GOVERNANCE_PATH = (
     "governance/"
-    "WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.md"
+    "WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720.md"
 )
 WP0002_NATIVE_PATH_FIX_RECEIPT_PATH = (
     "ledger/receipts/"
-    "RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.json"
+    "RR-WP0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720.json"
 )
 WP0002_NATIVE_PATH_FIX_RECEIPT_REPO_PATH = (
     "docs/foundation-v0.1/" + WP0002_NATIVE_PATH_FIX_RECEIPT_PATH
 )
 WP0002_NATIVE_PATH_FIX_PREVIOUS_BOUNDARY_SHA256 = (
-    "cdeb0000873ce27c257e4aeea1ba9c573ca9b90ad50a8a93a4a52d10c5c36959"
+    "640bdbf33ccccd06b04e0ae5b1bf12554e325c36d09101531f23d5f9b9eeba18"
 )
 WP0002_NATIVE_PATH_FIX_PACKET_BOUNDARY_SHA256 = (
     "e0de86facc529e6dc1d6be38244408c8463083b27bd45e41034496e382954d4b"
 )
 WP0002_NATIVE_PATH_FIX_PREVIOUS_DISPATCHER_SHA256 = (
-    "bd0764bebc486ac6f20354582ddfee1dfd3c1d95541f1be25def60a281783dfc"
+    "aafa9b87455ff8658a82226e57b207be3a8907f7590ec163f144e52e2e50abd0"
 )
 WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_ID = (
-    "RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719"
+    "RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720"
 )
 WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_PATH = (
     "ledger/receipts/"
-    "RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.json"
+    "RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.json"
 )
 WP0002_NATIVE_PATH_FIX_PREVIOUS_RECEIPT_SHA256 = (
-    "703bd05d1454c548d43f9d745ae3d0723dcb38f48428dc139b87140f7d273e97"
+    "11bf6d2bd90881fdfcae427c3532694614533089bab16c0353860d4747958dff"
 )
 WP0002_NATIVE_PATH_FIX_RETAINED_BUILD_PROFILE_PATH = (
     "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/"
@@ -858,7 +919,7 @@ WP0002_NATIVE_PATH_FIX_RETAINED_BUILD_PROFILE_SHA256 = (
     "6763b9edcb6ade391b132242c518796eebda444f883917768252a3314bda9249"
 )
 WP0002_NATIVE_PATH_FIX_STAGE1_BASE = (
-    "efff7181f4ece24bb2101bad30921b072ee3ab90"
+    "c5cfa463bf2b5ff9714be9483f67287f8180ec05"
 )
 WP0002_NATIVE_PATH_FIX_REMOTE = (
     "https://github.com/AC-21/sasha-the-land-pirate"
@@ -883,7 +944,7 @@ WP0002_NATIVE_PATH_FIX_STAGE1_PATHS = (
     "LastBearingAdapterTests.cs",
     "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs",
     "docs/foundation-v0.1/governance/"
-    "WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.md",
+    "WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720.md",
     "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json",
     "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json",
     "docs/foundation-v0.1/tools/validate_foundation.py",
@@ -891,38 +952,38 @@ WP0002_NATIVE_PATH_FIX_STAGE1_PATHS = (
     "test_validate_wp0002_native_editor_path_correction.py",
 )
 WP0002_NATIVE_PATH_FIX_DISPATCHER_SHA256 = (
-    "aafa9b87455ff8658a82226e57b207be3a8907f7590ec163f144e52e2e50abd0"
+    "309216986a1fe3f9f0de4fe3e40f605bafb4a24c3f93ad90e7e4dbe6f4462f5f"
 )
 WP0002_NATIVE_PATH_FIX_ARTIFACT_SHA256 = {
     "Game/Assets/AtomicLandPirate/LastBearing/Editor/"
     "WP0002GateDispatcher.cs": (
-        "aafa9b87455ff8658a82226e57b207be3a8907f7590ec163f144e52e2e50abd0"
+        "309216986a1fe3f9f0de4fe3e40f605bafb4a24c3f93ad90e7e4dbe6f4462f5f"
     ),
     "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/"
     "LastBearingAdapterTests.cs": (
-        "81fcd9209ec0e9ed112ade00b773f609b10c8090fbf7eca23519d207d9d037bc"
+        "0767adff10a584912240f655d8b367afc2e8a57624a9d4023434d68b129e3fdd"
     ),
     "Tests/AtomicLandPirate.CoreTests/LastBearing/GameSourceContract.cs": (
-        "7d462c0ea632da1ba253aa917bd6a459f6fa2052ec709271bd953875f8432373"
+        "e5b8bff5b8e7927a08fdb60e62720607e6be9457a0baad1c295098823fefa5c3"
     ),
     "docs/foundation-v0.1/governance/"
-    "WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.md": (
-        "990f3aa801e0386d4fbf53d6bc9fc0744ec4991de36ba38b5548c52146464ae5"
+    "WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720.md": (
+        "c39d14444d51cbbbd00dc4d989ad5111b42d60768a4522eaf3d5183068e3d139"
     ),
     "docs/foundation-v0.1/governance/a1-boundaries/WP-0002.json": (
-        "640bdbf33ccccd06b04e0ae5b1bf12554e325c36d09101531f23d5f9b9eeba18"
+        "8c4bc90adb850e4d05edbd3b0c7fb5ce7cd6b4d65281f60f5c9f1a4283b1d7fb"
     ),
     "docs/foundation-v0.1/schemas/local-a1-boundary.schema.json": (
-        "3d75b93474f5d10ba6131054b5e2e2de3980b14d74bf471a8663745c07ef885b"
+        "01a53288881b3b01e5e37e37e26c8b92842a4f80096a638fa8c4f25d793c4e48"
     ),
     "docs/foundation-v0.1/tools/"
     "test_validate_wp0002_native_editor_path_correction.py": (
-        "f7ee6645389d8b85ca41ecda6d41ad86a83f45b4547286ba6acd4f10134f1d61"
+        "f25ea041297bbdc5ce4f98d96a60189867e7b1a47bf406f2d3d53c518989b24d"
     ),
 }
 WP0002_NATIVE_PATH_FIX_BOUNDARY_AMENDMENT = {
     "amendment_id": WP0002_NATIVE_PATH_FIX_AMENDMENT_ID,
-    "amendment_kind": "append-only-native-boundary-duplicate-count-correction",
+    "amendment_kind": "append-only-native-player-executable-path-correction",
     "previous_boundary_sha256": (
         WP0002_NATIVE_PATH_FIX_PREVIOUS_BOUNDARY_SHA256
     ),
@@ -940,18 +1001,33 @@ WP0002_NATIVE_PATH_FIX_BOUNDARY_AMENDMENT = {
         WP0002_NATIVE_PATH_FIX_CLAIM,
     ],
     "governance_record": WP0002_NATIVE_PATH_FIX_GOVERNANCE_PATH,
+    "previous_player_executable_relative_path": (
+        "SashaAtomicLandPirateVGR13.app/Contents/MacOS/"
+        "Sasha the Atomic Land Pirate"
+    ),
+    "player_executable_relative_path": (
+        "SashaAtomicLandPirateVGR13.app/Contents/MacOS/Game"
+    ),
+    "accepted_player_executable_path_count": 1,
+    "fallback_player_executable_paths_allowed": False,
+    "hash_or_signature_checks_changed": False,
+    "build_profile_changed": False,
+    "project_settings_changed": False,
+    "gate_surface_changed": False,
     "packet_contract_changed": False,
     "authority_expansion": False,
     "materialization_control": {
         "classification": (
-            "creator-controlled-native-boundary-duplicate-count-correction-"
+            "creator-controlled-native-player-executable-path-correction-"
             "not-general-process-authority"
         ),
         "stage1_state": "proposed-unratified-non-executable",
         "stage2_delta_policy": (
-            "exactly-one-added-regular-sealed-duplicate-count-receipt-file"
+            "exactly-one-added-regular-sealed-player-executable-path-"
+            "correction-receipt-file"
         ),
-        "duplicate_count_corrected_gates_may_validate_their_own_control_pr": False,
+        "player_executable_path_corrected_gates_may_validate_their_own_"
+        "control_pr": False,
         "temporary_nonrequired_check": "wp0002-policy",
         "retained_required_checks": [
             "validate",
@@ -1507,6 +1583,7 @@ WP0002_BOUNDARY_AMENDMENTS = [
         },
     },
     WP0002_NATIVE_EDITOR_PATH_FIX_BOUNDARY_AMENDMENT,
+    WP0002_NATIVE_DUPLICATE_COUNT_FIX_BOUNDARY_AMENDMENT,
     WP0002_NATIVE_PATH_FIX_BOUNDARY_AMENDMENT,
 ]
 WP0002_DELEGATED_LOCAL_UNITY_OPERATOR = {
@@ -10415,7 +10492,7 @@ def _validate_wp0002_native_path_fix_stage1(
         )
     added_paths = {
         "docs/foundation-v0.1/governance/"
-        "WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.md",
+        "WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720.md",
     }
     artifact_hashes = receipt.get("artifact_sha256", {})
     for item in changed_files:
@@ -10646,7 +10723,7 @@ def validate_wp0002_native_editor_path_correction_git_materialization(
         )
     added_paths = {
         "docs/foundation-v0.1/governance/"
-        "WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.md",
+        "WP-0002-NATIVE-PLAYER-EXECUTABLE-PATH-CORRECTION-20260720.md",
         WP0002_NATIVE_PATH_FIX_RECEIPT_REPO_PATH,
     }
     artifact_hashes = receipt.get("artifact_sha256", {})
