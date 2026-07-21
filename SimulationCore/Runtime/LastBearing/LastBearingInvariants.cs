@@ -1,11 +1,22 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 
 namespace AtomicLandPirate.Simulation.LastBearing
 {
     public static class LastBearingInvariants
     {
+        private static readonly ResidentRoster HumanRoster =
+            ResidentRoster.CreateForComposition(
+                ColonyComposition.HumanOnly);
+        private static readonly ResidentRoster RobotRoster =
+            ResidentRoster.CreateForComposition(
+                ColonyComposition.RobotOnly);
+        private static readonly ResidentRoster MixedRoster =
+            ResidentRoster.CreateForComposition(
+                ColonyComposition.Mixed);
+
         public static void Validate(LastBearingState state)
         {
             if (state == null)
@@ -32,8 +43,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 ?? throw new InvalidOperationException(
                     "LAST_BEARING_ROSTER_REQUIRED");
             Require(
-                roster.Equals(
-                    ResidentRoster.CreateForComposition(state.Composition)),
+                roster.Equals(CanonicalRoster(state.Composition)),
                 "LAST_BEARING_ROSTER_NOT_EXACT");
             Require(
                 state.AssignedResidentId == null
@@ -828,14 +838,25 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
         private static void RequireAccumulator(int value, string label)
         {
-            Require(
-                value >= 0 && value < LastBearingBalanceV1.FullClockScaleMilli,
+            if (value >= 0 &&
+                value < LastBearingBalanceV1.FullClockScaleMilli)
+            {
+                return;
+            }
+
+            throw new InvalidOperationException(
                 "LAST_BEARING_" + label + "_ACCUMULATOR_INVALID");
         }
 
         private static void RequireNonnegative(long value, string label)
         {
-            Require(value >= 0, "LAST_BEARING_" + label + "_NEGATIVE");
+            if (value >= 0)
+            {
+                return;
+            }
+
+            throw new InvalidOperationException(
+                "LAST_BEARING_" + label + "_NEGATIVE");
         }
 
         private static void RequireRange(
@@ -844,17 +865,50 @@ namespace AtomicLandPirate.Simulation.LastBearing
             long maximum,
             string label)
         {
-            Require(
-                value >= minimum && value <= maximum,
+            if (value >= minimum && value <= maximum)
+            {
+                return;
+            }
+
+            throw new InvalidOperationException(
                 "LAST_BEARING_" + label + "_OUT_OF_RANGE");
         }
 
         private static void RequireEnum<TEnum>(TEnum value, string label)
-            where TEnum : struct
+            where TEnum : struct, Enum
         {
-            Require(
-                Enum.IsDefined(typeof(TEnum), value),
+            if (DefinedEnumValues<TEnum>.Values.Contains(value))
+            {
+                return;
+            }
+
+            throw new InvalidOperationException(
                 "LAST_BEARING_" + label + "_INVALID");
+        }
+
+        private static ResidentRoster CanonicalRoster(
+            ColonyComposition composition)
+        {
+            switch (composition)
+            {
+                case ColonyComposition.HumanOnly:
+                    return HumanRoster;
+                case ColonyComposition.RobotOnly:
+                    return RobotRoster;
+                case ColonyComposition.Mixed:
+                    return MixedRoster;
+                default:
+                    throw new ArgumentOutOfRangeException(
+                        nameof(composition));
+            }
+        }
+
+        private static class DefinedEnumValues<TEnum>
+            where TEnum : struct, Enum
+        {
+            internal static readonly HashSet<TEnum> Values =
+                new HashSet<TEnum>(
+                    (TEnum[])Enum.GetValues(typeof(TEnum)));
         }
     }
 }

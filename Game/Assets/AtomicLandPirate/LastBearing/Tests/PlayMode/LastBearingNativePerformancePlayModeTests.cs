@@ -156,6 +156,78 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 "duplicate runtime roots must fail closed");
         }
 
+        [UnityTest]
+        public IEnumerator PausedIdleTicksRetainCanonicalStateAndRemainObservable()
+        {
+            LastBearingGameController controller = BuildController();
+            yield return null;
+            StageRepresentativeCity(controller);
+            controller.enabled = false;
+            controller.TogglePause();
+            ApplyPendingTick(controller);
+
+            Assert.That(
+                controller.ReadModel?.PauseCause,
+                Is.EqualTo(PauseCause.Explicit));
+            LastBearingState pausedState = controller.State!;
+            string pausedHash = controller.CanonicalHash;
+            var observer = new TickObserver();
+            controller.AttachSimulationTickPerformanceObserver(observer);
+
+            AdvanceSimulation(controller, 0.8f);
+
+            Assert.That(controller.State, Is.SameAs(pausedState));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(pausedHash));
+            Assert.That(observer.Count, Is.EqualTo(8));
+            Assert.That(observer.MinimumStopwatchTicks, Is.GreaterThanOrEqualTo(0L));
+
+            controller.TogglePause();
+            AdvanceSimulation(controller, 0.05f);
+            Assert.That(controller.State, Is.SameAs(pausedState));
+            AdvanceSimulation(controller, 0.05f);
+            Assert.That(
+                controller.ReadModel?.PauseCause,
+                Is.EqualTo(PauseCause.None));
+            Assert.That(controller.State, Is.Not.SameAs(pausedState));
+        }
+
+        [UnityTest]
+        public IEnumerator SchedulerRetainsTenHertzCadenceAndCommandBoundaries()
+        {
+            LastBearingGameController controller = BuildController();
+            yield return null;
+            StageRepresentativeCity(controller);
+            controller.enabled = false;
+
+            long initialTick = controller.State!.GlobalTick;
+            AdvanceSimulation(controller, 0.1f);
+            Assert.That(
+                controller.State.GlobalTick,
+                Is.EqualTo(initialTick + 1),
+                "One tenth of a second must execute one authoritative tick.");
+
+            for (var tick = 0; tick < 7; tick++)
+            {
+                AdvanceSimulation(controller, 0.1f);
+            }
+
+            Assert.That(
+                controller.State.GlobalTick,
+                Is.EqualTo(initialTick + 8),
+                "Catch-up must retain the original ten-hertz schedule.");
+            controller.TogglePause();
+            AdvanceSimulation(controller, 0.05f);
+            Assert.That(
+                controller.ReadModel?.PauseCause,
+                Is.EqualTo(PauseCause.None),
+                "A command must not cross an unelapsed tick boundary.");
+            AdvanceSimulation(controller, 0.05f);
+            Assert.That(
+                controller.ReadModel?.PauseCause,
+                Is.EqualTo(PauseCause.Explicit),
+                "A pending command must retain the ordinary 0.1-second cadence.");
+        }
+
         private LastBearingGameController BuildController()
         {
             _root = new GameObject(LastBearingGameController.RuntimeRootName);
@@ -215,6 +287,17 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             method!.Invoke(controller, null);
         }
 
+        private static void AdvanceSimulation(
+            LastBearingGameController controller,
+            float elapsedSeconds)
+        {
+            MethodInfo? method = typeof(LastBearingGameController).GetMethod(
+                "AdvanceSimulation",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(method, Is.Not.Null);
+            method!.Invoke(controller, new object[] { elapsedSeconds });
+        }
+
         private static void SubmitPostCyclePauseTwice(
             LastBearingGameController controller)
         {
@@ -238,6 +321,23 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             internal void Advance(double seconds)
             {
                 NowSeconds += seconds;
+            }
+        }
+
+        private sealed class TickObserver :
+            ILastBearingSimulationTickPerformanceObserver
+        {
+            internal int Count { get; private set; }
+
+            internal long MinimumStopwatchTicks { get; private set; } =
+                long.MaxValue;
+
+            public void RecordSimulationTick(long stopwatchTicks)
+            {
+                Count++;
+                MinimumStopwatchTicks = System.Math.Min(
+                    MinimumStopwatchTicks,
+                    stopwatchTicks);
             }
         }
     }

@@ -433,18 +433,20 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                     }
 
                     _pausedCanonicalBefore = controller.CanonicalHash;
+                    // Retention snapshots must compare the same active
+                    // recorder lifecycle rather than its start/stop residue.
+                    BeginMeasurement(_pausedSamples!);
                     _retentionBefore = CaptureMemoryCheckpoint(
                         completedCycles: 0,
                         forceFullCollection: true);
-                    BeginMeasurement(_pausedSamples!);
                     break;
 
                 case LastBearingNativePerformanceAction
                     .EndPausedMeasurementAndRequestResume:
-                    StopMeasurement();
                     _retentionAfter = CaptureMemoryCheckpoint(
                         completedCycles: 0,
                         forceFullCollection: true);
+                    StopMeasurement();
                     _pausedCanonicalAfter = controller.CanonicalHash;
                     ValidateCycleTopology();
                     RequestResume(controller);
@@ -471,8 +473,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                     _cycleCanonicalBefore = controller.CanonicalHash;
                     _cycleCheckpointCount = 0;
                     _nextCycleCheckpoint = 25;
-                    CaptureCycleCheckpoint(0);
+                    // Every cycle checkpoint includes the same live recorder.
                     BeginMeasurement(_cycleSamples!);
+                    CaptureCycleCheckpoint(0);
                     break;
 
                 case LastBearingNativePerformanceAction.ShowGarage:

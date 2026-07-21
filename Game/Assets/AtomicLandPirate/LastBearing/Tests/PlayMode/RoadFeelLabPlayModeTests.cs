@@ -165,6 +165,33 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator KinematicResetMovesPresentationWithoutVelocityWrites()
+        {
+            yield return LoadLab();
+
+            RoadFeelVehicleController vehicle =
+                Object.FindAnyObjectByType<RoadFeelVehicleController>();
+            Assert.That(vehicle, Is.Not.Null);
+            vehicle.enabled = false;
+            Rigidbody body = vehicle.Body;
+            body.linearVelocity = Vector3.zero;
+            body.angularVelocity = Vector3.zero;
+            body.isKinematic = true;
+            Vector3 resetPosition = new Vector3(-4f, 2f, 11f);
+            Quaternion resetRotation = Quaternion.Euler(0f, 123f, 0f);
+
+            vehicle.ResetAt(resetPosition, resetRotation);
+
+            Assert.That(body.isKinematic, Is.True);
+            Assert.That(
+                Vector3.Distance(body.position, resetPosition),
+                Is.LessThan(0.001f));
+            Assert.That(
+                Quaternion.Angle(body.rotation, resetRotation),
+                Is.LessThan(0.001f));
+        }
+
+        [UnityTest]
         public IEnumerator VehicleFindsRoadAndSupportsThrottleBrakeAndReverse()
         {
             yield return LoadLab();
