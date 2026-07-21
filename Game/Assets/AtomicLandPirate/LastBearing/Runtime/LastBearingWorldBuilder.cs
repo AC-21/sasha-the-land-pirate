@@ -1,5 +1,6 @@
 #nullable enable
 
+using System;
 using System.Collections.Generic;
 using AtomicLandPirate.Presentation.LastBearing.RoadFeel;
 using AtomicLandPirate.Presentation.LastBearing.Vehicle;
@@ -15,6 +16,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
     [DisallowMultipleComponent]
     public sealed class LastBearingWorldBuilder : MonoBehaviour
     {
+        public const string RuntimeMaterialTemplateResourcePath =
+            "LastBearingRuntimeMaterialTemplate";
+
         public const string CityScaffoldRootName =
             "City Scaffold [Derived Only]";
 
@@ -29,6 +33,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private static readonly Color StopRed = new Color32(168, 66, 50, 255);
 
         private readonly List<Material> _ownedMaterials = new List<Material>();
+        private Shader? _runtimeMaterialShader;
         private Transform? _turbineRotor;
         private Transform? _waterFill;
         private Transform? _auxiliaryPumpRotor;
@@ -1080,13 +1085,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private Material CreateMaterial(Color baseColor, Color emission)
         {
-            var shader = Shader.Find("Universal Render Pipeline/Lit");
-            if (shader == null)
-            {
-                shader = Shader.Find("Standard");
-            }
-
-            var material = new Material(shader!);
+            var material = new Material(ResolveRuntimeMaterialShader());
             material.name = "Last Bearing Runtime Material";
             if (material.HasProperty("_BaseColor"))
             {
@@ -1105,6 +1104,28 @@ namespace AtomicLandPirate.Presentation.LastBearing
             SetEmission(material, emission, 1f);
             _ownedMaterials.Add(material);
             return material;
+        }
+
+        private Shader ResolveRuntimeMaterialShader()
+        {
+            if (_runtimeMaterialShader != null)
+            {
+                return _runtimeMaterialShader;
+            }
+
+            Material? template = Resources.Load<Material>(
+                RuntimeMaterialTemplateResourcePath);
+            _runtimeMaterialShader = template != null
+                ? template.shader
+                : Shader.Find("Universal Render Pipeline/Lit");
+            _runtimeMaterialShader ??= Shader.Find("Standard");
+            if (_runtimeMaterialShader == null)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_RUNTIME_SHADER_MISSING");
+            }
+
+            return _runtimeMaterialShader;
         }
 
         private static void SetEmission(Material? material, Color color, float intensity)

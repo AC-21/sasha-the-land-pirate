@@ -18,6 +18,11 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(runtimeRoot, "LastBearingModeCoordinator.cs"));
             string world = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingWorldBuilder.cs"));
+            string runtimeMaterialTemplate = File.ReadAllText(
+                Path.Combine(
+                    repoRoot,
+                    "Game/Assets/AtomicLandPirate/LastBearing/Resources/" +
+                    "LastBearingRuntimeMaterialTemplate.mat"));
             string hud = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingHud.cs"));
             string permitJobPresenter = File.ReadAllText(
@@ -403,6 +408,13 @@ namespace AtomicLandPirate.LastBearingTests
             Require(roadChaseCamera, "public void SnapBehind()");
             Require(roadChaseCamera, "_camera.fieldOfView = BaseFieldOfView;");
             Require(world, "RoadFeelRigFactory.Create");
+            Require(world, "RuntimeMaterialTemplateResourcePath");
+            Require(world, "Resources.Load<Material>(");
+            Require(world, "LAST_BEARING_RUNTIME_SHADER_MISSING");
+            Require(
+                runtimeMaterialTemplate,
+                "m_Shader: {fileID: 4800000, " +
+                "guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}");
             Require(world, "RoadFeelRigInstance");
             Require(world, "drivingModeRoot");
             string cameraBuild = Segment(
