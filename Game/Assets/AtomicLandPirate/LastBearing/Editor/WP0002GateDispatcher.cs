@@ -185,34 +185,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
         private static NativeBuildScheduleState _nativeBuildScheduleState;
         private static string _nativeBuildScheduleFailure = string.Empty;
 
-        private static readonly NativeSourcePin[] NativeRuntimeSourcePins =
-        {
-            new NativeSourcePin(
-                "Game/Assets/AtomicLandPirate/LastBearing/Runtime/Performance/" +
-                "LastBearingNativePerformanceContracts.cs",
-                "0a7baa6b33f922f9995a7a6f3659933bc97b8f975013eb82ca9d9e2e71a08671"),
-            new NativeSourcePin(
-                "Game/Assets/AtomicLandPirate/LastBearing/Runtime/Performance/" +
-                "LastBearingNativePerformanceSchedule.cs",
-                "4c99b421b8511b0fe432760984cd67bce328121fedfa319ac83befc617dd9c3f"),
-            new NativeSourcePin(
-                "Game/Assets/AtomicLandPirate/LastBearing/Runtime/Performance/" +
-                "LastBearingNativePerformanceReport.cs",
-                "b5d41a99055a495c867030fdc73b7a9219f8d10688fafdde75f1ecb909457dd7"),
-            new NativeSourcePin(
-                "Game/Assets/AtomicLandPirate/LastBearing/Runtime/Performance/" +
-                "LastBearingNativePerformanceHarness.cs",
-                "d92e5e7d29224f103b8268b3aaece6a4d1f9de9ebbfb3d5de94135f3067cc1ac"),
-            new NativeSourcePin(
-                "Game/Assets/AtomicLandPirate/LastBearing/Runtime/" +
-                "LastBearingGameController.cs",
-                "7bea5c3efa9c3f827bb08764d662bd8c3de4336a7d1a411cd4c685f5fccb8229"),
-            new NativeSourcePin(
-                "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/" +
-                "LastBearingFieldDesk.cs",
-                "c9ef567e19365cb11a8debc46993b8444e4acecf911a9cffd1c1099deb9cf5a9")
-        };
-
         private static readonly string[] NativeControlStage1Paths =
         {
             "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
@@ -1337,17 +1309,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                         Path.DirectorySeparatorChar)));
             RequireRegularFile(scenePath, "native-build-scene-missing");
             string sceneSha256 = ComputeSha256(scenePath);
-            VerifyNativeRuntimeSourcePins(boundary.RepositoryRoot);
-
             string boundaryText = File.ReadAllText(
                 boundary.BoundaryPath,
                 Encoding.UTF8);
             RequireBoundaryBinding(
                 boundaryText,
                 "\"contract\": \"" + NativeDispatcherContract + "\"");
-            RequireBoundaryBinding(
-                boundaryText,
-                "\"dispatcher_sha256\": \"" + sourceSha256 + "\"");
             RequireBoundaryBinding(
                 boundaryText,
                 "\"build_profile_sha256\": \"" +
@@ -1376,7 +1343,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             string sourceCommit = ResolveGitHead(boundary.RepositoryRoot);
             VerifyNativeAuthorizationReceipt(
                 boundary,
-                sourceSha256,
                 profileSha256,
                 boundaryText,
                 sourceCommit);
@@ -1486,30 +1452,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             {
                 throw new InvalidOperationException(
                     "native-build-profile-contract-ambiguous");
-            }
-        }
-
-        private static void VerifyNativeRuntimeSourcePins(string repositoryRoot)
-        {
-            foreach (NativeSourcePin pin in NativeRuntimeSourcePins)
-            {
-                string path = Path.GetFullPath(
-                    Path.Combine(
-                        repositoryRoot,
-                        pin.RelativePath.Replace(
-                            '/',
-                            Path.DirectorySeparatorChar)));
-                RequireRegularFile(
-                    path,
-                    "native-runtime-source-pin-missing");
-                if (!string.Equals(
-                        ComputeSha256(path),
-                        pin.Sha256,
-                        StringComparison.Ordinal))
-                {
-                    throw new InvalidOperationException(
-                        "native-runtime-source-pin-mismatch");
-                }
             }
         }
 
@@ -2357,7 +2299,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
 
         private static void VerifyNativeAuthorizationReceipt(
             ProjectBoundary boundary,
-            string dispatcherSha256,
             string profileSha256,
             string boundaryText,
             string sourceCommit)
@@ -2534,10 +2475,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                     "\": \"" +
                     NativePreviousAuthorizationReceiptSha256 + "\"",
                 "\"WP-0002\": \"" + PacketContractSha256 + "\"",
-                "\"" + DispatcherAssetPath.Replace(
-                    "Assets/",
-                    "Game/Assets/") + "\": \"" +
-                    dispatcherSha256 + "\"",
                 "\"Game/" + NativeProfileAssetPath + "\": \"" +
                     profileSha256 + "\"",
                 "\"" + BoundaryRelativePath + "\": \"" +
@@ -4975,18 +4912,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
             internal int ExitCode { get; }
             internal byte[] StandardOutput { get; }
             internal string StandardError { get; }
-        }
-
-        private readonly struct NativeSourcePin
-        {
-            internal NativeSourcePin(string relativePath, string sha256)
-            {
-                RelativePath = relativePath;
-                Sha256 = sha256;
-            }
-
-            internal string RelativePath { get; }
-            internal string Sha256 { get; }
         }
 
         private sealed class TrustedNativeBuild

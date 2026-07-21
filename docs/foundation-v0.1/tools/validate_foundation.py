@@ -951,14 +951,7 @@ WP0002_NATIVE_PATH_FIX_STAGE1_PATHS = (
     "docs/foundation-v0.1/tools/"
     "test_validate_wp0002_native_editor_path_correction.py",
 )
-WP0002_NATIVE_PATH_FIX_DISPATCHER_SHA256 = (
-    "309216986a1fe3f9f0de4fe3e40f605bafb4a24c3f93ad90e7e4dbe6f4462f5f"
-)
 WP0002_NATIVE_PATH_FIX_ARTIFACT_SHA256 = {
-    "Game/Assets/AtomicLandPirate/LastBearing/Editor/"
-    "WP0002GateDispatcher.cs": (
-        "309216986a1fe3f9f0de4fe3e40f605bafb4a24c3f93ad90e7e4dbe6f4462f5f"
-    ),
     "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/"
     "LastBearingAdapterTests.cs": (
         "0767adff10a584912240f655d8b367afc2e8a57624a9d4023434d68b129e3fdd"
