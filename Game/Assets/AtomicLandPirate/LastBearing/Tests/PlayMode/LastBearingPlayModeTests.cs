@@ -1115,6 +1115,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 "LAST_BEARING_CHASE_CAMERA_DISABLED ownership-lost");
 
             chaseCamera.enabled = false;
+            yield return new WaitForEndOfFrame();
+            AssertFixedRoadFallbackPose(sharedCamera, roadRig.Root.transform);
             yield return new WaitForSecondsRealtime(0.25f);
 
             AssertCameraOwnership(controller, chaseActive: false);
@@ -1129,7 +1131,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(roadRig.Adapter.IsRoadModeActive, Is.True);
             Assert.That(roadRig.Adapter.IsPhysicsSuspended, Is.False);
             Assert.That(roadRig.Vehicle.Body.isKinematic, Is.False);
-            AssertFixedRoadFallbackPose(sharedCamera, roadRig.Root.transform);
 
             Assert.That(controller.State!.GlobalTick, Is.GreaterThan(globalTickBefore));
             Assert.That(controller.State.NextCommandSequence, Is.EqualTo(sequenceBefore));
