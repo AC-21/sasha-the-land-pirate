@@ -1077,6 +1077,65 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo("Contents/MacOS/Unity"));
         }
 
+        [Test]
+        public void NativeBoundaryBindingDefaultsToOneExactOccurrence()
+        {
+            MethodInfo method = RequireBoundaryBindingMethod();
+            ParameterInfo expectedOccurrences = method.GetParameters()[2];
+
+            Assert.That(expectedOccurrences.HasDefaultValue, Is.True);
+            Assert.That(expectedOccurrences.DefaultValue, Is.EqualTo(1));
+        }
+
+        [TestCase(0, 2, false)]
+        [TestCase(1, 2, false)]
+        [TestCase(2, 2, true)]
+        [TestCase(3, 2, false)]
+        [TestCase(1, 1, true)]
+        [TestCase(2, 1, false)]
+        [TestCase(0, 0, false)]
+        public void NativeBoundaryBindingRequiresExactExpectedOccurrenceCount(
+            int actualOccurrences,
+            int expectedOccurrences,
+            bool expectedValid)
+        {
+            MethodInfo method = RequireBoundaryBindingMethod();
+            object[] arguments =
+            {
+                new string('x', actualOccurrences),
+                "x",
+                expectedOccurrences
+            };
+
+            if (expectedValid)
+            {
+                Assert.DoesNotThrow(() => method.Invoke(null, arguments));
+                return;
+            }
+
+            TargetInvocationException? exception = Assert.Throws<
+                TargetInvocationException>(() =>
+                    method.Invoke(null, arguments));
+            Assert.That(
+                exception!.InnerException,
+                Is.TypeOf<InvalidOperationException>());
+            Assert.That(
+                exception.InnerException!.Message,
+                Is.EqualTo("native-boundary-binding-missing-or-ambiguous"));
+        }
+
+        private static MethodInfo RequireBoundaryBindingMethod()
+        {
+            MethodInfo? method = typeof(WP0002GateDispatcher).GetMethod(
+                "RequireBoundaryBinding",
+                BindingFlags.NonPublic | BindingFlags.Static,
+                null,
+                new[] { typeof(string), typeof(string), typeof(int) },
+                null);
+            Assert.That(method, Is.Not.Null);
+            return method!;
+        }
+
         [TestCase("0123456789ab-0123456789abcdef0123456789abcdef", true)]
         [TestCase("0123456789AB-0123456789abcdef0123456789abcdef", false)]
         [TestCase("0123456789ab_0123456789abcdef0123456789abcdef", false)]

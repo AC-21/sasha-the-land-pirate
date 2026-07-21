@@ -237,6 +237,40 @@
         "restoration_deadline_seconds": 600,
         "general_process_or_argument_authority": false
       }
+    },
+    {
+      "amendment_id": "A1B-WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720",
+      "amendment_kind": "append-only-native-boundary-duplicate-count-correction",
+      "previous_boundary_sha256": "cdeb0000873ce27c257e4aeea1ba9c573ca9b90ad50a8a93a4a52d10c5c36959",
+      "predecessor_dispatcher_sha256": "bd0764bebc486ac6f20354582ddfee1dfd3c1d95541f1be25def60a281783dfc",
+      "predecessor_receipt": {
+        "receipt_id": "RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719",
+        "path": "ledger/receipts/RR-WP0002-NATIVE-EDITOR-PATH-CORRECTION-20260719.json",
+        "sha256": "703bd05d1454c548d43f9d745ae3d0723dcb38f48428dc139b87140f7d273e97"
+      },
+      "authorization_receipt_id": "RR-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720",
+      "required_claims": [
+        "SUPERSEDE-WP0002-GATE-DISPATCHER-V3-BOUNDARY-DUPLICATE-COUNT-CHECK-ONLY",
+        "AUTHORIZE-WP0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION"
+      ],
+      "governance_record": "governance/WP-0002-NATIVE-BOUNDARY-DUPLICATE-COUNT-CORRECTION-20260720.md",
+      "packet_contract_changed": false,
+      "authority_expansion": false,
+      "materialization_control": {
+        "classification": "creator-controlled-native-boundary-duplicate-count-correction-not-general-process-authority",
+        "stage1_state": "proposed-unratified-non-executable",
+        "stage2_delta_policy": "exactly-one-added-regular-sealed-duplicate-count-receipt-file",
+        "duplicate_count_corrected_gates_may_validate_their_own_control_pr": false,
+        "temporary_nonrequired_check": "wp0002-policy",
+        "retained_required_checks": ["validate", "wp0002-core"],
+        "restored_required_checks": ["validate", "wp0002-core", "wp0002-policy"],
+        "strict_protection_retained": true,
+        "no_bypass_allowances": true,
+        "force_push_disabled": true,
+        "deletion_disabled": true,
+        "squash_only": true,
+        "general_process_or_argument_authority": false
+      }
     }
   ],
   "active_checkout_successor": {
@@ -299,7 +333,7 @@
     "governance_record": "governance/WP-0002-NATIVE-IL2CPP-ARM64-PERFORMANCE-GATES-20260719.md",
     "previous_boundary_sha256": "3a157b115ba52a51b198fa0f0df1fa36b587bae55e3ab824e5af5f4b0b9c97d1",
     "packet_contract_sha256": "ce03ba29c00cec0235bd90c8044237f3286980ccfd7fe9a685aaa2a1e91e75aa",
-    "authorized_dispatcher_sha256": "bd0764bebc486ac6f20354582ddfee1dfd3c1d95541f1be25def60a281783dfc",
+    "authorized_dispatcher_sha256": "aafa9b87455ff8658a82226e57b207be3a8907f7590ec163f144e52e2e50abd0",
     "build_profile_path": "Game/Assets/AtomicLandPirate/LastBearing/BuildProfiles/WP0002NativeIl2CppArm64Performance.asset",
     "build_profile_sha256": "6763b9edcb6ade391b132242c518796eebda444f883917768252a3314bda9249",
     "scene_path": "Game/Assets/AtomicLandPirate/LastBearing/Scenes/LastBearing.unity",
@@ -359,7 +393,7 @@
         "sha256": "832348ad6c772a95dd5e98a4dc569de170707e8ffe4cb35c69f079dac7ecc484"
       },
       "superseded_dispatcher_sha256": "2aa5b1351e808d6c38819581c637bf171896ec2888633acbd8102ce6f1662392",
-      "dispatcher_sha256": "bd0764bebc486ac6f20354582ddfee1dfd3c1d95541f1be25def60a281783dfc",
+      "dispatcher_sha256": "aafa9b87455ff8658a82226e57b207be3a8907f7590ec163f144e52e2e50abd0",
       "editor_application_bundle_path": "/Applications/Unity/Hub/Editor/6000.5.4f1/Unity.app",
       "editor_executable_relative_path": "Contents/MacOS/Unity",
       "editor_binary_sha256": "5dcf81c5df5a9ff35006ee05832a1a6194c60fc4a386df652b9f49ea3a2a238b",
