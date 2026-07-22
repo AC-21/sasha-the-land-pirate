@@ -2,6 +2,7 @@
 
 using System.Runtime.InteropServices;
 using System.IO;
+using System.Reflection;
 using AtomicLandPirate.Presentation.LastBearing.Performance;
 using NUnit.Framework;
 using UnityEngine;
@@ -400,6 +401,29 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(1600));
         }
 
+        [TestCase(300d, 307712)]
+        [TestCase(60d, 61952)]
+        public void FrameBuffersCoverBoundedHighRefreshNativeRuns(
+            double seconds,
+            int expectedCapacity)
+        {
+            MethodInfo? createSamples =
+                typeof(LastBearingNativePerformanceHarness).GetMethod(
+                    "CreateSamples",
+                    BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.That(createSamples, Is.Not.Null);
+            object samples = createSamples!.Invoke(
+                null,
+                new object[] { "capacity-probe", seconds })!;
+            FieldInfo? frameSamples = samples.GetType().GetField(
+                "_gcAllocatedBytes",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(frameSamples, Is.Not.Null);
+            var values = (long[])frameSamples!.GetValue(samples)!;
+
+            Assert.That(values, Has.Length.EqualTo(expectedCapacity));
+        }
+
         [Test]
         public void InjectedClockTraversesEveryPhaseWithoutRealTimeDelay()
         {
@@ -423,6 +447,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(
                     LastBearingNativePerformanceAction
                         .RequestPauseForPausedMeasurement));
+            Assert.That(
+                schedule.Advance(isPaused: true),
+                Is.EqualTo(
+                    LastBearingNativePerformanceAction
+                        .PreparePausedMeasurement));
             Assert.That(
                 schedule.Advance(isPaused: true),
                 Is.EqualTo(
@@ -462,6 +491,39 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 schedule.Stage,
                 Is.EqualTo(LastBearingNativePerformanceStage.Complete));
+        }
+
+        [Test]
+        public void PausedMeasurementFailsClosedIfExplicitPauseDrifts()
+        {
+            var clock = new ManualClock();
+            var durations = new LastBearingNativePerformanceDurations(
+                warmupSeconds: 1d,
+                pausedSeconds: 2d,
+                representativeUnpausedSeconds: 3d,
+                cityGarageCycles: 2,
+                cycleHalfDwellSeconds: 0.5d);
+            var schedule = new LastBearingNativePerformanceSchedule(
+                clock,
+                durations);
+
+            schedule.Start();
+            clock.Advance(1d);
+            schedule.Advance(isPaused: false);
+            Assert.That(
+                schedule.Advance(isPaused: true),
+                Is.EqualTo(
+                    LastBearingNativePerformanceAction
+                        .PreparePausedMeasurement));
+            Assert.That(
+                schedule.Advance(isPaused: true),
+                Is.EqualTo(
+                    LastBearingNativePerformanceAction.BeginPausedMeasurement));
+            Assert.That(
+                schedule.Advance(isPaused: false),
+                Is.EqualTo(
+                    LastBearingNativePerformanceAction
+                        .FailPausedMeasurementDrift));
         }
 
         private static void AssertCycle(

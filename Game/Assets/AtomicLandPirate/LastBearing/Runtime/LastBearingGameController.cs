@@ -213,6 +213,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
         }
 
+        internal void SetLegacyHudSuppressedByFieldDesk(bool suppressed)
+        {
+            if (_hud != null)
+            {
+                _hud.enabled = !suppressed;
+            }
+        }
+
         private void Awake()
         {
             Initialize();
@@ -266,6 +274,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _hud = gameObject.AddComponent<LastBearingHud>();
             _hud.Configure(this, _fieldDesk);
+            SetLegacyHudSuppressedByFieldDesk(
+                _fieldDesk?.OwnsCityOverview == true);
 
             try
             {

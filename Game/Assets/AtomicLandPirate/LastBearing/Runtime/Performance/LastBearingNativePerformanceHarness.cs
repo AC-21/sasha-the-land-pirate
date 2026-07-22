@@ -112,7 +112,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
     {
         private const int MaximumControllerWaitFrames = 600;
         private const int MaximumResolutionWaitFrames = 600;
-        private const double MaximumExpectedFrameRate = 240d;
+        private const double MaximumExpectedFrameRate = 1024d;
         private const double MaximumExpectedSimulationRate = 12d;
 
         private readonly LastBearingNativePerformanceMemoryCheckpoint[]
@@ -226,7 +226,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
 
         private void LateUpdate()
         {
-            if (!_gcRecorderRunning || _activeSamples == null)
+            if (!_gcRecorderRunning)
             {
                 return;
             }
@@ -234,6 +234,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
             if (!_gcRecorder.Valid)
             {
                 _recorderInvalidObserved = true;
+                return;
+            }
+
+            if (_activeSamples == null)
+            {
+                _ = _gcRecorder.LastValue;
                 return;
             }
 
@@ -415,7 +421,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
             switch (action)
             {
                 case LastBearingNativePerformanceAction.BeginWarmup:
-                    WarmGcRecorder();
+                    BeginRecorderWarmup();
                     _warmupStartedAt = _clock!.NowSeconds;
                     break;
 
@@ -425,16 +431,26 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                     RequestExplicitPause(controller);
                     break;
 
-                case LastBearingNativePerformanceAction.BeginPausedMeasurement:
+                case LastBearingNativePerformanceAction.PreparePausedMeasurement:
                     if (controller.ReadModel?.PauseCause != PauseCause.Explicit)
                     {
                         throw new InvalidOperationException(
                             "paused phase did not reach explicit pause");
                     }
 
+                    controller.FieldDesk?.Refresh(force: true);
+                    break;
+
+                case LastBearingNativePerformanceAction.BeginPausedMeasurement:
+                    if (controller.ReadModel?.PauseCause != PauseCause.Explicit)
+                    {
+                        throw new InvalidOperationException(
+                            "paused phase did not retain explicit pause");
+                    }
+
                     _pausedCanonicalBefore = controller.CanonicalHash;
-                    // Retention snapshots must compare the same active
-                    // recorder lifecycle rather than its start/stop residue.
+                    // The recorder and paused UI have both survived a rendered
+                    // warm-up frame before this baseline is captured.
                     BeginMeasurement(_pausedSamples!);
                     _retentionBefore = CaptureMemoryCheckpoint(
                         completedCycles: 0,
@@ -513,6 +529,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                     _postCycleExactlyOneAction = true;
                     break;
 
+                case LastBearingNativePerformanceAction
+                    .FailPausedMeasurementDrift:
+                    Fail("paused-measurement-lost-explicit-pause");
+                    break;
+
                 case LastBearingNativePerformanceAction.Complete:
                     _finalTopology =
                         controller.FieldDesk?.CapturePerformanceTopology();
@@ -553,25 +574,33 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
         private void BeginMeasurement(
             LastBearingNativePerformanceSampleBuffer samples)
         {
-            if (_gcRecorderRunning || _activeSamples != null)
+            if (_activeSamples != null)
             {
                 throw new InvalidOperationException(
                     "a native performance measurement is already active");
             }
 
-            _gcRecorder = StartGcRecorder();
+            if (!_gcRecorderRunning)
+            {
+                _gcRecorder = StartGcRecorder();
+                _gcRecorderRunning = true;
+            }
 
             samples.StartedAtSeconds = _clock!.NowSeconds;
             _activeSamples = samples;
             _controller!.AttachSimulationTickPerformanceObserver(this);
-            _gcRecorderRunning = true;
         }
 
-        private static void WarmGcRecorder()
+        private void BeginRecorderWarmup()
         {
-            ProfilerRecorder recorder = StartGcRecorder();
-            recorder.Stop();
-            recorder.Dispose();
+            if (_gcRecorderRunning || _activeSamples != null)
+            {
+                throw new InvalidOperationException(
+                    "a native performance recorder is already active");
+            }
+
+            _gcRecorder = StartGcRecorder();
+            _gcRecorderRunning = true;
         }
 
         private static ProfilerRecorder StartGcRecorder()

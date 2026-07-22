@@ -291,6 +291,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void OnDestroy()
         {
+            _controller?.SetLegacyHudSuppressedByFieldDesk(false);
             UnregisterCallbacks();
             DestroyOwnedObjects();
             IsOperational = false;
@@ -574,7 +575,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void SetDeskVisible(bool visible)
         {
-            if (_overlay == null || _visible == visible)
+            if (_overlay == null)
+            {
+                return;
+            }
+
+            _controller?.SetLegacyHudSuppressedByFieldDesk(visible);
+            if (_visible == visible)
             {
                 return;
             }
@@ -647,6 +654,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void FailOpenCleanup()
         {
+            _controller?.SetLegacyHudSuppressedByFieldDesk(false);
             UnregisterCallbacks();
             if (_overlay != null)
             {

@@ -62,6 +62,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.ReadModel?.PauseCause,
                 Is.EqualTo(PauseCause.Explicit));
             Apply(schedule.Advance(isPaused: true), controller);
+            yield return null;
+            Apply(schedule.Advance(isPaused: true), controller);
 
             clock.Advance(0.01d);
             Apply(schedule.Advance(isPaused: true), controller);
@@ -261,6 +263,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 case LastBearingNativePerformanceAction
                     .EndPausedMeasurementAndRequestResume:
                     controller.TogglePause();
+                    break;
+                case LastBearingNativePerformanceAction
+                    .PreparePausedMeasurement:
+                    controller.FieldDesk?.Refresh(force: true);
                     break;
                 case LastBearingNativePerformanceAction
                     .EndCityGarageCyclesAndSubmitResume:

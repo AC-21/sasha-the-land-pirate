@@ -45,30 +45,38 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             desk.Refresh(force: true);
             Assert.That(desk.OwnsCityOverview, Is.True);
             Assert.That(overlay.style.display.value, Is.EqualTo(DisplayStyle.Flex));
-            Assert.That(controller.GetComponent<LastBearingHud>().enabled, Is.True);
+            LastBearingHud legacyHud =
+                controller.GetComponent<LastBearingHud>();
+            Assert.That(legacyHud.enabled, Is.False);
 
             desk.ResetForLifecycle();
             Assert.That(desk.OwnsCityOverview, Is.False);
             Assert.That(overlay.style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(legacyHud.enabled, Is.True);
             desk.Refresh(force: true);
             Assert.That(desk.OwnsCityOverview, Is.True);
+            Assert.That(legacyHud.enabled, Is.False);
 
             controller.OpenGarageBay();
             desk.Refresh(force: true);
             Assert.That(desk.OwnsCityOverview, Is.False);
             Assert.That(overlay.style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(legacyHud.enabled, Is.True);
             Assert.That(RequireDocument(controller), Is.SameAs(document));
 
             controller.ShowCityOverview();
             desk.Refresh(force: true);
             Assert.That(desk.OwnsCityOverview, Is.True);
+            Assert.That(legacyHud.enabled, Is.False);
 
             controller.ReturnToTitle();
             Assert.That(desk.OwnsCityOverview, Is.False);
+            Assert.That(legacyHud.enabled, Is.True);
 
             controller.StartNewGame(ColonyComposition.RobotOnly);
             desk.Refresh(force: true);
             Assert.That(desk.OwnsCityOverview, Is.True);
+            Assert.That(legacyHud.enabled, Is.False);
             Assert.That(RequireDocument(controller), Is.SameAs(document));
             Assert.That(
                 controller.GetComponentsInChildren<UIDocument>(true),

@@ -77,6 +77,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
         CityGarageCycles = 7,
         AwaitingPostCycleResume = 8,
         Complete = 9,
+        SettlingPausedMeasurement = 10,
     }
 
     public enum LastBearingNativePerformanceAction
@@ -93,6 +94,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
         ShowCity = 9,
         EndCityGarageCyclesAndSubmitResume = 10,
         Complete = 11,
+        PreparePausedMeasurement = 12,
+        FailPausedMeasurementDrift = 13,
     }
 
     /// <summary>
@@ -155,12 +158,31 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                         return LastBearingNativePerformanceAction.None;
                     }
 
+                    Stage = LastBearingNativePerformanceStage
+                        .SettlingPausedMeasurement;
+                    return LastBearingNativePerformanceAction
+                        .PreparePausedMeasurement;
+
+                case LastBearingNativePerformanceStage
+                    .SettlingPausedMeasurement:
+                    if (!isPaused)
+                    {
+                        return LastBearingNativePerformanceAction
+                            .FailPausedMeasurementDrift;
+                    }
+
                     BeginStage(
                         LastBearingNativePerformanceStage.PausedMeasurement,
                         now);
                     return LastBearingNativePerformanceAction.BeginPausedMeasurement;
 
                 case LastBearingNativePerformanceStage.PausedMeasurement:
+                    if (!isPaused)
+                    {
+                        return LastBearingNativePerformanceAction
+                            .FailPausedMeasurementDrift;
+                    }
+
                     if (Elapsed(now) < _durations.PausedSeconds)
                     {
                         return LastBearingNativePerformanceAction.None;
