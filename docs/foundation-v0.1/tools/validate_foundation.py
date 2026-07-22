@@ -275,9 +275,9 @@ WP0002_PACKAGE_GRAPH_CHECKER = (
     REPO_ROOT / "Tools" / "Validation" / "validate_wp0002_package_graph.py"
 )
 WP0002_PACKAGE_GRAPH_CHECKER_SHA256 = (
-    "d9b36dd20099a18de940d833085f81f60a0478f527879633e21c2d28fdae5fd2"
+    "8a69a74753430b95f15a4a1d186e8fee060592a0792d5f041d8b78b58fdd3c9f"
 )
-WP0002_PACKAGE_GRAPH_CHECKER_CONTRACT = "wp0002-package-graph-v2"
+WP0002_PACKAGE_GRAPH_CHECKER_CONTRACT = "wp0002-package-graph-v3"
 WP0002_PACKAGE_GRAPH_PATHS = (
     "Game/Packages/manifest.json",
     "Game/Packages/packages-lock.json",
@@ -1790,7 +1790,7 @@ WP0002_PACKAGE_META_SHA256 = {
 }
 WP0002_PROTECTED_SELF_VERIFICATION = {
     "Tools/Validation/validate_wp0002_package_graph.py": (
-        "d9b36dd20099a18de940d833085f81f60a0478f527879633e21c2d28fdae5fd2"
+        "8a69a74753430b95f15a4a1d186e8fee060592a0792d5f041d8b78b58fdd3c9f"
     ),
     "Tools/Validation/validate_wp0002_entry_gate.py": (
         "8bba4fccf7a0ac8cdcc488046fba4ce05fee6ef41903b0f545a028b40a3daeb0"

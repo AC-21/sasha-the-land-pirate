@@ -5,7 +5,9 @@
     "AC21.Sasha.LastBearing.Runtime",
     "AC21.Sasha.LastBearing.Editor",
     "AC21.Sasha.SimulationCore",
-    "AC21.Sasha.SaveContracts"
+    "AC21.Sasha.SaveContracts",
+    "Unity.Pipeline",
+    "Unity.Pipeline.Editor"
   ],
   "includePlatforms": [
     "Editor"

@@ -146,9 +146,13 @@ class WP0002PackageGraphTypeTests(unittest.TestCase):
             }
         }
         candidate_manifest = copy.deepcopy(base_manifest)
-        candidate_manifest["dependencies"].update(PACKAGE_GRAPH.LOCAL_PACKAGE_LINKS)
+        candidate_manifest["dependencies"].update(
+            PACKAGE_GRAPH.AUTHORIZED_MANIFEST_ADDITIONS
+        )
         candidate_lock = copy.deepcopy(base_lock)
-        candidate_lock["dependencies"].update(PACKAGE_GRAPH.LOCAL_LOCK_ENTRIES)
+        candidate_lock["dependencies"].update(
+            PACKAGE_GRAPH.AUTHORIZED_LOCK_ADDITIONS
+        )
 
         def encoded(value: object) -> bytes:
             return json.dumps(value, sort_keys=True).encode("utf-8") + b"\n"
@@ -173,6 +177,12 @@ class WP0002PackageGraphTypeTests(unittest.TestCase):
             json.dumps(lock, sort_keys=True).encode("utf-8") + b"\n"
         )
 
+    @staticmethod
+    def rewrite_manifest(files: dict[str, bytes], manifest: dict) -> None:
+        files["Game/Packages/manifest.json"] = (
+            json.dumps(manifest, sort_keys=True).encode("utf-8") + b"\n"
+        )
+
     def test_exact_integer_depth_passes(self) -> None:
         base, candidate = self.documents()
         self.assertEqual(PACKAGE_GRAPH.compare_package_graph(base, candidate), [])
@@ -186,7 +196,7 @@ class WP0002PackageGraphTypeTests(unittest.TestCase):
             unchanged,
             require_links=True,
         )
-        self.assertTrue(any("requires both exact" in error for error in errors), errors)
+        self.assertTrue(any("requires the exact authorized" in error for error in errors), errors)
 
     def test_current_tree_materialization_includes_symlinks(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -196,6 +206,80 @@ class WP0002PackageGraphTypeTests(unittest.TestCase):
             path.parent.mkdir(parents=True)
             path.symlink_to(root / "missing-target", target_is_directory=True)
             self.assertTrue(PACKAGE_GRAPH._last_bearing_materialized(root))
+
+    def test_pipeline_manifest_version_and_extra_package_are_rejected(self) -> None:
+        for mutation in ("wrong-version", "extra-package", "missing-pipeline"):
+            with self.subTest(mutation=mutation):
+                base, candidate = self.documents()
+                manifest = json.loads(candidate["Game/Packages/manifest.json"])
+                dependencies = manifest["dependencies"]
+                if mutation == "wrong-version":
+                    dependencies["com.unity.pipeline"] = "0.3.1-exp.2"
+                elif mutation == "extra-package":
+                    dependencies["com.example.extra"] = "1.0.0"
+                else:
+                    del dependencies["com.unity.pipeline"]
+                self.rewrite_manifest(candidate, manifest)
+                self.assertTrue(PACKAGE_GRAPH.compare_package_graph(base, candidate))
+
+    def test_pipeline_lock_fields_are_exact(self) -> None:
+        mutations = {
+            "version": "0.3.1-exp.2",
+            "depth": 1,
+            "source": "local",
+            "url": "https://example.invalid",
+        }
+        for field, value in mutations.items():
+            with self.subTest(field=field):
+                base, candidate = self.documents()
+                lock = json.loads(candidate["Game/Packages/packages-lock.json"])
+                lock["dependencies"]["com.unity.pipeline"][field] = value
+                self.rewrite_lock(candidate, lock)
+                self.assertTrue(PACKAGE_GRAPH.compare_package_graph(base, candidate))
+
+    def test_pipeline_direct_dependency_map_is_exact(self) -> None:
+        base, candidate = self.documents()
+        lock = json.loads(candidate["Game/Packages/packages-lock.json"])
+        lock["dependencies"]["com.unity.pipeline"]["dependencies"][
+            "com.unity.test-framework"
+        ] = "1.1.34"
+        self.rewrite_lock(candidate, lock)
+        self.assertTrue(PACKAGE_GRAPH.compare_package_graph(base, candidate))
+
+    def test_screencapture_lock_entry_is_exact(self) -> None:
+        mutations = {
+            "version": "2.0.0",
+            "depth": 2,
+            "source": "registry",
+            "dependencies": {},
+        }
+        for field, value in mutations.items():
+            with self.subTest(field=field):
+                base, candidate = self.documents()
+                lock = json.loads(candidate["Game/Packages/packages-lock.json"])
+                lock["dependencies"]["com.unity.modules.screencapture"][field] = value
+                self.rewrite_lock(candidate, lock)
+                self.assertTrue(PACKAGE_GRAPH.compare_package_graph(base, candidate))
+
+    def test_missing_or_extra_lock_entry_is_rejected(self) -> None:
+        for mutation in ("missing-pipeline", "missing-screencapture", "extra"):
+            with self.subTest(mutation=mutation):
+                base, candidate = self.documents()
+                lock = json.loads(candidate["Game/Packages/packages-lock.json"])
+                dependencies = lock["dependencies"]
+                if mutation == "missing-pipeline":
+                    del dependencies["com.unity.pipeline"]
+                elif mutation == "missing-screencapture":
+                    del dependencies["com.unity.modules.screencapture"]
+                else:
+                    dependencies["com.example.extra"] = {
+                        "version": "1.0.0",
+                        "depth": 0,
+                        "source": "registry",
+                        "dependencies": {},
+                    }
+                self.rewrite_lock(candidate, lock)
+                self.assertTrue(PACKAGE_GRAPH.compare_package_graph(base, candidate))
 
     def test_new_local_depth_bool_or_float_is_rejected(self) -> None:
         for wrong_depth in (False, 0.0):
