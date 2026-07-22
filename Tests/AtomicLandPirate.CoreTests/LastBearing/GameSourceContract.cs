@@ -2,6 +2,7 @@
 
 using System;
 using System.IO;
+using System.Text.Json;
 
 namespace AtomicLandPirate.LastBearingTests
 {
@@ -73,6 +74,17 @@ namespace AtomicLandPirate.LastBearingTests
                     repoRoot,
                     "Game/Assets/AtomicLandPirate/LastBearing/Editor/" +
                     "AC21.Sasha.LastBearing.Editor.asmdef"));
+            string cliCommands = File.ReadAllText(
+                Path.Combine(
+                    repoRoot,
+                    "Game/Assets/AtomicLandPirate/LastBearing/Editor/" +
+                    "WP0002CliGateCommands.cs"));
+            using JsonDocument packageManifest = JsonDocument.Parse(
+                File.ReadAllBytes(
+                    Path.Combine(repoRoot, "Game/Packages/manifest.json")));
+            using JsonDocument packageLock = JsonDocument.Parse(
+                File.ReadAllBytes(
+                    Path.Combine(repoRoot, "Game/Packages/packages-lock.json")));
 
             TestHarness.True(
                 controller.IndexOf("new ReturnHomeCommand", StringComparison.Ordinal) < 0,
@@ -1324,6 +1336,172 @@ namespace AtomicLandPirate.LastBearingTests
             Require(nativeBuildProfile, "m_Architecture: 1");
             Require(nativeBuildProfile, "m_CreateXcodeProject: 0");
             Require(editorAssembly, "\"UnityEngine.TestRunner\"");
+            Require(editorAssembly, "\"Unity.Pipeline\"");
+            VerifyCliCommands(cliCommands);
+            VerifyPipelinePackage(packageManifest, packageLock);
+        }
+
+        private static void VerifyCliCommands(string source)
+        {
+            var commandMappings = new (string Command, string Gate)[]
+            {
+                ("wp0002_asset_refresh", "AssetRefreshGate"),
+                ("wp0002_editmode_tests", "EditModeGate"),
+                ("wp0002_playmode_tests", "PlayModeGate"),
+                ("wp0002_technical_capture", "TechnicalCaptureGate"),
+                ("wp0002_native_build", "NativeBuildGate"),
+                (
+                    "wp0002_native_performance_start",
+                    "NativePerformanceStartGate"),
+                (
+                    "wp0002_native_performance_collect",
+                    "NativePerformanceCollectGate"),
+            };
+
+            TestHarness.Equal(
+                commandMappings.Length,
+                CountOccurrences(source, "[CliCommand("),
+                "fixed CLI command count");
+            TestHarness.Equal(
+                commandMappings.Length,
+                CountOccurrences(source, "MainThreadRequired = true"),
+                "main-thread CLI command count");
+            TestHarness.Equal(
+                commandMappings.Length,
+                CountOccurrences(source, "RuntimeOnly = false"),
+                "Editor CLI command count");
+            TestHarness.Equal(
+                commandMappings.Length,
+                CountOccurrences(source, "[CliArg("),
+                "CLI argument count");
+            TestHarness.Equal(
+                commandMappings.Length,
+                CountOccurrences(source, "                Required = true)]"),
+                "required CLI argument count");
+            TestHarness.Equal(
+                commandMappings.Length,
+                CountOccurrences(source, "\"expected_source_sha256\""),
+                "content-address CLI argument count");
+            TestHarness.Equal(
+                commandMappings.Length,
+                CountOccurrences(source, "WP0002GateDispatcher.Dispatch("),
+                "dispatcher delegation count");
+
+            foreach ((string command, string gate) in commandMappings)
+            {
+                Require(source, "\"" + command + "\"");
+                Require(source, "WP0002GateDispatcher." + gate);
+            }
+
+            TestHarness.True(
+                source.IndexOf("string gateId", StringComparison.Ordinal) < 0,
+                "CLI wrapper exposes a generic gate ID");
+            TestHarness.True(
+                source.IndexOf("\"gate_id\"", StringComparison.Ordinal) < 0,
+                "CLI wrapper exposes a generic gate_id argument");
+            TestHarness.True(
+                source.IndexOf("\"eval\"", StringComparison.Ordinal) < 0,
+                "CLI wrapper exposes eval");
+            TestHarness.True(
+                source.IndexOf("System.IO", StringComparison.Ordinal) < 0,
+                "CLI wrapper accepts filesystem behavior");
+        }
+
+        private static void VerifyPipelinePackage(
+            JsonDocument packageManifest,
+            JsonDocument packageLock)
+        {
+            const string packageName = "com.unity.pipeline";
+            const string packageVersion = "0.3.1-exp.1";
+            JsonElement manifestDependencies = packageManifest.RootElement
+                .GetProperty("dependencies");
+            TestHarness.Equal(
+                packageVersion,
+                manifestDependencies.GetProperty(packageName).GetString(),
+                "Unity Pipeline manifest version");
+
+            JsonElement pipeline = packageLock.RootElement
+                .GetProperty("dependencies")
+                .GetProperty(packageName);
+            TestHarness.Equal(
+                packageVersion,
+                pipeline.GetProperty("version").GetString(),
+                "Unity Pipeline lock version");
+            TestHarness.Equal(
+                0,
+                pipeline.GetProperty("depth").GetInt32(),
+                "Unity Pipeline lock depth");
+            TestHarness.Equal(
+                "registry",
+                pipeline.GetProperty("source").GetString(),
+                "Unity Pipeline lock source");
+            TestHarness.Equal(
+                "https://packages.unity.com",
+                pipeline.GetProperty("url").GetString(),
+                "Unity Pipeline lock registry");
+
+            JsonElement dependencies = pipeline.GetProperty("dependencies");
+            var expected = new (string Name, string Version)[]
+            {
+                ("com.unity.test-framework", "1.1.33"),
+                ("com.unity.modules.jsonserialize", "1.0.0"),
+                ("com.unity.nuget.newtonsoft-json", "3.0.2"),
+                ("com.unity.nuget.mono-cecil", "1.11.6"),
+                ("com.unity.modules.uielements", "1.0.0"),
+                ("com.unity.modules.screencapture", "1.0.0"),
+            };
+            TestHarness.Equal(
+                expected.Length,
+                dependencies.GetRawText() == "{}"
+                    ? 0
+                    : CountJsonProperties(dependencies),
+                "Unity Pipeline direct dependency count");
+            foreach ((string name, string version) in expected)
+            {
+                TestHarness.Equal(
+                    version,
+                    dependencies.GetProperty(name).GetString(),
+                    name + " Unity Pipeline dependency");
+            }
+
+            JsonElement screenCapture = packageLock.RootElement
+                .GetProperty("dependencies")
+                .GetProperty("com.unity.modules.screencapture");
+            TestHarness.Equal(
+                "1.0.0",
+                screenCapture.GetProperty("version").GetString(),
+                "screen capture lock version");
+            TestHarness.Equal(
+                1,
+                screenCapture.GetProperty("depth").GetInt32(),
+                "screen capture lock depth");
+            TestHarness.Equal(
+                "builtin",
+                screenCapture.GetProperty("source").GetString(),
+                "screen capture lock source");
+            JsonElement screenCaptureDependencies =
+                screenCapture.GetProperty("dependencies");
+            TestHarness.Equal(
+                1,
+                CountJsonProperties(screenCaptureDependencies),
+                "screen capture dependency count");
+            TestHarness.Equal(
+                "1.0.0",
+                screenCaptureDependencies
+                    .GetProperty("com.unity.modules.imageconversion")
+                    .GetString(),
+                "screen capture image conversion dependency");
+        }
+
+        private static int CountJsonProperties(JsonElement value)
+        {
+            var count = 0;
+            foreach (JsonProperty ignored in value.EnumerateObject())
+            {
+                count++;
+            }
+
+            return count;
         }
 
         private static void Require(string source, string token)
