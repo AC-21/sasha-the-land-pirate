@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Reflection;
 using AtomicLandPirate.Presentation.LastBearing.Performance;
+using AtomicLandPirate.Simulation.LastBearing;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -11,6 +12,51 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 {
     public sealed class LastBearingNativePerformanceContractTests
     {
+        [Test]
+        public void PublicSnapshotsRemainStableAcrossReusableTicks()
+        {
+            var root = new GameObject(
+                LastBearingGameController.RuntimeRootName);
+            try
+            {
+                var controller = root.AddComponent<LastBearingGameController>();
+                controller.Initialize();
+                controller.StartNewGame(ColonyComposition.Mixed);
+
+                LastBearingState retainedState = controller.State!;
+                LastBearingReadModel retainedView = controller.ReadModel!;
+                byte[] retainedBytes =
+                    LastBearingCanonicalCodec.Encode(retainedState);
+                long retainedTick = retainedView.GlobalTick;
+
+                SimulateOneTick(controller);
+                SimulateOneTick(controller);
+                SimulateOneTick(controller);
+
+                Assert.That(controller.State, Is.Not.SameAs(retainedState));
+                Assert.That(controller.ReadModel, Is.Not.SameAs(retainedView));
+                Assert.That(retainedView.GlobalTick, Is.EqualTo(retainedTick));
+                CollectionAssert.AreEqual(
+                    retainedBytes,
+                    LastBearingCanonicalCodec.Encode(retainedState));
+                Assert.That(
+                    controller.State!.GlobalTick,
+                    Is.EqualTo(retainedTick + 3));
+
+                long firstReusedBufferTick = controller.State.GlobalTick;
+                SimulateOneTick(controller);
+                SimulateOneTick(controller);
+                Assert.That(
+                    controller.State!.GlobalTick,
+                    Is.EqualTo(firstReusedBufferTick + 2),
+                    "revisiting a ping-pong slot must publish a fresh snapshot");
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
         [Test]
         public void SourceBoundRequestRequiresMatchingIl2CppArm64Identity()
         {
@@ -464,7 +510,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 schedule.Advance(isPaused: true),
                 Is.EqualTo(
                     LastBearingNativePerformanceAction.BeginPausedMeasurement));
-            clock.Advance(2d);
+            clock.Advance(0.25d);
+            schedule.ConfirmPausedMeasurementStarted();
+            clock.Advance(1.999d);
+            Assert.That(
+                schedule.Advance(isPaused: true),
+                Is.EqualTo(LastBearingNativePerformanceAction.None),
+                "checkpoint work must not shorten the measured paused phase");
+            clock.Advance(0.001d);
             Assert.That(
                 schedule.Advance(isPaused: true),
                 Is.EqualTo(
@@ -485,9 +538,31 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 schedule.Advance(isPaused: true),
                 Is.EqualTo(
                     LastBearingNativePerformanceAction.BeginCityGarageCycles));
+            clock.Advance(0.25d);
+            schedule.ConfirmCyclePresentationApplied();
+            Assert.That(
+                schedule.Advance(isPaused: true),
+                Is.EqualTo(LastBearingNativePerformanceAction.None),
+                "the cycle baseline must survive a rendered city dwell");
+            clock.Advance(0.499d);
+            Assert.That(
+                schedule.Advance(isPaused: true),
+                Is.EqualTo(LastBearingNativePerformanceAction.None),
+                "checkpoint work must not consume the rendered city dwell");
+            clock.Advance(0.001d);
 
             AssertCycle(schedule, clock, expectedCompletedCycles: 1);
+            Assert.That(
+                schedule.Advance(isPaused: true),
+                Is.EqualTo(LastBearingNativePerformanceAction.None),
+                "each checkpoint must follow its rendered city dwell");
+            clock.Advance(0.5d);
             AssertCycle(schedule, clock, expectedCompletedCycles: 2);
+            Assert.That(
+                schedule.Advance(isPaused: true),
+                Is.EqualTo(LastBearingNativePerformanceAction.None),
+                "the final checkpoint must follow its rendered city dwell");
+            clock.Advance(0.5d);
             Assert.That(
                 schedule.Advance(isPaused: true),
                 Is.EqualTo(
@@ -546,14 +621,25 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 schedule.Advance(isPaused: true),
                 Is.EqualTo(LastBearingNativePerformanceAction.ShowGarage));
+            schedule.ConfirmCyclePresentationApplied();
             clock.Advance(0.5d);
             Assert.That(
                 schedule.Advance(isPaused: true),
                 Is.EqualTo(LastBearingNativePerformanceAction.ShowCity));
+            schedule.ConfirmCyclePresentationApplied();
             Assert.That(
                 schedule.CompletedCityGarageCycles,
                 Is.EqualTo(expectedCompletedCycles));
-            clock.Advance(0.5d);
+        }
+
+        private static void SimulateOneTick(
+            LastBearingGameController controller)
+        {
+            typeof(LastBearingGameController)
+                .GetMethod(
+                    "SimulateOneTick",
+                    BindingFlags.Instance | BindingFlags.NonPublic)!
+                .Invoke(controller, null);
         }
 
         private static LastBearingNativePerformanceRequest ValidRequest()

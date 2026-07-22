@@ -55,9 +55,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 panelRect.height - 32f));
             _scroll = GUILayout.BeginScrollView(_scroll, false, true);
             DrawHeader();
-            if (_controller.HasActiveGame && _controller.ReadModel != null)
+            if (_controller.HasActiveGame && _controller.RuntimeReadModel != null)
             {
-                DrawActiveGame(_controller.ReadModel);
+                DrawActiveGame(_controller.RuntimeReadModel);
             }
             else
             {

@@ -32,8 +32,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private readonly List<LastBearingCommand> _pendingCommands =
             new List<LastBearingCommand>();
         private readonly LastBearingKernel _kernel = new LastBearingKernel();
+        private readonly LastBearingStepBuffer _stepBuffer =
+            new LastBearingStepBuffer();
         private LastBearingState? _state;
         private LastBearingReadModel? _readModel;
+        private LastBearingState? _stateSnapshot;
+        private LastBearingReadModel? _readModelSnapshot;
+        private LastBearingState? _snapshotSource;
+        private long _snapshotGlobalTick = -1L;
         private LastBearingWorldBuilder? _world;
         private LastBearingHud? _hud;
         private LastBearingFieldDesk? _fieldDesk;
@@ -51,9 +57,25 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool HasActiveGame => _state != null && _readModel != null;
 
-        public LastBearingState? State => _state;
+        public LastBearingState? State
+        {
+            get
+            {
+                EnsurePublicSnapshots();
+                return _stateSnapshot;
+            }
+        }
 
-        public LastBearingReadModel? ReadModel => _readModel;
+        public LastBearingReadModel? ReadModel
+        {
+            get
+            {
+                EnsurePublicSnapshots();
+                return _readModelSnapshot;
+            }
+        }
+
+        internal LastBearingReadModel? RuntimeReadModel => _readModel;
 
         public LastBearingWorldBuilder? World => _world;
 
@@ -201,6 +223,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "a simulation-tick performance observer is already attached");
             }
 
+            EnsurePublicSnapshots();
             _simulationTickPerformanceObserver = observer;
         }
 
@@ -297,6 +320,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _accumulator = 0f;
             _state = LastBearingScenarioFactory.CreateInitial(composition, 2011);
             _readModel = LastBearingReadModel.FromState(_state);
+            ResetPublicSnapshotsToRuntime();
             _cityNeedInspected = false;
             _saveStatus = "Unsaved local development state.";
             _world?.SetCityNeedInspected(false);
@@ -341,6 +365,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ClearGaragePlanIntent();
             _state = null;
             _readModel = null;
+            ResetPublicSnapshotsToRuntime();
             _accumulator = 0f;
             _cityNeedInspected = false;
             _status = "Choose who calls Last Bearing home.";
@@ -1044,6 +1069,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _modeCoordinator?.ClearSession();
                 _state = result.State;
                 _readModel = LastBearingReadModel.FromState(_state);
+                ResetPublicSnapshotsToRuntime();
                 _accumulator = 0f;
                 _cityNeedInspected = true;
                 _world?.SetCityNeedInspected(true);
@@ -1194,6 +1220,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingCommand[] commands = _pendingCommands.Count == 0
                 ? Array.Empty<LastBearingCommand>()
                 : _pendingCommands.ToArray();
+            bool hasCommands = commands.Length != 0;
             _pendingCommands.Clear();
 
             try
@@ -1201,11 +1228,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 ExpeditionPhase previousPhase = _readModel.ExpeditionPhase;
                 long simulationStartedAt =
                     observer == null ? 0L : Stopwatch.GetTimestamp();
-                LastBearingTickResult result = _kernel.Step(_state, commands);
+                LastBearingStepBuffer result = _stepBuffer;
+                _kernel.StepInto(_state, commands, result);
                 if (observer != null)
                 {
                     observer.RecordSimulationTick(
                         Stopwatch.GetTimestamp() - simulationStartedAt);
+                }
+                if (result.State == null)
+                {
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_STEP_BUFFER_STATE_UNAVAILABLE");
+                }
+
+                if (result.ReadModel == null)
+                {
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_STEP_BUFFER_READ_MODEL_UNAVAILABLE");
                 }
                 bool returnCheckInAccepted =
                     ContainsEvent(
@@ -1228,6 +1267,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     LastBearingEventKind.SpareBearingLotBartered);
                 _state = result.State;
                 _readModel = result.ReadModel;
+                if (hasCommands)
+                {
+                    PublishPublicSnapshots();
+                }
                 if (previousPhase == ExpeditionPhase.AtHome &&
                     _readModel.ExpeditionPhase != ExpeditionPhase.AtHome)
                 {
@@ -1617,6 +1660,54 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             return false;
+        }
+
+        private void EnsurePublicSnapshots()
+        {
+            if (_state == null)
+            {
+                if (_stateSnapshot == null && _readModelSnapshot == null)
+                {
+                    return;
+                }
+
+                ResetPublicSnapshotsToRuntime();
+                return;
+            }
+
+            if (_stateSnapshot != null &&
+                _readModelSnapshot != null &&
+                ReferenceEquals(_snapshotSource, _state) &&
+                _snapshotGlobalTick == _state.GlobalTick)
+            {
+                return;
+            }
+
+            PublishPublicSnapshots();
+        }
+
+        private void PublishPublicSnapshots()
+        {
+            if (_state == null || _readModel == null)
+            {
+                ResetPublicSnapshotsToRuntime();
+                return;
+            }
+
+            LastBearingState snapshot =
+                new LastBearingStateBuilder(_state).Build();
+            _stateSnapshot = snapshot;
+            _readModelSnapshot = LastBearingReadModel.FromState(snapshot);
+            _snapshotSource = _state;
+            _snapshotGlobalTick = _state.GlobalTick;
+        }
+
+        private void ResetPublicSnapshotsToRuntime()
+        {
+            _stateSnapshot = _state;
+            _readModelSnapshot = _readModel;
+            _snapshotSource = _state;
+            _snapshotGlobalTick = _state?.GlobalTick ?? -1L;
         }
 
         private void Queue(params Func<long, LastBearingCommand>[] factories)

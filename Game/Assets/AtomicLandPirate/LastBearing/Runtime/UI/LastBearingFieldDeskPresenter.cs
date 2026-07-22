@@ -249,7 +249,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public static LastBearingFieldDeskProjection Present(
             LastBearingGameController controller)
         {
-            LastBearingReadModel? model = controller.ReadModel;
+            LastBearingReadModel? model = controller.RuntimeReadModel;
             LastBearingPermitJobPresentation permitJob =
                 LastBearingPermitJobPresenter.Present(
                     model,
@@ -391,7 +391,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, controller.Status);
             Mix(ref hash, controller.SaveStatus);
 
-            LastBearingReadModel? model = controller.ReadModel;
+            LastBearingReadModel? model = controller.RuntimeReadModel;
             if (model == null)
             {
                 Mix(ref hash, -1);

@@ -130,6 +130,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
         private LastBearingNativePerformanceSampleBuffer? _cycleSamples;
         private LastBearingNativePerformanceSampleBuffer? _activeSamples;
         private ProfilerRecorder _gcRecorder;
+        private ProfilerRecorder _gcUsedMemoryRecorder;
         private bool _gcRecorderRunning;
         private bool _recorderInvalidObserved;
         private bool _prepared;
@@ -142,7 +143,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
         private double _warmupStartedAt;
         private double _warmupEndedAt;
         private int _controllerWaitFrames;
-        private int _nextCycleCheckpoint = 25;
+        private int _nextCycleCheckpoint;
         private int _cycleCheckpointCount;
         private string _cycleCanonicalBefore = string.Empty;
         private string _cycleCanonicalAfter = string.Empty;
@@ -213,7 +214,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                 }
 
                 bool isPaused =
-                    _controller?.ReadModel?.PauseCause != PauseCause.None;
+                    _controller?.RuntimeReadModel?.PauseCause != PauseCause.None;
                 LastBearingNativePerformanceAction action =
                     _schedule!.Advance(isPaused);
                 Apply(action);
@@ -231,7 +232,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                 return;
             }
 
-            if (!_gcRecorder.Valid)
+            if (!_gcRecorder.Valid || !_gcUsedMemoryRecorder.Valid)
             {
                 _recorderInvalidObserved = true;
                 return;
@@ -251,6 +252,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
         private void OnDestroy()
         {
             StopMeasurement();
+            DisposeRecorders();
         }
 
         private void TryPrepare()
@@ -432,13 +434,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                     break;
 
                 case LastBearingNativePerformanceAction.PreparePausedMeasurement:
-                    if (controller.ReadModel?.PauseCause != PauseCause.Explicit)
+                    if (controller.RuntimeReadModel?.PauseCause != PauseCause.Explicit)
                     {
                         throw new InvalidOperationException(
                             "paused phase did not reach explicit pause");
                     }
 
                     controller.FieldDesk?.Refresh(force: true);
+                    controller.AttachSimulationTickPerformanceObserver(this);
                     // Prime the managed and native Profiler memory queries
                     // before the rendered settling interval. Their first
                     // full sample must not become part of the steady-state
@@ -449,7 +452,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                     break;
 
                 case LastBearingNativePerformanceAction.BeginPausedMeasurement:
-                    if (controller.ReadModel?.PauseCause != PauseCause.Explicit)
+                    if (controller.RuntimeReadModel?.PauseCause != PauseCause.Explicit)
                     {
                         throw new InvalidOperationException(
                             "paused phase did not retain explicit pause");
@@ -459,10 +462,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                     // The recorder and paused UI have both survived the
                     // schedule's rendered settling interval before this
                     // steady-state baseline is captured.
-                    BeginMeasurement(_pausedSamples!);
                     _retentionBefore = CaptureMemoryCheckpoint(
                         completedCycles: 0,
                         forceFullCollection: true);
+                    BeginMeasurement(_pausedSamples!);
+                    _schedule!.ConfirmPausedMeasurementStarted();
                     break;
 
                 case LastBearingNativePerformanceAction
@@ -496,31 +500,28 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                 case LastBearingNativePerformanceAction.BeginCityGarageCycles:
                     _cycleCanonicalBefore = controller.CanonicalHash;
                     _cycleCheckpointCount = 0;
-                    _nextCycleCheckpoint = 25;
-                    // Every cycle checkpoint includes the same live recorder.
+                    _nextCycleCheckpoint = 0;
+                    // Every cycle checkpoint includes the same recorder that
+                    // has remained live since the native warm-up began.
                     BeginMeasurement(_cycleSamples!);
-                    CaptureCycleCheckpoint(0);
+                    _schedule!.ConfirmCyclePresentationApplied();
                     break;
 
                 case LastBearingNativePerformanceAction.ShowGarage:
+                    CaptureDueCycleCheckpoint();
                     controller.OpenGarageBay();
+                    _schedule!.ConfirmCyclePresentationApplied();
                     break;
 
                 case LastBearingNativePerformanceAction.ShowCity:
                     controller.ShowCityOverview();
+                    _schedule!.ConfirmCyclePresentationApplied();
                     ValidateCycleTopology();
-                    int completedCycles =
-                        _schedule!.CompletedCityGarageCycles;
-                    if (completedCycles == _nextCycleCheckpoint)
-                    {
-                        CaptureCycleCheckpoint(completedCycles);
-                        _nextCycleCheckpoint += 25;
-                    }
-
                     break;
 
                 case LastBearingNativePerformanceAction
                     .EndCityGarageCyclesAndSubmitResume:
+                    CaptureDueCycleCheckpoint();
                     StopMeasurement();
                     _cycleCanonicalAfter = controller.CanonicalHash;
                     ValidateCycleTopology();
@@ -565,7 +566,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
         private static void RequestExplicitPause(
             LastBearingGameController controller)
         {
-            if (controller.ReadModel?.PauseCause == PauseCause.None)
+            if (controller.RuntimeReadModel?.PauseCause == PauseCause.None)
             {
                 controller.TogglePause();
             }
@@ -573,7 +574,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
 
         private static void RequestResume(LastBearingGameController controller)
         {
-            if (controller.ReadModel?.PauseCause == PauseCause.Explicit)
+            if (controller.RuntimeReadModel?.PauseCause == PauseCause.Explicit)
             {
                 controller.TogglePause();
             }
@@ -590,8 +591,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
 
             if (!_gcRecorderRunning)
             {
-                _gcRecorder = StartGcRecorder();
-                _gcRecorderRunning = true;
+                StartRecorders();
             }
 
             samples.StartedAtSeconds = _clock!.NowSeconds;
@@ -607,8 +607,25 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                     "a native performance recorder is already active");
             }
 
-            _gcRecorder = StartGcRecorder();
-            _gcRecorderRunning = true;
+            StartRecorders();
+        }
+
+        private void StartRecorders()
+        {
+            ProfilerRecorder gcRecorder = StartGcRecorder();
+            try
+            {
+                ProfilerRecorder gcUsedMemoryRecorder =
+                    StartGcUsedMemoryRecorder();
+                _gcRecorder = gcRecorder;
+                _gcUsedMemoryRecorder = gcUsedMemoryRecorder;
+                _gcRecorderRunning = true;
+            }
+            catch
+            {
+                gcRecorder.Dispose();
+                throw;
+            }
         }
 
         private static ProfilerRecorder StartGcRecorder()
@@ -632,6 +649,26 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
             return recorder;
         }
 
+        private static ProfilerRecorder StartGcUsedMemoryRecorder()
+        {
+            ProfilerRecorderOptions options =
+                ProfilerRecorderOptions.StartImmediately |
+                ProfilerRecorderOptions.WrapAroundWhenCapacityReached;
+            ProfilerRecorder recorder = ProfilerRecorder.StartNew(
+                ProfilerCategory.Memory,
+                "GC Used Memory",
+                capacity: 1,
+                options: options);
+            if (!recorder.Valid)
+            {
+                recorder.Dispose();
+                throw new InvalidOperationException(
+                    "GC Used Memory recorder is unavailable");
+            }
+
+            return recorder;
+        }
+
         private void StopMeasurement()
         {
             _controller?.DetachSimulationTickPerformanceObserver(this);
@@ -640,14 +677,21 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                 _activeSamples.EndedAtSeconds = _clock.NowSeconds;
             }
 
-            if (_gcRecorderRunning)
+            _activeSamples = null;
+        }
+
+        private void DisposeRecorders()
+        {
+            if (!_gcRecorderRunning)
             {
-                _gcRecorder.Stop();
-                _gcRecorder.Dispose();
+                return;
             }
 
+            _gcRecorder.Stop();
+            _gcRecorder.Dispose();
+            _gcUsedMemoryRecorder.Stop();
+            _gcUsedMemoryRecorder.Dispose();
             _gcRecorderRunning = false;
-            _activeSamples = null;
         }
 
         private void ValidateCycleTopology()
@@ -665,19 +709,54 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
             }
 
             _cycleMemoryCheckpoints[_cycleCheckpointCount] =
-                CaptureMemoryCheckpoint(completedCycles);
+                CaptureMemoryCheckpoint(
+                    completedCycles,
+                    forceFullCollection: true);
             _cycleCheckpointCount++;
         }
 
-        private static LastBearingNativePerformanceMemoryCheckpoint
+        private void CaptureDueCycleCheckpoint()
+        {
+            int completedCycles =
+                _schedule?.CompletedCityGarageCycles ?? -1;
+            if (completedCycles != _nextCycleCheckpoint)
+            {
+                return;
+            }
+
+            CaptureCycleCheckpoint(completedCycles);
+            _nextCycleCheckpoint += 25;
+        }
+
+        private LastBearingNativePerformanceMemoryCheckpoint
             CaptureMemoryCheckpoint(
                 int completedCycles,
                 bool forceFullCollection = false)
         {
+            if (!_gcRecorderRunning || !_gcUsedMemoryRecorder.Valid)
+            {
+                throw new InvalidOperationException(
+                    "native memory recorders are unavailable");
+            }
+
+            if (forceFullCollection)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+            }
+
+            long managedHeapBytes = _gcUsedMemoryRecorder.CurrentValue;
+            if (managedHeapBytes <= 0L)
+            {
+                throw new InvalidOperationException(
+                    "GC Used Memory counter did not return a positive value");
+            }
+
             return new LastBearingNativePerformanceMemoryCheckpoint
             {
                 completed_cycles = completedCycles,
-                managed_heap_bytes = GC.GetTotalMemory(forceFullCollection),
+                managed_heap_bytes = managedHeapBytes,
                 unity_allocated_bytes = UnityProfiler.GetTotalAllocatedMemoryLong(),
                 unity_reserved_bytes = UnityProfiler.GetTotalReservedMemoryLong(),
             };
@@ -722,6 +801,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
             }
 
             _finished = true;
+            DisposeRecorders();
             try
             {
                 string json = JsonUtility.ToJson(report, prettyPrint: true) + "\n";

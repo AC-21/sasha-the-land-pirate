@@ -5,6 +5,7 @@ using System.Reflection;
 using AtomicLandPirate.Presentation.LastBearing.Performance;
 using AtomicLandPirate.Simulation.LastBearing;
 using NUnit.Framework;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -68,6 +69,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(LastBearingNativePerformanceAction.None));
             clock.Advance(5d);
             Apply(schedule.Advance(isPaused: true), controller);
+            schedule.ConfirmPausedMeasurementStarted();
 
             // Cross the decimal duration boundary instead of depending on
             // exact binary floating-point equality after the five-second
@@ -86,22 +88,33 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Apply(schedule.Advance(isPaused: false), controller);
             ApplyPendingTick(controller);
             Apply(schedule.Advance(isPaused: true), controller);
+            schedule.ConfirmCyclePresentationApplied();
+            Assert.That(
+                schedule.Advance(isPaused: true),
+                Is.EqualTo(LastBearingNativePerformanceAction.None));
+            yield return null;
+            clock.Advance(0.01d);
 
             for (var cycle = 0; cycle < 2; cycle++)
             {
                 Apply(schedule.Advance(isPaused: true), controller);
+                schedule.ConfirmCyclePresentationApplied();
                 Assert.That(
                     controller.ModeCoordinator?.CurrentMode,
                     Is.EqualTo(LastBearingPresentationMode.GarageBay));
                 yield return null;
                 clock.Advance(0.01d);
                 Apply(schedule.Advance(isPaused: true), controller);
+                schedule.ConfirmCyclePresentationApplied();
                 Assert.That(
                     controller.ModeCoordinator?.CurrentMode,
                     Is.EqualTo(LastBearingPresentationMode.CityOverview));
                 Assert.That(
                     desk.MatchesPerformanceTopology(topology),
                     Is.True);
+                Assert.That(
+                    schedule.Advance(isPaused: true),
+                    Is.EqualTo(LastBearingNativePerformanceAction.None));
                 yield return null;
                 clock.Advance(0.01d);
             }
@@ -118,6 +131,63 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(topology.BindingCount, Is.EqualTo(18));
             Assert.That(topology.RegisteredCallbackCount, Is.EqualTo(19));
             Assert.That(topology.OwnedUnityObjectCount, Is.EqualTo(3));
+        }
+
+        [UnityTest]
+        public IEnumerator NativeHarnessRetainsRecordersAcrossPhaseStops()
+        {
+            _root = new GameObject("native recorder lifetime probe");
+            LastBearingNativePerformanceHarness harness =
+                _root.AddComponent<LastBearingNativePerformanceHarness>();
+            MethodInfo? begin = typeof(LastBearingNativePerformanceHarness)
+                .GetMethod(
+                    "BeginRecorderWarmup",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+            MethodInfo? stop = typeof(LastBearingNativePerformanceHarness)
+                .GetMethod(
+                    "StopMeasurement",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+            MethodInfo? dispose = typeof(LastBearingNativePerformanceHarness)
+                .GetMethod(
+                    "DisposeRecorders",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+            FieldInfo? running = typeof(LastBearingNativePerformanceHarness)
+                .GetField(
+                    "_gcRecorderRunning",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+            FieldInfo? allocationRecorder =
+                typeof(LastBearingNativePerformanceHarness).GetField(
+                    "_gcRecorder",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+            FieldInfo? usedMemoryRecorder =
+                typeof(LastBearingNativePerformanceHarness).GetField(
+                    "_gcUsedMemoryRecorder",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(begin, Is.Not.Null);
+            Assert.That(stop, Is.Not.Null);
+            Assert.That(dispose, Is.Not.Null);
+            Assert.That(running, Is.Not.Null);
+            Assert.That(allocationRecorder, Is.Not.Null);
+            Assert.That(usedMemoryRecorder, Is.Not.Null);
+
+            begin!.Invoke(harness, null);
+            Assert.That(running!.GetValue(harness), Is.EqualTo(true));
+            Assert.That(
+                ((ProfilerRecorder)allocationRecorder!.GetValue(harness)!).Valid,
+                Is.True);
+            Assert.That(
+                ((ProfilerRecorder)usedMemoryRecorder!.GetValue(harness)!).Valid,
+                Is.True);
+
+            stop!.Invoke(harness, null);
+            Assert.That(
+                running.GetValue(harness),
+                Is.EqualTo(true),
+                "ending one phase must retain both warmed recorders");
+
+            dispose!.Invoke(harness, null);
+            Assert.That(running.GetValue(harness), Is.EqualTo(false));
+            yield return null;
         }
 
         [UnityTest]

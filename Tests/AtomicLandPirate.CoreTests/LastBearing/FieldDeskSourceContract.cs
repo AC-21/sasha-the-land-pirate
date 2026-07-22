@@ -80,7 +80,7 @@ namespace AtomicLandPirate.LastBearingTests
                     "IsExactFieldDeskCityOverview",
                     StringComparison.Ordinal) < 0,
                 "the legacy HUD must not duplicate the city-ownership predicate");
-            Require(hudEntry, "DrawActiveGame(_controller.ReadModel);");
+            Require(hudEntry, "DrawActiveGame(_controller.RuntimeReadModel);");
             Require(hudEntry, "DrawTitle();");
 
             Require(fieldDesk, "using UnityEngine.UIElements;");

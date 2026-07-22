@@ -126,6 +126,37 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
 
         public int CompletedCityGarageCycles { get; private set; }
 
+        /// <summary>
+        /// Rebases the measured interval after the harness has captured its
+        /// collected baseline, so checkpoint work cannot shorten 300 seconds.
+        /// </summary>
+        public void ConfirmPausedMeasurementStarted()
+        {
+            if (Stage != LastBearingNativePerformanceStage.PausedMeasurement)
+            {
+                throw new InvalidOperationException(
+                    "paused measurement can be confirmed only after it begins");
+            }
+
+            _stageStartedAt = _clock.NowSeconds;
+        }
+
+        /// <summary>
+        /// Rebases the next transition after the requested presentation has
+        /// actually been applied, preserving the full rendered half-dwell.
+        /// </summary>
+        public void ConfirmCyclePresentationApplied()
+        {
+            if (Stage != LastBearingNativePerformanceStage.CityGarageCycles)
+            {
+                throw new InvalidOperationException(
+                    "cycle presentation can be confirmed only during cycles");
+            }
+
+            _nextCycleActionAt =
+                _clock.NowSeconds + _durations.CycleHalfDwellSeconds;
+        }
+
         public LastBearingNativePerformanceAction Start()
         {
             if (Stage != LastBearingNativePerformanceStage.NotStarted)
@@ -237,13 +268,19 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                     BeginStage(
                         LastBearingNativePerformanceStage.CityGarageCycles,
                         now);
-                    _nextCycleActionAt = now;
+                    _nextCycleActionAt =
+                        now + _durations.CycleHalfDwellSeconds;
                     _garageLegActive = false;
                     CompletedCityGarageCycles = 0;
                     return LastBearingNativePerformanceAction
                         .BeginCityGarageCycles;
 
                 case LastBearingNativePerformanceStage.CityGarageCycles:
+                    if (now < _nextCycleActionAt)
+                    {
+                        return LastBearingNativePerformanceAction.None;
+                    }
+
                     if (CompletedCityGarageCycles >=
                         _durations.CityGarageCycles)
                     {
@@ -251,11 +288,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                             .AwaitingPostCycleResume;
                         return LastBearingNativePerformanceAction
                             .EndCityGarageCyclesAndSubmitResume;
-                    }
-
-                    if (now < _nextCycleActionAt)
-                    {
-                        return LastBearingNativePerformanceAction.None;
                     }
 
                     _nextCycleActionAt =
