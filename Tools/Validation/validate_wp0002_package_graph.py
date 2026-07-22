@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 
-CHECKER_CONTRACT_VERSION = "wp0002-package-graph-v2"
+CHECKER_CONTRACT_VERSION = "wp0002-package-graph-v3"
 PROTECTED_BASE_COMMIT = "b6b283fd63ab54fed5cd9b6dc6ac78a166cc5bb5"
 GRAPH_PATHS = (
     "Game/Packages/manifest.json",
@@ -41,6 +41,41 @@ LOCAL_LOCK_ENTRIES = {
         "dependencies": {},
     }
     for package_name, link in LOCAL_PACKAGE_LINKS.items()
+}
+PIPELINE_PACKAGE_LINK = {
+    "com.unity.pipeline": "0.3.1-exp.1",
+}
+PIPELINE_LOCK_ENTRIES = {
+    "com.unity.pipeline": {
+        "version": "0.3.1-exp.1",
+        "depth": 0,
+        "source": "registry",
+        "dependencies": {
+            "com.unity.test-framework": "1.1.33",
+            "com.unity.modules.jsonserialize": "1.0.0",
+            "com.unity.nuget.newtonsoft-json": "3.0.2",
+            "com.unity.nuget.mono-cecil": "1.11.6",
+            "com.unity.modules.uielements": "1.0.0",
+            "com.unity.modules.screencapture": "1.0.0",
+        },
+        "url": "https://packages.unity.com",
+    },
+    "com.unity.modules.screencapture": {
+        "version": "1.0.0",
+        "depth": 1,
+        "source": "builtin",
+        "dependencies": {
+            "com.unity.modules.imageconversion": "1.0.0",
+        },
+    },
+}
+AUTHORIZED_MANIFEST_ADDITIONS = {
+    **LOCAL_PACKAGE_LINKS,
+    **PIPELINE_PACKAGE_LINK,
+}
+AUTHORIZED_LOCK_ADDITIONS = {
+    **LOCAL_LOCK_ENTRIES,
+    **PIPELINE_LOCK_ENTRIES,
 }
 
 
@@ -129,7 +164,7 @@ def _compare_dependency_document(
     for package_name, expected in exact_additions.items():
         if not _json_values_equal(candidate_dependencies.get(package_name), expected):
             errors.append(
-                f"{label} local dependency {package_name} must equal {expected!r}"
+                f"{label} dependency {package_name} must equal {expected!r}"
             )
     return errors
 
@@ -151,19 +186,41 @@ def compare_package_graph(
     if all(base_files[path] == candidate_files[path] for path in GRAPH_PATHS):
         if require_links:
             return [
-                "LastBearing materialization requires both exact repository-local "
-                "UPM links and lock entries"
+                "LastBearing materialization requires the exact authorized UPM "
+                "dependencies and lock entries"
             ]
         return []
     for path in ("SimulationCore/package.json", "SaveContracts/package.json"):
         if candidate_files[path] != base_files[path]:
             errors.append(f"{path} must remain byte-identical to protected base")
+    manifest, manifest_errors = _parse_json(
+        candidate_files["Game/Packages/manifest.json"],
+        "Game/Packages/manifest.json",
+    )
+    errors.extend(manifest_errors)
+    manifest_dependencies = (
+        manifest.get("dependencies") if isinstance(manifest, dict) else None
+    )
+    pipeline_declared = (
+        isinstance(manifest_dependencies, dict)
+        and "com.unity.pipeline" in manifest_dependencies
+    )
+    manifest_additions = (
+        AUTHORIZED_MANIFEST_ADDITIONS
+        if pipeline_declared
+        else LOCAL_PACKAGE_LINKS
+    )
+    lock_additions = (
+        AUTHORIZED_LOCK_ADDITIONS
+        if pipeline_declared
+        else LOCAL_LOCK_ENTRIES
+    )
     errors.extend(
         _compare_dependency_document(
             label="Game/Packages/manifest.json",
             base_data=base_files["Game/Packages/manifest.json"],
             candidate_data=candidate_files["Game/Packages/manifest.json"],
-            exact_additions=LOCAL_PACKAGE_LINKS,
+            exact_additions=manifest_additions,
         )
     )
     errors.extend(
@@ -171,7 +228,7 @@ def compare_package_graph(
             label="Game/Packages/packages-lock.json",
             base_data=base_files["Game/Packages/packages-lock.json"],
             candidate_data=candidate_files["Game/Packages/packages-lock.json"],
-            exact_additions=LOCAL_LOCK_ENTRIES,
+            exact_additions=lock_additions,
         )
     )
     return errors
