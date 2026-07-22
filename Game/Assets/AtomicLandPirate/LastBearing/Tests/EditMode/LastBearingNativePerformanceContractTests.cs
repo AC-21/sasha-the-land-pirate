@@ -454,6 +454,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                         .PreparePausedMeasurement));
             Assert.That(
                 schedule.Advance(isPaused: true),
+                Is.EqualTo(LastBearingNativePerformanceAction.None));
+            clock.Advance(4.999d);
+            Assert.That(
+                schedule.Advance(isPaused: true),
+                Is.EqualTo(LastBearingNativePerformanceAction.None));
+            clock.Advance(0.001d);
+            Assert.That(
+                schedule.Advance(isPaused: true),
                 Is.EqualTo(
                     LastBearingNativePerformanceAction.BeginPausedMeasurement));
             clock.Advance(2d);
@@ -515,6 +523,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(
                     LastBearingNativePerformanceAction
                         .PreparePausedMeasurement));
+            Assert.That(
+                schedule.Advance(isPaused: true),
+                Is.EqualTo(LastBearingNativePerformanceAction.None));
+            clock.Advance(5d);
             Assert.That(
                 schedule.Advance(isPaused: true),
                 Is.EqualTo(

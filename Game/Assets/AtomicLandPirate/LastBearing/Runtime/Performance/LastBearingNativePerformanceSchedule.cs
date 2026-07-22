@@ -105,6 +105,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
     /// </summary>
     public sealed class LastBearingNativePerformanceSchedule
     {
+        private const double PausedSettleSeconds = 5d;
+
         private readonly ILastBearingNativePerformanceClock _clock;
         private readonly LastBearingNativePerformanceDurations _durations;
         private double _stageStartedAt;
@@ -158,8 +160,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                         return LastBearingNativePerformanceAction.None;
                     }
 
-                    Stage = LastBearingNativePerformanceStage
-                        .SettlingPausedMeasurement;
+                    BeginStage(
+                        LastBearingNativePerformanceStage
+                            .SettlingPausedMeasurement,
+                        now);
                     return LastBearingNativePerformanceAction
                         .PreparePausedMeasurement;
 
@@ -169,6 +173,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                     {
                         return LastBearingNativePerformanceAction
                             .FailPausedMeasurementDrift;
+                    }
+
+                    if (Elapsed(now) < PausedSettleSeconds)
+                    {
+                        return LastBearingNativePerformanceAction.None;
                     }
 
                     BeginStage(

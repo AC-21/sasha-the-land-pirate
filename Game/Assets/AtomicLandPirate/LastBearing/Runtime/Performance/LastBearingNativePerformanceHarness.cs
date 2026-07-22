@@ -439,6 +439,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                     }
 
                     controller.FieldDesk?.Refresh(force: true);
+                    // Prime the managed and native Profiler memory queries
+                    // before the rendered settling interval. Their first
+                    // full sample must not become part of the steady-state
+                    // paused-city baseline.
+                    _ = CaptureMemoryCheckpoint(
+                        completedCycles: 0,
+                        forceFullCollection: true);
                     break;
 
                 case LastBearingNativePerformanceAction.BeginPausedMeasurement:
@@ -449,8 +456,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                     }
 
                     _pausedCanonicalBefore = controller.CanonicalHash;
-                    // The recorder and paused UI have both survived a rendered
-                    // warm-up frame before this baseline is captured.
+                    // The recorder and paused UI have both survived the
+                    // schedule's rendered settling interval before this
+                    // steady-state baseline is captured.
                     BeginMeasurement(_pausedSamples!);
                     _retentionBefore = CaptureMemoryCheckpoint(
                         completedCycles: 0,

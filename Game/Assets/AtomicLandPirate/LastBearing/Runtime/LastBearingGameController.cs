@@ -215,9 +215,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         internal void SetLegacyHudSuppressedByFieldDesk(bool suppressed)
         {
-            if (_hud != null)
+            bool enabled = !suppressed;
+            if (_hud != null && _hud.enabled != enabled)
             {
-                _hud.enabled = !suppressed;
+                _hud.enabled = enabled;
             }
         }
 

@@ -63,9 +63,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(PauseCause.Explicit));
             Apply(schedule.Advance(isPaused: true), controller);
             yield return null;
+            Assert.That(
+                schedule.Advance(isPaused: true),
+                Is.EqualTo(LastBearingNativePerformanceAction.None));
+            clock.Advance(5d);
             Apply(schedule.Advance(isPaused: true), controller);
 
-            clock.Advance(0.01d);
+            // Cross the decimal duration boundary instead of depending on
+            // exact binary floating-point equality after the five-second
+            // settling offset.
+            clock.Advance(0.02d);
             Apply(schedule.Advance(isPaused: true), controller);
             ApplyPendingTick(controller);
             Assert.That(
