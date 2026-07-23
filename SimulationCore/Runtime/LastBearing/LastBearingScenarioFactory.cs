@@ -63,6 +63,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
                 VehicleModule = VehicleModule.None,
                 ModuleInstallationState = ModuleInstallationState.None,
+                RigUpgrade = RigUpgrade.None,
                 RouteKind = RouteKind.None,
                 RouteActionKind = RouteActionKind.None,
                 RouteActionUsed = false,

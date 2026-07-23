@@ -20,8 +20,8 @@ namespace AtomicLandPirate.LastBearingTests
                 "unsupported city decisions remain pending",
                 UnsupportedDecisionRemainsPending);
             harness.Run(
-                "city improvement survives v4 canonical round trip",
-                ImprovementRoundTripsInV4);
+                "city improvement survives v5 canonical round trip",
+                ImprovementRoundTripsInV5);
             harness.Run(
                 "forged city improvement states fail invariants",
                 ForgedImprovementStatesFailInvariants);
@@ -281,7 +281,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "installed improvement outside home phase");
         }
 
-        private static void ImprovementRoundTripsInV4()
+        private static void ImprovementRoundTripsInV5()
         {
             CoreTestDriver driver = ReachInstallationReady(
                 ColonyComposition.Mixed,
@@ -293,19 +293,19 @@ namespace AtomicLandPirate.LastBearingTests
                 LastBearingCanonicalCodec.TryDecode(encoded);
             TestHarness.True(
                 decoded.Succeeded && decoded.State != null,
-                "v4 improvement decode");
+                "v5 improvement decode");
             TestHarness.True(
                 encoded.SequenceEqual(
                     LastBearingCanonicalCodec.Encode(decoded.State!)),
-                "v4 improvement canonical bytes");
+                "v5 improvement canonical bytes");
             TestHarness.Equal(
                 CityImprovementKind.RefurbishedAuxiliaryPump,
                 decoded.State!.InstalledCityImprovement,
-                "v4 improvement field");
+                "v5 improvement field");
             TestHarness.Equal(
                 HeavyCargoCustody.InstalledAtAuxiliaryPump,
                 decoded.State.HeavyCargoCustody,
-                "v4 installed custody");
+                "v5 installed custody");
         }
 
         private static void PriorPayloadsRefuseReinterpretation()

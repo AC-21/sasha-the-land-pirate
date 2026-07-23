@@ -6,9 +6,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public static class LastBearingBalanceV1
     {
-        public const string Revision = "last-bearing-prototype-balance-v2";
+        public const string Revision = "last-bearing-prototype-balance-v3";
         internal const string LegacyRevisionV1 =
             "last-bearing-prototype-balance-v1";
+        internal const string LegacyRevisionV2 =
+            "last-bearing-prototype-balance-v2";
         public const int TickRateHz = 10;
         public const int FullClockScaleMilli = 1000;
         public const int ExpeditionHomeClockScaleMilli = 500;
@@ -42,6 +44,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const long WinchInstallFuelUnits = 2;
         public const long TankPartsCostUnits = 3;
         public const long TankInstallFuelUnits = 6;
+        public const long PatchworkSkidPlatePartsCostUnits = 3;
+        public const long PatchworkSkidPlateProtectionMilli = 40;
 
         public const long ShortRouteOneWayTicks = 150;
         public const long LongRouteOneWayTicks = 300;
@@ -226,14 +230,40 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
         internal static long RouteConditionLoss(VehicleModule module)
         {
+            return RouteConditionLoss(
+                module,
+                RigUpgrade.None);
+        }
+
+        internal static long RouteConditionLoss(
+            VehicleModule module,
+            RigUpgrade rigUpgrade)
+        {
+            long baseLoss;
             switch (module)
             {
                 case VehicleModule.WinchAssembly:
-                    return ShortRouteRoundTripConditionLossMilli;
+                    baseLoss = ShortRouteRoundTripConditionLossMilli;
+                    break;
                 case VehicleModule.SealedRangeTank:
-                    return LongRouteRoundTripConditionLossMilli;
+                    baseLoss = LongRouteRoundTripConditionLossMilli;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(module));
+            }
+
+            switch (rigUpgrade)
+            {
+                case RigUpgrade.None:
+                    return baseLoss;
+                case RigUpgrade.PatchworkSkidPlate:
+                    return Math.Max(
+                        0,
+                        checked(
+                            baseLoss
+                            - PatchworkSkidPlateProtectionMilli));
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(rigUpgrade));
             }
         }
 

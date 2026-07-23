@@ -176,6 +176,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 ApplyInstallModule(builder, installModule, events);
             }
+            else if (command is InstallRigUpgradeCommand installRigUpgrade)
+            {
+                ApplyInstallRigUpgrade(
+                    builder,
+                    installRigUpgrade,
+                    events);
+            }
             else if (command is PrepareExpeditionTransactionCommand prepare)
             {
                 ApplyPrepareTransaction(builder, prepare, events);
@@ -692,6 +699,71 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 CompleteModuleInstallation(builder, command.Sequence, events);
             }
+        }
+
+        private static void ApplyInstallRigUpgrade(
+            LastBearingStateBuilder builder,
+            InstallRigUpgradeCommand command,
+            LastBearingEventSink events)
+        {
+            if (builder.RigUpgrade == command.Upgrade)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (builder.RigUpgrade != RigUpgrade.None)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_RIG_UPGRADE_ALREADY_INSTALLED");
+            }
+
+            if (!builder.SliceInfrastructureActive)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_RIG_UPGRADE_REQUIRES_SERVICE_CELL");
+            }
+
+            if (builder.ExpeditionPhase != ExpeditionPhase.AtHome
+                || builder.TransactionPhase != TransactionPhase.None)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_RIG_UPGRADE_REQUIRES_HOME_GARAGE");
+            }
+
+            if (builder.PartsUnits
+                < LastBearingBalanceV1.PatchworkSkidPlatePartsCostUnits)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_RIG_UPGRADE_PARTS_INSUFFICIENT");
+            }
+
+            long previousParts = builder.PartsUnits;
+            builder.PartsUnits = checked(
+                builder.PartsUnits
+                - LastBearingBalanceV1.PatchworkSkidPlatePartsCostUnits);
+            builder.RigUpgrade = command.Upgrade;
+
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityResourcesCommitted,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                "settlement:last-bearing:parts",
+                previousParts,
+                builder.PartsUnits);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.RigUpgradeInstalled,
+                LastBearingEventCause.PlayerCommand,
+                builder.GlobalTick,
+                command.Sequence,
+                "vehicle:sasha:upgrade:patchwork-skid-plate",
+                (long)RigUpgrade.None,
+                (long)command.Upgrade);
         }
 
         private static void ApplyPrepareTransaction(
@@ -1399,7 +1471,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 checked(
                     builder.VehicleConditionMilli
                     - LastBearingBalanceV1.RouteConditionLoss(
-                        builder.VehicleModule)));
+                        builder.VehicleModule,
+                        builder.RigUpgrade)));
             Emit(
                 builder,
                 events,

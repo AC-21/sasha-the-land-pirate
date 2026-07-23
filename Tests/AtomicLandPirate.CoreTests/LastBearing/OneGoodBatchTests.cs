@@ -32,8 +32,8 @@ namespace AtomicLandPirate.LastBearingTests
                 "one good batch retries do not duplicate value",
                 RetriesDoNotDuplicateValue);
             harness.Run(
-                "one good batch canonical v4 is exact and unknown versions refuse",
-                CanonicalV4RoundTripsAndUnknownVersionsRefuse);
+                "one good batch canonical v5 is exact and unknown versions refuse",
+                CanonicalV5RoundTripsAndUnknownVersionsRefuse);
             harness.Run(
                 "one good batch mechanics are composition invariant",
                 CompositionsShareExactMechanics);
@@ -403,7 +403,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "barter replay repeated settlement effects");
         }
 
-        private static void CanonicalV4RoundTripsAndUnknownVersionsRefuse()
+        private static void CanonicalV5RoundTripsAndUnknownVersionsRefuse()
         {
             foreach (LastBearingState state in new[]
             {
@@ -414,20 +414,20 @@ namespace AtomicLandPirate.LastBearingTests
             })
             {
                 byte[] encoded = LastBearingCanonicalCodec.Encode(state);
-                TestHarness.Equal((byte)4, encoded[8], "codec version low byte");
+                TestHarness.Equal((byte)5, encoded[8], "codec version low byte");
                 TestHarness.Equal((byte)0, encoded[9], "codec version high byte");
                 LastBearingDecodeResult decoded =
                     LastBearingCanonicalCodec.TryDecode(encoded);
                 TestHarness.True(
                     decoded.Succeeded && decoded.State != null,
-                    "v4 round trip decode");
+                    "v5 round trip decode");
                 TestHarness.True(
                     encoded.SequenceEqual(
                         LastBearingCanonicalCodec.Encode(decoded.State!)),
-                    "v4 canonical bytes");
+                    "v5 canonical bytes");
             }
 
-            foreach (byte version in new byte[] { 1, 2, 5 })
+            foreach (byte version in new byte[] { 1, 2, 6 })
             {
                 byte[] encoded = LastBearingCanonicalCodec.Encode(
                     CreateStartedStateForSaveTests());

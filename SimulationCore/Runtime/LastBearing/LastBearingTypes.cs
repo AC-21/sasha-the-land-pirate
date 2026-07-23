@@ -46,6 +46,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
         SealedRangeTank = 2,
     }
 
+    public enum RigUpgrade
+    {
+        None = 0,
+        PatchworkSkidPlate = 1,
+    }
+
     public enum RouteKind
     {
         None = 0,
@@ -309,6 +315,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         CityServiceResidentAssigned = 49,
         CityServiceSledAdvanced = 50,
         CityServiceBatchDelivered = 51,
+        RigUpgradeInstalled = 52,
     }
 
     public enum LastBearingEventCause

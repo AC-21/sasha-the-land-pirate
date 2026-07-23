@@ -54,6 +54,23 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     - state.PreparationElapsedTicks);
             PlannedModule = state.PlannedModule;
             VehicleModule = state.VehicleModule;
+            RigUpgrade = state.RigUpgrade;
+            PatchworkSkidPlatePartsCostUnits =
+                LastBearingBalanceV1.PatchworkSkidPlatePartsCostUnits;
+            PatchworkSkidPlateProtectionMilli =
+                LastBearingBalanceV1.PatchworkSkidPlateProtectionMilli;
+            IsPatchworkSkidPlateInstallAvailable =
+                ComputePatchworkSkidPlateInstallAvailable(state);
+            VehicleModule projectedModule = state.VehicleModule
+                != VehicleModule.None
+                ? state.VehicleModule
+                : state.PlannedModule;
+            ProjectedRoundTripConditionLossMilli =
+                projectedModule == VehicleModule.None
+                    ? 0
+                    : LastBearingBalanceV1.RouteConditionLoss(
+                        projectedModule,
+                        state.RigUpgrade);
             ExpeditionPhase = state.ExpeditionPhase;
             TransactionPhase = state.TransactionPhase;
             RouteKind = state.RouteKind;
@@ -183,6 +200,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long PreparationRemainingTicks { get; private set; }
         public VehicleModule PlannedModule { get; private set; }
         public VehicleModule VehicleModule { get; private set; }
+        public RigUpgrade RigUpgrade { get; private set; }
+        public long PatchworkSkidPlatePartsCostUnits { get; private set; }
+        public long PatchworkSkidPlateProtectionMilli { get; private set; }
+        public bool IsPatchworkSkidPlateInstallAvailable { get; private set; }
+        public long ProjectedRoundTripConditionLossMilli { get; private set; }
         public ExpeditionPhase ExpeditionPhase { get; private set; }
         public TransactionPhase TransactionPhase { get; private set; }
         public RouteKind RouteKind { get; private set; }
@@ -481,6 +503,18 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.HeavyCargoCustody == HeavyCargoCustody.Settlement
                 && state.TowSlotsUsed == 1
                 && state.PartsUnits >= requiredParts;
+        }
+
+        private static bool ComputePatchworkSkidPlateInstallAvailable(
+            LastBearingState state)
+        {
+            return state.RigUpgrade == RigUpgrade.None
+                && state.SliceInfrastructureActive
+                && state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.None
+                && state.PartsUnits
+                    >= LastBearingBalanceV1
+                        .PatchworkSkidPlatePartsCostUnits;
         }
 
         private static bool ComputeRepairCargoLoadAvailable(

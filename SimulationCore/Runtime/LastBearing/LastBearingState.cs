@@ -6,7 +6,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public sealed class LastBearingState
     {
-        public const int CurrentSchemaVersion = 4;
+        public const int CurrentSchemaVersion = 5;
         public const int CityConstructionPadCount = 5;
         public const int UnplacedCityPadIndex = -1;
         public const string SashaProtagonistId = "sasha";
@@ -115,6 +115,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             VehicleModule = builder.VehicleModule;
             ModuleInstallationState = builder.ModuleInstallationState;
+            RigUpgrade = builder.RigUpgrade;
             RouteKind = builder.RouteKind;
             RouteActionKind = builder.RouteActionKind;
             RouteActionUsed = builder.RouteActionUsed;
@@ -275,6 +276,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public VehicleModule VehicleModule { get; private set; }
 
         public ModuleInstallationState ModuleInstallationState { get; private set; }
+
+        public RigUpgrade RigUpgrade { get; private set; }
 
         public RouteKind RouteKind { get; private set; }
 
@@ -453,6 +456,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             SpareBearingLotCustody = state.SpareBearingLotCustody;
             VehicleModule = state.VehicleModule;
             ModuleInstallationState = state.ModuleInstallationState;
+            RigUpgrade = state.RigUpgrade;
             RouteKind = state.RouteKind;
             RouteActionKind = state.RouteActionKind;
             RouteActionUsed = state.RouteActionUsed;
@@ -558,6 +562,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         internal SpareBearingLotCustody SpareBearingLotCustody;
         internal VehicleModule VehicleModule;
         internal ModuleInstallationState ModuleInstallationState;
+        internal RigUpgrade RigUpgrade;
         internal RouteKind RouteKind;
         internal RouteActionKind RouteActionKind;
         internal bool RouteActionUsed;

@@ -183,6 +183,22 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public VehicleModule Module { get; }
     }
 
+    public sealed class InstallRigUpgradeCommand : LastBearingCommand
+    {
+        public InstallRigUpgradeCommand(long sequence, RigUpgrade upgrade)
+            : base(sequence)
+        {
+            if (upgrade != RigUpgrade.PatchworkSkidPlate)
+            {
+                throw new ArgumentOutOfRangeException(nameof(upgrade));
+            }
+
+            Upgrade = upgrade;
+        }
+
+        public RigUpgrade Upgrade { get; }
+    }
+
     public sealed class PrepareExpeditionTransactionCommand : LastBearingCommand
     {
         public PrepareExpeditionTransactionCommand(

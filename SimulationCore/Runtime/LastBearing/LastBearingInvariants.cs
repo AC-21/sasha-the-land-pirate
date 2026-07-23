@@ -198,6 +198,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             RequireEnum(state.PreparationPhase, "PREPARATION_PHASE");
             RequireEnum(state.PlannedModule, "PLANNED_MODULE");
             RequireEnum(state.VehicleModule, "VEHICLE_MODULE");
+            RequireEnum(state.RigUpgrade, "RIG_UPGRADE");
             RequireEnum(
                 state.ModuleInstallationState,
                 "MODULE_INSTALLATION_STATE");
