@@ -83,6 +83,71 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That((int)LastBearingFieldDeskIntent.TogglePause, Is.EqualTo(24));
             Assert.That((int)LastBearingFieldDeskIntent.ReturnToTitle, Is.EqualTo(27));
             Assert.That((int)LastBearingFieldDeskIntent.RunHotShift, Is.EqualTo(28));
+            Assert.That(
+                (int)LastBearingFieldDeskIntent.AcknowledgeDustFront,
+                Is.EqualTo(29));
+        }
+
+        [TestCase(
+            false,
+            DustFrontOutcome.Breached,
+            "DUST FRONT BREACHED · HOT SHIFT STALLED")]
+        [TestCase(
+            true,
+            DustFrontOutcome.Held,
+            "DUST FRONT HELD · RESERVE ENDURED")]
+        public void DustFrontVerdictBecomesTheSoleHazardOrder(
+            bool holds,
+            DustFrontOutcome expectedOutcome,
+            string expectedPressure)
+        {
+            LastBearingGameController controller =
+                BuildController(ColonyComposition.Mixed);
+            LastBearingState thresholdState =
+                PrimeDustFrontThreshold(controller.State!, holds);
+            LastBearingState resolved = new LastBearingKernel()
+                .Step(
+                    thresholdState,
+                    System.Array.Empty<LastBearingCommand>())
+                .State;
+            InstallControllerState(controller, resolved);
+
+            LastBearingFieldDeskProjection projection =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                controller.ReadModel!.DustFrontOutcome,
+                Is.EqualTo(expectedOutcome));
+            Assert.That(
+                controller.ReadModel.IsDustFrontAcknowledgementRequired,
+                Is.True);
+            Assert.That(
+                controller.ReadModel.PauseCause,
+                Is.EqualTo(PauseCause.DustFrontAlert));
+            Assert.That(controller.CanAcknowledgeDustFront, Is.True);
+            Assert.That(projection.Pressure, Is.EqualTo(expectedPressure));
+            Assert.That(
+                projection.PrimaryAction.Intent,
+                Is.EqualTo(
+                    LastBearingFieldDeskIntent.AcknowledgeDustFront));
+            Assert.That(
+                projection.PrimaryAction.Label,
+                Is.EqualTo("ACKNOWLEDGE FRONT"));
+            Assert.That(
+                projection.PrimaryAction.Tone,
+                Is.EqualTo(LastBearingFieldDeskActionTone.Hazard));
+            Assert.That(projection.PrimaryAction.IsEnabled, Is.True);
+            Assert.That(projection.SecondaryAction.IsVisible, Is.False);
+            Assert.That(projection.Survey.IsVisible, Is.False);
+            Assert.That(
+                projection.PauseAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.TogglePause));
+            Assert.That(projection.PauseAction.IsVisible, Is.True);
+            Assert.That(projection.PauseAction.IsEnabled, Is.False);
+            Assert.That(
+                LastBearingFieldDeskPresenter.IsIntentAvailable(
+                    controller,
+                    LastBearingFieldDeskIntent.AcknowledgeDustFront),
+                Is.True);
         }
 
         [TestCase(PreparationChoice.CivicBuffer)]
@@ -462,6 +527,75 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 System.Collections.Generic.IEnumerable<LastBearingCommand>;
             Assert.That(pending, Is.Not.Null);
             return System.Linq.Enumerable.ToArray(pending!);
+        }
+
+        private static LastBearingState PrimeDustFrontThreshold(
+            LastBearingState state,
+            bool holds)
+        {
+            System.Type? builderType =
+                typeof(LastBearingState).Assembly.GetType(
+                    "AtomicLandPirate.Simulation.LastBearing." +
+                    "LastBearingStateBuilder");
+            Assert.That(builderType, Is.Not.Null);
+            const BindingFlags flags =
+                BindingFlags.Instance |
+                BindingFlags.NonPublic |
+                BindingFlags.Public;
+            ConstructorInfo? constructor = builderType!.GetConstructor(
+                flags,
+                binder: null,
+                new[] { typeof(LastBearingState) },
+                modifiers: null);
+            FieldInfo? progress = builderType.GetField(
+                "DustFrontProgressTicks",
+                flags);
+            FieldInfo? water = builderType.GetField("WaterMilli", flags);
+            MethodInfo? build = builderType.GetMethod("Build", flags);
+            Assert.That(constructor, Is.Not.Null);
+            Assert.That(progress, Is.Not.Null);
+            Assert.That(water, Is.Not.Null);
+            Assert.That(build, Is.Not.Null);
+
+            object builder = constructor!.Invoke(new object[] { state });
+            progress!.SetValue(
+                builder,
+                LastBearingBalanceV1.DustFrontThresholdCrisisTicks - 1);
+            water!.SetValue(builder, holds ? 60020L : 0L);
+            var result = build!.Invoke(builder, null) as LastBearingState;
+            Assert.That(result, Is.Not.Null);
+            return result!;
+        }
+
+        private static void InstallControllerState(
+            LastBearingGameController controller,
+            LastBearingState state)
+        {
+            const BindingFlags flags =
+                BindingFlags.Instance | BindingFlags.NonPublic;
+            FieldInfo? stateField =
+                typeof(LastBearingGameController).GetField("_state", flags);
+            FieldInfo? readModelField =
+                typeof(LastBearingGameController).GetField(
+                    "_readModel",
+                    flags);
+            FieldInfo? pendingField =
+                typeof(LastBearingGameController).GetField(
+                    "_pendingCommands",
+                    flags);
+            Assert.That(stateField, Is.Not.Null);
+            Assert.That(readModelField, Is.Not.Null);
+            Assert.That(pendingField, Is.Not.Null);
+
+            stateField!.SetValue(controller, state);
+            readModelField!.SetValue(
+                controller,
+                LastBearingReadModel.FromState(state));
+            var pending = pendingField!.GetValue(controller) as
+                System.Collections.Generic.List<LastBearingCommand>;
+            Assert.That(pending, Is.Not.Null);
+            pending!.Clear();
+            controller.ShowCityOverview();
         }
 
         private static void SimulateOneTick(

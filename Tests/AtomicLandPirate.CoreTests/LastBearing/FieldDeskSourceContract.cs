@@ -28,6 +28,7 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "public LastBearingFieldDesk? FieldDesk => _fieldDesk;");
             Require(controller, "public bool IsExactFieldDeskCityOverview");
             Require(controller, "public bool HasPendingPlayerCommands");
+            Require(controller, "public bool CanAcknowledgeDustFront");
 
             const string addDesk =
                 "gameObject.AddComponent<LastBearingFieldDesk>()";
@@ -152,6 +153,7 @@ namespace AtomicLandPirate.LastBearingTests
                 ".AdvanceCityServiceSled(",
                 ".CancelCityBuildingPreview(",
                 ".StartHotShift(",
+                ".AcknowledgeDustFront(",
                 ".BeginGaragePlan(",
                 ".OpenGarageBay(",
                 ".CommitExpedition(",
@@ -169,6 +171,18 @@ namespace AtomicLandPirate.LastBearingTests
             }
 
             Require(fieldDeskPresenter, "RunHotShift = 28");
+            Require(fieldDeskPresenter, "AcknowledgeDustFront = 29");
+            Require(fieldDeskPresenter, "\"ACKNOWLEDGE FRONT\"");
+            Require(
+                fieldDeskPresenter,
+                "model.IsDustFrontAcknowledgementRequired");
+            Require(fieldDeskPresenter, "PauseCause.DustFrontAlert");
+            Require(
+                fieldDeskPresenter,
+                "LastBearingFieldDeskActionTone.Hazard");
+            Require(hud, "DUST FRONT · GLOBAL ALERT");
+            Require(hud, "GUILayout.Button(\"ACKNOWLEDGE FRONT\"");
+            Require(hud, "_controller.AcknowledgeDustFront();");
             Require(
                 fieldDeskPresenter,
                 "RUN HOT SHIFT\";");

@@ -103,17 +103,34 @@ namespace AtomicLandPirate.LastBearingTests
                 "public bool IsWreckLineFrameRailRecoveryAvailable");
             Require(controller, "public bool CanStartHotShift");
             Require(controller, "public void StartHotShift()");
+            Require(controller, "public bool CanAcknowledgeDustFront");
+            Require(controller, "public void AcknowledgeDustFront()");
             string hotShiftOperation = Segment(
                 controller,
                 "public void StartHotShift()",
-                "public void BeginGaragePlan(");
+                "public void AcknowledgeDustFront()");
             Require(hotShiftOperation, "_readModel.HotShiftCompletedCount");
             Require(hotShiftOperation, "new RunHotShiftCommand(");
+            string dustFrontAcknowledgement = Segment(
+                controller,
+                "public void AcknowledgeDustFront()",
+                "public void BeginGaragePlan(");
+            Require(
+                dustFrontAcknowledgement,
+                "_readModel.IsDustFrontAcknowledgementRequired");
+            Require(
+                dustFrontAcknowledgement,
+                "new AcknowledgeDustFrontCommand(sequence)");
             Require(controller, "LastBearingEventKind.HotShiftStarted");
             Require(
                 controller,
                 "LastBearingEventKind.HotShiftCheckpointReached");
             Require(controller, "LastBearingEventKind.HotShiftCompleted");
+            Require(controller, "LastBearingEventKind.DustFrontResolved");
+            Require(controller, "LastBearingEventKind.DustFrontAcknowledged");
+            Require(controller, "PauseCause.DustFrontAlert");
+            Require(hud, "DUST FRONT · GLOBAL ALERT");
+            Require(hud, "GUILayout.Button(\"ACKNOWLEDGE FRONT\"");
             string shortcuts = Segment(
                 controller,
                 "private void HandleGlobalShortcuts()",
@@ -424,6 +441,20 @@ namespace AtomicLandPirate.LastBearingTests
                     "ApplyPresentation();",
                     StringComparison.Ordinal),
                 "critical autosave must precede fallible derived presentation");
+            TestHarness.True(
+                simulationTick.IndexOf(
+                    "if (hotShiftCompleted)",
+                    StringComparison.Ordinal) <
+                simulationTick.IndexOf(
+                    "if (dustFrontResolved)",
+                    StringComparison.Ordinal) &&
+                simulationTick.IndexOf(
+                    "if (dustFrontResolved)",
+                    StringComparison.Ordinal) <
+                simulationTick.IndexOf(
+                    "if (dustFrontAcknowledged)",
+                    StringComparison.Ordinal),
+                "Dust Front verdict status must supersede same-tick Hot Shift status");
             string autosave = Segment(
                 controller,
                 "private void TryAutosave(",
@@ -451,6 +482,8 @@ namespace AtomicLandPirate.LastBearingTests
                 "HotShiftStarted",
                 "HotShiftCheckpointReached",
                 "HotShiftCompleted",
+                "DustFrontResolved",
+                "DustFrontAcknowledged",
             })
             {
                 Require(autosave, "LastBearingEventKind." + criticalEvent);

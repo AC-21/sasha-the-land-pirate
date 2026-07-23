@@ -37,6 +37,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         Load = 26,
         ReturnToTitle = 27,
         RunHotShift = 28,
+        AcknowledgeDustFront = 29,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -314,8 +315,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 CreateSurvey(
                     controller,
                     model,
+                    !model.IsDustFrontAcknowledgementRequired &&
                     controller.CityNeedInspected &&
                     IsServiceCellObjective(model.NextObjective),
+                    !model.IsDustFrontAcknowledgementRequired &&
                     primary.Intent != LastBearingFieldDeskIntent.RunHotShift &&
                     secondary.Intent != LastBearingFieldDeskIntent.RunHotShift),
                 Action(
@@ -323,9 +326,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     model.PauseCause == PauseCause.None ? "PAUSE" : "RESUME",
                     model.PauseCause == PauseCause.AutoAlert
                         ? "The depot alert must be resolved in place."
-                        : "Hold or resume the settlement clocks.",
+                        : model.PauseCause == PauseCause.DustFrontAlert
+                            ? "Acknowledge the Dust Front verdict before resuming."
+                            : "Hold or resume the settlement clocks.",
                     true,
-                    canDispatch && model.PauseCause != PauseCause.AutoAlert,
+                    canDispatch &&
+                    model.PauseCause != PauseCause.AutoAlert &&
+                    model.PauseCause != PauseCause.DustFrontAlert,
                     LastBearingFieldDeskActionTone.Quiet),
                 Action(
                     LastBearingFieldDeskIntent.Save,
@@ -433,6 +440,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.HotShiftCompletedCount);
             Mix(ref hash, model.IsHotShiftRunAvailable);
             Mix(ref hash, model.IsHotShiftStalledByWorkshopPush);
+            Mix(ref hash, model.IsHotShiftStalledByDustFront);
             Mix(ref hash, model.IsHotShiftActivelyWorking);
             Mix(ref hash, model.WaterMilli);
             Mix(ref hash, model.WaterTrendMilliPerSettlementTick);
@@ -463,6 +471,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.IsSpareBearingBatchStartAvailable);
             Mix(ref hash, model.IsSpareBearingBarterAvailable);
             Mix(ref hash, model.PauseCause.GetHashCode());
+            Mix(ref hash, model.DustFrontOutcome.GetHashCode());
+            Mix(ref hash, model.IsDustFrontAcknowledgementRequired);
             Mix(ref hash, model.NextObjective);
             return new LastBearingFieldDeskStamp(hash);
         }
@@ -475,6 +485,20 @@ namespace AtomicLandPirate.Presentation.LastBearing
             out LastBearingFieldDeskActionProjection secondary)
         {
             secondary = Hidden();
+            if (model.IsDustFrontAcknowledgementRequired)
+            {
+                primary = Action(
+                    LastBearingFieldDeskIntent.AcknowledgeDustFront,
+                    "ACKNOWLEDGE FRONT",
+                    model.DustFrontOutcome == DustFrontOutcome.Held
+                        ? "HELD · Last Bearing kept the reserve above the recoverable line. Acknowledge the verdict and resume settlement clocks."
+                        : "BREACHED · The failing turbine could not hold the dry line. Acknowledge the verdict; Hot Shift stays stalled until turbine repair.",
+                    true,
+                    canDispatch && controller.CanAcknowledgeDustFront,
+                    LastBearingFieldDeskActionTone.Hazard);
+                return;
+            }
+
             if (model.AssignedResidentId == null)
             {
                 primary = Action(
@@ -1135,12 +1159,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
             string label;
             if (model.HotShiftPhase == HotShiftPhase.InProgress)
             {
-                label = model.IsHotShiftStalledByWorkshopPush
-                    ? "HOT SHIFT · STALLED · " +
+                label = model.IsHotShiftStalledByDustFront
+                    ? "HOT SHIFT · FRONT-STALLED · " +
                       model.HotShiftElapsedTicks + " / " +
                       model.HotShiftRequiredTicks
-                    : "HOT SHIFT · " + model.HotShiftElapsedTicks + " / " +
-                      model.HotShiftRequiredTicks;
+                    : model.IsHotShiftStalledByWorkshopPush
+                        ? "HOT SHIFT · STALLED · " +
+                          model.HotShiftElapsedTicks + " / " +
+                          model.HotShiftRequiredTicks
+                        : "HOT SHIFT · " + model.HotShiftElapsedTicks + " / " +
+                          model.HotShiftRequiredTicks;
             }
             else
             {
@@ -1154,7 +1182,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             string detail;
-            if (model.IsHotShiftStalledByWorkshopPush)
+            if (model.IsHotShiftStalledByDustFront)
+            {
+                detail =
+                    "The breached Dust Front stopped the failing waterworks. Progress and Hot Shift water draw stay held until turbine repair.";
+            }
+            else if (model.IsHotShiftStalledByWorkshopPush)
             {
                 detail =
                     "Workshop Push borrowed the machine-shop operator. Progress is held and the stalled Hot Shift adds no water penalty.";
@@ -1202,6 +1235,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 PauseCause.None => "CLOCKS RUNNING",
                 PauseCause.Explicit => "CLOCKS HELD BY PLAYER",
                 PauseCause.AutoAlert => "CLOCKS HELD BY DEPOT ALERT",
+                PauseCause.DustFrontAlert =>
+                    "CLOCKS HELD BY DUST FRONT VERDICT",
                 _ => "CLOCK STATE UNKNOWN",
             };
         }
@@ -1237,6 +1272,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private static string FormatPressure(LastBearingReadModel model)
         {
+            if (model.DustFrontOutcome == DustFrontOutcome.Held)
+            {
+                return "DUST FRONT HELD · RESERVE ENDURED";
+            }
+
+            if (model.DustFrontOutcome == DustFrontOutcome.Breached)
+            {
+                return model.IsHotShiftStalledByDustFront
+                    ? "DUST FRONT BREACHED · HOT SHIFT STALLED"
+                    : "DUST FRONT BREACHED · TURBINE RECOVERED";
+            }
+
             if (model.WaterTrendMilliPerSettlementTick > 0)
             {
                 return "RECOVERING · RESERVE CLIMBING";
