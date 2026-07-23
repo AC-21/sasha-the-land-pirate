@@ -316,6 +316,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return;
             }
 
+            if (!IsPristineCityServiceCell(builder))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_LEGACY_ACTIVATION_CITY_STATE_CONFLICT");
+            }
+
             SeedCompletedCityServiceCell(builder);
             Emit(
                 builder,
@@ -501,12 +507,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
             AdvanceCityServiceSledCommand command,
             LastBearingEventSink events)
         {
-            if (builder.CityDeliveryStage
-                    == CityDeliveryStage.DeliveredToWorkshop
-                && builder.CityDeliveryCount == 1)
+            if (builder.CityDeliveryStage > command.ExpectedSourceStage)
             {
                 EmitReplay(builder, command.Sequence, events);
                 return;
+            }
+
+            if (builder.CityDeliveryStage < command.ExpectedSourceStage)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_SERVICE_SLED_STAGE_PREMATURE");
             }
 
             RequireCityConstructionOpen(builder);
@@ -517,7 +527,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     "LAST_BEARING_CITY_SERVICE_NOT_STAFFED");
             }
 
-            if (builder.CityDeliveryStage == CityDeliveryStage.AtRecycler)
+            if (command.ExpectedSourceStage == CityDeliveryStage.AtRecycler)
             {
                 builder.CityDeliveryStage = CityDeliveryStage.InTransit;
                 Emit(
@@ -533,7 +543,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return;
             }
 
-            if (builder.CityDeliveryStage != CityDeliveryStage.InTransit
+            if (command.ExpectedSourceStage != CityDeliveryStage.InTransit
+                || builder.CityDeliveryStage != CityDeliveryStage.InTransit
                 || builder.CityDeliveryCount != 0)
             {
                 throw new InvalidOperationException(
@@ -2670,6 +2681,24 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     != LastBearingState.UnplacedCityPadIndex
                 && builder.EmergencyStoragePadIndex
                     != LastBearingState.UnplacedCityPadIndex;
+        }
+
+        private static bool IsPristineCityServiceCell(
+            LastBearingStateBuilder builder)
+        {
+            return builder.RecyclerPadIndex
+                    == LastBearingState.UnplacedCityPadIndex
+                && builder.RecyclerQuarterTurns == 0
+                && builder.MachineShopPadIndex
+                    == LastBearingState.UnplacedCityPadIndex
+                && builder.MachineShopQuarterTurns == 0
+                && builder.EmergencyStoragePadIndex
+                    == LastBearingState.UnplacedCityPadIndex
+                && builder.EmergencyStorageQuarterTurns == 0
+                && !builder.CityServiceLinkConnected
+                && builder.CityServiceResidentId == null
+                && builder.CityDeliveryStage == CityDeliveryStage.AtRecycler
+                && builder.CityDeliveryCount == 0;
         }
 
         private static bool CityPadOccupiedByOther(

@@ -52,6 +52,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private bool _cityNeedInspected;
         private PreparationChoice _garagePreparationIntent =
             PreparationChoice.Unselected;
+        private CityBuildingKind _cityPreviewBuilding = CityBuildingKind.None;
+        private int _cityPreviewPadIndex;
+        private int _cityPreviewQuarterTurns;
         private string _status = "Choose who calls Last Bearing home.";
         private string _saveStatus = "No local profile loaded.";
 
@@ -163,6 +166,56 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _readModel.PreparationChoice == PreparationChoice.Unselected &&
             _modeCoordinator?.HasActiveMode == true &&
             _modeCoordinator.CurrentMode == LastBearingPresentationMode.GarageBay;
+
+        public CityBuildingKind CityPreviewBuilding => _cityPreviewBuilding;
+
+        public int CityPreviewPadIndex => _cityPreviewPadIndex;
+
+        public int CityPreviewQuarterTurns => _cityPreviewQuarterTurns;
+
+        public bool HasCityBuildingPreview =>
+            _cityPreviewBuilding != CityBuildingKind.None;
+
+        public long CityPreviewPartsCost =>
+            CityBuildingPartsCost(_cityPreviewBuilding);
+
+        public bool CanPlaceCityBuildingPreview =>
+            _readModel != null &&
+            HasCityBuildingPreview &&
+            !_readModel.CityServiceLinkConnected &&
+            !IsCityPadOccupiedByOther(
+                _readModel,
+                _cityPreviewBuilding,
+                _cityPreviewPadIndex) &&
+            (CityBuildingPad(_readModel, _cityPreviewBuilding) >= 0 ||
+             _readModel.PartsUnits >= CityPreviewPartsCost);
+
+        public bool CanConnectCityServiceLink =>
+            _readModel != null &&
+            !HasCityBuildingPreview &&
+            !_readModel.CityServiceLinkConnected &&
+            _readModel.RecyclerPadIndex >= 0 &&
+            _readModel.MachineShopPadIndex >= 0 &&
+            _readModel.EmergencyStoragePadIndex >= 0 &&
+            _readModel.PartsUnits >=
+                LastBearingBalanceV1.CityServiceLinkPartsUnits;
+
+        public bool CanAdvanceCityServiceSled =>
+            _readModel != null &&
+            _readModel.CityServiceLinkConnected &&
+            _readModel.CityServiceResidentId != null &&
+            _readModel.CityDeliveryStage !=
+                CityDeliveryStage.DeliveredToWorkshop;
+
+        public bool CanAssignCityServiceHuman =>
+            _readModel != null &&
+            _readModel.CityServiceLinkConnected &&
+            RosterContains(_readModel, ResidentRoster.HumanResidentId);
+
+        public bool CanAssignCityServiceRobot =>
+            _readModel != null &&
+            _readModel.CityServiceLinkConnected &&
+            RosterContains(_readModel, ResidentRoster.RobotResidentId);
 
         public LastBearingCityGrammarHypothesis CityGrammarHypothesis =>
             _world?.CityGrammarComparison?.SelectedHypothesis ??
@@ -317,6 +370,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _fieldDesk?.ResetForLifecycle();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
+            ClearCityBuildingPreview();
             _accumulator = 0f;
             _state = LastBearingScenarioFactory.CreateInitial(composition, 2011);
             _readModel = LastBearingReadModel.FromState(_state);
@@ -363,6 +417,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
+            ClearCityBuildingPreview();
             _state = null;
             _readModel = null;
             ResetPublicSnapshotsToRuntime();
@@ -420,6 +475,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 futureRouteTollFuelUnits: 0,
                 humanVisible: true,
                 robotVisible: true);
+            _world?.HideCityServiceCell();
             _fieldDesk?.ResetForLifecycle();
         }
 
@@ -430,7 +486,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
-            if (_readModel?.NextObjective != "activate-slice-infrastructure")
+            string? objective = _readModel?.NextObjective;
+            if (objective != "activate-slice-infrastructure" &&
+                objective != "place-city-recycler")
             {
                 _status = "The recycler and machine shop are already accounted for.";
                 return;
@@ -447,6 +505,166 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.LeaveCityGrammarComparison();
             _status =
                 "Recycler and machine shop are coming online. The canonical result records no layout and D-0030 remains open.";
+        }
+
+        public void SelectCityBuildingPreview(CityBuildingKind building)
+        {
+            if (building != CityBuildingKind.Recycler &&
+                building != CityBuildingKind.MachineShop &&
+                building != CityBuildingKind.EmergencyStorage)
+            {
+                _status = "Unknown city building ignored.";
+                return;
+            }
+
+            if (!RequireCityConstructionAtHome() ||
+                _readModel == null ||
+                _readModel.CityServiceLinkConnected)
+            {
+                return;
+            }
+
+            _cityPreviewBuilding = building;
+            int placedPad = CityBuildingPad(_readModel, building);
+            _cityPreviewPadIndex = placedPad >= 0
+                ? placedPad
+                : FirstOpenCityPad(_readModel);
+            _cityPreviewQuarterTurns = placedPad >= 0
+                ? CityBuildingQuarterTurns(_readModel, building)
+                : 0;
+            _status = placedPad >= 0
+                ? building + " selected. Moving it before the service link is free."
+                : building + " selected. Placement costs " +
+                  CityPreviewPartsCost + " reclaimed parts.";
+            ApplyPresentation();
+            _fieldDesk?.Refresh(force: true);
+        }
+
+        public void MoveCityBuildingPreview(int direction)
+        {
+            if (!RequireCityConstructionAtHome() ||
+                !HasCityBuildingPreview ||
+                _readModel?.CityServiceLinkConnected != false)
+            {
+                return;
+            }
+
+            int normalized = direction < 0 ? -1 : 1;
+            _cityPreviewPadIndex =
+                (_cityPreviewPadIndex + normalized +
+                 LastBearingState.CityConstructionPadCount) %
+                LastBearingState.CityConstructionPadCount;
+            _status = "Previewing pad " + (_cityPreviewPadIndex + 1) +
+                " of " + LastBearingState.CityConstructionPadCount + ".";
+            ApplyPresentation();
+            _fieldDesk?.Refresh(force: true);
+        }
+
+        public void RotateCityBuildingPreview()
+        {
+            if (!RequireCityConstructionAtHome() ||
+                !HasCityBuildingPreview ||
+                _readModel?.CityServiceLinkConnected != false)
+            {
+                return;
+            }
+
+            _cityPreviewQuarterTurns = (_cityPreviewQuarterTurns + 1) % 4;
+            _status = "Preview rotated to " +
+                (_cityPreviewQuarterTurns * 90) + " degrees.";
+            ApplyPresentation();
+            _fieldDesk?.Refresh(force: true);
+        }
+
+        public void CancelCityBuildingPreview()
+        {
+            if (!HasCityBuildingPreview)
+            {
+                _status = "No city placement preview is active.";
+                return;
+            }
+
+            ClearCityBuildingPreview();
+            _status = "Placement preview canceled. No parts were spent.";
+            ApplyPresentation();
+            _fieldDesk?.Refresh(force: true);
+        }
+
+        public void PlaceCityBuildingPreview()
+        {
+            if (!RequireCityConstructionAtHome() ||
+                !CanPlaceCityBuildingPreview)
+            {
+                _status = HasCityBuildingPreview
+                    ? "That pad is occupied or the parts are unavailable."
+                    : "Select a city building before placing it.";
+                return;
+            }
+
+            CityBuildingKind building = _cityPreviewBuilding;
+            int padIndex = _cityPreviewPadIndex;
+            int quarterTurns = _cityPreviewQuarterTurns;
+            Queue(sequence => new PlaceCityBuildingCommand(
+                sequence,
+                building,
+                padIndex,
+                quarterTurns));
+            _status = building + " placement queued at pad " +
+                (padIndex + 1) + ".";
+        }
+
+        public void ConnectCityServiceLink()
+        {
+            if (!RequireCityConstructionAtHome() ||
+                !CanConnectCityServiceLink)
+            {
+                _status =
+                    "Place all three buildings and retain 1 part before locking the service link.";
+                return;
+            }
+
+            Queue(sequence => new ConnectCityServiceLinkCommand(sequence));
+            _status =
+                "Service link queued. Acceptance permanently locks this layout for 1 part.";
+        }
+
+        public void AssignCityServiceResident(string stableId)
+        {
+            if (!RequireCityConstructionAtHome() ||
+                _readModel == null ||
+                !_readModel.CityServiceLinkConnected ||
+                !RosterContains(_readModel, stableId))
+            {
+                _status =
+                    "That resident cannot staff the linked machine-shop slot.";
+                return;
+            }
+
+            Queue(sequence =>
+                new AssignCityServiceResidentCommand(sequence, stableId));
+            _status = "Machine-shop operator queued: " + stableId +
+                ". Resident kind grants no V0 bonus.";
+        }
+
+        public void AdvanceCityServiceSled()
+        {
+            if (!RequireCityConstructionAtHome() ||
+                !CanAdvanceCityServiceSled)
+            {
+                _status =
+                    "The sled needs a locked link and an assigned operator.";
+                return;
+            }
+
+            CityDeliveryStage expectedSourceStage =
+                _readModel!.CityDeliveryStage;
+            Queue(sequence => new AdvanceCityServiceSledCommand(
+                sequence,
+                expectedSourceStage));
+            _status = _readModel?.CityDeliveryStage ==
+                      CityDeliveryStage.AtRecycler
+                ? "Calibration sled queued for the service link."
+                : "Workshop delivery queued. Completion returns 2 reclaimed parts.";
         }
 
         public void BeginGaragePlan(PreparationChoice preparation)
@@ -1050,6 +1268,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             _fieldDesk?.ResetForLifecycle();
             ClearGaragePlanIntent();
+            ClearCityBuildingPreview();
             if (_saveAdapter == null)
             {
                 _saveStatus = "Save boundary unavailable.";
@@ -1265,8 +1484,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 bool spareBearingLotBartered = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.SpareBearingLotBartered);
+                bool cityBuildingChanged = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.CityBuildingPlaced) ||
+                    ContainsEvent(
+                        result.DomainEvents,
+                        LastBearingEventKind.CityBuildingMoved) ||
+                    ContainsEvent(
+                        result.DomainEvents,
+                        LastBearingEventKind.CityServiceLinkConnected);
                 _state = result.State;
                 _readModel = result.ReadModel;
+                if (cityBuildingChanged)
+                {
+                    ClearCityBuildingPreview();
+                }
                 if (hasCommands)
                 {
                     PublishPublicSnapshots();
@@ -1539,6 +1771,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? _garagePreparationIntent
                     : _readModel.PreparationChoice);
             _modeCoordinator?.ApplyCanonical(_readModel);
+            _world.ApplyCityServiceCell(
+                _readModel,
+                _cityPreviewBuilding,
+                _cityPreviewPadIndex,
+                _cityPreviewQuarterTurns,
+                HasCityBuildingPreview);
+            _world.SetCityServiceCellFocus(
+                IsExactFieldDeskCityOverview &&
+                !_readModel.SliceInfrastructureActive);
             _world.ApplyReturnServicePresentation(
                 IsReturnCheckInAvailable,
                 _readModel.RepairCargoKind,
@@ -1569,7 +1810,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     || kind == LastBearingEventKind.SpareBearingBatchCompleted
                     || kind == LastBearingEventKind.SpareBearingLotCreated
                     || kind == LastBearingEventKind.SpareBearingLotBartered
-                    || kind == LastBearingEventKind.RoutePermitGranted)
+                    || kind == LastBearingEventKind.RoutePermitGranted
+                    || kind == LastBearingEventKind.CityBuildingPlaced
+                    || kind == LastBearingEventKind.CityBuildingMoved
+                    || kind == LastBearingEventKind.CityServiceLinkConnected
+                    || kind == LastBearingEventKind.CityServiceResidentAssigned
+                    || kind == LastBearingEventKind.CityServiceSledAdvanced
+                    || kind == LastBearingEventKind.CityServiceBatchDelivered)
                 {
                     Save();
                     return;
@@ -1730,6 +1977,128 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _garagePreparationIntent = PreparationChoice.Unselected;
             _world?.ApplyGaragePlanIntent(
                 _readModel?.PreparationChoice ?? PreparationChoice.Unselected);
+        }
+
+        private void ClearCityBuildingPreview()
+        {
+            _cityPreviewBuilding = CityBuildingKind.None;
+            _cityPreviewPadIndex = 0;
+            _cityPreviewQuarterTurns = 0;
+        }
+
+        private bool RequireCityConstructionAtHome()
+        {
+            if (!RequireCityNeedInspected())
+            {
+                return false;
+            }
+
+            if (_readModel == null ||
+                _readModel.ExpeditionPhase != ExpeditionPhase.AtHome ||
+                _readModel.PreparationPhase != PreparationPhase.Unselected)
+            {
+                _status =
+                    "City construction is available only while Sasha is home before rig preparation.";
+                return false;
+            }
+
+            if (_readModel.SliceInfrastructureActive)
+            {
+                _status = "The working service cell is already online.";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static int FirstOpenCityPad(LastBearingReadModel model)
+        {
+            for (var pad = 0;
+                 pad < LastBearingState.CityConstructionPadCount;
+                 pad++)
+            {
+                if (model.RecyclerPadIndex != pad &&
+                    model.MachineShopPadIndex != pad &&
+                    model.EmergencyStoragePadIndex != pad)
+                {
+                    return pad;
+                }
+            }
+
+            return 0;
+        }
+
+        private static int CityBuildingPad(
+            LastBearingReadModel model,
+            CityBuildingKind building)
+        {
+            return building switch
+            {
+                CityBuildingKind.Recycler => model.RecyclerPadIndex,
+                CityBuildingKind.MachineShop => model.MachineShopPadIndex,
+                CityBuildingKind.EmergencyStorage =>
+                    model.EmergencyStoragePadIndex,
+                _ => LastBearingState.UnplacedCityPadIndex
+            };
+        }
+
+        private static int CityBuildingQuarterTurns(
+            LastBearingReadModel model,
+            CityBuildingKind building)
+        {
+            return building switch
+            {
+                CityBuildingKind.Recycler => model.RecyclerQuarterTurns,
+                CityBuildingKind.MachineShop => model.MachineShopQuarterTurns,
+                CityBuildingKind.EmergencyStorage =>
+                    model.EmergencyStorageQuarterTurns,
+                _ => 0
+            };
+        }
+
+        private static long CityBuildingPartsCost(CityBuildingKind building)
+        {
+            return building switch
+            {
+                CityBuildingKind.Recycler =>
+                    LastBearingBalanceV1.RecyclerPlacementPartsUnits,
+                CityBuildingKind.MachineShop =>
+                    LastBearingBalanceV1.MachineShopPlacementPartsUnits,
+                CityBuildingKind.EmergencyStorage =>
+                    LastBearingBalanceV1.EmergencyStoragePlacementPartsUnits,
+                _ => 0L
+            };
+        }
+
+        private static bool IsCityPadOccupiedByOther(
+            LastBearingReadModel model,
+            CityBuildingKind building,
+            int padIndex)
+        {
+            return (building != CityBuildingKind.Recycler &&
+                    model.RecyclerPadIndex == padIndex) ||
+                   (building != CityBuildingKind.MachineShop &&
+                    model.MachineShopPadIndex == padIndex) ||
+                   (building != CityBuildingKind.EmergencyStorage &&
+                    model.EmergencyStoragePadIndex == padIndex);
+        }
+
+        private static bool RosterContains(
+            LastBearingReadModel model,
+            string stableId)
+        {
+            for (var index = 0; index < model.Residents.Count; index++)
+            {
+                if (string.Equals(
+                        model.Residents[index].StableId,
+                        stableId,
+                        StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private bool RequireCityNeedInspected()

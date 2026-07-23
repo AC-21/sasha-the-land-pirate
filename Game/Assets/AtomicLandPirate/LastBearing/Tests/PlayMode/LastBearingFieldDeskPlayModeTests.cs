@@ -84,7 +84,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
-        public IEnumerator DeskRendersBothOrderExplanationsAndClearsFocusOnExit()
+        public IEnumerator DeskRendersCurrentOrderAndClearsFocusOnExit()
         {
             LastBearingGameController controller = BuildController();
             yield return null;
@@ -99,8 +99,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 "current-action-detail");
             Label secondaryDetail = document.rootVisualElement.Q<Label>(
                 "secondary-action-detail");
-            Button secondary = document.rootVisualElement.Q<Button>(
-                "secondary-action-button");
+            Button primary = document.rootVisualElement.Q<Button>(
+                "primary-action-button");
 
             Assert.That(primaryDetail.text, Is.EqualTo(projection.PrimaryAction.Detail));
             Assert.That(
@@ -108,18 +108,18 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(projection.SecondaryAction.Detail));
             Assert.That(
                 secondaryDetail.style.display.value,
-                Is.EqualTo(DisplayStyle.Flex));
+                Is.EqualTo(DisplayStyle.None));
 
-            secondary.Focus();
+            primary.Focus();
             yield return null;
             Assert.That(
                 document.rootVisualElement.panel.focusController.focusedElement,
-                Is.SameAs(secondary));
+                Is.SameAs(primary));
             controller.OpenGarageBay();
             desk.Refresh(force: true);
             Assert.That(
                 document.rootVisualElement.panel.focusController.focusedElement,
-                Is.Not.SameAs(secondary));
+                Is.Not.SameAs(primary));
         }
 
         [UnityTest]

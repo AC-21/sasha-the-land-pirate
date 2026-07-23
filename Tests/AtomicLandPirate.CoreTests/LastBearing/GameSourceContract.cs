@@ -34,6 +34,8 @@ namespace AtomicLandPirate.LastBearingTests
                     "RoadFeel/RoadFeelChaseCamera.cs"));
             string comparison = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingCityGrammarComparison.cs"));
+            string cityServiceCell = File.ReadAllText(
+                Path.Combine(runtimeRoot, "LastBearingCityServiceCellView.cs"));
             string recovery = File.ReadAllText(
                 Path.Combine(
                     runtimeRoot,
@@ -490,6 +492,34 @@ namespace AtomicLandPirate.LastBearingTests
                     comparison.IndexOf(forbidden, StringComparison.Ordinal) < 0,
                     "city comparison contains forbidden authority " + forbidden);
             }
+            Require(world, "LastBearingCityServiceCellView");
+            Require(world, "BuildCityServiceCell(");
+            Require(world, "CityServiceCellView?.Apply(");
+            Require(cityServiceCell, "LastBearingReadModel model");
+            Require(cityServiceCell, "CityBuildingKind previewBuilding");
+            Require(cityServiceCell, "Working Cell Pad ");
+            Require(cityServiceCell, "Canonical Recycler");
+            Require(cityServiceCell, "Canonical Machine Shop");
+            Require(cityServiceCell, "Canonical Emergency Storage");
+            Require(cityServiceCell, "Canonical Parts Sled");
+            Require(cityServiceCell, "collider.enabled = false");
+            foreach (string forbidden in new[]
+            {
+                "LastBearingKernel",
+                "LastBearingCommand",
+                "Queue(",
+                "SaveContracts",
+                "PlayerPrefs",
+                "System.IO",
+                "File.",
+                "AddComponent<Rigidbody>",
+            })
+            {
+                TestHarness.True(
+                    cityServiceCell.IndexOf(forbidden, StringComparison.Ordinal) < 0,
+                    "working service cell view contains forbidden authority " +
+                    forbidden);
+            }
             string cityTrialController = Segment(
                 controller,
                 "public void SelectCityGrammarHypothesis(",
@@ -515,6 +545,18 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 infrastructureActivation,
                 "records no layout and D-0030 remains open");
+            Require(controller, "public void SelectCityBuildingPreview(");
+            Require(controller, "public void MoveCityBuildingPreview(");
+            Require(controller, "public void RotateCityBuildingPreview()");
+            Require(controller, "public void CancelCityBuildingPreview()");
+            Require(controller, "public void PlaceCityBuildingPreview()");
+            Require(controller, "new PlaceCityBuildingCommand(");
+            Require(controller, "public void ConnectCityServiceLink()");
+            Require(controller, "new ConnectCityServiceLinkCommand(sequence)");
+            Require(controller, "public void AssignCityServiceResident(");
+            Require(controller, "new AssignCityServiceResidentCommand(");
+            Require(controller, "public void AdvanceCityServiceSled()");
+            Require(controller, "new AdvanceCityServiceSledCommand(");
 
             string beginGaragePlan = Segment(
                 controller,

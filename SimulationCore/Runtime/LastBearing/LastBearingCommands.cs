@@ -122,10 +122,22 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
     public sealed class AdvanceCityServiceSledCommand : LastBearingCommand
     {
-        public AdvanceCityServiceSledCommand(long sequence)
+        public AdvanceCityServiceSledCommand(
+            long sequence,
+            CityDeliveryStage expectedSourceStage)
             : base(sequence)
         {
+            if (expectedSourceStage != CityDeliveryStage.AtRecycler
+                && expectedSourceStage != CityDeliveryStage.InTransit)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(expectedSourceStage));
+            }
+
+            ExpectedSourceStage = expectedSourceStage;
         }
+
+        public CityDeliveryStage ExpectedSourceStage { get; }
     }
 
     public sealed class SelectPreparationCommand : LastBearingCommand

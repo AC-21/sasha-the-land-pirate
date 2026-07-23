@@ -97,7 +97,8 @@ root, checksums, atomic replacement, and fallback behavior stay unchanged.
 - V3 migration, V4 round trip, corrupted-generation fallback, and semantic replay
   remain deterministic and fail closed.
 - Existing garage, driving, depot, return, faction, manufacturing, and trade
-  state remains byte-for-byte compatible except for the explicit schema version.
+  state remains byte-for-byte compatible. Migration changes only the explicit
+  schema-v4 and balance-v2 revision metadata plus the city fields defined above.
 - The changed dependency surface passes core tests, compile, relevant EditMode
   and PlayMode tests, and a 3–5 transition native smoke.
 

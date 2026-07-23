@@ -42,6 +42,8 @@ namespace AtomicLandPirate.LastBearingTests
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingPermitJobPresenter.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCameraRig.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCityGrammarComparison.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCityServiceCellView.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCityServiceCellView.cs.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingDepotApproachRecoveryView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingRouteModulePointView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingPumpHallCutawayView.cs",

@@ -8,6 +8,28 @@ namespace AtomicLandPirate.LastBearingTests
 {
     internal static class CityConstructionTests
     {
+        private const string ReleasedInactiveV3Base64 =
+            "QUxQTEJDMDEDAAMAAAAhAGxhc3QtYmVhcmluZy1wcm90b3R5cGUtYmFsYW5jZS12MQUJAAAAAAAAAAAAAAAAAAAA" +
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQBzYXNoYQITAHJlc2lk" +
+            "ZW50Omh1bWFuOjAwMDEBAAAAEwByZXNpZGVudDpyb2JvdDowMDAxAgAAAAAAAAAAAMDUAQAAAAAAGAAAAAAAAAAS" +
+            "AAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
+            "AAAAAAAAAAAAAAAAAAAAAOgDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEA" +
+            "AAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
+            "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==";
+
+        private const string ReleasedActiveV3Base64 =
+            "QUxQTEJDMDEDAAMAAAAhAGxhc3QtYmVhcmluZy1wcm90b3R5cGUtYmFsYW5jZS12MQYJAAABAAAAAAAAAAEAAAAA" +
+            "AAAAAQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAABQBzYXNoYQETAHJlc2lk" +
+            "ZW50OnJvYm90OjAwMDECAAAAAAAAAAABttQBAAAAAAAYAAAAAAAAABIAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAA" +
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA6AMAAAAAAAAA" +
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
+            "AAAAAAABAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
+            "AAEAAAAAAAAA";
+
         internal static void Run(TestHarness harness)
         {
             harness.Run(
@@ -46,6 +68,9 @@ namespace AtomicLandPirate.LastBearingTests
             harness.Run(
                 "legacy activation retains its public compatibility behavior",
                 LegacyActivationSeedsCompletedCellWithoutCost);
+            harness.Run(
+                "legacy activation rejects non-pristine service cells",
+                LegacyActivationRejectsNonPristineCell);
         }
 
         private static void PlacementAndLinkCostsAreExact()
@@ -271,8 +296,28 @@ namespace AtomicLandPirate.LastBearingTests
                 ResidentRoster.HumanResidentId));
             long beforeDelivery = driver.State.PartsUnits;
 
-            driver.Apply(sequence =>
-                new AdvanceCityServiceSledCommand(sequence));
+            byte[] beforePrematureAdvance =
+                LastBearingCanonicalCodec.Encode(driver.State);
+            InvalidOperationException prematureAdvance =
+                TestHarness.Throws<InvalidOperationException>(
+                    () => driver.Apply(sequence =>
+                        new AdvanceCityServiceSledCommand(
+                            sequence,
+                            CityDeliveryStage.InTransit)),
+                    "second sled edge accepted before the first");
+            TestHarness.Equal(
+                "LAST_BEARING_CITY_SERVICE_SLED_STAGE_PREMATURE",
+                prematureAdvance.Message,
+                "premature sled edge code");
+            TestHarness.True(
+                beforePrematureAdvance.SequenceEqual(
+                    LastBearingCanonicalCodec.Encode(driver.State)),
+                "premature sled edge mutated state");
+
+            LastBearingTickResult firstAdvance = driver.Apply(sequence =>
+                new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.AtRecycler));
             TestHarness.Equal(
                 CityDeliveryStage.InTransit,
                 driver.State.CityDeliveryStage,
@@ -284,6 +329,34 @@ namespace AtomicLandPirate.LastBearingTests
             TestHarness.True(
                 !driver.State.SliceInfrastructureActive,
                 "infrastructure activated before delivery");
+            TestHarness.True(
+                firstAdvance.DomainEvents.Any(item =>
+                    item.Kind == LastBearingEventKind.CityServiceSledAdvanced),
+                "first sled edge event");
+
+            LastBearingTickResult firstReplay = driver.Apply(sequence =>
+                new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.AtRecycler));
+            TestHarness.Equal(
+                CityDeliveryStage.InTransit,
+                driver.State.CityDeliveryStage,
+                "first sled retry stage");
+            TestHarness.Equal(
+                beforeDelivery,
+                driver.State.PartsUnits,
+                "first sled retry duplicated value");
+            TestHarness.True(
+                firstReplay.DomainEvents.Any(item =>
+                    item.Kind == LastBearingEventKind.IdempotentReplayAccepted),
+                "first sled retry replay event");
+            TestHarness.True(
+                !firstReplay.DomainEvents.Any(item =>
+                    item.Kind == LastBearingEventKind.CityServiceSledAdvanced
+                    || item.Kind
+                        == LastBearingEventKind.CityServiceBatchDelivered),
+                "first sled retry emitted delivery effects");
+
             InvalidOperationException earlyPreparation =
                 TestHarness.Throws<InvalidOperationException>(
                     () => driver.Apply(sequence =>
@@ -298,7 +371,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "early preparation code");
 
             driver.Apply(sequence =>
-                new AdvanceCityServiceSledCommand(sequence));
+                new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.InTransit));
             TestHarness.Equal(
                 CityDeliveryStage.DeliveredToWorkshop,
                 driver.State.CityDeliveryStage,
@@ -314,12 +389,29 @@ namespace AtomicLandPirate.LastBearingTests
                 "infrastructure not activated by delivery");
 
             long deliveredParts = driver.State.PartsUnits;
-            driver.Apply(sequence =>
-                new AdvanceCityServiceSledCommand(sequence));
+            LastBearingTickResult secondReplay = driver.Apply(sequence =>
+                new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.InTransit));
             TestHarness.Equal(
                 deliveredParts,
                 driver.State.PartsUnits,
                 "delivery replay duplicated value");
+            TestHarness.True(
+                secondReplay.DomainEvents.Any(item =>
+                    item.Kind == LastBearingEventKind.IdempotentReplayAccepted),
+                "second sled retry replay event");
+            TestHarness.True(
+                !secondReplay.DomainEvents.Any(item =>
+                    item.Kind == LastBearingEventKind.CityServiceSledAdvanced
+                    || item.Kind
+                        == LastBearingEventKind.CityServiceBatchDelivered),
+                "second sled retry emitted delivery effects");
+            TestHarness.Throws<ArgumentOutOfRangeException>(
+                () => new AdvanceCityServiceSledCommand(
+                    1,
+                    CityDeliveryStage.DeliveredToWorkshop),
+                "delivered stage accepted as a source edge");
             driver.Apply(sequence => new SelectPreparationCommand(
                 sequence,
                 PreparationChoice.WorkshopPush,
@@ -372,10 +464,14 @@ namespace AtomicLandPirate.LastBearingTests
                 ResidentRoster.RobotResidentId));
             AssertV4RoundTrip(driver.State, "staffed");
             driver.Apply(sequence =>
-                new AdvanceCityServiceSledCommand(sequence));
+                new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.AtRecycler));
             AssertV4RoundTrip(driver.State, "in-transit");
             driver.Apply(sequence =>
-                new AdvanceCityServiceSledCommand(sequence));
+                new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.InTransit));
             AssertV4RoundTrip(driver.State, "delivered");
         }
 
@@ -427,13 +523,17 @@ namespace AtomicLandPirate.LastBearingTests
                 driver.View.NextObjective,
                 "first sled objective");
             driver.Apply(sequence =>
-                new AdvanceCityServiceSledCommand(sequence));
+                new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.AtRecycler));
             TestHarness.Equal(
                 "advance-city-service-sled",
                 driver.View.NextObjective,
                 "second sled objective");
             driver.Apply(sequence =>
-                new AdvanceCityServiceSledCommand(sequence));
+                new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.InTransit));
             TestHarness.Equal(
                 "assign-expedition-resident",
                 driver.View.NextObjective,
@@ -446,9 +546,14 @@ namespace AtomicLandPirate.LastBearingTests
                 LastBearingScenarioFactory.CreateInitial(
                     ColonyComposition.Mixed,
                     2309);
-            byte[] inactiveV3 =
+            byte[] generatedInactiveV3 =
                 LastBearingCanonicalCodec.EncodeLegacyV3ForMigrationTests(
                     inactive);
+            byte[] inactiveV3 =
+                Convert.FromBase64String(ReleasedInactiveV3Base64);
+            TestHarness.True(
+                inactiveV3.SequenceEqual(generatedInactiveV3),
+                "released inactive v3 bytes drifted");
             TestHarness.Equal((byte)3, inactiveV3[8], "inactive v3 marker");
             LastBearingState migratedInactive = Decode(inactiveV3, "inactive");
             TestHarness.Equal(
@@ -478,9 +583,14 @@ namespace AtomicLandPirate.LastBearingTests
                 2310);
             activeDriver.Apply(sequence =>
                 new ActivateSliceInfrastructureCommand(sequence));
-            byte[] activeV3 =
+            byte[] generatedActiveV3 =
                 LastBearingCanonicalCodec.EncodeLegacyV3ForMigrationTests(
                     activeDriver.State);
+            byte[] activeV3 =
+                Convert.FromBase64String(ReleasedActiveV3Base64);
+            TestHarness.True(
+                activeV3.SequenceEqual(generatedActiveV3),
+                "released active v3 bytes drifted");
             LastBearingState first = Decode(activeV3, "active first");
             LastBearingState second = Decode(activeV3, "active second");
             TestHarness.Equal(0, first.RecyclerPadIndex, "migrated recycler pad");
@@ -607,6 +717,57 @@ namespace AtomicLandPirate.LastBearingTests
                 "legacy infrastructure inactive");
         }
 
+        private static void LegacyActivationRejectsNonPristineCell()
+        {
+            var partial = new CoreTestDriver(
+                ColonyComposition.HumanOnly,
+                2315);
+            partial.Apply(sequence => new PlaceCityBuildingCommand(
+                sequence,
+                CityBuildingKind.Recycler,
+                4,
+                3));
+            AssertLegacyActivationRejected(partial, "partial placement");
+
+            CoreTestDriver linked = BuildLinkedCell(
+                ColonyComposition.RobotOnly,
+                2316);
+            AssertLegacyActivationRejected(linked, "linked cell");
+
+            CoreTestDriver inTransit = BuildLinkedCell(
+                ColonyComposition.Mixed,
+                2317);
+            inTransit.Apply(sequence =>
+                new AssignCityServiceResidentCommand(
+                    sequence,
+                    ResidentRoster.RobotResidentId));
+            inTransit.Apply(sequence =>
+                new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.AtRecycler));
+            AssertLegacyActivationRejected(inTransit, "in-transit cell");
+        }
+
+        private static void AssertLegacyActivationRejected(
+            CoreTestDriver driver,
+            string label)
+        {
+            byte[] before = LastBearingCanonicalCodec.Encode(driver.State);
+            InvalidOperationException error =
+                TestHarness.Throws<InvalidOperationException>(
+                    () => driver.Apply(sequence =>
+                        new ActivateSliceInfrastructureCommand(sequence)),
+                    label + " accepted legacy activation");
+            TestHarness.Equal(
+                "LAST_BEARING_LEGACY_ACTIVATION_CITY_STATE_CONFLICT",
+                error.Message,
+                label + " rejection code");
+            TestHarness.True(
+                before.SequenceEqual(
+                    LastBearingCanonicalCodec.Encode(driver.State)),
+                label + " rejection mutated state");
+        }
+
         private static CoreTestDriver BuildLinkedCell(
             ColonyComposition composition,
             int worldSeed)
@@ -643,9 +804,13 @@ namespace AtomicLandPirate.LastBearingTests
                 sequence,
                 residentId));
             driver.Apply(sequence =>
-                new AdvanceCityServiceSledCommand(sequence));
+                new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.AtRecycler));
             driver.Apply(sequence =>
-                new AdvanceCityServiceSledCommand(sequence));
+                new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.InTransit));
         }
 
         private static void PlaceAllBuildings(CoreTestDriver driver)

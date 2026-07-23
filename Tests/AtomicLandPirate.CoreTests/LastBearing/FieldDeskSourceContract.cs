@@ -143,17 +143,14 @@ namespace AtomicLandPirate.LastBearingTests
             {
                 ".AssignDefaultLeadResident(",
                 ".InspectCityNeed(",
-                ".SelectCityGrammarHypothesis(",
-                ".ManipulateCityGrammarPrimary(",
-                ".RotateCityGrammarPrimary(",
-                ".ToggleCityGrammarTrialPiece(",
-                ".ConnectCityGrammarLogistics(",
-                ".AdvanceCityGrammarDelivery(",
-                ".RecordCityGrammarPathRead(",
-                ".ResetActiveCityGrammarTrial(",
-                ".LeaveCityGrammarComparison(",
-                ".ResetCityGrammarComparison(",
-                ".ActivateInfrastructure(",
+                ".SelectCityBuildingPreview(",
+                ".MoveCityBuildingPreview(",
+                ".RotateCityBuildingPreview(",
+                ".PlaceCityBuildingPreview(",
+                ".ConnectCityServiceLink(",
+                ".AssignCityServiceResident(",
+                ".AdvanceCityServiceSled(",
+                ".CancelCityBuildingPreview(",
                 ".BeginGaragePlan(",
                 ".OpenGarageBay(",
                 ".CommitExpedition(",
@@ -168,6 +165,29 @@ namespace AtomicLandPirate.LastBearingTests
             })
             {
                 Require(fieldDesk, delegation);
+            }
+
+            foreach (string retiredDelegation in new[]
+            {
+                ".SelectCityGrammarHypothesis(",
+                ".ManipulateCityGrammarPrimary(",
+                ".RotateCityGrammarPrimary(",
+                ".ToggleCityGrammarTrialPiece(",
+                ".ConnectCityGrammarLogistics(",
+                ".AdvanceCityGrammarDelivery(",
+                ".RecordCityGrammarPathRead(",
+                ".ResetActiveCityGrammarTrial(",
+                ".LeaveCityGrammarComparison(",
+                ".ResetCityGrammarComparison(",
+                ".ActivateInfrastructure(",
+            })
+            {
+                TestHarness.True(
+                    fieldDesk.IndexOf(
+                        retiredDelegation,
+                        StringComparison.Ordinal) < 0,
+                    "Field Desk still surfaces retired comparison control " +
+                    retiredDelegation);
             }
 
             foreach (string source in new[] { fieldDesk, fieldDeskPresenter })

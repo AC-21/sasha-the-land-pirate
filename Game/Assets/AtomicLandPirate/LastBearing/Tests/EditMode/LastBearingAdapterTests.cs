@@ -350,6 +350,100 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
+        public void WorkingServiceCellBuildsMovesLocksStaffsAndDelivers()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.Mixed);
+            controller.InspectCityNeed();
+            LastBearingCityServiceCellView view =
+                controller.World!.CityServiceCellView!;
+
+            controller.SelectCityBuildingPreview(CityBuildingKind.Recycler);
+            Assert.That(controller.CityPreviewPadIndex, Is.EqualTo(0));
+            Assert.That(controller.CityPreviewPartsCost, Is.EqualTo(2));
+            Assert.That(view.IsRecyclerVisible, Is.True);
+            controller.MoveCityBuildingPreview(1);
+            controller.RotateCityBuildingPreview();
+            Assert.That(controller.ReadModel!.PartsUnits, Is.EqualTo(24));
+            controller.CancelCityBuildingPreview();
+            Assert.That(controller.HasCityBuildingPreview, Is.False);
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(24));
+
+            controller.SelectCityBuildingPreview(CityBuildingKind.Recycler);
+            controller.PlaceCityBuildingPreview();
+            SimulateOneTick(controller);
+            Assert.That(controller.ReadModel.RecyclerPadIndex, Is.EqualTo(0));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(22));
+
+            controller.SelectCityBuildingPreview(CityBuildingKind.MachineShop);
+            controller.RotateCityBuildingPreview();
+            controller.RotateCityBuildingPreview();
+            controller.PlaceCityBuildingPreview();
+            SimulateOneTick(controller);
+            Assert.That(controller.ReadModel.MachineShopPadIndex, Is.EqualTo(1));
+            Assert.That(controller.ReadModel.MachineShopQuarterTurns, Is.EqualTo(2));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(19));
+
+            controller.SelectCityBuildingPreview(
+                CityBuildingKind.EmergencyStorage);
+            controller.PlaceCityBuildingPreview();
+            SimulateOneTick(controller);
+            Assert.That(
+                controller.ReadModel.EmergencyStoragePadIndex,
+                Is.EqualTo(2));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(18));
+
+            controller.SelectCityBuildingPreview(CityBuildingKind.Recycler);
+            controller.MoveCityBuildingPreview(-1);
+            controller.PlaceCityBuildingPreview();
+            SimulateOneTick(controller);
+            Assert.That(controller.ReadModel.RecyclerPadIndex, Is.EqualTo(4));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(18),
+                "A pre-link move must not debit placement cost twice.");
+
+            Assert.That(controller.CanConnectCityServiceLink, Is.True);
+            controller.ConnectCityServiceLink();
+            SimulateOneTick(controller);
+            Assert.That(controller.ReadModel.CityServiceLinkConnected, Is.True);
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(17));
+            Assert.That(view.IsLinkVisible, Is.True);
+
+            controller.SelectCityBuildingPreview(CityBuildingKind.Recycler);
+            Assert.That(controller.HasCityBuildingPreview, Is.False);
+            controller.AssignCityServiceResident(ResidentRoster.RobotResidentId);
+            SimulateOneTick(controller);
+            Assert.That(
+                controller.ReadModel.CityServiceResidentId,
+                Is.EqualTo(ResidentRoster.RobotResidentId));
+            Assert.That(view.IsRobotOperatorVisible, Is.True);
+            Assert.That(view.IsHumanOperatorVisible, Is.False);
+
+            controller.AdvanceCityServiceSled();
+            SimulateOneTick(controller);
+            Assert.That(
+                controller.ReadModel.CityDeliveryStage,
+                Is.EqualTo(CityDeliveryStage.InTransit));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(17));
+            controller.AdvanceCityServiceSled();
+            SimulateOneTick(controller);
+            Assert.That(
+                controller.ReadModel.CityDeliveryStage,
+                Is.EqualTo(CityDeliveryStage.DeliveredToWorkshop));
+            Assert.That(controller.ReadModel.CityDeliveryCount, Is.EqualTo(1));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(19));
+            Assert.That(controller.ReadModel.SliceInfrastructureActive, Is.True);
+            Assert.That(
+                controller.ReadModel.NextObjective,
+                Is.EqualTo("select-preparation-and-module"));
+            Assert.That(view.IsSledVisible, Is.True);
+            Assert.That(controller.CanAdvanceCityServiceSled, Is.False);
+        }
+
+        [Test]
         public void CityGrammarComparisonIsReversibleFixedCameraAndCoreIsolated()
         {
             _root = new GameObject(LastBearingGameController.RuntimeRootName);
