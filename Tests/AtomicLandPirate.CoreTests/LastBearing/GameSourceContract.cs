@@ -101,6 +101,28 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 controller,
                 "public bool IsWreckLineFrameRailRecoveryAvailable");
+            Require(controller, "public bool CanStartHotShift");
+            Require(controller, "public void StartHotShift()");
+            string hotShiftOperation = Segment(
+                controller,
+                "public void StartHotShift()",
+                "public void BeginGaragePlan(");
+            Require(hotShiftOperation, "_readModel.HotShiftCompletedCount");
+            Require(hotShiftOperation, "new RunHotShiftCommand(");
+            Require(controller, "LastBearingEventKind.HotShiftStarted");
+            Require(
+                controller,
+                "LastBearingEventKind.HotShiftCheckpointReached");
+            Require(controller, "LastBearingEventKind.HotShiftCompleted");
+            string shortcuts = Segment(
+                controller,
+                "private void HandleGlobalShortcuts()",
+                "private void SimulateOneTick()");
+            TestHarness.True(
+                shortcuts.IndexOf(
+                    "StartHotShift",
+                    StringComparison.Ordinal) < 0,
+                "Hot Shift must remain a deliberate Field Desk action, not an E shortcut");
             Require(controller, "public void BeginGaragePlan(");
             Require(controller, "public void CommitGaragePlan(");
             Require(controller, "public void InstallPatchworkSkidPlate()");
@@ -570,6 +592,8 @@ namespace AtomicLandPirate.LastBearingTests
             Require(cityServiceCell, "Canonical Machine Shop");
             Require(cityServiceCell, "Canonical Emergency Storage");
             Require(cityServiceCell, "Canonical Parts Sled");
+            Require(cityServiceCell, "model.HotShiftElapsedTicks");
+            Require(cityServiceCell, "model.HotShiftRequiredTicks");
             Require(cityServiceCell, "collider.enabled = false");
             foreach (string forbidden in new[]
             {
@@ -1237,6 +1261,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(world, "ApplyOneGoodBatch(");
             Require(world, "ApplyGaragePreparationProgress(");
             Require(hud, "ONE GOOD BATCH");
+            Require(hud, "Hot shift  ");
+            Require(hud, "operator borrowed · no added water draw");
+            Require(hud, "-0.010 water / settlement tick");
+            Require(hud, "COMMISSIONING DELIVERY · ONCE");
             Require(hud, "ONE-OFF BARTER · CARAVAN EXCHANGE CLOSED");
             Require(hud, "Future route toll  ");
             Require(hud, "model.FutureRouteTollFuelUnits");

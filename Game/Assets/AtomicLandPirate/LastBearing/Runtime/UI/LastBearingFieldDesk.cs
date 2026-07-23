@@ -512,6 +512,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 case LastBearingFieldDeskIntent.StaffCityServiceRobot: _controller.AssignCityServiceResident(ResidentRoster.RobotResidentId); break;
                 case LastBearingFieldDeskIntent.AdvanceCityServiceSled: _controller.AdvanceCityServiceSled(); break;
                 case LastBearingFieldDeskIntent.CancelCityBuildingPreview: _controller.CancelCityBuildingPreview(); break;
+                case LastBearingFieldDeskIntent.RunHotShift: _controller.StartHotShift(); break;
                 case LastBearingFieldDeskIntent.BeginWorkshopPush: _controller.BeginGaragePlan(PreparationChoice.WorkshopPush); break;
                 case LastBearingFieldDeskIntent.BeginCivicBuffer: _controller.BeginGaragePlan(PreparationChoice.CivicBuffer); break;
                 case LastBearingFieldDeskIntent.OpenGarage: _controller.OpenGarageBay(); break;

@@ -204,10 +204,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     Mathf.Atan2(routeDirection.z, routeDirection.x) *
                     Mathf.Rad2Deg,
                     0f);
+                float sledProgress = (int)model.CityDeliveryStage / 2f;
+                if (model.CityDeliveryStage ==
+                    CityDeliveryStage.DeliveredToWorkshop)
+                {
+                    sledProgress = model.HotShiftPhase ==
+                                   HotShiftPhase.InProgress
+                        ? model.HotShiftRequiredTicks <= 0
+                            ? 0f
+                            : Mathf.Clamp01(
+                                (float)model.HotShiftElapsedTicks /
+                                model.HotShiftRequiredTicks)
+                        : 1f;
+                }
+
                 _sled.localPosition = Vector3.Lerp(
                     WithHeight(routeStart, 0.38f),
                     WithHeight(routeEnd, 0.38f),
-                    (int)model.CityDeliveryStage / 2f);
+                    sledProgress);
             }
 
             bool humanAssigned = string.Equals(

@@ -814,14 +814,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         atRecycler
                             ? "The first advance moves the calibration sled " +
                               "into transit; it returns no parts yet."
-                            : "The second advance completes the delivery and " +
+                            : "The commissioning delivery completes the route and " +
                               "returns exactly 2 reclaimed parts once.",
                         _bodyStyle);
                     if (_controller.CanAdvanceCityServiceSled &&
                         GUILayout.Button(
                             atRecycler
                                 ? "ADVANCE PARTS SLED"
-                                : "DELIVER SLED · +2 PARTS",
+                                : "COMMISSIONING DELIVERY · ONCE",
                             _buttonStyle))
                     {
                         _controller.AdvanceCityServiceSled();
@@ -1453,8 +1453,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         ? "Click ADVANCE PARTS SLED above; the first advance " +
                           "moves the calibration sled into transit and returns " +
                           "no parts yet."
-                        : "Click DELIVER SLED · +2 PARTS above; the second " +
-                          "advance completes the delivery and returns exactly " +
+                        : "Click COMMISSIONING DELIVERY · ONCE above; the second " +
+                          "advance completes commissioning and returns exactly " +
                           "2 reclaimed parts once.";
                 default:
                     return null;
@@ -1758,6 +1758,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 .Append("  ·  projected round-trip loss ")
                 .Append(model.ProjectedRoundTripConditionLossMilli)
                 .AppendLine();
+            text.Append("Hot shift  ")
+                .Append(FormatHotShift(model))
+                .AppendLine();
             text.Append("Route  ").Append(model.RouteKind)
                 .Append("  ").Append(model.RouteProgressTicks)
                 .Append('/').Append(model.RouteTargetTicks)
@@ -1799,6 +1802,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
             text.Append("Next city decision  ")
                 .Append(model.NextCityDecision);
             return text.ToString();
+        }
+
+        private static string FormatHotShift(LastBearingReadModel model)
+        {
+            if (model.HotShiftPhase == HotShiftPhase.InProgress)
+            {
+                return (model.IsHotShiftStalledByWorkshopPush
+                        ? "stalled · operator borrowed · no added water draw"
+                        : "working · -0.010 water / settlement tick") +
+                    " · " + model.HotShiftElapsedTicks + '/' +
+                    model.HotShiftRequiredTicks;
+            }
+
+            return "idle · completed " + model.HotShiftCompletedCount +
+                   " · next run 1 fuel / 120 ticks / +2 parts";
         }
 
         private static string FormatSigned(long value)

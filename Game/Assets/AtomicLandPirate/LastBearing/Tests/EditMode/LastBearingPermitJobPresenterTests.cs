@@ -165,8 +165,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             AssertWorkingServiceCellGuidance(
                 state,
                 "advance-city-service-sled",
-                "Deliver the sled to the workshop",
-                "DELIVER SLED · +2 PARTS",
+                "Complete the commissioning delivery",
+                "COMMISSIONING DELIVERY · ONCE",
                 "returns exactly 2 reclaimed parts once");
             state = ApplyOne(
                 state,

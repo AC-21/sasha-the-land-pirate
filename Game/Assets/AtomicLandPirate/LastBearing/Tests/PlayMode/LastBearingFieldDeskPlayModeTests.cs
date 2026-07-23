@@ -158,6 +158,123 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
         }
 
+        [UnityTest]
+        public IEnumerator HotShiftStallsThenMovesTheCommissioningSledAndAutosaves()
+        {
+            LastBearingGameController controller = BuildController();
+            LastBearingFieldDesk desk = RequireDesk(controller);
+            CompleteWorkingServiceCell(controller);
+            Transform sled = controller.World!.CityServiceCellView!.transform.Find(
+                "Canonical Parts Sled");
+            Assert.That(sled, Is.Not.Null);
+            Vector3 commissionedAtShop = sled.localPosition;
+
+            controller.BeginGaragePlan(PreparationChoice.WorkshopPush);
+            controller.CommitGaragePlan(VehicleModule.WinchAssembly);
+            InvokeSimulationTick(controller);
+            controller.ShowCityOverview();
+            yield return null;
+            desk.Refresh(force: true);
+
+            LastBearingFieldDeskProjection available =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                available.PrimaryAction.Label,
+                Is.EqualTo("INSPECT SASHA'S RIG"));
+            Assert.That(
+                available.SecondaryAction.Label,
+                Is.EqualTo(
+                    "RUN HOT SHIFT · 1 FUEL · 120 TICKS · +2 PARTS"));
+
+            long partsBefore = controller.ReadModel!.PartsUnits;
+            controller.StartHotShift();
+            InvokeSimulationTick(controller);
+            desk.Refresh(force: true);
+            Assert.That(
+                controller.ReadModel.HotShiftPhase,
+                Is.EqualTo(HotShiftPhase.InProgress));
+            Assert.That(controller.ReadModel.HotShiftElapsedTicks, Is.Zero);
+            Assert.That(
+                LastBearingFieldDeskPresenter.Present(controller)
+                    .SecondaryAction.Label,
+                Is.EqualTo("HOT SHIFT · STALLED · 0 / 120"));
+            Assert.That(
+                controller.Status,
+                Does.Contain("borrowed the operator"));
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith("LB_SAVE_OK ·"));
+            Vector3 stalledAtRecycler = sled.localPosition;
+            Assert.That(
+                Vector3.Distance(stalledAtRecycler, commissionedAtShop),
+                Is.GreaterThan(0.01f));
+
+            InvokeSimulationTick(controller);
+            Assert.That(sled.localPosition, Is.EqualTo(stalledAtRecycler));
+
+            var preparationGuard = 0;
+            long preparationBound =
+                controller.ReadModel!.PreparationRemainingTicks + 2;
+            while (controller.ReadModel!.PreparationPhase ==
+                       PreparationPhase.Preparing &&
+                   preparationGuard < preparationBound)
+            {
+                InvokeSimulationTick(controller);
+                preparationGuard++;
+            }
+
+            Assert.That(
+                controller.ReadModel!.PreparationPhase,
+                Is.EqualTo(PreparationPhase.Ready));
+            Assert.That(controller.ReadModel.HotShiftElapsedTicks, Is.Zero);
+            InvokeSimulationTick(controller);
+            Assert.That(controller.ReadModel.HotShiftElapsedTicks, Is.EqualTo(1));
+            Assert.That(
+                Vector3.Distance(sled.localPosition, stalledAtRecycler),
+                Is.GreaterThan(0.001f));
+
+            var checkpointGuard = 0;
+            while (controller.ReadModel.HotShiftElapsedTicks < 60 &&
+                   checkpointGuard <
+                       LastBearingBalanceV1.HotShiftRequiredSettlementTicks)
+            {
+                InvokeSimulationTick(controller);
+                checkpointGuard++;
+            }
+
+            Assert.That(controller.ReadModel.HotShiftElapsedTicks, Is.EqualTo(60));
+            Assert.That(controller.Status, Does.Contain("checkpoint: 60 / 120"));
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith("LB_SAVE_OK ·"));
+
+            var completionGuard = 0;
+            while (controller.ReadModel.HotShiftPhase ==
+                       HotShiftPhase.InProgress &&
+                   completionGuard <
+                       LastBearingBalanceV1.HotShiftRequiredSettlementTicks)
+            {
+                InvokeSimulationTick(controller);
+                completionGuard++;
+            }
+
+            Assert.That(controller.ReadModel.HotShiftPhase, Is.EqualTo(HotShiftPhase.Idle));
+            Assert.That(controller.ReadModel.HotShiftCompletedCount, Is.EqualTo(1));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(partsBefore + 2));
+            Assert.That(controller.Status, Does.Contain("Hot Shift complete"));
+            Assert.That(
+                Vector3.Distance(sled.localPosition, commissionedAtShop),
+                Is.LessThan(0.001f));
+
+            controller.StartHotShift();
+            InvokeSimulationTick(controller);
+            Assert.That(controller.ReadModel.HotShiftCompletedCount, Is.EqualTo(1));
+            Assert.That(controller.ReadModel.HotShiftPhase, Is.EqualTo(HotShiftPhase.InProgress));
+            Assert.That(
+                Vector3.Distance(sled.localPosition, stalledAtRecycler),
+                Is.LessThan(0.05f));
+        }
+
         private LastBearingGameController BuildController()
         {
             _root = new GameObject(LastBearingGameController.RuntimeRootName);
@@ -202,6 +319,37 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.AdvanceCityGrammarDelivery();
             controller.AdvanceCityGrammarDelivery();
             controller.RecordCityGrammarPathRead(clear: true);
+        }
+
+        private static void CompleteWorkingServiceCell(
+            LastBearingGameController controller)
+        {
+            controller.InspectCityNeed();
+            PlaceBuilding(controller, CityBuildingKind.Recycler);
+            PlaceBuilding(controller, CityBuildingKind.MachineShop);
+            PlaceBuilding(controller, CityBuildingKind.EmergencyStorage);
+            controller.ConnectCityServiceLink();
+            InvokeSimulationTick(controller);
+            controller.AssignCityServiceResident(ResidentRoster.HumanResidentId);
+            InvokeSimulationTick(controller);
+            controller.AdvanceCityServiceSled();
+            InvokeSimulationTick(controller);
+            controller.AdvanceCityServiceSled();
+            InvokeSimulationTick(controller);
+
+            Assert.That(controller.ReadModel!.SliceInfrastructureActive, Is.True);
+            Assert.That(
+                controller.ReadModel.CityDeliveryStage,
+                Is.EqualTo(CityDeliveryStage.DeliveredToWorkshop));
+        }
+
+        private static void PlaceBuilding(
+            LastBearingGameController controller,
+            CityBuildingKind building)
+        {
+            controller.SelectCityBuildingPreview(building);
+            controller.PlaceCityBuildingPreview();
+            InvokeSimulationTick(controller);
         }
 
         private static void InvokeSimulationTick(
