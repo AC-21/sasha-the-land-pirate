@@ -6,7 +6,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public sealed class LastBearingState
     {
-        public const int CurrentSchemaVersion = 6;
+        public const int CurrentSchemaVersion = 7;
         public const int CityConstructionPadCount = 5;
         public const int UnplacedCityPadIndex = -1;
         public const string SashaProtagonistId = "sasha";
@@ -44,6 +44,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             "city:last-bearing:service-slot:working-cell";
         public const string CityServiceBatchId =
             "city:last-bearing:delivery:parts-batch:0001";
+        public const string HotShiftId =
+            "city:last-bearing:production:hot-shift";
 
         internal LastBearingState(LastBearingStateBuilder builder)
         {
@@ -90,6 +92,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
             CityServiceResidentId = builder.CityServiceResidentId;
             CityDeliveryStage = builder.CityDeliveryStage;
             CityDeliveryCount = builder.CityDeliveryCount;
+            HotShiftPhase = builder.HotShiftPhase;
+            HotShiftElapsedTicks = builder.HotShiftElapsedTicks;
+            HotShiftRequiredTicks = builder.HotShiftRequiredTicks;
+            HotShiftFuelCommittedUnits =
+                builder.HotShiftFuelCommittedUnits;
+            HotShiftCompletedCount = builder.HotShiftCompletedCount;
 
             WaterMilli = builder.WaterMilli;
             PartsUnits = builder.PartsUnits;
@@ -234,6 +242,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public CityDeliveryStage CityDeliveryStage { get; private set; }
 
         public int CityDeliveryCount { get; private set; }
+
+        public HotShiftPhase HotShiftPhase { get; private set; }
+
+        public long HotShiftElapsedTicks { get; private set; }
+
+        public long HotShiftRequiredTicks { get; private set; }
+
+        public long HotShiftFuelCommittedUnits { get; private set; }
+
+        public long HotShiftCompletedCount { get; private set; }
 
         public long WaterMilli { get; private set; }
 
@@ -441,6 +459,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
             CityServiceResidentId = state.CityServiceResidentId;
             CityDeliveryStage = state.CityDeliveryStage;
             CityDeliveryCount = state.CityDeliveryCount;
+            HotShiftPhase = state.HotShiftPhase;
+            HotShiftElapsedTicks = state.HotShiftElapsedTicks;
+            HotShiftRequiredTicks = state.HotShiftRequiredTicks;
+            HotShiftFuelCommittedUnits =
+                state.HotShiftFuelCommittedUnits;
+            HotShiftCompletedCount = state.HotShiftCompletedCount;
             WaterMilli = state.WaterMilli;
             PartsUnits = state.PartsUnits;
             FuelUnits = state.FuelUnits;
@@ -549,6 +573,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
         internal string? CityServiceResidentId;
         internal CityDeliveryStage CityDeliveryStage;
         internal int CityDeliveryCount;
+        internal HotShiftPhase HotShiftPhase;
+        internal long HotShiftElapsedTicks;
+        internal long HotShiftRequiredTicks;
+        internal long HotShiftFuelCommittedUnits;
+        internal long HotShiftCompletedCount;
         internal long WaterMilli;
         internal long PartsUnits;
         internal long FuelUnits;

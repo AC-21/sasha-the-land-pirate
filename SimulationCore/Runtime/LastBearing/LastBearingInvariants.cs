@@ -78,6 +78,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             ValidatePreparation(state);
             ValidateCityConstruction(state);
+            ValidateHotShift(state);
             ValidateVehicleAndTransaction(state);
             ValidateCargo(state);
             ValidateFaction(state);
@@ -190,6 +191,51 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 padIndex != LastBearingState.UnplacedCityPadIndex
                     || quarterTurns == 0,
                 "LAST_BEARING_CITY_BUILDING_UNPLACED_INVALID");
+        }
+
+        private static void ValidateHotShift(LastBearingState state)
+        {
+            RequireEnum(state.HotShiftPhase, "HOT_SHIFT_PHASE");
+            RequireNonnegative(
+                state.HotShiftElapsedTicks,
+                "HOT_SHIFT_ELAPSED_TICKS");
+            RequireNonnegative(
+                state.HotShiftRequiredTicks,
+                "HOT_SHIFT_REQUIRED_TICKS");
+            RequireNonnegative(
+                state.HotShiftFuelCommittedUnits,
+                "HOT_SHIFT_FUEL_COMMITTED");
+            RequireNonnegative(
+                state.HotShiftCompletedCount,
+                "HOT_SHIFT_COMPLETED_COUNT");
+
+            if (state.HotShiftPhase == HotShiftPhase.Idle)
+            {
+                Require(
+                    state.HotShiftElapsedTicks == 0
+                    && state.HotShiftRequiredTicks == 0
+                    && state.HotShiftFuelCommittedUnits == 0,
+                    "LAST_BEARING_HOT_SHIFT_IDLE_STATE_INVALID");
+                return;
+            }
+
+            Require(
+                state.SliceInfrastructureActive
+                && state.CityDeliveryStage
+                    == CityDeliveryStage.DeliveredToWorkshop
+                && state.PreparationChoice
+                    != PreparationChoice.Unselected
+                && state.PlannedModule != VehicleModule.None
+                && state.ModuleInstallationState
+                    != ModuleInstallationState.None
+                && state.HotShiftRequiredTicks
+                    == LastBearingBalanceV1
+                        .HotShiftRequiredSettlementTicks
+                && state.HotShiftElapsedTicks
+                    < state.HotShiftRequiredTicks
+                && state.HotShiftFuelCommittedUnits
+                    == LastBearingBalanceV1.HotShiftFuelCostUnits,
+                "LAST_BEARING_HOT_SHIFT_PROGRESS_STATE_INVALID");
         }
 
         private static void ValidatePreparation(LastBearingState state)

@@ -45,6 +45,7 @@ namespace AtomicLandPirate.LastBearingTests
             SimulationTests.Run(harness);
             RigUpgradeTests.Run(harness, repoRoot);
             FrameRailSalvageTests.RunSave(harness, repoRoot);
+            HotShiftTests.RunSave(harness, repoRoot);
             SaveAtomicTests.Run(harness, repoRoot);
             HomecomingTests.RunSave(harness, repoRoot);
             SaveBoundaryTests.Run(harness, repoRoot);
@@ -117,6 +118,10 @@ namespace AtomicLandPirate.LastBearingTests
                 case "v0-wreck-line-salvage":
                     FrameRailSalvageTests.RunCore(harness);
                     FrameRailSalvageTests.RunSave(harness, repoRoot);
+                    break;
+                case "v0-hot-shift":
+                    HotShiftTests.RunCore(harness);
+                    HotShiftTests.RunSave(harness, repoRoot);
                     break;
                 default:
                     Console.Error.WriteLine("unknown protected test: " + id);

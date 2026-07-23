@@ -72,6 +72,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             var spareBearingBatchWasInProgressAtTickStart =
                 state.SpareBearingBatchPhase
                     == SpareBearingBatchPhase.InProgress;
+            var hotShiftWasInProgressAtTickStart =
+                state.HotShiftPhase == HotShiftPhase.InProgress;
             var expectedSequence = builder.NextCommandSequence;
 
             for (var index = 0; index < commands.Count; index++)
@@ -107,6 +109,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     builder,
                     homeScale,
                     spareBearingBatchWasInProgressAtTickStart,
+                    hotShiftWasInProgressAtTickStart,
                     events);
                 AdvanceFactionClock(builder, homeScale, events);
                 AdvanceCrisisClock(builder, homeScale);
@@ -167,6 +170,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
             else if (command is AdvanceCityServiceSledCommand advanceSled)
             {
                 ApplyAdvanceCityServiceSled(builder, advanceSled, events);
+            }
+            else if (command is RunHotShiftCommand runHotShift)
+            {
+                ApplyRunHotShift(builder, runHotShift, events);
             }
             else if (command is SelectPreparationCommand selectPreparation)
             {
@@ -661,6 +668,104 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 "settlement:last-bearing:preparation",
                 0,
                 builder.PreparationRequiredTicks);
+        }
+
+        private static void ApplyRunHotShift(
+            LastBearingStateBuilder builder,
+            RunHotShiftCommand command,
+            LastBearingEventSink events)
+        {
+            if (builder.HotShiftPhase == HotShiftPhase.InProgress)
+            {
+                if (command.ExpectedCompletedCount
+                    == builder.HotShiftCompletedCount)
+                {
+                    EmitReplay(builder, command.Sequence, events);
+                    return;
+                }
+
+                throw new InvalidOperationException(
+                    "LAST_BEARING_HOT_SHIFT_EXPECTED_COMPLETION_MISMATCH");
+            }
+
+            if (builder.HotShiftCompletedCount > 0
+                && command.ExpectedCompletedCount
+                    == builder.HotShiftCompletedCount - 1)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (command.ExpectedCompletedCount
+                != builder.HotShiftCompletedCount)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_HOT_SHIFT_EXPECTED_COMPLETION_MISMATCH");
+            }
+
+            if (!builder.SliceInfrastructureActive
+                || builder.CityDeliveryStage
+                    != CityDeliveryStage.DeliveredToWorkshop)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_HOT_SHIFT_SERVICE_CELL_REQUIRED");
+            }
+
+            if (builder.PreparationChoice
+                    == PreparationChoice.Unselected
+                || builder.PlannedModule == VehicleModule.None
+                || builder.ModuleInstallationState
+                    == ModuleInstallationState.None)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_HOT_SHIFT_GARAGE_PLAN_REQUIRED");
+            }
+
+            if (builder.ExpeditionPhase != ExpeditionPhase.AtHome)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_HOT_SHIFT_HOME_REQUIRED");
+            }
+
+            if (builder.FuelUnits
+                < LastBearingBalanceV1.HotShiftFuelCostUnits)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_HOT_SHIFT_FUEL_INSUFFICIENT");
+            }
+
+            long routeFuelReserve =
+                LastBearingBalanceV1.RouteFuelCost(
+                    builder.PlannedModule);
+            if (checked(
+                    builder.FuelUnits
+                    - LastBearingBalanceV1.HotShiftFuelCostUnits)
+                < routeFuelReserve)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_HOT_SHIFT_ROUTE_FUEL_RESERVE_REQUIRED");
+            }
+
+            long previousFuel = builder.FuelUnits;
+            builder.FuelUnits = checked(
+                builder.FuelUnits
+                - LastBearingBalanceV1.HotShiftFuelCostUnits);
+            builder.HotShiftPhase = HotShiftPhase.InProgress;
+            builder.HotShiftElapsedTicks = 0;
+            builder.HotShiftRequiredTicks =
+                LastBearingBalanceV1.HotShiftRequiredSettlementTicks;
+            builder.HotShiftFuelCommittedUnits =
+                LastBearingBalanceV1.HotShiftFuelCostUnits;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.HotShiftStarted,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.HotShiftId,
+                previousFuel,
+                builder.FuelUnits);
         }
 
         private static void ApplyInstallModule(
@@ -1664,7 +1769,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     "LAST_BEARING_TURBINE_REPAIR_NOT_READY");
             }
 
-            var previousTrend = ComputeWaterTrend(builder);
+            var previousTrend = ComputeWaterTrend(
+                builder,
+                IsHotShiftActivelyWorking(builder));
             if (builder.RepairCargoKind == RepairCargoKind.CeramicBearing)
             {
                 LastBearingOwnershipTransaction.TransferRepairCargo(
@@ -1700,7 +1807,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 command.Sequence,
                 "settlement:last-bearing:turbine",
                 previousTrend,
-                ComputeWaterTrend(builder));
+                ComputeWaterTrend(
+                    builder,
+                    IsHotShiftActivelyWorking(builder)));
         }
 
         private static void ApplyInstallCityImprovement(
@@ -2401,6 +2510,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             LastBearingStateBuilder builder,
             int scaleMilli,
             bool spareBearingBatchWasInProgressAtTickStart,
+            bool hotShiftWasInProgressAtTickStart,
             LastBearingEventSink events)
         {
             builder.SettlementAccumulatorMilli = checked(
@@ -2414,12 +2524,20 @@ namespace AtomicLandPirate.Simulation.LastBearing
             builder.SettlementAccumulatorMilli -=
                 LastBearingBalanceV1.FullClockScaleMilli;
             builder.SettlementTick = checked(builder.SettlementTick + 1);
+            bool hotShiftWorkingThisTick =
+                hotShiftWasInProgressAtTickStart
+                && builder.HotShiftPhase == HotShiftPhase.InProgress
+                && builder.WorkshopServiceSlotsReserved == 0;
             var previousWater = builder.WaterMilli;
             builder.WaterMilli = Math.Max(
                 0,
                 Math.Min(
                     LastBearingBalanceV1.WaterCapacityMilli,
-                    checked(builder.WaterMilli + ComputeWaterTrend(builder))));
+                    checked(
+                        builder.WaterMilli
+                        + ComputeWaterTrend(
+                            builder,
+                            hotShiftWorkingThisTick))));
             if (previousWater != builder.WaterMilli)
             {
                 Emit(
@@ -2475,6 +2593,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     == SpareBearingBatchPhase.InProgress)
             {
                 AdvanceSpareBearingBatch(builder, events);
+            }
+
+            if (hotShiftWorkingThisTick
+                && builder.HotShiftPhase == HotShiftPhase.InProgress)
+            {
+                AdvanceHotShift(builder, events);
             }
 
             if (builder.MaintenanceObligationActive
@@ -2550,6 +2674,55 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 "settlement:last-bearing:next-decision",
                 (long)previousDecision,
                 (long)builder.NextCityDecision);
+        }
+
+        private static void AdvanceHotShift(
+            LastBearingStateBuilder builder,
+            LastBearingEventSink events)
+        {
+            builder.HotShiftElapsedTicks = checked(
+                builder.HotShiftElapsedTicks + 1);
+            if (builder.HotShiftElapsedTicks
+                == LastBearingBalanceV1.HotShiftCheckpointSettlementTick)
+            {
+                Emit(
+                    builder,
+                    events,
+                    LastBearingEventKind.HotShiftCheckpointReached,
+                    LastBearingEventCause.AutonomousSettlementTick,
+                    builder.SettlementTick,
+                    LastBearingDomainEvent.AutonomousCommandSequence,
+                    LastBearingState.HotShiftId,
+                    builder.HotShiftElapsedTicks - 1,
+                    builder.HotShiftElapsedTicks);
+            }
+
+            if (builder.HotShiftElapsedTicks
+                != builder.HotShiftRequiredTicks)
+            {
+                return;
+            }
+
+            long previousParts = builder.PartsUnits;
+            builder.PartsUnits = checked(
+                builder.PartsUnits
+                + LastBearingBalanceV1.HotShiftOutputPartsUnits);
+            builder.HotShiftPhase = HotShiftPhase.Idle;
+            builder.HotShiftElapsedTicks = 0;
+            builder.HotShiftRequiredTicks = 0;
+            builder.HotShiftFuelCommittedUnits = 0;
+            builder.HotShiftCompletedCount = checked(
+                builder.HotShiftCompletedCount + 1);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.HotShiftCompleted,
+                LastBearingEventCause.AutonomousSettlementTick,
+                builder.SettlementTick,
+                LastBearingDomainEvent.AutonomousCommandSequence,
+                LastBearingState.HotShiftId,
+                previousParts,
+                builder.PartsUnits);
         }
 
         private static void AdvanceFactionClock(
@@ -2771,11 +2944,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     * LastBearingBalanceV1.ExpeditionHomeClockScaleMilli)
                 / LastBearingBalanceV1.FullClockScaleMilli);
             var projected = checked(
-                builder.WaterMilli + (ComputeWaterTrend(builder) * roadSettlementTicks));
+                builder.WaterMilli
+                + (ComputeWaterTrend(
+                    builder,
+                    IsHotShiftActivelyWorking(builder))
+                    * roadSettlementTicks));
             return Math.Max(0, projected);
         }
 
-        private static long ComputeWaterTrend(LastBearingStateBuilder builder)
+        private static long ComputeWaterTrend(
+            LastBearingStateBuilder builder,
+            bool hotShiftActivelyWorking)
         {
             long baseRate;
             switch (builder.TurbineCondition)
@@ -2800,8 +2979,19 @@ namespace AtomicLandPirate.Simulation.LastBearing
             return checked(
                 baseRate
                 + builder.ActiveWaterModifierMilliPerSettlementTick
+                + (hotShiftActivelyWorking
+                    ? LastBearingBalanceV1
+                        .HotShiftWaterModifierMilliPerSettlementTick
+                    : 0)
                 + LastBearingBalanceV1.CityImprovementWaterModifier(
                     builder.InstalledCityImprovement));
+        }
+
+        private static bool IsHotShiftActivelyWorking(
+            LastBearingStateBuilder builder)
+        {
+            return builder.HotShiftPhase == HotShiftPhase.InProgress
+                && builder.WorkshopServiceSlotsReserved == 0;
         }
 
         private static void EnsureTransactionIdentity(

@@ -359,7 +359,7 @@ namespace AtomicLandPirate.LastBearingTests
                 new RecoverWreckLineFrameRailsCommand(sequence));
 
             byte[] canonical = LastBearingCanonicalCodec.Encode(gate.State);
-            TestHarness.Equal((byte)6, canonical[8], "v6 codec marker");
+            TestHarness.Equal((byte)7, canonical[8], "v7 codec marker");
             string profile = FreshProfile(repoRoot, "frame-rail-vehicle");
             LastBearingProfileStore store =
                 LastBearingProfileStore.OpenFixedProfileDirectory(profile);

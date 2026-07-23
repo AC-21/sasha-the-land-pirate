@@ -20,8 +20,8 @@ namespace AtomicLandPirate.LastBearingTests
                 "unsupported city decisions remain pending",
                 UnsupportedDecisionRemainsPending);
             harness.Run(
-                "city improvement survives v6 canonical round trip",
-                ImprovementRoundTripsInV5);
+                "city improvement survives v7 canonical round trip",
+                ImprovementRoundTripsInV7);
             harness.Run(
                 "forged city improvement states fail invariants",
                 ForgedImprovementStatesFailInvariants);
@@ -281,7 +281,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "installed improvement outside home phase");
         }
 
-        private static void ImprovementRoundTripsInV5()
+        private static void ImprovementRoundTripsInV7()
         {
             CoreTestDriver driver = ReachInstallationReady(
                 ColonyComposition.Mixed,

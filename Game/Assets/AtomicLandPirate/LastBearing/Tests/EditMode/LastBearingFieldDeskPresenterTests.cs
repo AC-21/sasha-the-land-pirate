@@ -81,6 +81,125 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That((int)LastBearingFieldDeskIntent.CancelCityBuildingPreview, Is.EqualTo(14));
             Assert.That((int)LastBearingFieldDeskIntent.ActivateInfrastructure, Is.EqualTo(15));
             Assert.That((int)LastBearingFieldDeskIntent.TogglePause, Is.EqualTo(24));
+            Assert.That((int)LastBearingFieldDeskIntent.ReturnToTitle, Is.EqualTo(27));
+            Assert.That((int)LastBearingFieldDeskIntent.RunHotShift, Is.EqualTo(28));
+        }
+
+        [TestCase(PreparationChoice.CivicBuffer)]
+        [TestCase(PreparationChoice.WorkshopPush)]
+        public void PreparingKeepsRigPrimaryAndHotShiftSecondary(
+            PreparationChoice preparation)
+        {
+            LastBearingGameController controller =
+                BuildController(ColonyComposition.Mixed);
+            PrepareForHotShift(controller, preparation);
+
+            LastBearingFieldDeskProjection available =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                available.PrimaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.OpenGarage));
+            Assert.That(
+                available.PrimaryAction.Label,
+                Is.EqualTo("INSPECT SASHA'S RIG"));
+            Assert.That(
+                available.SecondaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.RunHotShift));
+            Assert.That(
+                available.SecondaryAction.Label,
+                Is.EqualTo(
+                    "RUN HOT SHIFT · 1 FUEL · 120 TICKS · +2 PARTS"));
+            Assert.That(available.SecondaryAction.IsEnabled, Is.True);
+            Assert.That(
+                available.SecondaryAction.Detail,
+                preparation == PreparationChoice.CivicBuffer
+                    ? Does.Contain("leaves the operator available")
+                    : Does.Contain("borrows the operator"));
+
+            string canonicalBefore = controller.CanonicalHash;
+            controller.StartHotShift();
+            LastBearingCommand[] pending = PendingCommands(controller);
+            Assert.That(pending, Has.Length.EqualTo(1));
+            Assert.That(pending[0], Is.TypeOf<RunHotShiftCommand>());
+            Assert.That(
+                ((RunHotShiftCommand)pending[0]).ExpectedCompletedCount,
+                Is.Zero);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            controller.StartHotShift();
+            Assert.That(PendingCommands(controller), Has.Length.EqualTo(1));
+            SimulateOneTick(controller);
+
+            LastBearingFieldDeskProjection active =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(active.SecondaryAction.IsEnabled, Is.False);
+            if (preparation == PreparationChoice.WorkshopPush)
+            {
+                Assert.That(
+                    active.SecondaryAction.Label,
+                    Is.EqualTo("HOT SHIFT · STALLED · 0 / 120"));
+                Assert.That(
+                    active.SecondaryAction.Detail,
+                    Does.Contain("adds no water penalty"));
+                Assert.That(controller.Status, Does.Contain("borrowed the operator"));
+            }
+            else
+            {
+                Assert.That(
+                    active.SecondaryAction.Label,
+                    Does.StartWith("HOT SHIFT · "));
+                Assert.That(
+                    active.SecondaryAction.Detail,
+                    Does.Contain("-0.010 water"));
+                Assert.That(controller.Status, Does.Contain("operator is working"));
+            }
+        }
+
+        [TestCase(PreparationChoice.CivicBuffer)]
+        [TestCase(PreparationChoice.WorkshopPush)]
+        public void ReadyKeepsManifestAndGarageWhileHotShiftUsesSurveyAction(
+            PreparationChoice preparation)
+        {
+            LastBearingGameController controller =
+                BuildController(ColonyComposition.Mixed);
+            PrepareForHotShift(controller, preparation);
+            long preparationBound =
+                controller.ReadModel!.PreparationRemainingTicks + 2;
+            for (var guard = 0L;
+                 controller.ReadModel!.PreparationPhase ==
+                     PreparationPhase.Preparing &&
+                 guard < preparationBound;
+                 guard++)
+            {
+                SimulateOneTick(controller);
+            }
+
+            Assert.That(
+                controller.ReadModel.PreparationPhase,
+                Is.EqualTo(PreparationPhase.Ready));
+            LastBearingFieldDeskProjection ready =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                ready.PrimaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.CommitExpedition));
+            Assert.That(
+                ready.PrimaryAction.Label,
+                Is.EqualTo("COMMIT THE MANIFEST"));
+            Assert.That(
+                ready.SecondaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.OpenGarage));
+            Assert.That(
+                ready.SecondaryAction.Label,
+                Is.EqualTo("INSPECT THE GARAGE"));
+            Assert.That(ready.Survey.IsVisible, Is.True);
+            Assert.That(
+                ready.Survey.AdvanceSled.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.RunHotShift));
+            Assert.That(
+                ready.Survey.AdvanceSled.Label,
+                Is.EqualTo(
+                    "RUN HOT SHIFT · 1 FUEL · 120 TICKS · +2 PARTS"));
+            Assert.That(ready.Survey.AdvanceSled.IsEnabled, Is.True);
         }
 
         [Test]
@@ -115,7 +234,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Does.Contain("OPERATOR IS NEUTRAL"));
             Assert.That(
                 recyclerOrder.Survey.Evidence,
-                Does.Contain("+2 PARTS ONCE"));
+                Does.Contain("+2 PARTS · ONCE"));
             AssertAvailable(
                 controller,
                 LastBearingFieldDeskIntent.SelectRecycler,
@@ -265,7 +384,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(beforeDelivery));
             LastBearingFieldDeskProjection deliveryOrder =
                 LastBearingFieldDeskPresenter.Present(controller);
-            Assert.That(deliveryOrder.PrimaryAction.Label, Does.Contain("+2 PARTS"));
+            Assert.That(
+                deliveryOrder.PrimaryAction.Label,
+                Is.EqualTo("COMMISSIONING DELIVERY · ONCE"));
+            Assert.That(
+                deliveryOrder.PrimaryAction.Detail,
+                Does.Contain("+2 PARTS · ONCE"));
             controller.AdvanceCityServiceSled();
             SimulateOneTick(controller);
             Assert.That(controller.ReadModel.CityDeliveryCount, Is.EqualTo(1));
@@ -300,6 +424,44 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.HasPendingPlayerCommands, Is.True);
             SimulateOneTick(controller);
             Assert.That(controller.HasPendingPlayerCommands, Is.False);
+        }
+
+        private static void PrepareForHotShift(
+            LastBearingGameController controller,
+            PreparationChoice preparation)
+        {
+            controller.InspectCityNeed();
+            controller.SelectCityGrammarHypothesis(
+                LastBearingCityGrammarHypothesis.DistrictStamp);
+            controller.ManipulateCityGrammarPrimary();
+            controller.AdvanceCityGrammarDelivery();
+            controller.AdvanceCityGrammarDelivery();
+            controller.RecordCityGrammarPathRead(clear: true);
+            controller.ActivateInfrastructure();
+            SimulateOneTick(controller);
+            controller.BeginGaragePlan(preparation);
+            controller.CommitGaragePlan(VehicleModule.WinchAssembly);
+            SimulateOneTick(controller);
+            controller.ShowCityOverview();
+
+            Assert.That(
+                controller.ReadModel!.PreparationPhase,
+                Is.EqualTo(PreparationPhase.Preparing));
+            Assert.That(controller.CanStartHotShift, Is.True);
+        }
+
+        private static LastBearingCommand[] PendingCommands(
+            LastBearingGameController controller)
+        {
+            FieldInfo? pendingField =
+                typeof(LastBearingGameController).GetField(
+                    "_pendingCommands",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.That(pendingField, Is.Not.Null);
+            var pending = pendingField!.GetValue(controller) as
+                System.Collections.Generic.IEnumerable<LastBearingCommand>;
+            Assert.That(pending, Is.Not.Null);
+            return System.Linq.Enumerable.ToArray(pending!);
         }
 
         private static void SimulateOneTick(

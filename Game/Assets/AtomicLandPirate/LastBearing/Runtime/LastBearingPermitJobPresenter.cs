@@ -717,10 +717,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                             LastBearingPermitJobChapter.CityCrisis,
                             1,
                             "CHAPTER I · THE WORKING CELL",
-                            "Deliver the sled to the workshop",
-                            "The second advance completes the first delivery and " +
+                            "Complete the commissioning delivery",
+                            "The second advance completes commissioning and " +
                             "returns exactly 2 reclaimed parts once.",
-                            "Click DELIVER SLED · +2 PARTS; the completed working " +
+                            "Click COMMISSIONING DELIVERY · ONCE; the completed working " +
                             "cell then hands control to expedition preparation.");
                 default:
                     return null;

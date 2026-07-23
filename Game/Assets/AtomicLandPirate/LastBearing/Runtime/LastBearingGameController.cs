@@ -224,6 +224,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _readModel.CityDeliveryStage !=
                 CityDeliveryStage.DeliveredToWorkshop;
 
+        public bool CanStartHotShift =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsHotShiftRunAvailable == true &&
+            IsExactFieldDeskCityOverview;
+
         public bool CanAssignCityServiceHuman =>
             _readModel != null &&
             _readModel.CityServiceLinkConnected &&
@@ -684,7 +689,45 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _status = _readModel?.CityDeliveryStage ==
                       CityDeliveryStage.AtRecycler
                 ? "Calibration sled queued for the service link."
-                : "Workshop delivery queued. Completion returns 2 reclaimed parts.";
+                : "Commissioning delivery queued. Completion returns 2 reclaimed parts once.";
+        }
+
+        public void StartHotShift()
+        {
+            if (_readModel == null)
+            {
+                _status = "Start or load Last Bearing before running the Hot Shift.";
+                return;
+            }
+
+            if (_pendingCommands.Count != 0)
+            {
+                _status =
+                    "Finish the queued city action before starting the Hot Shift.";
+                return;
+            }
+
+            if (!IsExactFieldDeskCityOverview)
+            {
+                _status =
+                    "Run the Hot Shift from the city Field Desk while Sasha is home.";
+                return;
+            }
+
+            if (!_readModel.IsHotShiftRunAvailable)
+            {
+                _status = _readModel.HotShiftPhase == HotShiftPhase.InProgress
+                    ? "The Hot Shift is already in progress."
+                    : "The Hot Shift needs the commissioned service cell, a fitted rig plan, Sasha home, and enough fuel for both shift and route.";
+                return;
+            }
+
+            long expectedCompletedCount = _readModel.HotShiftCompletedCount;
+            Queue(sequence => new RunHotShiftCommand(
+                sequence,
+                expectedCompletedCount));
+            _status =
+                "Hot Shift queued: 1 fuel · 120 settlement ticks · +2 reclaimed parts.";
         }
 
         public void BeginGaragePlan(PreparationChoice preparation)
@@ -1582,6 +1625,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 bool rigUpgradeInstalled = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.RigUpgradeInstalled);
+                bool hotShiftStarted = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.HotShiftStarted);
+                bool hotShiftCheckpointReached = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.HotShiftCheckpointReached);
+                bool hotShiftCompleted = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.HotShiftCompleted);
                 _state = result.State;
                 _readModel = result.ReadModel;
                 if (cityBuildingChanged)
@@ -1640,6 +1692,25 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _status =
                         "Patchwork Skid Plate installed. Round-trip condition loss is reduced by " +
                         _readModel.PatchworkSkidPlateProtectionMilli + ".";
+                }
+
+                if (hotShiftStarted)
+                {
+                    _status = _readModel.IsHotShiftStalledByWorkshopPush
+                        ? "Hot Shift started, but Workshop Push borrowed the operator. Progress and the Hot Shift water draw are stalled."
+                        : "Hot Shift started. The operator is working; water draw adds -0.010 per settlement tick.";
+                }
+
+                if (hotShiftCheckpointReached)
+                {
+                    _status =
+                        "Hot Shift checkpoint: 60 / 120 ticks. City state autosaved.";
+                }
+
+                if (hotShiftCompleted)
+                {
+                    _status =
+                        "Hot Shift complete. +2 reclaimed parts; the service sled is parked at the machine shop.";
                 }
             }
             catch (Exception exception)
@@ -1921,7 +1992,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     || kind == LastBearingEventKind.CityServiceLinkConnected
                     || kind == LastBearingEventKind.CityServiceResidentAssigned
                     || kind == LastBearingEventKind.CityServiceSledAdvanced
-                    || kind == LastBearingEventKind.CityServiceBatchDelivered)
+                    || kind == LastBearingEventKind.CityServiceBatchDelivered
+                    || kind == LastBearingEventKind.HotShiftStarted
+                    || kind == LastBearingEventKind.HotShiftCheckpointReached
+                    || kind == LastBearingEventKind.HotShiftCompleted)
                 {
                     Save();
                     return;

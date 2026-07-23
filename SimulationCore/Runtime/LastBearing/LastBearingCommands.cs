@@ -140,6 +140,25 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public CityDeliveryStage ExpectedSourceStage { get; }
     }
 
+    public sealed class RunHotShiftCommand : LastBearingCommand
+    {
+        public RunHotShiftCommand(
+            long sequence,
+            long expectedCompletedCount)
+            : base(sequence)
+        {
+            if (expectedCompletedCount < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(expectedCompletedCount));
+            }
+
+            ExpectedCompletedCount = expectedCompletedCount;
+        }
+
+        public long ExpectedCompletedCount { get; }
+    }
+
     public sealed class SelectPreparationCommand : LastBearingCommand
     {
         public SelectPreparationCommand(

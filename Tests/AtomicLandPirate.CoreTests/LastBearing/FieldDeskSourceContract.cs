@@ -151,6 +151,7 @@ namespace AtomicLandPirate.LastBearingTests
                 ".AssignCityServiceResident(",
                 ".AdvanceCityServiceSled(",
                 ".CancelCityBuildingPreview(",
+                ".StartHotShift(",
                 ".BeginGaragePlan(",
                 ".OpenGarageBay(",
                 ".CommitExpedition(",
@@ -166,6 +167,29 @@ namespace AtomicLandPirate.LastBearingTests
             {
                 Require(fieldDesk, delegation);
             }
+
+            Require(fieldDeskPresenter, "RunHotShift = 28");
+            Require(
+                fieldDeskPresenter,
+                "RUN HOT SHIFT\";");
+            Require(
+                fieldDeskPresenter,
+                "RUN ANOTHER HOT SHIFT");
+            Require(
+                fieldDeskPresenter,
+                "HOT SHIFT · STALLED · ");
+            Require(
+                fieldDeskPresenter,
+                "Workshop Push borrowed the machine-shop operator");
+            Require(
+                fieldDeskPresenter,
+                "Civic Buffer leaves the operator available");
+            Require(
+                fieldDeskPresenter,
+                "COMMISSIONING DELIVERY · ONCE");
+            Require(
+                fieldDeskPresenter,
+                "HOT SHIFT · CITY WORK ORDER");
 
             foreach (string retiredDelegation in new[]
             {

@@ -36,6 +36,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         Save = 25,
         Load = 26,
         ReturnToTitle = 27,
+        RunHotShift = 28,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -280,7 +281,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     permitJob,
                     unavailable,
                     unavailable,
-                    CreateSurvey(controller, null, false),
+                    CreateSurvey(controller, null, false, false),
                     unavailable,
                     unavailable,
                     unavailable,
@@ -314,7 +315,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     controller,
                     model,
                     controller.CityNeedInspected &&
-                    IsServiceCellObjective(model.NextObjective)),
+                    IsServiceCellObjective(model.NextObjective),
+                    primary.Intent != LastBearingFieldDeskIntent.RunHotShift &&
+                    secondary.Intent != LastBearingFieldDeskIntent.RunHotShift),
                 Action(
                     LastBearingFieldDeskIntent.TogglePause,
                     model.PauseCause == PauseCause.None ? "PAUSE" : "RESUME",
@@ -424,6 +427,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.CityDeliveryStage.GetHashCode());
             Mix(ref hash, model.CityDeliveryCount);
             Mix(ref hash, model.SliceInfrastructureActive);
+            Mix(ref hash, model.HotShiftPhase.GetHashCode());
+            Mix(ref hash, model.HotShiftElapsedTicks);
+            Mix(ref hash, model.HotShiftRequiredTicks);
+            Mix(ref hash, model.HotShiftCompletedCount);
+            Mix(ref hash, model.IsHotShiftRunAvailable);
+            Mix(ref hash, model.IsHotShiftStalledByWorkshopPush);
+            Mix(ref hash, model.IsHotShiftActivelyWorking);
             Mix(ref hash, model.WaterMilli);
             Mix(ref hash, model.WaterTrendMilliPerSettlementTick);
             Mix(ref hash, model.PartsUnits);
@@ -548,6 +558,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     true,
                     canDispatch,
                     LastBearingFieldDeskActionTone.Primary);
+                secondary = CreateHotShiftAction(
+                    controller,
+                    model,
+                    canDispatch);
                 return;
             }
 
@@ -629,6 +643,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 model.ExpeditionPhase == ExpeditionPhase.AtHome,
                 canDispatch && model.ExpeditionPhase == ExpeditionPhase.AtHome,
                 LastBearingFieldDeskActionTone.Quiet);
+            secondary = CreateHotShiftAction(
+                controller,
+                model,
+                canDispatch);
         }
 
         private static void DeriveServiceCellOrder(
@@ -721,7 +739,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private static LastBearingFieldDeskSurveyProjection CreateSurvey(
             LastBearingGameController controller,
             LastBearingReadModel? model,
-            bool visible)
+            bool serviceControlsVisible,
+            bool allowSupplementalHotShift)
         {
             if (model == null)
             {
@@ -744,76 +763,98 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     unavailable);
             }
 
-            bool canUse = visible &&
-                          controller.IsExactFieldDeskCityOverview &&
-                          !controller.HasPendingPlayerCommands;
+            bool canDispatch =
+                controller.IsExactFieldDeskCityOverview &&
+                !controller.HasPendingPlayerCommands;
+            LastBearingFieldDeskActionProjection supplementalHotShift =
+                allowSupplementalHotShift && !serviceControlsVisible
+                    ? CreateHotShiftAction(controller, model, canDispatch)
+                    : Hidden();
+            bool showSupplementalHotShift =
+                supplementalHotShift.IsVisible;
+            bool surveyVisible =
+                serviceControlsVisible || showSupplementalHotShift;
+            bool canUseService = serviceControlsVisible && canDispatch;
             bool hasPreview = controller.HasCityBuildingPreview;
             return new LastBearingFieldDeskSurveyProjection(
-                visible,
-                FormatServiceCellState(model, controller),
-                "COSTS: RECYCLER 2 · SHOP 3 · STORAGE 1 PART · " +
-                "MOVES FREE BEFORE LINK · " +
-                "LINK LOCKS PERMANENTLY FOR 1 PART · OPERATOR IS NEUTRAL · " +
-                "FIRST DELIVERY RETURNS +2 PARTS ONCE",
+                surveyVisible,
+                showSupplementalHotShift
+                    ? "HOT SHIFT · CITY WORK ORDER"
+                    : FormatServiceCellState(model, controller),
+                showSupplementalHotShift
+                    ? supplementalHotShift.Detail
+                    : "COSTS: RECYCLER 2 · SHOP 3 · STORAGE 1 PART · " +
+                      "MOVES FREE BEFORE LINK · " +
+                      "LINK LOCKS PERMANENTLY FOR 1 PART · OPERATOR IS NEUTRAL · " +
+                      "COMMISSIONING DELIVERY · ONCE · PAYOFF +2 PARTS · ONCE",
                 CreateSelectBuildingAction(
                     model,
                     CityBuildingKind.Recycler,
-                    canUse,
-                    visible),
+                    canUseService,
+                    serviceControlsVisible),
                 CreateSelectBuildingAction(
                     model,
                     CityBuildingKind.MachineShop,
-                    canUse,
-                    visible),
+                    canUseService,
+                    serviceControlsVisible),
                 CreateSelectBuildingAction(
                     model,
                     CityBuildingKind.EmergencyStorage,
-                    canUse,
-                    visible),
+                    canUseService,
+                    serviceControlsVisible),
                 Action(
                     LastBearingFieldDeskIntent.RotateCityBuilding,
                     "ROTATE 90°",
                     "Quarter-turn the preview. Rotation is free before link lock.",
-                    visible && hasPreview,
-                    canUse && hasPreview && !model.CityServiceLinkConnected,
+                    serviceControlsVisible && hasPreview,
+                    canUseService && hasPreview &&
+                    !model.CityServiceLinkConnected,
                     LastBearingFieldDeskActionTone.Quiet),
                 CreatePadAction(
                     LastBearingFieldDeskIntent.PreviousCityPad,
                     "PREVIOUS PAD",
-                    canUse,
-                    visible && hasPreview,
+                    canUseService,
+                    serviceControlsVisible && hasPreview,
                     model.CityServiceLinkConnected),
                 CreatePadAction(
                     LastBearingFieldDeskIntent.NextCityPad,
                     "NEXT PAD",
-                    canUse,
-                    visible && hasPreview,
+                    canUseService,
+                    serviceControlsVisible && hasPreview,
                     model.CityServiceLinkConnected),
                 CreatePlaceAction(
                     controller,
                     model,
-                    canUse,
-                    visible && hasPreview),
-                CreateConnectLinkAction(controller, model, canUse, visible),
+                    canUseService,
+                    serviceControlsVisible && hasPreview),
+                CreateConnectLinkAction(
+                    controller,
+                    model,
+                    canUseService,
+                    serviceControlsVisible),
                 CreateStaffHumanAction(
                     controller,
                     model,
-                    canUse,
-                    visible && model.Composition != ColonyComposition.RobotOnly),
+                    canUseService,
+                    serviceControlsVisible &&
+                    model.Composition != ColonyComposition.RobotOnly),
                 CreateStaffRobotAction(
                     controller,
                     model,
-                    canUse,
-                    visible && model.Composition != ColonyComposition.HumanOnly),
-                CreateAdvanceSledAction(
-                    controller,
-                    model,
-                    canUse,
-                    visible),
+                    canUseService,
+                    serviceControlsVisible &&
+                    model.Composition != ColonyComposition.HumanOnly),
+                showSupplementalHotShift
+                    ? supplementalHotShift
+                    : CreateAdvanceSledAction(
+                        controller,
+                        model,
+                        canUseService,
+                        serviceControlsVisible),
                 CreateCancelPreviewAction(
                     controller,
-                    canUse,
-                    visible && hasPreview));
+                    canUseService,
+                    serviceControlsVisible && hasPreview));
         }
 
         private static LastBearingFieldDeskActionProjection
@@ -999,8 +1040,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             string label = model.CityDeliveryStage switch
             {
                 CityDeliveryStage.AtRecycler => "ADVANCE PARTS SLED",
-                CityDeliveryStage.InTransit => "DELIVER SLED · +2 PARTS",
-                _ => "DELIVERY COMPLETE · +2 PARTS"
+                CityDeliveryStage.InTransit =>
+                    "COMMISSIONING DELIVERY · ONCE",
+                _ => "COMMISSIONING COMPLETE · ONCE"
             };
             return Action(
                 LastBearingFieldDeskIntent.AdvanceCityServiceSled,
@@ -1009,8 +1051,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? "Permanently lock the service link before moving the sled."
                     : model.CityServiceResidentId == null
                         ? "Assign one neutral human or utility-robot operator first."
-                        : "Two advances complete the route; the first completed " +
-                          "delivery returns exactly 2 parts once.",
+                        : "Two advances complete the route. Commissioning pays " +
+                          "+2 PARTS · ONCE.",
                 visible,
                 canUse && controller.CanAdvanceCityServiceSled,
                 LastBearingFieldDeskActionTone.Primary);
@@ -1072,6 +1114,74 @@ namespace AtomicLandPirate.Presentation.LastBearing
                    model.SpareBearingBatchPhase == SpareBearingBatchPhase.InProgress ||
                    model.IsSpareBearingBarterAvailable ||
                    model.SpareBearingBatchPhase == SpareBearingBatchPhase.Settled;
+        }
+
+        private static LastBearingFieldDeskActionProjection
+            CreateHotShiftAction(
+                LastBearingGameController controller,
+                LastBearingReadModel model,
+                bool canDispatch)
+        {
+            bool configuredAtHome =
+                model.ExpeditionPhase == ExpeditionPhase.AtHome &&
+                model.SliceInfrastructureActive &&
+                model.PreparationChoice != PreparationChoice.Unselected &&
+                model.PlannedModule != VehicleModule.None;
+            if (!configuredAtHome)
+            {
+                return Hidden();
+            }
+
+            string label;
+            if (model.HotShiftPhase == HotShiftPhase.InProgress)
+            {
+                label = model.IsHotShiftStalledByWorkshopPush
+                    ? "HOT SHIFT · STALLED · " +
+                      model.HotShiftElapsedTicks + " / " +
+                      model.HotShiftRequiredTicks
+                    : "HOT SHIFT · " + model.HotShiftElapsedTicks + " / " +
+                      model.HotShiftRequiredTicks;
+            }
+            else
+            {
+                string verb = model.HotShiftCompletedCount > 0
+                    ? "RUN ANOTHER HOT SHIFT"
+                    : "RUN HOT SHIFT";
+                label = verb + " · " + model.HotShiftFuelCostUnits +
+                    " FUEL · " +
+                    LastBearingBalanceV1.HotShiftRequiredSettlementTicks +
+                    " TICKS · +" + model.HotShiftOutputPartsUnits + " PARTS";
+            }
+
+            string detail;
+            if (model.IsHotShiftStalledByWorkshopPush)
+            {
+                detail =
+                    "Workshop Push borrowed the machine-shop operator. Progress is held and the stalled Hot Shift adds no water penalty.";
+            }
+            else if (model.HotShiftPhase == HotShiftPhase.InProgress)
+            {
+                detail =
+                    "The operator is working. Hot Shift adds -0.010 water per settlement tick until completion.";
+            }
+            else if (model.PreparationChoice == PreparationChoice.CivicBuffer)
+            {
+                detail =
+                    "Civic Buffer leaves the operator available. Working adds -0.010 water per settlement tick.";
+            }
+            else
+            {
+                detail =
+                    "Workshop Push borrows the operator while preparation runs. The shift stalls with no water penalty until that operator returns.";
+            }
+
+            return Action(
+                LastBearingFieldDeskIntent.RunHotShift,
+                label,
+                detail,
+                true,
+                canDispatch && controller.CanStartHotShift,
+                LastBearingFieldDeskActionTone.Signal);
         }
 
         private static string FormatComposition(ColonyComposition composition)
@@ -1282,7 +1392,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 CityDeliveryStage.AtRecycler => "SLED AT RECYCLER",
                 CityDeliveryStage.InTransit => "SLED IN TRANSIT",
                 CityDeliveryStage.DeliveredToWorkshop =>
-                    "SLED DELIVERED · +2 PARTS PAID ONCE",
+                    "COMMISSIONING DELIVERY · ONCE",
                 _ => "SLED STATE UNKNOWN"
             };
         }

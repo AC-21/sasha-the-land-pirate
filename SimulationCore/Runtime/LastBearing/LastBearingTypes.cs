@@ -270,6 +270,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
         DeliveredToWorkshop = 2,
     }
 
+    public enum HotShiftPhase
+    {
+        Idle = 0,
+        InProgress = 1,
+    }
+
     public enum LastBearingEventKind
     {
         ResidentAssigned = 1,
@@ -325,6 +331,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
         CityServiceBatchDelivered = 51,
         RigUpgradeInstalled = 52,
         FrameRailSalvageTransferred = 53,
+        HotShiftStarted = 54,
+        HotShiftCompleted = 55,
+        HotShiftCheckpointReached = 56,
     }
 
     public enum LastBearingEventCause
