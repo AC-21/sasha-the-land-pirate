@@ -502,6 +502,39 @@ namespace AtomicLandPirate.LastBearingTests
                 LastBearingCanonicalCodec.ComputeSha256(first.State),
                 LastBearingCanonicalCodec.ComputeSha256(second.State!),
                 "legacy v7 migration hash");
+
+            foreach (PauseCause legacyPause in new[]
+                     {
+                         PauseCause.Explicit,
+                         PauseCause.AutoAlert,
+                     })
+            {
+                LastBearingState pausedLegacyState =
+                    new LastBearingStateBuilder(acknowledged.State)
+                    {
+                        PauseCause = legacyPause,
+                    }.Build();
+                byte[] pausedLegacyBytes =
+                    LastBearingCanonicalCodec
+                        .EncodeLegacyV7ForMigrationTests(pausedLegacyState);
+                LastBearingDecodeResult pausedMigration =
+                    LastBearingCanonicalCodec.TryDecode(pausedLegacyBytes);
+                TestHarness.True(
+                    pausedMigration.Succeeded && pausedMigration.State != null,
+                    legacyPause + " v7 migration");
+                TestHarness.Equal(
+                    DustFrontOutcome.Held,
+                    pausedMigration.State!.DustFrontOutcome,
+                    legacyPause + " grandfathered outcome");
+                TestHarness.True(
+                    !pausedMigration.State
+                        .IsDustFrontAcknowledgementRequired,
+                    legacyPause + " retroactive acknowledgement");
+                TestHarness.Equal(
+                    legacyPause,
+                    pausedMigration.State.PauseCause,
+                    legacyPause + " pause preservation");
+            }
         }
 
         private static void ForgedStatesFailClosed()
