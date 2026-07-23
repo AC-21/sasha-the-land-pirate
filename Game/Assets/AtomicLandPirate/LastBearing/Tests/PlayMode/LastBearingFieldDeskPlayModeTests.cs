@@ -11,6 +11,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
 
 namespace AtomicLandPirate.Presentation.LastBearing.Tests
 {
