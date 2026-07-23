@@ -15,6 +15,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
     {
         private const float PanelWidth = 430f;
         private LastBearingGameController? _controller;
+        private LastBearingFieldDesk? _fieldDesk;
         private GUIStyle? _panelStyle;
         private GUIStyle? _titleStyle;
         private GUIStyle? _headingStyle;
@@ -23,14 +24,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private GUIStyle? _buttonStyle;
         private Vector2 _scroll;
 
-        public void Configure(LastBearingGameController controller)
+        public void Configure(
+            LastBearingGameController controller,
+            LastBearingFieldDesk? fieldDesk = null)
         {
             _controller = controller;
+            _fieldDesk = fieldDesk;
         }
 
         private void OnGUI()
         {
             if (_controller == null)
+            {
+                return;
+            }
+
+            if (_fieldDesk?.OwnsCityOverview == true)
             {
                 return;
             }
@@ -46,9 +55,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 panelRect.height - 32f));
             _scroll = GUILayout.BeginScrollView(_scroll, false, true);
             DrawHeader();
-            if (_controller.HasActiveGame && _controller.ReadModel != null)
+            if (_controller.HasActiveGame && _controller.RuntimeReadModel != null)
             {
-                DrawActiveGame(_controller.ReadModel);
+                DrawActiveGame(_controller.RuntimeReadModel);
             }
             else
             {

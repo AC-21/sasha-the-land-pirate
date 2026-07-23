@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="field-desk-overlay" class="field-desk-overlay" picking-mode="Ignore">
+        <ui:VisualElement name="field-desk" class="field-desk" picking-mode="Position">
+            <ui:ScrollView name="desk-scroll" class="desk-scroll">
+                <ui:VisualElement class="nameplate plate">
+                    <ui:Label text="SASHA THE ATOMIC LAND PIRATE" class="game-title" />
+                    <ui:Label text="THE LAST BEARING" class="settlement-title" />
+                    <ui:Label name="composition-label" class="service-copy signal-copy" />
+                    <ui:Label name="pause-label" class="service-copy" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="section plate civic-instruments">
+                    <ui:Label text="CIVIC INSTRUMENTS" class="section-kicker" />
+                    <ui:Label name="pressure-label" class="instrument-state hazard-copy" />
+                    <ui:VisualElement class="instrument-row">
+                        <ui:VisualElement class="instrument-cell instrument-cell-wide">
+                            <ui:Label text="RESERVE" class="instrument-label" />
+                            <ui:Label name="water-label" class="instrument-value" />
+                            <ui:Label name="water-trend-label" class="instrument-note" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="instrument-cell">
+                            <ui:Label text="PARTS" class="instrument-label" />
+                            <ui:Label name="parts-label" class="instrument-value-small" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="instrument-cell">
+                            <ui:Label text="FUEL" class="instrument-label" />
+                            <ui:Label name="fuel-label" class="instrument-value-small" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:Label name="turbine-label" class="turbine-strip" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="section plate permit-docket">
+                    <ui:VisualElement class="section-heading-row">
+                        <ui:Label text="PERMIT JOB" class="section-kicker signal-copy" />
+                        <ui:Label name="permit-step-label" class="step-label" />
+                    </ui:VisualElement>
+                    <ui:Label name="permit-chapter-label" class="chapter-label" />
+                    <ui:Label name="permit-headline-label" class="docket-headline" />
+                    <ui:Label name="permit-detail-label" class="body-copy" />
+                    <ui:ProgressBar name="permit-progress-bar" class="permit-progress" />
+                    <ui:Label name="permit-progress-label" class="progress-copy" />
+                    <ui:Label name="permit-cue-label" class="permit-cue" />
+                </ui:VisualElement>
+
+                <ui:VisualElement name="survey-section" class="section plate survey-board">
+                    <ui:Label text="D-0030 · REVERSIBLE SERVICE-CELL SURVEY" class="section-kicker signal-copy" />
+                    <ui:Label text="Evidence only. No score, winner, or persisted selection." class="survey-law" />
+                    <ui:Label name="survey-hypothesis-label" class="survey-state" />
+                    <ui:VisualElement class="button-row">
+                        <ui:Button name="trial-a-button" class="desk-button compact-button" />
+                        <ui:Button name="trial-b-button" class="desk-button compact-button" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="button-row">
+                        <ui:Button name="manipulate-button" class="desk-button compact-button" />
+                        <ui:Button name="rotate-button" class="desk-button compact-button" />
+                        <ui:Button name="toggle-piece-button" class="desk-button compact-button" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="button-row">
+                        <ui:Button name="connect-button" class="desk-button compact-button" />
+                        <ui:Button name="advance-button" class="desk-button compact-button" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="button-row">
+                        <ui:Button name="record-clear-button" class="desk-button compact-button" />
+                        <ui:Button name="record-unclear-button" class="desk-button compact-button" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="button-row">
+                        <ui:Button name="reset-trial-button" class="desk-button compact-button" />
+                        <ui:Button name="leave-trial-button" class="desk-button compact-button" />
+                        <ui:Button name="clear-trials-button" class="desk-button compact-button" />
+                    </ui:VisualElement>
+                    <ui:Label name="survey-evidence-label" class="audit-copy" />
+                </ui:VisualElement>
+            </ui:ScrollView>
+
+            <ui:VisualElement class="current-order plate">
+                <ui:Label text="CURRENT ORDER" class="section-kicker" />
+                <ui:Label name="current-action-detail" class="order-detail" />
+                <ui:Button name="primary-action-button" class="desk-button order-button" />
+                <ui:Label name="secondary-action-detail" class="order-detail secondary-order-detail" />
+                <ui:Button name="secondary-action-button" class="desk-button order-button secondary-button" />
+                <ui:Label name="status-label" class="status-copy" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="service-strip plate">
+                <ui:VisualElement class="button-row service-buttons">
+                    <ui:Button name="pause-button" class="desk-button service-button" />
+                    <ui:Button name="save-button" class="desk-button service-button" />
+                    <ui:Button name="load-button" class="desk-button service-button" />
+                    <ui:Button name="title-button" class="desk-button service-button" />
+                </ui:VisualElement>
+                <ui:Label name="save-status-label" class="save-copy" />
+                <ui:Foldout name="audit-foldout" text="DEVELOPMENT AUDIT" value="false" class="audit-foldout">
+                    <ui:Label name="audit-hash-label" text="AUDIT STOWED" class="audit-copy" />
+                </ui:Foldout>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

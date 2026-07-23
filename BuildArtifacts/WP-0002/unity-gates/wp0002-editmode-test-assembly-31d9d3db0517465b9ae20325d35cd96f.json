@@ -1,0 +1,12 @@
+{
+    "schema_version": 1,
+    "invocation_id": "31d9d3db0517465b9ae20325d35cd96f",
+    "gate_id": "wp0002-editmode-test-assembly",
+    "source_sha256": "1551a39e04703c70df8d2472ad879726d2ae57cfef8b4652f51ff1d8de22071b",
+    "command": "TestRunnerApi:AC21.Sasha.LastBearing.EditModeTests",
+    "result": "success:run=707aac06-928d-4fd3-ae2b-050a3b5b6ca8;discovered=106;passed=106;failed=0;inconclusive=0;skipped=0",
+    "started_at": "2026-07-19T07:33:15.1750850Z",
+    "completed_at": "2026-07-19T07:33:29.4853540Z",
+    "project_root": "Game",
+    "runtime_assembly": "AC21.Sasha.LastBearing.Runtime"
+}

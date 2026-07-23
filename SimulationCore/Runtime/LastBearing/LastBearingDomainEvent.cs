@@ -8,7 +8,34 @@ namespace AtomicLandPirate.Simulation.LastBearing
     {
         public const long AutonomousCommandSequence = -1;
 
+        internal LastBearingDomainEvent()
+        {
+            SubjectId = string.Empty;
+        }
+
         internal LastBearingDomainEvent(
+            LastBearingEventKind kind,
+            LastBearingEventCause cause,
+            long globalTick,
+            long domainTick,
+            long commandSequence,
+            string subjectId,
+            long beforeValue,
+            long afterValue)
+            : this()
+        {
+            Reset(
+                kind,
+                cause,
+                globalTick,
+                domainTick,
+                commandSequence,
+                subjectId,
+                beforeValue,
+                afterValue);
+        }
+
+        internal void Reset(
             LastBearingEventKind kind,
             LastBearingEventCause cause,
             long globalTick,
@@ -50,20 +77,20 @@ namespace AtomicLandPirate.Simulation.LastBearing
             AfterValue = afterValue;
         }
 
-        public LastBearingEventKind Kind { get; }
+        public LastBearingEventKind Kind { get; private set; }
 
-        public LastBearingEventCause Cause { get; }
+        public LastBearingEventCause Cause { get; private set; }
 
-        public long GlobalTick { get; }
+        public long GlobalTick { get; private set; }
 
-        public long DomainTick { get; }
+        public long DomainTick { get; private set; }
 
-        public long CommandSequence { get; }
+        public long CommandSequence { get; private set; }
 
-        public string SubjectId { get; }
+        public string SubjectId { get; private set; }
 
-        public long BeforeValue { get; }
+        public long BeforeValue { get; private set; }
 
-        public long AfterValue { get; }
+        public long AfterValue { get; private set; }
     }
 }

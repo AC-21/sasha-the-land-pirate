@@ -90,7 +90,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 new Vector3(0f, 1.15f, -0.15f));
             CameraAnchor = CreateAnchor(
                 "ANCHOR_GARAGE_CAMERA",
-                new Vector3(8.8f, 7.2f, 9.8f));
+                new Vector3(13.5f, 7.2f, 0.8f));
 
             CreatePart(
                 "SERVICE_FLOOR",

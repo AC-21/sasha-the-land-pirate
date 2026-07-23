@@ -23,13 +23,55 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             LastBearingInvariants.Validate(state);
             RejectMultipleDriveCommands(commands);
+            var builder = new LastBearingStateBuilder(state);
+            var events = new LastBearingAllocatingEventSink();
+            ApplyStep(state, commands, builder, events);
+
+            var nextState = builder.Build();
+            return new LastBearingTickResult(
+                nextState,
+                events.ToArray(),
+                LastBearingReadModel.FromState(nextState));
+        }
+
+        internal void StepInto(
+            LastBearingState state,
+            IReadOnlyList<LastBearingCommand> commands,
+            LastBearingStepBuffer destination)
+        {
+            if (state == null)
+            {
+                throw new ArgumentNullException(nameof(state));
+            }
+
+            if (commands == null)
+            {
+                throw new ArgumentNullException(nameof(commands));
+            }
+
+            if (destination == null)
+            {
+                throw new ArgumentNullException(nameof(destination));
+            }
+
+            LastBearingInvariants.Validate(state);
+            RejectMultipleDriveCommands(commands);
+            LastBearingStateBuilder builder = destination.Begin(state);
+            ApplyStep(state, commands, builder, destination.WorkingEvents);
+            destination.Commit();
+        }
+
+        private static void ApplyStep(
+            LastBearingState state,
+            IReadOnlyList<LastBearingCommand> commands,
+            LastBearingStateBuilder builder,
+            LastBearingEventSink events)
+        {
             var expeditionWasAwayAtTickStart = IsAwayFromSettlement(
                 state.ExpeditionPhase);
             var spareBearingBatchWasInProgressAtTickStart =
                 state.SpareBearingBatchPhase
                     == SpareBearingBatchPhase.InProgress;
-            var builder = new LastBearingStateBuilder(state);
-            var events = new List<LastBearingDomainEvent>();
             var expectedSequence = builder.NextCommandSequence;
 
             for (var index = 0; index < commands.Count; index++)
@@ -71,11 +113,6 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 AdvanceRoadClock(builder, roadScale);
             }
 
-            var nextState = builder.Build();
-            return new LastBearingTickResult(
-                nextState,
-                events.ToArray(),
-                LastBearingReadModel.FromState(nextState));
         }
 
         private static void RejectMultipleDriveCommands(
@@ -102,7 +139,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyCommand(
             LastBearingStateBuilder builder,
             LastBearingCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (command is AssignResidentCommand assignResident)
             {
@@ -219,7 +256,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyAssignResident(
             LastBearingStateBuilder builder,
             AssignResidentCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (!builder.Roster.Contains(command.StableId))
             {
@@ -252,7 +289,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyActivateInfrastructure(
             LastBearingStateBuilder builder,
             ActivateSliceInfrastructureCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.SliceInfrastructureActive)
             {
@@ -276,7 +313,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplySelectPreparation(
             LastBearingStateBuilder builder,
             SelectPreparationCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.PreparationPhase != PreparationPhase.Unselected)
             {
@@ -344,7 +381,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyInstallModule(
             LastBearingStateBuilder builder,
             InstallVehicleModuleCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.PlannedModule != command.Module
                 || builder.PreparationPhase == PreparationPhase.Unselected)
@@ -389,7 +426,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyPrepareTransaction(
             LastBearingStateBuilder builder,
             PrepareExpeditionTransactionCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.TransactionPhase != TransactionPhase.None)
             {
@@ -428,7 +465,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyDebitManifest(
             LastBearingStateBuilder builder,
             DebitCityManifestCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             EnsureTransactionIdentity(
                 builder,
@@ -473,7 +510,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyDepart(
             LastBearingStateBuilder builder,
             DepartExpeditionCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.TransactionPhase > TransactionPhase.CityDebited)
             {
@@ -491,7 +528,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyDrive(
             LastBearingStateBuilder builder,
             DriveVehicleCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.PauseCause != PauseCause.None)
             {
@@ -622,7 +659,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyOperateWreckLineModule(
             LastBearingStateBuilder builder,
             OperateWreckLineModuleCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (command.Action != builder.RouteActionKind)
             {
@@ -692,7 +729,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyOperateDepotRecoveryPoint(
             LastBearingStateBuilder builder,
             OperateDepotRecoveryPointCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.HasArrivalClaimSnapshot
                 && builder.ExpeditionPhase != ExpeditionPhase.Outbound)
@@ -735,7 +772,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyResolveDepot(
             LastBearingStateBuilder builder,
             ResolveDepotCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.DepotResolution != EncounterChoice.Unresolved)
             {
@@ -796,7 +833,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyChooseLiquid(
             LastBearingStateBuilder builder,
             ChooseLiquidReturnCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.VehicleModule != VehicleModule.SealedRangeTank
                 || builder.DepotResolution == EncounterChoice.Unresolved
@@ -856,7 +893,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyLoadDepotRepairCargo(
             LastBearingStateBuilder builder,
             LoadDepotRepairCargoCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.ExpeditionPhase != ExpeditionPhase.AtDepot
                 || builder.TransactionPhase != TransactionPhase.RoadOwned
@@ -968,7 +1005,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyFreezeReturn(
             LastBearingStateBuilder builder,
             FreezeReturnPayloadCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             EnsureTransactionIdentity(
                 builder,
@@ -1051,7 +1088,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyReturnHome(
             LastBearingStateBuilder builder,
             ReturnHomeCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.ExpeditionPhase != ExpeditionPhase.Returned
                 || builder.TransactionPhase != TransactionPhase.ReturnPending)
@@ -1066,7 +1103,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyCreditReturn(
             LastBearingStateBuilder builder,
             CreditCityReturnCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             EnsureTransactionIdentity(
                 builder,
@@ -1136,7 +1173,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyFinalize(
             LastBearingStateBuilder builder,
             FinalizeExpeditionTransactionCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             EnsureTransactionIdentity(
                 builder,
@@ -1171,7 +1208,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyInstallRepair(
             LastBearingStateBuilder builder,
             InstallTurbineRepairCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.TurbineCondition != TurbineCondition.Failing)
             {
@@ -1229,7 +1266,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyInstallCityImprovement(
             LastBearingStateBuilder builder,
             InstallCityImprovementCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             bool exactAuxiliaryPumpRequest =
                 command.Decision == NextCityDecision.RefurbishAuxiliaryPump
@@ -1352,7 +1389,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyStartSpareBearingBatch(
             LastBearingStateBuilder builder,
             StartSpareBearingBatchCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.SpareBearingBatchPhase
                 != SpareBearingBatchPhase.None)
@@ -1432,7 +1469,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyBarterSpareBearingLot(
             LastBearingStateBuilder builder,
             BarterSpareBearingLotCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.SpareBearingBatchPhase
                 == SpareBearingBatchPhase.Settled)
@@ -1502,7 +1539,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyServiceSleeve(
             LastBearingStateBuilder builder,
             ServiceFieldSleeveCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (!builder.MaintenanceObligationActive || !builder.MaintenanceDue
                 || builder.MaintenanceRecipe != MaintenanceRecipe.FieldSleeveService)
@@ -1539,7 +1576,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplySetPause(
             LastBearingStateBuilder builder,
             SetPauseCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.PauseCause == PauseCause.AutoAlert)
             {
@@ -1571,7 +1608,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyAutoPause(
             LastBearingStateBuilder builder,
             TriggerAutoPauseAlertCommand command,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.PauseCause == PauseCause.AutoAlert)
             {
@@ -1608,7 +1645,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void CompleteModuleInstallation(
             LastBearingStateBuilder builder,
             long commandSequence,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             builder.VehicleModule = builder.PlannedModule;
             builder.ModuleInstallationState = ModuleInstallationState.Installed;
@@ -1651,7 +1688,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static bool TryStartDeparture(
             LastBearingStateBuilder builder,
             long commandSequence,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.TransactionPhase != TransactionPhase.CityDebited
                 || builder.PreparationPhase != PreparationPhase.Ready
@@ -1686,7 +1723,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyCooperativeOutcome(
             LastBearingStateBuilder builder,
             long commandSequence,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             LastBearingOwnershipTransaction.CreateRepairCargo(
                 builder,
@@ -1732,7 +1769,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyAdverseOutcome(
             LastBearingStateBuilder builder,
             long commandSequence,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.DepotBearingDisposition != DepotBearingDisposition.AtDepot
                 && builder.DepotBearingDisposition
@@ -1802,7 +1839,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void CreditLiquidCargo(
             LastBearingStateBuilder builder,
             long commandSequence,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.LiquidCargoKind == LiquidCargoKind.None)
             {
@@ -1844,7 +1881,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ApplyCooperativeReturnConsequences(
             LastBearingStateBuilder builder,
             long commandSequence,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.PendingFactionOutcome != FactionOutcomeKind.Cooperative)
             {
@@ -1924,7 +1961,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             LastBearingStateBuilder builder,
             int scaleMilli,
             bool spareBearingBatchWasInProgressAtTickStart,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             builder.SettlementAccumulatorMilli = checked(
                 builder.SettlementAccumulatorMilli + scaleMilli);
@@ -2010,7 +2047,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
         private static void AdvanceSpareBearingBatch(
             LastBearingStateBuilder builder,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             var previousElapsedTicks = builder.SpareBearingElapsedTicks;
             builder.SpareBearingElapsedTicks = checked(
@@ -2078,7 +2115,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void AdvanceFactionClock(
             LastBearingStateBuilder builder,
             int scaleMilli,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             builder.FactionAccumulatorMilli = checked(
                 builder.FactionAccumulatorMilli + scaleMilli);
@@ -2097,7 +2134,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
         private static void AdvanceAutonomousClaim(
             LastBearingStateBuilder builder,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.DepotResolution != EncounterChoice.Unresolved
                 || builder.FactionClaimProgressMilli
@@ -2178,7 +2215,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
         private static void AdvanceFactionOutcome(
             LastBearingStateBuilder builder,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             if (builder.PendingFactionOutcome == FactionOutcomeKind.None)
             {
@@ -2356,7 +2393,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void EmitReplay(
             LastBearingStateBuilder builder,
             long commandSequence,
-            List<LastBearingDomainEvent> events)
+            LastBearingEventSink events)
         {
             Emit(
                 builder,
@@ -2372,7 +2409,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
         private static void Emit(
             LastBearingStateBuilder builder,
-            List<LastBearingDomainEvent> events,
+            LastBearingEventSink events,
             LastBearingEventKind kind,
             LastBearingEventCause cause,
             long domainTick,
@@ -2381,16 +2418,15 @@ namespace AtomicLandPirate.Simulation.LastBearing
             long beforeValue,
             long afterValue)
         {
-            events.Add(
-                new LastBearingDomainEvent(
-                    kind,
-                    cause,
-                    builder.GlobalTick,
-                    domainTick,
-                    commandSequence,
-                    subjectId,
-                    beforeValue,
-                    afterValue));
+            events.Emit(
+                kind,
+                cause,
+                builder.GlobalTick,
+                domainTick,
+                commandSequence,
+                subjectId,
+                beforeValue,
+                afterValue);
         }
     }
 }

@@ -5,9 +5,15 @@ using System.Collections.Generic;
 using AtomicLandPirate.Simulation.LastBearing;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Stopwatch = System.Diagnostics.Stopwatch;
 
 namespace AtomicLandPirate.Presentation.LastBearing
 {
+    public interface ILastBearingSimulationTickPerformanceObserver
+    {
+        void RecordSimulationTick(long stopwatchTicks);
+    }
+
     /// <summary>
     /// Thin Unity adapter around the deterministic Last Bearing kernel.
     /// Quantized commands enter the core at 10 Hz; Unity objects only render
@@ -26,12 +32,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private readonly List<LastBearingCommand> _pendingCommands =
             new List<LastBearingCommand>();
         private readonly LastBearingKernel _kernel = new LastBearingKernel();
+        private readonly LastBearingStepBuffer _stepBuffer =
+            new LastBearingStepBuffer();
         private LastBearingState? _state;
         private LastBearingReadModel? _readModel;
+        private LastBearingState? _stateSnapshot;
+        private LastBearingReadModel? _readModelSnapshot;
+        private LastBearingState? _snapshotSource;
+        private long _snapshotGlobalTick = -1L;
         private LastBearingWorldBuilder? _world;
         private LastBearingHud? _hud;
+        private LastBearingFieldDesk? _fieldDesk;
         private LastBearingModeCoordinator? _modeCoordinator;
         private LastBearingSaveAdapter? _saveAdapter;
+        private ILastBearingSimulationTickPerformanceObserver?
+            _simulationTickPerformanceObserver;
         private float _accumulator;
         private bool _initialized;
         private bool _cityNeedInspected;
@@ -42,13 +57,42 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool HasActiveGame => _state != null && _readModel != null;
 
-        public LastBearingState? State => _state;
+        public LastBearingState? State
+        {
+            get
+            {
+                EnsurePublicSnapshots();
+                return _stateSnapshot;
+            }
+        }
 
-        public LastBearingReadModel? ReadModel => _readModel;
+        public LastBearingReadModel? ReadModel
+        {
+            get
+            {
+                EnsurePublicSnapshots();
+                return _readModelSnapshot;
+            }
+        }
+
+        internal LastBearingReadModel? RuntimeReadModel => _readModel;
 
         public LastBearingWorldBuilder? World => _world;
 
         public LastBearingModeCoordinator? ModeCoordinator => _modeCoordinator;
+
+        public LastBearingFieldDesk? FieldDesk => _fieldDesk;
+
+        public bool IsExactFieldDeskCityOverview =>
+            HasActiveGame &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.CityOverview;
+
+        public bool HasPendingPlayerCommands => _pendingCommands.Count != 0;
+
+        internal int PendingPlayerCommandCountForPerformance =>
+            _pendingCommands.Count;
 
         public bool CanRecoverRoadPresentation =>
             _modeCoordinator?.CanRecoverRoadPresentation ?? false;
@@ -149,8 +193,57 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool CityGrammarLogisticsConnected =>
             _world?.CityGrammarComparison?.IsLogisticsConnected ?? false;
 
+        public int CityGrammarInteractionCount =>
+            _world?.CityGrammarComparison?.InteractionCount ?? 0;
+
+        public bool CanConnectCityGrammarLogistics =>
+            _world?.CityGrammarComparison is
+            {
+                SelectedHypothesis:
+                    LastBearingCityGrammarHypothesis.RestrainedSnapGrid,
+                HasValidSnapGridLayout: true,
+                IsLogisticsConnected: false
+            };
+
         public string CanonicalHash =>
             _state == null ? "none" : LastBearingCanonicalCodec.ComputeSha256(_state);
+
+        public void AttachSimulationTickPerformanceObserver(
+            ILastBearingSimulationTickPerformanceObserver observer)
+        {
+            if (observer == null)
+            {
+                throw new ArgumentNullException(nameof(observer));
+            }
+
+            if (_simulationTickPerformanceObserver != null &&
+                !ReferenceEquals(_simulationTickPerformanceObserver, observer))
+            {
+                throw new InvalidOperationException(
+                    "a simulation-tick performance observer is already attached");
+            }
+
+            EnsurePublicSnapshots();
+            _simulationTickPerformanceObserver = observer;
+        }
+
+        public void DetachSimulationTickPerformanceObserver(
+            ILastBearingSimulationTickPerformanceObserver observer)
+        {
+            if (ReferenceEquals(_simulationTickPerformanceObserver, observer))
+            {
+                _simulationTickPerformanceObserver = null;
+            }
+        }
+
+        internal void SetLegacyHudSuppressedByFieldDesk(bool suppressed)
+        {
+            bool enabled = !suppressed;
+            if (_hud != null && _hud.enabled != enabled)
+            {
+                _hud.enabled = enabled;
+            }
+        }
 
         private void Awake()
         {
@@ -183,6 +276,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world.CameraRig!,
                 _world.VehicleView!,
                 _world.RoadFeelRig!.Root.transform,
+                _world.CityScaffoldRoot!,
                 _world.GarageBayView!.CameraAnchor!,
                 _world.GarageBayView.FocusAnchor!,
                 _world.PumpHallCutawayView!.CameraAnchor!,
@@ -191,8 +285,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world.ReturnServiceView.FocusAnchor!);
             _modeCoordinator.AttachRoadModeAdapter(
                 _world.RoadFeelRig.Adapter);
+            try
+            {
+                _fieldDesk = gameObject.AddComponent<LastBearingFieldDesk>();
+                _fieldDesk.Configure(this);
+            }
+            catch (Exception exception)
+            {
+                _fieldDesk = null;
+                Debug.LogException(exception, this);
+            }
+
             _hud = gameObject.AddComponent<LastBearingHud>();
-            _hud.Configure(this);
+            _hud.Configure(this, _fieldDesk);
+            SetLegacyHudSuppressedByFieldDesk(
+                _fieldDesk?.OwnsCityOverview == true);
 
             try
             {
@@ -207,11 +314,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void StartNewGame(ColonyComposition composition)
         {
+            _fieldDesk?.ResetForLifecycle();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
             _accumulator = 0f;
             _state = LastBearingScenarioFactory.CreateInitial(composition, 2011);
             _readModel = LastBearingReadModel.FromState(_state);
+            ResetPublicSnapshotsToRuntime();
             _cityNeedInspected = false;
             _saveStatus = "Unsaved local development state.";
             _world?.SetCityNeedInspected(false);
@@ -256,6 +365,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ClearGaragePlanIntent();
             _state = null;
             _readModel = null;
+            ResetPublicSnapshotsToRuntime();
             _accumulator = 0f;
             _cityNeedInspected = false;
             _status = "Choose who calls Last Bearing home.";
@@ -310,6 +420,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 futureRouteTollFuelUnits: 0,
                 humanVisible: true,
                 robotVisible: true);
+            _fieldDesk?.ResetForLifecycle();
         }
 
         public void ActivateInfrastructure()
@@ -937,6 +1048,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void Load()
         {
+            _fieldDesk?.ResetForLifecycle();
             ClearGaragePlanIntent();
             if (_saveAdapter == null)
             {
@@ -957,6 +1069,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _modeCoordinator?.ClearSession();
                 _state = result.State;
                 _readModel = LastBearingReadModel.FromState(_state);
+                ResetPublicSnapshotsToRuntime();
                 _accumulator = 0f;
                 _cityNeedInspected = true;
                 _world?.SetCityNeedInspected(true);
@@ -983,11 +1096,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             if (!HasActiveGame)
             {
+                _fieldDesk?.Refresh();
                 return;
             }
 
             HandleGlobalShortcuts();
             AdvanceSimulation(Time.unscaledDeltaTime);
+            _fieldDesk?.Refresh();
         }
 
         private void AdvanceSimulation(float elapsedSeconds)
@@ -1085,9 +1200,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            ILastBearingSimulationTickPerformanceObserver? observer =
+                _simulationTickPerformanceObserver;
+            long pausedGuardStartedAt =
+                observer == null ? 0L : Stopwatch.GetTimestamp();
             if (_readModel.PauseCause != PauseCause.None &&
                 _pendingCommands.Count == 0)
             {
+                if (observer != null)
+                {
+                    observer.RecordSimulationTick(
+                        Stopwatch.GetTimestamp() - pausedGuardStartedAt);
+                }
+
                 return;
             }
 
@@ -1095,12 +1220,32 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingCommand[] commands = _pendingCommands.Count == 0
                 ? Array.Empty<LastBearingCommand>()
                 : _pendingCommands.ToArray();
+            bool hasCommands = commands.Length != 0;
             _pendingCommands.Clear();
 
             try
             {
                 ExpeditionPhase previousPhase = _readModel.ExpeditionPhase;
-                LastBearingTickResult result = _kernel.Step(_state, commands);
+                long simulationStartedAt =
+                    observer == null ? 0L : Stopwatch.GetTimestamp();
+                LastBearingStepBuffer result = _stepBuffer;
+                _kernel.StepInto(_state, commands, result);
+                if (observer != null)
+                {
+                    observer.RecordSimulationTick(
+                        Stopwatch.GetTimestamp() - simulationStartedAt);
+                }
+                if (result.State == null)
+                {
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_STEP_BUFFER_STATE_UNAVAILABLE");
+                }
+
+                if (result.ReadModel == null)
+                {
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_STEP_BUFFER_READ_MODEL_UNAVAILABLE");
+                }
                 bool returnCheckInAccepted =
                     ContainsEvent(
                         result.DomainEvents,
@@ -1122,6 +1267,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     LastBearingEventKind.SpareBearingLotBartered);
                 _state = result.State;
                 _readModel = result.ReadModel;
+                if (hasCommands)
+                {
+                    PublishPublicSnapshots();
+                }
                 if (previousPhase == ExpeditionPhase.AtHome &&
                     _readModel.ExpeditionPhase != ExpeditionPhase.AtHome)
                 {
@@ -1396,6 +1545,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _readModel.RepairCargoCustody,
                 humanVisible,
                 robotVisible);
+            _fieldDesk?.Refresh();
         }
 
         private void TryAutosave(
@@ -1512,6 +1662,54 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return false;
         }
 
+        private void EnsurePublicSnapshots()
+        {
+            if (_state == null)
+            {
+                if (_stateSnapshot == null && _readModelSnapshot == null)
+                {
+                    return;
+                }
+
+                ResetPublicSnapshotsToRuntime();
+                return;
+            }
+
+            if (_stateSnapshot != null &&
+                _readModelSnapshot != null &&
+                ReferenceEquals(_snapshotSource, _state) &&
+                _snapshotGlobalTick == _state.GlobalTick)
+            {
+                return;
+            }
+
+            PublishPublicSnapshots();
+        }
+
+        private void PublishPublicSnapshots()
+        {
+            if (_state == null || _readModel == null)
+            {
+                ResetPublicSnapshotsToRuntime();
+                return;
+            }
+
+            LastBearingState snapshot =
+                new LastBearingStateBuilder(_state).Build();
+            _stateSnapshot = snapshot;
+            _readModelSnapshot = LastBearingReadModel.FromState(snapshot);
+            _snapshotSource = _state;
+            _snapshotGlobalTick = _state.GlobalTick;
+        }
+
+        private void ResetPublicSnapshotsToRuntime()
+        {
+            _stateSnapshot = _state;
+            _readModelSnapshot = _readModel;
+            _snapshotSource = _state;
+            _snapshotGlobalTick = _state?.GlobalTick ?? -1L;
+        }
+
         private void Queue(params Func<long, LastBearingCommand>[] factories)
         {
             if (_state == null)
@@ -1568,6 +1766,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_modeCoordinator?.TryShowCityMode(mode, _readModel) == true)
             {
                 _status = successStatus;
+                _fieldDesk?.Refresh(force: true);
                 return;
             }
 

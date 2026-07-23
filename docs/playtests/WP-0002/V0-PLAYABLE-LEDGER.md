@@ -2,7 +2,7 @@
 
 Status: **provisional execution ledger**
 
-Baseline: `ba39285cd722a8ec95a4bd7d63f00cf4b8df7f2f`
+Baseline: `2ddbc3f90c14a5fa9bec2858ce9ff06b350a80db`
 
 Purpose: keep the next playable work vertically integrated, testable, and honest.
 
@@ -40,8 +40,8 @@ The stack already has a deterministic fixed-tick core, typed resident rosters,
 human/robot/mixed loop coverage, one-scene mode routing, strategy and chase
 cameras, a presentation-only road-physics rig, two vehicle modules, exact cargo
 custody, an autonomous faction claim, a depot recovery gate, a C0 scout and
-garage blockout, and atomic `last-bearing-dev-v1` save/load with current and
-last-good generations.
+garage blockout, workshop-local manufacture and claims-wicket handoff, and
+atomic `last-bearing-dev-v1` save/load with current and last-good generations.
 
 The current experience is still a constitutional toy:
 
@@ -52,7 +52,7 @@ The current experience is still a constitutional toy:
 | Garage | Stable C0 scout sockets, fixed dollhouse bay, and garage-local module commitment | Module assembly remains one authored operation; no generalized rig-upgrade path |
 | Depot/scavenging | Recovery gate, faction choice, heavy/liquid cargo fields, exact custody, and one operated repair-cargo handoff | Range-tank liquid selection and return sealing remain HUD-led; one depot and its interactions are still thin |
 | Colony | Exact typed rosters and visible human/robot primitives | No lived work feedback; mechanical differentiation remains forbidden while D-0039 is open |
-| Manufacturing/trade | One conserved spare-bearing batch, physical lot, one-off caravaner barter, and persistent corridor permit | Batch start and barter remain global HUD actions; no broader exchange by design while D-0044 remains open |
+| Manufacturing/trade | One conserved spare-bearing batch, physical lot, workshop-local start, claims-wicket barter, and persistent corridor permit | The physical handoffs still use the temporary legacy HUD inside one fixed cutaway; no broader exchange by design while D-0044 remains open |
 | Save | Exact disposable profile, fault-tested atomic store, and critical-transition autosaves | One dev slot; no production compatibility promise |
 | Presentation | Temporary IMGUI, procedural primitives, fixed cutaways, and a readable Permit Job rail | The released baseline still lacks retained UI, sound language, accepted meshes, textures, LODs, or audio |
 | Mac proof | Lightweight URP project on the selected Editor | No clean native build or target-Mac thermal/frame/memory soak evidence |
@@ -494,8 +494,9 @@ Detailed contract:
 Objective: finish the implemented Permit Job through the physical machine-shop
 and claims-wicket cutaway instead of two global HUD actions.
 
-Status: current implementation target; not released until independent, Unity,
-protected, and creator-delegated release gates pass.
+Status: released on protected `main` in `3812bbe` after independent review,
+exact Unity dispatcher gates, protected checks, and transparent
+creator-delegated manual release.
 
 Scope:
 
@@ -549,6 +550,58 @@ changes, and any D-0030, D-0039, or D-0044 selection.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-12-WORK-THE-WICKET-CONTRACT.md`.
+
+## VGR-13 — Field Desk
+
+Objective: give the normal strategy city view its first retained, player-facing
+interface without changing the implemented game or removing the legacy HUD.
+
+Status: current implementation target; not released until independent, Unity,
+protected, and creator-delegated release gates pass.
+
+Scope:
+
+- Build one retained UI Toolkit Field Desk only for an active exact
+  `CityOverview`; title, return, cutaways, garage, road, and depot retain the
+  existing legacy IMGUI surface.
+- Present the existing Permit Job docket, civic pressure, current city order,
+  reversible D-0030 survey board, service controls, save status, and subordinate
+  audit line from existing read-only projections.
+- Delegate every valid city intent to one named existing
+  `LastBearingGameController` method; never construct a command or touch the
+  kernel, state, world, mode coordinator, or save boundary directly.
+- Fail open to the legacy HUD if the retained surface cannot initialize, and
+  prevent simultaneous surfaces, duplicate callbacks, stale clicks, and
+  one-frame double actions during mode or lifecycle changes.
+- Preserve canonical and save bytes for rendering, focus, collapse, inspection,
+  trial, routing, and no-op interaction; keep explicit save and existing
+  accepted command effects exactly unchanged.
+- Express Texas iron x brutalist opera through civic hierarchy and workmanlike
+  panels, storybook salvage through warmth and readable care, and tungsten over
+  neon through warm normal light with rare semantic color only.
+
+Acceptance:
+
+- retained and legacy surfaces are mutually exclusive under the exact mode
+  matrix, including a usable legacy failure fallback in city overview;
+- the Field Desk is projection-only, delegates at most once per valid action,
+  and preserves pending commands, canonical hash, and save bytes on every stale,
+  duplicate, wrong-mode, and lifecycle request;
+- Permit Job output and D-0030 evidence remain exact, composition-neutral, and
+  free of a new score, recommendation, authority, or persistence seam;
+- one stable retained tree meets the zero-p95 allocation and repeated-entry
+  memory gates without a package, scene, project-setting, production-art, core,
+  or save change;
+- the full title-to-permit-save-load golden path, three composition smokes,
+  visual captures, Unity gates, protected checks, and rollback proof pass.
+
+Exclude: retained UI outside exact city overview, legacy-HUD removal, a broad UI
+framework, commands or gameplay rules, production art/audio, dependencies,
+scenes, packages, project settings, save/codec changes, and any D-0030, D-0039,
+or D-0044 selection.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-13-FIELD-DESK-CONTRACT.md`.
 
 ## Visual constitution
 

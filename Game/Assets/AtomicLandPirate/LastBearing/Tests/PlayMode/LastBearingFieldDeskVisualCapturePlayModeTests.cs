@@ -1,0 +1,1378 @@
+#nullable enable
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
+using AtomicLandPirate.Simulation.LastBearing;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
+using UnityEngine.UIElements;
+
+namespace AtomicLandPirate.Presentation.LastBearing.Tests
+{
+    public sealed class LastBearingFieldDeskVisualCapturePlayModeTests
+    {
+        private const string SceneName = "LastBearing";
+        private const string CaptureSet =
+            "vgr-13-field-desk-visual-acceptance";
+        private const string RequestRelativePath =
+            "BuildArtifacts/WP-0002/local-only/" +
+            "vgr-13-field-desk-capture-request.json";
+        private const string OutputRelativeDirectory =
+            "BuildArtifacts/WP-0002/visual-captures/vgr-13";
+        private const int CreatorTargetWidth = 2560;
+        private const int CreatorTargetHeight = 1600;
+        private const int EditorBackbufferWidth = 2560;
+        private const int EditorBackbufferHeight = 1440;
+        private const int ResolutionWaitFrames = 120;
+        private const float CameraSettleTimeoutSeconds = 2f;
+        private const int CameraSettleFrameLimit = 4096;
+
+        private readonly List<PendingArtifact> _pending =
+            new List<PendingArtifact>();
+        private int _originalWidth;
+        private int _originalHeight;
+        private FullScreenMode _originalFullScreenMode;
+        private int _unityReportedDisplayWidth;
+        private int _unityReportedDisplayHeight;
+        private object? _gameView;
+        private object? _gameViewSizes;
+        private object? _gameViewSizeGroup;
+        private object? _originalGameViewSizeGroupType;
+        private object? _originalGameViewSize;
+        private int _originalGameViewSizeIndex;
+        private int _originalGameViewCustomSizeCount;
+        private bool _gameViewSnapshotTaken;
+        private readonly Dictionary<string, int> _captureGameViewSizeIndices =
+            new Dictionary<string, int>(StringComparer.Ordinal);
+        private readonly List<object> _addedGameViewSizes =
+            new List<object>();
+        private bool _sceneLoadedByCapture;
+
+        [UnityTearDown]
+        public IEnumerator TearDownSceneAndResolution()
+        {
+            if (_gameViewSnapshotTaken)
+            {
+                RestoreGameViewSelectionAndRemoveCaptureSizes();
+                yield return WaitForExactPresentedResolution(
+                    _originalWidth,
+                    _originalHeight,
+                    "original Game View backbuffer");
+            }
+
+            Scene scene = SceneManager.GetSceneByName(SceneName);
+            if (_sceneLoadedByCapture && scene.IsValid() && scene.isLoaded)
+            {
+                Scene cleanup = SceneManager.CreateScene(
+                    "LastBearing_FieldDeskCaptureCleanup");
+                SceneManager.SetActiveScene(cleanup);
+                AsyncOperation? unload = SceneManager.UnloadSceneAsync(scene);
+                if (unload != null)
+                {
+                    yield return unload;
+                }
+            }
+
+            _pending.Clear();
+            _captureGameViewSizeIndices.Clear();
+            _addedGameViewSizes.Clear();
+            _gameView = null;
+            _gameViewSizes = null;
+            _gameViewSizeGroup = null;
+            _originalGameViewSizeGroupType = null;
+            _originalGameViewSize = null;
+            _gameViewSnapshotTaken = false;
+            _sceneLoadedByCapture = false;
+            _unityReportedDisplayWidth = 0;
+            _unityReportedDisplayHeight = 0;
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator CaptureVisualAcceptanceMatrixWhenLocallyRequested()
+        {
+            string repositoryRoot = ResolveRepositoryRoot();
+            string requestPath = Path.Combine(
+                repositoryRoot,
+                RequestRelativePath);
+            if (!File.Exists(requestPath))
+            {
+                yield break;
+            }
+
+            byte[] requestBytes = File.ReadAllBytes(requestPath);
+            CaptureRequest request = ParseAndValidateRequest(
+                repositoryRoot,
+                requestBytes);
+            _originalWidth = Screen.width;
+            _originalHeight = Screen.height;
+            _originalFullScreenMode = Screen.fullScreenMode;
+            SnapshotGameViewSelection();
+            Resolution currentResolution = Screen.currentResolution;
+            _unityReportedDisplayWidth = currentResolution.width;
+            _unityReportedDisplayHeight = currentResolution.height;
+            Assert.That(_unityReportedDisplayWidth, Is.GreaterThan(0));
+            Assert.That(_unityReportedDisplayHeight, Is.GreaterThan(0));
+
+            var manifest = new CaptureManifest
+            {
+                packet_id = "WP-0002",
+                slice_id = "VGR-13",
+                capture_set = CaptureSet,
+                request_id = request.request_id,
+                request_sha256 = ComputeSha256(requestBytes),
+                source_head = request.source_head,
+                source_tree = request.source_tree,
+                base_commit = request.base_commit,
+                branch = request.branch,
+                contract_path = request.contract_path,
+                contract_sha256 = request.contract_sha256,
+                unity_version = Application.unityVersion,
+                scene = SceneName,
+                operator_identity = "Codex under creator authority",
+                requested_at_utc = request.requested_at_utc,
+                captured_at_utc = UtcNow(),
+                original_width = _originalWidth,
+                original_height = _originalHeight,
+                original_full_screen_mode = _originalFullScreenMode.ToString(),
+                unity_reported_display_width = _unityReportedDisplayWidth,
+                unity_reported_display_height = _unityReportedDisplayHeight,
+                observed_editor_backbuffer_width = EditorBackbufferWidth,
+                observed_editor_backbuffer_height = EditorBackbufferHeight,
+                unity_reported_display_resolution_capture_reached = false,
+                provisional_architecture_target_width = CreatorTargetWidth,
+                provisional_architecture_target_height = CreatorTargetHeight,
+                provisional_architecture_target_reached =
+                    _unityReportedDisplayWidth == CreatorTargetWidth &&
+                    _unityReportedDisplayHeight == CreatorTargetHeight,
+                native_target_semantics =
+                    "Screen.currentResolution records Unity's current reported display resolution. " +
+                    "The city-trial-a-top-unity-reported-display capture uses an exact " +
+                    "editor Game-view backbuffer at those dimensions. This proves layout " +
+                    "and rendering at the reported pixel size, not physical panel sampling, " +
+                    "operating-system scaling, or the provisional architecture target unless " +
+                    "the dimensions match.",
+                game_view_size_control =
+                    "Reflection-only selection of transient fixed GameViewSize entries; " +
+                    "the prior selection and custom-size count are restored before evidence is written.",
+                original_game_view_size_index = _originalGameViewSizeIndex,
+                original_game_view_custom_size_count =
+                    _originalGameViewCustomSizeCount,
+                quality_level = QualitySettings.names[QualitySettings.GetQualityLevel()],
+                color_space = QualitySettings.activeColorSpace.ToString(),
+                render_scale_width = ScalableBufferManager.widthScaleFactor,
+                render_scale_height = ScalableBufferManager.heightScaleFactor,
+                graphics_api = SystemInfo.graphicsDeviceType.ToString(),
+                graphics_device = SystemInfo.graphicsDeviceName,
+                operating_system = SystemInfo.operatingSystem,
+                processor = SystemInfo.processorType,
+                system_memory_mb = SystemInfo.systemMemorySize,
+                bloom_state = "absent from the reserved Last Bearing source",
+                grayscale_conversion =
+                    "integer Rec.709 approximation: " +
+                    "(54*R + 183*G + 19*B + 128) >> 8; alpha preserved",
+                save_interaction = "none; no Save or Load method invoked",
+                known_limits = new[]
+                {
+                    "Captures do not prove interaction, allocation, memory, or target-Mac performance.",
+                    "Title and garage are representative legacy-surface checks, not exhaustive mode coverage.",
+                    "The source head and tree are request-bound; this harness does not inspect Git metadata.",
+                    "Unity reported a current display resolution of " +
+                    _unityReportedDisplayWidth + "x" +
+                    _unityReportedDisplayHeight +
+                    "; the exact observed editor backbuffer was " +
+                    EditorBackbufferWidth + "x" + EditorBackbufferHeight + ".",
+                    "An exact editor backbuffer matching Unity's reported display pixel " +
+                    "dimensions is included; physical panel sampling and operating-system " +
+                    "scaling remain outside this packet."
+                },
+                state_sequence = new[]
+                {
+                    "ReturnToTitle()",
+                    "StartNewGame(Mixed)",
+                    "InspectCityNeed()",
+                    "SelectCityGrammarHypothesis(RestrainedSnapGrid)",
+                    "ManipulateCityGrammarPrimary()",
+                    "ToggleCityGrammarTrialPiece()",
+                    "ManipulateCityGrammarPrimary() x2",
+                    "ConnectCityGrammarLogistics()",
+                    "AdvanceCityGrammarDelivery() x2",
+                    "RecordCityGrammarPathRead(true)",
+                    "OpenGarageBay()"
+                }
+            };
+
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            _sceneLoadedByCapture = true;
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller = RequireController();
+            controller.enabled = false;
+            Camera camera = RequireCamera(controller);
+
+            try
+            {
+                controller.ReturnToTitle();
+                Assert.That(controller.HasActiveGame, Is.False);
+                Assert.That(controller.FieldDesk?.OwnsCityOverview, Is.False);
+                yield return CaptureFrame(
+                    controller,
+                    "legacy-title-observed-editor-backbuffer",
+                    "title",
+                    EditorBackbufferWidth,
+                    EditorBackbufferHeight,
+                    ScrollPosition.None,
+                    makeGrayscale: false);
+
+                StageTrialA(controller);
+                yield return WaitForCityCamera(controller);
+                manifest.camera = CaptureCamera(camera);
+                string cityCanonicalHash = controller.CanonicalHash;
+                manifest.city_canonical_sha256_before = cityCanonicalHash;
+
+                yield return CaptureFrame(
+                    controller,
+                    "city-trial-a-top-1280x720",
+                    "city-trial-a",
+                    1280,
+                    720,
+                    ScrollPosition.Top,
+                    makeGrayscale: false);
+                yield return CaptureFrame(
+                    controller,
+                    "city-trial-a-bottom-1280x720",
+                    "city-trial-a",
+                    1280,
+                    720,
+                    ScrollPosition.Bottom,
+                    makeGrayscale: false);
+                yield return CaptureFrame(
+                    controller,
+                    "city-trial-a-top-1920x1200",
+                    "city-trial-a",
+                    1920,
+                    1200,
+                    ScrollPosition.Top,
+                    makeGrayscale: true);
+                yield return CaptureFrame(
+                    controller,
+                    "city-trial-a-top-observed-editor-backbuffer",
+                    "city-trial-a",
+                    EditorBackbufferWidth,
+                    EditorBackbufferHeight,
+                    ScrollPosition.Top,
+                    makeGrayscale: false);
+                yield return CaptureFrame(
+                    controller,
+                    "city-trial-a-top-unity-reported-display",
+                    "city-trial-a",
+                    _unityReportedDisplayWidth,
+                    _unityReportedDisplayHeight,
+                    ScrollPosition.Top,
+                    makeGrayscale: false);
+
+                Assert.That(controller.CanonicalHash, Is.EqualTo(cityCanonicalHash));
+                manifest.city_canonical_sha256_after = controller.CanonicalHash;
+
+                controller.OpenGarageBay();
+                controller.FieldDesk?.Refresh(force: true);
+                Assert.That(controller.FieldDesk?.OwnsCityOverview, Is.False);
+                yield return WaitForGarageCamera(controller);
+                yield return CaptureFrame(
+                    controller,
+                    "legacy-garage-observed-editor-backbuffer",
+                    "garage",
+                    EditorBackbufferWidth,
+                    EditorBackbufferHeight,
+                    ScrollPosition.None,
+                    makeGrayscale: false);
+
+                AssertExactCaptureMatrix();
+                manifest.unity_reported_display_resolution_capture_reached = true;
+                manifest.artifacts = BuildArtifactRecords();
+                RestoreGameViewSelectionAndRemoveCaptureSizes();
+                yield return WaitForExactPresentedResolution(
+                    _originalWidth,
+                    _originalHeight,
+                    "original Game View backbuffer");
+                manifest.game_view_custom_sizes_restored = true;
+                WriteEvidence(repositoryRoot, manifest);
+            }
+            finally
+            {
+                RestoreGameViewSelectionAndRemoveCaptureSizes();
+            }
+
+            yield return null;
+        }
+
+        private IEnumerator CaptureFrame(
+            LastBearingGameController controller,
+            string label,
+            string state,
+            int width,
+            int height,
+            ScrollPosition scrollPosition,
+            bool makeGrayscale)
+        {
+            SelectExactGameViewSize(width, height);
+            yield return WaitForExactPresentedResolution(
+                width,
+                height,
+                "requested capture backbuffer");
+
+            bool isCity = scrollPosition != ScrollPosition.None;
+            ScrollView? scroll = null;
+            bool currentOrderVisible = false;
+            bool serviceStripVisible = false;
+            float resolvedScrollOffset = 0f;
+            if (isCity)
+            {
+                LastBearingFieldDesk desk = RequireFieldDesk(controller);
+                desk.Refresh(force: true);
+                Assert.That(desk.OwnsCityOverview, Is.True);
+                UIDocument document = RequireDocument(controller);
+                VisualElement root = document.rootVisualElement;
+                scroll = root.Q<ScrollView>("desk-scroll");
+                Assert.That(scroll, Is.Not.Null);
+                yield return null;
+                yield return null;
+
+                if (scrollPosition == ScrollPosition.Top)
+                {
+                    scroll!.scrollOffset = Vector2.zero;
+                }
+                else
+                {
+                    float highValue = scroll!.verticalScroller.highValue;
+                    Assert.That(highValue, Is.GreaterThan(0f));
+                    scroll.verticalScroller.value = highValue;
+                    scroll.scrollOffset = new Vector2(0f, highValue);
+                }
+
+                yield return null;
+                resolvedScrollOffset = scroll!.scrollOffset.y;
+                if (scrollPosition == ScrollPosition.Top)
+                {
+                    Assert.That(resolvedScrollOffset, Is.EqualTo(0f).Within(1f));
+                }
+                else
+                {
+                    Assert.That(
+                        resolvedScrollOffset,
+                        Is.EqualTo(scroll.verticalScroller.highValue).Within(1f));
+                }
+
+                currentOrderVisible = IsFullyOnScreen(
+                    root.Q<VisualElement>(className: "current-order")?.worldBound,
+                    width,
+                    height);
+                serviceStripVisible = IsFullyOnScreen(
+                    root.Q<VisualElement>(className: "service-strip")?.worldBound,
+                    width,
+                    height);
+                Assert.That(currentOrderVisible, Is.True);
+                Assert.That(serviceStripVisible, Is.True);
+            }
+
+            yield return new WaitForEndOfFrame();
+            Texture2D? texture = CaptureScreenshotAsTexture();
+            Assert.That(texture, Is.Not.Null);
+            try
+            {
+                Assert.That(texture!.width, Is.EqualTo(width));
+                Assert.That(texture.height, Is.EqualTo(height));
+                byte[] png = texture.EncodeToPNG();
+                CameraRecord frameCamera = CaptureCamera(
+                    RequireCamera(controller));
+                PendingArtifact color = AddPendingArtifact(
+                    label,
+                    state,
+                    width,
+                    height,
+                    texture.width,
+                    texture.height,
+                    scrollPosition,
+                    resolvedScrollOffset,
+                    currentOrderVisible,
+                    serviceStripVisible,
+                    "color",
+                    string.Empty,
+                    frameCamera,
+                    png);
+
+                if (makeGrayscale)
+                {
+                    byte[] grayscale = EncodeGrayscalePng(texture);
+                    AddPendingArtifact(
+                        label + "-grayscale",
+                        state,
+                        width,
+                        height,
+                        texture.width,
+                        texture.height,
+                        scrollPosition,
+                        resolvedScrollOffset,
+                        currentOrderVisible,
+                        serviceStripVisible,
+                        "grayscale",
+                        color.sha256,
+                        frameCamera,
+                        grayscale);
+                }
+            }
+            finally
+            {
+                if (texture != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(texture);
+                }
+            }
+        }
+
+        private void SnapshotGameViewSelection()
+        {
+            Type gameViewType = RequireEditorType("UnityEditor.GameView");
+            Type playModeViewType = RequireEditorType(
+                "UnityEditor.PlayModeView");
+            MethodInfo? getMainPlayModeView = playModeViewType.GetMethod(
+                "GetMainPlayModeView",
+                BindingFlags.Static | BindingFlags.Public |
+                BindingFlags.NonPublic);
+            Assert.That(getMainPlayModeView, Is.Not.Null);
+            _gameView = getMainPlayModeView!.Invoke(null, null);
+            Assert.That(_gameView, Is.Not.Null);
+            Assert.That(
+                gameViewType.IsInstanceOfType(_gameView),
+                Is.True,
+                "The main PlayMode view must be an existing Unity Game view.");
+
+            Type sizesType = RequireEditorType("UnityEditor.GameViewSizes");
+            Type? singletonType = sizesType.BaseType;
+            Assert.That(singletonType, Is.Not.Null);
+            PropertyInfo? instanceProperty = singletonType!.GetProperty(
+                "instance",
+                BindingFlags.Static | BindingFlags.Public |
+                BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+            Assert.That(instanceProperty, Is.Not.Null);
+            _gameViewSizes = instanceProperty!.GetValue(null);
+            Assert.That(_gameViewSizes, Is.Not.Null);
+            _originalGameViewSizeGroupType = GetRequiredProperty(
+                _gameViewSizes!,
+                "currentGroupType");
+            _gameViewSizeGroup = GetRequiredProperty(
+                _gameViewSizes!,
+                "currentGroup");
+
+            _originalGameViewSizeIndex = GetRequiredIntProperty(
+                _gameView,
+                "selectedSizeIndex");
+            _originalGameViewCustomSizeCount = InvokeRequiredInt(
+                _gameViewSizeGroup,
+                "GetCustomCount");
+            int totalCount = InvokeRequiredInt(
+                _gameViewSizeGroup,
+                "GetTotalCount");
+            Assert.That(
+                _originalGameViewSizeIndex,
+                Is.InRange(0, totalCount - 1));
+            _originalGameViewSize = InvokeRequired(
+                _gameViewSizeGroup,
+                "GetGameViewSize",
+                new[] { typeof(int) },
+                new object[] { _originalGameViewSizeIndex });
+            Assert.That(_originalGameViewSize, Is.Not.Null);
+            _gameViewSnapshotTaken = true;
+            AssertGameViewContextStable();
+        }
+
+        private void SelectExactGameViewSize(int width, int height)
+        {
+            Assert.That(_gameViewSnapshotTaken, Is.True);
+            Assert.That(_gameView, Is.Not.Null);
+            Assert.That(_gameViewSizeGroup, Is.Not.Null);
+            AssertGameViewContextStable();
+            string key = width + "x" + height;
+            if (!_captureGameViewSizeIndices.TryGetValue(key, out int totalIndex))
+            {
+                Type sizeType = RequireEditorType("UnityEditor.GameViewSize");
+                Type sizeKindType = RequireEditorType(
+                    "UnityEditor.GameViewSizeType");
+                ConstructorInfo? constructor = sizeType.GetConstructor(
+                    BindingFlags.Instance | BindingFlags.Public |
+                    BindingFlags.NonPublic,
+                    binder: null,
+                    types: new[]
+                    {
+                        sizeKindType,
+                        typeof(int),
+                        typeof(int),
+                        typeof(string)
+                    },
+                    modifiers: null);
+                Assert.That(constructor, Is.Not.Null);
+                object fixedResolution = Enum.ToObject(sizeKindType, 1);
+                object size = constructor!.Invoke(new object[]
+                {
+                    fixedResolution,
+                    width,
+                    height,
+                    "WP0002 VGR13 " + key
+                });
+                int builtinCount = InvokeRequiredInt(
+                    _gameViewSizeGroup!,
+                    "GetBuiltinCount");
+                int beforeCustomCount = InvokeRequiredInt(
+                    _gameViewSizeGroup!,
+                    "GetCustomCount");
+                InvokeRequired(
+                    _gameViewSizeGroup!,
+                    "AddCustomSize",
+                    new[] { sizeType },
+                    new[] { size });
+                _addedGameViewSizes.Add(size);
+                int afterCustomCount = InvokeRequiredInt(
+                    _gameViewSizeGroup!,
+                    "GetCustomCount");
+                Assert.That(
+                    afterCustomCount,
+                    Is.EqualTo(beforeCustomCount + 1));
+                totalIndex = builtinCount + afterCustomCount - 1;
+                _captureGameViewSizeIndices.Add(key, totalIndex);
+            }
+
+            InvokeRequired(
+                _gameView!,
+                "SizeSelectionCallback",
+                new[] { typeof(int), typeof(object) },
+                new object[] { totalIndex, null! });
+            Assert.That(
+                GetRequiredIntProperty(_gameView!, "selectedSizeIndex"),
+                Is.EqualTo(totalIndex));
+            object selectedSize = GetRequiredProperty(
+                _gameView!,
+                "currentGameViewSize");
+            Assert.That(
+                GetRequiredIntProperty(selectedSize, "width"),
+                Is.EqualTo(width));
+            Assert.That(
+                GetRequiredIntProperty(selectedSize, "height"),
+                Is.EqualTo(height));
+            InvokeRequired(
+                _gameView!,
+                "Repaint",
+                Type.EmptyTypes,
+                Array.Empty<object>());
+        }
+
+        private void RestoreGameViewSelectionAndRemoveCaptureSizes()
+        {
+            if (!_gameViewSnapshotTaken ||
+                _gameView == null ||
+                _gameViewSizes == null ||
+                _gameViewSizeGroup == null)
+            {
+                return;
+            }
+
+            AssertGameViewContextStable();
+            InvokeRequired(
+                _gameView,
+                "SizeSelectionCallback",
+                new[] { typeof(int), typeof(object) },
+                new object[] { _originalGameViewSizeIndex, null! });
+            for (var addedIndex = _addedGameViewSizes.Count - 1;
+                 addedIndex >= 0;
+                 addedIndex--)
+            {
+                object addedSize = _addedGameViewSizes[addedIndex];
+                int foundIndex = -1;
+                int totalCount = InvokeRequiredInt(
+                    _gameViewSizeGroup,
+                    "GetTotalCount");
+                for (var totalIndex = 0;
+                     totalIndex < totalCount;
+                     totalIndex++)
+                {
+                    object? candidate = InvokeRequired(
+                        _gameViewSizeGroup,
+                        "GetGameViewSize",
+                        new[] { typeof(int) },
+                        new object[] { totalIndex });
+                    if (ReferenceEquals(candidate, addedSize))
+                    {
+                        Assert.That(foundIndex, Is.EqualTo(-1));
+                        foundIndex = totalIndex;
+                    }
+                }
+
+                Assert.That(
+                    foundIndex,
+                    Is.GreaterThanOrEqualTo(0),
+                    "A transient Game View size disappeared before cleanup.");
+                int beforeCustomCount = InvokeRequiredInt(
+                    _gameViewSizeGroup,
+                    "GetCustomCount");
+                InvokeRequired(
+                    _gameViewSizeGroup,
+                    "RemoveCustomSize",
+                    new[] { typeof(int) },
+                    new object[] { foundIndex });
+                Assert.That(
+                    InvokeRequiredInt(
+                        _gameViewSizeGroup,
+                        "GetCustomCount"),
+                    Is.EqualTo(beforeCustomCount - 1));
+                _addedGameViewSizes.RemoveAt(addedIndex);
+            }
+
+            Assert.That(
+                InvokeRequiredInt(
+                    _gameViewSizeGroup,
+                    "GetCustomCount"),
+                Is.EqualTo(_originalGameViewCustomSizeCount));
+            Assert.That(
+                GetRequiredIntProperty(_gameView, "selectedSizeIndex"),
+                Is.EqualTo(_originalGameViewSizeIndex));
+            Assert.That(
+                GetRequiredProperty(_gameView, "currentGameViewSize"),
+                Is.SameAs(_originalGameViewSize));
+            _captureGameViewSizeIndices.Clear();
+            InvokeRequired(
+                _gameView,
+                "Repaint",
+                Type.EmptyTypes,
+                Array.Empty<object>());
+            AssertGameViewContextStable();
+        }
+
+        private void AssertGameViewContextStable()
+        {
+            Assert.That(_gameViewSizes, Is.Not.Null);
+            Assert.That(_gameViewSizeGroup, Is.Not.Null);
+            Assert.That(_originalGameViewSizeGroupType, Is.Not.Null);
+            Assert.That(
+                GetRequiredProperty(_gameViewSizes!, "currentGroup"),
+                Is.SameAs(_gameViewSizeGroup),
+                "The active Game View size group changed during capture.");
+            Assert.That(
+                GetRequiredProperty(_gameViewSizes!, "currentGroupType"),
+                Is.EqualTo(_originalGameViewSizeGroupType),
+                "The active Game View size-group type changed during capture.");
+        }
+
+        private static IEnumerator WaitForExactPresentedResolution(
+            int width,
+            int height,
+            string label)
+        {
+            for (var frame = 0; frame < ResolutionWaitFrames; frame++)
+            {
+                if (Screen.width == width && Screen.height == height)
+                {
+                    yield break;
+                }
+
+                yield return null;
+            }
+
+            Assert.That(
+                new Vector2Int(Screen.width, Screen.height),
+                Is.EqualTo(new Vector2Int(width, height)),
+                "Editor did not reach the exact " + label + ".");
+        }
+
+        private static Type RequireEditorType(string fullName)
+        {
+            Type? type = Type.GetType(
+                fullName + ", UnityEditor.CoreModule",
+                throwOnError: false);
+            Assert.That(type, Is.Not.Null, "Missing Editor type: " + fullName);
+            return type!;
+        }
+
+        private static object GetRequiredProperty(
+            object target,
+            string propertyName)
+        {
+            PropertyInfo? property = target.GetType().GetProperty(
+                propertyName,
+                BindingFlags.Instance | BindingFlags.Public |
+                BindingFlags.NonPublic);
+            Assert.That(property, Is.Not.Null);
+            object? value = property!.GetValue(target);
+            Assert.That(value, Is.Not.Null);
+            return value!;
+        }
+
+        private static int GetRequiredIntProperty(
+            object target,
+            string propertyName)
+        {
+            object value = GetRequiredProperty(target, propertyName);
+            Assert.That(value, Is.TypeOf<int>());
+            return (int)value;
+        }
+
+        private static int InvokeRequiredInt(
+            object target,
+            string methodName)
+        {
+            object? value = InvokeRequired(
+                target,
+                methodName,
+                Type.EmptyTypes,
+                Array.Empty<object>());
+            Assert.That(value, Is.TypeOf<int>());
+            return (int)value!;
+        }
+
+        private static object? InvokeRequired(
+            object target,
+            string methodName,
+            Type[] parameterTypes,
+            object[] parameters)
+        {
+            MethodInfo? method = target.GetType().GetMethod(
+                methodName,
+                BindingFlags.Instance | BindingFlags.Public |
+                BindingFlags.NonPublic,
+                binder: null,
+                types: parameterTypes,
+                modifiers: null);
+            Assert.That(method, Is.Not.Null);
+            return method!.Invoke(target, parameters);
+        }
+
+        private static void StageTrialA(LastBearingGameController controller)
+        {
+            controller.StartNewGame(ColonyComposition.Mixed);
+            controller.InspectCityNeed();
+            controller.SelectCityGrammarHypothesis(
+                LastBearingCityGrammarHypothesis.RestrainedSnapGrid);
+            controller.ManipulateCityGrammarPrimary();
+            controller.ToggleCityGrammarTrialPiece();
+            controller.ManipulateCityGrammarPrimary();
+            controller.ManipulateCityGrammarPrimary();
+            controller.ConnectCityGrammarLogistics();
+            controller.AdvanceCityGrammarDelivery();
+            controller.AdvanceCityGrammarDelivery();
+            controller.RecordCityGrammarPathRead(clear: true);
+            controller.FieldDesk?.Refresh(force: true);
+            Assert.That(
+                controller.CityGrammarHypothesis,
+                Is.EqualTo(
+                    LastBearingCityGrammarHypothesis.RestrainedSnapGrid));
+            Assert.That(controller.CityGrammarLogisticsConnected, Is.True);
+            Assert.That(
+                controller.CityGrammarDeliveryStage,
+                Is.EqualTo(
+                    LastBearingCityTrialDeliveryStage.DeliveredToWorkshop));
+            Assert.That(
+                controller.CityGrammarPathRead,
+                Is.EqualTo(LastBearingCityTrialPathRead.Clear));
+            Assert.That(controller.CityGrammarTrialReady, Is.True);
+            Assert.That(controller.HasCompletedCityGrammarObservation, Is.True);
+            Assert.That(controller.HasPendingPlayerCommands, Is.False);
+            Assert.That(controller.FieldDesk?.OwnsCityOverview, Is.True);
+        }
+
+        private static IEnumerator WaitForCityCamera(
+            LastBearingGameController controller)
+        {
+            Camera camera = RequireCamera(controller);
+            Quaternion targetRotation = Quaternion.Euler(
+                LastBearingCameraRig.ComparisonPitch,
+                LastBearingCameraRig.ComparisonYaw,
+                0f);
+            Vector3 targetPosition =
+                LastBearingCameraRig.ComparisonFocus -
+                targetRotation * Vector3.forward *
+                LastBearingCameraRig.ComparisonDistance;
+            yield return WaitForCameraPose(
+                camera,
+                targetPosition,
+                targetRotation,
+                "city comparison");
+        }
+
+        private static IEnumerator WaitForGarageCamera(
+            LastBearingGameController controller)
+        {
+            Assert.That(controller.World, Is.Not.Null);
+            Assert.That(controller.World!.CameraRig, Is.Not.Null);
+            LastBearingCameraRig rig = controller.World.CameraRig!;
+            Assert.That(rig.IsInspectionMode, Is.True);
+            Assert.That(rig.InspectionCameraAnchor, Is.Not.Null);
+            Assert.That(rig.InspectionFocusAnchor, Is.Not.Null);
+            Vector3 targetPosition = rig.InspectionCameraAnchor!.position;
+            Vector3 focusDirection =
+                rig.InspectionFocusAnchor!.position - targetPosition;
+            Quaternion targetRotation = focusDirection.sqrMagnitude > 0.001f
+                ? Quaternion.LookRotation(focusDirection, Vector3.up)
+                : rig.InspectionCameraAnchor.rotation;
+            yield return WaitForCameraPose(
+                RequireCamera(controller),
+                targetPosition,
+                targetRotation,
+                "garage inspection");
+        }
+
+        private static IEnumerator WaitForCameraPose(
+            Camera camera,
+            Vector3 targetPosition,
+            Quaternion targetRotation,
+            string label)
+        {
+            float elapsed = 0f;
+            var frame = 0;
+            while (elapsed < CameraSettleTimeoutSeconds &&
+                   frame < CameraSettleFrameLimit)
+            {
+                if (Vector3.Distance(camera.transform.position, targetPosition) <= 0.02f &&
+                    Quaternion.Angle(camera.transform.rotation, targetRotation) <= 0.2f)
+                {
+                    yield break;
+                }
+
+                elapsed += Time.unscaledDeltaTime;
+                frame++;
+                yield return null;
+            }
+
+            Assert.That(
+                Vector3.Distance(camera.transform.position, targetPosition),
+                Is.LessThanOrEqualTo(0.02f),
+                label + " camera position did not settle.");
+            Assert.That(
+                Quaternion.Angle(camera.transform.rotation, targetRotation),
+                Is.LessThanOrEqualTo(0.2f),
+                label + " camera rotation did not settle.");
+        }
+
+        private PendingArtifact AddPendingArtifact(
+            string label,
+            string state,
+            int targetWidth,
+            int targetHeight,
+            int actualWidth,
+            int actualHeight,
+            ScrollPosition scrollPosition,
+            float scrollOffset,
+            bool currentOrderVisible,
+            bool serviceStripVisible,
+            string variant,
+            string derivedFromSha256,
+            CameraRecord camera,
+            byte[] bytes)
+        {
+            string sha256 = ComputeSha256(bytes);
+            string fileName = label + "-" + actualWidth + "x" + actualHeight +
+                              "-" + sha256 + ".png";
+            string relativePath = OutputRelativeDirectory + "/" + fileName;
+            var pending = new PendingArtifact
+            {
+                label = label,
+                state = state,
+                target_width = targetWidth,
+                target_height = targetHeight,
+                actual_width = actualWidth,
+                actual_height = actualHeight,
+                scroll_position = scrollPosition.ToString().ToLowerInvariant(),
+                scroll_offset_y = scrollOffset,
+                current_order_fully_visible = currentOrderVisible,
+                service_strip_fully_visible = serviceStripVisible,
+                variant = variant,
+                derived_from_sha256 = derivedFromSha256,
+                sha256 = sha256,
+                byte_count = bytes.LongLength,
+                relative_path = relativePath,
+                captured_at_utc = UtcNow(),
+                camera = camera,
+                bytes = bytes
+            };
+            _pending.Add(pending);
+            return pending;
+        }
+
+        private void AssertExactCaptureMatrix()
+        {
+            var expected = new HashSet<string>(StringComparer.Ordinal)
+            {
+                "legacy-title-observed-editor-backbuffer|color|" +
+                EditorBackbufferWidth + "x" + EditorBackbufferHeight,
+                "city-trial-a-top-1280x720|color|1280x720",
+                "city-trial-a-bottom-1280x720|color|1280x720",
+                "city-trial-a-top-1920x1200|color|1920x1200",
+                "city-trial-a-top-1920x1200-grayscale|grayscale|1920x1200",
+                "city-trial-a-top-observed-editor-backbuffer|color|" +
+                EditorBackbufferWidth + "x" + EditorBackbufferHeight,
+                "city-trial-a-top-unity-reported-display|color|" +
+                _unityReportedDisplayWidth + "x" +
+                _unityReportedDisplayHeight,
+                "legacy-garage-observed-editor-backbuffer|color|" +
+                EditorBackbufferWidth + "x" + EditorBackbufferHeight
+            };
+            var actual = new HashSet<string>(StringComparer.Ordinal);
+            for (var index = 0; index < _pending.Count; index++)
+            {
+                PendingArtifact artifact = _pending[index];
+                string key = artifact.label + "|" + artifact.variant + "|" +
+                             artifact.target_width + "x" + artifact.target_height;
+                Assert.That(actual.Add(key), Is.True, "Duplicate capture: " + key);
+                Assert.That(artifact.actual_width, Is.EqualTo(artifact.target_width));
+                Assert.That(artifact.actual_height, Is.EqualTo(artifact.target_height));
+            }
+
+            Assert.That(_pending, Has.Count.EqualTo(8));
+            Assert.That(actual.SetEquals(expected), Is.True);
+
+            PendingArtifact? grayscale = _pending.Find(
+                artifact => artifact.variant == "grayscale");
+            Assert.That(grayscale, Is.Not.Null);
+            Assert.That(IsLowerHex(grayscale!.derived_from_sha256, 64), Is.True);
+            Assert.That(
+                _pending.Exists(
+                    artifact => artifact.sha256 ==
+                                grayscale.derived_from_sha256),
+                Is.True);
+        }
+
+        private ArtifactRecord[] BuildArtifactRecords()
+        {
+            var records = new ArtifactRecord[_pending.Count];
+            for (var index = 0; index < _pending.Count; index++)
+            {
+                PendingArtifact pending = _pending[index];
+                records[index] = new ArtifactRecord
+                {
+                    label = pending.label,
+                    state = pending.state,
+                    target_width = pending.target_width,
+                    target_height = pending.target_height,
+                    actual_width = pending.actual_width,
+                    actual_height = pending.actual_height,
+                    scroll_position = pending.scroll_position,
+                    scroll_offset_y = pending.scroll_offset_y,
+                    current_order_fully_visible = pending.current_order_fully_visible,
+                    service_strip_fully_visible = pending.service_strip_fully_visible,
+                    variant = pending.variant,
+                    derived_from_sha256 = pending.derived_from_sha256,
+                    sha256 = pending.sha256,
+                    byte_count = pending.byte_count,
+                    relative_path = pending.relative_path,
+                    captured_at_utc = pending.captured_at_utc,
+                    camera = pending.camera
+                };
+            }
+
+            return records;
+        }
+
+        private void WriteEvidence(
+            string repositoryRoot,
+            CaptureManifest manifest)
+        {
+            string outputDirectory = Path.GetFullPath(Path.Combine(
+                repositoryRoot,
+                OutputRelativeDirectory));
+            string allowedRoot = Path.GetFullPath(Path.Combine(
+                repositoryRoot,
+                "BuildArtifacts/WP-0002"));
+            Assert.That(
+                outputDirectory.StartsWith(
+                    allowedRoot + Path.DirectorySeparatorChar,
+                    StringComparison.Ordinal),
+                Is.True);
+            Directory.CreateDirectory(outputDirectory);
+
+            for (var index = 0; index < _pending.Count; index++)
+            {
+                PendingArtifact artifact = _pending[index];
+                WriteImmutable(
+                    Path.Combine(repositoryRoot, artifact.relative_path),
+                    artifact.bytes);
+            }
+
+            string json = JsonUtility.ToJson(manifest, prettyPrint: true) + "\n";
+            byte[] manifestBytes = new UTF8Encoding(false).GetBytes(json);
+            string manifestSha256 = ComputeSha256(manifestBytes);
+            string manifestPath = Path.Combine(
+                outputDirectory,
+                "manifest-" + manifestSha256 + ".json");
+            WriteImmutable(manifestPath, manifestBytes);
+            Debug.Log(
+                "VGR13_VISUAL_CAPTURE_COMPLETE " +
+                Path.GetRelativePath(repositoryRoot, manifestPath)
+                    .Replace(Path.DirectorySeparatorChar, '/'));
+        }
+
+        private static void WriteImmutable(string path, byte[] bytes)
+        {
+            if (File.Exists(path))
+            {
+                Assert.That(File.ReadAllBytes(path), Is.EqualTo(bytes));
+                return;
+            }
+
+            string? directory = Path.GetDirectoryName(path);
+            Assert.That(directory, Is.Not.Null.And.Not.Empty);
+            Directory.CreateDirectory(directory!);
+            using var stream = new FileStream(
+                path,
+                FileMode.CreateNew,
+                FileAccess.Write,
+                FileShare.None);
+            stream.Write(bytes, 0, bytes.Length);
+            stream.Flush(flushToDisk: true);
+        }
+
+        private static byte[] EncodeGrayscalePng(Texture2D source)
+        {
+            Color32[] pixels = source.GetPixels32();
+            for (var index = 0; index < pixels.Length; index++)
+            {
+                Color32 pixel = pixels[index];
+                byte luminance = (byte)(
+                    (54 * pixel.r + 183 * pixel.g + 19 * pixel.b + 128) >> 8);
+                pixels[index] = new Color32(
+                    luminance,
+                    luminance,
+                    luminance,
+                    pixel.a);
+            }
+
+            var grayscale = new Texture2D(
+                source.width,
+                source.height,
+                TextureFormat.RGBA32,
+                mipChain: false,
+                linear: true);
+            try
+            {
+                grayscale.SetPixels32(pixels);
+                grayscale.Apply(updateMipmaps: false, makeNoLongerReadable: false);
+                return grayscale.EncodeToPNG();
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(grayscale);
+            }
+        }
+
+        private static Texture2D CaptureScreenshotAsTexture()
+        {
+            Type? screenCapture = Type.GetType(
+                "UnityEngine.ScreenCapture, UnityEngine.ScreenCaptureModule",
+                throwOnError: false);
+            MethodInfo? capture = screenCapture?.GetMethod(
+                "CaptureScreenshotAsTexture",
+                BindingFlags.Public | BindingFlags.Static,
+                binder: null,
+                types: new[] { typeof(int) },
+                modifiers: null);
+            Assert.That(screenCapture, Is.Not.Null);
+            Assert.That(capture, Is.Not.Null);
+            object? result = capture!.Invoke(null, new object[] { 1 });
+            Assert.That(result, Is.InstanceOf<Texture2D>());
+            return (Texture2D)result!;
+        }
+
+        private static bool IsFullyOnScreen(
+            Rect? bounds,
+            int width,
+            int height)
+        {
+            if (!bounds.HasValue)
+            {
+                return false;
+            }
+
+            Rect value = bounds.Value;
+            return value.width > 0f &&
+                   value.height > 0f &&
+                   value.xMin >= -1f &&
+                   value.yMin >= -1f &&
+                   value.xMax <= width + 1f &&
+                   value.yMax <= height + 1f;
+        }
+
+        private static CaptureRequest ParseAndValidateRequest(
+            string repositoryRoot,
+            byte[] bytes)
+        {
+            string json = new UTF8Encoding(false, true).GetString(bytes);
+            CaptureRequest? request = JsonUtility.FromJson<CaptureRequest>(json);
+            Assert.That(request, Is.Not.Null);
+            Assert.That(request!.schema_version, Is.EqualTo(1));
+            Assert.That(request.capture_set, Is.EqualTo(CaptureSet));
+            Assert.That(request.expected_unity_version, Is.EqualTo(Application.unityVersion));
+            Assert.That(IsLowerHex(request.source_head, 40), Is.True);
+            Assert.That(IsLowerHex(request.source_tree, 40), Is.True);
+            Assert.That(IsLowerHex(request.base_commit, 40), Is.True);
+            Assert.That(IsLowerHex(request.contract_sha256, 64), Is.True);
+            Assert.That(request.request_id, Is.Not.Null.And.Not.Empty);
+            Assert.That(request.branch, Does.StartWith("agent/"));
+            Assert.That(
+                request.contract_path,
+                Is.EqualTo("docs/playtests/WP-0002/VGR-13-FIELD-DESK-CONTRACT.md"));
+            string contractPath = Path.GetFullPath(Path.Combine(
+                repositoryRoot,
+                request.contract_path));
+            string allowedContractPath = Path.GetFullPath(Path.Combine(
+                repositoryRoot,
+                "docs/playtests/WP-0002/VGR-13-FIELD-DESK-CONTRACT.md"));
+            Assert.That(contractPath, Is.EqualTo(allowedContractPath));
+            Assert.That(File.Exists(contractPath), Is.True);
+            Assert.That(
+                ComputeSha256(File.ReadAllBytes(contractPath)),
+                Is.EqualTo(request.contract_sha256));
+            Assert.That(
+                DateTime.TryParse(
+                    request.requested_at_utc,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AdjustToUniversal |
+                    DateTimeStyles.AssumeUniversal,
+                    out _),
+                Is.True);
+            return request;
+        }
+
+        private static bool IsLowerHex(string? value, int length)
+        {
+            if (value == null || value.Length != length)
+            {
+                return false;
+            }
+
+            for (var index = 0; index < value.Length; index++)
+            {
+                char character = value[index];
+                if (!((character >= '0' && character <= '9') ||
+                      (character >= 'a' && character <= 'f')))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static LastBearingGameController RequireController()
+        {
+            LastBearingGameController[] controllers =
+                UnityEngine.Object.FindObjectsByType<LastBearingGameController>(
+                    FindObjectsInactive.Include);
+            Assert.That(controllers, Has.Length.EqualTo(1));
+            return controllers[0];
+        }
+
+        private static LastBearingFieldDesk RequireFieldDesk(
+            LastBearingGameController controller)
+        {
+            Assert.That(controller.FieldDesk, Is.Not.Null);
+            Assert.That(controller.FieldDesk!.IsOperational, Is.True);
+            return controller.FieldDesk;
+        }
+
+        private static UIDocument RequireDocument(
+            LastBearingGameController controller)
+        {
+            UIDocument[] documents =
+                controller.GetComponentsInChildren<UIDocument>(true);
+            Assert.That(documents, Has.Length.EqualTo(1));
+            return documents[0];
+        }
+
+        private static Camera RequireCamera(
+            LastBearingGameController controller)
+        {
+            Assert.That(controller.World, Is.Not.Null);
+            Assert.That(controller.World!.MainCamera, Is.Not.Null);
+            return controller.World.MainCamera!;
+        }
+
+        private static CameraRecord CaptureCamera(Camera camera)
+        {
+            Transform transform = camera.transform;
+            return new CameraRecord
+            {
+                name = camera.name,
+                orthographic = camera.orthographic,
+                field_of_view = camera.fieldOfView,
+                near_clip = camera.nearClipPlane,
+                far_clip = camera.farClipPlane,
+                position = FormatVector(transform.position),
+                euler_angles = FormatVector(transform.eulerAngles),
+                clear_flags = camera.clearFlags.ToString()
+            };
+        }
+
+        private static string FormatVector(Vector3 value)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "{0:R},{1:R},{2:R}",
+                value.x,
+                value.y,
+                value.z);
+        }
+
+        private static string ResolveRepositoryRoot()
+        {
+            return Path.GetFullPath(Path.Combine(
+                Application.dataPath,
+                "..",
+                ".."));
+        }
+
+        private static string UtcNow()
+        {
+            return DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture);
+        }
+
+        private static string ComputeSha256(byte[] bytes)
+        {
+            using SHA256 sha256 = SHA256.Create();
+            byte[] digest = sha256.ComputeHash(bytes);
+            var builder = new StringBuilder(digest.Length * 2);
+            for (var index = 0; index < digest.Length; index++)
+            {
+                builder.Append(digest[index].ToString("x2", CultureInfo.InvariantCulture));
+            }
+
+            return builder.ToString();
+        }
+
+        private enum ScrollPosition
+        {
+            None,
+            Top,
+            Bottom
+        }
+
+        [Serializable]
+        private sealed class CaptureRequest
+        {
+            public int schema_version;
+            public string capture_set = string.Empty;
+            public string request_id = string.Empty;
+            public string source_head = string.Empty;
+            public string source_tree = string.Empty;
+            public string base_commit = string.Empty;
+            public string branch = string.Empty;
+            public string contract_path = string.Empty;
+            public string contract_sha256 = string.Empty;
+            public string expected_unity_version = string.Empty;
+            public string requested_at_utc = string.Empty;
+        }
+
+        [Serializable]
+        private sealed class CaptureManifest
+        {
+            public int schema_version = 1;
+            public string packet_id = string.Empty;
+            public string slice_id = string.Empty;
+            public string capture_set = string.Empty;
+            public string request_id = string.Empty;
+            public string request_sha256 = string.Empty;
+            public string source_head = string.Empty;
+            public string source_tree = string.Empty;
+            public string base_commit = string.Empty;
+            public string branch = string.Empty;
+            public string contract_path = string.Empty;
+            public string contract_sha256 = string.Empty;
+            public string unity_version = string.Empty;
+            public string scene = string.Empty;
+            public string operator_identity = string.Empty;
+            public string requested_at_utc = string.Empty;
+            public string captured_at_utc = string.Empty;
+            public int original_width;
+            public int original_height;
+            public string original_full_screen_mode = string.Empty;
+            public int unity_reported_display_width;
+            public int unity_reported_display_height;
+            public int observed_editor_backbuffer_width;
+            public int observed_editor_backbuffer_height;
+            public bool unity_reported_display_resolution_capture_reached;
+            public int provisional_architecture_target_width;
+            public int provisional_architecture_target_height;
+            public bool provisional_architecture_target_reached;
+            public string native_target_semantics = string.Empty;
+            public string game_view_size_control = string.Empty;
+            public int original_game_view_size_index;
+            public int original_game_view_custom_size_count;
+            public bool game_view_custom_sizes_restored;
+            public string quality_level = string.Empty;
+            public string color_space = string.Empty;
+            public float render_scale_width;
+            public float render_scale_height;
+            public string graphics_api = string.Empty;
+            public string graphics_device = string.Empty;
+            public string operating_system = string.Empty;
+            public string processor = string.Empty;
+            public int system_memory_mb;
+            public string bloom_state = string.Empty;
+            public string grayscale_conversion = string.Empty;
+            public string save_interaction = string.Empty;
+            public string city_canonical_sha256_before = string.Empty;
+            public string city_canonical_sha256_after = string.Empty;
+            public string[] known_limits = Array.Empty<string>();
+            public string[] state_sequence = Array.Empty<string>();
+            public CameraRecord camera = new CameraRecord();
+            public ArtifactRecord[] artifacts = Array.Empty<ArtifactRecord>();
+        }
+
+        [Serializable]
+        private sealed class CameraRecord
+        {
+            public string name = string.Empty;
+            public bool orthographic;
+            public float field_of_view;
+            public float near_clip;
+            public float far_clip;
+            public string position = string.Empty;
+            public string euler_angles = string.Empty;
+            public string clear_flags = string.Empty;
+        }
+
+        [Serializable]
+        private class ArtifactRecord
+        {
+            public string label = string.Empty;
+            public string state = string.Empty;
+            public int target_width;
+            public int target_height;
+            public int actual_width;
+            public int actual_height;
+            public string scroll_position = string.Empty;
+            public float scroll_offset_y;
+            public bool current_order_fully_visible;
+            public bool service_strip_fully_visible;
+            public string variant = string.Empty;
+            public string derived_from_sha256 = string.Empty;
+            public string sha256 = string.Empty;
+            public long byte_count;
+            public string relative_path = string.Empty;
+            public string captured_at_utc = string.Empty;
+            public CameraRecord camera = new CameraRecord();
+        }
+
+        private sealed class PendingArtifact : ArtifactRecord
+        {
+            public byte[] bytes = Array.Empty<byte>();
+        }
+    }
+}

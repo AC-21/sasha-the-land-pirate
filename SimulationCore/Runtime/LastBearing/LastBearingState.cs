@@ -38,6 +38,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 throw new ArgumentNullException(nameof(builder));
             }
 
+            CopyFrom(builder);
+        }
+
+        internal void CopyFrom(LastBearingStateBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
             SchemaVersion = builder.SchemaVersion;
             BalanceRevision = builder.BalanceRevision;
             WorldSeed = builder.WorldSeed;
@@ -138,191 +148,191 @@ namespace AtomicLandPirate.Simulation.LastBearing
             DustFrontProgressTicks = builder.DustFrontProgressTicks;
         }
 
-        public int SchemaVersion { get; }
+        public int SchemaVersion { get; private set; }
 
-        public string BalanceRevision { get; }
+        public string BalanceRevision { get; private set; } = string.Empty;
 
-        public int WorldSeed { get; }
+        public int WorldSeed { get; private set; }
 
-        public long GlobalTick { get; }
+        public long GlobalTick { get; private set; }
 
-        public long SettlementTick { get; }
+        public long SettlementTick { get; private set; }
 
-        public long FactionTick { get; }
+        public long FactionTick { get; private set; }
 
-        public long CrisisTick { get; }
+        public long CrisisTick { get; private set; }
 
-        public long RoadTick { get; }
+        public long RoadTick { get; private set; }
 
-        public int SettlementAccumulatorMilli { get; }
+        public int SettlementAccumulatorMilli { get; private set; }
 
-        public int FactionAccumulatorMilli { get; }
+        public int FactionAccumulatorMilli { get; private set; }
 
-        public int CrisisAccumulatorMilli { get; }
+        public int CrisisAccumulatorMilli { get; private set; }
 
-        public int RoadAccumulatorMilli { get; }
+        public int RoadAccumulatorMilli { get; private set; }
 
-        public long NextCommandSequence { get; }
+        public long NextCommandSequence { get; private set; }
 
-        public string ProtagonistId { get; }
+        public string ProtagonistId { get; private set; } = string.Empty;
 
-        public ResidentRoster Roster { get; }
+        public ResidentRoster Roster { get; private set; } = null!;
 
         public ColonyComposition Composition => Roster.Composition;
 
-        public string? AssignedResidentId { get; }
+        public string? AssignedResidentId { get; private set; }
 
-        public PauseCause PauseCause { get; }
+        public PauseCause PauseCause { get; private set; }
 
         public bool IsPaused => PauseCause != PauseCause.None;
 
-        public bool SliceInfrastructureActive { get; }
+        public bool SliceInfrastructureActive { get; private set; }
 
-        public long WaterMilli { get; }
+        public long WaterMilli { get; private set; }
 
-        public long PartsUnits { get; }
+        public long PartsUnits { get; private set; }
 
-        public long FuelUnits { get; }
+        public long FuelUnits { get; private set; }
 
-        public TurbineCondition TurbineCondition { get; }
+        public TurbineCondition TurbineCondition { get; private set; }
 
-        public PreparationChoice PreparationChoice { get; }
+        public PreparationChoice PreparationChoice { get; private set; }
 
-        public PreparationPhase PreparationPhase { get; }
+        public PreparationPhase PreparationPhase { get; private set; }
 
-        public VehicleModule PlannedModule { get; }
+        public VehicleModule PlannedModule { get; private set; }
 
-        public long PreparationElapsedTicks { get; }
+        public long PreparationElapsedTicks { get; private set; }
 
-        public long PreparationRequiredTicks { get; }
+        public long PreparationRequiredTicks { get; private set; }
 
-        public long PreparationFuelDebitedUnits { get; }
+        public long PreparationFuelDebitedUnits { get; private set; }
 
-        public int WorkshopServiceSlotsReserved { get; }
+        public int WorkshopServiceSlotsReserved { get; private set; }
 
-        public long ActiveWaterModifierMilliPerSettlementTick { get; }
+        public long ActiveWaterModifierMilliPerSettlementTick { get; private set; }
 
-        public NextCityDecision NextCityDecision { get; }
+        public NextCityDecision NextCityDecision { get; private set; }
 
-        public CityImprovementKind InstalledCityImprovement { get; }
+        public CityImprovementKind InstalledCityImprovement { get; private set; }
 
-        public SpareBearingRecipe SpareBearingRecipe { get; }
+        public SpareBearingRecipe SpareBearingRecipe { get; private set; }
 
-        public SpareBearingBatchPhase SpareBearingBatchPhase { get; }
+        public SpareBearingBatchPhase SpareBearingBatchPhase { get; private set; }
 
-        public long SpareBearingElapsedTicks { get; }
+        public long SpareBearingElapsedTicks { get; private set; }
 
-        public long SpareBearingRequiredTicks { get; }
+        public long SpareBearingRequiredTicks { get; private set; }
 
-        public long SpareBearingLotQuantity { get; }
+        public long SpareBearingLotQuantity { get; private set; }
 
-        public SpareBearingLotCustody SpareBearingLotCustody { get; }
+        public SpareBearingLotCustody SpareBearingLotCustody { get; private set; }
 
-        public VehicleModule VehicleModule { get; }
+        public VehicleModule VehicleModule { get; private set; }
 
-        public ModuleInstallationState ModuleInstallationState { get; }
+        public ModuleInstallationState ModuleInstallationState { get; private set; }
 
-        public RouteKind RouteKind { get; }
+        public RouteKind RouteKind { get; private set; }
 
-        public RouteActionKind RouteActionKind { get; }
+        public RouteActionKind RouteActionKind { get; private set; }
 
-        public bool RouteActionUsed { get; }
+        public bool RouteActionUsed { get; private set; }
 
-        public ExpeditionPhase ExpeditionPhase { get; }
+        public ExpeditionPhase ExpeditionPhase { get; private set; }
 
-        public long RouteProgressTicks { get; }
+        public long RouteProgressTicks { get; private set; }
 
-        public long RouteTargetTicks { get; }
+        public long RouteTargetTicks { get; private set; }
 
-        public int RouteMovementAccumulatorMilli { get; }
+        public int RouteMovementAccumulatorMilli { get; private set; }
 
-        public int VehicleLateralMilli { get; }
+        public int VehicleLateralMilli { get; private set; }
 
-        public long VehicleConditionMilli { get; }
+        public long VehicleConditionMilli { get; private set; }
 
-        public long ExpeditionFuelManifestUnits { get; }
+        public long ExpeditionFuelManifestUnits { get; private set; }
 
-        public long OrdinaryCargoCapacityUnits { get; }
+        public long OrdinaryCargoCapacityUnits { get; private set; }
 
-        public long OrdinaryCargoUsedUnits { get; }
+        public long OrdinaryCargoUsedUnits { get; private set; }
 
-        public int TowSlots { get; }
+        public int TowSlots { get; private set; }
 
-        public int TowSlotsUsed { get; }
+        public int TowSlotsUsed { get; private set; }
 
-        public long LiquidCapacityMilli { get; }
+        public long LiquidCapacityMilli { get; private set; }
 
-        public HeavyCargoKind HeavyCargoKind { get; }
+        public HeavyCargoKind HeavyCargoKind { get; private set; }
 
-        public HeavyCargoCustody HeavyCargoCustody { get; }
+        public HeavyCargoCustody HeavyCargoCustody { get; private set; }
 
-        public LiquidCargoKind LiquidCargoKind { get; }
+        public LiquidCargoKind LiquidCargoKind { get; private set; }
 
-        public long LiquidCargoQuantityMilli { get; }
+        public long LiquidCargoQuantityMilli { get; private set; }
 
-        public LiquidCargoCustody LiquidCargoCustody { get; }
+        public LiquidCargoCustody LiquidCargoCustody { get; private set; }
 
-        public RepairCargoKind RepairCargoKind { get; }
+        public RepairCargoKind RepairCargoKind { get; private set; }
 
-        public RepairCargoCustody RepairCargoCustody { get; }
+        public RepairCargoCustody RepairCargoCustody { get; private set; }
 
-        public DepotBearingDisposition DepotBearingDisposition { get; }
+        public DepotBearingDisposition DepotBearingDisposition { get; private set; }
 
-        public bool ReturnPayloadFrozen { get; }
+        public bool ReturnPayloadFrozen { get; private set; }
 
-        public bool HasArrivalClaimSnapshot { get; }
+        public bool HasArrivalClaimSnapshot { get; private set; }
 
-        public long ArrivalFactionClaimProgressMilli { get; }
+        public long ArrivalFactionClaimProgressMilli { get; private set; }
 
-        public FactionClaimState ArrivalFactionClaimState { get; }
+        public FactionClaimState ArrivalFactionClaimState { get; private set; }
 
-        public string? TransactionId { get; }
+        public string? TransactionId { get; private set; }
 
-        public string? TransactionFingerprint { get; }
+        public string? TransactionFingerprint { get; private set; }
 
-        public TransactionPhase TransactionPhase { get; }
+        public TransactionPhase TransactionPhase { get; private set; }
 
-        public EncounterChoice DepotResolution { get; }
+        public EncounterChoice DepotResolution { get; private set; }
 
-        public long FactionClaimProgressMilli { get; }
+        public long FactionClaimProgressMilli { get; private set; }
 
-        public FactionClaimState FactionClaimState { get; }
+        public FactionClaimState FactionClaimState { get; private set; }
 
-        public DepotControl DepotControl { get; }
+        public DepotControl DepotControl { get; private set; }
 
-        public FactionAccessPolicy FactionAccessPolicy { get; }
+        public FactionAccessPolicy FactionAccessPolicy { get; private set; }
 
-        public FactionAidPolicy FactionAidPolicy { get; }
+        public FactionAidPolicy FactionAidPolicy { get; private set; }
 
-        public long DepotAccessFeePartsUnits { get; }
+        public long DepotAccessFeePartsUnits { get; private set; }
 
-        public long FutureRouteTollFuelUnits { get; }
+        public long FutureRouteTollFuelUnits { get; private set; }
 
-        public long EmergencyAidWaterMilli { get; }
+        public long EmergencyAidWaterMilli { get; private set; }
 
-        public FactionMemoryRecord? FactionMemory { get; }
+        public FactionMemoryRecord? FactionMemory { get; private set; }
 
-        public long FactionTrust { get; }
+        public long FactionTrust { get; private set; }
 
-        public long FactionGrievance { get; }
+        public long FactionGrievance { get; private set; }
 
-        public FactionOutcomeKind PendingFactionOutcome { get; }
+        public FactionOutcomeKind PendingFactionOutcome { get; private set; }
 
-        public long FactionOutcomeElapsedTicks { get; }
+        public long FactionOutcomeElapsedTicks { get; private set; }
 
-        public bool RoutePermitGranted { get; }
+        public bool RoutePermitGranted { get; private set; }
 
-        public MaintenanceRecipe MaintenanceRecipe { get; }
+        public MaintenanceRecipe MaintenanceRecipe { get; private set; }
 
-        public bool MaintenanceObligationActive { get; }
+        public bool MaintenanceObligationActive { get; private set; }
 
-        public long MaintenancePartsUnits { get; }
+        public long MaintenancePartsUnits { get; private set; }
 
-        public long NextMaintenanceDueSettlementTick { get; }
+        public long NextMaintenanceDueSettlementTick { get; private set; }
 
-        public bool MaintenanceDue { get; }
+        public bool MaintenanceDue { get; private set; }
 
-        public long DustFrontProgressTicks { get; }
+        public long DustFrontProgressTicks { get; private set; }
     }
 
     internal sealed class LastBearingStateBuilder
@@ -336,6 +346,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
         }
 
         internal LastBearingStateBuilder(LastBearingState state)
+            : this()
+        {
+            CopyFrom(state);
+        }
+
+        internal void CopyFrom(LastBearingState state)
         {
             if (state == null)
             {
@@ -535,6 +551,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
             var state = new LastBearingState(this);
             LastBearingInvariants.Validate(state);
             return state;
+        }
+
+        internal void BuildInto(LastBearingState state)
+        {
+            if (state == null)
+            {
+                throw new ArgumentNullException(nameof(state));
+            }
+
+            state.CopyFrom(this);
+            LastBearingInvariants.Validate(state);
         }
     }
 }

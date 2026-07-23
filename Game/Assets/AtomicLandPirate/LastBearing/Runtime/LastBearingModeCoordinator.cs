@@ -81,6 +81,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private LastBearingCameraRig? _cameraRig;
         private LastBearingVehicleView? _canonicalVehicle;
         private Transform? _roadTarget;
+        private Transform? _cityScaffoldRoot;
         private Transform? _garageCameraAnchor;
         private Transform? _garageFocusAnchor;
         private Transform? _pumpHallCameraAnchor;
@@ -173,6 +174,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingCameraRig cameraRig,
             LastBearingVehicleView canonicalVehicle,
             Transform roadTarget,
+            Transform cityScaffoldRoot,
             Transform garageCameraAnchor,
             Transform garageFocusAnchor,
             Transform pumpHallCameraAnchor,
@@ -184,6 +186,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _canonicalVehicle = canonicalVehicle ??
                                 throw new ArgumentNullException(nameof(canonicalVehicle));
             _roadTarget = roadTarget ?? throw new ArgumentNullException(nameof(roadTarget));
+            _cityScaffoldRoot = cityScaffoldRoot ??
+                                throw new ArgumentNullException(nameof(cityScaffoldRoot));
             _garageCameraAnchor = garageCameraAnchor ??
                                   throw new ArgumentNullException(nameof(garageCameraAnchor));
             _garageFocusAnchor = garageFocusAnchor ??
@@ -653,6 +657,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool returnServiceInspectionSelected =
                 HasActiveMode &&
                 CurrentMode == LastBearingPresentationMode.CityReturn;
+
+            if (_cityScaffoldRoot != null)
+            {
+                _cityScaffoldRoot.gameObject.SetActive(
+                    !garageInspectionSelected);
+            }
 
             if (_roadTarget != null)
             {

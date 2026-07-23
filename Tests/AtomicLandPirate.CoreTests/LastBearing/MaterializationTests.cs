@@ -47,6 +47,18 @@ namespace AtomicLandPirate.LastBearingTests
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingPumpHallCutawayView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingVehicleView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingSaveAdapter.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI.meta",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/LastBearingFieldDesk.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/LastBearingFieldDesk.cs.meta",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/LastBearingFieldDeskPresenter.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/LastBearingFieldDeskPresenter.cs.meta",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/Resources.meta",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/Resources/LastBearingFieldDeskLayout.uxml",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/Resources/LastBearingFieldDeskLayout.uxml.meta",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/Resources/LastBearingFieldDeskStyles.uss",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/Resources/LastBearingFieldDeskStyles.uss.meta",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/Resources/LastBearingFieldDeskTheme.tss",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI/Resources/LastBearingFieldDeskTheme.tss.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelContracts.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelSurface.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/RoadFeel/RoadFeelVehicleController.cs",
@@ -61,10 +73,14 @@ namespace AtomicLandPirate.LastBearingTests
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/Vehicle/LastBearingGarageBayView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Editor/WP0002GateDispatcher.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/LastBearingAdapterTests.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/LastBearingFieldDeskPresenterTests.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/LastBearingFieldDeskPresenterTests.cs.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/LastBearingPermitJobPresenterTests.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/RoadFeelMathTests.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/EditMode/SashaScoutPresentationTests.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/LastBearingPlayModeTests.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/LastBearingFieldDeskPlayModeTests.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/LastBearingFieldDeskPlayModeTests.cs.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/RoadFeelLabPlayModeTests.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Scenes/LastBearing.unity",
             "Game/Assets/AtomicLandPirate/LastBearing/Scenes/RoadFeelLab.unity",
@@ -85,6 +101,7 @@ namespace AtomicLandPirate.LastBearingTests
             VerifyBuildScene(repoRoot);
             VerifyGameMetadata(repoRoot);
             GameSourceContract.Verify(repoRoot);
+            FieldDeskSourceContract.Verify(repoRoot);
             RoadFeelSourceContract.Verify(repoRoot);
             SashaScoutSourceContract.Verify(repoRoot);
         }

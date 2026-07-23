@@ -13,6 +13,15 @@ namespace AtomicLandPirate.LastBearingTests
             harness.Run("identical command schedules are byte deterministic", DeterministicSchedule);
             harness.Run("one step advances one fixed tick", OneStepOneTick);
             harness.Run(
+                "reusable step matches immutable step for representative idle",
+                ReusableStepMatchesImmutableStep);
+            harness.Run(
+                "reusable step rejection retains its committed output",
+                ReusableStepRejectsAtomically);
+            harness.Run(
+                "reusable step allocates no managed memory after warmup",
+                ReusableStepAllocatesNoManagedMemoryAfterWarmup);
+            harness.Run(
                 "valid invariant checks allocate no managed memory after warmup",
                 ValidInvariantChecksAllocateNoManagedMemoryAfterWarmup);
             harness.Run(
@@ -52,6 +61,179 @@ namespace AtomicLandPirate.LastBearingTests
             long before = driver.View.GlobalTick;
             driver.Advance(1);
             TestHarness.Equal(before + 1, driver.View.GlobalTick, "global tick");
+        }
+
+        private static void ReusableStepMatchesImmutableStep()
+        {
+            var kernel = new LastBearingKernel();
+            var buffer = new LastBearingStepBuffer();
+            LastBearingState immutableState =
+                LastBearingScenarioFactory.CreateInitial(
+                    ColonyComposition.Mixed,
+                    2011);
+            LastBearingState reusableState = immutableState;
+
+            for (var tick = 0; tick < 3000; tick++)
+            {
+                LastBearingTickResult expected = kernel.Step(
+                    immutableState,
+                    Array.Empty<LastBearingCommand>());
+                kernel.StepInto(
+                    reusableState,
+                    Array.Empty<LastBearingCommand>(),
+                    buffer);
+
+                LastBearingState actual = buffer.State!;
+                LastBearingReadModel actualView = buffer.ReadModel!;
+                TestHarness.True(
+                    LastBearingCanonicalCodec.Encode(expected.State)
+                        .SequenceEqual(
+                            LastBearingCanonicalCodec.Encode(actual)),
+                    "reusable canonical state differs at tick " + tick);
+                TestHarness.Equal(
+                    expected.ReadModel.GlobalTick,
+                    actualView.GlobalTick,
+                    "reusable read-model global tick");
+                TestHarness.Equal(
+                    expected.ReadModel.WaterMilli,
+                    actualView.WaterMilli,
+                    "reusable read-model water");
+                TestHarness.Equal(
+                    expected.ReadModel.FactionClaimProgressMilli,
+                    actualView.FactionClaimProgressMilli,
+                    "reusable read-model faction progress");
+                TestHarness.Equal(
+                    expected.ReadModel.NextObjective,
+                    actualView.NextObjective,
+                    "reusable read-model objective");
+                AssertEventsEqual(
+                    expected.DomainEvents,
+                    buffer.DomainEvents,
+                    tick);
+
+                immutableState = expected.State;
+                reusableState = actual;
+            }
+        }
+
+        private static void ReusableStepRejectsAtomically()
+        {
+            var kernel = new LastBearingKernel();
+            var buffer = new LastBearingStepBuffer();
+            LastBearingState initial = LastBearingScenarioFactory.CreateInitial(
+                ColonyComposition.HumanOnly,
+                2011);
+            kernel.StepInto(
+                initial,
+                Array.Empty<LastBearingCommand>(),
+                buffer);
+
+            LastBearingState committedState = buffer.State!;
+            LastBearingReadModel committedView = buffer.ReadModel!;
+            byte[] committedBytes =
+                LastBearingCanonicalCodec.Encode(committedState);
+            int committedEventCount = buffer.DomainEvents.Count;
+            LastBearingEventKind committedFirstEvent =
+                committedEventCount == 0
+                    ? default
+                    : buffer.DomainEvents[0].Kind;
+
+            InvalidOperationException error =
+                TestHarness.Throws<InvalidOperationException>(
+                    () => kernel.StepInto(
+                        committedState,
+                        new LastBearingCommand[]
+                        {
+                            new SetPauseCommand(
+                                committedState.NextCommandSequence + 1,
+                                true),
+                        },
+                        buffer),
+                    "reusable step accepted a future command sequence");
+
+            TestHarness.Equal(
+                "LAST_BEARING_COMMAND_SEQUENCE_MISMATCH",
+                error.Message,
+                "reusable step rejection code");
+            TestHarness.True(
+                ReferenceEquals(committedState, buffer.State),
+                "rejected reusable step replaced committed state");
+            TestHarness.True(
+                ReferenceEquals(committedView, buffer.ReadModel),
+                "rejected reusable step replaced committed read model");
+            TestHarness.True(
+                committedBytes.SequenceEqual(
+                    LastBearingCanonicalCodec.Encode(committedState)),
+                "rejected reusable step mutated committed state");
+            TestHarness.Equal(
+                committedEventCount,
+                buffer.DomainEvents.Count,
+                "rejected reusable step replaced committed events");
+            if (committedEventCount != 0)
+            {
+                TestHarness.Equal(
+                    committedFirstEvent,
+                    buffer.DomainEvents[0].Kind,
+                    "rejected reusable step mutated committed events");
+            }
+        }
+
+        private static void
+            ReusableStepAllocatesNoManagedMemoryAfterWarmup()
+        {
+            var kernel = new LastBearingKernel();
+            var buffer = new LastBearingStepBuffer();
+            LastBearingState state = LastBearingScenarioFactory.CreateInitial(
+                ColonyComposition.Mixed,
+                2011);
+            LastBearingCommand[] noCommands =
+                Array.Empty<LastBearingCommand>();
+
+            for (var tick = 0; tick < 64; tick++)
+            {
+                kernel.StepInto(state, noCommands, buffer);
+                state = buffer.State!;
+            }
+
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            for (var tick = 0; tick < 10000; tick++)
+            {
+                kernel.StepInto(state, noCommands, buffer);
+                state = buffer.State!;
+            }
+
+            long allocated = checked(
+                GC.GetAllocatedBytesForCurrentThread() - before);
+            TestHarness.Equal(
+                0L,
+                allocated,
+                "warmed reusable step allocation bytes");
+        }
+
+        private static void AssertEventsEqual(
+            System.Collections.Generic.IReadOnlyList<LastBearingDomainEvent>
+                expected,
+            System.Collections.Generic.IReadOnlyList<LastBearingDomainEvent>
+                actual,
+            int tick)
+        {
+            TestHarness.Equal(
+                expected.Count,
+                actual.Count,
+                "reusable event count at tick " + tick);
+            for (var index = 0; index < expected.Count; index++)
+            {
+                LastBearingDomainEvent expectedEvent = expected[index];
+                LastBearingDomainEvent actualEvent = actual[index];
+                TestHarness.Equal(expectedEvent.Kind, actualEvent.Kind, "event kind");
+                TestHarness.Equal(expectedEvent.Cause, actualEvent.Cause, "event cause");
+                TestHarness.Equal(expectedEvent.GlobalTick, actualEvent.GlobalTick, "event global tick");
+                TestHarness.Equal(expectedEvent.DomainTick, actualEvent.DomainTick, "event domain tick");
+                TestHarness.Equal(expectedEvent.CommandSequence, actualEvent.CommandSequence, "event command sequence");
+                TestHarness.Equal(expectedEvent.SubjectId, actualEvent.SubjectId, "event subject");
+                TestHarness.Equal(expectedEvent.BeforeValue, actualEvent.BeforeValue, "event before value");
+                TestHarness.Equal(expectedEvent.AfterValue, actualEvent.AfterValue, "event after value");
+            }
         }
 
         private static void

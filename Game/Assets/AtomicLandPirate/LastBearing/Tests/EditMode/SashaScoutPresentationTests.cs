@@ -152,6 +152,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             string canonicalBefore = controller.CanonicalHash;
             LastBearingGarageBayView garage = controller.World!.GarageBayView!;
             LastBearingCameraRig cameraRig = controller.World.CameraRig!;
+            Transform cityScaffold = controller.World.CityScaffoldRoot!;
 
             Assert.That(garage.IsDollhouseCutaway, Is.True);
             Assert.That(garage.HasRoof, Is.False);
@@ -169,10 +170,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 _root.GetComponentsInChildren<Camera>(true),
                 Has.Length.EqualTo(1));
             Assert.That(garage.gameObject.activeInHierarchy, Is.False);
+            Assert.That(cityScaffold.gameObject.activeSelf, Is.True);
 
             controller.OpenGarageBay();
 
             Assert.That(garage.gameObject.activeInHierarchy, Is.True);
+            Assert.That(cityScaffold.gameObject.activeSelf, Is.False);
+            Assert.That(
+                controller.World.VehicleView!.gameObject.activeInHierarchy,
+                Is.True);
             Assert.That(cameraRig.IsInspectionMode, Is.True);
             Assert.That(
                 cameraRig.InspectionCameraAnchor,
@@ -185,6 +191,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.ShowCityOverview();
 
             Assert.That(garage.gameObject.activeInHierarchy, Is.False);
+            Assert.That(cityScaffold.gameObject.activeSelf, Is.True);
             Assert.That(cameraRig.IsInspectionMode, Is.False);
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
         }
