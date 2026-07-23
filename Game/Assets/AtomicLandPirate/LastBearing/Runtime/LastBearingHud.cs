@@ -435,6 +435,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     return;
                 }
 
+                if (model.IsWreckLineFrameRailRecoveryAvailable)
+                {
+                    GUILayout.Label(
+                        "The fitted skid plate can belly under the wreck and free one fixed bundle of frame rails. It occupies one ordinary cargo unit until home check-in.",
+                        _bodyStyle);
+                    if (GUILayout.Button(
+                            "E — Recover frame rails · +4 reclaimed parts at home",
+                            _buttonStyle))
+                    {
+                        _controller!.RecoverWreckLineFrameRails();
+                    }
+
+                    return;
+                }
+
                 if (model.IsDepotApproachRecoveryAvailable)
                 {
                     GUILayout.Label(
@@ -558,7 +573,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_controller!.IsReturnCheckInAvailable)
             {
                 GUILayout.Label(
-                    "Sasha is seated at the fixed return apron with the exact repair cargo still on the scout.",
+                    model.FrameRailSalvageCustody ==
+                        FrameRailSalvageCustody.Vehicle
+                        ? "Sasha is seated at the fixed return apron with the exact repair cargo and Wreck Line frame rails still on the scout. Check-in adds +4 reclaimed parts."
+                        : "Sasha is seated at the fixed return apron with the exact repair cargo still on the scout.",
                     _bodyStyle);
                 if (GUILayout.Button(
                         "CHECK IN LOADED RETURN · E / GAMEPAD SOUTH",
@@ -1266,6 +1284,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                        serviceControls;
             }
 
+            if (model.IsWreckLineFrameRailRecoveryAvailable)
+            {
+                return "Press E / gamepad south · recover the Wreck Line " +
+                       "frame rails for +4 reclaimed parts at home." +
+                       serviceControls;
+            }
+
             if (model.IsDepotApproachRecoveryAvailable)
             {
                 return "Press E / gamepad south · seat the recovery bridle " +
@@ -1573,6 +1598,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     FormatRepairCargoCustody(model.RepairCargoCustody));
             }
 
+            if (model.FrameRailSalvageCustody !=
+                FrameRailSalvageCustody.None)
+            {
+                AppendCargoItem(
+                    cargo,
+                    "frame rails " + FormatFrameRailSalvageCustody(
+                        model.FrameRailSalvageCustody));
+            }
+
             if (model.LiquidCargoKind != LiquidCargoKind.None)
             {
                 AppendCargoItem(
@@ -1639,6 +1673,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     return "consumed by the repair";
                 default:
                     return "not yet claimed";
+            }
+        }
+
+        private static string FormatFrameRailSalvageCustody(
+            FrameRailSalvageCustody custody)
+        {
+            switch (custody)
+            {
+                case FrameRailSalvageCustody.WreckLine:
+                    return "waiting at the Wreck Line";
+                case FrameRailSalvageCustody.Vehicle:
+                    return "strapped to Sasha's scout";
+                case FrameRailSalvageCustody.Credited:
+                    return "credited as +4 reclaimed parts";
+                default:
+                    return "not recovered";
             }
         }
 
@@ -1723,6 +1773,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 .AppendLine();
             text.Append("Repair cargo  ").Append(model.RepairCargoKind)
                 .Append("  ·  custody ").Append(model.RepairCargoCustody)
+                .AppendLine();
+            text.Append("Frame rails  ")
+                .Append(model.FrameRailSalvageCustody)
+                .Append("  ·  value +")
+                .Append(model.FrameRailSalvagePartsUnits)
+                .Append(" parts  ·  cargo ")
+                .Append(model.FrameRailSalvageCargoUnits)
                 .AppendLine();
             text.Append("City improvement  ")
                 .Append(model.InstalledCityImprovement)

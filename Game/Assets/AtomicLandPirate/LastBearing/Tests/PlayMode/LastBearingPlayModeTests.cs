@@ -707,6 +707,131 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator FrameRailsRequireSecondPressPersistAndCreditFourPartsOnce()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            _ = InstallTemporarySaveAdapter(controller);
+            LastBearingState gate = DriveUntilWreckLineAvailable(
+                CreateOutboundState(installPatchworkSkidPlate: true));
+            InstallControllerState(controller, gate);
+            LastBearingRouteModulePointView wreck =
+                controller.World!.RouteModulePointView!;
+            RoadFeelRigInstance roadRig = controller.World.RoadFeelRig!;
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+
+            Press(keyboard.eKey);
+            yield return null;
+            InvokeGlobalShortcuts(controller);
+            Release(keyboard.eKey);
+            yield return null;
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            Assert.That(
+                PendingCommands(controller)[0],
+                Is.TypeOf<OperateWreckLineModuleCommand>());
+            InvokeSimulationTick(controller);
+
+            Assert.That(
+                controller.ReadModel!.IsWreckLineFrameRailRecoveryAvailable,
+                Is.True);
+            Assert.That(
+                controller.ReadModel.FrameRailSalvageCustody,
+                Is.EqualTo(FrameRailSalvageCustody.WreckLine));
+            Assert.That(wreck.IsFrameRailSourceVisible, Is.True);
+            Assert.That(wreck.IsRoadFrameRailCargoVisible, Is.False);
+            AssertRoadModulePointHold(controller, roadRig);
+
+            Press(keyboard.eKey);
+            yield return null;
+            InvokeGlobalShortcuts(controller);
+            Release(keyboard.eKey);
+            yield return null;
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            Assert.That(
+                PendingCommands(controller)[0],
+                Is.TypeOf<RecoverWreckLineFrameRailsCommand>());
+            InvokeSimulationTick(controller);
+
+            Assert.That(
+                controller.ReadModel!.FrameRailSalvageCustody,
+                Is.EqualTo(FrameRailSalvageCustody.Vehicle));
+            Assert.That(controller.State!.OrdinaryCargoUsedUnits, Is.EqualTo(1));
+            Assert.That(wreck.IsFrameRailSourceVisible, Is.False);
+            Assert.That(wreck.IsCanonicalFrameRailCargoVisible, Is.True);
+            Assert.That(wreck.IsRoadFrameRailCargoVisible, Is.True);
+            AssertRoadPresentation(controller, roadRig, active: true);
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"));
+            string loadedCargoHash = controller.CanonicalHash;
+
+            controller.ReturnToTitle();
+            controller.Load();
+            yield return null;
+
+            Assert.That(controller.CanonicalHash, Is.EqualTo(loadedCargoHash));
+            Assert.That(
+                controller.ReadModel!.FrameRailSalvageCustody,
+                Is.EqualTo(FrameRailSalvageCustody.Vehicle));
+            Assert.That(wreck.IsRoadFrameRailCargoVisible, Is.True);
+
+            var kernel = new LastBearingKernel();
+            LastBearingState state = DriveUntilDepotRecoveryAvailable(
+                controller.State!);
+            state = Apply(kernel, state, sequence =>
+                new OperateDepotRecoveryPointCommand(sequence));
+            state = Apply(kernel, state, sequence =>
+                new ResolveDepotCommand(sequence, EncounterChoice.TakeBearing));
+            state = Apply(kernel, state, sequence =>
+                new LoadDepotRepairCargoCommand(sequence));
+            string transactionId = state.TransactionId!;
+            string fingerprint = state.TransactionFingerprint!;
+            state = Apply(kernel, state, sequence =>
+                new FreezeReturnPayloadCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            state = DriveUntilPhase(state, ExpeditionPhase.Returned);
+            InstallControllerState(controller, state);
+            long partsBeforeCheckIn = controller.ReadModel!.PartsUnits;
+
+            Assert.That(controller.IsReturnCheckInAvailable, Is.True);
+            Assert.That(wreck.IsCanonicalFrameRailCargoVisible, Is.True);
+            controller.CompleteReturn();
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(2));
+            InvokeSimulationTick(controller);
+
+            Assert.That(
+                controller.ReadModel!.FrameRailSalvageCustody,
+                Is.EqualTo(FrameRailSalvageCustody.Credited));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(
+                    partsBeforeCheckIn +
+                    LastBearingBalanceV1.WreckLineFrameRailSalvagePartsUnits));
+            Assert.That(controller.State!.OrdinaryCargoUsedUnits, Is.EqualTo(1));
+            Assert.That(
+                controller.ReadModel.RepairCargoCustody,
+                Is.EqualTo(RepairCargoCustody.Vehicle));
+            Assert.That(wreck.IsCanonicalFrameRailCargoVisible, Is.False);
+            Assert.That(wreck.IsRoadFrameRailCargoVisible, Is.False);
+            Assert.That(controller.Status, Does.Contain("+4 reclaimed parts"));
+
+            long partsAfterCheckIn = controller.ReadModel.PartsUnits;
+            controller.CompleteReturn();
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(partsAfterCheckIn));
+        }
+
+        [UnityTest]
         public IEnumerator DepotRepairCargoLoadsThroughCanonicalGateAndAutosaveRestoresExactCustody()
         {
             AsyncOperation? load = SceneManager.LoadSceneAsync(
@@ -1787,13 +1912,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.Status,
                 Does.Contain("Round-trip condition loss is reduced by 40"));
 
-            controller.Save();
+            string installedHash = controller.CanonicalHash;
             Assert.That(
                 controller.SaveStatus,
                 Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"),
                 controller.SaveStatus);
+            controller.ReturnToTitle();
             controller.Load();
 
+            Assert.That(controller.CanonicalHash, Is.EqualTo(installedHash));
             Assert.That(
                 controller.ReadModel!.RigUpgrade,
                 Is.EqualTo(RigUpgrade.PatchworkSkidPlate));
@@ -1975,7 +2102,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         private static LastBearingState CreateOutboundState(
-            bool waitForFactionClaim = false)
+            bool waitForFactionClaim = false,
+            bool installPatchworkSkidPlate = false)
         {
             var kernel = new LastBearingKernel();
             LastBearingState state = LastBearingScenarioFactory.CreateInitial(
@@ -1997,8 +2125,52 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             state = Apply(kernel, state, sequence =>
                 new AssignResidentCommand(sequence, ResidentRoster.HumanResidentId));
+            if (installPatchworkSkidPlate)
+            {
+                state = Apply(kernel, state, sequence =>
+                    new PlaceCityBuildingCommand(
+                        sequence,
+                        CityBuildingKind.Recycler,
+                        0,
+                        0));
+                state = Apply(kernel, state, sequence =>
+                    new PlaceCityBuildingCommand(
+                        sequence,
+                        CityBuildingKind.MachineShop,
+                        1,
+                        0));
+                state = Apply(kernel, state, sequence =>
+                    new PlaceCityBuildingCommand(
+                        sequence,
+                        CityBuildingKind.EmergencyStorage,
+                        2,
+                        0));
+                state = Apply(kernel, state, sequence =>
+                    new ConnectCityServiceLinkCommand(sequence));
+                state = Apply(kernel, state, sequence =>
+                    new AssignCityServiceResidentCommand(
+                        sequence,
+                        ResidentRoster.HumanResidentId));
+                state = Apply(kernel, state, sequence =>
+                    new AdvanceCityServiceSledCommand(
+                        sequence,
+                        CityDeliveryStage.AtRecycler));
+                state = Apply(kernel, state, sequence =>
+                    new AdvanceCityServiceSledCommand(
+                        sequence,
+                        CityDeliveryStage.InTransit));
+            }
+
             state = Apply(kernel, state, sequence =>
                 new ActivateSliceInfrastructureCommand(sequence));
+            if (installPatchworkSkidPlate)
+            {
+                state = Apply(kernel, state, sequence =>
+                    new InstallRigUpgradeCommand(
+                        sequence,
+                        RigUpgrade.PatchworkSkidPlate));
+            }
+
             state = Apply(kernel, state, sequence =>
                 new SelectPreparationCommand(
                     sequence,
@@ -2301,6 +2473,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                             readModel.RouteActionKind));
                 }
 
+                readModel = LastBearingReadModel.FromState(state);
+                if (readModel.IsWreckLineFrameRailRecoveryAvailable)
+                {
+                    state = Apply(kernel, state, sequence =>
+                        new RecoverWreckLineFrameRailsCommand(sequence));
+                }
+
                 state = Apply(kernel, state, sequence =>
                     new DriveVehicleCommand(sequence, 1000, 0));
                 guard++;
@@ -2327,6 +2506,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                         new OperateWreckLineModuleCommand(
                             sequence,
                             current.RouteActionKind));
+                }
+
+                current = LastBearingReadModel.FromState(state);
+                if (current.IsWreckLineFrameRailRecoveryAvailable)
+                {
+                    state = Apply(kernel, state, sequence =>
+                        new RecoverWreckLineFrameRailsCommand(sequence));
                 }
 
                 state = Apply(kernel, state, sequence =>
@@ -2572,6 +2758,19 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             var pending = pendingField!.GetValue(controller) as ICollection;
             Assert.That(pending, Is.Not.Null);
             return pending!.Count;
+        }
+
+        private static LastBearingCommand[] PendingCommands(
+            LastBearingGameController controller)
+        {
+            FieldInfo? pendingField = typeof(LastBearingGameController).GetField(
+                "_pendingCommands",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(pendingField, Is.Not.Null);
+            var pending = pendingField!.GetValue(controller) as
+                IEnumerable<LastBearingCommand>;
+            Assert.That(pending, Is.Not.Null);
+            return pending!.ToArray();
         }
 
         private static void AssertRecoveryUnavailableWithoutWrites(

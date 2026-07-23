@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using AtomicLandPirate.Simulation.LastBearing;
 using UnityEngine;
 
 namespace AtomicLandPirate.Presentation.LastBearing
@@ -36,9 +37,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private GameObject? _recoveredLatch;
         private GameObject? _dustCurtain;
         private GameObject? _crossedSignal;
+        private GameObject? _frameRailSource;
+        private GameObject? _canonicalFrameRails;
+        private GameObject? _roadFrameRails;
         private Light? _winchLight;
         private Light? _tankLight;
         private bool _built;
+        private bool _frameRailCargoBuilt;
+        private bool _frameRailRecoveryAvailable;
 
         public Transform? InteractionAnchor { get; private set; }
 
@@ -49,6 +55,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool IsDustCurtainVisible =>
             _dustCurtain != null && _dustCurtain.activeSelf;
+
+        public FrameRailSalvageCustody FrameRailCustody
+        {
+            get;
+            private set;
+        }
+
+        public bool IsFrameRailSourceVisible => IsActive(_frameRailSource);
+
+        public bool IsCanonicalFrameRailCargoVisible =>
+            IsActive(_canonicalFrameRails);
+
+        public bool IsRoadFrameRailCargoVisible => IsActive(_roadFrameRails);
 
         public void Build(
             Material iron,
@@ -153,7 +172,96 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 new Vector3(0f, 3.2f, -0.5f),
                 tungsten);
 
+            _frameRailSource = CreateFrameRailBundle(
+                "Recoverable Wreck-Line Frame Rails",
+                transform,
+                new Vector3(3.1f, 0.52f, 13.8f),
+                Quaternion.Euler(4f, -28f, -7f),
+                iron,
+                oxide);
+
             ApplyState(RouteModulePointPresentationState.Dormant);
+            ApplyFrameRailSalvage(
+                FrameRailSalvageCustody.None,
+                recoveryAvailable: false);
+        }
+
+        public void BindFrameRailCargoSockets(
+            Transform canonicalCargoSocket,
+            Transform roadCargoSocket,
+            Material iron,
+            Material oxide)
+        {
+            if (_frameRailCargoBuilt)
+            {
+                return;
+            }
+
+            if (!_built)
+            {
+                throw new InvalidOperationException(
+                    "Wreck Line view must be built before cargo sockets bind.");
+            }
+
+            if (canonicalCargoSocket == null)
+            {
+                throw new ArgumentNullException(nameof(canonicalCargoSocket));
+            }
+
+            if (roadCargoSocket == null)
+            {
+                throw new ArgumentNullException(nameof(roadCargoSocket));
+            }
+
+            if (iron == null)
+            {
+                throw new ArgumentNullException(nameof(iron));
+            }
+
+            if (oxide == null)
+            {
+                throw new ArgumentNullException(nameof(oxide));
+            }
+
+            _frameRailCargoBuilt = true;
+            var cargoOffset = new Vector3(0f, 0.56f, -0.18f);
+            Quaternion cargoRotation = Quaternion.Euler(0f, 3f, -5f);
+            _canonicalFrameRails = CreateFrameRailBundle(
+                "Canonical Scout Wreck-Line Frame Rails",
+                canonicalCargoSocket,
+                cargoOffset,
+                cargoRotation,
+                iron,
+                oxide);
+            _roadFrameRails = CreateFrameRailBundle(
+                "Road Scout Wreck-Line Frame Rails",
+                roadCargoSocket,
+                cargoOffset,
+                cargoRotation,
+                iron,
+                oxide);
+            ApplyFrameRailVisibility();
+        }
+
+        public void ApplyFrameRailSalvage(
+            FrameRailSalvageCustody custody,
+            bool recoveryAvailable)
+        {
+            if (!Enum.IsDefined(typeof(FrameRailSalvageCustody), custody))
+            {
+                throw new ArgumentOutOfRangeException(nameof(custody));
+            }
+
+            if (recoveryAvailable &&
+                custody != FrameRailSalvageCustody.WreckLine)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_FRAME_RAIL_PRESENTATION_READINESS_INVALID");
+            }
+
+            FrameRailCustody = custody;
+            _frameRailRecoveryAvailable = recoveryAvailable;
+            ApplyFrameRailVisibility();
         }
 
         public void ApplyState(RouteModulePointPresentationState state)
@@ -218,6 +326,62 @@ namespace AtomicLandPirate.Presentation.LastBearing
             light.range = 7f;
             light.shadows = LightShadows.None;
             return light;
+        }
+
+        private void ApplyFrameRailVisibility()
+        {
+            _frameRailSource?.SetActive(
+                _frameRailRecoveryAvailable &&
+                FrameRailCustody ==
+                    FrameRailSalvageCustody.WreckLine);
+            bool vehicleCargo = FrameRailCustody ==
+                FrameRailSalvageCustody.Vehicle;
+            _canonicalFrameRails?.SetActive(vehicleCargo);
+            _roadFrameRails?.SetActive(vehicleCargo);
+        }
+
+        private static GameObject CreateFrameRailBundle(
+            string name,
+            Transform parent,
+            Vector3 position,
+            Quaternion rotation,
+            Material iron,
+            Material oxide)
+        {
+            var bundle = new GameObject(name);
+            bundle.transform.SetParent(parent, false);
+            bundle.transform.localPosition = position;
+            bundle.transform.localRotation = rotation;
+            CreatePrimitive(
+                "Frame Rail Left",
+                PrimitiveType.Cube,
+                bundle.transform,
+                new Vector3(-0.17f, 0f, 0f),
+                new Vector3(0.18f, 0.16f, 2.15f),
+                iron,
+                Quaternion.identity);
+            CreatePrimitive(
+                "Frame Rail Right",
+                PrimitiveType.Cube,
+                bundle.transform,
+                new Vector3(0.17f, 0f, 0f),
+                new Vector3(0.18f, 0.16f, 2.15f),
+                iron,
+                Quaternion.identity);
+            CreatePrimitive(
+                "Oxide Tie Strap",
+                PrimitiveType.Cube,
+                bundle.transform,
+                new Vector3(0f, 0.11f, 0f),
+                new Vector3(0.58f, 0.08f, 0.24f),
+                oxide,
+                Quaternion.identity);
+            return bundle;
+        }
+
+        private static bool IsActive(GameObject? value)
+        {
+            return value != null && value.activeSelf;
         }
 
         private static GameObject CreatePrimitive(

@@ -301,7 +301,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 readModel.IsDepotApproachRecoveryAvailable;
             bool holdAtModulePoint =
                 mode == LastBearingPresentationMode.Driving &&
-                readModel.IsWreckLineModulePointAvailable;
+                (readModel.IsWreckLineModulePointAvailable ||
+                 readModel.IsWreckLineFrameRailRecoveryAvailable);
             int presentationCargoMass =
                 readModel.HeavyCargoKind == HeavyCargoKind.PumpRotor &&
                 readModel.HeavyCargoCustody == HeavyCargoCustody.Vehicle

@@ -282,6 +282,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         model.RouteTargetTicks);
                 }
 
+                if (model.IsWreckLineFrameRailRecoveryAvailable)
+                {
+                    return Create(
+                        LastBearingPermitJobChapter.Outbound,
+                        3,
+                        "CHAPTER III · THE WRECK LINE",
+                        "Strip the rails while the road is stopped",
+                        "The Patchwork Skid Plate lets Sasha belly under the wreck for one fixed frame-rail bundle. It uses one ordinary cargo slot and becomes four reclaimed parts only after home check-in.",
+                        "E — Recover frame rails · +4 reclaimed parts at home",
+                        model.RouteProgressTicks,
+                        model.RouteTargetTicks);
+                }
+
                 if (model.IsDepotApproachRecoveryAvailable)
                 {
                     return Create(

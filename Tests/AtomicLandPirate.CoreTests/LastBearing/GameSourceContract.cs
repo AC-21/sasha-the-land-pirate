@@ -98,6 +98,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 controller,
                 "public bool IsPatchworkSkidPlateInstallQueued");
+            Require(
+                controller,
+                "public bool IsWreckLineFrameRailRecoveryAvailable");
             Require(controller, "public void BeginGaragePlan(");
             Require(controller, "public void CommitGaragePlan(");
             Require(controller, "public void InstallPatchworkSkidPlate()");
@@ -133,7 +136,7 @@ namespace AtomicLandPirate.LastBearingTests
             string wreckLineOperation = Segment(
                 controller,
                 "public void OperateWreckLineModulePoint()",
-                "public void ChooseLiquidReturn");
+                "public void RecoverWreckLineFrameRails()");
             Require(
                 wreckLineOperation,
                 "_readModel.IsWreckLineModulePointAvailable");
@@ -157,10 +160,39 @@ namespace AtomicLandPirate.LastBearingTests
                     "Wreck Line controller operation reads presentation authority " +
                     forbidden);
             }
+            string frameRailOperation = Segment(
+                controller,
+                "public void RecoverWreckLineFrameRails()",
+                "public void ChooseLiquidReturn");
+            Require(
+                frameRailOperation,
+                "IsWreckLineFrameRailRecoveryAvailable");
+            Require(
+                frameRailOperation,
+                "new RecoverWreckLineFrameRailsCommand(sequence)");
+            foreach (string forbidden in new[]
+            {
+                "Rigidbody",
+                "RoadFeelTelemetry",
+                "Collider",
+                "Physics",
+                ".position",
+                ".transform",
+                "_state =",
+                "_saveAdapter",
+            })
+            {
+                TestHarness.True(
+                    frameRailOperation.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "frame-rail recovery crosses its command boundary " +
+                    forbidden);
+            }
             string recoveryOperation = Segment(
                 controller,
                 "public void OperateDepotApproachRecoveryPoint()",
-                "public void ChooseLiquidReturn");
+                "public void OperateWreckLineModulePoint()");
             Require(
                 recoveryOperation,
                 "_readModel.IsDepotApproachRecoveryAvailable");
@@ -236,6 +268,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "_readModel.IsWreckLineModulePointAvailable");
             Require(
                 globalShortcuts,
+                "IsWreckLineFrameRailRecoveryAvailable");
+            Require(
+                globalShortcuts,
                 "_readModel.IsDepotApproachRecoveryAvailable");
             Require(
                 globalShortcuts,
@@ -255,6 +290,9 @@ namespace AtomicLandPirate.LastBearingTests
             int depotGate = globalShortcuts.IndexOf(
                 "_readModel.IsDepotApproachRecoveryAvailable",
                 StringComparison.Ordinal);
+            int frameRailGate = globalShortcuts.IndexOf(
+                "IsWreckLineFrameRailRecoveryAvailable",
+                StringComparison.Ordinal);
             int wreckHotkey = globalShortcuts.IndexOf(
                 "keyboard.eKey.wasPressedThisFrame",
                 wreckGate,
@@ -262,6 +300,10 @@ namespace AtomicLandPirate.LastBearingTests
             int depotHotkey = globalShortcuts.IndexOf(
                 "keyboard.eKey.wasPressedThisFrame",
                 depotGate,
+                StringComparison.Ordinal);
+            int frameRailHotkey = globalShortcuts.IndexOf(
+                "keyboard.eKey.wasPressedThisFrame",
+                frameRailGate,
                 StringComparison.Ordinal);
             int cargoGate = globalShortcuts.IndexOf(
                 "_readModel.IsRepairCargoLoadAvailable",
@@ -273,7 +315,9 @@ namespace AtomicLandPirate.LastBearingTests
             TestHarness.True(
                 recoveryHotkey >= 0 && recoveryHotkey < wreckGate &&
                 wreckGate >= 0 && wreckHotkey > wreckGate &&
-                depotGate > wreckHotkey && depotHotkey > depotGate &&
+                frameRailGate > wreckHotkey &&
+                frameRailHotkey > frameRailGate &&
+                depotGate > frameRailHotkey && depotHotkey > depotGate &&
                 cargoGate > depotHotkey && cargoHotkey > cargoGate,
                 "manual recovery must precede context-gated road interactions");
             TestHarness.Equal(
@@ -293,6 +337,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "_readModel.IsWreckLineModulePointAvailable");
             Require(
                 driveInput,
+                "_readModel.IsWreckLineFrameRailRecoveryAvailable");
+            Require(
+                driveInput,
                 "_readModel.IsDepotApproachRecoveryAvailable");
             string load = Segment(
                 controller,
@@ -306,21 +353,30 @@ namespace AtomicLandPirate.LastBearingTests
                 load.IndexOf("_modeCoordinator?.ClearSession();", StringComparison.Ordinal) <
                 load.IndexOf("ApplyPresentation();", StringComparison.Ordinal),
                 "load must fail closed before applying the loaded presentation");
-            Require(controller, "_world.Apply(new LastBearingVisualSnapshot");
-            Require(controller, "_world.ApplyDepotApproachRecovery(");
-            Require(controller, "_world.ApplyRouteModulePoint(");
-            Require(controller, "_world.ApplyRoadCargoPresentation(");
-            Require(controller, "_world.ApplyRepairCargoPresentation(");
-            Require(controller, "_world.ApplyCityImprovement(");
-            Require(controller, "_world.ApplyGaragePreparationProgress(");
-            Require(controller, "_readModel.PreparationElapsedTicks");
-            Require(controller, "_readModel.PreparationRequiredTicks");
-            Require(controller, "_modeCoordinator?.ApplyCanonical(_readModel);");
+            string presentation = Segment(
+                controller,
+                "private void ApplyPresentation()",
+                "private void TryAutosave(");
+            Require(presentation, "_world.Apply(new LastBearingVisualSnapshot");
+            Require(presentation, "_world.ApplyDepotApproachRecovery(");
+            Require(presentation, "_world.ApplyRouteModulePoint(");
+            Require(presentation, "_world.ApplyFrameRailSalvage(");
+            Require(presentation, "_readModel.FrameRailSalvageCustody");
+            Require(
+                presentation,
+                "_readModel.IsWreckLineFrameRailRecoveryAvailable");
+            Require(presentation, "_world.ApplyRoadCargoPresentation(");
+            Require(presentation, "_world.ApplyRepairCargoPresentation(");
+            Require(presentation, "_world.ApplyCityImprovement(");
+            Require(presentation, "_world.ApplyGaragePreparationProgress(");
+            Require(presentation, "_readModel.PreparationElapsedTicks");
+            Require(presentation, "_readModel.PreparationRequiredTicks");
+            Require(presentation, "_modeCoordinator?.ApplyCanonical(_readModel);");
             TestHarness.True(
-                controller.IndexOf(
+                presentation.IndexOf(
                     "_world.Apply(new LastBearingVisualSnapshot",
                     StringComparison.Ordinal) <
-                controller.IndexOf(
+                presentation.IndexOf(
                     "_modeCoordinator?.ApplyCanonical(_readModel);",
                     StringComparison.Ordinal),
                 "canonical world pose must render before road activation and synchronization");
@@ -352,8 +408,10 @@ namespace AtomicLandPirate.LastBearingTests
                 "private void Queue(");
             foreach (string criticalEvent in new[]
             {
+                "RigUpgradeInstalled",
                 "ExpeditionDeparted",
                 "RouteActionUsed",
+                "FrameRailSalvageTransferred",
                 "DepotRecoveryPointOperated",
                 "DepotResolved",
                 "RepairCargoTransferred",
@@ -459,6 +517,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "Road Feel scout cargo socket is required for depot cargo custody.");
             Require(world, "LastBearingRouteModulePointView");
             Require(world, "RouteModulePointView.Build(");
+            Require(world, "ApplyFrameRailSalvage(");
+            Require(world, "BindFrameRailCargoSockets(");
+            Require(world, "SashaScoutSemanticContract.CargoSocket02Name");
             string pumpHallBuild = Segment(
                 world,
                 "private void BuildPumpHallCutaway(",
@@ -729,6 +790,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(modeCoordinator, "ILastBearingRoadModeAdapter");
             Require(modeCoordinator, "readModel.PauseCause == PauseCause.None");
             Require(modeCoordinator, "readModel.IsWreckLineModulePointAvailable");
+            Require(
+                modeCoordinator,
+                "readModel.IsWreckLineFrameRailRecoveryAvailable");
             Require(modeCoordinator, "ApplyDerivedPresentationLoad");
             Require(modeCoordinator, "readModel.VehicleConditionMilli");
             Require(modeCoordinator, "DerivePresentationDamageBand");
@@ -919,6 +983,11 @@ namespace AtomicLandPirate.LastBearingTests
             Require(hud, "OperateWreckLineModulePoint");
             Require(hud, "DEPLOY WINCH · RECOVER PUMP ROTOR");
             Require(hud, "CROSS SEALED DUST EXPOSURE");
+            Require(hud, "_controller!.RecoverWreckLineFrameRails();");
+            Require(
+                hud,
+                "E — Recover frame rails · +4 reclaimed parts at home");
+            Require(hud, "model.FrameRailSalvageCustody");
             Require(hud, "model.IsRepairCargoLoadAvailable");
             Require(hud, "_controller!.LoadDepotRepairCargo();");
             Require(hud, "LOAD FIELD SLEEVE · E / GAMEPAD SOUTH");
@@ -1016,6 +1085,11 @@ namespace AtomicLandPirate.LastBearingTests
             Require(wreckLine, "ANCHOR_WRECK_LINE_MODULE_INTERACTION");
             Require(wreckLine, "Existing Pump Rotor");
             Require(wreckLine, "Dust Exposure Curtain");
+            Require(wreckLine, "Recoverable Wreck-Line Frame Rails");
+            Require(wreckLine, "BindFrameRailCargoSockets(");
+            Require(wreckLine, "ApplyFrameRailSalvage(");
+            Require(wreckLine, "Canonical Scout Wreck-Line Frame Rails");
+            Require(wreckLine, "Road Scout Wreck-Line Frame Rails");
             Require(wreckLine, "collider.enabled = false");
             foreach (string forbidden in new[]
             {

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using AtomicLandPirate.Presentation.LastBearing.Editor;
 using AtomicLandPirate.Presentation.LastBearing.RoadFeel;
+using AtomicLandPirate.Presentation.LastBearing.Vehicle;
 using AtomicLandPirate.Simulation.LastBearing;
 using NUnit.Framework;
 using UnityEngine;
@@ -185,6 +186,73 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             view.ApplyState(RouteModulePointPresentationState.TankAvailable);
             Assert.That(view.IsDustCurtainVisible, Is.True);
             Assert.That(view.IsPumpRotorVisible, Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            view.ApplyState(RouteModulePointPresentationState.TankCrossed);
+            Assert.That(view.State, Is.EqualTo(
+                RouteModulePointPresentationState.TankCrossed));
+            Assert.That(view.IsDustCurtainVisible, Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            view.ApplyFrameRailSalvage(
+                FrameRailSalvageCustody.WreckLine,
+                recoveryAvailable: true);
+            Assert.That(view.IsFrameRailSourceVisible, Is.True);
+            Assert.That(view.IsCanonicalFrameRailCargoVisible, Is.False);
+            Assert.That(view.IsRoadFrameRailCargoVisible, Is.False);
+
+            view.ApplyFrameRailSalvage(
+                FrameRailSalvageCustody.Vehicle,
+                recoveryAvailable: false);
+            Assert.That(view.IsFrameRailSourceVisible, Is.False);
+            Assert.That(view.IsCanonicalFrameRailCargoVisible, Is.True);
+            Assert.That(view.IsRoadFrameRailCargoVisible, Is.True);
+            Transform[] allTransforms =
+                _root.GetComponentsInChildren<Transform>(includeInactive: true);
+            Transform canonicalRails = allTransforms.Single(item =>
+                item.name == "Canonical Scout Wreck-Line Frame Rails");
+            Transform roadRails = allTransforms.Single(item =>
+                item.name == "Road Scout Wreck-Line Frame Rails");
+            Assert.That(
+                canonicalRails.parent.name,
+                Is.EqualTo(
+                    SashaScoutSemanticContract.CargoSocket02Name));
+            Assert.That(
+                roadRails.parent.name,
+                Is.EqualTo(
+                    SashaScoutSemanticContract.CargoSocket02Name));
+            foreach (Collider collider in canonicalRails
+                         .GetComponentsInChildren<Collider>(true)
+                         .Concat(roadRails.GetComponentsInChildren<Collider>(true)))
+            {
+                Assert.That(collider.enabled, Is.False, collider.name);
+            }
+
+            GameObject rotorCargo =
+                controller.World.RoadFeelRig!.CargoVisuals[1];
+            rotorCargo.SetActive(true);
+            Renderer[] railRenderers =
+                roadRails.GetComponentsInChildren<Renderer>(true);
+            Assert.That(railRenderers, Is.Not.Empty);
+            Bounds railBounds = railRenderers[0].bounds;
+            for (var index = 1; index < railRenderers.Length; index++)
+            {
+                railBounds.Encapsulate(railRenderers[index].bounds);
+            }
+
+            Renderer rotorRenderer = rotorCargo.GetComponent<Renderer>();
+            Assert.That(rotorRenderer, Is.Not.Null);
+            Assert.That(
+                railBounds.Intersects(rotorRenderer.bounds),
+                Is.False,
+                "frame rails must ride above the Winch rotor proxy without clipping");
+
+            view.ApplyFrameRailSalvage(
+                FrameRailSalvageCustody.Credited,
+                recoveryAvailable: false);
+            Assert.That(view.IsFrameRailSourceVisible, Is.False);
+            Assert.That(view.IsCanonicalFrameRailCargoVisible, Is.False);
+            Assert.That(view.IsRoadFrameRailCargoVisible, Is.False);
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
         }
 
@@ -883,6 +951,59 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(PendingCommandCount(controller), Is.EqualTo(2));
         }
 
+        [Test]
+        public void WreckLineFrameRailRecoveryQueuesOnceWithoutPresentationAuthority()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            PrepareControllerForGaragePlan(controller, ColonyComposition.Mixed);
+            LastBearingState recovery =
+                CreateFrameRailRecoveryState(controller.State!);
+            SynchronizeControllerState(controller, recovery);
+            byte[] canonicalBefore = LastBearingCanonicalCodec.Encode(
+                controller.State!);
+
+            Assert.That(
+                controller.IsWreckLineFrameRailRecoveryAvailable,
+                Is.True);
+            Assert.That(
+                controller.World!.RouteModulePointView!
+                    .IsFrameRailSourceVisible,
+                Is.True);
+
+            controller.RecoverWreckLineFrameRails();
+
+            LastBearingCommand[] pending = PendingCommands(controller);
+            Assert.That(pending, Has.Length.EqualTo(1));
+            Assert.That(
+                pending[0],
+                Is.TypeOf<RecoverWreckLineFrameRailsCommand>());
+            Assert.That(
+                pending[0].Sequence,
+                Is.EqualTo(recovery.NextCommandSequence));
+            Assert.That(
+                controller.IsWreckLineFrameRailRecoveryAvailable,
+                Is.False);
+            CollectionAssert.AreEqual(
+                canonicalBefore,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            controller.RecoverWreckLineFrameRails();
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+
+            SimulateOneTick(controller);
+
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            Assert.That(
+                controller.ReadModel!.FrameRailSalvageCustody,
+                Is.EqualTo(FrameRailSalvageCustody.Vehicle));
+            Assert.That(
+                controller.World.RouteModulePointView!
+                    .IsRoadFrameRailCargoVisible,
+                Is.True);
+        }
+
         [TestCase(ColonyComposition.HumanOnly, PreparationChoice.WorkshopPush, VehicleModule.WinchAssembly)]
         [TestCase(ColonyComposition.HumanOnly, PreparationChoice.WorkshopPush, VehicleModule.SealedRangeTank)]
         [TestCase(ColonyComposition.HumanOnly, PreparationChoice.CivicBuffer, VehicleModule.WinchAssembly)]
@@ -1562,6 +1683,85 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     new DepartExpeditionCommand(sequence + 2),
                 }).State;
             Assert.That(state.ExpeditionPhase, Is.EqualTo(ExpeditionPhase.Outbound));
+            return state;
+        }
+
+        private static LastBearingState CreateFrameRailRecoveryState(
+            LastBearingState readyForPlan)
+        {
+            var kernel = new LastBearingKernel();
+            LastBearingState state = kernel.Step(
+                readyForPlan,
+                new LastBearingCommand[]
+                {
+                    new InstallRigUpgradeCommand(
+                        readyForPlan.NextCommandSequence,
+                        RigUpgrade.PatchworkSkidPlate),
+                }).State;
+            state = ApplyPlanCommands(
+                state,
+                PreparationChoice.CivicBuffer,
+                VehicleModule.WinchAssembly);
+            var guard = 0;
+            while ((state.PreparationPhase != PreparationPhase.Ready ||
+                    state.ModuleInstallationState !=
+                        ModuleInstallationState.Installed) &&
+                   guard < 1000)
+            {
+                state = kernel.Step(
+                    state,
+                    Array.Empty<LastBearingCommand>()).State;
+                guard++;
+            }
+
+            long sequence = state.NextCommandSequence;
+            state = kernel.Step(
+                state,
+                new LastBearingCommand[]
+                {
+                    new PrepareExpeditionTransactionCommand(
+                        sequence,
+                        "tx:wreck-line-adapter",
+                        "fp:wreck-line-adapter"),
+                    new DebitCityManifestCommand(
+                        sequence + 1,
+                        "tx:wreck-line-adapter",
+                        "fp:wreck-line-adapter"),
+                    new DepartExpeditionCommand(sequence + 2),
+                }).State;
+            guard = 0;
+            while (!LastBearingReadModel.FromState(state)
+                       .IsWreckLineModulePointAvailable &&
+                   guard < 1000)
+            {
+                state = kernel.Step(
+                    state,
+                    new LastBearingCommand[]
+                    {
+                        new DriveVehicleCommand(
+                            state.NextCommandSequence,
+                            1000,
+                            0),
+                    }).State;
+                guard++;
+            }
+
+            Assert.That(
+                LastBearingReadModel.FromState(state)
+                    .IsWreckLineModulePointAvailable,
+                Is.True);
+            state = kernel.Step(
+                state,
+                new LastBearingCommand[]
+                {
+                    new OperateWreckLineModuleCommand(
+                        state.NextCommandSequence,
+                        RouteActionKind.DeployWinch),
+                }).State;
+            Assert.That(
+                LastBearingReadModel.FromState(state)
+                    .IsWreckLineFrameRailRecoveryAvailable,
+                Is.True);
             return state;
         }
 
