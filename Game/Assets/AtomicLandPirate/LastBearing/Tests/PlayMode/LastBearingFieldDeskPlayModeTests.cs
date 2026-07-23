@@ -622,7 +622,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         private static LastBearingState CreatePostReturnState(
-            bool repairTurbine)
+            bool repairTurbine,
+            VehicleModule module = VehicleModule.SealedRangeTank)
         {
             LastBearingState state = LastBearingScenarioFactory.CreateInitial(
                 ColonyComposition.Mixed,
@@ -640,12 +641,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 sequence => new SelectPreparationCommand(
                     sequence,
                     PreparationChoice.CivicBuffer,
-                    VehicleModule.SealedRangeTank));
+                    module));
             state = Apply(
                 state,
                 sequence => new InstallVehicleModuleCommand(
                     sequence,
-                    VehicleModule.SealedRangeTank));
+                    module));
             for (var guard = 0;
                  LastBearingReadModel.FromState(state).PreparationPhase !=
                      PreparationPhase.Ready &&
@@ -713,11 +714,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             state = Apply(
                 state,
                 sequence => new LoadDepotRepairCargoCommand(sequence));
-            state = Apply(
-                state,
-                sequence => new ChooseLiquidReturnCommand(
-                    sequence,
-                    LiquidCargoKind.Fuel));
+            if (module == VehicleModule.SealedRangeTank)
+            {
+                state = Apply(
+                    state,
+                    sequence => new ChooseLiquidReturnCommand(
+                        sequence,
+                        LiquidCargoKind.Fuel));
+            }
             state = Apply(
                 state,
                 sequence => new FreezeReturnPayloadCommand(
@@ -769,7 +773,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             SpareBearingBatchPhase phase)
         {
             LastBearingState state =
-                CreatePostReturnState(repairTurbine: true);
+                CreatePostReturnState(
+                    repairTurbine: true,
+                    module: VehicleModule.WinchAssembly);
             if (phase != SpareBearingBatchPhase.None)
             {
                 state = Apply(
