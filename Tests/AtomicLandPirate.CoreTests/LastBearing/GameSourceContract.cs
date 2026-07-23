@@ -20,6 +20,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(runtimeRoot, "LastBearingWorldBuilder.cs"));
             string hud = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingHud.cs"));
+            string nativePerformanceHarness = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "Performance/LastBearingNativePerformanceHarness.cs"));
             string permitJobPresenter = File.ReadAllText(
                 Path.Combine(
                     runtimeRoot,
@@ -131,6 +135,37 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "PauseCause.DustFrontAlert");
             Require(hud, "DUST FRONT · GLOBAL ALERT");
             Require(hud, "GUILayout.Button(\"ACKNOWLEDGE FRONT\"");
+            string harnessUpdate = Segment(
+                nativePerformanceHarness,
+                "private void Update()",
+                "private static bool TryAcknowledgeDustFrontAlert(");
+            Require(
+                harnessUpdate,
+                "if (TryAcknowledgeDustFrontAlert(_controller!))");
+            TestHarness.True(
+                harnessUpdate.IndexOf(
+                    "TryAcknowledgeDustFrontAlert(_controller!)",
+                    StringComparison.Ordinal) <
+                harnessUpdate.IndexOf(
+                    "_schedule!.Advance(isPaused)",
+                    StringComparison.Ordinal),
+                "the native schedule must wait for Dust Front acknowledgement");
+            string harnessDustFrontAcknowledgement = Segment(
+                nativePerformanceHarness,
+                "private static bool TryAcknowledgeDustFrontAlert(",
+                "private void LateUpdate()");
+            Require(
+                harnessDustFrontAcknowledgement,
+                "IsDustFrontAcknowledgementRequired != true");
+            Require(
+                harnessDustFrontAcknowledgement,
+                "if (controller.CanAcknowledgeDustFront)");
+            TestHarness.Equal(
+                1,
+                CountOccurrences(
+                    harnessDustFrontAcknowledgement,
+                    "controller.AcknowledgeDustFront();"),
+                "the native harness must submit one Dust Front acknowledgement");
             string shortcuts = Segment(
                 controller,
                 "private void HandleGlobalShortcuts()",
