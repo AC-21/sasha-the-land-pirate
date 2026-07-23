@@ -368,6 +368,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     !state.RouteActionUsed
                     || state.TransactionPhase >= TransactionPhase.RoadOwned,
                     "LAST_BEARING_ROUTE_ACTION_PHASE_INVALID");
+                Require(
+                    state.ExpeditionPhase != ExpeditionPhase.Outbound
+                    || !state.RouteActionUsed
+                    || state.FrameRailSalvageCustody
+                        != FrameRailSalvageCustody.WreckLine
+                    || state.RouteProgressTicks == wreckLineGate,
+                    "LAST_BEARING_FRAME_RAIL_SALVAGE_GATE_BYPASSED");
             }
             else
             {
@@ -477,6 +484,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
         {
             RequireEnum(state.RepairCargoKind, "REPAIR_CARGO_KIND");
             RequireEnum(state.RepairCargoCustody, "REPAIR_CARGO_CUSTODY");
+            RequireEnum(
+                state.FrameRailSalvageCustody,
+                "FRAME_RAIL_SALVAGE_CUSTODY");
             RequireEnum(state.HeavyCargoKind, "HEAVY_CARGO_KIND");
             RequireEnum(state.HeavyCargoCustody, "HEAVY_CARGO_CUSTODY");
             RequireEnum(state.LiquidCargoKind, "LIQUID_CARGO_KIND");
@@ -490,7 +500,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 Require(
                     state.RepairCargoCustody == RepairCargoCustody.None
                     && state.DepotResolution == EncounterChoice.Unresolved
-                    && state.OrdinaryCargoUsedUnits == 0,
+                    && state.OrdinaryCargoUsedUnits
+                        == FrameRailCargoUnits(state),
                     "LAST_BEARING_EMPTY_REPAIR_CUSTODY_INVALID");
             }
             else if (state.RepairCargoKind == RepairCargoKind.CeramicBearing)
@@ -527,7 +538,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     state.ExpeditionPhase == ExpeditionPhase.AtDepot
                     && state.TransactionPhase == TransactionPhase.RoadOwned
                     && !state.ReturnPayloadFrozen
-                    && state.OrdinaryCargoUsedUnits == 0,
+                    && state.OrdinaryCargoUsedUnits
+                        == FrameRailCargoUnits(state),
                     "LAST_BEARING_REPAIR_CARGO_SOURCE_PHASE_INVALID");
 
                 bool exactDepotLineage =
@@ -599,8 +611,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     exactOutcome,
                     "LAST_BEARING_VEHICLE_REPAIR_CARGO_OUTCOME_INVALID");
                 Require(
-                    state.OrdinaryCargoUsedUnits == 1
-                    || (state.OrdinaryCargoUsedUnits == 0
+                    state.OrdinaryCargoUsedUnits
+                        == checked(1 + FrameRailCargoUnits(state))
+                    || (state.OrdinaryCargoUsedUnits
+                            == FrameRailCargoUnits(state)
                         && state.ExpeditionPhase == ExpeditionPhase.AtDepot
                         && state.TransactionPhase
                             == TransactionPhase.RoadOwned
@@ -611,7 +625,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 || state.RepairCargoCustody == RepairCargoCustody.Consumed)
             {
                 Require(
-                    state.OrdinaryCargoUsedUnits == 1,
+                    state.OrdinaryCargoUsedUnits
+                        == checked(1 + FrameRailCargoUnits(state)),
                     "LAST_BEARING_APPLIED_REPAIR_CARGO_OCCUPANCY_INVALID");
             }
 
@@ -622,6 +637,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     && state.RepairCargoCustody != RepairCargoCustody.Consumed,
                     "LAST_BEARING_UNAPPLIED_REPAIR_CARGO_INVALID");
             }
+
+            ValidateFrameRailSalvage(state);
 
             Require(
                 state.HeavyCargoKind == HeavyCargoKind.PumpRotor,
@@ -711,6 +728,74 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     && state.RepairCargoCustody == RepairCargoCustody.Consumed,
                     "LAST_BEARING_SLEEVE_REPAIR_INVALID");
             }
+        }
+
+        private static void ValidateFrameRailSalvage(
+            LastBearingState state)
+        {
+            if (state.FrameRailSalvageCustody
+                == FrameRailSalvageCustody.None)
+            {
+                return;
+            }
+
+            Require(
+                state.RigUpgrade == RigUpgrade.PatchworkSkidPlate,
+                "LAST_BEARING_FRAME_RAIL_SALVAGE_UPGRADE_REQUIRED");
+
+            if (state.FrameRailSalvageCustody
+                == FrameRailSalvageCustody.WreckLine)
+            {
+                Require(
+                    state.ExpeditionPhase == ExpeditionPhase.AtHome
+                        ? state.TransactionPhase
+                            != TransactionPhase.Finalized
+                        : state.ExpeditionPhase
+                                == ExpeditionPhase.Outbound
+                            && state.TransactionPhase
+                                == TransactionPhase.RoadOwned
+                            && (!state.RouteActionUsed
+                                || state.RouteProgressTicks
+                                    == LastBearingBalanceV1
+                                        .WreckLineGateTicks(
+                                            state.VehicleModule)),
+                    "LAST_BEARING_FRAME_RAIL_SALVAGE_WRECK_LINE_INVALID");
+                return;
+            }
+
+            if (state.FrameRailSalvageCustody
+                == FrameRailSalvageCustody.Vehicle)
+            {
+                Require(
+                    state.RouteActionUsed
+                    && (state.ExpeditionPhase == ExpeditionPhase.Outbound
+                        || state.ExpeditionPhase == ExpeditionPhase.AtDepot
+                        || state.ExpeditionPhase
+                            == ExpeditionPhase.Returning
+                        || state.ExpeditionPhase == ExpeditionPhase.Returned)
+                    && state.TransactionPhase >= TransactionPhase.RoadOwned
+                    && state.TransactionPhase
+                        <= TransactionPhase.ReturnPending,
+                    "LAST_BEARING_FRAME_RAIL_SALVAGE_VEHICLE_INVALID");
+                return;
+            }
+
+            Require(
+                state.FrameRailSalvageCustody
+                    == FrameRailSalvageCustody.Credited
+                && state.TransactionPhase >= TransactionPhase.CityCredited
+                && (state.ExpeditionPhase == ExpeditionPhase.Returned
+                    || state.ExpeditionPhase == ExpeditionPhase.AtHome),
+                "LAST_BEARING_FRAME_RAIL_SALVAGE_CREDIT_INVALID");
+        }
+
+        private static long FrameRailCargoUnits(LastBearingState state)
+        {
+            return state.FrameRailSalvageCustody
+                    == FrameRailSalvageCustody.Vehicle
+                ? LastBearingBalanceV1
+                    .WreckLineFrameRailSalvageCargoUnits
+                : 0;
         }
 
         private static void ValidateFaction(LastBearingState state)

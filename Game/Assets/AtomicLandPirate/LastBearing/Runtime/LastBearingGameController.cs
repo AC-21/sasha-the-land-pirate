@@ -100,6 +100,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool CanRecoverRoadPresentation =>
             _modeCoordinator?.CanRecoverRoadPresentation ?? false;
 
+        public bool IsWreckLineFrameRailRecoveryAvailable =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsWreckLineFrameRailRecoveryAvailable == true &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode == LastBearingPresentationMode.Driving;
+
         public bool IsReturnCheckInAvailable =>
             _pendingCommands.Count == 0 &&
             _state != null &&
@@ -459,6 +465,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 available: false,
                 RouteActionKind.None,
                 operated: false);
+            _world?.ApplyFrameRailSalvage(
+                FrameRailSalvageCustody.None,
+                recoveryAvailable: false);
             _world?.ApplyRoadCargoPresentation(
                 HeavyCargoKind.PumpRotor,
                 HeavyCargoCustody.Depot);
@@ -1113,6 +1122,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 : "Seals checked. Cross the Wreck Line dust exposure without heavy cargo.";
         }
 
+        public void RecoverWreckLineFrameRails()
+        {
+            if (!IsWreckLineFrameRailRecoveryAvailable)
+            {
+                _status =
+                    "The Wreck Line frame rails are not canonically available to recover.";
+                return;
+            }
+
+            Queue(sequence =>
+                new RecoverWreckLineFrameRailsCommand(sequence));
+            _status =
+                "Frame rails strapped to Sasha's scout. Last Bearing will reclaim four parts at home.";
+        }
+
         public void ChooseLiquidReturn(LiquidCargoKind kind)
         {
             Queue(sequence => new ChooseLiquidReturnCommand(sequence, kind));
@@ -1428,6 +1452,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 OperateWreckLineModulePoint();
             }
+            else if (IsWreckLineFrameRailRecoveryAvailable &&
+                ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
+                 (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
+            {
+                RecoverWreckLineFrameRails();
+            }
             else if (_readModel != null &&
                 _readModel.IsDepotApproachRecoveryAvailable &&
                 ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
@@ -1574,7 +1604,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 if (returnCheckInAccepted)
                 {
                     TryRouteToPumpHallRepair(
-                        "Return checked in. Seat the loaded repair at the pump hall.");
+                        _readModel.FrameRailSalvageCustody ==
+                            FrameRailSalvageCustody.Credited
+                            ? "Return checked in. +4 reclaimed parts from the Wreck Line frame rails; seat the loaded repair at the pump hall."
+                            : "Return checked in. Seat the loaded repair at the pump hall.");
                 }
 
                 if (turbineRepairAccepted &&
@@ -1622,6 +1655,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _readModel == null ||
                 _readModel.PauseCause != PauseCause.None ||
                 _readModel.IsWreckLineModulePointAvailable ||
+                _readModel.IsWreckLineFrameRailRecoveryAvailable ||
                 _readModel.IsDepotApproachRecoveryAvailable ||
                 (_readModel.ExpeditionPhase != ExpeditionPhase.Outbound &&
                  _readModel.ExpeditionPhase != ExpeditionPhase.Returning))
@@ -1807,6 +1841,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _readModel.IsWreckLineModulePointAvailable,
                 _readModel.RouteActionKind,
                 _readModel.RouteActionUsed);
+            _world.ApplyFrameRailSalvage(
+                _readModel.FrameRailSalvageCustody,
+                _readModel.IsWreckLineFrameRailRecoveryAvailable);
             _world.ApplyRoadCargoPresentation(
                 _readModel.HeavyCargoKind,
                 _readModel.HeavyCargoCustody);
@@ -1861,8 +1898,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             for (var index = 0; index < domainEvents.Count; index++)
             {
                 LastBearingEventKind kind = domainEvents[index].Kind;
-                if (kind == LastBearingEventKind.ExpeditionDeparted
+                if (kind == LastBearingEventKind.RigUpgradeInstalled
+                    || kind == LastBearingEventKind.ExpeditionDeparted
                     || kind == LastBearingEventKind.RouteActionUsed
+                    || kind == LastBearingEventKind.FrameRailSalvageTransferred
                     || kind == LastBearingEventKind.DepotRecoveryPointOperated
                     || kind == LastBearingEventKind.DepotResolved
                     || kind == LastBearingEventKind.RepairCargoTransferred

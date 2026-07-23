@@ -285,6 +285,30 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 canonicalCargoSocket,
                 roadCargoSocket);
 
+            Transform? canonicalFrameRailSocket =
+                VehicleView?.ScoutVisual?.FindSocket(
+                    SashaScoutSemanticContract.CargoSocket02Name);
+            if (canonicalFrameRailSocket == null)
+            {
+                throw new MissingReferenceException(
+                    "Canonical scout cargo socket 02 is required for frame-rail salvage custody.");
+            }
+
+            Transform? roadFrameRailSocket =
+                RoadFeelRig?.ScoutVisual.FindSocket(
+                    SashaScoutSemanticContract.CargoSocket02Name);
+            if (roadFrameRailSocket == null)
+            {
+                throw new MissingReferenceException(
+                    "Road Feel scout cargo socket 02 is required for frame-rail salvage custody.");
+            }
+
+            RouteModulePointView?.BindFrameRailCargoSockets(
+                canonicalFrameRailSocket,
+                roadFrameRailSocket,
+                iron,
+                oxide);
+
             BuildCamera();
 
             Apply(new LastBearingVisualSnapshot(
@@ -459,6 +483,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 RoadFeelRig.CargoVisuals[index].SetActive(
                     rotorInVehicle && index == 1);
             }
+        }
+
+        public void ApplyFrameRailSalvage(
+            FrameRailSalvageCustody custody,
+            bool recoveryAvailable)
+        {
+            RouteModulePointView?.ApplyFrameRailSalvage(
+                custody,
+                recoveryAvailable);
         }
 
         public void ApplyRepairCargoPresentation(

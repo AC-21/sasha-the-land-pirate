@@ -46,6 +46,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const long TankInstallFuelUnits = 6;
         public const long PatchworkSkidPlatePartsCostUnits = 3;
         public const long PatchworkSkidPlateProtectionMilli = 40;
+        public const long WreckLineFrameRailSalvagePartsUnits = 4;
+        public const long WreckLineFrameRailSalvageCargoUnits = 1;
 
         public const long ShortRouteOneWayTicks = 150;
         public const long LongRouteOneWayTicks = 300;

@@ -20,7 +20,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "unsupported city decisions remain pending",
                 UnsupportedDecisionRemainsPending);
             harness.Run(
-                "city improvement survives v5 canonical round trip",
+                "city improvement survives v6 canonical round trip",
                 ImprovementRoundTripsInV5);
             harness.Run(
                 "forged city improvement states fail invariants",
@@ -293,19 +293,19 @@ namespace AtomicLandPirate.LastBearingTests
                 LastBearingCanonicalCodec.TryDecode(encoded);
             TestHarness.True(
                 decoded.Succeeded && decoded.State != null,
-                "v5 improvement decode");
+                "v6 improvement decode");
             TestHarness.True(
                 encoded.SequenceEqual(
                     LastBearingCanonicalCodec.Encode(decoded.State!)),
-                "v5 improvement canonical bytes");
+                "v6 improvement canonical bytes");
             TestHarness.Equal(
                 CityImprovementKind.RefurbishedAuxiliaryPump,
                 decoded.State!.InstalledCityImprovement,
-                "v5 improvement field");
+                "v6 improvement field");
             TestHarness.Equal(
                 HeavyCargoCustody.InstalledAtAuxiliaryPump,
                 decoded.State.HeavyCargoCustody,
-                "v5 installed custody");
+                "v6 installed custody");
         }
 
         private static void PriorPayloadsRefuseReinterpretation()

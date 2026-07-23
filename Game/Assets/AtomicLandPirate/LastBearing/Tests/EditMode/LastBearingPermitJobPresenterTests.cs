@@ -355,6 +355,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     LastBearingBalanceV1.PatchworkSkidPlateProtectionMilli +
                     " protection"));
             Assert.That(outboundLedger, Does.Contain("CARGO  pump rotor waiting at the Wreck Line"));
+            Assert.That(
+                outboundLedger,
+                Does.Contain("frame rails waiting at the Wreck Line"));
             Assert.That(outboundLedger, Does.Contain("CONSEQUENCE  turbine failing"));
             Assert.That(
                 LastBearingCanonicalCodec.ComputeSha256(state),
@@ -363,9 +366,48 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             state = AdvanceUntil(
                 state,
+                model => model.IsWreckLineModulePointAvailable,
+                drive: true);
+            state = ApplyOne(
+                state,
+                sequence => new OperateWreckLineModuleCommand(
+                    sequence,
+                    RouteActionKind.DeployWinch));
+            LastBearingReadModel railsAvailable =
+                LastBearingReadModel.FromState(state);
+            Assert.That(
+                railsAvailable.NextObjective,
+                Is.EqualTo("recover-wreck-line-frame-rails"));
+            LastBearingPermitJobPresentation railsCue = Present(state, true);
+            Assert.That(railsCue.Headline, Does.Contain("Strip the rails"));
+            Assert.That(
+                railsCue.ProgressLabel,
+                Is.EqualTo(
+                    "E — Recover frame rails · +4 reclaimed parts at home"));
+            string railControls = InvokeHudString(
+                "BuildControlsText",
+                railsAvailable,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true);
+            Assert.That(railControls, Does.Contain("+4 reclaimed parts"));
+            state = ApplyOne(
+                state,
+                sequence => new RecoverWreckLineFrameRailsCommand(sequence));
+            string recoveredLedger = InvokeHudString(
+                "BuildJourneyLedgerText",
+                LastBearingReadModel.FromState(state));
+            Assert.That(
+                recoveredLedger,
+                Does.Contain("frame rails strapped to Sasha's scout"));
+            state = AdvanceUntil(
+                state,
                 model => model.IsDepotApproachRecoveryAvailable,
-                drive: true,
-                operateWreckLine: true);
+                drive: true);
             state = ApplyOne(
                 state,
                 sequence => new OperateDepotRecoveryPointCommand(sequence));
@@ -975,6 +1017,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                         sequence => new OperateWreckLineModuleCommand(
                             sequence,
                             model.RouteActionKind));
+                }
+                else if (operateWreckLine &&
+                         model.IsWreckLineFrameRailRecoveryAvailable)
+                {
+                    state = ApplyOne(
+                        state,
+                        sequence =>
+                            new RecoverWreckLineFrameRailsCommand(sequence));
                 }
                 else if (drive)
                 {

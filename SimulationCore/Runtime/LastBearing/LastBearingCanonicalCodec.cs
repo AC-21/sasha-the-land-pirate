@@ -34,7 +34,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const string DecodeUnknownVersionCode =
             "LB_CORE_DECODE_UNKNOWN_VERSION";
 
-        private const ushort CodecVersion = 5;
+        private const ushort CodecVersion = 6;
+        private const ushort LegacyCodecVersionV5 = 5;
         private const ushort LegacyCodecVersionV4 = 4;
         private const ushort LegacyCodecVersionV3 = 3;
         private const int MaximumCanonicalBytes = 1_048_576;
@@ -56,6 +57,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 LastBearingBalanceV1.Revision,
                 includeCityConstruction: true,
                 includeRigUpgrade: true,
+                includeFrameRailSalvage: true,
                 includeRepresentation: true);
         }
 
@@ -77,6 +79,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 reader.RequireBytes(Magic);
                 var version = reader.ReadUInt16();
                 if (version != CodecVersion
+                    && version != LegacyCodecVersionV5
                     && version != LegacyCodecVersionV4
                     && version != LegacyCodecVersionV3)
                 {
@@ -225,9 +228,15 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 builder.NextMaintenanceDueSettlementTick = reader.ReadInt64();
                 builder.MaintenanceDue = reader.ReadBoolean();
                 builder.DustFrontProgressTicks = reader.ReadInt64();
-                if (version == CodecVersion)
+                if (version >= LegacyCodecVersionV5)
                 {
                     builder.RigUpgrade = reader.ReadEnum<RigUpgrade>();
+                }
+
+                if (version == CodecVersion)
+                {
+                    builder.FrameRailSalvageCustody =
+                        reader.ReadEnum<FrameRailSalvageCustody>();
                 }
 
                 reader.RequireEnd();
@@ -258,12 +267,37 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
                     MigrateLegacyV4(builder);
                 }
+                else if (version == LegacyCodecVersionV5)
+                {
+                    if (builder.SchemaVersion != 5
+                        || !string.Equals(
+                            builder.BalanceRevision,
+                            LastBearingBalanceV1.Revision,
+                            StringComparison.Ordinal))
+                    {
+                        return Failure(DecodeInvalidCode);
+                    }
+
+                    MigrateLegacyV5(builder);
+                }
 
                 var state = builder.Build();
                 byte[] canonical;
                 if (version == CodecVersion)
                 {
                     canonical = Encode(state);
+                }
+                else if (version == LegacyCodecVersionV5)
+                {
+                    canonical = EncodeVersion(
+                        state,
+                        LegacyCodecVersionV5,
+                        5,
+                        LastBearingBalanceV1.Revision,
+                        includeCityConstruction: true,
+                        includeRigUpgrade: true,
+                        includeFrameRailSalvage: false,
+                        includeRepresentation: true);
                 }
                 else if (version == LegacyCodecVersionV4)
                 {
@@ -274,6 +308,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         LastBearingBalanceV1.LegacyRevisionV2,
                         includeCityConstruction: true,
                         includeRigUpgrade: false,
+                        includeFrameRailSalvage: false,
                         includeRepresentation: true);
                 }
                 else
@@ -285,6 +320,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         LastBearingBalanceV1.LegacyRevisionV1,
                         includeCityConstruction: false,
                         includeRigUpgrade: false,
+                        includeFrameRailSalvage: false,
                         includeRepresentation: true);
                 }
 
@@ -329,7 +365,28 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 LastBearingBalanceV1.Revision,
                 includeCityConstruction: true,
                 includeRigUpgrade: true,
+                includeFrameRailSalvage: true,
                 includeRepresentation: false);
+        }
+
+        internal static byte[] EncodeLegacyV5ForMigrationTests(
+            LastBearingState state)
+        {
+            if (state == null)
+            {
+                throw new ArgumentNullException(nameof(state));
+            }
+
+            LastBearingInvariants.Validate(state);
+            return EncodeVersion(
+                state,
+                LegacyCodecVersionV5,
+                5,
+                LastBearingBalanceV1.Revision,
+                includeCityConstruction: true,
+                includeRigUpgrade: true,
+                includeFrameRailSalvage: false,
+                includeRepresentation: true);
         }
 
         internal static byte[] EncodeLegacyV4ForMigrationTests(
@@ -348,6 +405,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 LastBearingBalanceV1.LegacyRevisionV2,
                 includeCityConstruction: true,
                 includeRigUpgrade: false,
+                includeFrameRailSalvage: false,
                 includeRepresentation: true);
         }
 
@@ -367,6 +425,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 LastBearingBalanceV1.LegacyRevisionV1,
                 includeCityConstruction: false,
                 includeRigUpgrade: false,
+                includeFrameRailSalvage: false,
                 includeRepresentation: true);
         }
 
@@ -387,6 +446,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 LastBearingBalanceV1.Revision,
                 includeCityConstruction: true,
                 includeRigUpgrade: true,
+                includeFrameRailSalvage: true,
                 includeRepresentation: includeRepresentation);
         }
 
@@ -397,6 +457,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             string balanceRevision,
             bool includeCityConstruction,
             bool includeRigUpgrade,
+            bool includeFrameRailSalvage,
             bool includeRepresentation)
         {
             var writer = new CanonicalWriter();
@@ -534,6 +595,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 writer.WriteEnum(state.RigUpgrade);
             }
 
+            if (includeFrameRailSalvage)
+            {
+                writer.WriteEnum(state.FrameRailSalvageCustody);
+            }
+
             return writer.ToArray();
         }
 
@@ -576,9 +642,44 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
         private static void MigrateLegacyV4(LastBearingStateBuilder builder)
         {
+            builder.RigUpgrade = RigUpgrade.None;
+            MigrateLegacyV5(builder);
+        }
+
+        private static void MigrateLegacyV5(LastBearingStateBuilder builder)
+        {
             builder.SchemaVersion = LastBearingState.CurrentSchemaVersion;
             builder.BalanceRevision = LastBearingBalanceV1.Revision;
-            builder.RigUpgrade = RigUpgrade.None;
+            builder.FrameRailSalvageCustody =
+                InferLegacyFrameRailSalvageCustody(builder);
+        }
+
+        private static FrameRailSalvageCustody
+            InferLegacyFrameRailSalvageCustody(
+                LastBearingStateBuilder builder)
+        {
+            if (builder.RigUpgrade != RigUpgrade.PatchworkSkidPlate)
+            {
+                return FrameRailSalvageCustody.None;
+            }
+
+            if (builder.ExpeditionPhase == ExpeditionPhase.AtHome)
+            {
+                return builder.TransactionPhase == TransactionPhase.Finalized
+                    ? FrameRailSalvageCustody.None
+                    : FrameRailSalvageCustody.WreckLine;
+            }
+
+            if (builder.ExpeditionPhase == ExpeditionPhase.Outbound
+                && builder.VehicleModule != VehicleModule.None
+                && builder.RouteProgressTicks
+                    <= LastBearingBalanceV1.WreckLineGateTicks(
+                        builder.VehicleModule))
+            {
+                return FrameRailSalvageCustody.WreckLine;
+            }
+
+            return FrameRailSalvageCustody.None;
         }
 
         private static void WriteMemory(

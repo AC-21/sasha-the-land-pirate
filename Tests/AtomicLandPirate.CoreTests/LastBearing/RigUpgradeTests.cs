@@ -215,7 +215,7 @@ namespace AtomicLandPirate.LastBearingTests
                     VehicleModule.SealedRangeTank));
 
             byte[] canonical = LastBearingCanonicalCodec.Encode(driver.State);
-            TestHarness.Equal((byte)5, canonical[8], "v5 codec marker");
+            TestHarness.Equal((byte)6, canonical[8], "v6 codec marker");
             string profileParent = Path.Combine(
                 repoRoot,
                 "BuildArtifacts/WP-0002/local-only/rig-upgrade-save");

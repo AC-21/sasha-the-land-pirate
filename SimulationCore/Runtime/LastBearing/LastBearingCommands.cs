@@ -310,6 +310,15 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public RouteActionKind Action { get; }
     }
 
+    public sealed class RecoverWreckLineFrameRailsCommand
+        : LastBearingCommand
+    {
+        public RecoverWreckLineFrameRailsCommand(long sequence)
+            : base(sequence)
+        {
+        }
+    }
+
     public sealed class OperateDepotRecoveryPointCommand : LastBearingCommand
     {
         public OperateDepotRecoveryPointCommand(long sequence)

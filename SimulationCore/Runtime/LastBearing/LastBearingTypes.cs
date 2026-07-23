@@ -117,6 +117,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
         Consumed = 5,
     }
 
+    public enum FrameRailSalvageCustody
+    {
+        None = 0,
+        WreckLine = 1,
+        Vehicle = 2,
+        Credited = 3,
+    }
+
     public enum HeavyCargoKind
     {
         None = 0,
@@ -316,6 +324,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         CityServiceSledAdvanced = 50,
         CityServiceBatchDelivered = 51,
         RigUpgradeInstalled = 52,
+        FrameRailSalvageTransferred = 53,
     }
 
     public enum LastBearingEventCause

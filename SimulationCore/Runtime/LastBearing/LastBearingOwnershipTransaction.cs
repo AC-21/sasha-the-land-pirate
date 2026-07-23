@@ -74,6 +74,72 @@ namespace AtomicLandPirate.Simulation.LastBearing
             builder.RepairCargoCustody = nextCustody;
         }
 
+        internal static void RecoverFrameRailSalvageToVehicle(
+            LastBearingStateBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            if (builder.FrameRailSalvageCustody
+                    != FrameRailSalvageCustody.WreckLine
+                || builder.RigUpgrade != RigUpgrade.PatchworkSkidPlate
+                || checked(
+                    builder.OrdinaryCargoUsedUnits
+                    + LastBearingBalanceV1
+                        .WreckLineFrameRailSalvageCargoUnits)
+                    > builder.OrdinaryCargoCapacityUnits)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_FRAME_RAIL_SALVAGE_RECOVERY_INVALID");
+            }
+
+            builder.FrameRailSalvageCustody =
+                FrameRailSalvageCustody.Vehicle;
+            builder.OrdinaryCargoUsedUnits = checked(
+                builder.OrdinaryCargoUsedUnits
+                + LastBearingBalanceV1
+                    .WreckLineFrameRailSalvageCargoUnits);
+        }
+
+        internal static void CreditFrameRailSalvage(
+            LastBearingStateBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            if (builder.FrameRailSalvageCustody
+                == FrameRailSalvageCustody.None)
+            {
+                return;
+            }
+
+            if (builder.FrameRailSalvageCustody
+                != FrameRailSalvageCustody.Vehicle)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_FRAME_RAIL_SALVAGE_OWNERSHIP_MISMATCH");
+            }
+
+            if (builder.OrdinaryCargoUsedUnits
+                < LastBearingBalanceV1
+                    .WreckLineFrameRailSalvageCargoUnits)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_FRAME_RAIL_SALVAGE_OCCUPANCY_INVALID");
+            }
+
+            builder.FrameRailSalvageCustody =
+                FrameRailSalvageCustody.Credited;
+            builder.OrdinaryCargoUsedUnits = checked(
+                builder.OrdinaryCargoUsedUnits
+                - LastBearingBalanceV1
+                    .WreckLineFrameRailSalvageCargoUnits);
+        }
+
         internal static void RecoverHeavyCargoToVehicle(
             LastBearingStateBuilder builder)
         {
