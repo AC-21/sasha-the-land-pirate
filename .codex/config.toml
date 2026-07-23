@@ -1,13 +1,11 @@
-# Project-scoped direct MCP for active WP-0003.
-# Loading or connecting does not authorize a tool call; the AGENTS.md
-# conditional first-use gate still applies.
+# Project-scoped direct MCP for the one canonical Unity project.
 
 [mcp_servers.unity_mcp]
 command = "/Users/sasha/.unity/relay/relay_mac_arm64.app/Contents/MacOS/relay_mac_arm64"
 args = [
   "--mcp",
   "--project-path",
-  "/Users/sasha/Documents/Codex/sasha-the-land-pirate/Game",
+  "/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game",
 ]
 startup_timeout_sec = 120
 enabled = true
