@@ -60,7 +60,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 includeRigUpgrade: true,
                 includeFrameRailSalvage: true,
                 includeHotShift: true,
-                includeRepresentation: true);
+                includeRepresentation: true,
+                includeDustFrontVerdict: true);
         }
 
         public static LastBearingDecodeResult TryDecode(byte[] bytes)
@@ -106,6 +107,18 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     NextCommandSequence = reader.ReadInt64(),
                     ProtagonistId = reader.ReadString(),
                 };
+                int sourceSchemaVersion = builder.SchemaVersion;
+                if (version == CodecVersion
+                    && (sourceSchemaVersion != 7
+                        && sourceSchemaVersion
+                            != LastBearingState.CurrentSchemaVersion
+                        || !string.Equals(
+                            builder.BalanceRevision,
+                            LastBearingBalanceV1.Revision,
+                            StringComparison.Ordinal)))
+                {
+                    return Failure(DecodeInvalidCode);
+                }
 
                 var residentCount = reader.ReadByte();
                 if (residentCount < 1 || residentCount > 2)
@@ -231,6 +244,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 builder.NextMaintenanceDueSettlementTick = reader.ReadInt64();
                 builder.MaintenanceDue = reader.ReadBoolean();
                 builder.DustFrontProgressTicks = reader.ReadInt64();
+                long sourceDustFrontProgressTicks =
+                    builder.DustFrontProgressTicks;
                 if (version >= LegacyCodecVersionV5)
                 {
                     builder.RigUpgrade = reader.ReadEnum<RigUpgrade>();
@@ -252,9 +267,23 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     builder.HotShiftCompletedCount = reader.ReadInt64();
                 }
 
+                if (version == CodecVersion
+                    && sourceSchemaVersion
+                        == LastBearingState.CurrentSchemaVersion)
+                {
+                    builder.DustFrontOutcome =
+                        reader.ReadEnum<DustFrontOutcome>();
+                    builder.IsDustFrontAcknowledgementRequired =
+                        reader.ReadBoolean();
+                }
+
                 reader.RequireEnd();
 
-                if (version == LegacyCodecVersionV3)
+                if (version == CodecVersion && sourceSchemaVersion == 7)
+                {
+                    MigrateLegacyV7(builder);
+                }
+                else if (version == LegacyCodecVersionV3)
                 {
                     if (builder.SchemaVersion != 3
                         || !string.Equals(
@@ -309,9 +338,26 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
                 var state = builder.Build();
                 byte[] canonical;
-                if (version == CodecVersion)
+                if (version == CodecVersion
+                    && sourceSchemaVersion
+                        == LastBearingState.CurrentSchemaVersion)
                 {
                     canonical = Encode(state);
+                }
+                else if (version == CodecVersion)
+                {
+                    canonical = EncodeVersion(
+                        state,
+                        CodecVersion,
+                        7,
+                        LastBearingBalanceV1.Revision,
+                        includeCityConstruction: true,
+                        includeRigUpgrade: true,
+                        includeFrameRailSalvage: true,
+                        includeHotShift: true,
+                        includeRepresentation: true,
+                        dustFrontProgressTicksOverride:
+                            sourceDustFrontProgressTicks);
                 }
                 else if (version == LegacyCodecVersionV6)
                 {
@@ -324,7 +370,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         includeRigUpgrade: true,
                         includeFrameRailSalvage: true,
                         includeHotShift: false,
-                        includeRepresentation: true);
+                        includeRepresentation: true,
+                        dustFrontProgressTicksOverride:
+                            sourceDustFrontProgressTicks);
                 }
                 else if (version == LegacyCodecVersionV5)
                 {
@@ -337,7 +385,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         includeRigUpgrade: true,
                         includeFrameRailSalvage: false,
                         includeHotShift: false,
-                        includeRepresentation: true);
+                        includeRepresentation: true,
+                        dustFrontProgressTicksOverride:
+                            sourceDustFrontProgressTicks);
                 }
                 else if (version == LegacyCodecVersionV4)
                 {
@@ -350,7 +400,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         includeRigUpgrade: false,
                         includeFrameRailSalvage: false,
                         includeHotShift: false,
-                        includeRepresentation: true);
+                        includeRepresentation: true,
+                        dustFrontProgressTicksOverride:
+                            sourceDustFrontProgressTicks);
                 }
                 else
                 {
@@ -363,7 +415,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         includeRigUpgrade: false,
                         includeFrameRailSalvage: false,
                         includeHotShift: false,
-                        includeRepresentation: true);
+                        includeRepresentation: true,
+                        dustFrontProgressTicksOverride:
+                            sourceDustFrontProgressTicks);
                 }
 
                 if (!BytesEqual(bytes, canonical))
@@ -409,7 +463,38 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 includeRigUpgrade: true,
                 includeFrameRailSalvage: true,
                 includeHotShift: true,
-                includeRepresentation: false);
+                includeRepresentation: false,
+                includeDustFrontVerdict: true);
+        }
+
+        internal static byte[] EncodeLegacyV7ForMigrationTests(
+            LastBearingState state,
+            long? legacyDustFrontProgressTicks = null)
+        {
+            if (state == null)
+            {
+                throw new ArgumentNullException(nameof(state));
+            }
+
+            LastBearingInvariants.Validate(state);
+            if (legacyDustFrontProgressTicks < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(legacyDustFrontProgressTicks));
+            }
+
+            return EncodeVersion(
+                state,
+                CodecVersion,
+                7,
+                LastBearingBalanceV1.Revision,
+                includeCityConstruction: true,
+                includeRigUpgrade: true,
+                includeFrameRailSalvage: true,
+                includeHotShift: true,
+                includeRepresentation: true,
+                dustFrontProgressTicksOverride:
+                    legacyDustFrontProgressTicks);
         }
 
         internal static byte[] EncodeLegacyV6ForMigrationTests(
@@ -515,7 +600,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 includeRigUpgrade: true,
                 includeFrameRailSalvage: true,
                 includeHotShift: true,
-                includeRepresentation: includeRepresentation);
+                includeRepresentation: includeRepresentation,
+                includeDustFrontVerdict: true);
         }
 
         private static byte[] EncodeVersion(
@@ -527,7 +613,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
             bool includeRigUpgrade,
             bool includeFrameRailSalvage,
             bool includeHotShift,
-            bool includeRepresentation)
+            bool includeRepresentation,
+            bool includeDustFrontVerdict = false,
+            long? dustFrontProgressTicksOverride = null)
         {
             var writer = new CanonicalWriter();
             writer.WriteBytes(Magic);
@@ -658,7 +746,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
             writer.WriteInt64(state.MaintenancePartsUnits);
             writer.WriteInt64(state.NextMaintenanceDueSettlementTick);
             writer.WriteBoolean(state.MaintenanceDue);
-            writer.WriteInt64(state.DustFrontProgressTicks);
+            writer.WriteInt64(
+                dustFrontProgressTicksOverride
+                    ?? state.DustFrontProgressTicks);
             if (includeRigUpgrade)
             {
                 writer.WriteEnum(state.RigUpgrade);
@@ -676,6 +766,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 writer.WriteInt64(state.HotShiftRequiredTicks);
                 writer.WriteInt64(state.HotShiftFuelCommittedUnits);
                 writer.WriteInt64(state.HotShiftCompletedCount);
+            }
+
+            if (includeDustFrontVerdict)
+            {
+                writer.WriteEnum(state.DustFrontOutcome);
+                writer.WriteBoolean(
+                    state.IsDustFrontAcknowledgementRequired);
             }
 
             return writer.ToArray();
@@ -735,13 +832,32 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
         private static void MigrateLegacyV6(LastBearingStateBuilder builder)
         {
-            builder.SchemaVersion = LastBearingState.CurrentSchemaVersion;
+            builder.SchemaVersion = 7;
             builder.BalanceRevision = LastBearingBalanceV1.Revision;
             builder.HotShiftPhase = HotShiftPhase.Idle;
             builder.HotShiftElapsedTicks = 0;
             builder.HotShiftRequiredTicks = 0;
             builder.HotShiftFuelCommittedUnits = 0;
             builder.HotShiftCompletedCount = 0;
+            MigrateLegacyV7(builder);
+        }
+
+        private static void MigrateLegacyV7(LastBearingStateBuilder builder)
+        {
+            builder.SchemaVersion = LastBearingState.CurrentSchemaVersion;
+            if (builder.DustFrontProgressTicks
+                >= LastBearingBalanceV1.DustFrontThresholdCrisisTicks)
+            {
+                builder.DustFrontProgressTicks =
+                    LastBearingBalanceV1.DustFrontThresholdCrisisTicks;
+                builder.DustFrontOutcome = DustFrontOutcome.Held;
+            }
+            else
+            {
+                builder.DustFrontOutcome = DustFrontOutcome.Unresolved;
+            }
+
+            builder.IsDustFrontAcknowledgementRequired = false;
         }
 
         private static FrameRailSalvageCustody

@@ -98,6 +98,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         None = 0,
         Explicit = 1,
         AutoAlert = 2,
+        DustFrontAlert = 3,
     }
 
     public enum RepairCargoKind
@@ -276,6 +277,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
         InProgress = 1,
     }
 
+    public enum DustFrontOutcome
+    {
+        Unresolved = 0,
+        Held = 1,
+        Breached = 2,
+    }
+
     public enum LastBearingEventKind
     {
         ResidentAssigned = 1,
@@ -334,6 +342,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         HotShiftStarted = 54,
         HotShiftCompleted = 55,
         HotShiftCheckpointReached = 56,
+        DustFrontResolved = 57,
+        DustFrontAcknowledged = 58,
     }
 
     public enum LastBearingEventCause

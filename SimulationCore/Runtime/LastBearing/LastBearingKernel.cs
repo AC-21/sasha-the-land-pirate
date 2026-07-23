@@ -112,7 +112,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     hotShiftWasInProgressAtTickStart,
                     events);
                 AdvanceFactionClock(builder, homeScale, events);
-                AdvanceCrisisClock(builder, homeScale);
+                AdvanceCrisisClock(builder, homeScale, events);
                 AdvanceRoadClock(builder, roadScale);
             }
 
@@ -285,6 +285,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
             else if (command is TriggerAutoPauseAlertCommand autoPause)
             {
                 ApplyAutoPause(builder, autoPause, events);
+            }
+            else if (command is AcknowledgeDustFrontCommand acknowledgeDustFront)
+            {
+                ApplyAcknowledgeDustFront(
+                    builder,
+                    acknowledgeDustFront,
+                    events);
             }
             else
             {
@@ -2127,6 +2134,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
             SetPauseCommand command,
             LastBearingEventSink events)
         {
+            if (builder.PauseCause == PauseCause.DustFrontAlert)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_DUST_FRONT_ACKNOWLEDGEMENT_REQUIRED");
+            }
+
             if (builder.PauseCause == PauseCause.AutoAlert)
             {
                 throw new InvalidOperationException(
@@ -2165,6 +2178,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return;
             }
 
+            if (builder.PauseCause == PauseCause.DustFrontAlert)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_DUST_FRONT_ACKNOWLEDGEMENT_REQUIRED");
+            }
+
             if (builder.PauseCause == PauseCause.Explicit)
             {
                 throw new InvalidOperationException(
@@ -2189,6 +2208,54 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 "simulation:last-bearing:auto-pause",
                 (long)PauseCause.None,
                 (long)PauseCause.AutoAlert);
+        }
+
+        private static void ApplyAcknowledgeDustFront(
+            LastBearingStateBuilder builder,
+            AcknowledgeDustFrontCommand command,
+            LastBearingEventSink events)
+        {
+            if (builder.DustFrontOutcome == DustFrontOutcome.Unresolved)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_DUST_FRONT_NOT_RESOLVED");
+            }
+
+            if (!builder.IsDustFrontAcknowledgementRequired)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (builder.PauseCause != PauseCause.DustFrontAlert)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_DUST_FRONT_ALERT_STATE_INVALID");
+            }
+
+            builder.IsDustFrontAcknowledgementRequired = false;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.DustFrontAcknowledged,
+                LastBearingEventCause.PlayerCommand,
+                builder.CrisisTick,
+                command.Sequence,
+                LastBearingState.DustFrontId,
+                1,
+                0);
+
+            builder.PauseCause = PauseCause.None;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.PauseChanged,
+                LastBearingEventCause.SystemTransition,
+                builder.GlobalTick,
+                command.Sequence,
+                LastBearingState.DustFrontId,
+                (long)PauseCause.DustFrontAlert,
+                (long)PauseCause.None);
         }
 
         private static void CompleteModuleInstallation(
@@ -2527,7 +2594,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             bool hotShiftWorkingThisTick =
                 hotShiftWasInProgressAtTickStart
                 && builder.HotShiftPhase == HotShiftPhase.InProgress
-                && builder.WorkshopServiceSlotsReserved == 0;
+                && IsHotShiftActivelyWorking(builder);
             var previousWater = builder.WaterMilli;
             builder.WaterMilli = Math.Max(
                 0,
@@ -2903,7 +2970,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
         private static void AdvanceCrisisClock(
             LastBearingStateBuilder builder,
-            int scaleMilli)
+            int scaleMilli,
+            LastBearingEventSink events)
         {
             builder.CrisisAccumulatorMilli = checked(
                 builder.CrisisAccumulatorMilli + scaleMilli);
@@ -2916,8 +2984,48 @@ namespace AtomicLandPirate.Simulation.LastBearing
             builder.CrisisAccumulatorMilli -=
                 LastBearingBalanceV1.FullClockScaleMilli;
             builder.CrisisTick = checked(builder.CrisisTick + 1);
+            if (builder.DustFrontOutcome != DustFrontOutcome.Unresolved)
+            {
+                return;
+            }
+
             builder.DustFrontProgressTicks = checked(
                 builder.DustFrontProgressTicks + 1);
+            if (builder.DustFrontProgressTicks
+                != LastBearingBalanceV1.DustFrontThresholdCrisisTicks)
+            {
+                return;
+            }
+
+            builder.DustFrontOutcome =
+                builder.TurbineCondition != TurbineCondition.Failing
+                || builder.WaterMilli
+                    > LastBearingBalanceV1.MinimumRecoverableWaterMilli
+                    ? DustFrontOutcome.Held
+                    : DustFrontOutcome.Breached;
+            builder.IsDustFrontAcknowledgementRequired = true;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.DustFrontResolved,
+                LastBearingEventCause.AutonomousCrisisTick,
+                builder.CrisisTick,
+                LastBearingDomainEvent.AutonomousCommandSequence,
+                LastBearingState.DustFrontId,
+                (long)DustFrontOutcome.Unresolved,
+                (long)builder.DustFrontOutcome);
+
+            builder.PauseCause = PauseCause.DustFrontAlert;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.PauseChanged,
+                LastBearingEventCause.SystemTransition,
+                builder.GlobalTick,
+                LastBearingDomainEvent.AutonomousCommandSequence,
+                LastBearingState.DustFrontId,
+                (long)PauseCause.None,
+                (long)PauseCause.DustFrontAlert);
         }
 
         private static void AdvanceRoadClock(
@@ -2991,7 +3099,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
             LastBearingStateBuilder builder)
         {
             return builder.HotShiftPhase == HotShiftPhase.InProgress
-                && builder.WorkshopServiceSlotsReserved == 0;
+                && builder.WorkshopServiceSlotsReserved == 0
+                && !(builder.DustFrontOutcome == DustFrontOutcome.Breached
+                    && builder.TurbineCondition
+                        == TurbineCondition.Failing);
         }
 
         private static void EnsureTransactionIdentity(

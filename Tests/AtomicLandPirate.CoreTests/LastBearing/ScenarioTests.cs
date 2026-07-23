@@ -338,7 +338,11 @@ namespace AtomicLandPirate.LastBearingTests
         private static void FactionWaitClaim()
         {
             var driver = new CoreTestDriver(ColonyComposition.HumanOnly, 2013);
-            driver.Advance(9000);
+            driver.Advance(checked((int)
+                LastBearingBalanceV1.DustFrontThresholdCrisisTicks));
+            driver.Apply(sequence =>
+                new AcknowledgeDustFrontCommand(sequence));
+            driver.Advance(3000);
             TestHarness.True(
                 driver.View.FactionClaimProgressMilli >=
                     LastBearingBalanceV1.FactionClaimThresholdMilli,
@@ -389,7 +393,11 @@ namespace AtomicLandPirate.LastBearingTests
                 ColonyComposition.HumanOnly,
                 2003);
             LastBearingReadModel before = driver.View;
-            driver.Advance(9000);
+            driver.Advance(checked((int)
+                LastBearingBalanceV1.DustFrontThresholdCrisisTicks));
+            driver.Apply(sequence =>
+                new AcknowledgeDustFrontCommand(sequence));
+            driver.Advance(3000);
             TestHarness.Equal(
                 FactionClaimState.Claimed,
                 driver.View.FactionClaimState,

@@ -436,7 +436,11 @@ namespace AtomicLandPirate.LastBearingTests
                 worldSeed);
             if (waitForFactionClaim)
             {
-                driver.Advance(9000);
+                driver.Advance(checked((int)
+                    LastBearingBalanceV1.DustFrontThresholdCrisisTicks));
+                driver.Apply(sequence =>
+                    new AcknowledgeDustFrontCommand(sequence));
+                driver.Advance(3000);
                 TestHarness.Equal(
                     FactionClaimState.Claimed,
                     driver.View.FactionClaimState,
