@@ -123,6 +123,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             DrawPermitJob(permitJob);
             GUILayout.Space(12f);
 
+            DrawGarageUpgrade(model);
+
             GUILayout.Label("NEXT MOVE", _headingStyle);
             DrawContextActions(model, permitJob);
             GUILayout.Space(10f);
@@ -160,6 +162,68 @@ namespace AtomicLandPirate.Presentation.LastBearing
             GUILayout.Space(10f);
 
             DrawOneGoodBatch(model);
+        }
+
+        private void DrawGarageUpgrade(LastBearingReadModel model)
+        {
+            LastBearingModeCoordinator? coordinator = _controller!.ModeCoordinator;
+            if (coordinator?.HasActiveMode != true ||
+                coordinator.CurrentMode != LastBearingPresentationMode.GarageBay)
+            {
+                return;
+            }
+
+            GUILayout.Label("RIG ARMOR · PATCHWORK SKID PLATE", _headingStyle);
+            if (model.RigUpgrade == RigUpgrade.PatchworkSkidPlate)
+            {
+                GUILayout.Label(
+                    "INSTALLED · round-trip condition loss reduced by " +
+                    model.PatchworkSkidPlateProtectionMilli + ".",
+                    _bodyStyle);
+                if (model.ProjectedRoundTripConditionLossMilli > 0)
+                {
+                    GUILayout.Label(
+                        "PROJECTED ROUND-TRIP LOSS · " +
+                        model.ProjectedRoundTripConditionLossMilli,
+                        _mutedStyle);
+                }
+
+                GUILayout.Space(10f);
+                return;
+            }
+
+            GUILayout.Label(
+                "Bolt settlement-cut plate beneath Sasha's scout for " +
+                model.PatchworkSkidPlatePartsCostUnits +
+                " reclaimed parts. It reduces the next round-trip condition " +
+                "loss by " + model.PatchworkSkidPlateProtectionMilli + ".",
+                _bodyStyle);
+            if (_controller.IsPatchworkSkidPlateInstallQueued)
+            {
+                GUILayout.Label(
+                    "INSTALLATION QUEUED · awaiting the next deterministic tick. " +
+                    "Garage preparation remains unchanged.",
+                    _mutedStyle);
+            }
+            else if (_controller.IsPatchworkSkidPlateInstallAvailable)
+            {
+                if (GUILayout.Button(
+                        "INSTALL PATCHWORK SKID PLATE · " +
+                        model.PatchworkSkidPlatePartsCostUnits + " PARTS",
+                        _buttonStyle))
+                {
+                    _controller.InstallPatchworkSkidPlate();
+                }
+            }
+            else
+            {
+                GUILayout.Label(
+                    "Requires the working service cell, Sasha at home, no " +
+                    "active transaction, and enough reclaimed parts.",
+                    _mutedStyle);
+            }
+
+            GUILayout.Space(10f);
         }
 
         private void DrawServiceControls(LastBearingReadModel model)
@@ -1426,8 +1490,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 .Append('/')
                 .Append(LastBearingBalanceV1.StartingVehicleConditionMilli)
                 .Append(" · ")
-                .Append(FormatCondition(model.VehicleConditionMilli))
-                .AppendLine();
+                .Append(FormatCondition(model.VehicleConditionMilli));
+            if (model.RigUpgrade == RigUpgrade.PatchworkSkidPlate)
+            {
+                text.Append(" · patchwork skid plate +")
+                    .Append(model.PatchworkSkidPlateProtectionMilli)
+                    .Append(" protection");
+            }
+
+            text.AppendLine();
             text.Append("CARGO  ").Append(FormatJourneyCargo(model)).AppendLine();
             text.Append("CONSEQUENCE  ").Append(FormatJourneyConsequence(model));
             return text.ToString();
@@ -1633,6 +1704,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             text.Append("Plan  ").Append(model.PreparationChoice)
                 .Append(" + ").Append(model.PlannedModule)
                 .Append("  ·  module ").Append(model.VehicleModule).AppendLine();
+            text.Append("Rig upgrade  ").Append(model.RigUpgrade)
+                .Append("  ·  projected round-trip loss ")
+                .Append(model.ProjectedRoundTripConditionLossMilli)
+                .AppendLine();
             text.Append("Route  ").Append(model.RouteKind)
                 .Append("  ").Append(model.RouteProgressTicks)
                 .Append('/').Append(model.RouteTargetTicks)

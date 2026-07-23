@@ -1736,6 +1736,89 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator GarageSkidPlateInstallsPersistsAndLeavesModuleChoiceOpen()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
+            controller.StartNewGame(ColonyComposition.Mixed);
+            controller.InspectCityNeed();
+            CompleteDistrictObservation(controller, clear: true);
+            controller.ActivateInfrastructure();
+            InvokeSimulationTick(controller);
+            controller.BeginGaragePlan(PreparationChoice.CivicBuffer);
+            long partsBefore = controller.ReadModel!.PartsUnits;
+
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.GarageBay));
+            Assert.That(
+                controller.GetComponent<LastBearingHud>().enabled,
+                Is.True,
+                "the garage must return ownership to the HUD action card");
+            Assert.That(controller.IsPatchworkSkidPlateInstallAvailable, Is.True);
+
+            controller.InstallPatchworkSkidPlate();
+
+            Assert.That(controller.IsPatchworkSkidPlateInstallQueued, Is.True);
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            Assert.That(controller.IsGaragePlanIntentActive, Is.True);
+            InvokeSimulationTick(controller);
+
+            Assert.That(
+                controller.ReadModel!.RigUpgrade,
+                Is.EqualTo(RigUpgrade.PatchworkSkidPlate));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(
+                    partsBefore -
+                    LastBearingBalanceV1.PatchworkSkidPlatePartsCostUnits));
+            Assert.That(controller.IsGaragePlanIntentActive, Is.True);
+            Assert.That(controller.IsGaragePlanCommitAvailable, Is.True);
+            Assert.That(
+                controller.Status,
+                Does.Contain("Round-trip condition loss is reduced by 40"));
+
+            controller.Save();
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"),
+                controller.SaveStatus);
+            controller.Load();
+
+            Assert.That(
+                controller.ReadModel!.RigUpgrade,
+                Is.EqualTo(RigUpgrade.PatchworkSkidPlate));
+            Assert.That(controller.IsGaragePlanIntentActive, Is.False);
+            Assert.That(
+                controller.ModeCoordinator.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.CityOverview));
+
+            controller.BeginGaragePlan(PreparationChoice.CivicBuffer);
+            controller.CommitGaragePlan(VehicleModule.WinchAssembly);
+            InvokeSimulationTick(controller);
+
+            Assert.That(
+                controller.ReadModel.PreparationChoice,
+                Is.EqualTo(PreparationChoice.CivicBuffer));
+            Assert.That(
+                controller.ReadModel.PlannedModule,
+                Is.EqualTo(VehicleModule.WinchAssembly));
+            Assert.That(
+                controller.ReadModel.RigUpgrade,
+                Is.EqualTo(RigUpgrade.PatchworkSkidPlate));
+            Assert.That(Directory.Exists(profileDirectory), Is.True);
+        }
+
+        [UnityTest]
         public IEnumerator PumpHallHomecomingInstallsAutosavesAndReloadsExactly()
         {
             AsyncOperation? load = SceneManager.LoadSceneAsync(

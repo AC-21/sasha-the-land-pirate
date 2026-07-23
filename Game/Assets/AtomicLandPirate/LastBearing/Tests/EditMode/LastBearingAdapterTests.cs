@@ -814,6 +814,75 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 LastBearingCanonicalCodec.Encode(controller.State!));
         }
 
+        [Test]
+        public void GaragePatchworkSkidPlateInstallQueuesOnceAndPreservesPlanIntent()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            PrepareControllerForGaragePlan(controller, ColonyComposition.Mixed);
+            byte[] cityBytes = LastBearingCanonicalCodec.Encode(controller.State!);
+
+            Assert.That(controller.IsPatchworkSkidPlateInstallAvailable, Is.False);
+            controller.InstallPatchworkSkidPlate();
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            CollectionAssert.AreEqual(
+                cityBytes,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            controller.BeginGaragePlan(PreparationChoice.CivicBuffer);
+            long partsBefore = controller.ReadModel!.PartsUnits;
+            long sequenceBefore = controller.State!.NextCommandSequence;
+            byte[] garageBytes = LastBearingCanonicalCodec.Encode(controller.State);
+
+            Assert.That(controller.IsPatchworkSkidPlateInstallAvailable, Is.True);
+            controller.InstallPatchworkSkidPlate();
+
+            LastBearingCommand[] pending = PendingCommands(controller);
+            Assert.That(pending, Has.Length.EqualTo(1));
+            Assert.That(pending[0], Is.TypeOf<InstallRigUpgradeCommand>());
+            var install = (InstallRigUpgradeCommand)pending[0];
+            Assert.That(install.Sequence, Is.EqualTo(sequenceBefore));
+            Assert.That(install.Upgrade, Is.EqualTo(RigUpgrade.PatchworkSkidPlate));
+            Assert.That(controller.IsPatchworkSkidPlateInstallQueued, Is.True);
+            Assert.That(controller.IsPatchworkSkidPlateInstallAvailable, Is.False);
+            Assert.That(controller.IsGaragePlanIntentActive, Is.True);
+            Assert.That(
+                controller.GaragePreparationIntent,
+                Is.EqualTo(PreparationChoice.CivicBuffer));
+            CollectionAssert.AreEqual(
+                garageBytes,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            controller.InstallPatchworkSkidPlate();
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+
+            SimulateOneTick(controller);
+
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            Assert.That(controller.IsPatchworkSkidPlateInstallQueued, Is.False);
+            Assert.That(controller.IsPatchworkSkidPlateInstallAvailable, Is.False);
+            Assert.That(
+                controller.ReadModel!.RigUpgrade,
+                Is.EqualTo(RigUpgrade.PatchworkSkidPlate));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(
+                    partsBefore -
+                    LastBearingBalanceV1.PatchworkSkidPlatePartsCostUnits));
+            Assert.That(controller.IsGaragePlanIntentActive, Is.True);
+            Assert.That(
+                controller.GaragePreparationIntent,
+                Is.EqualTo(PreparationChoice.CivicBuffer));
+            Assert.That(controller.IsGaragePlanCommitAvailable, Is.True);
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.GarageBay));
+
+            controller.CommitGaragePlan(VehicleModule.WinchAssembly);
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(2));
+        }
+
         [TestCase(ColonyComposition.HumanOnly, PreparationChoice.WorkshopPush, VehicleModule.WinchAssembly)]
         [TestCase(ColonyComposition.HumanOnly, PreparationChoice.WorkshopPush, VehicleModule.SealedRangeTank)]
         [TestCase(ColonyComposition.HumanOnly, PreparationChoice.CivicBuffer, VehicleModule.WinchAssembly)]

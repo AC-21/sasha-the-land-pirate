@@ -92,8 +92,15 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "public PreparationChoice GaragePreparationIntent");
             Require(controller, "public bool IsGaragePlanIntentActive");
             Require(controller, "public bool IsGaragePlanCommitAvailable");
+            Require(
+                controller,
+                "public bool IsPatchworkSkidPlateInstallAvailable");
+            Require(
+                controller,
+                "public bool IsPatchworkSkidPlateInstallQueued");
             Require(controller, "public void BeginGaragePlan(");
             Require(controller, "public void CommitGaragePlan(");
+            Require(controller, "public void InstallPatchworkSkidPlate()");
             Require(controller, "public void CancelGaragePlan()");
             Require(controller, "public void StartSpareBearingBatch()");
             Require(controller, "new StartSpareBearingBatchCommand(sequence)");
@@ -591,7 +598,7 @@ namespace AtomicLandPirate.LastBearingTests
             string commitGaragePlan = Segment(
                 controller,
                 "public void CommitGaragePlan(",
-                "public void CancelGaragePlan()");
+                "public void InstallPatchworkSkidPlate()");
             Require(commitGaragePlan, "IsGaragePlanIntentActive");
             Require(commitGaragePlan, "VehicleModule.WinchAssembly");
             Require(commitGaragePlan, "VehicleModule.SealedRangeTank");
@@ -612,6 +619,46 @@ namespace AtomicLandPirate.LastBearingTests
                     "new InstallVehicleModuleCommand("),
                 "garage commit must queue the existing module command once");
 
+            string installPatchworkSkidPlate = Segment(
+                controller,
+                "public void InstallPatchworkSkidPlate()",
+                "public void CancelGaragePlan()");
+            Require(
+                installPatchworkSkidPlate,
+                "LastBearingPresentationMode.GarageBay");
+            Require(
+                installPatchworkSkidPlate,
+                "_readModel.IsPatchworkSkidPlateInstallAvailable");
+            Require(
+                installPatchworkSkidPlate,
+                "new InstallRigUpgradeCommand(");
+            Require(
+                installPatchworkSkidPlate,
+                "RigUpgrade.PatchworkSkidPlate");
+            TestHarness.Equal(
+                1,
+                CountOccurrences(
+                    installPatchworkSkidPlate,
+                    "new InstallRigUpgradeCommand("),
+                "garage armor install must queue exactly one upgrade command");
+            foreach (string forbidden in new[]
+            {
+                "ClearGaragePlanIntent();",
+                "new SelectPreparationCommand(",
+                "new InstallVehicleModuleCommand(",
+                "_state =",
+                "_saveAdapter",
+                "Save();",
+            })
+            {
+                TestHarness.True(
+                    installPatchworkSkidPlate.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "garage armor install crosses its command boundary " +
+                    forbidden);
+            }
+
             string cancelGaragePlan = Segment(
                 controller,
                 "public void CancelGaragePlan()",
@@ -628,6 +675,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "the HUD must not retain a global composite planning action");
             Require(hud, ".BeginGaragePlan(");
             Require(hud, ".CommitGaragePlan(");
+            Require(hud, "DrawGarageUpgrade(model);");
+            Require(hud, ".InstallPatchworkSkidPlate();");
+            Require(hud, "INSTALL PATCHWORK SKID PLATE · ");
             Require(hud, ".CancelGaragePlan();");
             Require(world, "ApplyGaragePlanIntent(PreparationChoice preparation)");
             Require(controller, "_world.ApplyGaragePlanIntent(");

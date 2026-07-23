@@ -303,7 +303,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingState state = CreatePreparation(
                 PreparationChoice.CivicBuffer,
                 VehicleModule.WinchAssembly,
-                worldSeed: 3105);
+                worldSeed: 3105,
+                installPatchworkSkidPlate: true);
             string before = LastBearingCanonicalCodec.ComputeSha256(state);
             string recommendedModule = InvokeHudString(
                 "BuildGarageModuleLabel",
@@ -346,6 +347,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(drivingControls, Does.Contain("R / gamepad north"));
             Assert.That(outboundLedger, Does.StartWith("ROUTE  outbound"));
             Assert.That(outboundLedger, Does.Contain("RIG  winch fitted"));
+            Assert.That(outboundLedger, Does.Contain("patchwork skid plate"));
+            Assert.That(
+                outboundLedger,
+                Does.Contain(
+                    "+" +
+                    LastBearingBalanceV1.PatchworkSkidPlateProtectionMilli +
+                    " protection"));
             Assert.That(outboundLedger, Does.Contain("CARGO  pump rotor waiting at the Wreck Line"));
             Assert.That(outboundLedger, Does.Contain("CONSEQUENCE  turbine failing"));
             Assert.That(
@@ -819,7 +827,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         private static LastBearingState CreatePreparation(
             PreparationChoice preparation,
             VehicleModule module,
-            int worldSeed)
+            int worldSeed,
+            bool installPatchworkSkidPlate = false)
         {
             LastBearingState state = LastBearingScenarioFactory.CreateInitial(
                 ColonyComposition.Mixed,
@@ -830,6 +839,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     sequence,
                     ResidentRoster.HumanResidentId),
                 sequence => new ActivateSliceInfrastructureCommand(sequence));
+            if (installPatchworkSkidPlate)
+            {
+                state = ApplyOne(
+                    state,
+                    sequence => new InstallRigUpgradeCommand(
+                        sequence,
+                        RigUpgrade.PatchworkSkidPlate));
+            }
+
             return ApplyMany(
                 state,
                 sequence => new SelectPreparationCommand(

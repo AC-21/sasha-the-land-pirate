@@ -167,6 +167,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _modeCoordinator?.HasActiveMode == true &&
             _modeCoordinator.CurrentMode == LastBearingPresentationMode.GarageBay;
 
+        public bool IsPatchworkSkidPlateInstallAvailable =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsPatchworkSkidPlateInstallAvailable == true &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode == LastBearingPresentationMode.GarageBay;
+
+        public bool IsPatchworkSkidPlateInstallQueued =>
+            _pendingCommands.Exists(command =>
+                command is InstallRigUpgradeCommand install &&
+                install.Upgrade == RigUpgrade.PatchworkSkidPlate);
+
         public CityBuildingKind CityPreviewBuilding => _cityPreviewBuilding;
 
         public int CityPreviewPadIndex => _cityPreviewPadIndex;
@@ -708,6 +719,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _status = preparation == PreparationChoice.WorkshopPush
                 ? "Workshop Push is penciled in. Choose Sasha's rig module in the garage to commit it."
                 : "Civic Buffer is penciled in. Choose Sasha's rig module in the garage to commit it.";
+            _fieldDesk?.Refresh(force: true);
         }
 
         public void CommitGaragePlan(VehicleModule module)
@@ -751,6 +763,50 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ClearGaragePlanIntent();
             _status = preparation + " + " + module +
                 " committed at Sasha's rig. Work begins only if both canonical commands are accepted.";
+        }
+
+        public void InstallPatchworkSkidPlate()
+        {
+            if (_readModel == null)
+            {
+                _status = "Start or load Last Bearing before fitting rig armor.";
+                return;
+            }
+
+            if (_pendingCommands.Count != 0)
+            {
+                _status = "Finish the queued garage action before fitting another part.";
+                return;
+            }
+
+            if (_readModel.RigUpgrade == RigUpgrade.PatchworkSkidPlate)
+            {
+                _status = "The Patchwork Skid Plate is already bolted to Sasha's scout.";
+                return;
+            }
+
+            if (_modeCoordinator?.HasActiveMode != true ||
+                _modeCoordinator.CurrentMode !=
+                    LastBearingPresentationMode.GarageBay)
+            {
+                _status = "Open Sasha's garage before fitting the Patchwork Skid Plate.";
+                return;
+            }
+
+            if (!_readModel.IsPatchworkSkidPlateInstallAvailable)
+            {
+                _status = "The skid plate needs the working service cell, Sasha home, and " +
+                    _readModel.PatchworkSkidPlatePartsCostUnits +
+                    " reclaimed parts.";
+                return;
+            }
+
+            Queue(sequence => new InstallRigUpgradeCommand(
+                sequence,
+                RigUpgrade.PatchworkSkidPlate));
+            _status = "Patchwork Skid Plate queued for " +
+                _readModel.PatchworkSkidPlatePartsCostUnits +
+                " parts. Garage preparation remains unchanged.";
         }
 
         public void CancelGaragePlan()
@@ -1493,6 +1549,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ContainsEvent(
                         result.DomainEvents,
                         LastBearingEventKind.CityServiceLinkConnected);
+                bool rigUpgradeInstalled = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.RigUpgradeInstalled);
                 _state = result.State;
                 _readModel = result.ReadModel;
                 if (cityBuildingChanged)
@@ -1541,6 +1600,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 {
                     _status =
                         "Barter accepted. The physical lot crossed the claims wicket and the route permit is recorded.";
+                }
+
+                if (rigUpgradeInstalled)
+                {
+                    _status =
+                        "Patchwork Skid Plate installed. Round-trip condition loss is reduced by " +
+                        _readModel.PatchworkSkidPlateProtectionMilli + ".";
                 }
             }
             catch (Exception exception)
