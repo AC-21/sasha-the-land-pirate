@@ -929,11 +929,11 @@ PlayerSettings:
   activeInputHandler: 1
   windowsGamepadBackendHint: 0
   enableDirectStorage: 0
-  cloudProjectId:
+  cloudProjectId: b2f6f654-8c39-4360-bc5e-26a62e50e159
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Sasha the Atomic Land Pirate
-  organizationId:
+  projectName: Sashas
+  organizationId: unity_2d2aeb94bdf989c70701
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
