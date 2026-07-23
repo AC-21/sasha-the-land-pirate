@@ -187,6 +187,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 fieldDeskPresenter,
                 "COMMISSIONING DELIVERY · ONCE");
+            Require(
+                fieldDeskPresenter,
+                "HOT SHIFT · CITY WORK ORDER");
 
             foreach (string retiredDelegation in new[]
             {

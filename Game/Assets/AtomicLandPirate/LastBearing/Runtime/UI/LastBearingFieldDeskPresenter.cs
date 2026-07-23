@@ -281,7 +281,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     permitJob,
                     unavailable,
                     unavailable,
-                    CreateSurvey(controller, null, false),
+                    CreateSurvey(controller, null, false, false),
                     unavailable,
                     unavailable,
                     unavailable,
@@ -315,7 +315,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     controller,
                     model,
                     controller.CityNeedInspected &&
-                    IsServiceCellObjective(model.NextObjective)),
+                    IsServiceCellObjective(model.NextObjective),
+                    primary.Intent != LastBearingFieldDeskIntent.RunHotShift &&
+                    secondary.Intent != LastBearingFieldDeskIntent.RunHotShift),
                 Action(
                     LastBearingFieldDeskIntent.TogglePause,
                     model.PauseCause == PauseCause.None ? "PAUSE" : "RESUME",
@@ -737,7 +739,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private static LastBearingFieldDeskSurveyProjection CreateSurvey(
             LastBearingGameController controller,
             LastBearingReadModel? model,
-            bool visible)
+            bool serviceControlsVisible,
+            bool allowSupplementalHotShift)
         {
             if (model == null)
             {
@@ -760,76 +763,98 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     unavailable);
             }
 
-            bool canUse = visible &&
-                          controller.IsExactFieldDeskCityOverview &&
-                          !controller.HasPendingPlayerCommands;
+            bool canDispatch =
+                controller.IsExactFieldDeskCityOverview &&
+                !controller.HasPendingPlayerCommands;
+            LastBearingFieldDeskActionProjection supplementalHotShift =
+                allowSupplementalHotShift && !serviceControlsVisible
+                    ? CreateHotShiftAction(controller, model, canDispatch)
+                    : Hidden();
+            bool showSupplementalHotShift =
+                supplementalHotShift.IsVisible;
+            bool surveyVisible =
+                serviceControlsVisible || showSupplementalHotShift;
+            bool canUseService = serviceControlsVisible && canDispatch;
             bool hasPreview = controller.HasCityBuildingPreview;
             return new LastBearingFieldDeskSurveyProjection(
-                visible,
-                FormatServiceCellState(model, controller),
-                "COSTS: RECYCLER 2 · SHOP 3 · STORAGE 1 PART · " +
-                "MOVES FREE BEFORE LINK · " +
-                "LINK LOCKS PERMANENTLY FOR 1 PART · OPERATOR IS NEUTRAL · " +
-                "COMMISSIONING DELIVERY · ONCE · PAYOFF +2 PARTS · ONCE",
+                surveyVisible,
+                showSupplementalHotShift
+                    ? "HOT SHIFT · CITY WORK ORDER"
+                    : FormatServiceCellState(model, controller),
+                showSupplementalHotShift
+                    ? supplementalHotShift.Detail
+                    : "COSTS: RECYCLER 2 · SHOP 3 · STORAGE 1 PART · " +
+                      "MOVES FREE BEFORE LINK · " +
+                      "LINK LOCKS PERMANENTLY FOR 1 PART · OPERATOR IS NEUTRAL · " +
+                      "COMMISSIONING DELIVERY · ONCE · PAYOFF +2 PARTS · ONCE",
                 CreateSelectBuildingAction(
                     model,
                     CityBuildingKind.Recycler,
-                    canUse,
-                    visible),
+                    canUseService,
+                    serviceControlsVisible),
                 CreateSelectBuildingAction(
                     model,
                     CityBuildingKind.MachineShop,
-                    canUse,
-                    visible),
+                    canUseService,
+                    serviceControlsVisible),
                 CreateSelectBuildingAction(
                     model,
                     CityBuildingKind.EmergencyStorage,
-                    canUse,
-                    visible),
+                    canUseService,
+                    serviceControlsVisible),
                 Action(
                     LastBearingFieldDeskIntent.RotateCityBuilding,
                     "ROTATE 90°",
                     "Quarter-turn the preview. Rotation is free before link lock.",
-                    visible && hasPreview,
-                    canUse && hasPreview && !model.CityServiceLinkConnected,
+                    serviceControlsVisible && hasPreview,
+                    canUseService && hasPreview &&
+                    !model.CityServiceLinkConnected,
                     LastBearingFieldDeskActionTone.Quiet),
                 CreatePadAction(
                     LastBearingFieldDeskIntent.PreviousCityPad,
                     "PREVIOUS PAD",
-                    canUse,
-                    visible && hasPreview,
+                    canUseService,
+                    serviceControlsVisible && hasPreview,
                     model.CityServiceLinkConnected),
                 CreatePadAction(
                     LastBearingFieldDeskIntent.NextCityPad,
                     "NEXT PAD",
-                    canUse,
-                    visible && hasPreview,
+                    canUseService,
+                    serviceControlsVisible && hasPreview,
                     model.CityServiceLinkConnected),
                 CreatePlaceAction(
                     controller,
                     model,
-                    canUse,
-                    visible && hasPreview),
-                CreateConnectLinkAction(controller, model, canUse, visible),
+                    canUseService,
+                    serviceControlsVisible && hasPreview),
+                CreateConnectLinkAction(
+                    controller,
+                    model,
+                    canUseService,
+                    serviceControlsVisible),
                 CreateStaffHumanAction(
                     controller,
                     model,
-                    canUse,
-                    visible && model.Composition != ColonyComposition.RobotOnly),
+                    canUseService,
+                    serviceControlsVisible &&
+                    model.Composition != ColonyComposition.RobotOnly),
                 CreateStaffRobotAction(
                     controller,
                     model,
-                    canUse,
-                    visible && model.Composition != ColonyComposition.HumanOnly),
-                CreateAdvanceSledAction(
-                    controller,
-                    model,
-                    canUse,
-                    visible),
+                    canUseService,
+                    serviceControlsVisible &&
+                    model.Composition != ColonyComposition.HumanOnly),
+                showSupplementalHotShift
+                    ? supplementalHotShift
+                    : CreateAdvanceSledAction(
+                        controller,
+                        model,
+                        canUseService,
+                        serviceControlsVisible),
                 CreateCancelPreviewAction(
                     controller,
-                    canUse,
-                    visible && hasPreview));
+                    canUseService,
+                    serviceControlsVisible && hasPreview));
         }
 
         private static LastBearingFieldDeskActionProjection

@@ -155,6 +155,53 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             }
         }
 
+        [TestCase(PreparationChoice.CivicBuffer)]
+        [TestCase(PreparationChoice.WorkshopPush)]
+        public void ReadyKeepsManifestAndGarageWhileHotShiftUsesSurveyAction(
+            PreparationChoice preparation)
+        {
+            LastBearingGameController controller =
+                BuildController(ColonyComposition.Mixed);
+            PrepareForHotShift(controller, preparation);
+            long preparationBound =
+                controller.ReadModel!.PreparationRemainingTicks + 2;
+            for (var guard = 0L;
+                 controller.ReadModel!.PreparationPhase ==
+                     PreparationPhase.Preparing &&
+                 guard < preparationBound;
+                 guard++)
+            {
+                SimulateOneTick(controller);
+            }
+
+            Assert.That(
+                controller.ReadModel.PreparationPhase,
+                Is.EqualTo(PreparationPhase.Ready));
+            LastBearingFieldDeskProjection ready =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                ready.PrimaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.CommitExpedition));
+            Assert.That(
+                ready.PrimaryAction.Label,
+                Is.EqualTo("COMMIT THE MANIFEST"));
+            Assert.That(
+                ready.SecondaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.OpenGarage));
+            Assert.That(
+                ready.SecondaryAction.Label,
+                Is.EqualTo("INSPECT THE GARAGE"));
+            Assert.That(ready.Survey.IsVisible, Is.True);
+            Assert.That(
+                ready.Survey.AdvanceSled.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.RunHotShift));
+            Assert.That(
+                ready.Survey.AdvanceSled.Label,
+                Is.EqualTo(
+                    "RUN HOT SHIFT · 1 FUEL · 120 TICKS · +2 PARTS"));
+            Assert.That(ready.Survey.AdvanceSled.IsEnabled, Is.True);
+        }
+
         [Test]
         public void WorkingServiceCellTracksObjectivesCostsLockAndDelivery()
         {

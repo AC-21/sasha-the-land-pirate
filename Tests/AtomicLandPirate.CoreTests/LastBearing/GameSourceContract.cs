@@ -448,6 +448,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "SpareBearingLotCreated",
                 "SpareBearingLotBartered",
                 "RoutePermitGranted",
+                "HotShiftStarted",
+                "HotShiftCheckpointReached",
+                "HotShiftCompleted",
             })
             {
                 Require(autosave, "LastBearingEventKind." + criticalEvent);
