@@ -17,6 +17,21 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 {
     public sealed class LastBearingFieldDeskPlayModeTests
     {
+        private const string CommittedPostReturnFixture =
+            "QUxQTEJDMDEHAAcAAAAhAGxhc3QtYmVhcmluZy1wcm90b3R5cGUtYmFsYW5jZS12NF0SAAD4BAAAAAAAAMgDAAAAAAAAyAMA" +
+            "AAAAAADIAwAAAAAAAF8CAAAAAAAA9AEAAPQBAAD0AQAAAAAAAGYCAAAAAAAABQBzYXNoYQITAHJlc2lkZW50Omh1bWFuOjAw" +
+            "MDEBAAAAEwByZXNpZGVudDpyb2JvdDowMDAxAgAAAAETAHJlc2lkZW50Omh1bWFuOjAwMDEAAAAAAQAAAAAAAAAAAQAAAAAA" +
+            "AAACAAAAAAAAAAEBEwByZXNpZGVudDpodW1hbjowMDAxAgAAAAEAAACA4gEAAAAAABUAAAAAAAAACQAAAAAAAAABAAAAAgAA" +
+            "AAMAAAACAAAAlAIAAAAAAACUAgAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
+            "AAAAAAAAAAAAAAAAAAAAAAACAAAAAgAAAAIAAAACAAAAAQAAAAAsAQAAAAAAACwBAAAAAAAAAAAAAAAAAAA0AwAAAAAAAAcA" +
+            "AAAAAAAACgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAMHUAAAAAAAABAAAAAQAAAAIAAACIEwAAAAAAAAMAAAABAAAAAwAAAAUA" +
+            "AAABAS0DAAAAAAAAAgAAAAElAHRyYW5zYWN0aW9uOmZpZWxkLWRlc2staG90LXNoaWZ0OjQ3MDEBJQBmaW5nZXJwcmludDpm" +
+            "aWVsZC1kZXNrLWhvdC1zaGlmdDo0NzAxBgAAAAIAAAAuAwAAAAAAAAUAAAAEAAAAAwAAAAMAAAAAAAAAAAAAAAIAAAAAAAAA" +
+            "AAAAAAAAAAABHQBtZW1vcnk6bGFzdC1iZWFyaW5nOnRha2U6MDAwMRIAVGFrZUNsYWltZWRCZWFyaW5nHwBmYWN0aW9uOmxh" +
+            "c3QtYmVhcmluZzpjYXJhdmFuZXJzKAAAAAAAAAAOAGN1c3RvZHktYnJlYWNoxgMAAAAAAAATAERFUE9UX0FDQ0VTU19DTE9T" +
+            "RUTs/////////ygAAAAAAAAAAgAAAJoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADIAwAAAAAAAAAAAAAAAAAAAAAA" +
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
         private GameObject? _root;
         private readonly List<string> _temporarySaveRoots =
             new List<string>();
@@ -385,6 +400,143 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.LessThan(0.05f));
         }
 
+        [UnityTest]
+        public IEnumerator CommittedPostReturnKeepsPumpHallOrderAndSubmitsHotShift()
+        {
+            LastBearingGameController controller = BuildController();
+            LastBearingFieldDesk desk = RequireDesk(controller);
+            _ = InstallTemporarySaveAdapter(controller);
+            InstallControllerState(
+                controller,
+                CreatePostReturnState(repairTurbine: false));
+            controller.ShowCityOverview();
+            yield return null;
+            desk.Refresh(force: true);
+
+            LastBearingFieldDeskProjection projection =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                controller.ReadModel!.PreparationPhase,
+                Is.EqualTo(PreparationPhase.Committed));
+            Assert.That(
+                projection.PrimaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.OpenPumpHallRepair));
+            Assert.That(
+                projection.PrimaryAction.Label,
+                Is.EqualTo("OPEN THE PUMP HALL"));
+            Assert.That(projection.SecondaryAction.IsVisible, Is.False);
+            Assert.That(projection.Survey.IsVisible, Is.True);
+            Assert.That(
+                projection.Survey.AdvanceSled.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.RunHotShift));
+
+            VisualElement root =
+                RequireDocument(controller).rootVisualElement;
+            Assert.That(
+                root.Q<Button>("primary-action-button").text,
+                Is.EqualTo("OPEN THE PUMP HALL"));
+            Button advanceAction = root.Q<Button>("advance-button");
+            Assert.That(advanceAction.enabledSelf, Is.True);
+            Submit(advanceAction);
+            Assert.That(controller.HasPendingPlayerCommands, Is.True);
+            InvokeSimulationTick(controller);
+            desk.Refresh(force: true);
+
+            Assert.That(
+                controller.ReadModel.HotShiftPhase,
+                Is.EqualTo(HotShiftPhase.InProgress));
+            Assert.That(controller.ReadModel.HotShiftElapsedTicks, Is.Zero);
+            Assert.That(
+                root.Q<Button>("primary-action-button").text,
+                Is.EqualTo("OPEN THE PUMP HALL"));
+            Assert.That(
+                advanceAction.text,
+                Is.EqualTo("HOT SHIFT · 0 / 120"));
+        }
+
+        [UnityTest]
+        public IEnumerator OneGoodBatchKeepsWorkshopPrimaryWithSupplementalHotShift()
+        {
+            LastBearingGameController controller = BuildController();
+            LastBearingFieldDesk desk = RequireDesk(controller);
+            _ = InstallTemporarySaveAdapter(controller);
+            yield return null;
+            VisualElement root =
+                RequireDocument(controller).rootVisualElement;
+            Button advanceAction = root.Q<Button>("advance-button");
+
+            foreach (SpareBearingBatchPhase phase in new[]
+                     {
+                         SpareBearingBatchPhase.None,
+                         SpareBearingBatchPhase.InProgress,
+                         SpareBearingBatchPhase.Complete,
+                     })
+            {
+                InstallControllerState(
+                    controller,
+                    CreateOneGoodBatchState(phase));
+                controller.ShowCityOverview();
+                desk.Refresh(force: true);
+
+                LastBearingFieldDeskProjection projection =
+                    LastBearingFieldDeskPresenter.Present(controller);
+                Assert.That(
+                    controller.ReadModel!.SpareBearingBatchPhase,
+                    Is.EqualTo(phase));
+                Assert.That(
+                    projection.PrimaryAction.Intent,
+                    Is.EqualTo(
+                        LastBearingFieldDeskIntent.OpenOneGoodBatchWorkshop));
+                Assert.That(
+                    projection.PrimaryAction.Label,
+                    Is.EqualTo("OPEN ONE GOOD BATCH"));
+                Assert.That(projection.SecondaryAction.IsVisible, Is.False);
+                Assert.That(projection.Survey.IsVisible, Is.True);
+                Assert.That(
+                    projection.Survey.AdvanceSled.Intent,
+                    Is.EqualTo(LastBearingFieldDeskIntent.RunHotShift));
+                Assert.That(
+                    root.Q<Button>("primary-action-button").text,
+                    Is.EqualTo("OPEN ONE GOOD BATCH"));
+                Assert.That(
+                    advanceAction.style.display.value,
+                    Is.EqualTo(DisplayStyle.Flex));
+
+                if (phase == SpareBearingBatchPhase.InProgress)
+                {
+                    Assert.That(
+                        advanceAction.text,
+                        Is.EqualTo("HOT SHIFT · 30 / 120"));
+                    Assert.That(advanceAction.enabledSelf, Is.False);
+                }
+                else
+                {
+                    Assert.That(
+                        advanceAction.text,
+                        Is.EqualTo(
+                            "RUN HOT SHIFT · 1 FUEL · 120 TICKS · +2 PARTS"));
+                    Assert.That(advanceAction.enabledSelf, Is.True);
+                }
+
+                if (phase == SpareBearingBatchPhase.None)
+                {
+                    Submit(advanceAction);
+                    Assert.That(controller.HasPendingPlayerCommands, Is.True);
+                    InvokeSimulationTick(controller);
+                    desk.Refresh(force: true);
+                    Assert.That(
+                        controller.ReadModel.HotShiftPhase,
+                        Is.EqualTo(HotShiftPhase.InProgress));
+                    Assert.That(
+                        root.Q<Button>("primary-action-button").text,
+                        Is.EqualTo("OPEN ONE GOOD BATCH"));
+                    Assert.That(
+                        advanceAction.text,
+                        Is.EqualTo("HOT SHIFT · 0 / 120"));
+                }
+            }
+        }
+
         private LastBearingGameController BuildController()
         {
             _root = new GameObject(LastBearingGameController.RuntimeRootName);
@@ -469,6 +621,242 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             return Directory.GetFiles(profileDirectory, "gen-*.lbg").Length;
         }
 
+        private static LastBearingState CreatePostReturnState(
+            bool repairTurbine)
+        {
+            LastBearingState state = LastBearingScenarioFactory.CreateInitial(
+                ColonyComposition.Mixed,
+                4701);
+            state = Apply(
+                state,
+                sequence => new AssignResidentCommand(
+                    sequence,
+                    ResidentRoster.HumanResidentId));
+            state = Apply(
+                state,
+                sequence => new ActivateSliceInfrastructureCommand(sequence));
+            state = Apply(
+                state,
+                sequence => new SelectPreparationCommand(
+                    sequence,
+                    PreparationChoice.CivicBuffer,
+                    VehicleModule.SealedRangeTank));
+            state = Apply(
+                state,
+                sequence => new InstallVehicleModuleCommand(
+                    sequence,
+                    VehicleModule.SealedRangeTank));
+            for (var guard = 0;
+                 LastBearingReadModel.FromState(state).PreparationPhase !=
+                     PreparationPhase.Ready &&
+                 guard < 1000;
+                 guard++)
+            {
+                state = Advance(state, 1);
+            }
+
+            const string transactionId =
+                "transaction:field-desk-hot-shift:4701";
+            const string fingerprint =
+                "fingerprint:field-desk-hot-shift:4701";
+            state = Apply(
+                state,
+                sequence => new PrepareExpeditionTransactionCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            state = Apply(
+                state,
+                sequence => new DebitCityManifestCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            for (var guard = 0;
+                 !LastBearingReadModel.FromState(state)
+                     .IsDepotApproachRecoveryAvailable &&
+                 guard < 1000;
+                 guard++)
+            {
+                LastBearingReadModel view =
+                    LastBearingReadModel.FromState(state);
+                if (view.IsWreckLineModulePointAvailable)
+                {
+                    state = Apply(
+                        state,
+                        sequence => new OperateWreckLineModuleCommand(
+                            sequence,
+                            view.RouteActionKind));
+                    view = LastBearingReadModel.FromState(state);
+                }
+
+                if (view.IsWreckLineFrameRailRecoveryAvailable)
+                {
+                    state = Apply(
+                        state,
+                        sequence =>
+                            new RecoverWreckLineFrameRailsCommand(sequence));
+                }
+
+                state = Apply(
+                    state,
+                    sequence => new DriveVehicleCommand(sequence, 1000, 0));
+            }
+
+            state = Apply(
+                state,
+                sequence => new OperateDepotRecoveryPointCommand(sequence));
+            state = Apply(
+                state,
+                sequence => new ResolveDepotCommand(
+                    sequence,
+                    EncounterChoice.TakeBearing));
+            state = Apply(
+                state,
+                sequence => new LoadDepotRepairCargoCommand(sequence));
+            state = Apply(
+                state,
+                sequence => new ChooseLiquidReturnCommand(
+                    sequence,
+                    LiquidCargoKind.Fuel));
+            state = Apply(
+                state,
+                sequence => new FreezeReturnPayloadCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            for (var guard = 0;
+                 LastBearingReadModel.FromState(state).ExpeditionPhase !=
+                     ExpeditionPhase.Returned &&
+                 guard < 1000;
+                 guard++)
+            {
+                state = Apply(
+                    state,
+                    sequence => new DriveVehicleCommand(sequence, 1000, 0));
+            }
+
+            state = Apply(
+                state,
+                sequence => new CreditCityReturnCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            state = Apply(
+                state,
+                sequence => new FinalizeExpeditionTransactionCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            if (repairTurbine)
+            {
+                state = Apply(
+                    state,
+                    sequence => new InstallTurbineRepairCommand(sequence));
+            }
+
+            LastBearingReadModel result =
+                LastBearingReadModel.FromState(state);
+            Assert.That(
+                result.PreparationPhase,
+                Is.EqualTo(PreparationPhase.Committed));
+            Assert.That(
+                result.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.AtHome));
+            return state;
+        }
+
+        private static LastBearingState CreateOneGoodBatchState(
+            SpareBearingBatchPhase phase)
+        {
+            LastBearingState state =
+                CreatePostReturnState(repairTurbine: true);
+            if (phase != SpareBearingBatchPhase.None)
+            {
+                state = Apply(
+                    state,
+                    sequence => new StartSpareBearingBatchCommand(sequence));
+            }
+
+            if (phase == SpareBearingBatchPhase.InProgress)
+            {
+                state = Apply(
+                    state,
+                    sequence => new RunHotShiftCommand(sequence, 0));
+                state = Advance(state, 30);
+            }
+            else if (phase == SpareBearingBatchPhase.Complete)
+            {
+                state = Advance(
+                    state,
+                    LastBearingBalanceV1
+                        .SpareBearingBatchRequiredSettlementTicks);
+            }
+
+            LastBearingReadModel result =
+                LastBearingReadModel.FromState(state);
+            Assert.That(result.SpareBearingBatchPhase, Is.EqualTo(phase));
+            return state;
+        }
+
+        private static LastBearingState Apply(
+            LastBearingState state,
+            Func<long, LastBearingCommand> createCommand)
+        {
+            LastBearingCommand command =
+                createCommand(state.NextCommandSequence);
+            return new LastBearingKernel()
+                .Step(state, new[] { command })
+                .State;
+        }
+
+        private static LastBearingState Advance(
+            LastBearingState state,
+            int ticks)
+        {
+            var kernel = new LastBearingKernel();
+            for (var index = 0; index < ticks; index++)
+            {
+                state = kernel.Step(
+                    state,
+                    Array.Empty<LastBearingCommand>())
+                    .State;
+            }
+
+            return state;
+        }
+
+        private static void InstallControllerState(
+            LastBearingGameController controller,
+            LastBearingState state)
+        {
+            const BindingFlags flags =
+                BindingFlags.Instance | BindingFlags.NonPublic;
+            FieldInfo? stateField =
+                typeof(LastBearingGameController).GetField("_state", flags);
+            FieldInfo? readModelField =
+                typeof(LastBearingGameController).GetField(
+                    "_readModel",
+                    flags);
+            FieldInfo? pendingField =
+                typeof(LastBearingGameController).GetField(
+                    "_pendingCommands",
+                    flags);
+            Assert.That(stateField, Is.Not.Null);
+            Assert.That(readModelField, Is.Not.Null);
+            Assert.That(pendingField, Is.Not.Null);
+
+            controller.ModeCoordinator!.ClearSession();
+            stateField!.SetValue(controller, state);
+            readModelField!.SetValue(
+                controller,
+                LastBearingReadModel.FromState(state));
+            var pending = pendingField!.GetValue(controller) as
+                List<LastBearingCommand>;
+            Assert.That(pending, Is.Not.Null);
+            pending!.Clear();
+            InvokeApplyPresentation(controller);
+        }
+
         private static LastBearingFieldDesk RequireDesk(
             LastBearingGameController controller)
         {
@@ -542,6 +930,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         {
             MethodInfo? method = typeof(LastBearingGameController).GetMethod(
                 "SimulateOneTick",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(method, Is.Not.Null);
+            method!.Invoke(controller, null);
+        }
+
+        private static void InvokeApplyPresentation(
+            LastBearingGameController controller)
+        {
+            MethodInfo? method = typeof(LastBearingGameController).GetMethod(
+                "ApplyPresentation",
                 BindingFlags.Instance | BindingFlags.NonPublic);
             Assert.That(method, Is.Not.Null);
             method!.Invoke(controller, null);
