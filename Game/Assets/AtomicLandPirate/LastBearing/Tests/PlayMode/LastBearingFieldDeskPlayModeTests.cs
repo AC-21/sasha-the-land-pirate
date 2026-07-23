@@ -817,10 +817,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
         private static LastBearingState Advance(
             LastBearingState state,
-            int ticks)
+            long ticks)
         {
             var kernel = new LastBearingKernel();
-            for (var index = 0; index < ticks; index++)
+            for (var index = 0L; index < ticks; index++)
             {
                 state = kernel.Step(
                     state,
