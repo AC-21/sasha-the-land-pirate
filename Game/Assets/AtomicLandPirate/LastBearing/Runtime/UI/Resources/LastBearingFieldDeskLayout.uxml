@@ -45,8 +45,8 @@
                 </ui:VisualElement>
 
                 <ui:VisualElement name="survey-section" class="section plate survey-board">
-                    <ui:Label text="D-0030 · REVERSIBLE SERVICE-CELL SURVEY" class="section-kicker signal-copy" />
-                    <ui:Label text="Evidence only. No score, winner, or persisted selection." class="survey-law" />
+                    <ui:Label text="WORKING SERVICE CELL · HYBRID CITY" class="section-kicker signal-copy" />
+                    <ui:Label text="THREE BUILDINGS · FIVE PADS · ONE PERMANENT LINK" class="survey-law" />
                     <ui:Label name="survey-hypothesis-label" class="survey-state" />
                     <ui:VisualElement class="button-row">
                         <ui:Button name="trial-a-button" class="desk-button compact-button" />

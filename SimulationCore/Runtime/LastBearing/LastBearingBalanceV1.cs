@@ -6,7 +6,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public static class LastBearingBalanceV1
     {
-        public const string Revision = "last-bearing-prototype-balance-v1";
+        public const string Revision = "last-bearing-prototype-balance-v3";
+        internal const string LegacyRevisionV1 =
+            "last-bearing-prototype-balance-v1";
+        internal const string LegacyRevisionV2 =
+            "last-bearing-prototype-balance-v2";
         public const int TickRateHz = 10;
         public const int FullClockScaleMilli = 1000;
         public const int ExpeditionHomeClockScaleMilli = 500;
@@ -16,6 +20,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const long StartingFuelUnits = 18;
         public const long StartingVehicleConditionMilli = 1000;
         public const long WaterCapacityMilli = 180000;
+
+        public const long RecyclerPlacementPartsUnits = 2;
+        public const long MachineShopPlacementPartsUnits = 3;
+        public const long EmergencyStoragePlacementPartsUnits = 1;
+        public const long CityServiceLinkPartsUnits = 1;
+        public const long CityServiceDeliveryPartsUnits = 2;
 
         public const long FailingWaterRateMilliPerSettlementTick = -10;
         public const long BearingRepairRateMilliPerSettlementTick = 30;
@@ -34,6 +44,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const long WinchInstallFuelUnits = 2;
         public const long TankPartsCostUnits = 3;
         public const long TankInstallFuelUnits = 6;
+        public const long PatchworkSkidPlatePartsCostUnits = 3;
+        public const long PatchworkSkidPlateProtectionMilli = 40;
 
         public const long ShortRouteOneWayTicks = 150;
         public const long LongRouteOneWayTicks = 300;
@@ -96,6 +108,21 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     return AuxiliaryPumpInstallationPartsUnits;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(improvement));
+            }
+        }
+
+        internal static long CityBuildingPartsCost(CityBuildingKind building)
+        {
+            switch (building)
+            {
+                case CityBuildingKind.Recycler:
+                    return RecyclerPlacementPartsUnits;
+                case CityBuildingKind.MachineShop:
+                    return MachineShopPlacementPartsUnits;
+                case CityBuildingKind.EmergencyStorage:
+                    return EmergencyStoragePlacementPartsUnits;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(building));
             }
         }
 
@@ -203,14 +230,40 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
         internal static long RouteConditionLoss(VehicleModule module)
         {
+            return RouteConditionLoss(
+                module,
+                RigUpgrade.None);
+        }
+
+        internal static long RouteConditionLoss(
+            VehicleModule module,
+            RigUpgrade rigUpgrade)
+        {
+            long baseLoss;
             switch (module)
             {
                 case VehicleModule.WinchAssembly:
-                    return ShortRouteRoundTripConditionLossMilli;
+                    baseLoss = ShortRouteRoundTripConditionLossMilli;
+                    break;
                 case VehicleModule.SealedRangeTank:
-                    return LongRouteRoundTripConditionLossMilli;
+                    baseLoss = LongRouteRoundTripConditionLossMilli;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(module));
+            }
+
+            switch (rigUpgrade)
+            {
+                case RigUpgrade.None:
+                    return baseLoss;
+                case RigUpgrade.PatchworkSkidPlate:
+                    return Math.Max(
+                        0,
+                        checked(
+                            baseLoss
+                            - PatchworkSkidPlateProtectionMilli));
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(rigUpgrade));
             }
         }
 

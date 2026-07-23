@@ -96,6 +96,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public LastBearingCityGrammarComparison? CityGrammarComparison { get; private set; }
 
+        public LastBearingCityServiceCellView? CityServiceCellView
+        {
+            get;
+            private set;
+        }
+
         public LastBearingDepotApproachRecoveryView? DepotApproachRecoveryView
         {
             get;
@@ -176,6 +182,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 signal);
             BuildResidents(CityScaffoldRoot, oxide, bone, iron, concrete);
             BuildCityGrammarComparison(
+                CityScaffoldRoot,
+                concrete,
+                iron,
+                oxide,
+                bone);
+            BuildCityServiceCell(
                 CityScaffoldRoot,
                 concrete,
                 iron,
@@ -296,6 +308,38 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 _needInspectionMarker.SetActive(inspected);
             }
+        }
+
+        public void ApplyCityServiceCell(
+            LastBearingReadModel model,
+            CityBuildingKind previewBuilding,
+            int previewPadIndex,
+            int previewQuarterTurns,
+            bool previewActive)
+        {
+            if (CityGrammarComparison?.SelectedHypothesis !=
+                LastBearingCityGrammarHypothesis.Unselected)
+            {
+                CityServiceCellView?.Hide();
+                return;
+            }
+
+            CityServiceCellView?.Apply(
+                model,
+                previewBuilding,
+                previewPadIndex,
+                previewQuarterTurns,
+                previewActive);
+        }
+
+        public void HideCityServiceCell()
+        {
+            CityServiceCellView?.Hide();
+        }
+
+        public void SetCityServiceCellFocus(bool focused)
+        {
+            CameraRig?.SetComparisonMode(focused);
         }
 
         public void SelectCityGrammarHypothesis(
@@ -1055,6 +1099,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
             CityGrammarComparison =
                 comparison.AddComponent<LastBearingCityGrammarComparison>();
             CityGrammarComparison.Build(concrete, iron, oxide, bone);
+        }
+
+        private void BuildCityServiceCell(
+            Transform cityScaffoldRoot,
+            Material concrete,
+            Material iron,
+            Material oxide,
+            Material bone)
+        {
+            var serviceCell = new GameObject(
+                "Working Service Cell [Derived Only]");
+            serviceCell.transform.SetParent(cityScaffoldRoot, false);
+            CityServiceCellView =
+                serviceCell.AddComponent<LastBearingCityServiceCellView>();
+            CityServiceCellView.Build(concrete, iron, oxide, bone);
         }
 
         private void BuildCamera()

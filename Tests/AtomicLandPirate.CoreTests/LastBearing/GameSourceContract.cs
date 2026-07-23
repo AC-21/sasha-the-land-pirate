@@ -34,6 +34,8 @@ namespace AtomicLandPirate.LastBearingTests
                     "RoadFeel/RoadFeelChaseCamera.cs"));
             string comparison = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingCityGrammarComparison.cs"));
+            string cityServiceCell = File.ReadAllText(
+                Path.Combine(runtimeRoot, "LastBearingCityServiceCellView.cs"));
             string recovery = File.ReadAllText(
                 Path.Combine(
                     runtimeRoot,
@@ -90,8 +92,15 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "public PreparationChoice GaragePreparationIntent");
             Require(controller, "public bool IsGaragePlanIntentActive");
             Require(controller, "public bool IsGaragePlanCommitAvailable");
+            Require(
+                controller,
+                "public bool IsPatchworkSkidPlateInstallAvailable");
+            Require(
+                controller,
+                "public bool IsPatchworkSkidPlateInstallQueued");
             Require(controller, "public void BeginGaragePlan(");
             Require(controller, "public void CommitGaragePlan(");
+            Require(controller, "public void InstallPatchworkSkidPlate()");
             Require(controller, "public void CancelGaragePlan()");
             Require(controller, "public void StartSpareBearingBatch()");
             Require(controller, "new StartSpareBearingBatchCommand(sequence)");
@@ -490,6 +499,34 @@ namespace AtomicLandPirate.LastBearingTests
                     comparison.IndexOf(forbidden, StringComparison.Ordinal) < 0,
                     "city comparison contains forbidden authority " + forbidden);
             }
+            Require(world, "LastBearingCityServiceCellView");
+            Require(world, "BuildCityServiceCell(");
+            Require(world, "CityServiceCellView?.Apply(");
+            Require(cityServiceCell, "LastBearingReadModel model");
+            Require(cityServiceCell, "CityBuildingKind previewBuilding");
+            Require(cityServiceCell, "Working Cell Pad ");
+            Require(cityServiceCell, "Canonical Recycler");
+            Require(cityServiceCell, "Canonical Machine Shop");
+            Require(cityServiceCell, "Canonical Emergency Storage");
+            Require(cityServiceCell, "Canonical Parts Sled");
+            Require(cityServiceCell, "collider.enabled = false");
+            foreach (string forbidden in new[]
+            {
+                "LastBearingKernel",
+                "LastBearingCommand",
+                "Queue(",
+                "SaveContracts",
+                "PlayerPrefs",
+                "System.IO",
+                "File.",
+                "AddComponent<Rigidbody>",
+            })
+            {
+                TestHarness.True(
+                    cityServiceCell.IndexOf(forbidden, StringComparison.Ordinal) < 0,
+                    "working service cell view contains forbidden authority " +
+                    forbidden);
+            }
             string cityTrialController = Segment(
                 controller,
                 "public void SelectCityGrammarHypothesis(",
@@ -515,6 +552,18 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 infrastructureActivation,
                 "records no layout and D-0030 remains open");
+            Require(controller, "public void SelectCityBuildingPreview(");
+            Require(controller, "public void MoveCityBuildingPreview(");
+            Require(controller, "public void RotateCityBuildingPreview()");
+            Require(controller, "public void CancelCityBuildingPreview()");
+            Require(controller, "public void PlaceCityBuildingPreview()");
+            Require(controller, "new PlaceCityBuildingCommand(");
+            Require(controller, "public void ConnectCityServiceLink()");
+            Require(controller, "new ConnectCityServiceLinkCommand(sequence)");
+            Require(controller, "public void AssignCityServiceResident(");
+            Require(controller, "new AssignCityServiceResidentCommand(");
+            Require(controller, "public void AdvanceCityServiceSled()");
+            Require(controller, "new AdvanceCityServiceSledCommand(");
 
             string beginGaragePlan = Segment(
                 controller,
@@ -549,7 +598,7 @@ namespace AtomicLandPirate.LastBearingTests
             string commitGaragePlan = Segment(
                 controller,
                 "public void CommitGaragePlan(",
-                "public void CancelGaragePlan()");
+                "public void InstallPatchworkSkidPlate()");
             Require(commitGaragePlan, "IsGaragePlanIntentActive");
             Require(commitGaragePlan, "VehicleModule.WinchAssembly");
             Require(commitGaragePlan, "VehicleModule.SealedRangeTank");
@@ -570,6 +619,46 @@ namespace AtomicLandPirate.LastBearingTests
                     "new InstallVehicleModuleCommand("),
                 "garage commit must queue the existing module command once");
 
+            string installPatchworkSkidPlate = Segment(
+                controller,
+                "public void InstallPatchworkSkidPlate()",
+                "public void CancelGaragePlan()");
+            Require(
+                installPatchworkSkidPlate,
+                "LastBearingPresentationMode.GarageBay");
+            Require(
+                installPatchworkSkidPlate,
+                "_readModel.IsPatchworkSkidPlateInstallAvailable");
+            Require(
+                installPatchworkSkidPlate,
+                "new InstallRigUpgradeCommand(");
+            Require(
+                installPatchworkSkidPlate,
+                "RigUpgrade.PatchworkSkidPlate");
+            TestHarness.Equal(
+                1,
+                CountOccurrences(
+                    installPatchworkSkidPlate,
+                    "new InstallRigUpgradeCommand("),
+                "garage armor install must queue exactly one upgrade command");
+            foreach (string forbidden in new[]
+            {
+                "ClearGaragePlanIntent();",
+                "new SelectPreparationCommand(",
+                "new InstallVehicleModuleCommand(",
+                "_state =",
+                "_saveAdapter",
+                "Save();",
+            })
+            {
+                TestHarness.True(
+                    installPatchworkSkidPlate.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "garage armor install crosses its command boundary " +
+                    forbidden);
+            }
+
             string cancelGaragePlan = Segment(
                 controller,
                 "public void CancelGaragePlan()",
@@ -586,6 +675,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "the HUD must not retain a global composite planning action");
             Require(hud, ".BeginGaragePlan(");
             Require(hud, ".CommitGaragePlan(");
+            Require(hud, "DrawGarageUpgrade(model);");
+            Require(hud, ".InstallPatchworkSkidPlate();");
+            Require(hud, "INSTALL PATCHWORK SKID PLATE · ");
             Require(hud, ".CancelGaragePlan();");
             Require(world, "ApplyGaragePlanIntent(PreparationChoice preparation)");
             Require(controller, "_world.ApplyGaragePlanIntent(");

@@ -10,18 +10,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
         None = 0,
         AssignDefaultLead = 1,
         InspectCityNeed = 2,
-        SelectTrialA = 3,
-        SelectTrialB = 4,
-        ManipulateTrial = 5,
-        RotateTrial = 6,
-        ToggleTrialPiece = 7,
-        ConnectTrial = 8,
-        AdvanceTrialDelivery = 9,
-        RecordPathClear = 10,
-        RecordPathUnclear = 11,
-        ResetActiveTrial = 12,
-        LeaveTrial = 13,
-        ClearTrials = 14,
+        SelectRecycler = 3,
+        SelectMachineShop = 4,
+        SelectEmergencyStorage = 5,
+        RotateCityBuilding = 6,
+        PreviousCityPad = 7,
+        NextCityPad = 8,
+        PlaceCityBuilding = 9,
+        ConnectCityServiceLink = 10,
+        StaffCityServiceHuman = 11,
+        StaffCityServiceRobot = 12,
+        AdvanceCityServiceSled = 13,
+        CancelCityBuildingPreview = 14,
+        // Legacy compatibility value. The working service-cell UI never emits it.
         ActivateInfrastructure = 15,
         BeginWorkshopPush = 16,
         BeginCivicBuffer = 17,
@@ -83,34 +84,34 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool visible,
             string hypothesisLabel,
             string evidence,
-            LastBearingFieldDeskActionProjection selectA,
-            LastBearingFieldDeskActionProjection selectB,
-            LastBearingFieldDeskActionProjection manipulate,
+            LastBearingFieldDeskActionProjection selectRecycler,
+            LastBearingFieldDeskActionProjection selectMachineShop,
+            LastBearingFieldDeskActionProjection selectEmergencyStorage,
             LastBearingFieldDeskActionProjection rotate,
-            LastBearingFieldDeskActionProjection togglePiece,
-            LastBearingFieldDeskActionProjection connect,
-            LastBearingFieldDeskActionProjection advance,
-            LastBearingFieldDeskActionProjection recordClear,
-            LastBearingFieldDeskActionProjection recordUnclear,
-            LastBearingFieldDeskActionProjection reset,
-            LastBearingFieldDeskActionProjection leave,
-            LastBearingFieldDeskActionProjection clear)
+            LastBearingFieldDeskActionProjection previousPad,
+            LastBearingFieldDeskActionProjection nextPad,
+            LastBearingFieldDeskActionProjection place,
+            LastBearingFieldDeskActionProjection connectLink,
+            LastBearingFieldDeskActionProjection staffHuman,
+            LastBearingFieldDeskActionProjection staffRobot,
+            LastBearingFieldDeskActionProjection advanceSled,
+            LastBearingFieldDeskActionProjection cancelPreview)
         {
             IsVisible = visible;
             HypothesisLabel = hypothesisLabel;
             Evidence = evidence;
-            SelectA = selectA;
-            SelectB = selectB;
-            Manipulate = manipulate;
+            SelectRecycler = selectRecycler;
+            SelectMachineShop = selectMachineShop;
+            SelectEmergencyStorage = selectEmergencyStorage;
             Rotate = rotate;
-            TogglePiece = togglePiece;
-            Connect = connect;
-            Advance = advance;
-            RecordClear = recordClear;
-            RecordUnclear = recordUnclear;
-            Reset = reset;
-            Leave = leave;
-            Clear = clear;
+            PreviousPad = previousPad;
+            NextPad = nextPad;
+            Place = place;
+            ConnectLink = connectLink;
+            StaffHuman = staffHuman;
+            StaffRobot = staffRobot;
+            AdvanceSled = advanceSled;
+            CancelPreview = cancelPreview;
         }
 
         public bool IsVisible { get; }
@@ -119,29 +120,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public string Evidence { get; }
 
-        public LastBearingFieldDeskActionProjection SelectA { get; }
+        public LastBearingFieldDeskActionProjection SelectRecycler { get; }
 
-        public LastBearingFieldDeskActionProjection SelectB { get; }
+        public LastBearingFieldDeskActionProjection SelectMachineShop { get; }
 
-        public LastBearingFieldDeskActionProjection Manipulate { get; }
+        public LastBearingFieldDeskActionProjection SelectEmergencyStorage { get; }
 
         public LastBearingFieldDeskActionProjection Rotate { get; }
 
-        public LastBearingFieldDeskActionProjection TogglePiece { get; }
+        public LastBearingFieldDeskActionProjection PreviousPad { get; }
 
-        public LastBearingFieldDeskActionProjection Connect { get; }
+        public LastBearingFieldDeskActionProjection NextPad { get; }
 
-        public LastBearingFieldDeskActionProjection Advance { get; }
+        public LastBearingFieldDeskActionProjection Place { get; }
 
-        public LastBearingFieldDeskActionProjection RecordClear { get; }
+        public LastBearingFieldDeskActionProjection ConnectLink { get; }
 
-        public LastBearingFieldDeskActionProjection RecordUnclear { get; }
+        public LastBearingFieldDeskActionProjection StaffHuman { get; }
 
-        public LastBearingFieldDeskActionProjection Reset { get; }
+        public LastBearingFieldDeskActionProjection StaffRobot { get; }
 
-        public LastBearingFieldDeskActionProjection Leave { get; }
+        public LastBearingFieldDeskActionProjection AdvanceSled { get; }
 
-        public LastBearingFieldDeskActionProjection Clear { get; }
+        public LastBearingFieldDeskActionProjection CancelPreview { get; }
     }
 
     public sealed class LastBearingFieldDeskProjection
@@ -239,8 +240,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
     /// </summary>
     public static class LastBearingFieldDeskPresenter
     {
-        private const string ActivateInfrastructureObjective =
-            "activate-slice-infrastructure";
+        private const string PlaceRecyclerObjective = "place-city-recycler";
+        private const string PlaceMachineShopObjective =
+            "place-city-machine-shop";
+        private const string PlaceEmergencyStorageObjective =
+            "place-city-emergency-storage";
+        private const string ConnectServiceLinkObjective =
+            "connect-city-service-link";
+        private const string StaffServiceCellObjective =
+            "staff-city-service-cell";
+        private const string AdvanceServiceSledObjective =
+            "advance-city-service-sled";
         private const string SelectPreparationObjective =
             "select-preparation-and-module";
         private const ulong OffsetBasis = 14695981039346656037UL;
@@ -303,8 +313,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 CreateSurvey(
                     controller,
                     model,
-                    canDispatch && controller.CityNeedInspected &&
-                    model.NextObjective == ActivateInfrastructureObjective),
+                    controller.CityNeedInspected &&
+                    IsServiceCellObjective(model.NextObjective)),
                 Action(
                     LastBearingFieldDeskIntent.TogglePause,
                     model.PauseCause == PauseCause.None ? "PAUSE" : "RESUME",
@@ -357,18 +367,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
                    Matches(projection.SaveAction, intent) ||
                    Matches(projection.LoadAction, intent) ||
                    Matches(projection.TitleAction, intent) ||
-                   Matches(projection.Survey.SelectA, intent) ||
-                   Matches(projection.Survey.SelectB, intent) ||
-                   Matches(projection.Survey.Manipulate, intent) ||
+                   Matches(projection.Survey.SelectRecycler, intent) ||
+                   Matches(projection.Survey.SelectMachineShop, intent) ||
+                   Matches(projection.Survey.SelectEmergencyStorage, intent) ||
                    Matches(projection.Survey.Rotate, intent) ||
-                   Matches(projection.Survey.TogglePiece, intent) ||
-                   Matches(projection.Survey.Connect, intent) ||
-                   Matches(projection.Survey.Advance, intent) ||
-                   Matches(projection.Survey.RecordClear, intent) ||
-                   Matches(projection.Survey.RecordUnclear, intent) ||
-                   Matches(projection.Survey.Reset, intent) ||
-                   Matches(projection.Survey.Leave, intent) ||
-                   Matches(projection.Survey.Clear, intent);
+                   Matches(projection.Survey.PreviousPad, intent) ||
+                   Matches(projection.Survey.NextPad, intent) ||
+                   Matches(projection.Survey.Place, intent) ||
+                   Matches(projection.Survey.ConnectLink, intent) ||
+                   Matches(projection.Survey.StaffHuman, intent) ||
+                   Matches(projection.Survey.StaffRobot, intent) ||
+                   Matches(projection.Survey.AdvanceSled, intent) ||
+                   Matches(projection.Survey.CancelPreview, intent);
         }
 
         internal static LastBearingFieldDeskStamp CaptureStamp(
@@ -380,6 +390,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, controller.CityNeedInspected);
             Mix(ref hash, controller.IsTurbineRepairReady);
             Mix(ref hash, controller.GaragePreparationIntent.GetHashCode());
+            Mix(ref hash, controller.CityPreviewBuilding.GetHashCode());
+            Mix(ref hash, controller.CityPreviewPadIndex);
+            Mix(ref hash, controller.CityPreviewQuarterTurns);
             Mix(ref hash, controller.CityGrammarHypothesis.GetHashCode());
             Mix(ref hash, controller.CityGrammarTrialReady);
             Mix(ref hash, controller.HasCompletedCityGrammarObservation);
@@ -400,6 +413,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             Mix(ref hash, model.Composition.GetHashCode());
             Mix(ref hash, model.AssignedResidentId);
+            Mix(ref hash, model.RecyclerPadIndex);
+            Mix(ref hash, model.RecyclerQuarterTurns);
+            Mix(ref hash, model.MachineShopPadIndex);
+            Mix(ref hash, model.MachineShopQuarterTurns);
+            Mix(ref hash, model.EmergencyStoragePadIndex);
+            Mix(ref hash, model.EmergencyStorageQuarterTurns);
+            Mix(ref hash, model.CityServiceLinkConnected);
+            Mix(ref hash, model.CityServiceResidentId);
+            Mix(ref hash, model.CityDeliveryStage.GetHashCode());
+            Mix(ref hash, model.CityDeliveryCount);
+            Mix(ref hash, model.SliceInfrastructureActive);
             Mix(ref hash, model.WaterMilli);
             Mix(ref hash, model.WaterTrendMilliPerSettlementTick);
             Mix(ref hash, model.PartsUnits);
@@ -465,9 +489,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
-            if (model.NextObjective == ActivateInfrastructureObjective)
+            if (IsServiceCellObjective(model.NextObjective))
             {
-                DeriveTrialOrder(controller, canDispatch, out primary, out secondary);
+                DeriveServiceCellOrder(
+                    controller,
+                    model,
+                    canDispatch,
+                    out primary,
+                    out secondary);
                 return;
             }
 
@@ -602,94 +631,91 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 LastBearingFieldDeskActionTone.Quiet);
         }
 
-        private static void DeriveTrialOrder(
+        private static void DeriveServiceCellOrder(
             LastBearingGameController controller,
+            LastBearingReadModel model,
             bool canDispatch,
             out LastBearingFieldDeskActionProjection primary,
             out LastBearingFieldDeskActionProjection secondary)
         {
             secondary = Hidden();
-            if (controller.HasCompletedCityGrammarObservation)
+            if (controller.HasCityBuildingPreview)
             {
-                primary = Action(
-                    LastBearingFieldDeskIntent.ActivateInfrastructure,
-                    "BRING THE SERVICE CELL ONLINE",
-                    "Use the recorded observation without selecting a city grammar.",
-                    true,
+                primary = CreatePlaceAction(controller, model, canDispatch, true);
+                secondary = CreateCancelPreviewAction(
+                    controller,
                     canDispatch,
-                    LastBearingFieldDeskActionTone.Primary);
+                    true);
                 return;
             }
 
-            if (controller.CityGrammarHypothesis ==
-                LastBearingCityGrammarHypothesis.Unselected)
+            switch (model.NextObjective)
             {
-                primary = Action(
-                    LastBearingFieldDeskIntent.SelectTrialA,
-                    "STAGE TRIAL A",
-                    "Place the recycler and workshop as individual service pieces.",
-                    true,
-                    canDispatch,
-                    LastBearingFieldDeskActionTone.Primary);
-                secondary = Action(
-                    LastBearingFieldDeskIntent.SelectTrialB,
-                    "STAGE TRIAL B",
-                    "Move the same empty service cell as one district stamp.",
-                    true,
-                    canDispatch,
-                    LastBearingFieldDeskActionTone.Signal);
-                return;
-            }
+                case PlaceRecyclerObjective:
+                    primary = CreateSelectBuildingAction(
+                        model,
+                        CityBuildingKind.Recycler,
+                        canDispatch,
+                        true);
+                    return;
+                case PlaceMachineShopObjective:
+                    primary = CreateSelectBuildingAction(
+                        model,
+                        CityBuildingKind.MachineShop,
+                        canDispatch,
+                        true);
+                    return;
+                case PlaceEmergencyStorageObjective:
+                    primary = CreateSelectBuildingAction(
+                        model,
+                        CityBuildingKind.EmergencyStorage,
+                        canDispatch,
+                        true);
+                    return;
+                case ConnectServiceLinkObjective:
+                    primary = CreateConnectLinkAction(
+                        controller,
+                        model,
+                        canDispatch,
+                        true);
+                    return;
+                case StaffServiceCellObjective:
+                    if (model.Composition == ColonyComposition.RobotOnly)
+                    {
+                        primary = CreateStaffRobotAction(
+                            controller,
+                            model,
+                            canDispatch,
+                            true);
+                        return;
+                    }
 
-            if (!controller.CityGrammarLogisticsConnected)
-            {
-                primary = Action(
-                    LastBearingFieldDeskIntent.ManipulateTrial,
-                    "PLACE / MOVE THE TRIAL",
-                    "Stage the active empty service-cell hypothesis.",
-                    true,
-                    canDispatch,
-                    LastBearingFieldDeskActionTone.Primary);
-                secondary = Action(
-                    LastBearingFieldDeskIntent.ConnectTrial,
-                    "CONNECT THE SERVICE LINK",
-                    controller.CanConnectCityGrammarLogistics
-                        ? "Connect recycler output to workshop input."
-                        : "Place recycler and workshop on different pads first.",
-                    controller.CityGrammarHypothesis ==
-                    LastBearingCityGrammarHypothesis.RestrainedSnapGrid,
-                    canDispatch && controller.CanConnectCityGrammarLogistics,
-                    LastBearingFieldDeskActionTone.Signal);
-                return;
-            }
+                    primary = CreateStaffHumanAction(
+                        controller,
+                        model,
+                        canDispatch,
+                        true);
+                    if (model.Composition == ColonyComposition.Mixed)
+                    {
+                        secondary = CreateStaffRobotAction(
+                            controller,
+                            model,
+                            canDispatch,
+                            true);
+                    }
 
-            if (controller.CityGrammarDeliveryStage !=
-                LastBearingCityTrialDeliveryStage.DeliveredToWorkshop)
-            {
-                primary = Action(
-                    LastBearingFieldDeskIntent.AdvanceTrialDelivery,
-                    "ADVANCE THE EMPTY SLED",
-                    "Move the same calibration sled across the service path.",
-                    true,
-                    canDispatch,
-                    LastBearingFieldDeskActionTone.Primary);
-                return;
+                    return;
+                case AdvanceServiceSledObjective:
+                    primary = CreateAdvanceSledAction(
+                        controller,
+                        model,
+                        canDispatch,
+                        true);
+                    return;
+                default:
+                    primary = Hidden();
+                    return;
             }
-
-            primary = Action(
-                LastBearingFieldDeskIntent.RecordPathClear,
-                "RECORD: CLEAR",
-                "Record only the raw path observation.",
-                true,
-                canDispatch,
-                LastBearingFieldDeskActionTone.Primary);
-            secondary = Action(
-                LastBearingFieldDeskIntent.RecordPathUnclear,
-                "RECORD: UNCLEAR",
-                "Record only the raw path observation.",
-                true,
-                canDispatch,
-                LastBearingFieldDeskActionTone.Signal);
         }
 
         private static LastBearingFieldDeskSurveyProjection CreateSurvey(
@@ -697,39 +723,312 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingReadModel? model,
             bool visible)
         {
-            bool selected = controller.CityGrammarHypothesis !=
-                            LastBearingCityGrammarHypothesis.Unselected;
-            bool trialA = controller.CityGrammarHypothesis ==
-                          LastBearingCityGrammarHypothesis.RestrainedSnapGrid;
-            bool delivered = controller.CityGrammarDeliveryStage ==
-                             LastBearingCityTrialDeliveryStage.DeliveredToWorkshop;
-            bool unrecorded = controller.CityGrammarPathRead ==
-                              LastBearingCityTrialPathRead.Unrecorded;
-            bool canUse = visible && !controller.HasPendingPlayerCommands;
-            string label = selected
-                ? FormatHypothesis(controller.CityGrammarHypothesis) +
-                  " · " + FormatPiece(controller.ActiveCityGrammarPiece) +
-                  " · " + FormatDelivery(controller.CityGrammarDeliveryStage)
-                : "NO HYPOTHESIS STAGED · BOTH TRIALS REMAIN REVERSIBLE";
-            string evidence = visible
-                ? controller.CityGrammarEvidence
-                : "Comparison stowed outside the current civic trial.";
+            if (model == null)
+            {
+                LastBearingFieldDeskActionProjection unavailable = Hidden();
+                return new LastBearingFieldDeskSurveyProjection(
+                    false,
+                    "NO CANONICAL SERVICE CELL",
+                    "Construction controls are stowed without an active run.",
+                    unavailable,
+                    unavailable,
+                    unavailable,
+                    unavailable,
+                    unavailable,
+                    unavailable,
+                    unavailable,
+                    unavailable,
+                    unavailable,
+                    unavailable,
+                    unavailable,
+                    unavailable);
+            }
+
+            bool canUse = visible &&
+                          controller.IsExactFieldDeskCityOverview &&
+                          !controller.HasPendingPlayerCommands;
+            bool hasPreview = controller.HasCityBuildingPreview;
             return new LastBearingFieldDeskSurveyProjection(
                 visible,
+                FormatServiceCellState(model, controller),
+                "COSTS: RECYCLER 2 · SHOP 3 · STORAGE 1 PART · " +
+                "MOVES FREE BEFORE LINK · " +
+                "LINK LOCKS PERMANENTLY FOR 1 PART · OPERATOR IS NEUTRAL · " +
+                "FIRST DELIVERY RETURNS +2 PARTS ONCE",
+                CreateSelectBuildingAction(
+                    model,
+                    CityBuildingKind.Recycler,
+                    canUse,
+                    visible),
+                CreateSelectBuildingAction(
+                    model,
+                    CityBuildingKind.MachineShop,
+                    canUse,
+                    visible),
+                CreateSelectBuildingAction(
+                    model,
+                    CityBuildingKind.EmergencyStorage,
+                    canUse,
+                    visible),
+                Action(
+                    LastBearingFieldDeskIntent.RotateCityBuilding,
+                    "ROTATE 90°",
+                    "Quarter-turn the preview. Rotation is free before link lock.",
+                    visible && hasPreview,
+                    canUse && hasPreview && !model.CityServiceLinkConnected,
+                    LastBearingFieldDeskActionTone.Quiet),
+                CreatePadAction(
+                    LastBearingFieldDeskIntent.PreviousCityPad,
+                    "PREVIOUS PAD",
+                    canUse,
+                    visible && hasPreview,
+                    model.CityServiceLinkConnected),
+                CreatePadAction(
+                    LastBearingFieldDeskIntent.NextCityPad,
+                    "NEXT PAD",
+                    canUse,
+                    visible && hasPreview,
+                    model.CityServiceLinkConnected),
+                CreatePlaceAction(
+                    controller,
+                    model,
+                    canUse,
+                    visible && hasPreview),
+                CreateConnectLinkAction(controller, model, canUse, visible),
+                CreateStaffHumanAction(
+                    controller,
+                    model,
+                    canUse,
+                    visible && model.Composition != ColonyComposition.RobotOnly),
+                CreateStaffRobotAction(
+                    controller,
+                    model,
+                    canUse,
+                    visible && model.Composition != ColonyComposition.HumanOnly),
+                CreateAdvanceSledAction(
+                    controller,
+                    model,
+                    canUse,
+                    visible),
+                CreateCancelPreviewAction(
+                    controller,
+                    canUse,
+                    visible && hasPreview));
+        }
+
+        private static LastBearingFieldDeskActionProjection
+            CreateSelectBuildingAction(
+                LastBearingReadModel model,
+                CityBuildingKind building,
+                bool canUse,
+                bool visible)
+        {
+            int pad = CityBuildingPad(model, building);
+            long cost = CityBuildingCost(building);
+            bool alreadyPlaced = pad >= 0;
+            bool locked = model.CityServiceLinkConnected;
+            return Action(
+                SelectBuildingIntent(building),
+                locked
+                    ? CityBuildingLabel(building) + " · LOCKED"
+                    : (alreadyPlaced ? "MOVE " : "SELECT ") +
+                      CityBuildingLabel(building) +
+                      (alreadyPlaced
+                          ? " · FREE"
+                          : " · " + FormatPartsCost(cost)),
+                locked
+                    ? "The permanent 1-part service link has locked this pad " +
+                      "and orientation; V0 has no demolition or refund."
+                    : alreadyPlaced
+                    ? CityBuildingLabel(building) + " is on pad " +
+                      (pad + 1) +
+                      "; repositioning stays free until the link is locked."
+                    : "Preview across five pads before committing " +
+                      FormatReclaimedParts(cost) + ".",
+                visible,
+                canUse && !locked,
+                LastBearingFieldDeskActionTone.Signal);
+        }
+
+        private static LastBearingFieldDeskActionProjection CreatePadAction(
+            LastBearingFieldDeskIntent intent,
+            string label,
+            bool canUse,
+            bool visible,
+            bool linkConnected)
+        {
+            return Action(
+                intent,
                 label,
-                evidence,
-                Action(LastBearingFieldDeskIntent.SelectTrialA, "TRIAL A", "Restrained snap-grid.", true, canUse, LastBearingFieldDeskActionTone.Signal),
-                Action(LastBearingFieldDeskIntent.SelectTrialB, "TRIAL B", "District stamp.", true, canUse, LastBearingFieldDeskActionTone.Signal),
-                Action(LastBearingFieldDeskIntent.ManipulateTrial, trialA ? "PLACE / MOVE" : "MOVE STAMP", "Manipulate the active presentation trial.", selected, canUse && selected, LastBearingFieldDeskActionTone.Primary),
-                Action(LastBearingFieldDeskIntent.RotateTrial, "ROTATE", "Rotate the active presentation trial.", selected, canUse && selected, LastBearingFieldDeskActionTone.Quiet),
-                Action(LastBearingFieldDeskIntent.ToggleTrialPiece, "SWITCH PIECE", "Switch recycler and workshop in trial A.", trialA, canUse && trialA, LastBearingFieldDeskActionTone.Quiet),
-                Action(LastBearingFieldDeskIntent.ConnectTrial, "CONNECT", "Connect the existing service link.", trialA, canUse && controller.CanConnectCityGrammarLogistics, LastBearingFieldDeskActionTone.Signal),
-                Action(LastBearingFieldDeskIntent.AdvanceTrialDelivery, "ADVANCE SLED", "Advance the empty calibration sled.", selected, canUse && selected && controller.CityGrammarLogisticsConnected && !delivered, LastBearingFieldDeskActionTone.Primary),
-                Action(LastBearingFieldDeskIntent.RecordPathClear, "CLEAR", "Record raw path evidence.", selected, canUse && selected && delivered && unrecorded, LastBearingFieldDeskActionTone.Signal),
-                Action(LastBearingFieldDeskIntent.RecordPathUnclear, "UNCLEAR", "Record raw path evidence.", selected, canUse && selected && delivered && unrecorded, LastBearingFieldDeskActionTone.Signal),
-                Action(LastBearingFieldDeskIntent.ResetActiveTrial, "RESET ACTIVE", "Reset only the active trial.", selected, canUse && selected, LastBearingFieldDeskActionTone.Quiet),
-                Action(LastBearingFieldDeskIntent.LeaveTrial, "LEAVE", "Stow the comparison without clearing it.", selected, canUse && selected, LastBearingFieldDeskActionTone.Quiet),
-                Action(LastBearingFieldDeskIntent.ClearTrials, "CLEAR ALL", "Clear both in-memory trials.", selected || controller.HasCompletedCityGrammarObservation, canUse && (selected || controller.HasCompletedCityGrammarObservation), LastBearingFieldDeskActionTone.Hazard));
+                "Cycle the preview across five authored pads for free.",
+                visible,
+                canUse && !linkConnected,
+                LastBearingFieldDeskActionTone.Quiet);
+        }
+
+        private static LastBearingFieldDeskActionProjection CreatePlaceAction(
+            LastBearingGameController controller,
+            LastBearingReadModel model,
+            bool canUse,
+            bool visible)
+        {
+            CityBuildingKind building = controller.CityPreviewBuilding;
+            bool moving = CityBuildingPad(model, building) >= 0;
+            long cost = CityBuildingCost(building);
+            bool occupied = IsPadOccupiedByOther(
+                model,
+                building,
+                controller.CityPreviewPadIndex);
+            bool insufficient = !moving && model.PartsUnits < cost;
+            string detail = occupied
+                ? "Pad " + (controller.CityPreviewPadIndex + 1) +
+                  " is occupied; choose another authored pad."
+                : insufficient
+                    ? "Needs " + FormatReclaimedParts(cost) + "; only " +
+                      FormatReclaimedParts(model.PartsUnits) + " remain."
+                    : "Pad " + (controller.CityPreviewPadIndex + 1) +
+                      " · " + (controller.CityPreviewQuarterTurns * 90) +
+                      "°. " + (moving
+                          ? "This move is free until the permanent link lock."
+                          : "Acceptance spends " +
+                            FormatReclaimedParts(cost) + ".");
+            return Action(
+                LastBearingFieldDeskIntent.PlaceCityBuilding,
+                (moving ? "MOVE " : "PLACE ") +
+                CityBuildingLabel(building) +
+                (moving ? " · FREE" : " · " + FormatPartsCost(cost)),
+                detail,
+                visible,
+                canUse && controller.CanPlaceCityBuildingPreview,
+                LastBearingFieldDeskActionTone.Primary);
+        }
+
+        private static LastBearingFieldDeskActionProjection
+            CreateConnectLinkAction(
+                LastBearingGameController controller,
+                LastBearingReadModel model,
+                bool canUse,
+                bool visible)
+        {
+            bool allPlaced = model.RecyclerPadIndex >= 0 &&
+                             model.MachineShopPadIndex >= 0 &&
+                             model.EmergencyStoragePadIndex >= 0;
+            string detail = !allPlaced
+                ? "Place recycler, machine shop, and emergency storage first; " +
+                  "then 1 part permanently locks every pad and orientation."
+                : model.CityServiceLinkConnected
+                    ? "The 1-part service link is permanently locked; layout " +
+                      "moves are closed."
+                    : model.PartsUnits <
+                      LastBearingBalanceV1.CityServiceLinkPartsUnits
+                    ? "The permanent link needs 1 reclaimed part; none remain."
+                    : "Permanent: locks all three pads and orientations for 1 " +
+                      "part; V0 has no demolition or refund.";
+            return Action(
+                LastBearingFieldDeskIntent.ConnectCityServiceLink,
+                model.CityServiceLinkConnected
+                    ? "SERVICE LINK · LOCKED"
+                    : "LOCK SERVICE LINK · 1 PART",
+                detail,
+                visible,
+                canUse && controller.CanConnectCityServiceLink,
+                LastBearingFieldDeskActionTone.Hazard);
+        }
+
+        private static LastBearingFieldDeskActionProjection
+            CreateStaffHumanAction(
+                LastBearingGameController controller,
+                LastBearingReadModel model,
+                bool canUse,
+                bool visible)
+        {
+            bool assigned = string.Equals(
+                model.CityServiceResidentId,
+                ResidentRoster.HumanResidentId,
+                StringComparison.Ordinal);
+            return Action(
+                LastBearingFieldDeskIntent.StaffCityServiceHuman,
+                assigned
+                    ? "HUMAN ASSIGNED · NEUTRAL"
+                    : "STAFF HUMAN · NEUTRAL",
+                !model.CityServiceLinkConnected
+                    ? "Lock the permanent service link before staffing."
+                    : assigned
+                        ? "The human cohort is the current neutral operator."
+                        : "Assign the human cohort to the one operator slot; " +
+                          "no V0 bonus.",
+                visible,
+                canUse && controller.CanAssignCityServiceHuman && !assigned,
+                LastBearingFieldDeskActionTone.Signal);
+        }
+
+        private static LastBearingFieldDeskActionProjection
+            CreateStaffRobotAction(
+                LastBearingGameController controller,
+                LastBearingReadModel model,
+                bool canUse,
+                bool visible)
+        {
+            bool assigned = string.Equals(
+                model.CityServiceResidentId,
+                ResidentRoster.RobotResidentId,
+                StringComparison.Ordinal);
+            return Action(
+                LastBearingFieldDeskIntent.StaffCityServiceRobot,
+                assigned
+                    ? "UTILITY ROBOT ASSIGNED · NEUTRAL"
+                    : "STAFF UTILITY ROBOT · NEUTRAL",
+                !model.CityServiceLinkConnected
+                    ? "Lock the permanent service link before staffing."
+                    : assigned
+                        ? "The utility robot is the current neutral operator."
+                        : "Assign the utility robot to the one operator slot; " +
+                          "no V0 bonus.",
+                visible,
+                canUse && controller.CanAssignCityServiceRobot && !assigned,
+                LastBearingFieldDeskActionTone.Signal);
+        }
+
+        private static LastBearingFieldDeskActionProjection
+            CreateAdvanceSledAction(
+                LastBearingGameController controller,
+                LastBearingReadModel model,
+                bool canUse,
+                bool visible)
+        {
+            string label = model.CityDeliveryStage switch
+            {
+                CityDeliveryStage.AtRecycler => "ADVANCE PARTS SLED",
+                CityDeliveryStage.InTransit => "DELIVER SLED · +2 PARTS",
+                _ => "DELIVERY COMPLETE · +2 PARTS"
+            };
+            return Action(
+                LastBearingFieldDeskIntent.AdvanceCityServiceSled,
+                label,
+                !model.CityServiceLinkConnected
+                    ? "Permanently lock the service link before moving the sled."
+                    : model.CityServiceResidentId == null
+                        ? "Assign one neutral human or utility-robot operator first."
+                        : "Two advances complete the route; the first completed " +
+                          "delivery returns exactly 2 parts once.",
+                visible,
+                canUse && controller.CanAdvanceCityServiceSled,
+                LastBearingFieldDeskActionTone.Primary);
+        }
+
+        private static LastBearingFieldDeskActionProjection
+            CreateCancelPreviewAction(
+                LastBearingGameController controller,
+                bool canUse,
+                bool visible)
+        {
+            return Action(
+                LastBearingFieldDeskIntent.CancelCityBuildingPreview,
+                "CANCEL PREVIEW",
+                "Discard only the unsaved preview; no parts are spent.",
+                visible,
+                canUse && controller.HasCityBuildingPreview,
+                LastBearingFieldDeskActionTone.Quiet);
         }
 
         private static LastBearingFieldDeskActionProjection Action(
@@ -841,30 +1140,150 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return "PRESSURE · RESERVE FALLING";
         }
 
-        private static string FormatHypothesis(
-            LastBearingCityGrammarHypothesis hypothesis)
+        private static bool IsServiceCellObjective(string objective)
         {
-            return hypothesis == LastBearingCityGrammarHypothesis.RestrainedSnapGrid
-                ? "TRIAL A · RESTRAINED SNAP-GRID"
-                : "TRIAL B · DISTRICT STAMP";
+            return objective == PlaceRecyclerObjective ||
+                   objective == PlaceMachineShopObjective ||
+                   objective == PlaceEmergencyStorageObjective ||
+                   objective == ConnectServiceLinkObjective ||
+                   objective == StaffServiceCellObjective ||
+                   objective == AdvanceServiceSledObjective;
         }
 
-        private static string FormatPiece(LastBearingCityTrialPiece piece)
+        private static LastBearingFieldDeskIntent SelectBuildingIntent(
+            CityBuildingKind building)
         {
-            return piece == LastBearingCityTrialPiece.Recycler
-                ? "RECYCLER ACTIVE"
-                : "WORKSHOP ACTIVE";
+            return building switch
+            {
+                CityBuildingKind.Recycler =>
+                    LastBearingFieldDeskIntent.SelectRecycler,
+                CityBuildingKind.MachineShop =>
+                    LastBearingFieldDeskIntent.SelectMachineShop,
+                CityBuildingKind.EmergencyStorage =>
+                    LastBearingFieldDeskIntent.SelectEmergencyStorage,
+                _ => LastBearingFieldDeskIntent.None
+            };
         }
 
-        private static string FormatDelivery(
-            LastBearingCityTrialDeliveryStage stage)
+        private static string CityBuildingLabel(CityBuildingKind building)
+        {
+            return building switch
+            {
+                CityBuildingKind.Recycler => "RECYCLER",
+                CityBuildingKind.MachineShop => "MACHINE SHOP",
+                CityBuildingKind.EmergencyStorage => "EMERGENCY STORAGE",
+                _ => "CITY BUILDING"
+            };
+        }
+
+        private static long CityBuildingCost(CityBuildingKind building)
+        {
+            return building switch
+            {
+                CityBuildingKind.Recycler =>
+                    LastBearingBalanceV1.RecyclerPlacementPartsUnits,
+                CityBuildingKind.MachineShop =>
+                    LastBearingBalanceV1.MachineShopPlacementPartsUnits,
+                CityBuildingKind.EmergencyStorage =>
+                    LastBearingBalanceV1.EmergencyStoragePlacementPartsUnits,
+                _ => 0L
+            };
+        }
+
+        private static string FormatPartsCost(long cost)
+        {
+            return cost + (cost == 1 ? " PART" : " PARTS");
+        }
+
+        private static string FormatReclaimedParts(long parts)
+        {
+            return parts +
+                   (parts == 1 ? " reclaimed part" : " reclaimed parts");
+        }
+
+        private static int CityBuildingPad(
+            LastBearingReadModel model,
+            CityBuildingKind building)
+        {
+            return building switch
+            {
+                CityBuildingKind.Recycler => model.RecyclerPadIndex,
+                CityBuildingKind.MachineShop => model.MachineShopPadIndex,
+                CityBuildingKind.EmergencyStorage =>
+                    model.EmergencyStoragePadIndex,
+                _ => -1
+            };
+        }
+
+        private static bool IsPadOccupiedByOther(
+            LastBearingReadModel model,
+            CityBuildingKind building,
+            int padIndex)
+        {
+            return (building != CityBuildingKind.Recycler &&
+                    model.RecyclerPadIndex == padIndex) ||
+                   (building != CityBuildingKind.MachineShop &&
+                    model.MachineShopPadIndex == padIndex) ||
+                   (building != CityBuildingKind.EmergencyStorage &&
+                    model.EmergencyStoragePadIndex == padIndex);
+        }
+
+        private static string FormatServiceCellState(
+            LastBearingReadModel model,
+            LastBearingGameController controller)
+        {
+            string preview = controller.HasCityBuildingPreview
+                ? "PREVIEW " +
+                  CityBuildingLabel(controller.CityPreviewBuilding) +
+                  " @ PAD " + (controller.CityPreviewPadIndex + 1) +
+                  " / " + (controller.CityPreviewQuarterTurns * 90) + "°"
+                : "NO PREVIEW";
+            return "RECYCLER " + FormatPad(model.RecyclerPadIndex) +
+                   " · SHOP " + FormatPad(model.MachineShopPadIndex) +
+                   " · STORAGE " + FormatPad(model.EmergencyStoragePadIndex) +
+                   " · LINK " +
+                   (model.CityServiceLinkConnected ? "LOCKED" : "OPEN") +
+                   " · OPERATOR " +
+                   FormatOperator(model.CityServiceResidentId) +
+                   " · " + FormatCityDelivery(model.CityDeliveryStage) +
+                   " · " + preview;
+        }
+
+        private static string FormatPad(int padIndex)
+        {
+            return padIndex < 0 ? "UNPLACED" : "PAD " + (padIndex + 1);
+        }
+
+        private static string FormatOperator(string? stableId)
+        {
+            if (string.Equals(
+                    stableId,
+                    ResidentRoster.HumanResidentId,
+                    StringComparison.Ordinal))
+            {
+                return "HUMAN · NEUTRAL";
+            }
+
+            if (string.Equals(
+                    stableId,
+                    ResidentRoster.RobotResidentId,
+                    StringComparison.Ordinal))
+            {
+                return "UTILITY ROBOT · NEUTRAL";
+            }
+
+            return stableId == null ? "UNSTAFFED" : stableId + " · NEUTRAL";
+        }
+
+        private static string FormatCityDelivery(CityDeliveryStage stage)
         {
             return stage switch
             {
-                LastBearingCityTrialDeliveryStage.AtRecycler => "SLED AT RECYCLER",
-                LastBearingCityTrialDeliveryStage.InTransit => "SLED IN TRANSIT",
-                LastBearingCityTrialDeliveryStage.DeliveredToWorkshop => "SLED AT WORKSHOP",
-                _ => "SLED STATE UNKNOWN",
+                CityDeliveryStage.AtRecycler => "SLED AT RECYCLER",
+                CityDeliveryStage.InTransit => "SLED IN TRANSIT",
+                CityDeliveryStage.DeliveredToWorkshop =>
+                    "SLED DELIVERED · +2 PARTS PAID ONCE",
+                _ => "SLED STATE UNKNOWN"
             };
         }
 

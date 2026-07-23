@@ -1,5 +1,6 @@
 #nullable enable
 
+using System.Reflection;
 using AtomicLandPirate.Simulation.LastBearing;
 using NUnit.Framework;
 using UnityEngine;
@@ -64,7 +65,26 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
-        public void AvailabilityTracksModeTrialAndPendingCommand()
+        public void IntentValuesRetainEighteenBindingContract()
+        {
+            Assert.That((int)LastBearingFieldDeskIntent.SelectRecycler, Is.EqualTo(3));
+            Assert.That((int)LastBearingFieldDeskIntent.SelectMachineShop, Is.EqualTo(4));
+            Assert.That((int)LastBearingFieldDeskIntent.SelectEmergencyStorage, Is.EqualTo(5));
+            Assert.That((int)LastBearingFieldDeskIntent.RotateCityBuilding, Is.EqualTo(6));
+            Assert.That((int)LastBearingFieldDeskIntent.PreviousCityPad, Is.EqualTo(7));
+            Assert.That((int)LastBearingFieldDeskIntent.NextCityPad, Is.EqualTo(8));
+            Assert.That((int)LastBearingFieldDeskIntent.PlaceCityBuilding, Is.EqualTo(9));
+            Assert.That((int)LastBearingFieldDeskIntent.ConnectCityServiceLink, Is.EqualTo(10));
+            Assert.That((int)LastBearingFieldDeskIntent.StaffCityServiceHuman, Is.EqualTo(11));
+            Assert.That((int)LastBearingFieldDeskIntent.StaffCityServiceRobot, Is.EqualTo(12));
+            Assert.That((int)LastBearingFieldDeskIntent.AdvanceCityServiceSled, Is.EqualTo(13));
+            Assert.That((int)LastBearingFieldDeskIntent.CancelCityBuildingPreview, Is.EqualTo(14));
+            Assert.That((int)LastBearingFieldDeskIntent.ActivateInfrastructure, Is.EqualTo(15));
+            Assert.That((int)LastBearingFieldDeskIntent.TogglePause, Is.EqualTo(24));
+        }
+
+        [Test]
+        public void WorkingServiceCellTracksObjectivesCostsLockAndDelivery()
         {
             LastBearingGameController controller =
                 BuildController(ColonyComposition.Mixed);
@@ -75,47 +95,191 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 LastBearingFieldDeskIntent.InspectCityNeed,
                 expected: true);
             controller.InspectCityNeed();
-            LastBearingFieldDeskProjection inspection =
+            LastBearingFieldDeskProjection recyclerOrder =
                 LastBearingFieldDeskPresenter.Present(controller);
-            Assert.That(inspection.Survey.IsVisible, Is.True);
+            Assert.That(recyclerOrder.Survey.IsVisible, Is.True);
             Assert.That(
-                inspection.PrimaryAction.Intent,
-                Is.EqualTo(LastBearingFieldDeskIntent.SelectTrialA));
+                recyclerOrder.PrimaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.SelectRecycler));
             Assert.That(
-                inspection.SecondaryAction.Intent,
-                Is.EqualTo(LastBearingFieldDeskIntent.SelectTrialB));
-            Assert.That(inspection.PrimaryAction.Detail, Is.Not.Empty);
-            Assert.That(inspection.SecondaryAction.Detail, Is.Not.Empty);
+                recyclerOrder.PrimaryAction.Label,
+                Does.Contain("2 PARTS"));
             Assert.That(
-                inspection.SecondaryAction.Detail,
-                Is.Not.EqualTo(inspection.PrimaryAction.Detail));
-            AssertAvailable(controller, LastBearingFieldDeskIntent.SelectTrialA, true);
-            AssertAvailable(controller, LastBearingFieldDeskIntent.SelectTrialB, true);
-
-            controller.OpenGarageBay();
-            LastBearingFieldDeskProjection garage =
-                LastBearingFieldDeskPresenter.Present(controller);
-            Assert.That(garage.PrimaryAction.IsVisible, Is.True);
-            Assert.That(garage.PrimaryAction.IsEnabled, Is.False);
-            AssertAvailable(controller, LastBearingFieldDeskIntent.SelectTrialA, false);
-
-            controller.ShowCityOverview();
-            CompleteDistrictObservation(controller);
+                recyclerOrder.Survey.Evidence,
+                Does.Contain("MOVES FREE BEFORE LINK"));
+            Assert.That(
+                recyclerOrder.Survey.Evidence,
+                Does.Contain("LINK LOCKS PERMANENTLY FOR 1 PART"));
+            Assert.That(
+                recyclerOrder.Survey.Evidence,
+                Does.Contain("OPERATOR IS NEUTRAL"));
+            Assert.That(
+                recyclerOrder.Survey.Evidence,
+                Does.Contain("+2 PARTS ONCE"));
             AssertAvailable(
                 controller,
-                LastBearingFieldDeskIntent.ActivateInfrastructure,
+                LastBearingFieldDeskIntent.SelectRecycler,
                 true);
-            controller.ActivateInfrastructure();
+
+            controller.OpenGarageBay();
+            AssertAvailable(
+                controller,
+                LastBearingFieldDeskIntent.SelectRecycler,
+                false);
+
+            controller.ShowCityOverview();
+            controller.SelectCityBuildingPreview(CityBuildingKind.Recycler);
+            LastBearingFieldDeskProjection recyclerPreview =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                recyclerPreview.PrimaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.PlaceCityBuilding));
+            Assert.That(recyclerPreview.PrimaryAction.Label, Does.Contain("2 PARTS"));
+            AssertAvailable(
+                controller,
+                LastBearingFieldDeskIntent.RotateCityBuilding,
+                true);
+            AssertAvailable(
+                controller,
+                LastBearingFieldDeskIntent.PreviousCityPad,
+                true);
+            AssertAvailable(
+                controller,
+                LastBearingFieldDeskIntent.NextCityPad,
+                true);
+            AssertAvailable(
+                controller,
+                LastBearingFieldDeskIntent.CancelCityBuildingPreview,
+                true);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            long startingParts = controller.ReadModel!.PartsUnits;
+            PlaceAndAccept(controller);
+            Assert.That(
+                controller.ReadModel!.NextObjective,
+                Is.EqualTo("place-city-machine-shop"));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(startingParts - 2));
+
+            LastBearingFieldDeskProjection shopOrder =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                shopOrder.PrimaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.SelectMachineShop));
+            Assert.That(shopOrder.PrimaryAction.Label, Does.Contain("3 PARTS"));
+            controller.SelectCityBuildingPreview(CityBuildingKind.MachineShop);
+            PlaceAndAccept(controller);
+            Assert.That(
+                controller.ReadModel.NextObjective,
+                Is.EqualTo("place-city-emergency-storage"));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(startingParts - 5));
+
+            LastBearingFieldDeskProjection storageOrder =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                storageOrder.PrimaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.SelectEmergencyStorage));
+            Assert.That(storageOrder.PrimaryAction.Label, Does.Contain("1 PART"));
+            controller.SelectCityBuildingPreview(
+                CityBuildingKind.EmergencyStorage);
+            PlaceAndAccept(controller);
+            Assert.That(
+                controller.ReadModel.NextObjective,
+                Is.EqualTo("connect-city-service-link"));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(startingParts - 6));
+
+            LastBearingFieldDeskProjection linkOrder =
+                LastBearingFieldDeskPresenter.Present(controller);
+            AssertAvailable(
+                controller,
+                LastBearingFieldDeskIntent.ConnectCityServiceLink,
+                true);
+            Assert.That(linkOrder.PrimaryAction.Label, Does.Contain("1 PART"));
+            Assert.That(linkOrder.PrimaryAction.Detail, Does.Contain("Permanent"));
+
+            controller.SelectCityBuildingPreview(CityBuildingKind.Recycler);
+            AssertAvailable(
+                controller,
+                LastBearingFieldDeskIntent.ConnectCityServiceLink,
+                false);
+            controller.CancelCityBuildingPreview();
+            AssertAvailable(
+                controller,
+                LastBearingFieldDeskIntent.ConnectCityServiceLink,
+                true);
+
+            controller.ConnectCityServiceLink();
             LastBearingFieldDeskProjection pending =
                 LastBearingFieldDeskPresenter.Present(controller);
             Assert.That(controller.HasPendingPlayerCommands, Is.True);
             Assert.That(pending.PrimaryAction.IsEnabled, Is.False);
             Assert.That(pending.SaveAction.IsEnabled, Is.False);
+            SimulateOneTick(controller);
+            Assert.That(controller.ReadModel.CityServiceLinkConnected, Is.True);
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(startingParts - 7));
+            Assert.That(
+                LastBearingFieldDeskPresenter.Present(controller)
+                    .Survey.ConnectLink.Label,
+                Is.EqualTo("SERVICE LINK · LOCKED"));
+            Assert.That(
+                controller.ReadModel.NextObjective,
+                Is.EqualTo("staff-city-service-cell"));
+
+            LastBearingFieldDeskProjection staffOrder =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                staffOrder.PrimaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.StaffCityServiceHuman));
+            Assert.That(
+                staffOrder.SecondaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.StaffCityServiceRobot));
+            Assert.That(staffOrder.PrimaryAction.Detail, Does.Contain("no V0 bonus"));
+            Assert.That(staffOrder.SecondaryAction.Detail, Does.Contain("no V0 bonus"));
+            controller.AssignCityServiceResident(ResidentRoster.RobotResidentId);
+            SimulateOneTick(controller);
+            Assert.That(
+                controller.ReadModel.CityServiceResidentId,
+                Is.EqualTo(ResidentRoster.RobotResidentId));
+            Assert.That(
+                controller.ReadModel.NextObjective,
+                Is.EqualTo("advance-city-service-sled"));
+
+            long beforeDelivery = controller.ReadModel.PartsUnits;
+            LastBearingFieldDeskProjection sledOrder =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                sledOrder.PrimaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.AdvanceCityServiceSled));
+            controller.AdvanceCityServiceSled();
+            SimulateOneTick(controller);
+            Assert.That(
+                controller.ReadModel.CityDeliveryStage,
+                Is.EqualTo(CityDeliveryStage.InTransit));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(beforeDelivery));
+            LastBearingFieldDeskProjection deliveryOrder =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(deliveryOrder.PrimaryAction.Label, Does.Contain("+2 PARTS"));
+            controller.AdvanceCityServiceSled();
+            SimulateOneTick(controller);
+            Assert.That(controller.ReadModel.CityDeliveryCount, Is.EqualTo(1));
+            Assert.That(controller.ReadModel.SliceInfrastructureActive, Is.True);
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(beforeDelivery + 2));
+            Assert.That(
+                LastBearingFieldDeskPresenter.Present(controller).Survey.IsVisible,
+                Is.False);
             AssertAvailable(
                 controller,
                 LastBearingFieldDeskIntent.ActivateInfrastructure,
                 false);
-            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
         }
 
         private LastBearingGameController BuildController(
@@ -129,16 +293,23 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             return controller;
         }
 
-        private static void CompleteDistrictObservation(
+        private static void PlaceAndAccept(
             LastBearingGameController controller)
         {
-            controller.SelectCityGrammarHypothesis(
-                LastBearingCityGrammarHypothesis.DistrictStamp);
-            controller.ManipulateCityGrammarPrimary();
-            controller.AdvanceCityGrammarDelivery();
-            controller.AdvanceCityGrammarDelivery();
-            controller.RecordCityGrammarPathRead(clear: true);
-            Assert.That(controller.HasCompletedCityGrammarObservation, Is.True);
+            controller.PlaceCityBuildingPreview();
+            Assert.That(controller.HasPendingPlayerCommands, Is.True);
+            SimulateOneTick(controller);
+            Assert.That(controller.HasPendingPlayerCommands, Is.False);
+        }
+
+        private static void SimulateOneTick(
+            LastBearingGameController controller)
+        {
+            MethodInfo? simulate = typeof(LastBearingGameController).GetMethod(
+                "SimulateOneTick",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.That(simulate, Is.Not.Null);
+            simulate!.Invoke(controller, null);
         }
 
         private static void AssertAvailable(

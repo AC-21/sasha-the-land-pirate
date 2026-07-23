@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using AtomicLandPirate.Simulation.LastBearing;
 using NUnit.Framework;
 
@@ -54,11 +55,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             LastBearingPermitJobPresentation infrastructure =
                 LastBearingPermitJobPresenter.Present(assigned, true);
-            Assert.That(infrastructure.Headline, Does.Contain("service-cell trial"));
+            Assert.That(infrastructure.Headline, Does.Contain("Place the recycler"));
 
-            state = ApplyOne(
+            state = CompleteWorkingServiceCell(
                 state,
-                sequence => new ActivateSliceInfrastructureCommand(sequence));
+                ResidentRoster.RobotResidentId);
             LastBearingPermitJobPresentation plan =
                 Present(state, cityNeedInspected: true);
             Assert.That(
@@ -66,8 +67,119 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(LastBearingPermitJobChapter.Preparation));
             Assert.That(plan.ShowRecommendedFirstRunCue, Is.True);
             Assert.That(plan.RecommendedFirstRunCue, Does.Contain("CIVIC BUFFER + WINCH"));
+            Assert.That(plan.RecommendedFirstRunCue, Does.Contain("RECOMMENDED FIRST RUN"));
+            Assert.That(plan.RecommendedFirstRunCue, Does.Contain("Nothing is auto-selected"));
             Assert.That(plan.IsFinale, Is.False);
             AssertLegible(plan);
+        }
+
+        [Test]
+        public void WorkingServiceCellObjectivesExposeExactCostsControlsAndConsequences()
+        {
+            LastBearingState state = LastBearingScenarioFactory.CreateInitial(
+                ColonyComposition.Mixed,
+                3106);
+            state = ApplyOne(
+                state,
+                sequence => new AssignResidentCommand(
+                    sequence,
+                    ResidentRoster.HumanResidentId));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "place-city-recycler",
+                "Place the recycler",
+                "SELECT RECYCLER · 2 PARTS",
+                "2 reclaimed parts");
+            state = ApplyOne(
+                state,
+                sequence => new PlaceCityBuildingCommand(
+                    sequence,
+                    CityBuildingKind.Recycler,
+                    0,
+                    1));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "place-city-machine-shop",
+                "Place the machine shop",
+                "SELECT MACHINE SHOP · 3 PARTS",
+                "3 reclaimed-part");
+            state = ApplyOne(
+                state,
+                sequence => new PlaceCityBuildingCommand(
+                    sequence,
+                    CityBuildingKind.MachineShop,
+                    1,
+                    2));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "place-city-emergency-storage",
+                "Place emergency storage",
+                "SELECT EMERGENCY STORAGE · 1 PART",
+                "1 reclaimed-part");
+            state = ApplyOne(
+                state,
+                sequence => new PlaceCityBuildingCommand(
+                    sequence,
+                    CityBuildingKind.EmergencyStorage,
+                    2,
+                    3));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "connect-city-service-link",
+                "Lock the service link",
+                "LOCK SERVICE LINK · 1 PART",
+                "permanently");
+            state = ApplyOne(
+                state,
+                sequence => new ConnectCityServiceLinkCommand(sequence));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "staff-city-service-cell",
+                "Staff the machine-shop slot",
+                "STAFF HUMAN · NEUTRAL",
+                "mechanically neutral",
+                "STAFF UTILITY ROBOT · NEUTRAL");
+            state = ApplyOne(
+                state,
+                sequence => new AssignCityServiceResidentCommand(
+                    sequence,
+                    ResidentRoster.RobotResidentId));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "advance-city-service-sled",
+                "Send the calibration sled",
+                "ADVANCE PARTS SLED",
+                "returns no parts yet");
+            state = ApplyOne(
+                state,
+                sequence => new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.AtRecycler));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "advance-city-service-sled",
+                "Deliver the sled to the workshop",
+                "DELIVER SLED · +2 PARTS",
+                "returns exactly 2 reclaimed parts once");
+            state = ApplyOne(
+                state,
+                sequence => new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.InTransit));
+
+            LastBearingPermitJobPresentation preparation =
+                Present(state, cityNeedInspected: true);
+            Assert.That(
+                preparation.Chapter,
+                Is.EqualTo(LastBearingPermitJobChapter.Preparation));
+            Assert.That(preparation.Headline, Does.Contain("Choose the bargain"));
         }
 
         [Test]
@@ -90,6 +202,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     LastBearingBalanceV1.WinchFabricationTicks));
             Assert.That(preparing.PhaseProgressCurrent, Is.GreaterThan(0));
             Assert.That(preparing.ProgressLabel, Does.Contain("remaining"));
+            Assert.That(
+                preparing.ProgressLabel,
+                Does.Contain("keep the settlement unpaused"));
 
             state = AdvanceUntil(
                 state,
@@ -98,6 +213,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(manifest.Headline, Does.Contain("manifest is ready"));
             Assert.That(manifest.PhaseProgressCurrent, Is.EqualTo(1));
             Assert.That(manifest.PhaseProgressTarget, Is.EqualTo(1));
+            Assert.That(manifest.ProgressLabel, Does.StartWith("Click COMMIT MANIFEST"));
+            Assert.That(manifest.ProgressLabel, Does.Contain("chase driving begins"));
 
             state = Depart(state);
             LastBearingPermitJobPresentation outbound = Present(state, true);
@@ -105,6 +222,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 outbound.Chapter,
                 Is.EqualTo(LastBearingPermitJobChapter.Outbound));
             Assert.That(outbound.Headline, Does.Contain("Drive"));
+            Assert.That(outbound.ProgressLabel, Does.StartWith("Hold W / right trigger"));
+            Assert.That(outbound.Detail, Does.Contain("costs vehicle condition"));
 
             state = AdvanceUntil(
                 state,
@@ -113,6 +232,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingPermitJobPresentation wreckLine = Present(state, true);
             Assert.That(wreckLine.Headline, Does.Contain("winch"));
             Assert.That(wreckLine.HasMeasuredPhaseProgress, Is.True);
+            Assert.That(wreckLine.ProgressLabel, Does.StartWith("Press E / gamepad south"));
+            Assert.That(wreckLine.ProgressLabel, Does.Contain("pump rotor"));
             state = ApplyOne(
                 state,
                 sequence => new OperateWreckLineModuleCommand(
@@ -125,6 +246,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 drive: true);
             LastBearingPermitJobPresentation recovery = Present(state, true);
             Assert.That(recovery.Headline, Does.Contain("recovery bridle"));
+            Assert.That(recovery.ProgressLabel, Does.StartWith("Press E / gamepad south"));
+            Assert.That(recovery.ProgressLabel, Does.Contain("open the depot decision"));
             state = ApplyOne(
                 state,
                 sequence => new OperateDepotRecoveryPointCommand(sequence));
@@ -136,6 +259,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(depot.ShowRecommendedFirstRunCue, Is.True);
             Assert.That(depot.RecommendedFirstRunCue, Does.Contain("TAKE THE CERAMIC BEARING"));
             Assert.That(depot.RecommendedFirstRunCue, Does.Contain("One Good Batch"));
+            Assert.That(depot.ProgressLabel, Does.StartWith("Click COOPERATE"));
+            Assert.That(depot.ProgressLabel, Does.Contain("click TAKE"));
 
             state = ApplyOne(
                 state,
@@ -154,6 +279,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 sequence => new LoadDepotRepairCargoCommand(sequence));
             LastBearingPermitJobPresentation payload = Present(state, true);
             Assert.That(payload.Headline, Does.Contain("Seal the consequences"));
+            Assert.That(payload.ProgressLabel, Does.StartWith("Click FREEZE PAYLOAD"));
             state = ApplyOne(
                 state,
                 sequence => new FreezeReturnPayloadCommand(
@@ -167,7 +293,117 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(LastBearingPermitJobChapter.Returning));
             Assert.That(returning.HasMeasuredPhaseProgress, Is.True);
             Assert.That(returning.ProgressLabel, Does.Contain("route ticks"));
+            Assert.That(returning.ProgressLabel, Does.StartWith("Hold W / right trigger"));
             AssertLegible(returning);
+        }
+
+        [Test]
+        public void NonCityHudCopyShowsExactControlsAndConsequencesWithoutMutation()
+        {
+            LastBearingState state = CreatePreparation(
+                PreparationChoice.CivicBuffer,
+                VehicleModule.WinchAssembly,
+                worldSeed: 3105,
+                installPatchworkSkidPlate: true);
+            string before = LastBearingCanonicalCodec.ComputeSha256(state);
+            string recommendedModule = InvokeHudString(
+                "BuildGarageModuleLabel",
+                PreparationChoice.CivicBuffer,
+                VehicleModule.WinchAssembly);
+            string alternateModule = InvokeHudString(
+                "BuildGarageModuleLabel",
+                PreparationChoice.WorkshopPush,
+                VehicleModule.WinchAssembly);
+            Assert.That(recommendedModule, Does.StartWith("RECOMMENDED FIRST RUN"));
+            Assert.That(recommendedModule, Does.Contain("PUMP ROTOR"));
+            Assert.That(alternateModule, Does.Not.Contain("RECOMMENDED FIRST RUN"));
+            Assert.That(
+                LastBearingCanonicalCodec.ComputeSha256(state),
+                Is.EqualTo(before),
+                "module-label projection mutated canonical state");
+
+            state = AdvanceUntil(
+                state,
+                model => model.PreparationPhase == PreparationPhase.Ready);
+            state = Depart(state);
+            string outboundHash = LastBearingCanonicalCodec.ComputeSha256(state);
+            LastBearingReadModel outbound = LastBearingReadModel.FromState(state);
+            string drivingControls = InvokeHudString(
+                "BuildControlsText",
+                outbound,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true);
+            string outboundLedger = InvokeHudString(
+                "BuildJourneyLedgerText",
+                outbound);
+            Assert.That(drivingControls, Does.Contain("Hold W / right trigger"));
+            Assert.That(drivingControls, Does.Contain("A/D / left stick"));
+            Assert.That(drivingControls, Does.Contain("costs rig condition"));
+            Assert.That(drivingControls, Does.Contain("R / gamepad north"));
+            Assert.That(outboundLedger, Does.StartWith("ROUTE  outbound"));
+            Assert.That(outboundLedger, Does.Contain("RIG  winch fitted"));
+            Assert.That(outboundLedger, Does.Contain("patchwork skid plate"));
+            Assert.That(
+                outboundLedger,
+                Does.Contain(
+                    "+" +
+                    LastBearingBalanceV1.PatchworkSkidPlateProtectionMilli +
+                    " protection"));
+            Assert.That(outboundLedger, Does.Contain("CARGO  pump rotor waiting at the Wreck Line"));
+            Assert.That(outboundLedger, Does.Contain("CONSEQUENCE  turbine failing"));
+            Assert.That(
+                LastBearingCanonicalCodec.ComputeSha256(state),
+                Is.EqualTo(outboundHash),
+                "driving copy projection mutated canonical state");
+
+            state = AdvanceUntil(
+                state,
+                model => model.IsDepotApproachRecoveryAvailable,
+                drive: true,
+                operateWreckLine: true);
+            state = ApplyOne(
+                state,
+                sequence => new OperateDepotRecoveryPointCommand(sequence));
+            state = ApplyOne(
+                state,
+                sequence => new ResolveDepotCommand(
+                    sequence,
+                    EncounterChoice.TakeBearing));
+            LastBearingReadModel awaitingLoad = LastBearingReadModel.FromState(state);
+            string loadControls = InvokeHudString(
+                "BuildControlsText",
+                awaitingLoad,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true);
+            Assert.That(loadControls, Does.StartWith("Press E / gamepad south"));
+            Assert.That(loadControls, Does.Contain("ceramic bearing"));
+
+            state = ApplyOne(
+                state,
+                sequence => new LoadDepotRepairCargoCommand(sequence));
+            string loadedHash = LastBearingCanonicalCodec.ComputeSha256(state);
+            LastBearingReadModel loaded = LastBearingReadModel.FromState(state);
+            string loadedLedger = InvokeHudString(
+                "BuildJourneyLedgerText",
+                loaded);
+            Assert.That(loadedLedger, Does.Contain("pump rotor on Sasha's scout"));
+            Assert.That(loadedLedger, Does.Contain("ceramic bearing on Sasha's scout"));
+            Assert.That(loadedLedger, Does.Contain("grievance 40"));
+            Assert.That(loadedLedger, Does.Contain("future access consequence pending"));
+            Assert.That(
+                LastBearingCanonicalCodec.ComputeSha256(state),
+                Is.EqualTo(loadedHash),
+                "loaded-cargo projection mutated canonical state");
         }
 
         [TestCase(
@@ -233,7 +469,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingPermitJobPresentation selection = Present(state, true);
             Assert.That(selection.Headline, Does.Contain("fills the range tank"));
             Assert.That(selection.Detail, Does.Contain("water or fuel"));
-            Assert.That(selection.ProgressLabel, Does.Contain("Load water or fuel"));
+            Assert.That(selection.ProgressLabel, Does.Contain("LOAD WATER"));
+            Assert.That(selection.ProgressLabel, Does.Contain("LOAD FUEL"));
+            Assert.That(selection.ProgressLabel, Does.Contain("return payload"));
             Assert.That(selection.IsFinale, Is.False);
 
             state = ApplyOne(
@@ -243,7 +481,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     LiquidCargoKind.Fuel));
             LastBearingPermitJobPresentation payload = Present(state, true);
             Assert.That(payload.Headline, Does.Contain("Seal the consequences"));
-            Assert.That(payload.ProgressLabel, Does.Contain("Freeze"));
+            Assert.That(payload.ProgressLabel, Does.Contain("FREEZE PAYLOAD"));
             AssertLegible(payload);
         }
 
@@ -326,7 +564,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingPermitJobPresentation midpoint = Present(state, true);
             Assert.That(midpoint.PhaseProgressCurrent, Is.EqualTo(60));
             Assert.That(midpoint.PhaseProgressTarget, Is.EqualTo(120));
-            Assert.That(midpoint.ProgressLabel, Is.EqualTo("60 / 120 settlement ticks"));
+            Assert.That(midpoint.ProgressLabel, Does.StartWith("60 / 120 settlement ticks"));
+            Assert.That(midpoint.ProgressLabel, Does.Contain("keep the settlement unpaused"));
+            Assert.That(midpoint.ProgressLabel, Does.Contain("workshop output"));
 
             state = Advance(state, 60);
             LastBearingPermitJobPresentation barter = Present(state, true);
@@ -486,10 +726,109 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             AssertLegible(serviced);
         }
 
+        private static void AssertWorkingServiceCellGuidance(
+            LastBearingState state,
+            string expectedObjective,
+            string expectedHeadline,
+            string expectedControl,
+            string expectedConsequence,
+            params string[] additionalControls)
+        {
+            string before = LastBearingCanonicalCodec.ComputeSha256(state);
+            LastBearingReadModel model = LastBearingReadModel.FromState(state);
+            Assert.That(model.NextObjective, Is.EqualTo(expectedObjective));
+
+            LastBearingPermitJobPresentation presentation =
+                LastBearingPermitJobPresenter.Present(
+                    model,
+                    cityNeedInspected: true);
+            string hudControls = InvokeHudString(
+                "BuildControlsText",
+                model,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true);
+
+            Assert.That(
+                presentation.Chapter,
+                Is.EqualTo(LastBearingPermitJobChapter.CityCrisis));
+            Assert.That(presentation.Headline, Does.Contain(expectedHeadline));
+            Assert.That(
+                presentation.ProgressLabel,
+                Does.Contain(expectedControl));
+            Assert.That(
+                presentation.Detail,
+                Does.Contain(expectedConsequence));
+            Assert.That(hudControls, Does.Contain(expectedControl));
+            foreach (string additionalControl in additionalControls)
+            {
+                Assert.That(
+                    presentation.ProgressLabel,
+                    Does.Contain(additionalControl));
+                Assert.That(hudControls, Does.Contain(additionalControl));
+            }
+
+            AssertLegible(presentation);
+            Assert.That(
+                LastBearingCanonicalCodec.ComputeSha256(state),
+                Is.EqualTo(before),
+                expectedObjective + " guidance mutated canonical state");
+        }
+
+        private static LastBearingState CompleteWorkingServiceCell(
+            LastBearingState state,
+            string operatorStableId)
+        {
+            state = ApplyOne(
+                state,
+                sequence => new PlaceCityBuildingCommand(
+                    sequence,
+                    CityBuildingKind.Recycler,
+                    0,
+                    0));
+            state = ApplyOne(
+                state,
+                sequence => new PlaceCityBuildingCommand(
+                    sequence,
+                    CityBuildingKind.MachineShop,
+                    1,
+                    0));
+            state = ApplyOne(
+                state,
+                sequence => new PlaceCityBuildingCommand(
+                    sequence,
+                    CityBuildingKind.EmergencyStorage,
+                    2,
+                    0));
+            state = ApplyOne(
+                state,
+                sequence => new ConnectCityServiceLinkCommand(sequence));
+            state = ApplyOne(
+                state,
+                sequence => new AssignCityServiceResidentCommand(
+                    sequence,
+                    operatorStableId));
+            state = ApplyOne(
+                state,
+                sequence => new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.AtRecycler));
+            return ApplyOne(
+                state,
+                sequence => new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.InTransit));
+        }
+
         private static LastBearingState CreatePreparation(
             PreparationChoice preparation,
             VehicleModule module,
-            int worldSeed)
+            int worldSeed,
+            bool installPatchworkSkidPlate = false)
         {
             LastBearingState state = LastBearingScenarioFactory.CreateInitial(
                 ColonyComposition.Mixed,
@@ -500,6 +839,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     sequence,
                     ResidentRoster.HumanResidentId),
                 sequence => new ActivateSliceInfrastructureCommand(sequence));
+            if (installPatchworkSkidPlate)
+            {
+                state = ApplyOne(
+                    state,
+                    sequence => new InstallRigUpgradeCommand(
+                        sequence,
+                        RigUpgrade.PatchworkSkidPlate));
+            }
+
             return ApplyMany(
                 state,
                 sequence => new SelectPreparationCommand(
@@ -694,12 +1042,31 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 cityNeedInspected);
         }
 
+        private static string InvokeHudString(
+            string methodName,
+            params object[] arguments)
+        {
+            MethodInfo? method = typeof(LastBearingHud).GetMethod(
+                methodName,
+                BindingFlags.NonPublic | BindingFlags.Static);
+            Assert.That(method, Is.Not.Null, methodName + " test seam is missing");
+            object? result = method!.Invoke(null, arguments);
+            Assert.That(result, Is.TypeOf<string>());
+            return (string)result!;
+        }
+
         private static void AssertLegible(
             LastBearingPermitJobPresentation presentation)
         {
             string[] rawObjectives =
             {
                 "activate-slice-infrastructure",
+                "place-city-recycler",
+                "place-city-machine-shop",
+                "place-city-emergency-storage",
+                "connect-city-service-link",
+                "staff-city-service-cell",
+                "advance-city-service-sled",
                 "complete-preparation",
                 "drive-to-depot",
                 "resolve-depot",

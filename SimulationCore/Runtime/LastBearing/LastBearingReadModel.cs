@@ -27,6 +27,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
             Composition = state.Composition;
             Residents = state.Roster.Residents;
             AssignedResidentId = state.AssignedResidentId;
+            RecyclerPadIndex = state.RecyclerPadIndex;
+            RecyclerQuarterTurns = state.RecyclerQuarterTurns;
+            MachineShopPadIndex = state.MachineShopPadIndex;
+            MachineShopQuarterTurns = state.MachineShopQuarterTurns;
+            EmergencyStoragePadIndex = state.EmergencyStoragePadIndex;
+            EmergencyStorageQuarterTurns = state.EmergencyStorageQuarterTurns;
+            CityServiceLinkConnected = state.CityServiceLinkConnected;
+            CityServiceResidentId = state.CityServiceResidentId;
+            CityDeliveryStage = state.CityDeliveryStage;
+            CityDeliveryCount = state.CityDeliveryCount;
+            SliceInfrastructureActive = state.SliceInfrastructureActive;
             WaterMilli = state.WaterMilli;
             WaterTrendMilliPerSettlementTick = ComputeWaterTrend(state);
             IsWaterRecovering = WaterTrendMilliPerSettlementTick > 0;
@@ -43,6 +54,23 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     - state.PreparationElapsedTicks);
             PlannedModule = state.PlannedModule;
             VehicleModule = state.VehicleModule;
+            RigUpgrade = state.RigUpgrade;
+            PatchworkSkidPlatePartsCostUnits =
+                LastBearingBalanceV1.PatchworkSkidPlatePartsCostUnits;
+            PatchworkSkidPlateProtectionMilli =
+                LastBearingBalanceV1.PatchworkSkidPlateProtectionMilli;
+            IsPatchworkSkidPlateInstallAvailable =
+                ComputePatchworkSkidPlateInstallAvailable(state);
+            VehicleModule projectedModule = state.VehicleModule
+                != VehicleModule.None
+                ? state.VehicleModule
+                : state.PlannedModule;
+            ProjectedRoundTripConditionLossMilli =
+                projectedModule == VehicleModule.None
+                    ? 0
+                    : LastBearingBalanceV1.RouteConditionLoss(
+                        projectedModule,
+                        state.RigUpgrade);
             ExpeditionPhase = state.ExpeditionPhase;
             TransactionPhase = state.TransactionPhase;
             RouteKind = state.RouteKind;
@@ -148,6 +176,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public IReadOnlyList<ResidentRecord> Residents { get; private set; } =
             Array.Empty<ResidentRecord>();
         public string? AssignedResidentId { get; private set; }
+        public int RecyclerPadIndex { get; private set; }
+        public int RecyclerQuarterTurns { get; private set; }
+        public int MachineShopPadIndex { get; private set; }
+        public int MachineShopQuarterTurns { get; private set; }
+        public int EmergencyStoragePadIndex { get; private set; }
+        public int EmergencyStorageQuarterTurns { get; private set; }
+        public bool CityServiceLinkConnected { get; private set; }
+        public string? CityServiceResidentId { get; private set; }
+        public CityDeliveryStage CityDeliveryStage { get; private set; }
+        public int CityDeliveryCount { get; private set; }
+        public bool SliceInfrastructureActive { get; private set; }
         public long WaterMilli { get; private set; }
         public long WaterTrendMilliPerSettlementTick { get; private set; }
         public bool IsWaterRecovering { get; private set; }
@@ -161,6 +200,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long PreparationRemainingTicks { get; private set; }
         public VehicleModule PlannedModule { get; private set; }
         public VehicleModule VehicleModule { get; private set; }
+        public RigUpgrade RigUpgrade { get; private set; }
+        public long PatchworkSkidPlatePartsCostUnits { get; private set; }
+        public long PatchworkSkidPlateProtectionMilli { get; private set; }
+        public bool IsPatchworkSkidPlateInstallAvailable { get; private set; }
+        public long ProjectedRoundTripConditionLossMilli { get; private set; }
         public ExpeditionPhase ExpeditionPhase { get; private set; }
         public TransactionPhase TransactionPhase { get; private set; }
         public RouteKind RouteKind { get; private set; }
@@ -298,7 +342,35 @@ namespace AtomicLandPirate.Simulation.LastBearing
         {
             if (!state.SliceInfrastructureActive)
             {
-                return "activate-slice-infrastructure";
+                if (state.RecyclerPadIndex
+                    == LastBearingState.UnplacedCityPadIndex)
+                {
+                    return "place-city-recycler";
+                }
+
+                if (state.MachineShopPadIndex
+                    == LastBearingState.UnplacedCityPadIndex)
+                {
+                    return "place-city-machine-shop";
+                }
+
+                if (state.EmergencyStoragePadIndex
+                    == LastBearingState.UnplacedCityPadIndex)
+                {
+                    return "place-city-emergency-storage";
+                }
+
+                if (!state.CityServiceLinkConnected)
+                {
+                    return "connect-city-service-link";
+                }
+
+                if (state.CityServiceResidentId == null)
+                {
+                    return "staff-city-service-cell";
+                }
+
+                return "advance-city-service-sled";
             }
 
             if (state.AssignedResidentId == null)
@@ -431,6 +503,18 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.HeavyCargoCustody == HeavyCargoCustody.Settlement
                 && state.TowSlotsUsed == 1
                 && state.PartsUnits >= requiredParts;
+        }
+
+        private static bool ComputePatchworkSkidPlateInstallAvailable(
+            LastBearingState state)
+        {
+            return state.RigUpgrade == RigUpgrade.None
+                && state.SliceInfrastructureActive
+                && state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.None
+                && state.PartsUnits
+                    >= LastBearingBalanceV1
+                        .PatchworkSkidPlatePartsCostUnits;
         }
 
         private static bool ComputeRepairCargoLoadAvailable(

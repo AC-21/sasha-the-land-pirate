@@ -34,7 +34,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const string DecodeUnknownVersionCode =
             "LB_CORE_DECODE_UNKNOWN_VERSION";
 
-        private const ushort CodecVersion = 3;
+        private const ushort CodecVersion = 5;
+        private const ushort LegacyCodecVersionV4 = 4;
+        private const ushort LegacyCodecVersionV3 = 3;
         private const int MaximumCanonicalBytes = 1_048_576;
         private static readonly byte[] Magic =
             Encoding.ASCII.GetBytes("ALPLBC01");
@@ -47,7 +49,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             LastBearingInvariants.Validate(state);
-            return EncodeInternal(state, includeRepresentation: true);
+            return EncodeVersion(
+                state,
+                CodecVersion,
+                LastBearingState.CurrentSchemaVersion,
+                LastBearingBalanceV1.Revision,
+                includeCityConstruction: true,
+                includeRigUpgrade: true,
+                includeRepresentation: true);
         }
 
         public static LastBearingDecodeResult TryDecode(byte[] bytes)
@@ -67,7 +76,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 var reader = new CanonicalReader(bytes);
                 reader.RequireBytes(Magic);
                 var version = reader.ReadUInt16();
-                if (version != CodecVersion)
+                if (version != CodecVersion
+                    && version != LegacyCodecVersionV4
+                    && version != LegacyCodecVersionV3)
                 {
                     return Failure(DecodeUnknownVersionCode);
                 }
@@ -108,6 +119,21 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 builder.AssignedResidentId = reader.ReadNullableString();
                 builder.PauseCause = reader.ReadEnum<PauseCause>();
                 builder.SliceInfrastructureActive = reader.ReadBoolean();
+                if (version >= LegacyCodecVersionV4)
+                {
+                    builder.RecyclerPadIndex = reader.ReadInt32();
+                    builder.RecyclerQuarterTurns = reader.ReadInt32();
+                    builder.MachineShopPadIndex = reader.ReadInt32();
+                    builder.MachineShopQuarterTurns = reader.ReadInt32();
+                    builder.EmergencyStoragePadIndex = reader.ReadInt32();
+                    builder.EmergencyStorageQuarterTurns = reader.ReadInt32();
+                    builder.CityServiceLinkConnected = reader.ReadBoolean();
+                    builder.CityServiceResidentId =
+                        reader.ReadNullableString();
+                    builder.CityDeliveryStage =
+                        reader.ReadEnum<CityDeliveryStage>();
+                    builder.CityDeliveryCount = reader.ReadInt32();
+                }
 
                 builder.WaterMilli = reader.ReadInt64();
                 builder.PartsUnits = reader.ReadInt64();
@@ -199,10 +225,69 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 builder.NextMaintenanceDueSettlementTick = reader.ReadInt64();
                 builder.MaintenanceDue = reader.ReadBoolean();
                 builder.DustFrontProgressTicks = reader.ReadInt64();
+                if (version == CodecVersion)
+                {
+                    builder.RigUpgrade = reader.ReadEnum<RigUpgrade>();
+                }
+
                 reader.RequireEnd();
 
+                if (version == LegacyCodecVersionV3)
+                {
+                    if (builder.SchemaVersion != 3
+                        || !string.Equals(
+                            builder.BalanceRevision,
+                            LastBearingBalanceV1.LegacyRevisionV1,
+                            StringComparison.Ordinal))
+                    {
+                        return Failure(DecodeInvalidCode);
+                    }
+
+                    MigrateLegacyV3(builder);
+                }
+                else if (version == LegacyCodecVersionV4)
+                {
+                    if (builder.SchemaVersion != 4
+                        || !string.Equals(
+                            builder.BalanceRevision,
+                            LastBearingBalanceV1.LegacyRevisionV2,
+                            StringComparison.Ordinal))
+                    {
+                        return Failure(DecodeInvalidCode);
+                    }
+
+                    MigrateLegacyV4(builder);
+                }
+
                 var state = builder.Build();
-                var canonical = Encode(state);
+                byte[] canonical;
+                if (version == CodecVersion)
+                {
+                    canonical = Encode(state);
+                }
+                else if (version == LegacyCodecVersionV4)
+                {
+                    canonical = EncodeVersion(
+                        state,
+                        LegacyCodecVersionV4,
+                        4,
+                        LastBearingBalanceV1.LegacyRevisionV2,
+                        includeCityConstruction: true,
+                        includeRigUpgrade: false,
+                        includeRepresentation: true);
+                }
+                else
+                {
+                    canonical = EncodeVersion(
+                        state,
+                        LegacyCodecVersionV3,
+                        3,
+                        LastBearingBalanceV1.LegacyRevisionV1,
+                        includeCityConstruction: false,
+                        includeRigUpgrade: false,
+                        includeRepresentation: true);
+                }
+
                 if (!BytesEqual(bytes, canonical))
                 {
                     return Failure(DecodeInvalidCode);
@@ -237,7 +322,52 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             LastBearingInvariants.Validate(state);
-            return EncodeInternal(state, includeRepresentation: false);
+            return EncodeVersion(
+                state,
+                CodecVersion,
+                LastBearingState.CurrentSchemaVersion,
+                LastBearingBalanceV1.Revision,
+                includeCityConstruction: true,
+                includeRigUpgrade: true,
+                includeRepresentation: false);
+        }
+
+        internal static byte[] EncodeLegacyV4ForMigrationTests(
+            LastBearingState state)
+        {
+            if (state == null)
+            {
+                throw new ArgumentNullException(nameof(state));
+            }
+
+            LastBearingInvariants.Validate(state);
+            return EncodeVersion(
+                state,
+                LegacyCodecVersionV4,
+                4,
+                LastBearingBalanceV1.LegacyRevisionV2,
+                includeCityConstruction: true,
+                includeRigUpgrade: false,
+                includeRepresentation: true);
+        }
+
+        internal static byte[] EncodeLegacyV3ForMigrationTests(
+            LastBearingState state)
+        {
+            if (state == null)
+            {
+                throw new ArgumentNullException(nameof(state));
+            }
+
+            LastBearingInvariants.Validate(state);
+            return EncodeVersion(
+                state,
+                LegacyCodecVersionV3,
+                3,
+                LastBearingBalanceV1.LegacyRevisionV1,
+                includeCityConstruction: false,
+                includeRigUpgrade: false,
+                includeRepresentation: true);
         }
 
         internal static string ComputeMechanicalSha256(
@@ -250,11 +380,30 @@ namespace AtomicLandPirate.Simulation.LastBearing
             LastBearingState state,
             bool includeRepresentation)
         {
+            return EncodeVersion(
+                state,
+                CodecVersion,
+                LastBearingState.CurrentSchemaVersion,
+                LastBearingBalanceV1.Revision,
+                includeCityConstruction: true,
+                includeRigUpgrade: true,
+                includeRepresentation: includeRepresentation);
+        }
+
+        private static byte[] EncodeVersion(
+            LastBearingState state,
+            ushort codecVersion,
+            int schemaVersion,
+            string balanceRevision,
+            bool includeCityConstruction,
+            bool includeRigUpgrade,
+            bool includeRepresentation)
+        {
             var writer = new CanonicalWriter();
             writer.WriteBytes(Magic);
-            writer.WriteUInt16(CodecVersion);
-            writer.WriteInt32(state.SchemaVersion);
-            writer.WriteString(state.BalanceRevision);
+            writer.WriteUInt16(codecVersion);
+            writer.WriteInt32(schemaVersion);
+            writer.WriteString(balanceRevision);
             writer.WriteInt32(state.WorldSeed);
             writer.WriteInt64(state.GlobalTick);
             writer.WriteInt64(state.SettlementTick);
@@ -287,6 +436,22 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             writer.WriteEnum(state.PauseCause);
             writer.WriteBoolean(state.SliceInfrastructureActive);
+            if (includeCityConstruction)
+            {
+                writer.WriteInt32(state.RecyclerPadIndex);
+                writer.WriteInt32(state.RecyclerQuarterTurns);
+                writer.WriteInt32(state.MachineShopPadIndex);
+                writer.WriteInt32(state.MachineShopQuarterTurns);
+                writer.WriteInt32(state.EmergencyStoragePadIndex);
+                writer.WriteInt32(state.EmergencyStorageQuarterTurns);
+                writer.WriteBoolean(state.CityServiceLinkConnected);
+                writer.WriteNullableString(
+                    includeRepresentation
+                        ? state.CityServiceResidentId
+                        : null);
+                writer.WriteEnum(state.CityDeliveryStage);
+                writer.WriteInt32(state.CityDeliveryCount);
+            }
 
             writer.WriteInt64(state.WaterMilli);
             writer.WriteInt64(state.PartsUnits);
@@ -364,7 +529,56 @@ namespace AtomicLandPirate.Simulation.LastBearing
             writer.WriteInt64(state.NextMaintenanceDueSettlementTick);
             writer.WriteBoolean(state.MaintenanceDue);
             writer.WriteInt64(state.DustFrontProgressTicks);
+            if (includeRigUpgrade)
+            {
+                writer.WriteEnum(state.RigUpgrade);
+            }
+
             return writer.ToArray();
+        }
+
+        private static void MigrateLegacyV3(LastBearingStateBuilder builder)
+        {
+            if (builder.SliceInfrastructureActive)
+            {
+                builder.RecyclerPadIndex = 0;
+                builder.RecyclerQuarterTurns = 0;
+                builder.MachineShopPadIndex = 1;
+                builder.MachineShopQuarterTurns = 0;
+                builder.EmergencyStoragePadIndex = 2;
+                builder.EmergencyStorageQuarterTurns = 0;
+                builder.CityServiceLinkConnected = true;
+                builder.CityServiceResidentId = builder.AssignedResidentId
+                    ?? builder.Roster.Residents[0].StableId;
+                builder.CityDeliveryStage =
+                    CityDeliveryStage.DeliveredToWorkshop;
+                builder.CityDeliveryCount = 1;
+            }
+            else
+            {
+                builder.RecyclerPadIndex =
+                    LastBearingState.UnplacedCityPadIndex;
+                builder.RecyclerQuarterTurns = 0;
+                builder.MachineShopPadIndex =
+                    LastBearingState.UnplacedCityPadIndex;
+                builder.MachineShopQuarterTurns = 0;
+                builder.EmergencyStoragePadIndex =
+                    LastBearingState.UnplacedCityPadIndex;
+                builder.EmergencyStorageQuarterTurns = 0;
+                builder.CityServiceLinkConnected = false;
+                builder.CityServiceResidentId = null;
+                builder.CityDeliveryStage = CityDeliveryStage.AtRecycler;
+                builder.CityDeliveryCount = 0;
+            }
+
+            MigrateLegacyV4(builder);
+        }
+
+        private static void MigrateLegacyV4(LastBearingStateBuilder builder)
+        {
+            builder.SchemaVersion = LastBearingState.CurrentSchemaVersion;
+            builder.BalanceRevision = LastBearingBalanceV1.Revision;
+            builder.RigUpgrade = RigUpgrade.None;
         }
 
         private static void WriteMemory(

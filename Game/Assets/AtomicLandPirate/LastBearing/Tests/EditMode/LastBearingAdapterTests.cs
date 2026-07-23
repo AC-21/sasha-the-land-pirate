@@ -350,6 +350,100 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
+        public void WorkingServiceCellBuildsMovesLocksStaffsAndDelivers()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.Mixed);
+            controller.InspectCityNeed();
+            LastBearingCityServiceCellView view =
+                controller.World!.CityServiceCellView!;
+
+            controller.SelectCityBuildingPreview(CityBuildingKind.Recycler);
+            Assert.That(controller.CityPreviewPadIndex, Is.EqualTo(0));
+            Assert.That(controller.CityPreviewPartsCost, Is.EqualTo(2));
+            Assert.That(view.IsRecyclerVisible, Is.True);
+            controller.MoveCityBuildingPreview(1);
+            controller.RotateCityBuildingPreview();
+            Assert.That(controller.ReadModel!.PartsUnits, Is.EqualTo(24));
+            controller.CancelCityBuildingPreview();
+            Assert.That(controller.HasCityBuildingPreview, Is.False);
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(24));
+
+            controller.SelectCityBuildingPreview(CityBuildingKind.Recycler);
+            controller.PlaceCityBuildingPreview();
+            SimulateOneTick(controller);
+            Assert.That(controller.ReadModel.RecyclerPadIndex, Is.EqualTo(0));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(22));
+
+            controller.SelectCityBuildingPreview(CityBuildingKind.MachineShop);
+            controller.RotateCityBuildingPreview();
+            controller.RotateCityBuildingPreview();
+            controller.PlaceCityBuildingPreview();
+            SimulateOneTick(controller);
+            Assert.That(controller.ReadModel.MachineShopPadIndex, Is.EqualTo(1));
+            Assert.That(controller.ReadModel.MachineShopQuarterTurns, Is.EqualTo(2));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(19));
+
+            controller.SelectCityBuildingPreview(
+                CityBuildingKind.EmergencyStorage);
+            controller.PlaceCityBuildingPreview();
+            SimulateOneTick(controller);
+            Assert.That(
+                controller.ReadModel.EmergencyStoragePadIndex,
+                Is.EqualTo(2));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(18));
+
+            controller.SelectCityBuildingPreview(CityBuildingKind.Recycler);
+            controller.MoveCityBuildingPreview(-1);
+            controller.PlaceCityBuildingPreview();
+            SimulateOneTick(controller);
+            Assert.That(controller.ReadModel.RecyclerPadIndex, Is.EqualTo(4));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(18),
+                "A pre-link move must not debit placement cost twice.");
+
+            Assert.That(controller.CanConnectCityServiceLink, Is.True);
+            controller.ConnectCityServiceLink();
+            SimulateOneTick(controller);
+            Assert.That(controller.ReadModel.CityServiceLinkConnected, Is.True);
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(17));
+            Assert.That(view.IsLinkVisible, Is.True);
+
+            controller.SelectCityBuildingPreview(CityBuildingKind.Recycler);
+            Assert.That(controller.HasCityBuildingPreview, Is.False);
+            controller.AssignCityServiceResident(ResidentRoster.RobotResidentId);
+            SimulateOneTick(controller);
+            Assert.That(
+                controller.ReadModel.CityServiceResidentId,
+                Is.EqualTo(ResidentRoster.RobotResidentId));
+            Assert.That(view.IsRobotOperatorVisible, Is.True);
+            Assert.That(view.IsHumanOperatorVisible, Is.False);
+
+            controller.AdvanceCityServiceSled();
+            SimulateOneTick(controller);
+            Assert.That(
+                controller.ReadModel.CityDeliveryStage,
+                Is.EqualTo(CityDeliveryStage.InTransit));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(17));
+            controller.AdvanceCityServiceSled();
+            SimulateOneTick(controller);
+            Assert.That(
+                controller.ReadModel.CityDeliveryStage,
+                Is.EqualTo(CityDeliveryStage.DeliveredToWorkshop));
+            Assert.That(controller.ReadModel.CityDeliveryCount, Is.EqualTo(1));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(19));
+            Assert.That(controller.ReadModel.SliceInfrastructureActive, Is.True);
+            Assert.That(
+                controller.ReadModel.NextObjective,
+                Is.EqualTo("select-preparation-and-module"));
+            Assert.That(view.IsSledVisible, Is.True);
+            Assert.That(controller.CanAdvanceCityServiceSled, Is.False);
+        }
+
+        [Test]
         public void CityGrammarComparisonIsReversibleFixedCameraAndCoreIsolated()
         {
             _root = new GameObject(LastBearingGameController.RuntimeRootName);
@@ -718,6 +812,75 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             CollectionAssert.AreEqual(
                 canonicalBefore,
                 LastBearingCanonicalCodec.Encode(controller.State!));
+        }
+
+        [Test]
+        public void GaragePatchworkSkidPlateInstallQueuesOnceAndPreservesPlanIntent()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            PrepareControllerForGaragePlan(controller, ColonyComposition.Mixed);
+            byte[] cityBytes = LastBearingCanonicalCodec.Encode(controller.State!);
+
+            Assert.That(controller.IsPatchworkSkidPlateInstallAvailable, Is.False);
+            controller.InstallPatchworkSkidPlate();
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            CollectionAssert.AreEqual(
+                cityBytes,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            controller.BeginGaragePlan(PreparationChoice.CivicBuffer);
+            long partsBefore = controller.ReadModel!.PartsUnits;
+            long sequenceBefore = controller.State!.NextCommandSequence;
+            byte[] garageBytes = LastBearingCanonicalCodec.Encode(controller.State);
+
+            Assert.That(controller.IsPatchworkSkidPlateInstallAvailable, Is.True);
+            controller.InstallPatchworkSkidPlate();
+
+            LastBearingCommand[] pending = PendingCommands(controller);
+            Assert.That(pending, Has.Length.EqualTo(1));
+            Assert.That(pending[0], Is.TypeOf<InstallRigUpgradeCommand>());
+            var install = (InstallRigUpgradeCommand)pending[0];
+            Assert.That(install.Sequence, Is.EqualTo(sequenceBefore));
+            Assert.That(install.Upgrade, Is.EqualTo(RigUpgrade.PatchworkSkidPlate));
+            Assert.That(controller.IsPatchworkSkidPlateInstallQueued, Is.True);
+            Assert.That(controller.IsPatchworkSkidPlateInstallAvailable, Is.False);
+            Assert.That(controller.IsGaragePlanIntentActive, Is.True);
+            Assert.That(
+                controller.GaragePreparationIntent,
+                Is.EqualTo(PreparationChoice.CivicBuffer));
+            CollectionAssert.AreEqual(
+                garageBytes,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            controller.InstallPatchworkSkidPlate();
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+
+            SimulateOneTick(controller);
+
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            Assert.That(controller.IsPatchworkSkidPlateInstallQueued, Is.False);
+            Assert.That(controller.IsPatchworkSkidPlateInstallAvailable, Is.False);
+            Assert.That(
+                controller.ReadModel!.RigUpgrade,
+                Is.EqualTo(RigUpgrade.PatchworkSkidPlate));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(
+                    partsBefore -
+                    LastBearingBalanceV1.PatchworkSkidPlatePartsCostUnits));
+            Assert.That(controller.IsGaragePlanIntentActive, Is.True);
+            Assert.That(
+                controller.GaragePreparationIntent,
+                Is.EqualTo(PreparationChoice.CivicBuffer));
+            Assert.That(controller.IsGaragePlanCommitAvailable, Is.True);
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.GarageBay));
+
+            controller.CommitGaragePlan(VehicleModule.WinchAssembly);
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(2));
         }
 
         [TestCase(ColonyComposition.HumanOnly, PreparationChoice.WorkshopPush, VehicleModule.WinchAssembly)]

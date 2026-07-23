@@ -28,6 +28,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 AssignedResidentId = null,
                 PauseCause = PauseCause.None,
                 SliceInfrastructureActive = false,
+                RecyclerPadIndex = LastBearingState.UnplacedCityPadIndex,
+                RecyclerQuarterTurns = 0,
+                MachineShopPadIndex = LastBearingState.UnplacedCityPadIndex,
+                MachineShopQuarterTurns = 0,
+                EmergencyStoragePadIndex =
+                    LastBearingState.UnplacedCityPadIndex,
+                EmergencyStorageQuarterTurns = 0,
+                CityServiceLinkConnected = false,
+                CityServiceResidentId = null,
+                CityDeliveryStage = CityDeliveryStage.AtRecycler,
+                CityDeliveryCount = 0,
 
                 WaterMilli = LastBearingBalanceV1.StartingWaterMilli,
                 PartsUnits = LastBearingBalanceV1.StartingPartsUnits,
@@ -52,6 +63,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
                 VehicleModule = VehicleModule.None,
                 ModuleInstallationState = ModuleInstallationState.None,
+                RigUpgrade = RigUpgrade.None,
                 RouteKind = RouteKind.None,
                 RouteActionKind = RouteActionKind.None,
                 RouteActionUsed = false,

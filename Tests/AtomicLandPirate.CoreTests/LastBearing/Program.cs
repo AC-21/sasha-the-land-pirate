@@ -43,6 +43,7 @@ namespace AtomicLandPirate.LastBearingTests
             harness.Run("complete first-materialization union", () =>
                 MaterializationTests.CompleteUnionIsPresent(repoRoot));
             SimulationTests.Run(harness);
+            RigUpgradeTests.Run(harness, repoRoot);
             SaveAtomicTests.Run(harness, repoRoot);
             HomecomingTests.RunSave(harness, repoRoot);
             SaveBoundaryTests.Run(harness, repoRoot);
@@ -105,6 +106,12 @@ namespace AtomicLandPirate.LastBearingTests
                     break;
                 case "vgr05-one-good-batch":
                     SaveAtomicTests.RunOneGoodBatch(harness, repoRoot);
+                    break;
+                case "vgr14-working-service-cell":
+                    CityConstructionTests.Run(harness);
+                    break;
+                case "v0-garage-upgrade":
+                    RigUpgradeTests.Run(harness, repoRoot);
                     break;
                 default:
                     Console.Error.WriteLine("unknown protected test: " + id);

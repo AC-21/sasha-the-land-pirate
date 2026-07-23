@@ -61,6 +61,85 @@ namespace AtomicLandPirate.Simulation.LastBearing
         }
     }
 
+    public sealed class PlaceCityBuildingCommand : LastBearingCommand
+    {
+        public PlaceCityBuildingCommand(
+            long sequence,
+            CityBuildingKind building,
+            int padIndex,
+            int orientationQuarterTurns)
+            : base(sequence)
+        {
+            if (building != CityBuildingKind.Recycler
+                && building != CityBuildingKind.MachineShop
+                && building != CityBuildingKind.EmergencyStorage)
+            {
+                throw new ArgumentOutOfRangeException(nameof(building));
+            }
+
+            if (padIndex < 0
+                || padIndex >= LastBearingState.CityConstructionPadCount)
+            {
+                throw new ArgumentOutOfRangeException(nameof(padIndex));
+            }
+
+            if (orientationQuarterTurns < 0 || orientationQuarterTurns > 3)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(orientationQuarterTurns));
+            }
+
+            Building = building;
+            PadIndex = padIndex;
+            OrientationQuarterTurns = orientationQuarterTurns;
+        }
+
+        public CityBuildingKind Building { get; }
+
+        public int PadIndex { get; }
+
+        public int OrientationQuarterTurns { get; }
+    }
+
+    public sealed class ConnectCityServiceLinkCommand : LastBearingCommand
+    {
+        public ConnectCityServiceLinkCommand(long sequence)
+            : base(sequence)
+        {
+        }
+    }
+
+    public sealed class AssignCityServiceResidentCommand : LastBearingCommand
+    {
+        public AssignCityServiceResidentCommand(long sequence, string stableId)
+            : base(sequence)
+        {
+            StableId = RequireToken(stableId, nameof(stableId));
+        }
+
+        public string StableId { get; }
+    }
+
+    public sealed class AdvanceCityServiceSledCommand : LastBearingCommand
+    {
+        public AdvanceCityServiceSledCommand(
+            long sequence,
+            CityDeliveryStage expectedSourceStage)
+            : base(sequence)
+        {
+            if (expectedSourceStage != CityDeliveryStage.AtRecycler
+                && expectedSourceStage != CityDeliveryStage.InTransit)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(expectedSourceStage));
+            }
+
+            ExpectedSourceStage = expectedSourceStage;
+        }
+
+        public CityDeliveryStage ExpectedSourceStage { get; }
+    }
+
     public sealed class SelectPreparationCommand : LastBearingCommand
     {
         public SelectPreparationCommand(
@@ -102,6 +181,22 @@ namespace AtomicLandPirate.Simulation.LastBearing
         }
 
         public VehicleModule Module { get; }
+    }
+
+    public sealed class InstallRigUpgradeCommand : LastBearingCommand
+    {
+        public InstallRigUpgradeCommand(long sequence, RigUpgrade upgrade)
+            : base(sequence)
+        {
+            if (upgrade != RigUpgrade.PatchworkSkidPlate)
+            {
+                throw new ArgumentOutOfRangeException(nameof(upgrade));
+            }
+
+            Upgrade = upgrade;
+        }
+
+        public RigUpgrade Upgrade { get; }
     }
 
     public sealed class PrepareExpeditionTransactionCommand : LastBearingCommand
