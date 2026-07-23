@@ -1,193 +1,198 @@
-# Sasha the Atomic Land Pirate — Agent Contract
+# Sasha the Atomic Land Pirate — Agent Guide
 
-This file is the practical front door for every coding, art, QA, and planning agent in this repository. Read it before acting. More specific `AGENTS.md` files may add local rules but cannot weaken this one.
+This is the practical operating guide for every engineering, design, art, and
+QA agent. Build the game, protect player state, and keep the critical path moving.
 
 ## Mission
 
-Build an endearing, real-time, post-apocalyptic city-builder and resource-management game in which Sasha turns wasteland salvage into a home worth returning to.
+Build an endearing real-time post-apocalyptic city-builder in which Sasha turns wasteland salvage into a home worth returning to.
 
-Ratified identity:
+The game is:
 
-- The title is **Sasha the Atomic Land Pirate**; Sasha is the protagonist.
-- Colonies may be human-only, humanoid-utility-robot-only, or mixed.
-- The game includes city building, scavenging, manufacturing, physical-goods trading, upgradeable travel vehicles, distinct factions, real-time play, no zombies, durable save/load, and strong art direction. “Stock” never means company shares; after an authored aggregate world-population threshold, caravaners open/administer the physical-goods exchange. Exact market law remains D-0044.
-- The visual north star is **Texas iron × brutalist opera**, with **tungsten over neon**; named references are functional coordinates, never copying authority.
-- It must perform well on the creator's MacBook Pro and eventually support safe background-agent work.
+- an isometric settlement builder and resource-management game;
+- a third-person driving and vehicle-upgrade game;
+- a wasteland scavenging game whose expeditions change the settlement;
+- a colony story supporting humans, original humanoid utility robots, or both;
+- a manufacturing and physical-goods trading game, with a caravan-administered goods exchange unlocked by world population;
+- a native Apple Silicon Mac game with durable save/load.
 
-Original robot design and exclusion of Tesla names, marks, silhouettes, surfaces, and trade dress are production/IP safeguards, not inferred lore. Whether the three colony compositions require distinct capabilities and dependencies is the open D-0039 composition-mechanics decision.
+The visual north star is **Texas iron × brutalist opera**, lit with **tungsten
+over neon**. Aim for endearing, purposeful, weathered forms—not generic cyberpunk,
+cowboy kitsch, or recognizable franchise imitation.
 
-The current thesis, pillars, loop, “storybook salvage” phrase, mechanics, lore, and technical choices remain provisional wherever the foundation says so. Do not promote recommendations into facts.
+## Product north star
 
-## Current authority: A1 — WP-0002 Last Bearing only
+The current priority is the smallest complete playable loop:
 
-WP-0003 is released under `RR-WP0003-COMPLETE-20260717`; its reservation is
-released and grants no continuing authority. WP-0002 is active under
-`RR-WP0002-ACTIVATE-20260717` with exactly the held Last Bearing reservation
-recorded in its packet and local boundary. This is the sole active A1 packet.
+1. Start or load a colony.
+2. Place, connect, and staff useful buildings.
+3. Produce and consume resources under visible pressure.
+4. Enter the garage and upgrade Sasha's rig.
+5. Drive to a wasteland site.
+6. Scavenge cargo while facing a cost, hazard, or decision.
+7. Return, unload, and materially improve the colony.
+8. Save, quit, reload, and continue correctly.
 
-- The canonical Unity project skeleton, deterministic core seams, non-persisting save boundary, tests, and technical sandbox are retained WP-0003 outputs. They are not a playable-game claim.
-- D-0051 still selects `UNITY-MCP-EXTERNAL`: implementation interacts with Unity only through the receipt-bound Unity MCP Bridge and exact installed relay. The v1 local-operator control is `superseded-unclosed-never-effective`; its sealed receipt remains historical and its absent report paths cannot be revived. Successor receipt `RR-WP0002-LOCAL-OPERATOR-SUCCESSOR-20260718`, only after its new authenticated online transaction and separate exact-three-report evidence-closure PR are both merged to protected `main`, permits Codex through visible Computer Use to add/open/switch the exact canonical project, approve only the Bridge-visible receipt-bound Codex client whose OS publisher/path and application version/build match, and inspect non-secret Unity state in the two exact installed app bundles. The prior host signature observation is context-limited and the UI does not prove its CDHash; any visible or version/build drift fails closed pending a new receipt. Except for the exact product-first CLI exception below, it permits no shell, CLI, batchmode, headless, executable, arbitrary project, different or unattested client, Bridge tool/configuration mutation, or CI invocation. Until that closure, no visible-UI exception exists.
-- WP-0001 remains accepted but inactive. Its historical receipts and route law do not create an alternative implementation lane.
-- At most one A1 packet may be active. WP-0002 occupies that slot; do not start or activate another packet.
-- Work only from fresh `agent/*` branches rooted in protected `main`, inside WP-0002's exact reserved paths/domains. Governance, receipts, workflows, creator-owned drift, and all unreserved paths remain read-only; this exact product-first PR alone may edit `AGENTS.md`, the package-graph checker and direct test, and only its two hash pins plus contract scalar in `validate_foundation.py`.
-- Human-only, robot-only, and mixed colonies must use explicit typed resident sets and the same golden-path mechanics. D-0039 is still open, so do not add differentiated human needs, robot maintenance, staffing advantages, or mixed-composition bonuses.
-- Unity access remains conditional: the exact five Unity MCP names are a transport allowlist, not blanket action authority. The original creator-opened first-use record remains historical; under the sealed successor, either the creator or receipt-bound delegated operator may open/switch only the exact project, followed by licensed-Editor, running-Bridge, exact visible receipt-bound client identity, target, and requested-call checks. `Unity_RunCommand` remains denied except through the materialized, hash-bound enumerated dispatcher. Outside the exact product-first CLI exception below, never invoke Unity directly.
-- The active durable checkout is `/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate`; its Unity target is the exact `Game` child. Earlier checkout paths remain historical evidence only. Delegated local operation is attributed to Codex under creator authority, but it is not identity impersonation and grants no new creator commitment or external communication authority.
-- The legacy visible-UI successor uses one creator-controlled control-plane transaction and is not a precondition for the exact product-first CLI exception below. Base-owned `wp0002-policy` rejects active-to-active governance by design: only that legacy context may be temporarily nonrequired for the exact receipt-bound final PR head and patch, while `validate`, `wp0002-core`, strict PR/admin/conversation/linear enforcement, empty bypass allowances, an empty inherited/repository ruleset inventory, no force push/deletion, and squash-only merge remain. The v2 verifier hash-pins v1, authenticates predecessor bytes from immutable Git objects, rejects v1 report injection, and must authenticate both new owner comments, exact two-commit tree/delta, checks, squash tree, and before/during/after protection snapshots; restored protection must be captured within 600 seconds. A separate PR must add exactly the three fixed successor report files and nothing else. Its base-owned `wp0002-policy` run hash-checks protected verifier bytes and live-reverifies the comment/hash chain, control PR, main, checks, restored protection, and empty rulesets; all absent is non-executable pending state and any partial set fails closed. Classic branch protection must be read through the separately provisioned single-repository, short-expiry Administration-read Actions secret exposed only to that base-owned closure step; absence fails closed, and candidate code or agents never receive its credential material. Prove restored policy on that closure PR and the first implementation PR opened after restoration. This is not A1 implementation authority or a reusable bypass.
+Build this loop thinly before adding breadth. A rough complete loop is more valuable
+than polished disconnected systems. Infrastructure exists to support the game.
 
-At A1, implement and verify only WP-0002. Every pull request still requires
-the deterministic checks and creator-delegated manual release; Cursor is
-optional and advisory. A1 does not authorize publishing, production content,
-dependency expansion beyond the exact Pipeline graph below, arbitrary filesystem writes, direct merge, or autonomy
-promotion.
+Do not stop because a ticket, PR, or named milestone ends. Continue toward the
+active user goal while a safe, useful next step remains.
 
-## Source of truth
+## How agents work
 
-When sources conflict, the higher source wins:
+- Lead with the intended player or developer outcome.
+- Inspect the real baseline before planning or editing.
+- Use the smallest coherent change; avoid speculative frameworks and broad cleanup.
+- Make reversible decisions autonomously and record meaningful assumptions.
+- Ask only when a choice is irreversible, materially changes the game's identity,
+  risks user data, spends money, expands external access, or needs a secret.
+- Push back when a simpler path produces the same outcome.
+- Keep long validation off the critical path; continue independent product work.
+- Parallel agents use isolated worktrees and disjoint file ownership. One integrator owns the final result.
+- Do not create governance, receipt, schema, or control work unless it directly
+  protects or unblocks the current product increment.
 
-1. Authenticated creator receipts bound to the active ratified decision head
-2. The exact constitutional artifact hash named by those receipts
-3. Accepted system, feature, save, and work-packet contracts
-4. Content and asset manifests
-5. Automated tests and accepted reference captures
-6. Implementation
-7. Generated documentation and summaries
+## Voice and code style
 
-The foundation lives at `docs/foundation-v0.1/`. Start with:
+- Communicate directly, from first principles, with concise actionable updates.
+- Take clear positions, explain tradeoffs, and push back when a simpler path wins.
+- Prefer plain readable code, explicit dependencies, and names from the game domain.
+- Avoid god objects, vague `Manager` abstractions, clever indirection, and premature generalization.
+- Comments explain intent or constraints, never restate syntax.
+- Tests assert player-visible behavior and authoritative state, not private implementation.
+- Follow existing C# and Unity conventions unless changing them is the task.
 
-- `docs/foundation-v0.1/README.md` — map, status language, and change law
-- `docs/foundation-v0.1/00-GAME-CONSTITUTION.md` — identity, loop, pillars, invariants, open decisions
-- `docs/foundation-v0.1/01-DECISION-LEDGER.md` and `docs/foundation-v0.1/ledger/decisions.jsonl` — decision history
-- `docs/foundation-v0.1/02-SYSTEM-MAP.md` — authoritative domains and state exchange
-- `docs/foundation-v0.1/03-VERTICAL-SLICE.md` — first proof and hard cuts
-- `docs/foundation-v0.1/04-TECHNICAL-ARCHITECTURE.md` — runtime, saves, performance, repository shape
-- `docs/foundation-v0.1/05-ART-BIBLE.md` — visual grammar and asset law
-- `docs/foundation-v0.1/06-AGENT-OPERATING-MODEL.md`, `docs/foundation-v0.1/07-QUALITY-GATES.md`, and `docs/foundation-v0.1/11-TRUST-AND-ENFORCEMENT.md` — autonomy and proof
-- `docs/foundation-v0.1/13-MANUFACTURING-AND-CARAVAN-EXCHANGE.md` and `docs/foundation-v0.1/14-CREATIVE-DIRECTION.md` — later economy and creative-direction contracts
-- `docs/foundation-v0.1/governance/ratification-state.json` — current draft entry gates
-- `docs/foundation-v0.1/work-packets/proposed/` — bootstrap packet records; each packet's internal status and sealed receipts control authority, never the legacy directory name
+## Load context progressively
 
-Any mismatch between a creator source/active decision and its constitutional materialization is a hard stop; precedence never licenses silent repair. Activation prose is non-executable unless the same protected tree contains the receipt-bound packet, boundary, state, and evidence. Conflict, ambiguity, or an open creator-owned decision that the active packet depends on, would resolve, or would encode is a stop condition. Propose a decision; never choose silently in code, content, balance, art, or lore.
+Read only what the task needs:
 
-The active packet does not authorize governance edits. Any new documentation/control-plane change requires its own explicit authority and protected transaction; never use implementation work to rewrite its gate.
+- `docs/foundation-v0.1/00-GAME-CONSTITUTION.md` — identity and invariants
+- `docs/foundation-v0.1/02-SYSTEM-MAP.md` — domain ownership
+- `docs/foundation-v0.1/03-VERTICAL-SLICE.md` — slice and hard cuts
+- `docs/foundation-v0.1/04-TECHNICAL-ARCHITECTURE.md` — runtime and saves
+- `docs/foundation-v0.1/05-ART-BIBLE.md` — visual grammar
+- `docs/foundation-v0.1/01-DECISION-LEDGER.md` — durable product decisions
+- `docs/playtests/` — current feature contracts and playtest notes
 
-## Orient before editing
+Historical packets and receipts are audit material, not the default execution
+path. Do not read the governance archive before ordinary implementation.
 
-From the repository root:
+When sources conflict: current user instruction wins, followed by the game
+constitution, accepted decisions, contracts, tests, implementation, and summaries.
 
-```bash
-git status --short --branch
-git log -5 --oneline --decorate
-rg --files -g 'AGENTS.md' -g '!Library/**' -g '!Temp/**'
-python3 docs/foundation-v0.1/tools/validate_foundation.py
-```
+## Repository map
 
-Then read this file, the relevant foundation sections, the canonical JSON work packet, and any narrower `AGENTS.md`. Inspect the real baseline before planning. The validator is bootstrap lint, not protected approval or a release gate.
+- `Game/` — Unity presentation, authoring, input, camera, UI, and adapters
+- `SimulationCore/` — engine-independent deterministic game rules
+- `SaveContracts/` — save envelopes, sections, migrations, and compatibility
+- `ContentSource/Blender/` — editable canonical 3D sources
+- `ContentSource/Incoming/` — quarantined generated or external assets
+- `Tests/` — scenarios, contracts, golden saves, and validation fixtures
+- `Tools/` — focused build and validation tools
+- `BuildArtifacts/` — generated local evidence; not source truth
 
-Creator-authorized product-first exception: use only the official Apple-signed Unity CLI `1.0.0-beta.2` with SHA-256 `e47f6dbd631e961345d7eff64f0c5f0571587a7a55077bafd13674e3c1f21030`, the exact `com.unity.pipeline@0.3.1-exp.1` graph, and this exact `Game` project's fail-closed discovery of seven fixed named commands; `eval`, free-form commands, another project, and direct Editor launch remain denied.
-
-Commands named by a proposed packet are planned interface contracts only. Their presence makes the future gate reproducible; it does not mean the tool exists, has run, or is authorized before the packet is accepted and its A1 quarantine is receipt-bound.
-
-## Repository seams
-
-WP-0003 established these roots. Preserve their protected baseline and create or
-edit only the exact subpaths reserved by an active packet:
-
-- `Game/` — existing Unity presentation/authoring project; never canonical game state
-- `SimulationCore/` — existing engine-independent deterministic C# rules
-- `SaveContracts/` — existing save interfaces plus packet-gated envelopes, sections, migrations, and compatibility
-- `ContentSource/Blender/` — canonical modeled sources
-- `ContentSource/Incoming/<packet-id>/` — quarantined generated or external assets
-- `Tools/` — pinned build, validation, scenario, and asset tools
-- `Tests/` — scenarios, golden saves/vectors, performance, and validation fixtures
-- `BuildArtifacts/<packet-id>/` and `docs/evidence/<packet-id>/` — bounded outputs and evidence
-
-Unity-generated `Library/`, `Temp/`, `Logs/`, `Obj/`, user settings, caches, and local builds never enter Git.
-
-## Work packet and reservation law
-
-Implementation requires one accepted, schema-valid work packet with a reproducible baseline, exact scope/non-goals, decisions and contracts, save impact, tests, budgets, rollback, and creator/integrator approval appropriate to risk.
-
-Before editing:
-
-1. Reproduce the packet baseline; stop if it differs.
-2. Confirm packet status and approval receipt, not merely its filename.
-3. Acquire the required reservation: exact base commit, paths, state domains/content IDs, lease, expiry, heartbeat, and fencing token.
-4. Work only in the packet's standalone disposable clone/sandbox with an independent `.git` directory, or its isolated asset package. An explicitly activated protected-PR local packet may instead use fresh durable-repository `agent/*` branches rooted in protected `main`; WP-0003 used that historical exception, and active WP-0002 is its sole current exact instance.
-5. Touch only declared paths and interfaces. Ask to amend scope before crossing them.
-
-Generic A1 uses read-only/hash-checked foundation inputs, exact reserved outputs, manifest-bound scratch, and a disposable runtime HOME/private temp with no merge/release credentials. An activated protected-PR local packet instead uses protected `main`, required checks, creator-controlled merge, its exact local boundary, and conditional first Unity MCP use; it grants no governance, credential, install, publishing, release, or self-merge authority. WP-0003's instance is released; WP-0002's exact instance is active and occupies the sole A1 slot. A folder named `sandbox` is never proof of a boundary.
+Unity-generated `Library/`, `Temp/`, `Logs/`, `Obj/`, local builds, recovery files, and user settings do not enter Git.
 
 ## Engineering laws
 
-- Keep the authoritative simulation in plain C# with no `UnityEngine` or presentation dependency.
-- Use commands → deterministic state transitions → domain events → read models.
-- Use fixed ticks, stable IDs, injected clocks/storage/logging, and named pinned RNG streams. Render-frame delta is never the sole gameplay clock.
-- Unity scenes, GameObjects, animation, UI, and raw physics are presentation/authoring state unless an accepted contract says otherwise.
-- Presentation tiers must not change authoritative outcomes. Quantize or event-encode physics-derived outcomes before they enter canonical state.
-- Prefer inspectable text content and manifests over binary asset truth.
-- Add no dependency, service, network requirement, or license obligation without packet authority and a removal plan.
-- Implement the smallest coherent change. No speculative framework, broad cleanup, or opportunistic refactor.
+- Keep authoritative simulation in plain C# without `UnityEngine`.
+- Use commands → deterministic transitions → domain events → read models.
+- Use fixed ticks, stable IDs, injected time/storage, and seeded named RNG streams.
+  Render-frame delta is never authoritative gameplay time.
+- Unity scenes, GameObjects, animation, UI, and raw physics are presentation; quantize physics outcomes before they enter canonical state.
+- Prefer explicit data and inspectable content over hidden scene or binary
+  truth.
+- Add dependencies only when they materially reduce risk or implementation
+  cost; document license and removal path.
+- Optimize after measurement, not anticipation, except for known hot loops.
+- Treat warnings introduced by the change as defects.
 
-## Save and migration laws
+## Saves are gameplay
 
-- Save/load is part of every playable milestone, not end-stage polish.
-- Preserve the byte-exact Save Envelope/root/pointer/protected-retention-anchor v1 contract once WP-0001 freezes it.
-- Never serialize a runtime object graph as canonical state or silently reinterpret an existing field/version.
-- New sections need a manifest schema, criticality, deterministic absence default, and explicit version. Changed sections need an explicit migration.
-- Unknown authoritative sections make a save read-incompatible and prohibit rewriting it.
-- Writes use immutable generations and crash-safe pointer/anchor rules. Never mutate the only good generation.
-- Migrations are explicit, idempotent, observable, tested on verified copies, and covered by golden saves plus compatibility and rollback evidence.
-- S2/S3 changes are human-gated at every autonomy level. A save-gate failure blocks rollout.
+- Every playable milestone includes save/load; it is not end-stage polish.
+- Never serialize a Unity runtime object graph as canonical state.
+- Preserve previous readable generations and use crash-safe atomic writes.
+- New authoritative fields require explicit defaults and versioning.
+- Changed formats require deterministic, idempotent migrations and golden-save coverage.
+- Unknown critical data fails closed without overwriting the last good save.
+- Test saving at meaningful partial-progress points, not only ideal endpoints.
 
-## Proof, performance, and evidence
+## Validation ladder
 
-Tests accompany implementation. Green unit tests are necessary, never sufficient.
+Use evidence proportional to the changed surface:
 
-- Reuse registered scenario IDs, seeds, fixture hashes, oracles, canonical-state versions, and exact inputs. Changing one creates a new revision; do not overwrite history.
-- Capture commands, exit results, commit/toolchain/environment, hashes, metrics, logs, captures, actual changed paths, and known limits in a content-addressed evidence manifest.
-- Report every failed, aborted, and rolled-back attempt. Never improve a denominator by omission.
-- The implementer cannot accept their own evidence. At A2–A4, implementer, verifier, and integrator are pairwise-distinct trusted principals for every packet.
+1. **Inner loop:** compile, static checks, and targeted tests for changed behavior.
+2. **Gameplay PR:** relevant suites, short native smoke, player-path verification, and 3–5 repeated mode transitions.
+3. **Milestone/nightly:** full native build, extended performance, save compatibility, and 100-cycle transition soak.
 
-Target-Mac spike budgets are provisional gates, not tuning suggestions: native ARM64; five-minute warm-up plus 30 measured minutes; whole-frame p95 ≤ 16.7 ms and p99 ≤ 25 ms; simulation tick p95 < 4 ms; process RSS < 6 GB; tracked Metal allocation < 3.5 GB; managed allocation p95 0 B/frame and average < 1,024 B/frame; 30-minute frame degradation < 10% and retained-memory growth < 5%. Do not loosen a gate to pass a build.
+Rules:
+
+- Run the full soak only after the milestone's final source hash, not after
+  every edit.
+- Documentation, copy, isolated content, and unrelated assets do not trigger
+  unrelated performance gates.
+- Do not weaken a valid threshold to obtain green.
+- Give infrastructure failure one clean retry. On recurrence, fix or quarantine
+  the harness; do not blindly repeat the soak.
+- Preserve failed-attempt evidence, but do not let evidence production become
+  the product.
+- Validate on the target Mac at milestones. Quality budgets do not belong in the everyday edit loop.
+
+## Unity workflow
+
+- Prefer the official Unity CLI and fixed project commands for reproducible operations.
+- Use visible Editor control only when the CLI cannot perform the required
+  action.
+- Before a gate, verify the exact project path, branch, Unity version, and
+  active scene.
+- Keep one Unity Editor session per checkout. Close the old project before opening another worktree.
+- On zero tests, duplicate TypeDB registration, or stale attestation, restart
+  once in a clean session and rerun only the affected gate.
+- Commit `ProjectSettings` changes only when intentional and reviewed.
+- Never expose credentials or broaden tool access beyond this project.
 
 ## Art and generated assets
 
-- Optimize for silhouette → function → history and strategy-camera truth with representative UI visible.
-- Translate Texas iron into working infrastructure, brutalist opera into civic scale/staging, and tungsten-over-neon into a measurable lighting hierarchy; reject cowboy-theme-park, generic cyberpunk, and recognizable franchise motifs.
-- `1 Blender unit = 1 metre`; preserve declared pivots, axes, sockets, materials, LODs, collision, and naming.
-- The accepted `.blend` is the editable canonical source; an interchange file is a derived artifact.
-- Tripo and similar outputs begin as concepts/blockouts, never shipping assets.
-- Keep external/AI output in `ContentSource/Incoming/<packet-id>/` until provenance, exact terms/license, safety, geometry, render-sheet, art-direction, engine-import, and performance gates pass.
-- Open unknown/generated files only in an isolated OS sandbox with factory settings, script/auto-execution disabled, no credentials/network, read-only inputs, and scratch outputs.
-- Preserve prompts, inputs, raw outputs, edits, tool/model/version, timestamps, terms, manifests, and hashes. The generator cannot be the sole art verifier.
+- Design silhouette → function → history; assets must read from the strategy camera.
+- Texas iron means fabricated, load-bearing, heat-scarred utility. Brutalist opera means civic scale, procession, rhythm, and theatrical framing—not concrete boxes.
+- Tungsten is warm functional light; neon is rare status, warning, or desire. Preserve darkness and material contrast instead of filling the frame with glow.
+- Keep wit, tenderness, and human eccentricity inside the hardship; avoid brown-mush misery and anonymous military-industrial sameness.
+- Use `1 Blender unit = 1 metre` and preserve pivots, axes, sockets, materials,
+  LODs, collision, and naming.
+- An accepted `.blend` is the editable canonical source; interchange files are
+  derived.
+- Tripo output remains a blockout until provenance, license, topology, art direction, optimization, and Unity import pass.
+- Preserve prompts, raw outputs, edits, tool/model/version, license, and hashes.
+- Never ship recognizable third-party marks, characters, silhouettes, or trade
+  dress.
+- Named inspirations describe function and feeling; never copy protected expression.
 
 ## Git and change hygiene
 
-- Preserve user work and unrelated changes. Never use destructive reset or discard another agent's diff.
-- Keep diffs surgical and reviewable; every changed line must trace to the packet or explicit request.
-- Do not commit secrets, credentials, generated caches, unlicensed inputs, or sole binary sources.
-- Do not push, merge, release, rewrite history, or create a remote without explicit authority. A0/A1 agents cannot self-integrate; any protected local-packet merge remains creator-controlled, including when Codex merely transmits an explicit authenticated delegation.
-- Use descriptive conventional commits only when an accepted packet or explicit creator-authorized A0 documentation task permits them: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`.
-- Before handoff, inspect `git diff`, rerun every relevant available gate, and state what was not run.
+- Preserve user and other-agent work. Never destructively reset or discard unrelated changes.
+- Branch from current `main`; use an isolated worktree for parallel work.
+- Keep commits logical and use descriptive conventional commit messages.
+- Push a complete logical unit rather than triggering CI after every edit.
+- Never commit secrets, caches, local builds, generated recovery files, or
+  unlicensed assets.
+- Do not push directly to protected `main`; merge through the repository's
+  required checks.
+- Before handoff, inspect the diff, run the relevant validation tier, and state
+  what was not run.
 
-## Handoff contract
+## Completion and handoff
 
-Hand off outcomes, not confidence. Include:
+Report:
 
-1. packet ID and objective;
-2. baseline reproduced and exact scope completed;
-3. changed paths and state/save/content impact;
-4. commands and exact pass/fail results;
-5. evidence, scenario, save, build, and asset hashes/locations;
-6. performance deltas and visual review status;
-7. known limits, open decisions, incidents, and failed attempts;
-8. rollback procedure and clean next action.
+1. the player-visible outcome;
+2. changed files and authoritative state/save impact;
+3. exact tests and observed results;
+4. native/visual/performance checks that ran;
+5. known imperfections and deferred work;
+6. the next highest-value product step.
 
-Never label a candidate accepted, ratified, verified, or release-ready without the required independent/protected receipt.
-
-## Stop and escalate
-
-Stop before changing course when any of these occurs: constitutional conflict; unclear or open design authority; unreproducible baseline; missing approval/quarantine/reservation; undeclared path or scope growth; nondeterministic authoritative result; save or migration uncertainty; performance regression without accepted tradeoff; missing asset provenance/license; protected-state edit; new install/network/remote/credential need; or inability to explain the resulting state.
-
-After three equivalent failures, return the packet to planning with preserved evidence. Ask before assuming. State the evidence, the exact blocker, the smallest decision needed, and the reversible options.
+Stop only for credible risk of data loss, conflicting user work, irreversible
+product direction, missing legal authority, unavailable credentials, or repeated
+failure requiring a different approach. Otherwise choose a reversible default,
+state it, and keep building.
