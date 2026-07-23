@@ -77,11 +77,119 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 "INSTALLED_CITY_IMPROVEMENT");
 
             ValidatePreparation(state);
+            ValidateCityConstruction(state);
             ValidateVehicleAndTransaction(state);
             ValidateCargo(state);
             ValidateFaction(state);
             ValidateCityImprovement(state);
             ValidateSpareBearingBatch(state);
+        }
+
+        private static void ValidateCityConstruction(LastBearingState state)
+        {
+            ValidateCityBuildingPlacement(
+                state.RecyclerPadIndex,
+                state.RecyclerQuarterTurns);
+            ValidateCityBuildingPlacement(
+                state.MachineShopPadIndex,
+                state.MachineShopQuarterTurns);
+            ValidateCityBuildingPlacement(
+                state.EmergencyStoragePadIndex,
+                state.EmergencyStorageQuarterTurns);
+            Require(
+                state.RecyclerPadIndex == LastBearingState.UnplacedCityPadIndex
+                    || state.RecyclerPadIndex != state.MachineShopPadIndex,
+                "LAST_BEARING_CITY_PAD_DUPLICATE");
+            Require(
+                state.RecyclerPadIndex == LastBearingState.UnplacedCityPadIndex
+                    || state.RecyclerPadIndex
+                        != state.EmergencyStoragePadIndex,
+                "LAST_BEARING_CITY_PAD_DUPLICATE");
+            Require(
+                state.MachineShopPadIndex
+                        == LastBearingState.UnplacedCityPadIndex
+                    || state.MachineShopPadIndex
+                        != state.EmergencyStoragePadIndex,
+                "LAST_BEARING_CITY_PAD_DUPLICATE");
+            RequireEnum(state.CityDeliveryStage, "CITY_DELIVERY_STAGE");
+            Require(
+                state.CityDeliveryCount == 0 || state.CityDeliveryCount == 1,
+                "LAST_BEARING_CITY_DELIVERY_COUNT_INVALID");
+            Require(
+                state.CityServiceResidentId == null
+                    || state.Roster.Contains(state.CityServiceResidentId),
+                "LAST_BEARING_CITY_SERVICE_RESIDENT_NOT_IN_ROSTER");
+
+            bool allBuildingsPlaced =
+                state.RecyclerPadIndex != LastBearingState.UnplacedCityPadIndex
+                && state.MachineShopPadIndex
+                    != LastBearingState.UnplacedCityPadIndex
+                && state.EmergencyStoragePadIndex
+                    != LastBearingState.UnplacedCityPadIndex;
+            if (!state.CityServiceLinkConnected)
+            {
+                Require(
+                    state.CityServiceResidentId == null
+                    && state.CityDeliveryStage
+                        == CityDeliveryStage.AtRecycler
+                    && state.CityDeliveryCount == 0
+                    && !state.SliceInfrastructureActive,
+                    "LAST_BEARING_CITY_SERVICE_UNLINKED_STATE_INVALID");
+            }
+            else
+            {
+                Require(
+                    allBuildingsPlaced,
+                    "LAST_BEARING_CITY_SERVICE_LINK_BUILDINGS_INVALID");
+            }
+
+            if (state.CityServiceResidentId == null)
+            {
+                Require(
+                    state.CityDeliveryStage == CityDeliveryStage.AtRecycler
+                    && state.CityDeliveryCount == 0
+                    && !state.SliceInfrastructureActive,
+                    "LAST_BEARING_CITY_SERVICE_UNSTAFFED_STATE_INVALID");
+            }
+
+            switch (state.CityDeliveryStage)
+            {
+                case CityDeliveryStage.AtRecycler:
+                case CityDeliveryStage.InTransit:
+                    Require(
+                        state.CityDeliveryCount == 0
+                        && !state.SliceInfrastructureActive,
+                        "LAST_BEARING_CITY_DELIVERY_PENDING_STATE_INVALID");
+                    break;
+                case CityDeliveryStage.DeliveredToWorkshop:
+                    Require(
+                        state.CityServiceLinkConnected
+                        && state.CityServiceResidentId != null
+                        && state.CityDeliveryCount == 1
+                        && state.SliceInfrastructureActive,
+                        "LAST_BEARING_CITY_DELIVERY_COMPLETE_STATE_INVALID");
+                    break;
+                default:
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_CITY_DELIVERY_STAGE_INVALID");
+            }
+        }
+
+        private static void ValidateCityBuildingPlacement(
+            int padIndex,
+            int quarterTurns)
+        {
+            Require(
+                padIndex >= LastBearingState.UnplacedCityPadIndex
+                    && padIndex < LastBearingState.CityConstructionPadCount,
+                "LAST_BEARING_CITY_BUILDING_PAD_INVALID");
+            Require(
+                quarterTurns >= 0 && quarterTurns <= 3,
+                "LAST_BEARING_CITY_BUILDING_ORIENTATION_INVALID");
+            Require(
+                padIndex != LastBearingState.UnplacedCityPadIndex
+                    || quarterTurns == 0,
+                "LAST_BEARING_CITY_BUILDING_UNPLACED_INVALID");
         }
 
         private static void ValidatePreparation(LastBearingState state)

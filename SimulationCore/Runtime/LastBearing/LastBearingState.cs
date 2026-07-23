@@ -6,7 +6,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public sealed class LastBearingState
     {
-        public const int CurrentSchemaVersion = 3;
+        public const int CurrentSchemaVersion = 4;
+        public const int CityConstructionPadCount = 5;
+        public const int UnplacedCityPadIndex = -1;
         public const string SashaProtagonistId = "sasha";
         public const string LastBearingFactionId = "faction:last-bearing:caravaners";
         public const string AuxiliaryPumpSocketId =
@@ -30,6 +32,18 @@ namespace AtomicLandPirate.Simulation.LastBearing
             "board:last-bearing:depot-corridor";
         public const string OneGoodBatchPresentationContentId =
             "bld_machine_shop_claims_wicket_a";
+        public const string RecyclerBuildingId =
+            "city:last-bearing:building:recycler";
+        public const string MachineShopBuildingId =
+            "city:last-bearing:building:machine-shop";
+        public const string EmergencyStorageBuildingId =
+            "city:last-bearing:building:emergency-storage";
+        public const string CityServiceLinkId =
+            "city:last-bearing:service-link:recycler-workshop";
+        public const string CityServiceSlotId =
+            "city:last-bearing:service-slot:working-cell";
+        public const string CityServiceBatchId =
+            "city:last-bearing:delivery:parts-batch:0001";
 
         internal LastBearingState(LastBearingStateBuilder builder)
         {
@@ -66,6 +80,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
             AssignedResidentId = builder.AssignedResidentId;
             PauseCause = builder.PauseCause;
             SliceInfrastructureActive = builder.SliceInfrastructureActive;
+            RecyclerPadIndex = builder.RecyclerPadIndex;
+            RecyclerQuarterTurns = builder.RecyclerQuarterTurns;
+            MachineShopPadIndex = builder.MachineShopPadIndex;
+            MachineShopQuarterTurns = builder.MachineShopQuarterTurns;
+            EmergencyStoragePadIndex = builder.EmergencyStoragePadIndex;
+            EmergencyStorageQuarterTurns = builder.EmergencyStorageQuarterTurns;
+            CityServiceLinkConnected = builder.CityServiceLinkConnected;
+            CityServiceResidentId = builder.CityServiceResidentId;
+            CityDeliveryStage = builder.CityDeliveryStage;
+            CityDeliveryCount = builder.CityDeliveryCount;
 
             WaterMilli = builder.WaterMilli;
             PartsUnits = builder.PartsUnits;
@@ -187,6 +211,26 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public bool IsPaused => PauseCause != PauseCause.None;
 
         public bool SliceInfrastructureActive { get; private set; }
+
+        public int RecyclerPadIndex { get; private set; }
+
+        public int RecyclerQuarterTurns { get; private set; }
+
+        public int MachineShopPadIndex { get; private set; }
+
+        public int MachineShopQuarterTurns { get; private set; }
+
+        public int EmergencyStoragePadIndex { get; private set; }
+
+        public int EmergencyStorageQuarterTurns { get; private set; }
+
+        public bool CityServiceLinkConnected { get; private set; }
+
+        public string? CityServiceResidentId { get; private set; }
+
+        public CityDeliveryStage CityDeliveryStage { get; private set; }
+
+        public int CityDeliveryCount { get; private set; }
 
         public long WaterMilli { get; private set; }
 
@@ -376,6 +420,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
             AssignedResidentId = state.AssignedResidentId;
             PauseCause = state.PauseCause;
             SliceInfrastructureActive = state.SliceInfrastructureActive;
+            RecyclerPadIndex = state.RecyclerPadIndex;
+            RecyclerQuarterTurns = state.RecyclerQuarterTurns;
+            MachineShopPadIndex = state.MachineShopPadIndex;
+            MachineShopQuarterTurns = state.MachineShopQuarterTurns;
+            EmergencyStoragePadIndex = state.EmergencyStoragePadIndex;
+            EmergencyStorageQuarterTurns = state.EmergencyStorageQuarterTurns;
+            CityServiceLinkConnected = state.CityServiceLinkConnected;
+            CityServiceResidentId = state.CityServiceResidentId;
+            CityDeliveryStage = state.CityDeliveryStage;
+            CityDeliveryCount = state.CityDeliveryCount;
             WaterMilli = state.WaterMilli;
             PartsUnits = state.PartsUnits;
             FuelUnits = state.FuelUnits;
@@ -472,6 +526,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
         internal string? AssignedResidentId;
         internal PauseCause PauseCause;
         internal bool SliceInfrastructureActive;
+        internal int RecyclerPadIndex;
+        internal int RecyclerQuarterTurns;
+        internal int MachineShopPadIndex;
+        internal int MachineShopQuarterTurns;
+        internal int EmergencyStoragePadIndex;
+        internal int EmergencyStorageQuarterTurns;
+        internal bool CityServiceLinkConnected;
+        internal string? CityServiceResidentId;
+        internal CityDeliveryStage CityDeliveryStage;
+        internal int CityDeliveryCount;
         internal long WaterMilli;
         internal long PartsUnits;
         internal long FuelUnits;

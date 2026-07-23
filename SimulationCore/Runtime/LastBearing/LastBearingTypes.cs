@@ -241,6 +241,21 @@ namespace AtomicLandPirate.Simulation.LastBearing
         RefurbishedAuxiliaryPump = 1,
     }
 
+    public enum CityBuildingKind
+    {
+        None = 0,
+        Recycler = 1,
+        MachineShop = 2,
+        EmergencyStorage = 3,
+    }
+
+    public enum CityDeliveryStage
+    {
+        AtRecycler = 0,
+        InTransit = 1,
+        DeliveredToWorkshop = 2,
+    }
+
     public enum LastBearingEventKind
     {
         ResidentAssigned = 1,
@@ -288,6 +303,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
         SpareBearingLotCreated = 43,
         SpareBearingLotBartered = 44,
         RoutePermitGranted = 45,
+        CityBuildingPlaced = 46,
+        CityBuildingMoved = 47,
+        CityServiceLinkConnected = 48,
+        CityServiceResidentAssigned = 49,
+        CityServiceSledAdvanced = 50,
+        CityServiceBatchDelivered = 51,
     }
 
     public enum LastBearingEventCause

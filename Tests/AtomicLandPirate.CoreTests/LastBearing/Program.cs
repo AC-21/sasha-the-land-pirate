@@ -106,6 +106,9 @@ namespace AtomicLandPirate.LastBearingTests
                 case "vgr05-one-good-batch":
                     SaveAtomicTests.RunOneGoodBatch(harness, repoRoot);
                     break;
+                case "vgr14-working-service-cell":
+                    CityConstructionTests.Run(harness);
+                    break;
                 default:
                     Console.Error.WriteLine("unknown protected test: " + id);
                     return 2;

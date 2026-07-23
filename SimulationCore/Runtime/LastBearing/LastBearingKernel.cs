@@ -149,6 +149,25 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 ApplyActivateInfrastructure(builder, activate, events);
             }
+            else if (command is PlaceCityBuildingCommand placeBuilding)
+            {
+                ApplyPlaceCityBuilding(builder, placeBuilding, events);
+            }
+            else if (command is ConnectCityServiceLinkCommand connectLink)
+            {
+                ApplyConnectCityServiceLink(builder, connectLink, events);
+            }
+            else if (command is AssignCityServiceResidentCommand assignService)
+            {
+                ApplyAssignCityServiceResident(
+                    builder,
+                    assignService,
+                    events);
+            }
+            else if (command is AdvanceCityServiceSledCommand advanceSled)
+            {
+                ApplyAdvanceCityServiceSled(builder, advanceSled, events);
+            }
             else if (command is SelectPreparationCommand selectPreparation)
             {
                 ApplySelectPreparation(builder, selectPreparation, events);
@@ -297,7 +316,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return;
             }
 
-            builder.SliceInfrastructureActive = true;
+            SeedCompletedCityServiceCell(builder);
             Emit(
                 builder,
                 events,
@@ -308,6 +327,247 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 "settlement:last-bearing:workshop",
                 0,
                 1);
+        }
+
+        private static void ApplyPlaceCityBuilding(
+            LastBearingStateBuilder builder,
+            PlaceCityBuildingCommand command,
+            LastBearingEventSink events)
+        {
+            int currentPad = CityBuildingPad(builder, command.Building);
+            int currentQuarterTurns = CityBuildingQuarterTurns(
+                builder,
+                command.Building);
+            if (currentPad == command.PadIndex
+                && currentQuarterTurns == command.OrientationQuarterTurns)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            RequireCityConstructionOpen(builder);
+            if (builder.CityServiceLinkConnected)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_BUILDINGS_LOCKED");
+            }
+
+            if (CityPadOccupiedByOther(
+                builder,
+                command.Building,
+                command.PadIndex))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_PAD_OCCUPIED");
+            }
+
+            bool isFirstPlacement =
+                currentPad == LastBearingState.UnplacedCityPadIndex;
+            if (isFirstPlacement)
+            {
+                long cost = LastBearingBalanceV1.CityBuildingPartsCost(
+                    command.Building);
+                if (builder.PartsUnits < cost)
+                {
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_CITY_BUILDING_PARTS_INSUFFICIENT");
+                }
+
+                long previousParts = builder.PartsUnits;
+                builder.PartsUnits = checked(builder.PartsUnits - cost);
+                Emit(
+                    builder,
+                    events,
+                    LastBearingEventKind.CityResourcesCommitted,
+                    LastBearingEventCause.PlayerCommand,
+                    builder.SettlementTick,
+                    command.Sequence,
+                    "settlement:last-bearing:parts",
+                    previousParts,
+                    builder.PartsUnits);
+            }
+
+            SetCityBuilding(
+                builder,
+                command.Building,
+                command.PadIndex,
+                command.OrientationQuarterTurns);
+            Emit(
+                builder,
+                events,
+                isFirstPlacement
+                    ? LastBearingEventKind.CityBuildingPlaced
+                    : LastBearingEventKind.CityBuildingMoved,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                CityBuildingId(command.Building),
+                currentPad,
+                command.PadIndex);
+        }
+
+        private static void ApplyConnectCityServiceLink(
+            LastBearingStateBuilder builder,
+            ConnectCityServiceLinkCommand command,
+            LastBearingEventSink events)
+        {
+            if (builder.CityServiceLinkConnected)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            RequireCityConstructionOpen(builder);
+            if (!AllCityBuildingsPlaced(builder))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_SERVICE_BUILDINGS_REQUIRED");
+            }
+
+            long cost = LastBearingBalanceV1.CityServiceLinkPartsUnits;
+            if (builder.PartsUnits < cost)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_SERVICE_LINK_PARTS_INSUFFICIENT");
+            }
+
+            long previousParts = builder.PartsUnits;
+            builder.PartsUnits = checked(builder.PartsUnits - cost);
+            builder.CityServiceLinkConnected = true;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityResourcesCommitted,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                "settlement:last-bearing:parts",
+                previousParts,
+                builder.PartsUnits);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityServiceLinkConnected,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.CityServiceLinkId,
+                0,
+                1);
+        }
+
+        private static void ApplyAssignCityServiceResident(
+            LastBearingStateBuilder builder,
+            AssignCityServiceResidentCommand command,
+            LastBearingEventSink events)
+        {
+            if (string.Equals(
+                builder.CityServiceResidentId,
+                command.StableId,
+                StringComparison.Ordinal))
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            RequireCityConstructionOpen(builder);
+            if (!builder.CityServiceLinkConnected)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_SERVICE_LINK_REQUIRED");
+            }
+
+            if (!builder.Roster.Contains(command.StableId))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_SERVICE_RESIDENT_NOT_IN_ROSTER");
+            }
+
+            builder.CityServiceResidentId = command.StableId;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityServiceResidentAssigned,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.CityServiceSlotId,
+                0,
+                1);
+        }
+
+        private static void ApplyAdvanceCityServiceSled(
+            LastBearingStateBuilder builder,
+            AdvanceCityServiceSledCommand command,
+            LastBearingEventSink events)
+        {
+            if (builder.CityDeliveryStage
+                    == CityDeliveryStage.DeliveredToWorkshop
+                && builder.CityDeliveryCount == 1)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            RequireCityConstructionOpen(builder);
+            if (!builder.CityServiceLinkConnected
+                || builder.CityServiceResidentId == null)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_SERVICE_NOT_STAFFED");
+            }
+
+            if (builder.CityDeliveryStage == CityDeliveryStage.AtRecycler)
+            {
+                builder.CityDeliveryStage = CityDeliveryStage.InTransit;
+                Emit(
+                    builder,
+                    events,
+                    LastBearingEventKind.CityServiceSledAdvanced,
+                    LastBearingEventCause.PlayerCommand,
+                    builder.SettlementTick,
+                    command.Sequence,
+                    LastBearingState.CityServiceBatchId,
+                    (long)CityDeliveryStage.AtRecycler,
+                    (long)CityDeliveryStage.InTransit);
+                return;
+            }
+
+            if (builder.CityDeliveryStage != CityDeliveryStage.InTransit
+                || builder.CityDeliveryCount != 0)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_SERVICE_DELIVERY_STATE_INVALID");
+            }
+
+            long previousParts = builder.PartsUnits;
+            builder.PartsUnits = checked(
+                builder.PartsUnits
+                + LastBearingBalanceV1.CityServiceDeliveryPartsUnits);
+            builder.CityDeliveryStage =
+                CityDeliveryStage.DeliveredToWorkshop;
+            builder.CityDeliveryCount = 1;
+            builder.SliceInfrastructureActive = true;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityServiceSledAdvanced,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.CityServiceBatchId,
+                (long)CityDeliveryStage.InTransit,
+                (long)CityDeliveryStage.DeliveredToWorkshop);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityServiceBatchDelivered,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.CityServiceBatchId,
+                previousParts,
+                builder.PartsUnits);
         }
 
         private static void ApplySelectPreparation(
@@ -2388,6 +2648,137 @@ namespace AtomicLandPirate.Simulation.LastBearing
             return phase == ExpeditionPhase.Outbound
                 || phase == ExpeditionPhase.AtDepot
                 || phase == ExpeditionPhase.Returning;
+        }
+
+        private static void RequireCityConstructionOpen(
+            LastBearingStateBuilder builder)
+        {
+            if (builder.ExpeditionPhase != ExpeditionPhase.AtHome
+                || builder.PreparationPhase != PreparationPhase.Unselected)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_CONSTRUCTION_PHASE_INVALID");
+            }
+        }
+
+        private static bool AllCityBuildingsPlaced(
+            LastBearingStateBuilder builder)
+        {
+            return builder.RecyclerPadIndex
+                    != LastBearingState.UnplacedCityPadIndex
+                && builder.MachineShopPadIndex
+                    != LastBearingState.UnplacedCityPadIndex
+                && builder.EmergencyStoragePadIndex
+                    != LastBearingState.UnplacedCityPadIndex;
+        }
+
+        private static bool CityPadOccupiedByOther(
+            LastBearingStateBuilder builder,
+            CityBuildingKind building,
+            int padIndex)
+        {
+            return (building != CityBuildingKind.Recycler
+                    && builder.RecyclerPadIndex == padIndex)
+                || (building != CityBuildingKind.MachineShop
+                    && builder.MachineShopPadIndex == padIndex)
+                || (building != CityBuildingKind.EmergencyStorage
+                    && builder.EmergencyStoragePadIndex == padIndex);
+        }
+
+        private static int CityBuildingPad(
+            LastBearingStateBuilder builder,
+            CityBuildingKind building)
+        {
+            switch (building)
+            {
+                case CityBuildingKind.Recycler:
+                    return builder.RecyclerPadIndex;
+                case CityBuildingKind.MachineShop:
+                    return builder.MachineShopPadIndex;
+                case CityBuildingKind.EmergencyStorage:
+                    return builder.EmergencyStoragePadIndex;
+                default:
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_CITY_BUILDING_INVALID");
+            }
+        }
+
+        private static int CityBuildingQuarterTurns(
+            LastBearingStateBuilder builder,
+            CityBuildingKind building)
+        {
+            switch (building)
+            {
+                case CityBuildingKind.Recycler:
+                    return builder.RecyclerQuarterTurns;
+                case CityBuildingKind.MachineShop:
+                    return builder.MachineShopQuarterTurns;
+                case CityBuildingKind.EmergencyStorage:
+                    return builder.EmergencyStorageQuarterTurns;
+                default:
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_CITY_BUILDING_INVALID");
+            }
+        }
+
+        private static void SetCityBuilding(
+            LastBearingStateBuilder builder,
+            CityBuildingKind building,
+            int padIndex,
+            int quarterTurns)
+        {
+            switch (building)
+            {
+                case CityBuildingKind.Recycler:
+                    builder.RecyclerPadIndex = padIndex;
+                    builder.RecyclerQuarterTurns = quarterTurns;
+                    return;
+                case CityBuildingKind.MachineShop:
+                    builder.MachineShopPadIndex = padIndex;
+                    builder.MachineShopQuarterTurns = quarterTurns;
+                    return;
+                case CityBuildingKind.EmergencyStorage:
+                    builder.EmergencyStoragePadIndex = padIndex;
+                    builder.EmergencyStorageQuarterTurns = quarterTurns;
+                    return;
+                default:
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_CITY_BUILDING_INVALID");
+            }
+        }
+
+        private static string CityBuildingId(CityBuildingKind building)
+        {
+            switch (building)
+            {
+                case CityBuildingKind.Recycler:
+                    return LastBearingState.RecyclerBuildingId;
+                case CityBuildingKind.MachineShop:
+                    return LastBearingState.MachineShopBuildingId;
+                case CityBuildingKind.EmergencyStorage:
+                    return LastBearingState.EmergencyStorageBuildingId;
+                default:
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_CITY_BUILDING_INVALID");
+            }
+        }
+
+        private static void SeedCompletedCityServiceCell(
+            LastBearingStateBuilder builder)
+        {
+            builder.RecyclerPadIndex = 0;
+            builder.RecyclerQuarterTurns = 0;
+            builder.MachineShopPadIndex = 1;
+            builder.MachineShopQuarterTurns = 0;
+            builder.EmergencyStoragePadIndex = 2;
+            builder.EmergencyStorageQuarterTurns = 0;
+            builder.CityServiceLinkConnected = true;
+            builder.CityServiceResidentId = builder.AssignedResidentId
+                ?? builder.Roster.Residents[0].StableId;
+            builder.CityDeliveryStage =
+                CityDeliveryStage.DeliveredToWorkshop;
+            builder.CityDeliveryCount = 1;
+            builder.SliceInfrastructureActive = true;
         }
 
         private static void EmitReplay(

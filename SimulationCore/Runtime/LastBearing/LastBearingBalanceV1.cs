@@ -6,7 +6,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public static class LastBearingBalanceV1
     {
-        public const string Revision = "last-bearing-prototype-balance-v1";
+        public const string Revision = "last-bearing-prototype-balance-v2";
+        internal const string LegacyRevisionV1 =
+            "last-bearing-prototype-balance-v1";
         public const int TickRateHz = 10;
         public const int FullClockScaleMilli = 1000;
         public const int ExpeditionHomeClockScaleMilli = 500;
@@ -16,6 +18,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const long StartingFuelUnits = 18;
         public const long StartingVehicleConditionMilli = 1000;
         public const long WaterCapacityMilli = 180000;
+
+        public const long RecyclerPlacementPartsUnits = 2;
+        public const long MachineShopPlacementPartsUnits = 3;
+        public const long EmergencyStoragePlacementPartsUnits = 1;
+        public const long CityServiceLinkPartsUnits = 1;
+        public const long CityServiceDeliveryPartsUnits = 2;
 
         public const long FailingWaterRateMilliPerSettlementTick = -10;
         public const long BearingRepairRateMilliPerSettlementTick = 30;
@@ -96,6 +104,21 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     return AuxiliaryPumpInstallationPartsUnits;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(improvement));
+            }
+        }
+
+        internal static long CityBuildingPartsCost(CityBuildingKind building)
+        {
+            switch (building)
+            {
+                case CityBuildingKind.Recycler:
+                    return RecyclerPlacementPartsUnits;
+                case CityBuildingKind.MachineShop:
+                    return MachineShopPlacementPartsUnits;
+                case CityBuildingKind.EmergencyStorage:
+                    return EmergencyStoragePlacementPartsUnits;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(building));
             }
         }
 

@@ -27,6 +27,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
             Composition = state.Composition;
             Residents = state.Roster.Residents;
             AssignedResidentId = state.AssignedResidentId;
+            RecyclerPadIndex = state.RecyclerPadIndex;
+            RecyclerQuarterTurns = state.RecyclerQuarterTurns;
+            MachineShopPadIndex = state.MachineShopPadIndex;
+            MachineShopQuarterTurns = state.MachineShopQuarterTurns;
+            EmergencyStoragePadIndex = state.EmergencyStoragePadIndex;
+            EmergencyStorageQuarterTurns = state.EmergencyStorageQuarterTurns;
+            CityServiceLinkConnected = state.CityServiceLinkConnected;
+            CityServiceResidentId = state.CityServiceResidentId;
+            CityDeliveryStage = state.CityDeliveryStage;
+            CityDeliveryCount = state.CityDeliveryCount;
+            SliceInfrastructureActive = state.SliceInfrastructureActive;
             WaterMilli = state.WaterMilli;
             WaterTrendMilliPerSettlementTick = ComputeWaterTrend(state);
             IsWaterRecovering = WaterTrendMilliPerSettlementTick > 0;
@@ -148,6 +159,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public IReadOnlyList<ResidentRecord> Residents { get; private set; } =
             Array.Empty<ResidentRecord>();
         public string? AssignedResidentId { get; private set; }
+        public int RecyclerPadIndex { get; private set; }
+        public int RecyclerQuarterTurns { get; private set; }
+        public int MachineShopPadIndex { get; private set; }
+        public int MachineShopQuarterTurns { get; private set; }
+        public int EmergencyStoragePadIndex { get; private set; }
+        public int EmergencyStorageQuarterTurns { get; private set; }
+        public bool CityServiceLinkConnected { get; private set; }
+        public string? CityServiceResidentId { get; private set; }
+        public CityDeliveryStage CityDeliveryStage { get; private set; }
+        public int CityDeliveryCount { get; private set; }
+        public bool SliceInfrastructureActive { get; private set; }
         public long WaterMilli { get; private set; }
         public long WaterTrendMilliPerSettlementTick { get; private set; }
         public bool IsWaterRecovering { get; private set; }
@@ -298,7 +320,35 @@ namespace AtomicLandPirate.Simulation.LastBearing
         {
             if (!state.SliceInfrastructureActive)
             {
-                return "activate-slice-infrastructure";
+                if (state.RecyclerPadIndex
+                    == LastBearingState.UnplacedCityPadIndex)
+                {
+                    return "place-city-recycler";
+                }
+
+                if (state.MachineShopPadIndex
+                    == LastBearingState.UnplacedCityPadIndex)
+                {
+                    return "place-city-machine-shop";
+                }
+
+                if (state.EmergencyStoragePadIndex
+                    == LastBearingState.UnplacedCityPadIndex)
+                {
+                    return "place-city-emergency-storage";
+                }
+
+                if (!state.CityServiceLinkConnected)
+                {
+                    return "connect-city-service-link";
+                }
+
+                if (state.CityServiceResidentId == null)
+                {
+                    return "staff-city-service-cell";
+                }
+
+                return "advance-city-service-sled";
             }
 
             if (state.AssignedResidentId == null)
