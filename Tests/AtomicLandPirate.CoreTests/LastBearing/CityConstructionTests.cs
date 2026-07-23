@@ -54,13 +54,13 @@ namespace AtomicLandPirate.LastBearingTests
                 "read model exposes the authored service-cell objective chain",
                 ReadModelObjectiveChainIsExact);
             harness.Run(
-                "working service cell checkpoints round trip through canonical v6",
-                CanonicalV5RoundTripsAtEveryCheckpoint);
+                "working service cell checkpoints round trip through canonical v7",
+                CanonicalV7RoundTripsAtEveryCheckpoint);
             harness.Run(
                 "delivered service cell keeps reusable stepping allocation free",
                 DeliveredCellStepIntoRemainsAllocationFree);
             harness.Run(
-                "canonical v3 city states migrate deterministically to v6",
+                "canonical v3 city states migrate deterministically to v7",
                 LegacyV3MigrationIsDeterministic);
             harness.Run(
                 "forged city construction states fail closed",
@@ -435,16 +435,16 @@ namespace AtomicLandPirate.LastBearingTests
                 "construction survival pressure");
         }
 
-        private static void CanonicalV5RoundTripsAtEveryCheckpoint()
+        private static void CanonicalV7RoundTripsAtEveryCheckpoint()
         {
             var driver = new CoreTestDriver(ColonyComposition.Mixed, 2308);
-            AssertV5RoundTrip(driver.State, "initial");
+            AssertV7RoundTrip(driver.State, "initial");
             driver.Apply(sequence => new PlaceCityBuildingCommand(
                 sequence,
                 CityBuildingKind.Recycler,
                 4,
                 3));
-            AssertV5RoundTrip(driver.State, "recycler");
+            AssertV7RoundTrip(driver.State, "recycler");
             driver.Apply(sequence => new PlaceCityBuildingCommand(
                 sequence,
                 CityBuildingKind.MachineShop,
@@ -455,24 +455,24 @@ namespace AtomicLandPirate.LastBearingTests
                 CityBuildingKind.EmergencyStorage,
                 2,
                 1));
-            AssertV5RoundTrip(driver.State, "placed");
+            AssertV7RoundTrip(driver.State, "placed");
             driver.Apply(sequence =>
                 new ConnectCityServiceLinkCommand(sequence));
-            AssertV5RoundTrip(driver.State, "linked");
+            AssertV7RoundTrip(driver.State, "linked");
             driver.Apply(sequence => new AssignCityServiceResidentCommand(
                 sequence,
                 ResidentRoster.RobotResidentId));
-            AssertV5RoundTrip(driver.State, "staffed");
+            AssertV7RoundTrip(driver.State, "staffed");
             driver.Apply(sequence =>
                 new AdvanceCityServiceSledCommand(
                     sequence,
                     CityDeliveryStage.AtRecycler));
-            AssertV5RoundTrip(driver.State, "in-transit");
+            AssertV7RoundTrip(driver.State, "in-transit");
             driver.Apply(sequence =>
                 new AdvanceCityServiceSledCommand(
                     sequence,
                     CityDeliveryStage.InTransit));
-            AssertV5RoundTrip(driver.State, "delivered");
+            AssertV7RoundTrip(driver.State, "delivered");
         }
 
         private static void ReadModelObjectiveChainIsExact()
@@ -832,12 +832,12 @@ namespace AtomicLandPirate.LastBearingTests
                 2));
         }
 
-        private static void AssertV5RoundTrip(
+        private static void AssertV7RoundTrip(
             LastBearingState state,
             string label)
         {
             byte[] encoded = LastBearingCanonicalCodec.Encode(state);
-            TestHarness.Equal((byte)6, encoded[8], label + " codec marker");
+            TestHarness.Equal((byte)7, encoded[8], label + " codec marker");
             LastBearingDecodeResult result =
                 LastBearingCanonicalCodec.TryDecode(encoded);
             TestHarness.True(

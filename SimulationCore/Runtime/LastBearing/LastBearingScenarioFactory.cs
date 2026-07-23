@@ -39,6 +39,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 CityServiceResidentId = null,
                 CityDeliveryStage = CityDeliveryStage.AtRecycler,
                 CityDeliveryCount = 0,
+                HotShiftPhase = HotShiftPhase.Idle,
+                HotShiftElapsedTicks = 0,
+                HotShiftRequiredTicks = 0,
+                HotShiftFuelCommittedUnits = 0,
+                HotShiftCompletedCount = 0,
 
                 WaterMilli = LastBearingBalanceV1.StartingWaterMilli,
                 PartsUnits = LastBearingBalanceV1.StartingPartsUnits,

@@ -6,11 +6,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public static class LastBearingBalanceV1
     {
-        public const string Revision = "last-bearing-prototype-balance-v3";
+        public const string Revision = "last-bearing-prototype-balance-v4";
         internal const string LegacyRevisionV1 =
             "last-bearing-prototype-balance-v1";
         internal const string LegacyRevisionV2 =
             "last-bearing-prototype-balance-v2";
+        internal const string LegacyRevisionV3 =
+            "last-bearing-prototype-balance-v3";
         public const int TickRateHz = 10;
         public const int FullClockScaleMilli = 1000;
         public const int ExpeditionHomeClockScaleMilli = 500;
@@ -26,6 +28,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const long EmergencyStoragePlacementPartsUnits = 1;
         public const long CityServiceLinkPartsUnits = 1;
         public const long CityServiceDeliveryPartsUnits = 2;
+        public const long HotShiftFuelCostUnits = 1;
+        public const long HotShiftRequiredSettlementTicks = 120;
+        public const long HotShiftCheckpointSettlementTick = 60;
+        public const long HotShiftOutputPartsUnits = 2;
+        public const long HotShiftWaterModifierMilliPerSettlementTick = -10;
 
         public const long FailingWaterRateMilliPerSettlementTick = -10;
         public const long BearingRepairRateMilliPerSettlementTick = 30;

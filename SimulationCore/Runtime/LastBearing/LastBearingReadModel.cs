@@ -38,6 +38,29 @@ namespace AtomicLandPirate.Simulation.LastBearing
             CityDeliveryStage = state.CityDeliveryStage;
             CityDeliveryCount = state.CityDeliveryCount;
             SliceInfrastructureActive = state.SliceInfrastructureActive;
+            HotShiftPhase = state.HotShiftPhase;
+            HotShiftElapsedTicks = state.HotShiftElapsedTicks;
+            HotShiftRequiredTicks = state.HotShiftRequiredTicks;
+            HotShiftRemainingTicks = Math.Max(
+                0,
+                state.HotShiftRequiredTicks
+                    - state.HotShiftElapsedTicks);
+            HotShiftFuelCostUnits =
+                LastBearingBalanceV1.HotShiftFuelCostUnits;
+            HotShiftOutputPartsUnits =
+                LastBearingBalanceV1.HotShiftOutputPartsUnits;
+            HotShiftWaterModifierMilliPerSettlementTick =
+                LastBearingBalanceV1
+                    .HotShiftWaterModifierMilliPerSettlementTick;
+            HotShiftCompletedCount = state.HotShiftCompletedCount;
+            IsHotShiftRunAvailable =
+                ComputeHotShiftRunAvailable(state);
+            IsHotShiftStalledByWorkshopPush =
+                state.HotShiftPhase == HotShiftPhase.InProgress
+                && state.WorkshopServiceSlotsReserved > 0;
+            IsHotShiftActivelyWorking =
+                state.HotShiftPhase == HotShiftPhase.InProgress
+                && state.WorkshopServiceSlotsReserved == 0;
             WaterMilli = state.WaterMilli;
             WaterTrendMilliPerSettlementTick = ComputeWaterTrend(state);
             IsWaterRecovering = WaterTrendMilliPerSettlementTick > 0;
@@ -197,6 +220,21 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public CityDeliveryStage CityDeliveryStage { get; private set; }
         public int CityDeliveryCount { get; private set; }
         public bool SliceInfrastructureActive { get; private set; }
+        public HotShiftPhase HotShiftPhase { get; private set; }
+        public long HotShiftElapsedTicks { get; private set; }
+        public long HotShiftRequiredTicks { get; private set; }
+        public long HotShiftRemainingTicks { get; private set; }
+        public long HotShiftFuelCostUnits { get; private set; }
+        public long HotShiftOutputPartsUnits { get; private set; }
+        public long HotShiftWaterModifierMilliPerSettlementTick
+        {
+            get;
+            private set;
+        }
+        public long HotShiftCompletedCount { get; private set; }
+        public bool IsHotShiftRunAvailable { get; private set; }
+        public bool IsHotShiftStalledByWorkshopPush { get; private set; }
+        public bool IsHotShiftActivelyWorking { get; private set; }
         public long WaterMilli { get; private set; }
         public long WaterTrendMilliPerSettlementTick { get; private set; }
         public bool IsWaterRecovering { get; private set; }
@@ -328,8 +366,31 @@ namespace AtomicLandPirate.Simulation.LastBearing
             return checked(
                 baseRate
                 + state.ActiveWaterModifierMilliPerSettlementTick
+                + (state.HotShiftPhase == HotShiftPhase.InProgress
+                        && state.WorkshopServiceSlotsReserved == 0
+                    ? LastBearingBalanceV1
+                        .HotShiftWaterModifierMilliPerSettlementTick
+                    : 0)
                 + LastBearingBalanceV1.CityImprovementWaterModifier(
                     state.InstalledCityImprovement));
+        }
+
+        private static bool ComputeHotShiftRunAvailable(
+            LastBearingState state)
+        {
+            return state.SliceInfrastructureActive
+                && state.HotShiftPhase == HotShiftPhase.Idle
+                && state.PreparationChoice
+                    != PreparationChoice.Unselected
+                && state.PlannedModule != VehicleModule.None
+                && state.ModuleInstallationState
+                    != ModuleInstallationState.None
+                && state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.FuelUnits
+                    >= checked(
+                        LastBearingBalanceV1.HotShiftFuelCostUnits
+                        + LastBearingBalanceV1.RouteFuelCost(
+                            state.PlannedModule));
         }
 
         private static long ThresholdTicks(
