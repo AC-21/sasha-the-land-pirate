@@ -79,6 +79,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             ValidatePreparation(state);
             ValidateCityConstruction(state);
             ValidateHotShift(state);
+            ValidateDustFront(state);
             ValidateVehicleAndTransaction(state);
             ValidateCargo(state);
             ValidateFaction(state);
@@ -236,6 +237,37 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.HotShiftFuelCommittedUnits
                     == LastBearingBalanceV1.HotShiftFuelCostUnits,
                 "LAST_BEARING_HOT_SHIFT_PROGRESS_STATE_INVALID");
+        }
+
+        private static void ValidateDustFront(LastBearingState state)
+        {
+            RequireEnum(state.DustFrontOutcome, "DUST_FRONT_OUTCOME");
+            RequireRange(
+                state.DustFrontProgressTicks,
+                0,
+                LastBearingBalanceV1.DustFrontThresholdCrisisTicks,
+                "DUST_FRONT_PROGRESS");
+
+            if (state.DustFrontOutcome == DustFrontOutcome.Unresolved)
+            {
+                Require(
+                    state.DustFrontProgressTicks
+                        < LastBearingBalanceV1
+                            .DustFrontThresholdCrisisTicks
+                    && !state.IsDustFrontAcknowledgementRequired
+                    && state.PauseCause != PauseCause.DustFrontAlert,
+                    "LAST_BEARING_DUST_FRONT_UNRESOLVED_STATE_INVALID");
+                return;
+            }
+
+            Require(
+                state.DustFrontProgressTicks
+                    == LastBearingBalanceV1.DustFrontThresholdCrisisTicks,
+                "LAST_BEARING_DUST_FRONT_RESOLVED_PROGRESS_INVALID");
+            Require(
+                state.IsDustFrontAcknowledgementRequired
+                    == (state.PauseCause == PauseCause.DustFrontAlert),
+                "LAST_BEARING_DUST_FRONT_ACKNOWLEDGEMENT_STATE_INVALID");
         }
 
         private static void ValidatePreparation(LastBearingState state)
@@ -877,10 +909,6 @@ namespace AtomicLandPirate.Simulation.LastBearing
             RequireNonnegative(
                 state.NextMaintenanceDueSettlementTick,
                 "NEXT_MAINTENANCE_DUE");
-            RequireNonnegative(
-                state.DustFrontProgressTicks,
-                "DUST_FRONT_PROGRESS");
-
             Require(
                 (state.FactionMemory == null)
                     == (state.PendingFactionOutcome == FactionOutcomeKind.None),

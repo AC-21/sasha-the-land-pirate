@@ -125,6 +125,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 NextMaintenanceDueSettlementTick = 0,
                 MaintenanceDue = false,
                 DustFrontProgressTicks = 0,
+                DustFrontOutcome = DustFrontOutcome.Unresolved,
+                IsDustFrontAcknowledgementRequired = false,
             };
 
             return builder.Build();

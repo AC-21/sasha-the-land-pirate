@@ -117,6 +117,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     model,
                     _controller!.CityNeedInspected);
 
+            DrawDustFrontAlert(model);
+
             // Keep the playable journey above the temporary development
             // instruments so the next verb never depends on scrolling through
             // internal state first.
@@ -162,6 +164,31 @@ namespace AtomicLandPirate.Presentation.LastBearing
             GUILayout.Space(10f);
 
             DrawOneGoodBatch(model);
+        }
+
+        private void DrawDustFrontAlert(LastBearingReadModel model)
+        {
+            if (!model.IsDustFrontAcknowledgementRequired)
+            {
+                return;
+            }
+
+            GUILayout.Label("DUST FRONT · GLOBAL ALERT", _headingStyle);
+            GUILayout.Label(
+                model.DustFrontOutcome == DustFrontOutcome.Held
+                    ? "HELD · Last Bearing kept the reserve above the recoverable line."
+                    : "BREACHED · The failing turbine could not hold the dry line. Hot Shift stays stalled until turbine repair.",
+                _bodyStyle);
+            bool wasEnabled = GUI.enabled;
+            GUI.enabled = wasEnabled &&
+                          _controller!.CanAcknowledgeDustFront;
+            if (GUILayout.Button("ACKNOWLEDGE FRONT", _buttonStyle))
+            {
+                _controller.AcknowledgeDustFront();
+            }
+
+            GUI.enabled = wasEnabled;
+            GUILayout.Space(12f);
         }
 
         private void DrawGarageUpgrade(LastBearingReadModel model)
@@ -230,7 +257,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             GUILayout.Label("SERVICE", _headingStyle);
             GUILayout.BeginHorizontal();
-            if (model.PauseCause == PauseCause.AutoAlert)
+            if (model.PauseCause == PauseCause.DustFrontAlert)
+            {
+                GUILayout.Label(
+                    "AUTO-PAUSED · acknowledge the Dust Front verdict above",
+                    _mutedStyle);
+            }
+            else if (model.PauseCause == PauseCause.AutoAlert)
             {
                 GUILayout.Label(
                     "AUTO-PAUSED · choose the depot response above",
@@ -1245,6 +1278,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             const string serviceControls =
                 "\nP · pause  F5 · save  F9 · load";
+            if (model.IsDustFrontAcknowledgementRequired)
+            {
+                return "Click ACKNOWLEDGE FRONT above · accept the Held or " +
+                       "Breached verdict before settlement clocks resume." +
+                       serviceControls;
+            }
+
             if (model.AssignedResidentId == null)
             {
                 return "Click ASSIGN DEFAULT EXPEDITION LEAD above · the " +
@@ -1761,6 +1801,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             text.Append("Hot shift  ")
                 .Append(FormatHotShift(model))
                 .AppendLine();
+            text.Append("Dust front  ")
+                .Append(model.DustFrontOutcome)
+                .Append("  ·  acknowledgement ")
+                .Append(model.IsDustFrontAcknowledgementRequired
+                    ? "required"
+                    : "clear")
+                .AppendLine();
             text.Append("Route  ").Append(model.RouteKind)
                 .Append("  ").Append(model.RouteProgressTicks)
                 .Append('/').Append(model.RouteTargetTicks)
@@ -1808,9 +1855,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             if (model.HotShiftPhase == HotShiftPhase.InProgress)
             {
-                return (model.IsHotShiftStalledByWorkshopPush
-                        ? "stalled · operator borrowed · no added water draw"
-                        : "working · -0.010 water / settlement tick") +
+                return (model.IsHotShiftStalledByDustFront
+                        ? "front-stalled · turbine repair required · no added water draw"
+                        : model.IsHotShiftStalledByWorkshopPush
+                            ? "stalled · operator borrowed · no added water draw"
+                            : "working · -0.010 water / settlement tick") +
                     " · " + model.HotShiftElapsedTicks + '/' +
                     model.HotShiftRequiredTicks;
             }

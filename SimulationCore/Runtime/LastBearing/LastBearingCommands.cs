@@ -498,4 +498,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
         {
         }
     }
+
+    public sealed class AcknowledgeDustFrontCommand : LastBearingCommand
+    {
+        public AcknowledgeDustFrontCommand(long sequence)
+            : base(sequence)
+        {
+        }
+    }
 }

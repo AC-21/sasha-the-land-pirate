@@ -537,6 +537,118 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             }
         }
 
+        [UnityTest]
+        public IEnumerator DustFrontSubmitClearsPausePersistsBreachAndIsModeSafe()
+        {
+            LastBearingGameController controller = BuildController();
+            LastBearingFieldDesk desk = RequireDesk(controller);
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
+            InstallControllerState(
+                controller,
+                PrimeDustFrontThreshold(controller.State!, holds: false));
+            controller.ShowCityOverview();
+            yield return null;
+
+            int generationsBeforeResolution =
+                GenerationCount(profileDirectory);
+            string hashBeforeResolution = controller.CanonicalHash;
+            InvokeSimulationTick(controller);
+            string resolutionHash = AssertAutosaveBoundary(
+                controller,
+                profileDirectory,
+                generationsBeforeResolution,
+                hashBeforeResolution);
+            desk.Refresh(force: true);
+
+            LastBearingFieldDeskProjection projection =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                controller.ReadModel!.DustFrontOutcome,
+                Is.EqualTo(DustFrontOutcome.Breached));
+            Assert.That(
+                controller.ReadModel.IsDustFrontAcknowledgementRequired,
+                Is.True);
+            Assert.That(
+                controller.ReadModel.PauseCause,
+                Is.EqualTo(PauseCause.DustFrontAlert));
+            Assert.That(controller.Status, Does.Contain("DUST FRONT BREACHED"));
+            Assert.That(
+                projection.PrimaryAction.Intent,
+                Is.EqualTo(
+                    LastBearingFieldDeskIntent.AcknowledgeDustFront));
+            Assert.That(
+                projection.PrimaryAction.Label,
+                Is.EqualTo("ACKNOWLEDGE FRONT"));
+            Assert.That(
+                projection.PrimaryAction.Tone,
+                Is.EqualTo(LastBearingFieldDeskActionTone.Hazard));
+            Assert.That(projection.SecondaryAction.IsVisible, Is.False);
+            Assert.That(projection.Survey.IsVisible, Is.False);
+
+            VisualElement root =
+                RequireDocument(controller).rootVisualElement;
+            Button primary =
+                root.Q<Button>("primary-action-button");
+            Button pause =
+                root.Q<Button>("pause-button");
+            Assert.That(primary.text, Is.EqualTo("ACKNOWLEDGE FRONT"));
+            Assert.That(primary.enabledSelf, Is.True);
+            Assert.That(pause.style.display.value, Is.EqualTo(DisplayStyle.Flex));
+            Assert.That(pause.enabledSelf, Is.False);
+
+            controller.OpenGarageBay();
+            desk.Refresh(force: true);
+            AssertMode(controller, LastBearingPresentationMode.GarageBay);
+            Assert.That(controller.CanAcknowledgeDustFront, Is.True);
+            Assert.That(controller.GetComponent<LastBearingHud>().enabled, Is.True);
+
+            controller.ShowCityOverview();
+            desk.Refresh(force: true);
+            Assert.That(primary.text, Is.EqualTo("ACKNOWLEDGE FRONT"));
+            int generationsBeforeAcknowledgement =
+                GenerationCount(profileDirectory);
+            Submit(primary);
+            Assert.That(controller.HasPendingPlayerCommands, Is.True);
+            Assert.That(controller.CanAcknowledgeDustFront, Is.False);
+
+            // The command is canonical and mode-agnostic: leaving the city
+            // after submission cannot strand the global verdict.
+            controller.OpenGarageBay();
+            InvokeSimulationTick(controller);
+            string acknowledgementHash = AssertAutosaveBoundary(
+                controller,
+                profileDirectory,
+                generationsBeforeAcknowledgement,
+                resolutionHash);
+            AssertMode(controller, LastBearingPresentationMode.GarageBay);
+            Assert.That(
+                controller.ReadModel!.PauseCause,
+                Is.EqualTo(PauseCause.None));
+            Assert.That(
+                controller.ReadModel.DustFrontOutcome,
+                Is.EqualTo(DustFrontOutcome.Breached));
+            Assert.That(
+                controller.ReadModel.IsDustFrontAcknowledgementRequired,
+                Is.False);
+            Assert.That(controller.CanAcknowledgeDustFront, Is.False);
+            Assert.That(
+                controller.Status,
+                Does.Contain("acknowledged: BREACHED"));
+
+            controller.ReturnToTitle();
+            controller.Load();
+            Assert.That(controller.CanonicalHash, Is.EqualTo(acknowledgementHash));
+            Assert.That(
+                controller.ReadModel!.DustFrontOutcome,
+                Is.EqualTo(DustFrontOutcome.Breached));
+            Assert.That(
+                controller.ReadModel.IsDustFrontAcknowledgementRequired,
+                Is.False);
+            Assert.That(
+                controller.ReadModel.PauseCause,
+                Is.EqualTo(PauseCause.None));
+        }
+
         private LastBearingGameController BuildController()
         {
             _root = new GameObject(LastBearingGameController.RuntimeRootName);
@@ -829,6 +941,44 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             }
 
             return state;
+        }
+
+        private static LastBearingState PrimeDustFrontThreshold(
+            LastBearingState state,
+            bool holds)
+        {
+            Type? builderType =
+                typeof(LastBearingState).Assembly.GetType(
+                    "AtomicLandPirate.Simulation.LastBearing." +
+                    "LastBearingStateBuilder");
+            Assert.That(builderType, Is.Not.Null);
+            const BindingFlags flags =
+                BindingFlags.Instance |
+                BindingFlags.NonPublic |
+                BindingFlags.Public;
+            ConstructorInfo? constructor = builderType!.GetConstructor(
+                flags,
+                binder: null,
+                new[] { typeof(LastBearingState) },
+                modifiers: null);
+            FieldInfo? progress = builderType.GetField(
+                "DustFrontProgressTicks",
+                flags);
+            FieldInfo? water = builderType.GetField("WaterMilli", flags);
+            MethodInfo? build = builderType.GetMethod("Build", flags);
+            Assert.That(constructor, Is.Not.Null);
+            Assert.That(progress, Is.Not.Null);
+            Assert.That(water, Is.Not.Null);
+            Assert.That(build, Is.Not.Null);
+
+            object builder = constructor!.Invoke(new object[] { state });
+            progress!.SetValue(
+                builder,
+                LastBearingBalanceV1.DustFrontThresholdCrisisTicks - 1);
+            water!.SetValue(builder, holds ? 60020L : 0L);
+            var result = build!.Invoke(builder, null) as LastBearingState;
+            Assert.That(result, Is.Not.Null);
+            return result!;
         }
 
         private static void InstallControllerState(

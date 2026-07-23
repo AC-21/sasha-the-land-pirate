@@ -213,6 +213,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                     return;
                 }
 
+                if (TryAcknowledgeDustFrontAlert(_controller!))
+                {
+                    return;
+                }
+
                 bool isPaused =
                     _controller?.RuntimeReadModel?.PauseCause != PauseCause.None;
                 LastBearingNativePerformanceAction action =
@@ -223,6 +228,23 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
             {
                 Fail("runtime-exception-" + exception.GetType().Name);
             }
+        }
+
+        private static bool TryAcknowledgeDustFrontAlert(
+            LastBearingGameController controller)
+        {
+            if (controller.RuntimeReadModel
+                    ?.IsDustFrontAcknowledgementRequired != true)
+            {
+                return false;
+            }
+
+            if (controller.CanAcknowledgeDustFront)
+            {
+                controller.AcknowledgeDustFront();
+            }
+
+            return true;
         }
 
         private void LateUpdate()

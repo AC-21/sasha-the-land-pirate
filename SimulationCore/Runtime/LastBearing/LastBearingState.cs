@@ -6,7 +6,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public sealed class LastBearingState
     {
-        public const int CurrentSchemaVersion = 7;
+        public const int CurrentSchemaVersion = 8;
         public const int CityConstructionPadCount = 5;
         public const int UnplacedCityPadIndex = -1;
         public const string SashaProtagonistId = "sasha";
@@ -46,6 +46,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             "city:last-bearing:delivery:parts-batch:0001";
         public const string HotShiftId =
             "city:last-bearing:production:hot-shift";
+        public const string DustFrontId =
+            "crisis:last-bearing:dust-front";
 
         internal LastBearingState(LastBearingStateBuilder builder)
         {
@@ -181,6 +183,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 builder.NextMaintenanceDueSettlementTick;
             MaintenanceDue = builder.MaintenanceDue;
             DustFrontProgressTicks = builder.DustFrontProgressTicks;
+            DustFrontOutcome = builder.DustFrontOutcome;
+            IsDustFrontAcknowledgementRequired =
+                builder.IsDustFrontAcknowledgementRequired;
         }
 
         public int SchemaVersion { get; private set; }
@@ -406,6 +411,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public bool MaintenanceDue { get; private set; }
 
         public long DustFrontProgressTicks { get; private set; }
+
+        public DustFrontOutcome DustFrontOutcome { get; private set; }
+
+        public bool IsDustFrontAcknowledgementRequired { get; private set; }
     }
 
     internal sealed class LastBearingStateBuilder
@@ -543,6 +552,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 state.NextMaintenanceDueSettlementTick;
             MaintenanceDue = state.MaintenanceDue;
             DustFrontProgressTicks = state.DustFrontProgressTicks;
+            DustFrontOutcome = state.DustFrontOutcome;
+            IsDustFrontAcknowledgementRequired =
+                state.IsDustFrontAcknowledgementRequired;
         }
 
         internal int SchemaVersion;
@@ -653,6 +665,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         internal long NextMaintenanceDueSettlementTick;
         internal bool MaintenanceDue;
         internal long DustFrontProgressTicks;
+        internal DustFrontOutcome DustFrontOutcome;
+        internal bool IsDustFrontAcknowledgementRequired;
 
         internal LastBearingState Build()
         {

@@ -58,9 +58,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
             IsHotShiftStalledByWorkshopPush =
                 state.HotShiftPhase == HotShiftPhase.InProgress
                 && state.WorkshopServiceSlotsReserved > 0;
+            IsHotShiftStalledByDustFront =
+                IsHotShiftBlockedByDustFront(state);
             IsHotShiftActivelyWorking =
                 state.HotShiftPhase == HotShiftPhase.InProgress
-                && state.WorkshopServiceSlotsReserved == 0;
+                && state.WorkshopServiceSlotsReserved == 0
+                && !IsHotShiftStalledByDustFront;
             WaterMilli = state.WaterMilli;
             WaterTrendMilliPerSettlementTick = ComputeWaterTrend(state);
             IsWaterRecovering = WaterTrendMilliPerSettlementTick > 0;
@@ -185,6 +188,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 0,
                 LastBearingBalanceV1.DustFrontThresholdCrisisTicks
                     - state.DustFrontProgressTicks);
+            DustFrontOutcome = state.DustFrontOutcome;
+            IsDustFrontAcknowledgementRequired =
+                state.IsDustFrontAcknowledgementRequired;
             RouteArrivalGlobalTicks = state.ExpeditionPhase
                 == ExpeditionPhase.Outbound
                 ? Math.Max(0, state.RouteTargetTicks - state.RouteProgressTicks)
@@ -234,6 +240,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long HotShiftCompletedCount { get; private set; }
         public bool IsHotShiftRunAvailable { get; private set; }
         public bool IsHotShiftStalledByWorkshopPush { get; private set; }
+        public bool IsHotShiftStalledByDustFront { get; private set; }
         public bool IsHotShiftActivelyWorking { get; private set; }
         public long WaterMilli { get; private set; }
         public long WaterTrendMilliPerSettlementTick { get; private set; }
@@ -314,6 +321,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long ClaimContestedFactionTicks { get; private set; }
         public long ClaimedFactionTicks { get; private set; }
         public long DustFrontCrisisTicks { get; private set; }
+        public DustFrontOutcome DustFrontOutcome { get; private set; }
+        public bool IsDustFrontAcknowledgementRequired { get; private set; }
         public long? RouteArrivalGlobalTicks { get; private set; }
         public long? RouteReturnGlobalTicks { get; private set; }
         public string NextObjective { get; private set; } = string.Empty;
@@ -368,6 +377,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 + state.ActiveWaterModifierMilliPerSettlementTick
                 + (state.HotShiftPhase == HotShiftPhase.InProgress
                         && state.WorkshopServiceSlotsReserved == 0
+                        && !IsHotShiftBlockedByDustFront(state)
                     ? LastBearingBalanceV1
                         .HotShiftWaterModifierMilliPerSettlementTick
                     : 0)
@@ -391,6 +401,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         LastBearingBalanceV1.HotShiftFuelCostUnits
                         + LastBearingBalanceV1.RouteFuelCost(
                             state.PlannedModule));
+        }
+
+        private static bool IsHotShiftBlockedByDustFront(
+            LastBearingState state)
+        {
+            return state.DustFrontOutcome == DustFrontOutcome.Breached
+                && state.TurbineCondition == TurbineCondition.Failing;
         }
 
         private static long ThresholdTicks(

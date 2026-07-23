@@ -229,6 +229,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _readModel?.IsHotShiftRunAvailable == true &&
             IsExactFieldDeskCityOverview;
 
+        public bool CanAcknowledgeDustFront =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsDustFrontAcknowledgementRequired == true;
+
         public bool CanAssignCityServiceHuman =>
             _readModel != null &&
             _readModel.CityServiceLinkConnected &&
@@ -728,6 +732,32 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 expectedCompletedCount));
             _status =
                 "Hot Shift queued: 1 fuel · 120 settlement ticks · +2 reclaimed parts.";
+        }
+
+        public void AcknowledgeDustFront()
+        {
+            if (_readModel == null)
+            {
+                _status =
+                    "Start or load Last Bearing before acknowledging the Dust Front.";
+                return;
+            }
+
+            if (_pendingCommands.Count != 0)
+            {
+                _status =
+                    "Finish the queued action before acknowledging the Dust Front.";
+                return;
+            }
+
+            if (!_readModel.IsDustFrontAcknowledgementRequired)
+            {
+                _status = "No Dust Front verdict is waiting for acknowledgement.";
+                return;
+            }
+
+            Queue(sequence => new AcknowledgeDustFrontCommand(sequence));
+            _status = "Dust Front verdict acknowledgement queued.";
         }
 
         public void BeginGaragePlan(PreparationChoice preparation)
@@ -1333,6 +1363,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            if (_readModel.PauseCause == PauseCause.DustFrontAlert)
+            {
+                _status =
+                    "Acknowledge the Dust Front verdict before settlement clocks resume.";
+                return;
+            }
+
             if (_readModel.PauseCause == PauseCause.AutoAlert)
             {
                 _status = "Resolve the depot encounter before domain clocks resume.";
@@ -1634,6 +1671,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 bool hotShiftCompleted = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.HotShiftCompleted);
+                bool dustFrontResolved = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.DustFrontResolved);
+                bool dustFrontAcknowledged = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.DustFrontAcknowledged);
                 _state = result.State;
                 _readModel = result.ReadModel;
                 if (cityBuildingChanged)
@@ -1696,9 +1739,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
                 if (hotShiftStarted)
                 {
-                    _status = _readModel.IsHotShiftStalledByWorkshopPush
-                        ? "Hot Shift started, but Workshop Push borrowed the operator. Progress and the Hot Shift water draw are stalled."
-                        : "Hot Shift started. The operator is working; water draw adds -0.010 per settlement tick.";
+                    _status = _readModel.IsHotShiftStalledByDustFront
+                        ? "Hot Shift started, but the breached Dust Front has stopped the failing waterworks. Progress and water draw are stalled until turbine repair."
+                        : _readModel.IsHotShiftStalledByWorkshopPush
+                            ? "Hot Shift started, but Workshop Push borrowed the operator. Progress and the Hot Shift water draw are stalled."
+                            : "Hot Shift started. The operator is working; water draw adds -0.010 per settlement tick.";
                 }
 
                 if (hotShiftCheckpointReached)
@@ -1711,6 +1756,25 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 {
                     _status =
                         "Hot Shift complete. +2 reclaimed parts; the service sled is parked at the machine shop.";
+                }
+
+                // Verdict handling stays after production status so an
+                // autonomous threshold reached on the same tick remains the
+                // player-visible interruption.
+                if (dustFrontResolved)
+                {
+                    _status = _readModel.DustFrontOutcome ==
+                              DustFrontOutcome.Held
+                        ? "DUST FRONT HELD. Last Bearing kept the reserve above the recoverable line. Acknowledge the verdict to resume."
+                        : "DUST FRONT BREACHED. The failing turbine could not hold the dry line. Acknowledge the verdict; Hot Shift stays stalled until turbine repair.";
+                }
+
+                if (dustFrontAcknowledged)
+                {
+                    _status = _readModel.DustFrontOutcome ==
+                              DustFrontOutcome.Held
+                        ? "Dust Front verdict acknowledged: HELD. Settlement clocks resumed."
+                        : "Dust Front verdict acknowledged: BREACHED. Settlement clocks resumed; Hot Shift remains stalled until turbine repair.";
                 }
             }
             catch (Exception exception)
@@ -1995,7 +2059,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     || kind == LastBearingEventKind.CityServiceBatchDelivered
                     || kind == LastBearingEventKind.HotShiftStarted
                     || kind == LastBearingEventKind.HotShiftCheckpointReached
-                    || kind == LastBearingEventKind.HotShiftCompleted)
+                    || kind == LastBearingEventKind.HotShiftCompleted
+                    || kind == LastBearingEventKind.DustFrontResolved
+                    || kind == LastBearingEventKind.DustFrontAcknowledged)
                 {
                     Save();
                     return;
