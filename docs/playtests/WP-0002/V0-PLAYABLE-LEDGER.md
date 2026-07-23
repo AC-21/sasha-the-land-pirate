@@ -556,8 +556,11 @@ Detailed contract:
 Objective: give the normal strategy city view its first retained, player-facing
 interface without changing the implemented game or removing the legacy HUD.
 
-Status: current implementation target; not released until independent, Unity,
-protected, and creator-delegated release gates pass.
+Status: released on protected `main` in `7f105741` after deterministic, Unity,
+protected, visual, and creator-delegated release gates. The final native soak was
+quarantined before performance start after Unity reproduced the same Build
+Profile source-serialization defect on its one authorized retry; no current-head
+native performance claim is made.
 
 Scope:
 
@@ -603,6 +606,46 @@ or D-0044 selection.
 Detailed contract:
 `docs/playtests/WP-0002/VGR-13-FIELD-DESK-CONTRACT.md`.
 
+## VGR-14 — Working Service Cell
+
+Objective: replace the reversible city comparison with one small, canonical,
+saved city-building and local-logistics task that a first-time player can finish.
+
+Status: current implementation target under creator-delegated `HYBRID-CITY`
+selection for the V0 slice.
+
+Scope:
+
+- Place a recycler, machine shop, and emergency storage on five authored pads
+  using quarter-turn orientation and existing reclaimed parts.
+- Commit one recycler-to-shop service link, which locks the layout.
+- Staff one typed machine-shop slot with an eligible resident from the selected
+  human, robot, or mixed roster without composition modifiers.
+- Move one visible aggregate sled through three deterministic stages and credit
+  exactly 2 reclaimed parts once on delivery.
+- Persist the completed city state in schema v4 with one exact v3 migration.
+- Reuse the Field Desk, existing city objects, camera, resources, clock, and
+  zero-allocation simulation hot path.
+
+Acceptance:
+
+- costs are 2/3/1 parts for buildings and 1 part for the committed link;
+- preview/cancel are free, pre-link repositioning is free, and no demolition or
+  refund exists in this bounded slice;
+- invalid, duplicate, premature, unaffordable, and replayed commands fail closed;
+- water pressure continues to fall while the player builds;
+- all three colony compositions complete the same service-cell task;
+- save, title, load, v3 migration, v4 round trip, and exact continuation pass;
+- compile, targeted deterministic tests, relevant EditMode/PlayMode tests, and a
+  3–5 transition native smoke cover the changed dependency surface.
+
+Exclude: a generalized building kernel, freeform terrain, NavMesh logistics,
+composition bonuses, broad production chains, market rules, production art,
+new scenes/packages/dependencies, or a normal-PR 100-cycle soak.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-14-WORKING-SERVICE-CELL-CONTRACT.md`.
+
 ## Visual constitution
 
 - **Texas iron is the scale of work:** cast housings, plate steel, oilfield,
@@ -638,29 +681,38 @@ Detailed contract:
 - WP-0002 does not reserve `ContentSource/` and does not authorize production
   art. A separate accepted C1 asset packet is required before asset fan-out.
 
-## Target-Mac gate
+## Validation ladder
 
-Use native ARM64. After a five-minute warm-up, measure 30 continuous minutes of
-representative city, driving, depot, return, cutaway, save, and load play:
+Use only the gate tier affected by the changed dependency surface:
 
-- whole-frame p95 <= 16.7 ms and p99 <= 25 ms;
-- simulation tick p95 < 4 ms;
-- process RSS < 6 GB;
-- tracked Metal allocation < 3.5 GB;
-- managed allocation p95 = 0 B/frame and average < 1,024 B/frame;
-- frame-time degradation < 10 percent over the run;
-- retained-memory growth < 5 percent;
-- slice save < 25 MB, snapshot pause < 50 ms, save < 2 seconds, and load to
-  interaction < 3 seconds.
+1. **Inner loop:** compile, targeted deterministic tests, and relevant EditMode
+   or PlayMode tests.
+2. **Gameplay PR:** the inner loop plus a short native ARM64 smoke, 3–5 mode
+   cycles, and direct verification of the changed mechanic.
+3. **Milestone/nightly:** full native build, five-minute warmup, paused and
+   representative unpaused performance phases, and the 100-cycle soak. The
+   broader 30-minute representative V0 profile remains a release milestone.
 
-Do not loosen a threshold, omit a loading/save interval, or hide a failed run.
-Primitive performance is not evidence that later unbounded art will pass.
+Documentation, UI copy, isolated content, and unrelated assets do not invalidate
+an existing complete performance proof. Long gates run in parallel with product
+work. Build, start, and collect use one clean Unity session. Zero-test results,
+duplicate TypeDB registration, stale attestation, or editor corruption receive
+one automatic retry; the same infrastructure failure twice is recorded as a
+harness defect and fixed or quarantined instead of retried unchanged.
+
+Release thresholds remain whole-frame p95 <= 16.7 ms and p99 <= 25 ms,
+simulation tick p95 < 4 ms, process RSS < 6 GB, tracked Metal allocation < 3.5
+GB, managed allocation p95 = 0 B/frame and average < 1,024 B/frame, frame-time
+degradation < 10 percent, retained-memory growth < 5 percent, slice save < 25
+MB, snapshot pause < 50 ms, save < 2 seconds, and load to interaction < 3
+seconds. Do not loosen a threshold or hide a failed run.
 
 ## Decision and reservation gates
 
-- **D-0030 — city grammar:** open. Canonical placement cannot begin until the
-  creator selects or supersedes a tested hypothesis. A fixed civic socket may
-  prove one return upgrade without resolving it.
+- **D-0030 — city grammar:** creator-delegated `HYBRID-CITY` is selected for the
+  V0 implementation in VGR-14: restrained individual placement, physical local
+  links, visible nearby/aggregate delivery, cohort population plus typed
+  specialists, and one evolving city. Broader capacity remains evidence-gated.
 - **D-0039 — composition mechanics:** open. V0 keeps human, robot, and mixed
   colonies mechanically identical; do not add food/power/maintenance bonuses,
   staffing advantages, or mixed synergies.
