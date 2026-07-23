@@ -246,6 +246,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 model.PreparationChoice == PreparationChoice.Unselected &&
                 model.TurbineCondition == TurbineCondition.Failing)
             {
+                if (IsWorkingServiceCellObjective(model.NextObjective))
+                {
+                    DrawWorkingServiceCellActions(model);
+                    return;
+                }
+
                 if (model.NextObjective == "activate-slice-infrastructure")
                 {
                     if (!_controller.HasCompletedCityGrammarObservation)
@@ -623,6 +629,192 @@ namespace AtomicLandPirate.Presentation.LastBearing
             GUILayout.Label(permitJob.ProgressLabel, _bodyStyle);
         }
 
+        private void DrawWorkingServiceCellActions(
+            LastBearingReadModel model)
+        {
+            if (_controller!.HasPendingPlayerCommands)
+            {
+                GUILayout.Label(
+                    "SERVICE-CELL ACTION QUEUED · let the next settlement tick " +
+                    "accept it before issuing another canonical action.",
+                    _mutedStyle);
+                return;
+            }
+
+            if (_controller.HasCityBuildingPreview)
+            {
+                DrawCityBuildingPreview(model);
+                return;
+            }
+
+            switch (model.NextObjective)
+            {
+                case "place-city-recycler":
+                    DrawSelectCityBuilding(
+                        "SELECT RECYCLER · 2 PARTS",
+                        CityBuildingKind.Recycler);
+                    return;
+                case "place-city-machine-shop":
+                    DrawSelectCityBuilding(
+                        "SELECT MACHINE SHOP · 3 PARTS",
+                        CityBuildingKind.MachineShop);
+                    return;
+                case "place-city-emergency-storage":
+                    DrawSelectCityBuilding(
+                        "SELECT EMERGENCY STORAGE · 1 PART",
+                        CityBuildingKind.EmergencyStorage);
+                    return;
+                case "connect-city-service-link":
+                    GUILayout.Label(
+                        "Optional: reposition any placed building for free " +
+                        "before the permanent link lock.",
+                        _mutedStyle);
+                    DrawSelectCityBuilding(
+                        "MOVE RECYCLER · FREE",
+                        CityBuildingKind.Recycler);
+                    DrawSelectCityBuilding(
+                        "MOVE MACHINE SHOP · FREE",
+                        CityBuildingKind.MachineShop);
+                    DrawSelectCityBuilding(
+                        "MOVE EMERGENCY STORAGE · FREE",
+                        CityBuildingKind.EmergencyStorage);
+                    GUILayout.Label(
+                        "Locking spends 1 reclaimed part and permanently fixes " +
+                        "all three pads and orientations. V0 has no demolition " +
+                        "or refund.",
+                        _bodyStyle);
+                    if (_controller.CanConnectCityServiceLink &&
+                        GUILayout.Button(
+                            "LOCK SERVICE LINK · 1 PART",
+                            _buttonStyle))
+                    {
+                        _controller.ConnectCityServiceLink();
+                    }
+                    else if (!_controller.CanConnectCityServiceLink)
+                    {
+                        GUILayout.Label(
+                            "The permanent link needs all three buildings and " +
+                            "1 reclaimed part.",
+                            _mutedStyle);
+                    }
+
+                    return;
+                case "staff-city-service-cell":
+                    GUILayout.Label(
+                        "Assign one eligible resident to the machine-shop slot. " +
+                        "Human and utility-robot operators are neutral here; " +
+                        "neither grants a V0 bonus.",
+                        _bodyStyle);
+                    if (_controller.CanAssignCityServiceHuman &&
+                        GUILayout.Button(
+                            "STAFF HUMAN · NEUTRAL",
+                            _buttonStyle))
+                    {
+                        _controller.AssignCityServiceResident(
+                            ResidentRoster.HumanResidentId);
+                    }
+
+                    if (_controller.CanAssignCityServiceRobot &&
+                        GUILayout.Button(
+                            "STAFF UTILITY ROBOT · NEUTRAL",
+                            _buttonStyle))
+                    {
+                        _controller.AssignCityServiceResident(
+                            ResidentRoster.RobotResidentId);
+                    }
+
+                    return;
+                case "advance-city-service-sled":
+                    bool atRecycler =
+                        model.CityDeliveryStage ==
+                        CityDeliveryStage.AtRecycler;
+                    GUILayout.Label(
+                        atRecycler
+                            ? "The first advance moves the calibration sled " +
+                              "into transit; it returns no parts yet."
+                            : "The second advance completes the delivery and " +
+                              "returns exactly 2 reclaimed parts once.",
+                        _bodyStyle);
+                    if (_controller.CanAdvanceCityServiceSled &&
+                        GUILayout.Button(
+                            atRecycler
+                                ? "ADVANCE PARTS SLED"
+                                : "DELIVER SLED · +2 PARTS",
+                            _buttonStyle))
+                    {
+                        _controller.AdvanceCityServiceSled();
+                    }
+
+                    return;
+            }
+        }
+
+        private void DrawCityBuildingPreview(LastBearingReadModel model)
+        {
+            CityBuildingKind building = _controller!.CityPreviewBuilding;
+            bool moving = CityBuildingPad(model, building) >= 0;
+            GUILayout.Label(
+                "PREVIEW · " + FormatCityBuilding(building) +
+                " · PAD " + (_controller.CityPreviewPadIndex + 1) +
+                " · " + (_controller.CityPreviewQuarterTurns * 90) + "°\n" +
+                "Pad changes, quarter-turns, and cancellation are free.",
+                _bodyStyle);
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("PREVIOUS PAD", _buttonStyle))
+            {
+                _controller.MoveCityBuildingPreview(-1);
+            }
+
+            if (GUILayout.Button("NEXT PAD", _buttonStyle))
+            {
+                _controller.MoveCityBuildingPreview(1);
+            }
+
+            GUILayout.EndHorizontal();
+            if (GUILayout.Button("ROTATE 90°", _buttonStyle))
+            {
+                _controller.RotateCityBuildingPreview();
+            }
+
+            if (_controller.CanPlaceCityBuildingPreview)
+            {
+                string placementLabel = moving
+                    ? "MOVE " + FormatCityBuilding(building) + " · FREE"
+                    : "PLACE " + FormatCityBuilding(building) + " · " +
+                      _controller.CityPreviewPartsCost +
+                      (_controller.CityPreviewPartsCost == 1
+                          ? " PART"
+                          : " PARTS");
+                if (GUILayout.Button(placementLabel, _buttonStyle))
+                {
+                    _controller.PlaceCityBuildingPreview();
+                }
+            }
+            else
+            {
+                GUILayout.Label(
+                    "That pad is occupied or the required reclaimed parts are " +
+                    "not available. Choose another pad or cancel.",
+                    _mutedStyle);
+            }
+
+            if (GUILayout.Button("CANCEL PREVIEW · NO PARTS SPENT", _buttonStyle))
+            {
+                _controller.CancelCityBuildingPreview();
+            }
+        }
+
+        private void DrawSelectCityBuilding(
+            string label,
+            CityBuildingKind building)
+        {
+            if (GUILayout.Button(label, _buttonStyle))
+            {
+                _controller!.SelectCityBuildingPreview(building);
+            }
+        }
+
         private void DrawPermitJob(
             LastBearingPermitJobPresentation presentation)
         {
@@ -985,6 +1177,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                        serviceControls;
             }
 
+            string? workingCellControls =
+                BuildWorkingServiceCellControlsText(model);
+            if (workingCellControls != null)
+            {
+                return workingCellControls + serviceControls;
+            }
+
             if (model.NextObjective == "activate-slice-infrastructure")
             {
                 return "Use TRIAL A or TRIAL B in the diagnostics below, then " +
@@ -1122,6 +1321,97 @@ namespace AtomicLandPirate.Presentation.LastBearing
                    "WASD · camera pan  Q/E · rotate\n" +
                    "Mouse wheel · zoom  RMB · orbit" +
                    serviceControls;
+        }
+
+        private static string? BuildWorkingServiceCellControlsText(
+            LastBearingReadModel model)
+        {
+            switch (model.NextObjective)
+            {
+                case "place-city-recycler":
+                    return "Click SELECT RECYCLER · 2 PARTS above; choose one " +
+                           "of five pads, rotate if wanted, then click PLACE " +
+                           "RECYCLER · 2 PARTS. Preview and cancel are free.";
+                case "place-city-machine-shop":
+                    return "Click SELECT MACHINE SHOP · 3 PARTS above; choose " +
+                           "a free pad, rotate if wanted, then click PLACE " +
+                           "MACHINE SHOP · 3 PARTS. Preview and cancel are free.";
+                case "place-city-emergency-storage":
+                    return "Click SELECT EMERGENCY STORAGE · 1 PART above; " +
+                           "choose a free pad, rotate if wanted, then click " +
+                           "PLACE EMERGENCY STORAGE · 1 PART. Preview and " +
+                           "cancel are free.";
+                case "connect-city-service-link":
+                    return "Optionally move any building for free, then click " +
+                           "LOCK SERVICE LINK · 1 PART above. Locking " +
+                           "permanently fixes every pad and orientation.";
+                case "staff-city-service-cell":
+                    switch (model.Composition)
+                    {
+                        case ColonyComposition.HumanOnly:
+                            return "Click STAFF HUMAN · NEUTRAL above; fill the " +
+                                   "one machine-shop slot with no V0 bonus.";
+                        case ColonyComposition.RobotOnly:
+                            return "Click STAFF UTILITY ROBOT · NEUTRAL above; " +
+                                   "fill the one machine-shop slot with no V0 bonus.";
+                        default:
+                            return "Click STAFF HUMAN · NEUTRAL or STAFF UTILITY " +
+                                   "ROBOT · NEUTRAL above; either fills the same " +
+                                   "one machine-shop slot with no V0 bonus.";
+                    }
+                case "advance-city-service-sled":
+                    return model.CityDeliveryStage == CityDeliveryStage.AtRecycler
+                        ? "Click ADVANCE PARTS SLED above; the first advance " +
+                          "moves the calibration sled into transit and returns " +
+                          "no parts yet."
+                        : "Click DELIVER SLED · +2 PARTS above; the second " +
+                          "advance completes the delivery and returns exactly " +
+                          "2 reclaimed parts once.";
+                default:
+                    return null;
+            }
+        }
+
+        private static bool IsWorkingServiceCellObjective(string objective)
+        {
+            return objective == "place-city-recycler" ||
+                   objective == "place-city-machine-shop" ||
+                   objective == "place-city-emergency-storage" ||
+                   objective == "connect-city-service-link" ||
+                   objective == "staff-city-service-cell" ||
+                   objective == "advance-city-service-sled";
+        }
+
+        private static int CityBuildingPad(
+            LastBearingReadModel model,
+            CityBuildingKind building)
+        {
+            switch (building)
+            {
+                case CityBuildingKind.Recycler:
+                    return model.RecyclerPadIndex;
+                case CityBuildingKind.MachineShop:
+                    return model.MachineShopPadIndex;
+                case CityBuildingKind.EmergencyStorage:
+                    return model.EmergencyStoragePadIndex;
+                default:
+                    return LastBearingState.UnplacedCityPadIndex;
+            }
+        }
+
+        private static string FormatCityBuilding(CityBuildingKind building)
+        {
+            switch (building)
+            {
+                case CityBuildingKind.Recycler:
+                    return "RECYCLER";
+                case CityBuildingKind.MachineShop:
+                    return "MACHINE SHOP";
+                case CityBuildingKind.EmergencyStorage:
+                    return "EMERGENCY STORAGE";
+                default:
+                    return "CITY BUILDING";
+            }
         }
 
         private static string BuildJourneyLedgerText(

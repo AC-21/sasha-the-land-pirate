@@ -55,11 +55,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             LastBearingPermitJobPresentation infrastructure =
                 LastBearingPermitJobPresenter.Present(assigned, true);
-            Assert.That(infrastructure.Headline, Does.Contain("service-cell trial"));
+            Assert.That(infrastructure.Headline, Does.Contain("Place the recycler"));
 
-            state = ApplyOne(
+            state = CompleteWorkingServiceCell(
                 state,
-                sequence => new ActivateSliceInfrastructureCommand(sequence));
+                ResidentRoster.RobotResidentId);
             LastBearingPermitJobPresentation plan =
                 Present(state, cityNeedInspected: true);
             Assert.That(
@@ -71,6 +71,115 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(plan.RecommendedFirstRunCue, Does.Contain("Nothing is auto-selected"));
             Assert.That(plan.IsFinale, Is.False);
             AssertLegible(plan);
+        }
+
+        [Test]
+        public void WorkingServiceCellObjectivesExposeExactCostsControlsAndConsequences()
+        {
+            LastBearingState state = LastBearingScenarioFactory.CreateInitial(
+                ColonyComposition.Mixed,
+                3106);
+            state = ApplyOne(
+                state,
+                sequence => new AssignResidentCommand(
+                    sequence,
+                    ResidentRoster.HumanResidentId));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "place-city-recycler",
+                "Place the recycler",
+                "SELECT RECYCLER · 2 PARTS",
+                "2 reclaimed parts");
+            state = ApplyOne(
+                state,
+                sequence => new PlaceCityBuildingCommand(
+                    sequence,
+                    CityBuildingKind.Recycler,
+                    0,
+                    1));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "place-city-machine-shop",
+                "Place the machine shop",
+                "SELECT MACHINE SHOP · 3 PARTS",
+                "3 reclaimed-part");
+            state = ApplyOne(
+                state,
+                sequence => new PlaceCityBuildingCommand(
+                    sequence,
+                    CityBuildingKind.MachineShop,
+                    1,
+                    2));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "place-city-emergency-storage",
+                "Place emergency storage",
+                "SELECT EMERGENCY STORAGE · 1 PART",
+                "1 reclaimed-part");
+            state = ApplyOne(
+                state,
+                sequence => new PlaceCityBuildingCommand(
+                    sequence,
+                    CityBuildingKind.EmergencyStorage,
+                    2,
+                    3));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "connect-city-service-link",
+                "Lock the service link",
+                "LOCK SERVICE LINK · 1 PART",
+                "permanently");
+            state = ApplyOne(
+                state,
+                sequence => new ConnectCityServiceLinkCommand(sequence));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "staff-city-service-cell",
+                "Staff the machine-shop slot",
+                "STAFF HUMAN · NEUTRAL",
+                "mechanically neutral",
+                "STAFF UTILITY ROBOT · NEUTRAL");
+            state = ApplyOne(
+                state,
+                sequence => new AssignCityServiceResidentCommand(
+                    sequence,
+                    ResidentRoster.RobotResidentId));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "advance-city-service-sled",
+                "Send the calibration sled",
+                "ADVANCE PARTS SLED",
+                "returns no parts yet");
+            state = ApplyOne(
+                state,
+                sequence => new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.AtRecycler));
+
+            AssertWorkingServiceCellGuidance(
+                state,
+                "advance-city-service-sled",
+                "Deliver the sled to the workshop",
+                "DELIVER SLED · +2 PARTS",
+                "returns exactly 2 reclaimed parts once");
+            state = ApplyOne(
+                state,
+                sequence => new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.InTransit));
+
+            LastBearingPermitJobPresentation preparation =
+                Present(state, cityNeedInspected: true);
+            Assert.That(
+                preparation.Chapter,
+                Is.EqualTo(LastBearingPermitJobChapter.Preparation));
+            Assert.That(preparation.Headline, Does.Contain("Choose the bargain"));
         }
 
         [Test]
@@ -609,6 +718,104 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             AssertLegible(serviced);
         }
 
+        private static void AssertWorkingServiceCellGuidance(
+            LastBearingState state,
+            string expectedObjective,
+            string expectedHeadline,
+            string expectedControl,
+            string expectedConsequence,
+            params string[] additionalControls)
+        {
+            string before = LastBearingCanonicalCodec.ComputeSha256(state);
+            LastBearingReadModel model = LastBearingReadModel.FromState(state);
+            Assert.That(model.NextObjective, Is.EqualTo(expectedObjective));
+
+            LastBearingPermitJobPresentation presentation =
+                LastBearingPermitJobPresenter.Present(
+                    model,
+                    cityNeedInspected: true);
+            string hudControls = InvokeHudString(
+                "BuildControlsText",
+                model,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true);
+
+            Assert.That(
+                presentation.Chapter,
+                Is.EqualTo(LastBearingPermitJobChapter.CityCrisis));
+            Assert.That(presentation.Headline, Does.Contain(expectedHeadline));
+            Assert.That(
+                presentation.ProgressLabel,
+                Does.Contain(expectedControl));
+            Assert.That(
+                presentation.Detail,
+                Does.Contain(expectedConsequence));
+            Assert.That(hudControls, Does.Contain(expectedControl));
+            foreach (string additionalControl in additionalControls)
+            {
+                Assert.That(
+                    presentation.ProgressLabel,
+                    Does.Contain(additionalControl));
+                Assert.That(hudControls, Does.Contain(additionalControl));
+            }
+
+            AssertLegible(presentation);
+            Assert.That(
+                LastBearingCanonicalCodec.ComputeSha256(state),
+                Is.EqualTo(before),
+                expectedObjective + " guidance mutated canonical state");
+        }
+
+        private static LastBearingState CompleteWorkingServiceCell(
+            LastBearingState state,
+            string operatorStableId)
+        {
+            state = ApplyOne(
+                state,
+                sequence => new PlaceCityBuildingCommand(
+                    sequence,
+                    CityBuildingKind.Recycler,
+                    0,
+                    0));
+            state = ApplyOne(
+                state,
+                sequence => new PlaceCityBuildingCommand(
+                    sequence,
+                    CityBuildingKind.MachineShop,
+                    1,
+                    0));
+            state = ApplyOne(
+                state,
+                sequence => new PlaceCityBuildingCommand(
+                    sequence,
+                    CityBuildingKind.EmergencyStorage,
+                    2,
+                    0));
+            state = ApplyOne(
+                state,
+                sequence => new ConnectCityServiceLinkCommand(sequence));
+            state = ApplyOne(
+                state,
+                sequence => new AssignCityServiceResidentCommand(
+                    sequence,
+                    operatorStableId));
+            state = ApplyOne(
+                state,
+                sequence => new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.AtRecycler));
+            return ApplyOne(
+                state,
+                sequence => new AdvanceCityServiceSledCommand(
+                    sequence,
+                    CityDeliveryStage.InTransit));
+        }
+
         private static LastBearingState CreatePreparation(
             PreparationChoice preparation,
             VehicleModule module,
@@ -836,6 +1043,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             string[] rawObjectives =
             {
                 "activate-slice-infrastructure",
+                "place-city-recycler",
+                "place-city-machine-shop",
+                "place-city-emergency-storage",
+                "connect-city-service-link",
+                "staff-city-service-cell",
+                "advance-city-service-sled",
                 "complete-preparation",
                 "drive-to-depot",
                 "resolve-depot",

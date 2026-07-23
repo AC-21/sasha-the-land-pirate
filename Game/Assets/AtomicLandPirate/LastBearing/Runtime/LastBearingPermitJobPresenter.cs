@@ -106,6 +106,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private const string ReplayCue =
             "REPLAY CUE · Choose CIVIC BUFFER + WINCH, then TAKE THE " +
             "CERAMIC BEARING to reach manufacturing and barter.";
+        private const string PlaceRecyclerObjective = "place-city-recycler";
+        private const string PlaceMachineShopObjective =
+            "place-city-machine-shop";
+        private const string PlaceEmergencyStorageObjective =
+            "place-city-emergency-storage";
+        private const string ConnectServiceLinkObjective =
+            "connect-city-service-link";
+        private const string StaffServiceCellObjective =
+            "staff-city-service-cell";
+        private const string AdvanceServiceSledObjective =
+            "advance-city-service-sled";
 
         public static LastBearingPermitJobPresentation Present(
             LastBearingReadModel? model,
@@ -169,6 +180,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "committing labor, parts, or fuel.",
                     "Click Inspect Failing Water System; the stopped turbine " +
                     "becomes the active city need.");
+            }
+
+            LastBearingPermitJobPresentation? serviceCell =
+                PresentServiceCellObjective(model);
+            if (serviceCell != null)
+            {
+                return serviceCell;
             }
 
             if (model.NextObjective == "activate-slice-infrastructure")
@@ -334,8 +352,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         (model.RepairCargoCustody == RepairCargoCustody.Faction
                             ? " It remains at the faction service stand until Sasha loads the scout cargo socket."
                             : " It remains at the depot cradle until Sasha loads the scout cargo socket."),
-                        "Press E or gamepad south; move the repair cargo into " +
-                        "Sasha's vehicle custody.");
+                        "Load the repair cargo with E or gamepad south. This " +
+                        "moves it into Sasha's vehicle custody.");
                 }
 
                 if (model.VehicleModule == VehicleModule.SealedRangeTank
@@ -608,6 +626,109 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 "This branch is complete for the current V0.",
                 isAlternateConclusion: true,
                 recommendedFirstRunCue: ReplayCue);
+        }
+
+        private static LastBearingPermitJobPresentation?
+            PresentServiceCellObjective(LastBearingReadModel model)
+        {
+            switch (model.NextObjective)
+            {
+                case PlaceRecyclerObjective:
+                    return Create(
+                        LastBearingPermitJobChapter.CityCrisis,
+                        1,
+                        "CHAPTER I · THE WORKING CELL",
+                        "Place the recycler",
+                        "Preview the recycler across five authored pads. Moving, " +
+                        "quarter-turning, and canceling the preview are free; " +
+                        "acceptance spends 2 reclaimed parts while the water " +
+                        "reserve keeps falling.",
+                        "In the city Field Desk, click SELECT RECYCLER · 2 PARTS; " +
+                        "choose its pad and rotation, then click PLACE RECYCLER · 2 PARTS.");
+                case PlaceMachineShopObjective:
+                    return Create(
+                        LastBearingPermitJobChapter.CityCrisis,
+                        1,
+                        "CHAPTER I · THE WORKING CELL",
+                        "Place the machine shop",
+                        "The shop receives the service-cell delivery. Preview, " +
+                        "move, rotate, or cancel for free before accepting its " +
+                        "3 reclaimed-part cost.",
+                        "Click SELECT MACHINE SHOP · 3 PARTS; choose its pad and " +
+                        "rotation, then click PLACE MACHINE SHOP · 3 PARTS.");
+                case PlaceEmergencyStorageObjective:
+                    return Create(
+                        LastBearingPermitJobChapter.CityCrisis,
+                        1,
+                        "CHAPTER I · THE WORKING CELL",
+                        "Place emergency storage",
+                        "Storage completes the three-building cell. Preview, " +
+                        "move, rotate, or cancel for free before accepting its " +
+                        "1 reclaimed-part cost.",
+                        "Click SELECT EMERGENCY STORAGE · 1 PART; choose its pad " +
+                        "and rotation, then click PLACE EMERGENCY STORAGE · 1 PART.");
+                case ConnectServiceLinkObjective:
+                    return Create(
+                        LastBearingPermitJobChapter.CityCrisis,
+                        1,
+                        "CHAPTER I · THE WORKING CELL",
+                        "Lock the service link",
+                        "All three buildings may still move for free. Locking " +
+                        "the link spends 1 reclaimed part and permanently fixes " +
+                        "every pad and orientation; V0 has no demolition or refund.",
+                        "Reposition any building now, or click LOCK SERVICE LINK · " +
+                        "1 PART to make the layout permanent.");
+                case StaffServiceCellObjective:
+                    return Create(
+                        LastBearingPermitJobChapter.CityCrisis,
+                        1,
+                        "CHAPTER I · THE WORKING CELL",
+                        "Staff the machine-shop slot",
+                        "Assign one eligible resident already in this colony. " +
+                        "Human and utility-robot operators are mechanically " +
+                        "neutral here; neither receives a V0 bonus.",
+                        FormatStaffingControl(model.Composition));
+                case AdvanceServiceSledObjective:
+                    return model.CityDeliveryStage == CityDeliveryStage.AtRecycler
+                        ? Create(
+                            LastBearingPermitJobChapter.CityCrisis,
+                            1,
+                            "CHAPTER I · THE WORKING CELL",
+                            "Send the calibration sled",
+                            "The linked cell has an operator. The first of two " +
+                            "explicit advances moves the sled into transit and " +
+                            "returns no parts yet.",
+                            "Click ADVANCE PARTS SLED; the sled moves from the " +
+                            "recycler onto the permanent service link.")
+                        : Create(
+                            LastBearingPermitJobChapter.CityCrisis,
+                            1,
+                            "CHAPTER I · THE WORKING CELL",
+                            "Deliver the sled to the workshop",
+                            "The second advance completes the first delivery and " +
+                            "returns exactly 2 reclaimed parts once.",
+                            "Click DELIVER SLED · +2 PARTS; the completed working " +
+                            "cell then hands control to expedition preparation.");
+                default:
+                    return null;
+            }
+        }
+
+        private static string FormatStaffingControl(
+            ColonyComposition composition)
+        {
+            switch (composition)
+            {
+                case ColonyComposition.HumanOnly:
+                    return "Click STAFF HUMAN · NEUTRAL; fill the one operator " +
+                           "slot without a composition bonus.";
+                case ColonyComposition.RobotOnly:
+                    return "Click STAFF UTILITY ROBOT · NEUTRAL; fill the one " +
+                           "operator slot without a composition bonus.";
+                default:
+                    return "Click STAFF HUMAN · NEUTRAL or STAFF UTILITY ROBOT · " +
+                           "NEUTRAL; either fills the same one operator slot.";
+            }
         }
 
         private static bool IsPermitJobFinale(LastBearingReadModel model)
