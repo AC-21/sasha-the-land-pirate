@@ -54,13 +54,13 @@ namespace AtomicLandPirate.LastBearingTests
                 "read model exposes the authored service-cell objective chain",
                 ReadModelObjectiveChainIsExact);
             harness.Run(
-                "working service cell checkpoints round trip through canonical v5",
+                "working service cell checkpoints round trip through canonical v6",
                 CanonicalV5RoundTripsAtEveryCheckpoint);
             harness.Run(
                 "delivered service cell keeps reusable stepping allocation free",
                 DeliveredCellStepIntoRemainsAllocationFree);
             harness.Run(
-                "canonical v3 city states migrate deterministically to v5",
+                "canonical v3 city states migrate deterministically to v6",
                 LegacyV3MigrationIsDeterministic);
             harness.Run(
                 "forged city construction states fail closed",
@@ -837,7 +837,7 @@ namespace AtomicLandPirate.LastBearingTests
             string label)
         {
             byte[] encoded = LastBearingCanonicalCodec.Encode(state);
-            TestHarness.Equal((byte)5, encoded[8], label + " codec marker");
+            TestHarness.Equal((byte)6, encoded[8], label + " codec marker");
             LastBearingDecodeResult result =
                 LastBearingCanonicalCodec.TryDecode(encoded);
             TestHarness.True(

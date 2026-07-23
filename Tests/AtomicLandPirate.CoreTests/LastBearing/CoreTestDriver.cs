@@ -66,15 +66,19 @@ namespace AtomicLandPirate.LastBearingTests
 
         public void OperateWreckLineIfAvailable()
         {
-            if (!View.IsWreckLineModulePointAvailable)
+            if (View.IsWreckLineModulePointAvailable)
             {
-                return;
+                RouteActionKind action = View.RouteActionKind;
+                Apply(sequence => new OperateWreckLineModuleCommand(
+                    sequence,
+                    action));
             }
 
-            RouteActionKind action = View.RouteActionKind;
-            Apply(sequence => new OperateWreckLineModuleCommand(
-                sequence,
-                action));
+            if (View.IsWreckLineFrameRailRecoveryAvailable)
+            {
+                Apply(sequence =>
+                    new RecoverWreckLineFrameRailsCommand(sequence));
+            }
         }
     }
 }

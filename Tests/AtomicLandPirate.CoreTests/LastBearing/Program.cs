@@ -44,6 +44,7 @@ namespace AtomicLandPirate.LastBearingTests
                 MaterializationTests.CompleteUnionIsPresent(repoRoot));
             SimulationTests.Run(harness);
             RigUpgradeTests.Run(harness, repoRoot);
+            FrameRailSalvageTests.RunSave(harness, repoRoot);
             SaveAtomicTests.Run(harness, repoRoot);
             HomecomingTests.RunSave(harness, repoRoot);
             SaveBoundaryTests.Run(harness, repoRoot);
@@ -112,6 +113,10 @@ namespace AtomicLandPirate.LastBearingTests
                     break;
                 case "v0-garage-upgrade":
                     RigUpgradeTests.Run(harness, repoRoot);
+                    break;
+                case "v0-wreck-line-salvage":
+                    FrameRailSalvageTests.RunCore(harness);
+                    FrameRailSalvageTests.RunSave(harness, repoRoot);
                     break;
                 default:
                     Console.Error.WriteLine("unknown protected test: " + id);

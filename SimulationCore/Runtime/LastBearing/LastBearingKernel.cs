@@ -203,6 +203,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 ApplyOperateWreckLineModule(builder, operateModule, events);
             }
+            else if (command is RecoverWreckLineFrameRailsCommand recoverRails)
+            {
+                ApplyRecoverWreckLineFrameRails(
+                    builder,
+                    recoverRails,
+                    events);
+            }
             else if (command is OperateDepotRecoveryPointCommand operateRecovery)
             {
                 ApplyOperateDepotRecoveryPoint(
@@ -743,6 +750,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 builder.PartsUnits
                 - LastBearingBalanceV1.PatchworkSkidPlatePartsCostUnits);
             builder.RigUpgrade = command.Upgrade;
+            builder.FrameRailSalvageCustody =
+                FrameRailSalvageCustody.WreckLine;
 
             Emit(
                 builder,
@@ -890,6 +899,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 throw new InvalidOperationException(
                     "LAST_BEARING_WRECK_LINE_MODULE_ACTION_REQUIRED");
+            }
+
+            if (IsWreckLineFrameRailRecoveryAvailable(builder))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_WRECK_LINE_FRAME_RAIL_RECOVERY_REQUIRED");
             }
 
             if (IsDepotApproachRecoveryAvailable(builder))
@@ -1057,6 +1072,40 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 (long)command.Action);
         }
 
+        private static void ApplyRecoverWreckLineFrameRails(
+            LastBearingStateBuilder builder,
+            RecoverWreckLineFrameRailsCommand command,
+            LastBearingEventSink events)
+        {
+            if (builder.FrameRailSalvageCustody
+                    == FrameRailSalvageCustody.Vehicle
+                || builder.FrameRailSalvageCustody
+                    == FrameRailSalvageCustody.Credited)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (!IsWreckLineFrameRailRecoveryAvailable(builder))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_WRECK_LINE_FRAME_RAIL_RECOVERY_NOT_READY");
+            }
+
+            LastBearingOwnershipTransaction
+                .RecoverFrameRailSalvageToVehicle(builder);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.FrameRailSalvageTransferred,
+                LastBearingEventCause.PlayerCommand,
+                builder.RoadTick,
+                command.Sequence,
+                "cargo:wreck-line:frame-rails",
+                (long)FrameRailSalvageCustody.WreckLine,
+                (long)FrameRailSalvageCustody.Vehicle);
+        }
+
         private static bool IsWreckLineModulePointAvailable(
             LastBearingStateBuilder builder)
         {
@@ -1067,6 +1116,25 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && builder.RouteProgressTicks ==
                     LastBearingBalanceV1.WreckLineGateTicks(
                         builder.VehicleModule);
+        }
+
+        private static bool IsWreckLineFrameRailRecoveryAvailable(
+            LastBearingStateBuilder builder)
+        {
+            return builder.ExpeditionPhase == ExpeditionPhase.Outbound
+                && builder.TransactionPhase == TransactionPhase.RoadOwned
+                && builder.RigUpgrade == RigUpgrade.PatchworkSkidPlate
+                && builder.RouteActionUsed
+                && builder.FrameRailSalvageCustody
+                    == FrameRailSalvageCustody.WreckLine
+                && builder.RouteProgressTicks ==
+                    LastBearingBalanceV1.WreckLineGateTicks(
+                        builder.VehicleModule)
+                && checked(
+                    builder.OrdinaryCargoUsedUnits
+                    + LastBearingBalanceV1
+                        .WreckLineFrameRailSalvageCargoUnits)
+                    <= builder.OrdinaryCargoCapacityUnits;
         }
 
         private static void ApplyOperateDepotRecoveryPoint(
@@ -1311,8 +1379,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             if (builder.RepairCargoKind != expectedKind
                 || builder.RepairCargoCustody != expectedSource
-                || builder.OrdinaryCargoUsedUnits != 0
-                || builder.OrdinaryCargoCapacityUnits < 1)
+                || builder.OrdinaryCargoUsedUnits
+                    != FrameRailCargoUnits(builder)
+                || checked(builder.OrdinaryCargoUsedUnits + 1)
+                    > builder.OrdinaryCargoCapacityUnits)
             {
                 throw new InvalidOperationException(
                     "LAST_BEARING_REPAIR_CARGO_LOAD_SOURCE_INVALID");
@@ -1323,7 +1393,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 expectedKind,
                 expectedSource,
                 RepairCargoCustody.Vehicle);
-            builder.OrdinaryCargoUsedUnits = 1;
+            builder.OrdinaryCargoUsedUnits = checked(
+                builder.OrdinaryCargoUsedUnits + 1);
             if (builder.DepotResolution == EncounterChoice.TakeBearing)
             {
                 builder.DepotBearingDisposition =
@@ -1397,14 +1468,18 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     "LAST_BEARING_TANK_RETURN_SELECTION_REQUIRED");
             }
 
-            if (builder.OrdinaryCargoUsedUnits == 0)
+            long expectedOrdinaryCargoUsed = checked(
+                1 + FrameRailCargoUnits(builder));
+            if (builder.OrdinaryCargoUsedUnits == 0
+                && builder.FrameRailSalvageCustody
+                    == FrameRailSalvageCustody.None)
             {
                 // Compatibility for valid development saves created before
                 // the explicit depot load command existed.
                 builder.OrdinaryCargoUsedUnits = 1;
             }
 
-            if (builder.OrdinaryCargoUsedUnits != 1)
+            if (builder.OrdinaryCargoUsedUnits != expectedOrdinaryCargoUsed)
             {
                 throw new InvalidOperationException(
                     "LAST_BEARING_REPAIR_CARGO_OCCUPANCY_INVALID");
@@ -1487,6 +1562,27 @@ namespace AtomicLandPirate.Simulation.LastBearing
             LastBearingOwnershipTransaction.TransferHeavyCargoToSettlement(
                 builder);
             CreditLiquidCargo(builder, command.Sequence, events);
+            if (builder.FrameRailSalvageCustody
+                == FrameRailSalvageCustody.Vehicle)
+            {
+                builder.PartsUnits = checked(
+                    builder.PartsUnits
+                    + LastBearingBalanceV1
+                        .WreckLineFrameRailSalvagePartsUnits);
+                LastBearingOwnershipTransaction.CreditFrameRailSalvage(
+                    builder);
+                Emit(
+                    builder,
+                    events,
+                    LastBearingEventKind.FrameRailSalvageTransferred,
+                    LastBearingEventCause.PlayerCommand,
+                    builder.SettlementTick,
+                    command.Sequence,
+                    "cargo:wreck-line:frame-rails",
+                    (long)FrameRailSalvageCustody.Vehicle,
+                    (long)FrameRailSalvageCustody.Credited);
+            }
+
             ApplyCooperativeReturnConsequences(builder, command.Sequence, events);
 
             var previousDecision = builder.NextCityDecision;
@@ -2725,6 +2821,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 throw new InvalidOperationException(
                     "LAST_BEARING_TRANSACTION_FINGERPRINT_MISMATCH");
             }
+        }
+
+        private static long FrameRailCargoUnits(
+            LastBearingStateBuilder builder)
+        {
+            return builder.FrameRailSalvageCustody
+                    == FrameRailSalvageCustody.Vehicle
+                ? LastBearingBalanceV1
+                    .WreckLineFrameRailSalvageCargoUnits
+                : 0;
         }
 
         private static bool IsAwayFromSettlement(ExpeditionPhase phase)

@@ -6,7 +6,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public sealed class LastBearingState
     {
-        public const int CurrentSchemaVersion = 5;
+        public const int CurrentSchemaVersion = 6;
         public const int CityConstructionPadCount = 5;
         public const int UnplacedCityPadIndex = -1;
         public const string SashaProtagonistId = "sasha";
@@ -138,6 +138,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             LiquidCargoCustody = builder.LiquidCargoCustody;
             RepairCargoKind = builder.RepairCargoKind;
             RepairCargoCustody = builder.RepairCargoCustody;
+            FrameRailSalvageCustody =
+                builder.FrameRailSalvageCustody;
             DepotBearingDisposition = builder.DepotBearingDisposition;
             ReturnPayloadFrozen = builder.ReturnPayloadFrozen;
             HasArrivalClaimSnapshot = builder.HasArrivalClaimSnapshot;
@@ -323,6 +325,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
         public RepairCargoCustody RepairCargoCustody { get; private set; }
 
+        public FrameRailSalvageCustody FrameRailSalvageCustody
+        {
+            get;
+            private set;
+        }
+
         public DepotBearingDisposition DepotBearingDisposition { get; private set; }
 
         public bool ReturnPayloadFrozen { get; private set; }
@@ -479,6 +487,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             LiquidCargoCustody = state.LiquidCargoCustody;
             RepairCargoKind = state.RepairCargoKind;
             RepairCargoCustody = state.RepairCargoCustody;
+            FrameRailSalvageCustody = state.FrameRailSalvageCustody;
             DepotBearingDisposition = state.DepotBearingDisposition;
             ReturnPayloadFrozen = state.ReturnPayloadFrozen;
             HasArrivalClaimSnapshot = state.HasArrivalClaimSnapshot;
@@ -585,6 +594,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         internal LiquidCargoCustody LiquidCargoCustody;
         internal RepairCargoKind RepairCargoKind;
         internal RepairCargoCustody RepairCargoCustody;
+        internal FrameRailSalvageCustody FrameRailSalvageCustody;
         internal DepotBearingDisposition DepotBearingDisposition;
         internal bool ReturnPayloadFrozen;
         internal bool HasArrivalClaimSnapshot;

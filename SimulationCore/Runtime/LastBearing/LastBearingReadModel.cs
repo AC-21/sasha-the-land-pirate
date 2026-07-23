@@ -86,6 +86,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
             VehicleConditionMilli = state.VehicleConditionMilli;
             RepairCargoKind = state.RepairCargoKind;
             RepairCargoCustody = state.RepairCargoCustody;
+            FrameRailSalvageCustody =
+                state.FrameRailSalvageCustody;
+            FrameRailSalvagePartsUnits =
+                LastBearingBalanceV1
+                    .WreckLineFrameRailSalvagePartsUnits;
+            FrameRailSalvageCargoUnits =
+                LastBearingBalanceV1
+                    .WreckLineFrameRailSalvageCargoUnits;
             HeavyCargoKind = state.HeavyCargoKind;
             HeavyCargoCustody = state.HeavyCargoCustody;
             LiquidCargoKind = state.LiquidCargoKind;
@@ -126,6 +134,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 ComputeDepotApproachRecoveryAvailable(state);
             IsWreckLineModulePointAvailable =
                 ComputeWreckLineModulePointAvailable(state);
+            IsWreckLineFrameRailRecoveryAvailable =
+                ComputeWreckLineFrameRailRecoveryAvailable(state);
             IsRepairCargoLoadAvailable =
                 ComputeRepairCargoLoadAvailable(state);
 
@@ -217,6 +227,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long VehicleConditionMilli { get; private set; }
         public RepairCargoKind RepairCargoKind { get; private set; }
         public RepairCargoCustody RepairCargoCustody { get; private set; }
+        public FrameRailSalvageCustody FrameRailSalvageCustody
+        {
+            get;
+            private set;
+        }
+        public long FrameRailSalvagePartsUnits { get; private set; }
+        public long FrameRailSalvageCargoUnits { get; private set; }
         public HeavyCargoKind HeavyCargoKind { get; private set; }
         public HeavyCargoCustody HeavyCargoCustody { get; private set; }
         public LiquidCargoKind LiquidCargoKind { get; private set; }
@@ -249,6 +266,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public PauseCause PauseCause { get; private set; }
         public bool IsDepotApproachRecoveryAvailable { get; private set; }
         public bool IsWreckLineModulePointAvailable { get; private set; }
+        public bool IsWreckLineFrameRailRecoveryAvailable
+        {
+            get;
+            private set;
+        }
         public bool IsRepairCargoLoadAvailable { get; private set; }
         public long? WaterZeroSettlementTicks { get; private set; }
         public long ClaimContestedFactionTicks { get; private set; }
@@ -407,6 +429,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         : "cross-wreck-line-dust-exposure";
                 }
 
+                if (ComputeWreckLineFrameRailRecoveryAvailable(state))
+                {
+                    return "recover-wreck-line-frame-rails";
+                }
+
                 return ComputeDepotApproachRecoveryAvailable(state)
                     ? "operate-depot-recovery-point"
                     : "drive-to-depot";
@@ -524,8 +551,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 || state.TransactionPhase != TransactionPhase.RoadOwned
                 || state.DepotResolution == EncounterChoice.Unresolved
                 || state.ReturnPayloadFrozen
-                || state.OrdinaryCargoUsedUnits != 0
-                || state.OrdinaryCargoCapacityUnits < 1)
+                || state.OrdinaryCargoUsedUnits
+                    != FrameRailCargoUnits(state)
+                || checked(state.OrdinaryCargoUsedUnits + 1)
+                    > state.OrdinaryCargoCapacityUnits)
             {
                 return false;
             }
@@ -624,6 +653,34 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.RouteProgressTicks ==
                     LastBearingBalanceV1.WreckLineGateTicks(
                         state.VehicleModule);
+        }
+
+        private static bool ComputeWreckLineFrameRailRecoveryAvailable(
+            LastBearingState state)
+        {
+            return state.ExpeditionPhase == ExpeditionPhase.Outbound
+                && state.TransactionPhase == TransactionPhase.RoadOwned
+                && state.RigUpgrade == RigUpgrade.PatchworkSkidPlate
+                && state.RouteActionUsed
+                && state.FrameRailSalvageCustody
+                    == FrameRailSalvageCustody.WreckLine
+                && state.RouteProgressTicks ==
+                    LastBearingBalanceV1.WreckLineGateTicks(
+                        state.VehicleModule)
+                && checked(
+                    state.OrdinaryCargoUsedUnits
+                    + LastBearingBalanceV1
+                        .WreckLineFrameRailSalvageCargoUnits)
+                    <= state.OrdinaryCargoCapacityUnits;
+        }
+
+        private static long FrameRailCargoUnits(LastBearingState state)
+        {
+            return state.FrameRailSalvageCustody
+                    == FrameRailSalvageCustody.Vehicle
+                ? LastBearingBalanceV1
+                    .WreckLineFrameRailSalvageCargoUnits
+                : 0;
         }
     }
 }
