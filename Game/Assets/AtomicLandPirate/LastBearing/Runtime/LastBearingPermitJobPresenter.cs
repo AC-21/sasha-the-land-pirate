@@ -97,7 +97,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private const int JobStepCount = 9;
         private const string NoCue = "";
         private const string RecommendedPlanCue =
-            "FIRST RUN · CIVIC BUFFER + WINCH opens the complete " +
+            "RECOMMENDED FIRST RUN · Choose CIVIC BUFFER + WINCH. " +
+            "Nothing is auto-selected; this path opens the complete " +
             "manufacturing-and-permit continuation.";
         private const string RecommendedDepotCue =
             "FIRST RUN · TAKE THE CERAMIC BEARING opens One Good Batch; " +
@@ -119,7 +120,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Choose who calls this place home",
                     "Human, utility-robot, and mixed colonies share the same " +
                     "Permit Job mechanics in this build.",
-                    "Choose a colony composition or load the fixed profile.");
+                    "Click a colony composition, or click LOAD LAST-BEARING-DEV-V1 " +
+                    "to continue the fixed profile.");
             }
 
             if (IsPermitJobFinale(model))
@@ -152,7 +154,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Name an expedition lead",
                     "The roster is valid, but the road manifest needs one " +
                     "resident in the lead slot.",
-                    "Assign the default expedition lead.");
+                    "Click Assign Default Expedition Lead; the resident enters " +
+                    "the manifest without changing colony mechanics.");
             }
 
             if (!cityNeedInspected)
@@ -164,7 +167,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Read the waterworks before spending",
                     "Inspect the stopped turbine and falling reserve before " +
                     "committing labor, parts, or fuel.",
-                    "Inspect the failing water system.");
+                    "Click Inspect Failing Water System; the stopped turbine " +
+                    "becomes the active city need.");
             }
 
             if (model.NextObjective == "activate-slice-infrastructure")
@@ -178,7 +182,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "calibration sled, and record whether its path reads " +
                     "clearly. Either reversible trial unlocks the same " +
                     "canonical infrastructure fact without selecting D-0030.",
-                    "Complete one city trial, then bring the service cell online.");
+                    "Use the trial buttons to place, connect, deliver, and record " +
+                    "one path; then click BRING THE SAME RECYCLER + MACHINE SHOP ONLINE.");
             }
 
             if (model.PreparationPhase == PreparationPhase.Unselected)
@@ -190,7 +195,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Choose the bargain before the road",
                     "Preparation sets the city's water risk; the fitted module " +
                     "sets the route and the cargo Sasha can bring home.",
-                    "Choose one preparation and one vehicle module.",
+                    "Click CIVIC BUFFER or WORKSHOP PUSH, then click one rig " +
+                    "module in the garage; that pair starts the preparation clock.",
                     recommendedFirstRunCue: RecommendedPlanCue);
             }
 
@@ -206,7 +212,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "city, pump hall, workshop, or garage while the crew works.",
                     model.PreparationElapsedTicks + " / " +
                     model.PreparationRequiredTicks + " settlement ticks · " +
-                    model.PreparationRemainingTicks + " remaining",
+                    model.PreparationRemainingTicks +
+                    " remaining · keep the settlement unpaused to advance",
                     model.PreparationElapsedTicks,
                     model.PreparationRequiredTicks);
             }
@@ -225,7 +232,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     FormatPlan(model) +
                     " is fitted. Commit the bounded fuel and cargo manifest " +
                     "before Sasha takes responsibility for the road.",
-                    "Commit the manifest and depart.",
+                    "Click COMMIT MANIFEST + DEPART; the exact manifest is " +
+                    "debited and chase driving begins.",
                     phaseProgressCurrent: 1,
                     phaseProgressTarget: 1);
             }
@@ -248,8 +256,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                             : "The rotor stays behind on this route. Use the sealed " +
                               "range tank to cross the exposure.",
                         winch
-                            ? "Operate the Wreck Line winch."
-                            : "Cross the sealed dust exposure.",
+                            ? "Press E / gamepad south; the winch moves the pump " +
+                              "rotor onto Sasha's scout and reopens the route."
+                            : "Press E / gamepad south; the sealed scout crosses " +
+                              "the dust exposure without the pump rotor.",
                         model.RouteProgressTicks,
                         model.RouteTargetTicks);
                 }
@@ -263,7 +273,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         "Seat the recovery bridle",
                         "The route is complete, but the encounter remains locked " +
                         "until Sasha secures the authored recovery point.",
-                        "Operate the depot recovery point.",
+                        "Press E / gamepad south; seat the recovery bridle and " +
+                        "open the depot decision.",
                         model.RouteProgressTicks,
                         model.RouteTargetTicks);
                 }
@@ -275,7 +286,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Drive the corridor",
                     "Throttle advances the canonical route. Steering outside " +
                     "the safe road half-width costs vehicle condition.",
-                    FormatRouteProgress(model),
+                    "Hold W / right trigger to advance; steer with A/D / left " +
+                    "stick · " + FormatRouteProgress(model),
                     model.RouteProgressTicks,
                     model.RouteTargetTicks);
             }
@@ -291,7 +303,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         "Choose what the depot will remember",
                         "Cooperate for a field sleeve and maintenance promise, " +
                         "or take the ceramic bearing without agreement and carry the grievance home.",
-                        "Resolve the depot encounter.",
+                        "Click COOPERATE for the field sleeve and obligation, or " +
+                        "click TAKE for the ceramic bearing and grievance.",
                         recommendedFirstRunCue: DepotChoiceCue(model));
                 }
 
@@ -321,7 +334,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         (model.RepairCargoCustody == RepairCargoCustody.Faction
                             ? " It remains at the faction service stand until Sasha loads the scout cargo socket."
                             : " It remains at the depot cradle until Sasha loads the scout cargo socket."),
-                        "Load the repair cargo with E or gamepad south.");
+                        "Press E or gamepad south; move the repair cargo into " +
+                        "Sasha's vehicle custody.");
                 }
 
                 if (model.VehicleModule == VehicleModule.SealedRangeTank
@@ -335,7 +349,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         cargoDetail +
                         " The return payload cannot freeze until the tank carries " +
                         "either emergency water or fuel.",
-                        "Load water or fuel.");
+                        "Click LOAD WATER or LOAD FUEL; that liquid becomes part " +
+                        "of the return payload.");
                 }
 
                 return Create(
@@ -345,7 +360,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Seal the consequences into the manifest",
                     cargoDetail +
                     " Freeze the exact payload before turning toward home.",
-                    "Freeze the payload and begin the return.");
+                    "Click FREEZE PAYLOAD + RETURN; lock the exact cargo and " +
+                    "consequences, then begin the road home.");
             }
 
             if (model.ExpeditionPhase == ExpeditionPhase.Returning)
@@ -357,7 +373,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Bring the consequence back intact",
                     "The frozen payload, vehicle condition, faction memory, " +
                     "and recovered cargo all travel together.",
-                    FormatRouteProgress(model),
+                    "Hold W / right trigger to drive home; steer with A/D / " +
+                    "left stick · " + FormatRouteProgress(model),
                     model.RouteProgressTicks,
                     model.RouteTargetTicks);
             }
@@ -372,7 +389,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Credit the road back to Last Bearing",
                     "Move the frozen return payload into settlement custody and " +
                     "finalize the one expedition transaction.",
-                    "Check in at the fixed return apron with E or gamepad south.");
+                    "Press E / gamepad south at the fixed return apron; credit " +
+                    "the cargo to Last Bearing and open the repair route.");
             }
 
             if (model.TurbineCondition == TurbineCondition.Failing
@@ -388,7 +406,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                           "erase the depot's grievance."
                         : "Install the cooperative field sleeve. Its maintenance " +
                           "obligation remains part of the settlement.",
-                    "Open the pump hall, then seat the repair with E or gamepad south.");
+                    "Click OPEN PUMP HALL REPAIR LINE, then press E / gamepad " +
+                    "south; install the carried repair and reverse the water loss.");
             }
 
             if (model.IsCityImprovementInstallationAvailable)
@@ -400,7 +419,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Seat the recovered rotor",
                     "Workshop Push + Winch returned the physical pump rotor. " +
                     "Install it at the fixed auxiliary-pump socket to close this branch.",
-                    "Install the refurbished auxiliary pump.");
+                    "Click INSTALL REFURBISHED AUXILIARY PUMP; the returned " +
+                    "rotor becomes permanent civic infrastructure.");
             }
 
             if (model.IsSpareBearingBatchStartAvailable)
@@ -412,7 +432,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Commit exactly two parts",
                     "The machine shop can make one physical spare-bearing lot " +
                     "while retaining the two-part civic reserve.",
-                    "Start the one approved spare-bearing batch.",
+                    "Click OPEN MACHINE SHOP, then press E / gamepad south; " +
+                    "commit two parts and start the batch clock.",
                     phaseProgressCurrent: 0,
                     phaseProgressTarget:
                         LastBearingBalanceV1.SpareBearingBatchRequiredSettlementTicks);
@@ -428,7 +449,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "The committed inputs are on the machine. Paused settlement " +
                     "time does not advance this fixed batch.",
                     model.SpareBearingElapsedTicks + " / " +
-                    model.SpareBearingRequiredTicks + " settlement ticks",
+                    model.SpareBearingRequiredTicks + " settlement ticks · " +
+                    "keep the settlement unpaused; completion moves one " +
+                    "physical lot to workshop output",
                     model.SpareBearingElapsedTicks,
                     model.SpareBearingRequiredTicks);
             }
@@ -442,7 +465,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Trade the thing, not a number",
                     "One tagged spare-bearing lot sits in workshop output custody. " +
                     "Barter it once for the fixed depot-corridor permit.",
-                    "Barter the lot for the route permit.",
+                    "Click OPEN CLAIMS WICKET, then press E / gamepad south; " +
+                    "exchange the physical lot for the route permit.",
                     phaseProgressCurrent: 0,
                     phaseProgressTarget: 1);
             }
@@ -456,7 +480,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Service the field sleeve",
                     "The cooperative repair kept the water moving, and its " +
                     "two-part maintenance promise is now due.",
-                    "Service the field sleeve.");
+                    "Click SERVICE FIELD SLEEVE; spend two parts and settle the " +
+                    "due maintenance obligation.");
             }
 
             return PresentAlternateConclusion(model);

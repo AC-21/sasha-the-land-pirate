@@ -116,9 +116,39 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 LastBearingPermitJobPresenter.Present(
                     model,
                     _controller!.CityNeedInspected);
+
+            // Keep the playable journey above the temporary development
+            // instruments so the next verb never depends on scrolling through
+            // internal state first.
             DrawPermitJob(permitJob);
             GUILayout.Space(12f);
 
+            GUILayout.Label("NEXT MOVE", _headingStyle);
+            DrawContextActions(model, permitJob);
+            GUILayout.Space(10f);
+
+            GUILayout.Label("EXACT CONTROLS", _headingStyle);
+            GUILayout.Label(
+                BuildControlsText(
+                    model,
+                    _controller.CanRecoverRoadPresentation,
+                    _controller.IsReturnCheckInAvailable,
+                    _controller.IsPumpHallRepairAvailable,
+                    _controller.IsWorkshopBatchStartAvailable,
+                    _controller.IsWorkshopBarterAvailable,
+                    _controller.IsGaragePlanIntentActive,
+                    _controller.CityNeedInspected),
+                _mutedStyle);
+            GUILayout.Space(10f);
+
+            GUILayout.Label("JOURNEY LEDGER", _headingStyle);
+            GUILayout.Label(BuildJourneyLedgerText(model), _bodyStyle);
+            GUILayout.Space(10f);
+
+            DrawServiceControls(model);
+            GUILayout.Space(10f);
+
+            GUILayout.Label("DEVELOPMENT DIAGNOSTICS", _headingStyle);
             GUILayout.Label("CIVIC INSTRUMENTS", _headingStyle);
             GUILayout.Label(BuildInstrumentText(model), _bodyStyle);
             GUILayout.Space(10f);
@@ -130,47 +160,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
             GUILayout.Space(10f);
 
             DrawOneGoodBatch(model);
-            GUILayout.Space(10f);
+        }
 
-            GUILayout.Label("CURRENT ACTION", _headingStyle);
-            DrawContextActions(model, permitJob);
-            GUILayout.Space(10f);
-
-            GUILayout.Label("CONTROLS", _headingStyle);
-            GUILayout.Label(
-                model.IsWreckLineModulePointAvailable
-                    ? model.RouteActionKind == RouteActionKind.DeployWinch
-                        ? "E or gamepad south · deploy winch + recover rotor\nP · pause  F5 · save  F9 · load"
-                        : "E or gamepad south · cross sealed dust exposure\nP · pause  F5 · save  F9 · load"
-                    : model.IsDepotApproachRecoveryAvailable
-                    ? "E or gamepad south · seat recovery bridle\nP · pause  F5 · save  F9 · load"
-                    : model.IsRepairCargoLoadAvailable
-                    ? model.RepairCargoKind == RepairCargoKind.FieldSleeve
-                        ? "E or gamepad south · load field sleeve\nP · pause  F5 · save  F9 · load"
-                        : "E or gamepad south · load ceramic bearing\nP · pause  F5 · save  F9 · load"
-                    : _controller!.IsReturnCheckInAvailable
-                    ? "E or gamepad south · check in loaded return\nP · pause  F5 · save  F9 · load"
-                    : _controller.IsPumpHallRepairAvailable
-                    ? "E or gamepad south · seat turbine repair\nP · pause  F5 · save  F9 · load"
-                    : _controller.IsWorkshopBatchStartAvailable
-                    ? "E or gamepad south · start One Good Batch\nP · pause  F5 · save  F9 · load"
-                    : _controller.IsWorkshopBarterAvailable
-                    ? "E or gamepad south · barter physical lot\nP · pause  F5 · save  F9 · load"
-                    : model.ExpeditionPhase == ExpeditionPhase.Outbound ||
-                model.ExpeditionPhase == ExpeditionPhase.Returning
-                    ? _controller!.CanRecoverRoadPresentation
-                        ? "W/right trigger · throttle\nS/left trigger · presentation brake + reverse\nA/D or stick · steer  Space/LB · handbrake\nR/gamepad north · recover local rig\nP · pause  F5 · save  F9 · load"
-                        : "W/right trigger · throttle\nS/left trigger · presentation brake + reverse\nA/D or stick · steer  Space/LB · handbrake\nLocal rig recovery unavailable\nP · pause  F5 · save  F9 · load"
-                    : model.ExpeditionPhase == ExpeditionPhase.AtDepot
-                        ? "Depot view locked · choose encounter and cargo below\nP · pause  F5 · save  F9 · load"
-                    : "WASD · camera pan  Q/E · rotate\nMouse wheel · zoom  RMB · orbit\nP · pause  F5 · save  F9 · load",
-                _mutedStyle);
-
+        private void DrawServiceControls(LastBearingReadModel model)
+        {
+            GUILayout.Label("SERVICE", _headingStyle);
             GUILayout.BeginHorizontal();
             if (model.PauseCause == PauseCause.AutoAlert)
             {
                 GUILayout.Label(
-                    "AUTO-PAUSED · resolve the depot encounter below",
+                    "AUTO-PAUSED · choose the depot response above",
                     _mutedStyle);
             }
             else if (GUILayout.Button("PAUSE / RESUME", _buttonStyle))
@@ -233,6 +232,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Inspect the failing water system before committing labor, " +
                     "infrastructure, or an expedition plan.",
                     _bodyStyle);
+                if (GUILayout.Button(
+                        "INSPECT FAILING WATER SYSTEM",
+                        _buttonStyle))
+                {
+                    _controller.InspectCityNeed();
+                }
+
                 return;
             }
 
@@ -245,7 +251,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     if (!_controller.HasCompletedCityGrammarObservation)
                     {
                         GUILayout.Label(
-                            "Complete either neutral service-cell trial above: stage the same recycler and workshop, move one empty calibration sled, and record whether the path reads clearly.",
+                            "Complete either neutral service-cell trial in the development diagnostics below: stage the same recycler and workshop, move one empty calibration sled, and record whether the path reads clearly.",
                             _bodyStyle);
                         return;
                     }
@@ -315,7 +321,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "WORKSHOP PUSH\nLEAVE SOONER · ASK HOME TO RUN LEAN",
                     PreparationChoice.WorkshopPush);
                 DrawPreparationButton(
-                    "CIVIC BUFFER\nPROTECT HOME · RISK A LATER CLAIM",
+                    "RECOMMENDED FIRST RUN · CIVIC BUFFER\n" +
+                    "PAIR WITH WINCH · PROTECT HOME · RISK A LATER CLAIM",
                     PreparationChoice.CivicBuffer);
                 return;
             }
@@ -767,13 +774,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 GUILayout.Label(
                     "The red turbine stop and falling reserve are visible. " +
-                    "Inspect them before taking action.",
+                    "Use the primary action above to inspect them before " +
+                    "taking action.",
                     _bodyStyle);
-                if (GUILayout.Button("INSPECT FAILING WATER SYSTEM", _buttonStyle))
-                {
-                    _controller.InspectCityNeed();
-                }
-
                 return;
             }
 
@@ -933,18 +936,395 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void DrawGarageModuleButton(VehicleModule module)
         {
-            bool recommended =
-                _controller!.GaragePreparationIntent ==
-                    PreparationChoice.CivicBuffer &&
-                module == VehicleModule.WinchAssembly;
-            string label = module == VehicleModule.WinchAssembly
-                ? (recommended ? "RECOMMENDED FIRST RUN · " : string.Empty) +
-                  "COMMIT WINCH ASSEMBLY\nAUXILIARY-PUMP BRANCH"
-                : "COMMIT SEALED RANGE TANK\nCISTERN / DEPOT-ACCESS BRANCH";
+            string label = BuildGarageModuleLabel(
+                _controller!.GaragePreparationIntent,
+                module);
             if (GUILayout.Button(label, _buttonStyle))
             {
                 _controller.CommitGaragePlan(module);
             }
+        }
+
+        private static string BuildGarageModuleLabel(
+            PreparationChoice preparation,
+            VehicleModule module)
+        {
+            bool recommended = preparation == PreparationChoice.CivicBuffer &&
+                               module == VehicleModule.WinchAssembly;
+            return module == VehicleModule.WinchAssembly
+                ? (recommended ? "RECOMMENDED FIRST RUN · " : string.Empty) +
+                  "COMMIT WINCH ASSEMBLY\n" +
+                  "RECOVER THE PUMP ROTOR · START THE PREPARATION CLOCK"
+                : "COMMIT SEALED RANGE TANK\n" +
+                  "CARRY WATER OR FUEL · START THE PREPARATION CLOCK";
+        }
+
+        private static string BuildControlsText(
+            LastBearingReadModel model,
+            bool canRecoverRoadPresentation,
+            bool isReturnCheckInAvailable,
+            bool isPumpHallRepairAvailable,
+            bool isWorkshopBatchStartAvailable,
+            bool isWorkshopBarterAvailable,
+            bool isGaragePlanIntentActive,
+            bool cityNeedInspected)
+        {
+            const string serviceControls =
+                "\nP · pause  F5 · save  F9 · load";
+            if (model.AssignedResidentId == null)
+            {
+                return "Click ASSIGN DEFAULT EXPEDITION LEAD above · the " +
+                       "resident enters the manifest without changing colony " +
+                       "mechanics." + serviceControls;
+            }
+
+            if (!cityNeedInspected)
+            {
+                return "Click INSPECT FAILING WATER SYSTEM above · the stopped " +
+                       "turbine becomes the active city need." +
+                       serviceControls;
+            }
+
+            if (model.NextObjective == "activate-slice-infrastructure")
+            {
+                return "Use TRIAL A or TRIAL B in the diagnostics below, then " +
+                       "click BRING THE SAME RECYCLER + MACHINE SHOP ONLINE · " +
+                       "the service cell becomes available without selecting a " +
+                       "layout winner." + serviceControls;
+            }
+
+            if (model.IsWreckLineModulePointAvailable)
+            {
+                return (model.RouteActionKind == RouteActionKind.DeployWinch
+                        ? "Press E / gamepad south · deploy the winch and put " +
+                          "the pump rotor on Sasha's scout."
+                        : "Press E / gamepad south · seal the scout and cross " +
+                          "the dust exposure without the pump rotor.") +
+                       serviceControls;
+            }
+
+            if (model.IsDepotApproachRecoveryAvailable)
+            {
+                return "Press E / gamepad south · seat the recovery bridle " +
+                       "and open the depot decision." + serviceControls;
+            }
+
+            if (model.IsRepairCargoLoadAvailable)
+            {
+                return model.RepairCargoKind == RepairCargoKind.FieldSleeve
+                    ? "Press E / gamepad south · move the field sleeve from " +
+                      "the faction stand into Sasha's cargo socket." +
+                      serviceControls
+                    : "Press E / gamepad south · move the ceramic bearing " +
+                      "from its depot source into Sasha's cargo socket." +
+                      serviceControls;
+            }
+
+            if (isReturnCheckInAvailable)
+            {
+                return "Press E / gamepad south · credit the loaded return to " +
+                       "Last Bearing and open the repair route." +
+                       serviceControls;
+            }
+
+            if (isPumpHallRepairAvailable)
+            {
+                return "Press E / gamepad south · install the carried repair " +
+                       "and reverse the failing water trend." +
+                       serviceControls;
+            }
+
+            if (isWorkshopBatchStartAvailable)
+            {
+                return "Press E / gamepad south · commit two parts to One " +
+                       "Good Batch and start its settlement clock." +
+                       serviceControls;
+            }
+
+            if (isWorkshopBarterAvailable)
+            {
+                return "Press E / gamepad south · hand the physical lot across " +
+                       "the claims wicket for the depot route permit." +
+                       serviceControls;
+            }
+
+            if (model.ExpeditionPhase == ExpeditionPhase.Outbound ||
+                model.ExpeditionPhase == ExpeditionPhase.Returning)
+            {
+                return "Hold W / right trigger · advance the route\n" +
+                       "S / left trigger · brake, then reverse locally\n" +
+                       "A/D / left stick · steer; leaving the safe lane costs " +
+                       "rig condition\n" +
+                       "Space / LB · handbrake" +
+                       (canRecoverRoadPresentation
+                           ? "\nR / gamepad north · recover the local rig to " +
+                             "the current route marker"
+                           : "\nLocal rig recovery is unavailable") +
+                       serviceControls;
+            }
+
+            if (model.ExpeditionPhase == ExpeditionPhase.AtDepot)
+            {
+                if (model.RepairCargoKind == RepairCargoKind.None)
+                {
+                    return "Click one depot decision above · COOPERATE brings " +
+                           "a maintenance promise; TAKE brings the ceramic " +
+                           "bearing and a grievance." + serviceControls;
+                }
+
+                if (model.VehicleModule == VehicleModule.SealedRangeTank &&
+                    model.LiquidCargoKind == LiquidCargoKind.None)
+                {
+                    return "Click LOAD WATER or LOAD FUEL above · the chosen " +
+                           "liquid becomes part of the frozen return payload." +
+                           serviceControls;
+                }
+
+                return "Click FREEZE PAYLOAD + RETURN above · lock the exact " +
+                       "cargo and consequences, then start the road home." +
+                       serviceControls;
+            }
+
+            if (isGaragePlanIntentActive &&
+                model.PreparationChoice == PreparationChoice.Unselected)
+            {
+                return "Click one rig module above · the choice commits its " +
+                       "costs and starts the preparation clock. Nothing is " +
+                       "auto-selected." + serviceControls;
+            }
+
+            if (model.ExpeditionPhase == ExpeditionPhase.AtHome &&
+                (model.PreparationPhase == PreparationPhase.Ready ||
+                 model.PreparationPhase == PreparationPhase.Committed) &&
+                model.TurbineCondition == TurbineCondition.Failing &&
+                model.RepairCargoKind == RepairCargoKind.None)
+            {
+                return "Click COMMIT MANIFEST + DEPART above · debit the exact " +
+                       "fuel and cargo manifest and begin the outbound route." +
+                       serviceControls;
+            }
+
+            if (model.PreparationPhase == PreparationPhase.Preparing)
+            {
+                return "Keep the settlement unpaused · preparation advances " +
+                       "on the settlement clock; use the view buttons below " +
+                       "while the crew works." + serviceControls;
+            }
+
+            if (model.SpareBearingBatchPhase == SpareBearingBatchPhase.InProgress)
+            {
+                return "Keep the settlement unpaused · the machine advances " +
+                       "the committed batch; completion moves one physical lot " +
+                       "to workshop output." + serviceControls;
+            }
+
+            return "Click the highlighted action above.\n" +
+                   "WASD · camera pan  Q/E · rotate\n" +
+                   "Mouse wheel · zoom  RMB · orbit" +
+                   serviceControls;
+        }
+
+        private static string BuildJourneyLedgerText(
+            LastBearingReadModel model)
+        {
+            var text = new StringBuilder(320);
+            text.Append("ROUTE  ").Append(FormatJourneyRoute(model)).AppendLine();
+            text.Append("RIG  ")
+                .Append(FormatPlayerModule(model.VehicleModule))
+                .Append(" · condition ")
+                .Append(model.VehicleConditionMilli)
+                .Append('/')
+                .Append(LastBearingBalanceV1.StartingVehicleConditionMilli)
+                .Append(" · ")
+                .Append(FormatCondition(model.VehicleConditionMilli))
+                .AppendLine();
+            text.Append("CARGO  ").Append(FormatJourneyCargo(model)).AppendLine();
+            text.Append("CONSEQUENCE  ").Append(FormatJourneyConsequence(model));
+            return text.ToString();
+        }
+
+        private static string FormatJourneyRoute(LastBearingReadModel model)
+        {
+            switch (model.ExpeditionPhase)
+            {
+                case ExpeditionPhase.Outbound:
+                    return "outbound " + model.RouteProgressTicks + '/' +
+                           model.RouteTargetTicks + " · lane " +
+                           model.VehicleLateralMilli + "/±" +
+                           LastBearingBalanceV1.RoadLateralLimitMilli;
+                case ExpeditionPhase.AtDepot:
+                    return "at the Last Bearing depot";
+                case ExpeditionPhase.Returning:
+                    return "homebound " + model.RouteProgressTicks + '/' +
+                           model.RouteTargetTicks + " · lane " +
+                           model.VehicleLateralMilli + "/±" +
+                           LastBearingBalanceV1.RoadLateralLimitMilli;
+                case ExpeditionPhase.Returned:
+                    return "at the fixed return apron";
+                default:
+                    return "home at Last Bearing";
+            }
+        }
+
+        private static string FormatPlayerModule(VehicleModule module)
+        {
+            switch (module)
+            {
+                case VehicleModule.WinchAssembly:
+                    return "winch fitted";
+                case VehicleModule.SealedRangeTank:
+                    return "sealed range tank fitted";
+                default:
+                    return "no expedition module fitted";
+            }
+        }
+
+        private static string FormatCondition(long conditionMilli)
+        {
+            if (conditionMilli <=
+                LastBearingBalanceV1.MinimumReturnVehicleConditionMilli)
+            {
+                return "critical handling";
+            }
+
+            return conditionMilli <
+                LastBearingBalanceV1.StartingVehicleConditionMilli
+                    ? "worn handling"
+                    : "healthy handling";
+        }
+
+        private static string FormatJourneyCargo(LastBearingReadModel model)
+        {
+            var cargo = new StringBuilder(128);
+            if (model.HeavyCargoKind == HeavyCargoKind.PumpRotor)
+            {
+                AppendCargoItem(
+                    cargo,
+                    "pump rotor " + FormatHeavyCargoCustody(
+                        model.HeavyCargoCustody));
+            }
+
+            if (model.RepairCargoKind != RepairCargoKind.None)
+            {
+                AppendCargoItem(
+                    cargo,
+                    FormatRepairCargo(model.RepairCargoKind) + " " +
+                    FormatRepairCargoCustody(model.RepairCargoCustody));
+            }
+
+            if (model.LiquidCargoKind != LiquidCargoKind.None)
+            {
+                AppendCargoItem(
+                    cargo,
+                    model.LiquidCargoKind == LiquidCargoKind.Water
+                        ? "emergency water " +
+                          FormatLiquidCargoCustody(model.LiquidCargoCustody)
+                        : "return fuel " +
+                          FormatLiquidCargoCustody(model.LiquidCargoCustody));
+            }
+
+            return cargo.Length == 0 ? "empty" : cargo.ToString();
+        }
+
+        private static void AppendCargoItem(StringBuilder text, string item)
+        {
+            if (text.Length > 0)
+            {
+                text.Append(" · ");
+            }
+
+            text.Append(item);
+        }
+
+        private static string FormatHeavyCargoCustody(
+            HeavyCargoCustody custody)
+        {
+            switch (custody)
+            {
+                case HeavyCargoCustody.Depot:
+                    return "waiting at the Wreck Line";
+                case HeavyCargoCustody.Vehicle:
+                    return "on Sasha's scout";
+                case HeavyCargoCustody.Settlement:
+                    return "staged at Last Bearing";
+                case HeavyCargoCustody.InstalledAtAuxiliaryPump:
+                    return "installed at the auxiliary pump";
+                default:
+                    return "not recovered";
+            }
+        }
+
+        private static string FormatRepairCargo(RepairCargoKind kind)
+        {
+            return kind == RepairCargoKind.FieldSleeve
+                ? "field sleeve"
+                : "ceramic bearing";
+        }
+
+        private static string FormatRepairCargoCustody(
+            RepairCargoCustody custody)
+        {
+            switch (custody)
+            {
+                case RepairCargoCustody.Depot:
+                    return "at the depot cradle";
+                case RepairCargoCustody.Faction:
+                    return "at the faction stand";
+                case RepairCargoCustody.Vehicle:
+                    return "on Sasha's scout";
+                case RepairCargoCustody.Turbine:
+                    return "installed in the turbine";
+                case RepairCargoCustody.Consumed:
+                    return "consumed by the repair";
+                default:
+                    return "not yet claimed";
+            }
+        }
+
+        private static string FormatJourneyConsequence(
+            LastBearingReadModel model)
+        {
+            string civic = model.TurbineCondition != TurbineCondition.Failing
+                ? "water recovering at " +
+                  FormatSigned(model.WaterTrendMilliPerSettlementTick) +
+                  " per settlement tick"
+                : "turbine failing · water trend " +
+                  FormatSigned(model.WaterTrendMilliPerSettlementTick) +
+                  " per settlement tick";
+            if (model.FactionClaimState == FactionClaimState.Aggrieved)
+            {
+                return civic + " · depot aggrieved · grievance " +
+                       model.FactionGrievance +
+                       (model.FutureRouteTollFuelUnits > 0
+                           ? " · next passage +" +
+                             model.FutureRouteTollFuelUnits + " fuel"
+                           : " · future access consequence pending");
+            }
+
+            if (model.FactionClaimState == FactionClaimState.Cooperating ||
+                model.MaintenanceObligationActive)
+            {
+                return civic + " · depot cooperation · trust " +
+                       model.FactionTrust +
+                       (model.MaintenanceDue
+                           ? " · field-sleeve service due"
+                           : " · field-sleeve maintenance promise active");
+            }
+
+            if (model.ExpeditionPhase == ExpeditionPhase.AtDepot)
+            {
+                return civic + " · depot choice not yet carried home";
+            }
+
+            return civic;
+        }
+
+        private static string FormatLiquidCargoCustody(
+            LiquidCargoCustody custody)
+        {
+            return custody == LiquidCargoCustody.Settlement
+                ? "credited at Last Bearing"
+                : "in the range tank";
         }
 
         private static string BuildInstrumentText(LastBearingReadModel model)
