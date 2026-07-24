@@ -111,6 +111,7 @@ namespace AtomicLandPirate.LastBearingTests
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/LastBearingKeepThePromisePlayModeTests.cs.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/RoadFeelLabPlayModeTests.cs",
             "docs/playtests/WP-0002/VGR-18-KEEP-THE-PROMISE-CONTRACT.md",
+            "docs/playtests/WP-0002/VGR-19-READ-THE-DRY-LINE-CONTRACT.md",
             "Game/Assets/AtomicLandPirate/LastBearing/Scenes/LastBearing.unity",
             "Game/Assets/AtomicLandPirate/LastBearing/Scenes/RoadFeelLab.unity",
             "Tests/AtomicLandPirate.CoreTests/LastBearing/AtomicLandPirate.LastBearingTests.csproj",

@@ -768,7 +768,7 @@ Detailed contract:
 Objective: turn the existing cooperative field-sleeve maintenance obligation
 into physical pump-hall work.
 
-Status: current implementation target on the V0 feature branch.
+Status: released on protected `main` in PR #116.
 
 Scope:
 
@@ -787,6 +787,31 @@ audio, or normal-PR performance-soak changes.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-18-KEEP-THE-PROMISE-CONTRACT.md`.
+
+## VGR-19 — Read the Dry Line
+
+Objective: make the existing Dust Front threshold readable before it resolves.
+
+Status: current implementation target on the V0 feature branch.
+
+Scope:
+
+- Add a presentation-only Field Desk forecast from current water, current draw,
+  remaining Dust Front ticks, and the existing strict `> 60.000` Held rule.
+- Show a derived Emergency Storage water column, fixed dry-line marker, and
+  approaching-front telltale at strategy zoom.
+- Update the projection after accepted cistern and Hot Shift changes, keep it
+  stable through pause and save/load, and replace it with the existing durable
+  verdict after resolution.
+- Preserve canonical bytes and all existing commands, balance, clocks, saves,
+  and Dust Front consequences.
+
+Exclude: SimulationCore, SaveContracts, command, schema, migration, balance,
+scene, package, dependency, production asset, generalized forecast framework,
+audio, or normal-PR performance-soak changes.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-19-READ-THE-DRY-LINE-CONTRACT.md`.
 
 ## Visual constitution
 

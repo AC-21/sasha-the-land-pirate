@@ -47,12 +47,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
             "DUST_FRONT_RELAY_HELD_SIGNAL";
         public const string DustFrontRelayBreachedSignalName =
             "DUST_FRONT_RELAY_BREACHED_SIGNAL";
+        public const string DryLineGaugeName =
+            "EMERGENCY_STORAGE_DRY_LINE_GAUGE";
+        public const string DryLineWaterColumnName =
+            "EMERGENCY_STORAGE_WATER_COLUMN";
+        public const string DryLineMarkerName =
+            "EMERGENCY_STORAGE_DRY_LINE_MARKER";
+        public const string DustFrontApproachTelltaleName =
+            "EMERGENCY_STORAGE_FRONT_APPROACH_TELLTALE";
         public const string FeedbackLabelName =
             "WORKING_SERVICE_CELL_FEEDBACK";
 
         private const int PadCount = 5;
         private const int RaycastBufferSize = 12;
         private const float RaycastDistance = 500f;
+        private const float DryLineColumnBaseY = 0.08f;
+        private const float DryLineColumnMaxHeight = 2.4f;
 
         private static readonly Vector3[] PadPositions =
         {
@@ -91,6 +101,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private TextMesh? _emergencyCisternPumpLabel;
         private GameObject? _dustFrontRelayHeldSignal;
         private GameObject? _dustFrontRelayBreachedSignal;
+        private GameObject? _dryLineGauge;
+        private GameObject? _dryLineWaterColumn;
+        private GameObject? _dryLineMarker;
+        private GameObject? _dustFrontApproachTelltale;
+        private TextMesh? _dryLineGaugeLabel;
         private TextMesh? _feedbackLabel;
         private int _hoveredPadIndex = -1;
         private bool _linkSourceSelected;
@@ -178,6 +193,28 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public string DustFrontRelayLabel =>
             _emergencyCisternPumpLabel?.text ?? string.Empty;
+
+        public bool IsDryLineGaugeVisible =>
+            _dryLineGauge?.activeInHierarchy == true;
+
+        public bool IsDustFrontApproachTelltaleVisible =>
+            _dustFrontApproachTelltale?.activeInHierarchy == true;
+
+        public float DryLineWaterColumnNormalized =>
+            _dryLineWaterColumn == null
+                ? 0f
+                : _dryLineWaterColumn.transform.localScale.y /
+                  DryLineColumnMaxHeight;
+
+        public float DryLineMarkerNormalized =>
+            _dryLineMarker == null
+                ? 0f
+                : (_dryLineMarker.transform.localPosition.y -
+                   DryLineColumnBaseY) /
+                  DryLineColumnMaxHeight;
+
+        public string DryLineGaugeLabel =>
+            _dryLineGaugeLabel?.text ?? string.Empty;
 
         public bool HasDedicatedInteractionTargets =>
             _targets.Count >= 17;
@@ -371,6 +408,48 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _emergencyCisternPumpLabel =
                 _emergencyCisternPumpControl.
                     GetComponentInChildren<TextMesh>();
+
+            _dryLineGauge = new GameObject(DryLineGaugeName);
+            _dryLineGauge.transform.SetParent(transform, false);
+            CreateVisualBlock(
+                DryLineGaugeName + "_BACKPLATE",
+                _dryLineGauge.transform,
+                new Vector3(0f, 1.32f, 0.16f),
+                new Vector3(0.86f, 2.72f, 0.18f),
+                iron);
+            _dryLineWaterColumn = CreateVisualBlock(
+                DryLineWaterColumnName,
+                _dryLineGauge.transform,
+                new Vector3(0f, DryLineColumnBaseY, -0.04f),
+                new Vector3(0.46f, 0f, 0.22f),
+                signal);
+            float markerNormalized =
+                (float)LastBearingBalanceV1.MinimumRecoverableWaterMilli /
+                LastBearingBalanceV1.WaterCapacityMilli;
+            _dryLineMarker = CreateVisualBlock(
+                DryLineMarkerName,
+                _dryLineGauge.transform,
+                new Vector3(
+                    0f,
+                    DryLineColumnBaseY +
+                    (DryLineColumnMaxHeight * markerNormalized),
+                    -0.2f),
+                new Vector3(1.12f, 0.12f, 0.14f),
+                tungsten);
+            _dustFrontApproachTelltale = CreateVisualBlock(
+                DustFrontApproachTelltaleName,
+                _dryLineGauge.transform,
+                new Vector3(0f, 2.82f, 0f),
+                new Vector3(1.28f, 0.28f, 0.34f),
+                oxide);
+            CreateLabel(
+                DryLineGaugeName + "_LABEL",
+                _dryLineGauge.transform,
+                "FRONT OFFLINE",
+                new Vector3(0f, 3.18f, -0.2f));
+            _dryLineGaugeLabel =
+                _dryLineGauge.GetComponentInChildren<TextMesh>();
+            _dryLineGauge.SetActive(false);
 
             var feedbackObject = new GameObject(
                 FeedbackLabelName);
@@ -1504,6 +1583,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         0f);
             }
 
+            if (_dryLineGauge != null &&
+                IsValidPad(model.EmergencyStoragePadIndex))
+            {
+                int gaugeQuarterTurns =
+                    SelectEmergencyCisternPumpQuarterTurns(model);
+                Vector3 position =
+                    PadPositions[model.EmergencyStoragePadIndex] +
+                    RotateOffset(
+                        new Vector3(-1.08f, 0f, -0.72f),
+                        gaugeQuarterTurns);
+                moved |= SetLocalPositionIfChanged(
+                    _dryLineGauge,
+                    WithHeight(position, 0.12f));
+                _dryLineGauge.transform.localRotation =
+                    Quaternion.Euler(
+                        0f,
+                        gaugeQuarterTurns * 90f,
+                        0f);
+            }
+
             return moved;
         }
 
@@ -1530,6 +1629,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool showDustFrontRelayControl =
                 _model != null &&
                 ShouldShowDustFrontRelayControl(_model);
+            bool showDryLineGauge =
+                _model != null &&
+                IsValidPad(_model.EmergencyStoragePadIndex);
             bool showSharedEmergencyControl =
                 showEmergencyCisternPumpControl ||
                 showDustFrontRelayControl;
@@ -1579,6 +1681,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             SetActive(
                 _emergencyCisternPumpControl,
                 showSharedEmergencyControl);
+            SetActive(_dryLineGauge, showDryLineGauge);
+            if (showDryLineGauge && _model != null)
+            {
+                RefreshDryLineGauge(_model);
+            }
 
             ScaleSelection(
                 _recyclerSelector,
@@ -1699,6 +1806,43 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             RefreshPadHighlights();
+        }
+
+        private void RefreshDryLineGauge(LastBearingReadModel model)
+        {
+            LastBearingDryLineProjection projection =
+                LastBearingFieldDeskPresenter.ProjectDryLine(model);
+            float waterNormalized = Mathf.Clamp01(
+                (float)model.WaterMilli /
+                LastBearingBalanceV1.WaterCapacityMilli);
+            float columnHeight =
+                DryLineColumnMaxHeight * waterNormalized;
+            if (_dryLineWaterColumn != null)
+            {
+                _dryLineWaterColumn.transform.localScale =
+                    new Vector3(0.46f, columnHeight, 0.22f);
+                _dryLineWaterColumn.transform.localPosition =
+                    new Vector3(
+                        0f,
+                        DryLineColumnBaseY + (columnHeight * 0.5f),
+                        -0.04f);
+            }
+
+            SetActive(
+                _dustFrontApproachTelltale,
+                projection.IsApproaching);
+            if (_dryLineGaugeLabel != null)
+            {
+                if (_dryLineGaugeLabel.text != projection.Telltale)
+                {
+                    _dryLineGaugeLabel.text = projection.Telltale;
+                }
+
+                _dryLineGaugeLabel.color =
+                    projection.ProjectedOutcome == DustFrontOutcome.Breached
+                        ? new Color32(255, 154, 102, 255)
+                        : new Color32(238, 221, 178, 255);
+            }
         }
 
         private void RefreshPadHighlights()

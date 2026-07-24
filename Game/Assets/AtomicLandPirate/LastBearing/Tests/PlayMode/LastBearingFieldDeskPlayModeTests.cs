@@ -116,6 +116,238 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator DryLineForecastTracksCisternHotShiftPauseLoadAndCycles()
+        {
+            LastBearingGameController controller = BuildController();
+            LastBearingFieldDesk desk = RequireDesk(controller);
+            _ = InstallTemporarySaveAdapter(controller);
+            yield return null;
+
+            LastBearingFieldDeskProjection initial =
+                AssertDryLineProjectionPure(controller, desk);
+            Assert.That(
+                initial.DryLine.Forecast,
+                Is.EqualTo(
+                    "FRONT IN 6000 TICKS · DRY LINE 60.000 · " +
+                    "PROJECTED BREACHED IF CURRENT DRAW CONTINUES"));
+            Assert.That(
+                RequireDocument(controller)
+                    .rootVisualElement.Q<Label>("front-forecast-label").text,
+                Is.EqualTo(initial.DryLine.Forecast));
+
+            CompleteWorkingServiceCell(controller);
+            controller.BeginGaragePlan(PreparationChoice.CivicBuffer);
+            controller.CommitGaragePlan(VehicleModule.WinchAssembly);
+            InvokeSimulationTick(controller);
+            controller.ShowCityOverview();
+            desk.Refresh(force: true);
+            LastBearingCityServiceCellInteractor interactor =
+                controller.World!.CityServiceCellView!.Interactor!;
+            Assert.That(interactor.IsDryLineGaugeVisible, Is.True);
+            Assert.That(
+                interactor.DryLineWaterColumnNormalized,
+                Is.EqualTo(
+                    (float)controller.ReadModel!.WaterMilli /
+                    LastBearingBalanceV1.WaterCapacityMilli)
+                    .Within(0.0001f));
+            Assert.That(
+                interactor.DryLineMarkerNormalized,
+                Is.EqualTo(1f / 3f).Within(0.0001f));
+            Assert.That(
+                interactor.IsDustFrontApproachTelltaleVisible,
+                Is.True);
+            Assert.That(
+                interactor.DryLineGaugeLabel,
+                Does.Contain("BREACHED"));
+
+            for (var cycle = 0; cycle < 4; cycle++)
+            {
+                string cycleHash = controller.CanonicalHash;
+                controller.OpenGarageBay();
+                Assert.That(interactor.IsDryLineGaugeVisible, Is.False);
+                controller.ShowCityOverview();
+                Assert.That(interactor.IsDryLineGaugeVisible, Is.True);
+                Assert.That(controller.CanonicalHash, Is.EqualTo(cycleHash));
+            }
+
+            LastBearingDryLineProjection beforePause =
+                AssertDryLineProjectionPure(controller, desk).DryLine;
+            controller.TogglePause();
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel!.PauseCause,
+                Is.EqualTo(PauseCause.Explicit));
+            LastBearingDryLineProjection paused =
+                AssertDryLineProjectionPure(controller, desk).DryLine;
+            Assert.That(
+                paused.ProjectedWaterMilli,
+                Is.EqualTo(beforePause.ProjectedWaterMilli));
+            Assert.That(
+                paused.ProjectedOutcome,
+                Is.EqualTo(beforePause.ProjectedOutcome));
+            controller.Save();
+            string pausedHash = controller.CanonicalHash;
+            controller.ReturnToTitle();
+            controller.Load();
+            Assert.That(controller.CanonicalHash, Is.EqualTo(pausedHash));
+            controller.ShowCityOverview();
+            Assert.That(
+                AssertDryLineProjectionPure(controller, desk)
+                    .DryLine.Forecast,
+                Is.EqualTo(paused.Forecast));
+
+            controller.TogglePause();
+            InvokeSimulationTick(controller);
+            float markerBeforePump = interactor.DryLineMarkerNormalized;
+            float columnBeforePump =
+                interactor.DryLineWaterColumnNormalized;
+            controller.OpenEmergencyCisternPump();
+            yield return null;
+            InvokeInteractorUpdate(interactor);
+            Assert.That(
+                interactor.IsEmergencyCisternPumpInputArmed,
+                Is.True);
+            byte[] pumpBytesBefore =
+                LastBearingCanonicalCodec.Encode(controller.State!);
+            string pumpHashBefore = controller.CanonicalHash;
+            desk.Refresh(force: true);
+            string forecastBeforePump =
+                RequireDocument(controller)
+                    .rootVisualElement.Q<Label>("front-forecast-label").text;
+            controller.PumpEmergencyCistern();
+            Assert.That(controller.IsEmergencyCisternPumpQueued, Is.True);
+            Assert.That(
+                LastBearingCanonicalCodec.Encode(controller.State!),
+                Is.EqualTo(pumpBytesBefore));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(pumpHashBefore));
+            InvokeSimulationTick(controller);
+
+            LastBearingDryLineProjection pumped =
+                AssertDryLineProjectionPure(
+                    controller,
+                    desk,
+                    forceRefresh: false).DryLine;
+            Assert.That(pumped.Forecast, Is.Not.EqualTo(forecastBeforePump));
+            Assert.That(
+                RequireDocument(controller)
+                    .rootVisualElement.Q<Label>("front-forecast-label").text,
+                Is.EqualTo(pumped.Forecast));
+            Assert.That(
+                pumped.ProjectedOutcome,
+                Is.EqualTo(DustFrontOutcome.Held));
+            Assert.That(pumped.ProjectedWaterMilli, Is.EqualTo(70000));
+            Assert.That(
+                pumped.Forecast,
+                Does.Contain(
+                    "PROJECTED HELD IF CURRENT DRAW CONTINUES"));
+            Assert.That(
+                interactor.DryLineWaterColumnNormalized,
+                Is.GreaterThan(columnBeforePump));
+            Assert.That(
+                interactor.DryLineMarkerNormalized,
+                Is.EqualTo(markerBeforePump).Within(0.0001f));
+            Assert.That(interactor.DryLineGaugeLabel, Does.Contain("HELD"));
+
+            byte[] hotShiftBytesBefore =
+                LastBearingCanonicalCodec.Encode(controller.State!);
+            string hotShiftHashBefore = controller.CanonicalHash;
+            controller.StartHotShift();
+            Assert.That(controller.IsHotShiftStartQueued, Is.True);
+            Assert.That(
+                LastBearingCanonicalCodec.Encode(controller.State!),
+                Is.EqualTo(hotShiftBytesBefore));
+            Assert.That(
+                controller.CanonicalHash,
+                Is.EqualTo(hotShiftHashBefore));
+            InvokeSimulationTick(controller);
+
+            LastBearingDryLineProjection hotShift =
+                AssertDryLineProjectionPure(controller, desk).DryLine;
+            Assert.That(
+                controller.ReadModel!.WaterTrendMilliPerSettlementTick,
+                Is.EqualTo(-20));
+            Assert.That(
+                hotShift.ProjectedOutcome,
+                Is.EqualTo(DustFrontOutcome.Breached));
+            Assert.That(
+                hotShift.ProjectedWaterMilli,
+                Is.LessThan(60000));
+            Assert.That(
+                hotShift.Forecast,
+                Does.Contain(
+                    "PROJECTED BREACHED IF CURRENT DRAW CONTINUES"));
+            Assert.That(interactor.DryLineGaugeLabel, Does.Contain("BREACHED"));
+
+            string hotShiftHash = controller.CanonicalHash;
+            string hotShiftForecast = hotShift.Forecast;
+            controller.ReturnToTitle();
+            controller.Load();
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hotShiftHash));
+            controller.ShowCityOverview();
+            Assert.That(
+                AssertDryLineProjectionPure(controller, desk)
+                    .DryLine.Forecast,
+                Is.EqualTo(hotShiftForecast));
+        }
+
+        [UnityTest]
+        public IEnumerator ResolvedDryLineUsesExistingDurableVerdictWitness()
+        {
+            LastBearingGameController controller = BuildController();
+            LastBearingFieldDesk desk = RequireDesk(controller);
+            CompleteWorkingServiceCell(controller);
+            yield return null;
+            LastBearingCityServiceCellInteractor interactor =
+                controller.World!.CityServiceCellView!.Interactor!;
+            LastBearingState source = controller.State!;
+
+            foreach ((bool Holds, DustFrontOutcome Outcome, string Witness)
+                     item in new[]
+                     {
+                         (
+                             true,
+                             DustFrontOutcome.Held,
+                             "DUST FRONT HELD · RESERVE ENDURED"),
+                         (
+                             false,
+                             DustFrontOutcome.Breached,
+                             "DUST FRONT BREACHED · HOT SHIFT STALLED"),
+                     })
+            {
+                LastBearingState primed =
+                    PrimeDustFrontThreshold(source, item.Holds);
+                LastBearingState resolved = new LastBearingKernel()
+                    .Step(
+                        primed,
+                        Array.Empty<LastBearingCommand>())
+                    .State;
+                InstallControllerState(controller, resolved);
+                controller.ShowCityOverview();
+                desk.Refresh(force: true);
+
+                LastBearingDryLineProjection projection =
+                    AssertDryLineProjectionPure(controller, desk).DryLine;
+                Assert.That(
+                    projection.ProjectedOutcome,
+                    Is.EqualTo(item.Outcome));
+                Assert.That(projection.IsApproaching, Is.False);
+                Assert.That(projection.Forecast, Is.EqualTo(item.Witness));
+                Assert.That(
+                    projection.Telltale,
+                    Is.EqualTo(
+                        item.Outcome == DustFrontOutcome.Held
+                            ? "FRONT HELD"
+                            : "FRONT BREACHED"));
+                Assert.That(
+                    interactor.IsDustFrontApproachTelltaleVisible,
+                    Is.False);
+                Assert.That(
+                    interactor.DryLineGaugeLabel,
+                    Is.EqualTo(projection.Telltale));
+            }
+        }
+
+        [UnityTest]
         public IEnumerator DeskRendersCurrentOrderAndClearsFocusOnExit()
         {
             LastBearingGameController controller = BuildController();
@@ -1231,6 +1463,36 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 BindingFlags.Instance | BindingFlags.NonPublic);
             Assert.That(method, Is.Not.Null);
             method!.Invoke(controller, null);
+        }
+
+        private static void InvokeInteractorUpdate(
+            LastBearingCityServiceCellInteractor interactor)
+        {
+            MethodInfo? method =
+                typeof(LastBearingCityServiceCellInteractor).GetMethod(
+                    "Update",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(method, Is.Not.Null);
+            method!.Invoke(interactor, null);
+        }
+
+        private static LastBearingFieldDeskProjection
+            AssertDryLineProjectionPure(
+                LastBearingGameController controller,
+                LastBearingFieldDesk desk,
+                bool forceRefresh = true)
+        {
+            byte[] canonicalBefore =
+                LastBearingCanonicalCodec.Encode(controller.State!);
+            string hashBefore = controller.CanonicalHash;
+            LastBearingFieldDeskProjection projection =
+                LastBearingFieldDeskPresenter.Present(controller);
+            desk.Refresh(force: forceRefresh);
+            Assert.That(
+                LastBearingCanonicalCodec.Encode(controller.State!),
+                Is.EqualTo(canonicalBefore));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBefore));
+            return projection;
         }
 
         private static void InvokeApplyPresentation(

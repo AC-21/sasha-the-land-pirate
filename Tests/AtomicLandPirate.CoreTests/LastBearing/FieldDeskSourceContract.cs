@@ -23,6 +23,14 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(
                     runtimeRoot,
                     "UI/LastBearingFieldDeskPresenter.cs"));
+            string serviceCellInteractor = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "LastBearingCityServiceCellInteractor.cs"));
+            string fieldDeskLayout = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "UI/Resources/LastBearingFieldDeskLayout.uxml"));
 
             Require(controller, "private LastBearingFieldDesk? _fieldDesk;");
             Require(controller, "public LastBearingFieldDesk? FieldDesk => _fieldDesk;");
@@ -148,6 +156,56 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 fieldDeskPresenter,
                 "LastBearingPermitJobPresenter.Present(");
+            Require(
+                fieldDeskPresenter,
+                "public readonly struct LastBearingDryLineProjection");
+            Require(
+                fieldDeskPresenter,
+                "public static LastBearingDryLineProjection ProjectDryLine(");
+            Require(
+                fieldDeskPresenter,
+                "model.DustFrontCrisisTicks");
+            Require(
+                fieldDeskPresenter,
+                "ProjectWaterAtConstantDraw(");
+            Require(
+                fieldDeskPresenter,
+                "projectedWater > dryLine");
+            Require(
+                fieldDeskPresenter,
+                "\"FRONT IN \" + frontTicks");
+            Require(
+                fieldDeskPresenter,
+                "\" TICKS · DRY LINE \"");
+            Require(
+                fieldDeskPresenter,
+                "\" IF CURRENT DRAW CONTINUES\"");
+            Require(
+                fieldDeskPresenter,
+                "FormatPressure(model)");
+            Require(fieldDesk, "front-forecast-label");
+            Require(fieldDesk, "projection.DryLine.Forecast");
+            Require(
+                fieldDeskLayout,
+                "name=\"front-forecast-label\"");
+            Require(
+                serviceCellInteractor,
+                "EMERGENCY_STORAGE_DRY_LINE_GAUGE");
+            Require(
+                serviceCellInteractor,
+                "EMERGENCY_STORAGE_WATER_COLUMN");
+            Require(
+                serviceCellInteractor,
+                "EMERGENCY_STORAGE_DRY_LINE_MARKER");
+            Require(
+                serviceCellInteractor,
+                "EMERGENCY_STORAGE_FRONT_APPROACH_TELLTALE");
+            Require(
+                serviceCellInteractor,
+                "LastBearingFieldDeskPresenter.ProjectDryLine(model)");
+            Require(
+                serviceCellInteractor,
+                "projection.IsApproaching");
 
             foreach (string delegation in new[]
             {
