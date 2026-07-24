@@ -404,6 +404,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             _world.ConfigureCityServiceCellInteraction(this);
+            _world.ConfigureDepotReturnInteraction(this);
             _hud = gameObject.AddComponent<LastBearingHud>();
             _hud.Configure(this, _fieldDesk);
             SetLegacyHudSuppressedByFieldDesk(
@@ -424,6 +425,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             _fieldDesk?.ResetForLifecycle();
             _world?.ResetCityServiceCellInteraction();
+            _world?.ResetDepotReturnInteraction();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
@@ -476,6 +478,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
             _world?.ResetCityServiceCellInteraction();
+            _world?.ResetDepotReturnInteraction();
             _state = null;
             _readModel = null;
             ResetPublicSnapshotsToRuntime();
@@ -1503,11 +1506,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             _fieldDesk?.ResetForLifecycle();
             _world?.ResetCityServiceCellInteraction();
+            _world?.ResetDepotReturnInteraction();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
             if (_saveAdapter == null)
             {
                 _saveStatus = "Save boundary unavailable.";
+                RestoreDepotReturnInteractionAfterFailedLoad();
                 return;
             }
 
@@ -1517,6 +1522,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 if (!result.Succeeded || result.State == null)
                 {
                     _saveStatus = "Load refused: " + result.Code;
+                    RestoreDepotReturnInteractionAfterFailedLoad();
                     return;
                 }
 
@@ -1544,7 +1550,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
             catch (Exception exception)
             {
                 _saveStatus = "Load failed closed: " + exception.GetType().Name;
+                RestoreDepotReturnInteractionAfterFailedLoad();
                 Debug.LogException(exception, this);
+            }
+        }
+
+        private void RestoreDepotReturnInteractionAfterFailedLoad()
+        {
+            if (_readModel != null)
+            {
+                _world?.ApplyDepotReturnInteraction(_readModel);
             }
         }
 
@@ -2163,6 +2178,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _cityPreviewPadIndex,
                 _cityPreviewQuarterTurns,
                 HasCityBuildingPreview);
+            _world.ApplyDepotReturnInteraction(_readModel);
             _world.SetCityServiceCellFocus(
                 IsExactFieldDeskCityOverview &&
                 !_readModel.SliceInfrastructureActive);
@@ -2188,6 +2204,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     || kind == LastBearingEventKind.DepotRecoveryPointOperated
                     || kind == LastBearingEventKind.DepotResolved
                     || kind == LastBearingEventKind.RepairCargoTransferred
+                    || kind == LastBearingEventKind.LiquidCargoTransferred
                     || kind == LastBearingEventKind.ReturnPayloadFrozen
                     || kind == LastBearingEventKind.VehicleReturned
                     || kind == LastBearingEventKind.CityReturnCredited

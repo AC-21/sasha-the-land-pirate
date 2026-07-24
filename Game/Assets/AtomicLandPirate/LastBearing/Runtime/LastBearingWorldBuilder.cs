@@ -114,6 +114,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             private set;
         }
 
+        public LastBearingDepotReturnInteractor? DepotReturnInteractor
+        {
+            get;
+            private set;
+        }
+
         public LastBearingRouteModulePointView? RouteModulePointView
         {
             get;
@@ -312,6 +318,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 oxide);
 
             BuildCamera();
+            BuildDepotReturnInteraction(
+                VehicleView!.transform,
+                iron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
 
             Apply(new LastBearingVisualSnapshot(
                 LastBearingVisualPhase.Title,
@@ -386,6 +399,28 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public void ResetCityServiceCellInteraction()
         {
             CityServiceCellView?.Interactor?.ResetLocalSelection();
+        }
+
+        public void ConfigureDepotReturnInteraction(
+            LastBearingGameController controller)
+        {
+            if (MainCamera == null || DepotReturnInteractor == null)
+            {
+                throw new InvalidOperationException(
+                    "Depot return interaction requires Sasha's shared camera.");
+            }
+
+            DepotReturnInteractor.Configure(controller, MainCamera);
+        }
+
+        public void ResetDepotReturnInteraction()
+        {
+            DepotReturnInteractor?.ResetLocalFocus();
+        }
+
+        public void ApplyDepotReturnInteraction(LastBearingReadModel model)
+        {
+            DepotReturnInteractor?.Apply(model);
         }
 
         public void SelectCityGrammarHypothesis(
@@ -1224,6 +1259,27 @@ namespace AtomicLandPirate.Presentation.LastBearing
             RoadChaseCamera.SetChaseActive(false);
             CameraRig = cameraObject.AddComponent<LastBearingCameraRig>();
             CameraRig.Configure(VehicleView!.transform, RoadChaseCamera);
+        }
+
+        private void BuildDepotReturnInteraction(
+            Transform vehicle,
+            Material iron,
+            Material oxide,
+            Material bone,
+            Material tungsten,
+            Material signal)
+        {
+            var controls = new GameObject(
+                LastBearingDepotReturnInteractor.RootName);
+            controls.transform.SetParent(vehicle, false);
+            DepotReturnInteractor =
+                controls.AddComponent<LastBearingDepotReturnInteractor>();
+            DepotReturnInteractor.Build(
+                iron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
         }
 
         private Material CreateMaterial(Color baseColor, Color emission)
