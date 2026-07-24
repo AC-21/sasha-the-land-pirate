@@ -101,6 +101,8 @@ namespace AtomicLandPirate.LastBearingTests
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/LastBearingFeelTheLoadPlayModeTests.cs.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/LastBearingHaulTheFrameRailsPlayModeTests.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/LastBearingHaulTheFrameRailsPlayModeTests.cs.meta",
+            "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/LastBearingWorkTheCisternPumpPlayModeTests.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/LastBearingWorkTheCisternPumpPlayModeTests.cs.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Tests/PlayMode/RoadFeelLabPlayModeTests.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Scenes/LastBearing.unity",
             "Game/Assets/AtomicLandPirate/LastBearing/Scenes/RoadFeelLab.unity",

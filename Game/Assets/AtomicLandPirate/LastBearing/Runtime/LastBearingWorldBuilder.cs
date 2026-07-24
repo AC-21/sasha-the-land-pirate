@@ -418,6 +418,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             CityServiceCellView.Interactor.Configure(
                 controller,
                 MainCamera);
+            CameraRig?.SetCityServiceCellInteractor(
+                CityServiceCellView.Interactor);
         }
 
         public void ResetCityServiceCellInteraction()

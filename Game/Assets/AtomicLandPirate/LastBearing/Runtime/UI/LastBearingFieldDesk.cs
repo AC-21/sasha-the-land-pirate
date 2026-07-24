@@ -104,6 +104,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private bool _hasStamp;
         private bool _visible;
         private bool _auditCallbackRegistered;
+        private bool _physicalWorkRouted;
 
         public bool IsOperational { get; private set; }
 
@@ -286,8 +287,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (!_controller.IsExactFieldDeskCityOverview)
             {
+                _physicalWorkRouted = false;
                 HideAndResetTransient();
                 return;
+            }
+
+            if (_physicalWorkRouted)
+            {
+                bool pumpStillFocused =
+                    _controller.IsEmergencyCisternPumpFocused;
+                if (pumpStillFocused)
+                {
+                    HideAndResetTransient();
+                    _controller.SetLegacyHudSuppressedByFieldDesk(true);
+                    return;
+                }
+
+                _physicalWorkRouted = false;
             }
 
             float now = Time.unscaledTime;
@@ -320,6 +336,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             _lastDispatchFrame = Time.frameCount;
+            _physicalWorkRouted = false;
             HideAndResetTransient();
         }
 
@@ -549,7 +566,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 case LastBearingFieldDeskIntent.CancelCityBuildingPreview: _controller.CancelCityBuildingPreview(); break;
                 case LastBearingFieldDeskIntent.RunHotShift: _controller.StartHotShift(); break;
                 case LastBearingFieldDeskIntent.AcknowledgeDustFront: _controller.AcknowledgeDustFront(); break;
-                case LastBearingFieldDeskIntent.PumpEmergencyCistern: _controller.PumpEmergencyCistern(); break;
+                case LastBearingFieldDeskIntent.OpenEmergencyCisternPump:
+                    _controller.OpenEmergencyCisternPump();
+                    _physicalWorkRouted =
+                        _controller.IsEmergencyCisternPumpFocused;
+                    HideAndResetTransient();
+                    break;
                 case LastBearingFieldDeskIntent.BeginWorkshopPush: _controller.BeginGaragePlan(PreparationChoice.WorkshopPush); break;
                 case LastBearingFieldDeskIntent.BeginCivicBuffer: _controller.BeginGaragePlan(PreparationChoice.CivicBuffer); break;
                 case LastBearingFieldDeskIntent.OpenGarage: _controller.OpenGarageBay(); break;

@@ -29,7 +29,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "public bool IsExactFieldDeskCityOverview");
             Require(controller, "public bool HasPendingPlayerCommands");
             Require(controller, "public bool CanAcknowledgeDustFront");
+            Require(controller, "public bool CanOpenEmergencyCisternPump");
+            Require(controller, "public bool IsEmergencyCisternPumpFocused");
             Require(controller, "public bool CanPumpEmergencyCistern");
+            Require(controller, "public bool IsEmergencyCisternPumpQueued");
 
             const string addDesk =
                 "gameObject.AddComponent<LastBearingFieldDesk>()";
@@ -155,7 +158,7 @@ namespace AtomicLandPirate.LastBearingTests
                 ".CancelCityBuildingPreview(",
                 ".StartHotShift(",
                 ".AcknowledgeDustFront(",
-                ".PumpEmergencyCistern(",
+                ".OpenEmergencyCisternPump(",
                 ".BeginGaragePlan(",
                 ".OpenGarageBay(",
                 ".CommitExpedition(",
@@ -184,7 +187,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "OPEN PUMP HALL · SEAT AUXILIARY PUMP");
             Require(fieldDeskPresenter, "RunHotShift = 28");
             Require(fieldDeskPresenter, "AcknowledgeDustFront = 29");
-            Require(fieldDeskPresenter, "PumpEmergencyCistern = 30");
+            Require(
+                fieldDeskPresenter,
+                "OpenEmergencyCisternPump = 30");
             Require(fieldDeskPresenter, "\"ACKNOWLEDGE FRONT\"");
             Require(
                 fieldDeskPresenter,
@@ -198,16 +203,21 @@ namespace AtomicLandPirate.LastBearingTests
             Require(hud, "_controller.AcknowledgeDustFront();");
             Require(
                 fieldDeskPresenter,
-                "PUMP EMERGENCY CISTERN · ");
+                "OPEN EMERGENCY STORAGE · WORK CISTERN PUMP");
             Require(
                 fieldDeskPresenter,
-                "controller.CanPumpEmergencyCistern");
+                "controller.CanOpenEmergencyCisternPump");
             Require(
                 hud,
-                "_controller!.PumpEmergencyCistern();");
+                "_controller.OpenEmergencyCisternPump();");
             Require(
                 hud,
-                "\"PUMP EMERGENCY CISTERN · 1 FUEL · +10.000 WATER · ONE FILL\"");
+                "\"OPEN EMERGENCY STORAGE · WORK CISTERN PUMP\"");
+            TestHarness.True(
+                fieldDesk.IndexOf(
+                    ".PumpEmergencyCistern(",
+                    StringComparison.Ordinal) < 0,
+                "Field Desk must route to the physical cistern pump instead of submitting the command");
             Require(
                 fieldDeskPresenter,
                 "RUN HOT SHIFT\";");

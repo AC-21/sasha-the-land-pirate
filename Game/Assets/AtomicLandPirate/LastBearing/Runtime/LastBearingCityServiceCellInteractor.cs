@@ -39,6 +39,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             "SOCKET_CALIBRATION_SLED_DESTINATION";
         public const string HotShiftMachineControlName =
             "INTERACT_MACHINE_SHOP_HOT_SHIFT";
+        public const string EmergencyCisternPumpControlName =
+            "INTERACT_EMERGENCY_CISTERN_PUMP";
         public const string FeedbackLabelName =
             "WORKING_SERVICE_CELL_FEEDBACK";
 
@@ -77,11 +79,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private GameObject? _sledDestination;
         private GameObject? _hotShiftMachineControl;
         private TextMesh? _hotShiftMachineLabel;
+        private GameObject? _emergencyCisternPumpControl;
+        private GameObject? _emergencyCisternPumpLever;
+        private GameObject? _emergencyCisternPumpFocusRail;
+        private TextMesh? _emergencyCisternPumpLabel;
         private TextMesh? _feedbackLabel;
         private int _hoveredPadIndex = -1;
         private bool _linkSourceSelected;
         private string? _selectedResidentId;
         private bool _hotShiftControlFocused;
+        private bool _emergencyCisternPumpFocused;
+        private bool _emergencyCisternPumpInputArmed;
+        private bool _emergencyCisternPumpPresentationActive;
+        private int _emergencyCisternPumpPresentationEntryFrame = -1;
         private bool _built;
 
         public string Feedback { get; private set; } =
@@ -123,8 +133,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public string HotShiftMachineLabel =>
             _hotShiftMachineLabel?.text ?? string.Empty;
 
+        public bool IsEmergencyCisternPumpControlVisible =>
+            _emergencyCisternPumpControl?.activeInHierarchy == true &&
+            IsInteractionActive() &&
+            _model != null &&
+            ShouldShowEmergencyCisternPumpControl(_model);
+
+        public bool IsEmergencyCisternPumpFocused =>
+            _emergencyCisternPumpFocused &&
+            IsEmergencyCisternPumpControlVisible;
+
+        public bool IsEmergencyCisternPumpInputArmed =>
+            IsEmergencyCisternPumpFocused &&
+            _emergencyCisternPumpInputArmed;
+
         public bool HasDedicatedInteractionTargets =>
-            _targets.Count >= 16;
+            _targets.Count >= 17;
 
         internal void Build(
             Material iron,
@@ -262,6 +286,45 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 "CLOCK HOT SHIFT\nRETURN · GAMEPAD SOUTH");
             _hotShiftMachineLabel =
                 _hotShiftMachineControl.GetComponentInChildren<TextMesh>();
+            _emergencyCisternPumpControl = CreateInvisibleInteractionTarget(
+                EmergencyCisternPumpControlName,
+                Vector3.zero,
+                new Vector3(1.18f, 1.08f, 0.94f),
+                InteractionKind.EmergencyCisternPumpControl,
+                -1);
+            CreateVisualBlock(
+                "EMERGENCY_CISTERN_PUMP_PLINTH",
+                _emergencyCisternPumpControl.transform,
+                new Vector3(0f, -0.38f, 0f),
+                new Vector3(0.92f, 0.22f, 0.72f),
+                iron);
+            _emergencyCisternPumpLever = CreateVisualBlock(
+                "EMERGENCY_CISTERN_PUMP_LEVER",
+                _emergencyCisternPumpControl.transform,
+                new Vector3(0f, 0.06f, 0.02f),
+                new Vector3(0.16f, 0.72f, 0.16f),
+                oxide);
+            CreateVisualBlock(
+                "EMERGENCY_CISTERN_PUMP_HANDLE",
+                _emergencyCisternPumpLever.transform,
+                new Vector3(0f, 0.5f, 0f),
+                new Vector3(0.46f, 0.18f, 0.18f),
+                signal);
+            _emergencyCisternPumpFocusRail = CreateVisualBlock(
+                "EMERGENCY_CISTERN_PUMP_FOCUS_RAIL",
+                _emergencyCisternPumpControl.transform,
+                new Vector3(0f, -0.18f, -0.4f),
+                new Vector3(1.02f, 0.08f, 0.08f),
+                tungsten);
+            _emergencyCisternPumpFocusRail.SetActive(false);
+            CreateLabel(
+                "EMERGENCY_CISTERN_PUMP_LABEL",
+                _emergencyCisternPumpControl.transform,
+                "PUMP CISTERN\nE · GAMEPAD SOUTH",
+                new Vector3(0f, 0.5f, -0.22f));
+            _emergencyCisternPumpLabel =
+                _emergencyCisternPumpControl.
+                    GetComponentInChildren<TextMesh>();
 
             var feedbackObject = new GameObject(
                 FeedbackLabelName);
@@ -309,11 +372,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _selectedResidentId = null;
             }
 
+            if (!ShouldShowEmergencyCisternPumpControl(model))
+            {
+                ResetEmergencyCisternPumpFocus();
+            }
+
             if (!ShouldShowHotShiftControl(model))
             {
                 _hotShiftControlFocused = false;
             }
-            else if (!_hotShiftControlFocused)
+            else if (!_hotShiftControlFocused &&
+                     !_emergencyCisternPumpFocused)
             {
                 _hotShiftControlFocused = true;
             }
@@ -346,6 +415,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _linkSourceSelected = false;
             _selectedResidentId = null;
             _hotShiftControlFocused = false;
+            ResetEmergencyCisternPumpFocus();
             SetFeedback(
                 "CHOOSE A BUILDING · THEN A WORK PAD",
                 rejected: false);
@@ -723,6 +793,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             _hotShiftControlFocused = true;
+            ResetEmergencyCisternPumpFocus();
             SetFeedback(HotShiftFeedback(_model), rejected: false);
             RefreshInteractionVisuals();
         }
@@ -738,6 +809,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             _hotShiftControlFocused = true;
+            ResetEmergencyCisternPumpFocus();
             if (_controller!.HasPendingPlayerCommands)
             {
                 SetFeedback(
@@ -767,6 +839,86 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             SetFeedback(
                 "HOT SHIFT QUEUED · 1 fuel and machine motion begin on the authoritative tick",
+                rejected: false);
+            RefreshInteractionVisuals();
+        }
+
+        public void FocusEmergencyCisternPump()
+        {
+            if (!IsInteractionActive() ||
+                _model == null ||
+                !ShouldShowEmergencyCisternPumpControl(_model))
+            {
+                ResetEmergencyCisternPumpFocus();
+                Reject("EMERGENCY CISTERN PUMP UNAVAILABLE");
+                RefreshInteractionVisuals();
+                return;
+            }
+
+            _emergencyCisternPumpFocused = true;
+            _hotShiftControlFocused = false;
+            _emergencyCisternPumpInputArmed = false;
+            _emergencyCisternPumpPresentationActive = true;
+            _emergencyCisternPumpPresentationEntryFrame =
+                Time.frameCount;
+
+            SetFeedback(
+                _emergencyCisternPumpInputArmed
+                    ? "CISTERN PUMP READY · E · GAMEPAD SOUTH · or pull the lever"
+                    : "CISTERN PUMP FOCUSED · release controls to set the lever",
+                rejected: false);
+            RefreshInteractionVisuals();
+        }
+
+        public void ClickEmergencyCisternPump()
+        {
+            if (!RequireCityOverview() ||
+                _model == null ||
+                !ShouldShowEmergencyCisternPumpControl(_model))
+            {
+                Reject("EMERGENCY CISTERN PUMP UNAVAILABLE");
+                return;
+            }
+
+            if (!_emergencyCisternPumpFocused)
+            {
+                Reject("FOCUS THE EMERGENCY CISTERN PUMP FIRST");
+                return;
+            }
+
+            if (_controller?.IsEmergencyCisternPumpQueued == true)
+            {
+                SetFeedback(
+                    "CISTERN PUMP ALREADY QUEUED · fill marker waits for the city tick",
+                    rejected: false);
+                return;
+            }
+
+            if (!_emergencyCisternPumpInputArmed)
+            {
+                Reject("RELEASE CONTROLS · THEN PULL THE CISTERN LEVER");
+                return;
+            }
+
+            if (_controller?.CanPumpEmergencyCistern != true)
+            {
+                Reject("CISTERN PUMP CONTROL STALE");
+                return;
+            }
+
+            _controller.PumpEmergencyCistern();
+            if (!_controller.IsEmergencyCisternPumpQueued)
+            {
+                Reject(
+                    string.IsNullOrWhiteSpace(_controller.Status)
+                        ? "CISTERN PUMP ACTION NOT QUEUED"
+                        : _controller.Status);
+                return;
+            }
+
+            _emergencyCisternPumpInputArmed = false;
+            SetFeedback(
+                "CISTERN PUMP QUEUED · 1 fuel · +10.000 water on the authoritative tick",
                 rejected: false);
             RefreshInteractionVisuals();
         }
@@ -811,7 +963,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 if (_hoveredPadIndex != -1 ||
                     _linkSourceSelected ||
                     _selectedResidentId != null ||
-                    _hotShiftControlFocused)
+                    _hotShiftControlFocused ||
+                    _emergencyCisternPumpFocused ||
+                    _emergencyCisternPumpPresentationActive)
                 {
                     ResetLocalSelection();
                 }
@@ -826,17 +980,30 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             var gamepad = Gamepad.current;
+            var mouse = Mouse.current;
+            UpdateEmergencyCisternPumpInputArming(
+                keyboard,
+                gamepad,
+                mouse);
+            bool operateEmergencyCisternPump =
+                keyboard?.eKey.wasPressedThisFrame == true ||
+                gamepad?.buttonSouth.wasPressedThisFrame == true;
             bool operateHotShift =
                 keyboard?.enterKey.wasPressedThisFrame == true ||
                 gamepad?.buttonSouth.wasPressedThisFrame == true;
-            if (operateHotShift &&
+            if (operateEmergencyCisternPump &&
+                IsEmergencyCisternPumpFocused &&
+                _controller?.FieldDesk?.OwnsKeyboardFocus != true)
+            {
+                ClickEmergencyCisternPump();
+            }
+            else if (operateHotShift &&
                 IsHotShiftControlFocused &&
                 _controller?.FieldDesk?.OwnsKeyboardFocus != true)
             {
                 ClickHotShiftControl();
             }
 
-            var mouse = Mouse.current;
             if (mouse != null &&
                 _controller?.FieldDesk?.BlocksWorldPointer(
                     mouse.position.ReadValue()) == true)
@@ -866,6 +1033,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 target.Index != _hoveredPadIndex)
             {
                 HoverPad(target.Index);
+            }
+            else if (target.Kind ==
+                         InteractionKind.EmergencyCisternPumpControl &&
+                     !_emergencyCisternPumpFocused)
+            {
+                FocusEmergencyCisternPump();
             }
             else if (target.Kind != InteractionKind.Pad &&
                      _hoveredPadIndex != -1)
@@ -938,6 +1111,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 case InteractionKind.HotShiftMachineControl:
                     FocusHotShiftControl();
                     ClickHotShiftControl();
+                    break;
+                case InteractionKind.EmergencyCisternPumpControl:
+                    if (!IsEmergencyCisternPumpFocused)
+                    {
+                        FocusEmergencyCisternPump();
+                    }
+
+                    ClickEmergencyCisternPump();
                     break;
             }
         }
@@ -1120,6 +1301,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         0f);
             }
 
+            if (_emergencyCisternPumpControl != null &&
+                IsValidPad(model.EmergencyStoragePadIndex))
+            {
+                int pumpQuarterTurns =
+                    SelectEmergencyCisternPumpQuarterTurns(model);
+                Vector3 position =
+                    PadPositions[model.EmergencyStoragePadIndex] +
+                    RotateOffset(
+                        new Vector3(0f, 0f, -1.18f),
+                        pumpQuarterTurns);
+                moved |= SetLocalPositionIfChanged(
+                    _emergencyCisternPumpControl,
+                    WithHeight(position, 0.56f));
+                _emergencyCisternPumpControl.transform.localRotation =
+                    Quaternion.Euler(
+                        0f,
+                        pumpQuarterTurns * 90f,
+                        0f);
+            }
+
             return moved;
         }
 
@@ -1140,6 +1341,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool showHotShiftControl =
                 _model != null &&
                 ShouldShowHotShiftControl(_model);
+            bool showEmergencyCisternPumpControl =
+                _model != null &&
+                ShouldShowEmergencyCisternPumpControl(_model);
             bool humanChoiceAvailable = staffingOpen &&
                 _controller?.CanAssignCityServiceHuman == true &&
                 !string.Equals(
@@ -1183,6 +1387,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             SetActive(
                 _hotShiftMachineControl,
                 showHotShiftControl);
+            SetActive(
+                _emergencyCisternPumpControl,
+                showEmergencyCisternPumpControl);
 
             ScaleSelection(
                 _recyclerSelector,
@@ -1212,6 +1419,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ScaleSelection(
                 _hotShiftMachineControl,
                 showHotShiftControl && _hotShiftControlFocused);
+            ScaleSelection(
+                _emergencyCisternPumpControl,
+                showEmergencyCisternPumpControl &&
+                _emergencyCisternPumpFocused);
+            SetActive(
+                _emergencyCisternPumpFocusRail,
+                showEmergencyCisternPumpControl &&
+                _emergencyCisternPumpFocused);
             if (_hotShiftMachineLabel != null && _model != null)
             {
                 string label = HotShiftControlLabel(_model);
@@ -1225,6 +1440,38 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _model.IsHotShiftStalledByWorkshopPush
                         ? new Color32(255, 154, 102, 255)
                         : new Color32(238, 221, 178, 255);
+            }
+
+            if (_emergencyCisternPumpLabel != null)
+            {
+                string label =
+                    _controller?.IsEmergencyCisternPumpQueued == true
+                        ? "CISTERN PUMP QUEUED\nCITY TICK PENDING"
+                        : !_emergencyCisternPumpFocused
+                            ? "PUMP CISTERN\nSELECT LEVER"
+                            : _emergencyCisternPumpInputArmed
+                                ? "PUMP CISTERN\nE · GAMEPAD SOUTH"
+                                : "PUMP CISTERN\nRELEASE CONTROLS";
+                if (_emergencyCisternPumpLabel.text != label)
+                {
+                    _emergencyCisternPumpLabel.text = label;
+                }
+
+                _emergencyCisternPumpLabel.color =
+                    _controller?.IsEmergencyCisternPumpQueued == true
+                        ? new Color32(255, 190, 104, 255)
+                        : new Color32(238, 221, 178, 255);
+            }
+
+            if (_emergencyCisternPumpLever != null)
+            {
+                _emergencyCisternPumpLever.transform.localRotation =
+                    Quaternion.Euler(
+                        _controller?.IsEmergencyCisternPumpQueued == true
+                            ? -32f
+                            : 18f,
+                        0f,
+                        0f);
             }
 
             RefreshPadHighlights();
@@ -1389,6 +1636,92 @@ namespace AtomicLandPirate.Presentation.LastBearing
                    model.PlannedModule != VehicleModule.None;
         }
 
+        private static bool ShouldShowEmergencyCisternPumpControl(
+            LastBearingReadModel model)
+        {
+            return model.IsEmergencyCisternPumpAvailable;
+        }
+
+        private static int SelectEmergencyCisternPumpQuarterTurns(
+            LastBearingReadModel model)
+        {
+            int preferred = model.EmergencyStorageQuarterTurns;
+            if (!IsValidPad(model.MachineShopPadIndex))
+            {
+                return preferred;
+            }
+
+            Vector3 storage = PadPositions[model.EmergencyStoragePadIndex];
+            Vector3 hotShift = PadPositions[model.MachineShopPadIndex] +
+                RotateOffset(
+                    new Vector3(0f, 0f, -0.82f),
+                    model.MachineShopQuarterTurns);
+            int bestQuarterTurns = preferred;
+            float bestDistance = float.NegativeInfinity;
+            for (var offset = 0; offset < 4; offset++)
+            {
+                int candidate = (preferred + offset) % 4;
+                Vector3 position = storage + RotateOffset(
+                    new Vector3(0f, 0f, -1.18f),
+                    candidate);
+                float distance = (position - hotShift).sqrMagnitude;
+                if (distance > bestDistance)
+                {
+                    bestDistance = distance;
+                    bestQuarterTurns = candidate;
+                }
+            }
+
+            return bestQuarterTurns;
+        }
+
+        private void UpdateEmergencyCisternPumpInputArming(
+            Keyboard? keyboard,
+            Gamepad? gamepad,
+            Mouse? mouse)
+        {
+            if (!IsEmergencyCisternPumpFocused)
+            {
+                _emergencyCisternPumpInputArmed = false;
+                _emergencyCisternPumpPresentationActive = false;
+                _emergencyCisternPumpPresentationEntryFrame = -1;
+                return;
+            }
+
+            if (!_emergencyCisternPumpPresentationActive)
+            {
+                _emergencyCisternPumpPresentationActive = true;
+                _emergencyCisternPumpPresentationEntryFrame =
+                    Time.frameCount;
+                _emergencyCisternPumpInputArmed = false;
+                return;
+            }
+
+            bool controlsReleased =
+                keyboard?.eKey.isPressed != true &&
+                gamepad?.buttonSouth.isPressed != true &&
+                mouse?.leftButton.isPressed != true;
+            if (!_emergencyCisternPumpInputArmed &&
+                Time.frameCount >
+                    _emergencyCisternPumpPresentationEntryFrame &&
+                controlsReleased)
+            {
+                _emergencyCisternPumpInputArmed = true;
+                SetFeedback(
+                    "CISTERN PUMP READY · E · GAMEPAD SOUTH · or pull the lever",
+                    rejected: false);
+                RefreshInteractionVisuals();
+            }
+        }
+
+        private void ResetEmergencyCisternPumpFocus()
+        {
+            _emergencyCisternPumpFocused = false;
+            _emergencyCisternPumpInputArmed = false;
+            _emergencyCisternPumpPresentationActive = false;
+            _emergencyCisternPumpPresentationEntryFrame = -1;
+        }
+
         private static string HotShiftControlLabel(
             LastBearingReadModel model)
         {
@@ -1532,6 +1865,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Sled,
             SledDestination,
             HotShiftMachineControl,
+            EmergencyCisternPumpControl,
         }
     }
 }

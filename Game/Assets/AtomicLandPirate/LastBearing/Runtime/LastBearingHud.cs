@@ -161,6 +161,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _controller.IsReturnCheckInAvailable,
                     _controller.IsPumpHallRepairAvailable,
                     _controller.IsCityImprovementInstallationAvailable,
+                    _controller.IsEmergencyCisternPumpFocused,
+                    _controller.IsEmergencyCisternPumpQueued,
                     _controller.IsWorkshopBatchStartAvailable,
                     _controller.IsWorkshopBarterAvailable,
                     _controller.IsGaragePlanIntentActive,
@@ -354,17 +356,34 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 "One full fill only: spend 1 fuel, preserve Sasha's planned " +
                 "route reserve, and add +10.000 water before the Dust Front.",
                 _bodyStyle);
-            bool wasEnabled = GUI.enabled;
-            GUI.enabled = wasEnabled &&
-                          _controller!.CanPumpEmergencyCistern;
-            if (GUILayout.Button(
-                    "PUMP EMERGENCY CISTERN · 1 FUEL · +10.000 WATER · ONE FILL",
-                    _buttonStyle))
+            if (_controller!.IsEmergencyCisternPumpQueued)
             {
-                _controller!.PumpEmergencyCistern();
+                GUILayout.Label(
+                    "CISTERN PUMP QUEUED · the full marker appears after the authoritative city tick.",
+                    _mutedStyle);
+            }
+            else if (_controller.IsEmergencyCisternPumpFocused)
+            {
+                GUILayout.Label(
+                    "CISTERN PUMP FOCUSED · release, then press E / gamepad " +
+                    "south or click the physical control.",
+                    _mutedStyle);
+            }
+            else
+            {
+                bool wasEnabled = GUI.enabled;
+                GUI.enabled = wasEnabled &&
+                              _controller.CanOpenEmergencyCisternPump;
+                if (GUILayout.Button(
+                        "OPEN EMERGENCY STORAGE · WORK CISTERN PUMP",
+                        _buttonStyle))
+                {
+                    _controller.OpenEmergencyCisternPump();
+                }
+
+                GUI.enabled = wasEnabled;
             }
 
-            GUI.enabled = wasEnabled;
             if (!model.IsEmergencyCisternPumpAvailable)
             {
                 GUILayout.Label(
@@ -1384,6 +1403,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool isReturnCheckInAvailable,
             bool isPumpHallRepairAvailable,
             bool isCityImprovementInstallationAvailable,
+            bool isEmergencyCisternPumpFocused,
+            bool isEmergencyCisternPumpQueued,
             bool isWorkshopBatchStartAvailable,
             bool isWorkshopBarterAvailable,
             bool isGaragePlanIntentActive,
@@ -1492,6 +1513,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return "Press E / gamepad south · seat the staged rotor in " +
                        "the fixed civic socket and wake the auxiliary pump." +
                        serviceControls;
+            }
+
+            if (isEmergencyCisternPumpQueued)
+            {
+                return "Cistern pump queued · the full marker appears on the " +
+                       "authoritative city tick." + serviceControls;
+            }
+
+            if (isEmergencyCisternPumpFocused)
+            {
+                return "Release, then press E / gamepad south or click the " +
+                       "physical control · pump one full emergency-cistern " +
+                       "fill." + serviceControls;
             }
 
             if (isWorkshopBatchStartAvailable)

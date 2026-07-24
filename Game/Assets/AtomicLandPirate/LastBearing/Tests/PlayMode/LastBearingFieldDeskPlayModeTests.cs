@@ -191,7 +191,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
-        public IEnumerator EmergencyCisternDelegatesOnceMarksStorageAndAutosaves()
+        public IEnumerator EmergencyCisternDeskRoutesWithoutCanonicalMutation()
         {
             LastBearingGameController controller = BuildController();
             LastBearingFieldDesk desk = RequireDesk(controller);
@@ -209,7 +209,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 available.Survey.AdvanceSled.Intent,
                 Is.EqualTo(
-                    LastBearingFieldDeskIntent.PumpEmergencyCistern));
+                    LastBearingFieldDeskIntent.OpenEmergencyCisternPump));
             Button action = RequireDocument(controller)
                 .rootVisualElement.Q<Button>("leave-trial-button");
             Assert.That(
@@ -218,7 +218,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 action.text,
                 Is.EqualTo(
-                    "PUMP EMERGENCY CISTERN · 1 FUEL · +10.000 WATER · ONE FILL"));
+                    "OPEN EMERGENCY STORAGE · WORK CISTERN PUMP"));
             Assert.That(action.enabledSelf, Is.True);
             LastBearingCityServiceCellView view =
                 controller.World!.CityServiceCellView!;
@@ -226,45 +226,50 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             int generationsBefore = GenerationCount(profileDirectory);
             string hashBefore = controller.CanonicalHash;
+            byte[] stateBefore =
+                LastBearingCanonicalCodec.Encode(controller.State!);
             long fuelBefore = controller.ReadModel!.FuelUnits;
+            long waterBefore = controller.ReadModel.WaterMilli;
             Submit(action);
-            Assert.That(controller.HasPendingPlayerCommands, Is.True);
-            InvokeSimulationTick(controller);
-            desk.Refresh(force: true);
-
-            Assert.That(
-                controller.ReadModel.EmergencyCisternCharged,
-                Is.True);
-            Assert.That(
-                controller.ReadModel.FuelUnits,
-                Is.EqualTo(
-                    fuelBefore
-                    - LastBearingBalanceV1
-                        .EmergencyCisternFuelCostUnits));
-            Assert.That(view.IsEmergencyCisternFillVisible, Is.True);
-            string chargedHash = AssertAutosaveBoundary(
-                controller,
-                profileDirectory,
-                generationsBefore,
-                hashBefore);
-
-            controller.ReturnToTitle();
-            controller.Load();
-            Assert.That(controller.CanonicalHash, Is.EqualTo(chargedHash));
-            Assert.That(
-                controller.ReadModel!.EmergencyCisternCharged,
-                Is.True);
-            controller.ShowCityOverview();
-            desk.Refresh(force: true);
-            Assert.That(view.IsEmergencyCisternFillVisible, Is.True);
-
-            int generationsAfterLoad =
-                GenerationCount(profileDirectory);
-            controller.PumpEmergencyCistern();
             Assert.That(controller.HasPendingPlayerCommands, Is.False);
             Assert.That(
+                desk.OwnsCityOverview,
+                Is.False,
+                "The Field Desk must stay stowed while the physical pump owns focus.");
+            Assert.That(
+                controller.Hud!.enabled,
+                Is.False,
+                "Routing must yield to the world control without exposing the legacy overlay.");
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBefore));
+            Assert.That(
+                LastBearingCanonicalCodec.Encode(controller.State!),
+                Is.EqualTo(stateBefore));
+            Assert.That(
+                controller.ReadModel.FuelUnits,
+                Is.EqualTo(fuelBefore));
+            Assert.That(
+                controller.ReadModel.WaterMilli,
+                Is.EqualTo(waterBefore));
+            Assert.That(
                 GenerationCount(profileDirectory),
-                Is.EqualTo(generationsAfterLoad));
+                Is.EqualTo(generationsBefore));
+            LastBearingCityServiceCellInteractor interactor =
+                view.Interactor!;
+            Assert.That(
+                interactor.IsEmergencyCisternPumpFocused,
+                Is.True);
+            Assert.That(
+                interactor.IsEmergencyCisternPumpInputArmed,
+                Is.False);
+            Assert.That(controller.CanPumpEmergencyCistern, Is.False);
+            Assert.That(view.IsEmergencyCisternFillVisible, Is.False);
+            Assert.That(
+                controller.ReadModel.EmergencyCisternCharged,
+                Is.False);
+            Assert.That(
+                controller.Status,
+                Does.Contain("pump focused"));
+            yield return null;
         }
 
         [UnityTest]

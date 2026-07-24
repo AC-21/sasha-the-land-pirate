@@ -656,8 +656,10 @@ an integration gate.
 
 Scope:
 
-- Add one Field Desk and legacy fallback action that spends exactly 1 fuel and
-  adds exactly 10,000 `WaterMilli` once.
+- Make the Field Desk and legacy fallback route the player to a physical pump
+  lever beside Emergency Storage; routing alone changes no resources.
+- Require a fresh `E`, gamepad South, or pointer activation at the lever before
+  spending exactly 1 fuel and adding exactly 10,000 `WaterMilli` once.
 - Preserve the planned route fuel reserve and reject partial fill or spill.
 - Require the commissioned service cell, placed storage, available operator,
   committed rig plan, Sasha home, unresolved Dust Front, and inactive Hot Shift.
@@ -671,8 +673,9 @@ Acceptance:
 - invalid and repeated attempts conserve fuel and water exactly;
 - the base Dust Front brink changes from `Breached` without the fill to `Held`
   with it;
-- current round trip, schema-8 migration, canonical mechanical hash, controller
-  delegation, and derived presentation are directly tested;
+- current round trip, schema-8 migration, canonical mechanical hash, physical
+  command delegation, fresh-input arming, and derived presentation are directly
+  tested;
 - no new scene, package, dependency, asset, generalized storage system, or
   everyday performance soak is introduced.
 

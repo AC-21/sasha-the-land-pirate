@@ -561,14 +561,30 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.CommitGaragePlan(VehicleModule.WinchAssembly);
             SimulateOneTick(controller);
             controller.ShowCityOverview();
-            Assert.That(controller.CanPumpEmergencyCistern, Is.True);
+            LastBearingCityServiceCellInteractor interactor =
+                view.Interactor!;
+            Assert.That(controller.CanOpenEmergencyCisternPump, Is.True);
+            Assert.That(controller.CanPumpEmergencyCistern, Is.False);
             Assert.That(view.IsEmergencyCisternFillVisible, Is.False);
-            controller.PumpEmergencyCistern();
-            SimulateOneTick(controller);
+            string hashBeforeRoute = controller.CanonicalHash;
+            long fuelBeforeRoute = controller.ReadModel.FuelUnits;
+            long waterBeforeRoute = controller.ReadModel.WaterMilli;
+            controller.OpenEmergencyCisternPump();
+            Assert.That(controller.HasPendingPlayerCommands, Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBeforeRoute));
             Assert.That(
-                controller.ReadModel.EmergencyCisternCharged,
+                controller.ReadModel.FuelUnits,
+                Is.EqualTo(fuelBeforeRoute));
+            Assert.That(
+                controller.ReadModel.WaterMilli,
+                Is.EqualTo(waterBeforeRoute));
+            Assert.That(
+                interactor.IsEmergencyCisternPumpFocused,
                 Is.True);
-            Assert.That(view.IsEmergencyCisternFillVisible, Is.True);
+            Assert.That(
+                interactor.IsEmergencyCisternPumpInputArmed,
+                Is.False);
+            Assert.That(view.IsEmergencyCisternFillVisible, Is.False);
         }
 
         [Test]
