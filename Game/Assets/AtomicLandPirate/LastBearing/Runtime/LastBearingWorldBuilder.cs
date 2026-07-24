@@ -22,6 +22,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public const string CityScaffoldRootName =
             "City Scaffold [Derived Only]";
 
+        public const string RoadCorridorRootName =
+            "Two Path Road Corridor";
+
+        public const string RouteApronName =
+            "Route Apron";
+
+        public const string CollapsedShortBranchName =
+            "Collapsed Short Branch";
+
+        public const string ExposedLongRouteAName =
+            "Exposed Long Route A";
+
+        public const string ExposedLongRouteBName =
+            "Exposed Long Route B";
+
         private static readonly Color Bone = new Color32(216, 199, 161, 255);
         private static readonly Color Concrete = new Color32(119, 113, 104, 255);
         private static readonly Color ConcreteDark = new Color32(52, 51, 50, 255);
@@ -1162,13 +1177,41 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Material tungsten,
             Material signal)
         {
-            var root = new GameObject("Two Path Road Corridor").transform;
+            var root = new GameObject(RoadCorridorRootName).transform;
             root.SetParent(cityScaffoldRoot, false);
 
-            CreateBlock("Route Apron", root, new Vector3(-6f, -0.01f, 3f), new Vector3(5f, 0.25f, 17f), iron).transform.localRotation = Quaternion.Euler(0f, -24f, 0f);
-            CreateBlock("Collapsed Short Branch", root, new Vector3(1f, 0f, 17f), new Vector3(4f, 0.24f, 22f), iron).transform.localRotation = Quaternion.Euler(0f, -18f, 0f);
-            CreateBlock("Exposed Long Route A", root, new Vector3(10f, 0f, 11f), new Vector3(4f, 0.24f, 22f), iron).transform.localRotation = Quaternion.Euler(0f, -52f, 0f);
-            CreateBlock("Exposed Long Route B", root, new Vector3(15f, 0f, 25f), new Vector3(4f, 0.24f, 18f), iron).transform.localRotation = Quaternion.Euler(0f, 25f, 0f);
+            CreateRoadSurface(
+                RouteApronName,
+                root,
+                new Vector3(-6f, -0.01f, 3f),
+                new Vector3(5f, 0.25f, 17f),
+                iron,
+                -24f,
+                RoadFeelSurfaceKind.Concrete);
+            CreateRoadSurface(
+                CollapsedShortBranchName,
+                root,
+                new Vector3(1f, 0f, 17f),
+                new Vector3(4f, 0.24f, 22f),
+                iron,
+                -18f,
+                RoadFeelSurfaceKind.Washboard);
+            CreateRoadSurface(
+                ExposedLongRouteAName,
+                root,
+                new Vector3(10f, 0f, 11f),
+                new Vector3(4f, 0.24f, 22f),
+                iron,
+                -52f,
+                RoadFeelSurfaceKind.Sand);
+            CreateRoadSurface(
+                ExposedLongRouteBName,
+                root,
+                new Vector3(15f, 0f, 25f),
+                new Vector3(4f, 0.24f, 18f),
+                iron,
+                25f,
+                RoadFeelSurfaceKind.Gravel);
 
             CreateBlock("Pipeline Ruin", root, new Vector3(-8f, 2.4f, 19f), new Vector3(18f, 0.55f, 0.55f), oxide);
 
@@ -1549,6 +1592,27 @@ namespace AtomicLandPirate.Presentation.LastBearing
             block.transform.localScale = scale;
             block.GetComponent<Renderer>().sharedMaterial = oxide;
             return block;
+        }
+
+        private static GameObject CreateRoadSurface(
+            string objectName,
+            Transform parent,
+            Vector3 position,
+            Vector3 scale,
+            Material material,
+            float yawDegrees,
+            RoadFeelSurfaceKind kind)
+        {
+            GameObject surface = CreateBlock(
+                objectName,
+                parent,
+                position,
+                scale,
+                material);
+            surface.transform.localRotation =
+                Quaternion.Euler(0f, yawDegrees, 0f);
+            surface.AddComponent<RoadFeelSurface>().Configure(kind);
+            return surface;
         }
 
         private static GameObject CreateCylinder(
