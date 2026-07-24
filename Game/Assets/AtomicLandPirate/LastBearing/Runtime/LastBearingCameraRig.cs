@@ -255,7 +255,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
                 if (keyboard.eKey.isPressed &&
                     _cityServiceCellInteractor?
-                        .IsEmergencyCisternPumpFocused != true)
+                        .IsEmergencyCisternPumpFocused != true &&
+                    _cityServiceCellInteractor?
+                        .IsDustFrontRelayFocused != true)
                 {
                     _cityYaw += 48f * deltaTime;
                 }

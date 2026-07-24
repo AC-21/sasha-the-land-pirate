@@ -44,6 +44,11 @@ namespace AtomicLandPirate.LastBearingTests
                     repoRoot,
                     "Game/Assets/AtomicLandPirate/LastBearing/Tests/" +
                     "PlayMode/LastBearingClockHotShiftPlayModeTests.cs"));
+            string dustFrontPlayMode = File.ReadAllText(
+                Path.Combine(
+                    repoRoot,
+                    "Game/Assets/AtomicLandPirate/LastBearing/Tests/" +
+                    "PlayMode/LastBearingFaceTheDustFrontPlayModeTests.cs"));
 
             Require(
                 interactor,
@@ -100,6 +105,16 @@ namespace AtomicLandPirate.LastBearingTests
                 "bool operateEmergencyCisternPump =");
             Require(
                 interactorUpdate,
+                "bool operateDustFrontRelay =");
+            Require(
+                interactor,
+                "public bool HasDustFrontRelayControl");
+            Require(
+                interactor,
+                "public string DustFrontRelayLabel");
+            Require(interactor, "FRONT BREACHED\\nREPAIR HOLDS");
+            Require(
+                interactorUpdate,
                 "keyboard?.eKey.wasPressedThisFrame == true");
             Require(
                 cameraRig,
@@ -107,6 +122,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 cameraRig,
                 ".IsEmergencyCisternPumpFocused != true");
+            Require(
+                cameraRig,
+                ".IsDustFrontRelayFocused != true");
             Require(
                 world,
                 "CameraRig?.SetCityServiceCellInteractor(");
@@ -125,6 +143,8 @@ namespace AtomicLandPirate.LastBearingTests
                 "INTERACT_CALIBRATION_SLED",
                 "SOCKET_CALIBRATION_SLED_DESTINATION",
                 "INTERACT_MACHINE_SHOP_HOT_SHIFT",
+                "DUST_FRONT_RELAY_HELD_SIGNAL",
+                "DUST_FRONT_RELAY_BREACHED_SIGNAL",
                 "WORKING_SERVICE_CELL_FEEDBACK",
             })
             {
@@ -141,6 +161,7 @@ namespace AtomicLandPirate.LastBearingTests
                 ".AssignCityServiceResident(",
                 ".AdvanceCityServiceSled(",
                 ".StartHotShift(",
+                ".AcknowledgeDustFront(",
             })
             {
                 Require(interactor, delegation);
@@ -156,6 +177,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "new AssignCityServiceResidentCommand",
                 "new AdvanceCityServiceSledCommand",
                 "new RunHotShiftCommand",
+                "new AcknowledgeDustFrontCommand",
                 "Queue(",
                 "SaveContracts",
                 "LastBearingSaveAdapter",
@@ -303,6 +325,48 @@ namespace AtomicLandPirate.LastBearingTests
             Require(hotShiftPlayMode, "controller.Save();");
             Require(hotShiftPlayMode, "controller.ReturnToTitle();");
             Require(hotShiftPlayMode, "controller.Load();");
+            Require(
+                dustFrontPlayMode,
+                "RouteSurvivesFourModeCyclesAndHeldInputFailsClosed");
+            Require(
+                dustFrontPlayMode,
+                "FreshInputsAcknowledgeExactHeldAndBreachedVerdicts");
+            Require(
+                dustFrontPlayMode,
+                "NonCityAndGenuinelyMissingRelayUseBoundedFallback");
+            Require(
+                dustFrontPlayMode,
+                "CreateRepairedDustFrontState");
+            Require(
+                dustFrontPlayMode,
+                "TitleModeFocusStaleAndPendingGuardsFailClosed");
+            Require(
+                dustFrontPlayMode,
+                "controller.OpenDustFrontRelay();");
+            Require(
+                dustFrontPlayMode,
+                "interactor.ClickDustFrontRelay();");
+            Require(dustFrontPlayMode, "keyboard.eKey");
+            Require(dustFrontPlayMode, "gamepad.buttonSouth");
+            Require(
+                dustFrontPlayMode,
+                "interactor.TryActivateAtScreenPosition(pointer)");
+            Require(
+                dustFrontPlayMode,
+                "AssertSingleAcknowledgementCommand(");
+            Require(
+                dustFrontPlayMode,
+                "AssertPreTickUnchanged(");
+            Require(
+                dustFrontPlayMode,
+                "AssertRelayVerdictPresentation(");
+            Require(
+                dustFrontPlayMode,
+                "\"ResetPublicSnapshotsToRuntime\"");
+            Require(dustFrontPlayMode, "controller.OpenGarageBay();");
+            Require(dustFrontPlayMode, "controller.ShowCityOverview();");
+            Require(dustFrontPlayMode, "controller.ReturnToTitle();");
+            Require(dustFrontPlayMode, "controller.Load();");
         }
 
         private static void Require(string source, string fragment)

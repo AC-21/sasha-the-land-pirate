@@ -239,6 +239,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
                 return false;
             }
 
+            if (controller.CanOpenDustFrontRelay &&
+                !controller.IsDustFrontRelayFocused)
+            {
+                controller.OpenDustFrontRelay();
+                return true;
+            }
+
             if (controller.CanAcknowledgeDustFront)
             {
                 controller.AcknowledgeDustFront();

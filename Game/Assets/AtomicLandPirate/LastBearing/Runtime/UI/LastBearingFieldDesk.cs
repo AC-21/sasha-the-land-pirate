@@ -294,9 +294,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (_physicalWorkRouted)
             {
-                bool pumpStillFocused =
-                    _controller.IsEmergencyCisternPumpFocused;
-                if (pumpStillFocused)
+                bool physicalControlStillFocused =
+                    _controller.IsEmergencyCisternPumpFocused ||
+                    _controller.IsDustFrontRelayFocused;
+                if (physicalControlStillFocused)
                 {
                     HideAndResetTransient();
                     _controller.SetLegacyHudSuppressedByFieldDesk(true);
@@ -565,11 +566,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 case LastBearingFieldDeskIntent.AdvanceCityServiceSled: _controller.AdvanceCityServiceSled(); break;
                 case LastBearingFieldDeskIntent.CancelCityBuildingPreview: _controller.CancelCityBuildingPreview(); break;
                 case LastBearingFieldDeskIntent.RunHotShift: _controller.StartHotShift(); break;
-                case LastBearingFieldDeskIntent.AcknowledgeDustFront: _controller.AcknowledgeDustFront(); break;
+                case LastBearingFieldDeskIntent.AcknowledgeDustFront:
+                    _controller.AcknowledgeDustFrontFallback();
+                    break;
                 case LastBearingFieldDeskIntent.OpenEmergencyCisternPump:
                     _controller.OpenEmergencyCisternPump();
                     _physicalWorkRouted =
                         _controller.IsEmergencyCisternPumpFocused;
+                    HideAndResetTransient();
+                    break;
+                case LastBearingFieldDeskIntent.OpenDustFrontRelay:
+                    _controller.OpenDustFrontRelay();
+                    _physicalWorkRouted =
+                        _controller.IsDustFrontRelayFocused;
                     HideAndResetTransient();
                     break;
                 case LastBearingFieldDeskIntent.BeginWorkshopPush: _controller.BeginGaragePlan(PreparationChoice.WorkshopPush); break;

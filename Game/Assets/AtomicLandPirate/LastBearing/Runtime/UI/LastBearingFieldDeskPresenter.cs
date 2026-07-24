@@ -39,6 +39,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         RunHotShift = 28,
         AcknowledgeDustFront = 29,
         OpenEmergencyCisternPump = 30,
+        OpenDustFrontRelay = 31,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -492,14 +493,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
             secondary = Hidden();
             if (model.IsDustFrontAcknowledgementRequired)
             {
+                bool useFallback =
+                    controller.CanAcknowledgeDustFrontFallback;
                 primary = Action(
-                    LastBearingFieldDeskIntent.AcknowledgeDustFront,
-                    "ACKNOWLEDGE FRONT",
-                    model.DustFrontOutcome == DustFrontOutcome.Held
-                        ? "HELD · Last Bearing kept the reserve above the recoverable line. Acknowledge the verdict and resume settlement clocks."
-                        : "BREACHED · The failing turbine could not hold the dry line. Acknowledge the verdict; Hot Shift stays stalled until turbine repair.",
+                    useFallback
+                        ? LastBearingFieldDeskIntent.AcknowledgeDustFront
+                        : LastBearingFieldDeskIntent.OpenDustFrontRelay,
+                    useFallback
+                        ? "ACKNOWLEDGE FRONT · FALLBACK"
+                        : "OPEN EMERGENCY STORAGE · FACE DUST FRONT",
+                    (model.DustFrontOutcome == DustFrontOutcome.Held
+                        ? "HELD · Last Bearing kept the reserve above the recoverable line. Face the physical relay to resume settlement clocks."
+                        : "BREACHED · The failing turbine could not hold the dry line. Face the physical relay; Hot Shift stays stalled until turbine repair.") +
+                    (useFallback
+                        ? " Physical relay unavailable; use the bounded fallback."
+                        : string.Empty),
                     true,
-                    canDispatch && controller.CanAcknowledgeDustFront,
+                    canDispatch &&
+                    (useFallback
+                        ? controller.CanAcknowledgeDustFrontFallback
+                        : controller.CanOpenDustFrontRelay),
                     LastBearingFieldDeskActionTone.Hazard);
                 return;
             }

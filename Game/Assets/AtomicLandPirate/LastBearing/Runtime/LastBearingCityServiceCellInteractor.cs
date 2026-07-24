@@ -41,6 +41,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             "INTERACT_MACHINE_SHOP_HOT_SHIFT";
         public const string EmergencyCisternPumpControlName =
             "INTERACT_EMERGENCY_CISTERN_PUMP";
+        public const string DustFrontRelayControlName =
+            EmergencyCisternPumpControlName;
+        public const string DustFrontRelayHeldSignalName =
+            "DUST_FRONT_RELAY_HELD_SIGNAL";
+        public const string DustFrontRelayBreachedSignalName =
+            "DUST_FRONT_RELAY_BREACHED_SIGNAL";
         public const string FeedbackLabelName =
             "WORKING_SERVICE_CELL_FEEDBACK";
 
@@ -83,6 +89,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private GameObject? _emergencyCisternPumpLever;
         private GameObject? _emergencyCisternPumpFocusRail;
         private TextMesh? _emergencyCisternPumpLabel;
+        private GameObject? _dustFrontRelayHeldSignal;
+        private GameObject? _dustFrontRelayBreachedSignal;
         private TextMesh? _feedbackLabel;
         private int _hoveredPadIndex = -1;
         private bool _linkSourceSelected;
@@ -92,6 +100,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private bool _emergencyCisternPumpInputArmed;
         private bool _emergencyCisternPumpPresentationActive;
         private int _emergencyCisternPumpPresentationEntryFrame = -1;
+        private bool _dustFrontRelayFocused;
+        private bool _dustFrontRelayInputArmed;
+        private bool _dustFrontRelayPresentationActive;
+        private int _dustFrontRelayPresentationEntryFrame = -1;
         private bool _built;
 
         public string Feedback { get; private set; } =
@@ -146,6 +158,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool IsEmergencyCisternPumpInputArmed =>
             IsEmergencyCisternPumpFocused &&
             _emergencyCisternPumpInputArmed;
+
+        public bool IsDustFrontRelayControlVisible =>
+            _emergencyCisternPumpControl?.activeInHierarchy == true &&
+            IsInteractionActive() &&
+            _model != null &&
+            ShouldShowDustFrontRelayControl(_model);
+
+        public bool HasDustFrontRelayControl =>
+            _built && _emergencyCisternPumpControl != null;
+
+        public bool IsDustFrontRelayFocused =>
+            _dustFrontRelayFocused &&
+            IsDustFrontRelayControlVisible;
+
+        public bool IsDustFrontRelayInputArmed =>
+            IsDustFrontRelayFocused &&
+            _dustFrontRelayInputArmed;
+
+        public string DustFrontRelayLabel =>
+            _emergencyCisternPumpLabel?.text ?? string.Empty;
 
         public bool HasDedicatedInteractionTargets =>
             _targets.Count >= 17;
@@ -317,6 +349,20 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 new Vector3(1.02f, 0.08f, 0.08f),
                 tungsten);
             _emergencyCisternPumpFocusRail.SetActive(false);
+            _dustFrontRelayHeldSignal = CreateVisualBlock(
+                DustFrontRelayHeldSignalName,
+                _emergencyCisternPumpControl.transform,
+                new Vector3(-0.25f, 0.48f, 0.22f),
+                new Vector3(0.18f, 0.18f, 0.18f),
+                tungsten);
+            _dustFrontRelayHeldSignal.SetActive(false);
+            _dustFrontRelayBreachedSignal = CreateVisualBlock(
+                DustFrontRelayBreachedSignalName,
+                _emergencyCisternPumpControl.transform,
+                new Vector3(0.25f, 0.48f, 0.22f),
+                new Vector3(0.18f, 0.18f, 0.18f),
+                oxide);
+            _dustFrontRelayBreachedSignal.SetActive(false);
             CreateLabel(
                 "EMERGENCY_CISTERN_PUMP_LABEL",
                 _emergencyCisternPumpControl.transform,
@@ -377,12 +423,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 ResetEmergencyCisternPumpFocus();
             }
 
+            if (!CanWorkDustFrontRelay(model))
+            {
+                ResetDustFrontRelayFocus();
+            }
+
             if (!ShouldShowHotShiftControl(model))
             {
                 _hotShiftControlFocused = false;
             }
             else if (!_hotShiftControlFocused &&
-                     !_emergencyCisternPumpFocused)
+                     !_emergencyCisternPumpFocused &&
+                     !_dustFrontRelayFocused)
             {
                 _hotShiftControlFocused = true;
             }
@@ -416,6 +468,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _selectedResidentId = null;
             _hotShiftControlFocused = false;
             ResetEmergencyCisternPumpFocus();
+            ResetDustFrontRelayFocus();
             SetFeedback(
                 "CHOOSE A BUILDING · THEN A WORK PAD",
                 rejected: false);
@@ -794,6 +847,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _hotShiftControlFocused = true;
             ResetEmergencyCisternPumpFocus();
+            ResetDustFrontRelayFocus();
             SetFeedback(HotShiftFeedback(_model), rejected: false);
             RefreshInteractionVisuals();
         }
@@ -810,6 +864,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _hotShiftControlFocused = true;
             ResetEmergencyCisternPumpFocus();
+            ResetDustFrontRelayFocus();
             if (_controller!.HasPendingPlayerCommands)
             {
                 SetFeedback(
@@ -857,6 +912,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _emergencyCisternPumpFocused = true;
             _hotShiftControlFocused = false;
+            ResetDustFrontRelayFocus();
             _emergencyCisternPumpInputArmed = false;
             _emergencyCisternPumpPresentationActive = true;
             _emergencyCisternPumpPresentationEntryFrame =
@@ -866,6 +922,85 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _emergencyCisternPumpInputArmed
                     ? "CISTERN PUMP READY · E · GAMEPAD SOUTH · or pull the lever"
                     : "CISTERN PUMP FOCUSED · release controls to set the lever",
+                rejected: false);
+            RefreshInteractionVisuals();
+        }
+
+        public void FocusDustFrontRelay()
+        {
+            if (!IsInteractionActive() ||
+                _model == null ||
+                !CanWorkDustFrontRelay(_model))
+            {
+                ResetDustFrontRelayFocus();
+                Reject("DUST FRONT RELAY UNAVAILABLE");
+                RefreshInteractionVisuals();
+                return;
+            }
+
+            _dustFrontRelayFocused = true;
+            _hotShiftControlFocused = false;
+            ResetEmergencyCisternPumpFocus();
+            _dustFrontRelayInputArmed = false;
+            _dustFrontRelayPresentationActive = true;
+            _dustFrontRelayPresentationEntryFrame = Time.frameCount;
+            SetFeedback(
+                "DUST FRONT RELAY FOCUSED · release controls before facing the verdict",
+                rejected: false);
+            RefreshInteractionVisuals();
+        }
+
+        public void ClickDustFrontRelay()
+        {
+            if (!RequireCityOverview() ||
+                _model == null ||
+                !CanWorkDustFrontRelay(_model))
+            {
+                Reject("DUST FRONT RELAY UNAVAILABLE");
+                return;
+            }
+
+            if (!_dustFrontRelayFocused)
+            {
+                Reject("FOCUS THE DUST FRONT RELAY FIRST");
+                return;
+            }
+
+            if (_controller?.IsDustFrontAcknowledgementQueued == true)
+            {
+                SetFeedback(
+                    "DUST FRONT VERDICT ALREADY QUEUED · clocks wait for the city tick",
+                    rejected: false);
+                return;
+            }
+
+            if (!_dustFrontRelayInputArmed)
+            {
+                Reject("RELEASE CONTROLS · THEN FACE THE DUST FRONT");
+                return;
+            }
+
+            if (_controller?.CanAcknowledgeDustFront != true)
+            {
+                Reject("DUST FRONT RELAY CONTROL STALE");
+                return;
+            }
+
+            _controller.AcknowledgeDustFront();
+            if (!_controller.IsDustFrontAcknowledgementQueued)
+            {
+                Reject(
+                    string.IsNullOrWhiteSpace(_controller.Status)
+                        ? "DUST FRONT VERDICT NOT QUEUED"
+                        : _controller.Status);
+                return;
+            }
+
+            _dustFrontRelayInputArmed = false;
+            SetFeedback(
+                _model.DustFrontOutcome == DustFrontOutcome.Held
+                    ? "FRONT HELD · acknowledgement queued · clocks resume on the authoritative tick"
+                    : "FRONT BREACHED · acknowledgement queued · shutter stays down until turbine repair",
                 rejected: false);
             RefreshInteractionVisuals();
         }
@@ -965,7 +1100,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _selectedResidentId != null ||
                     _hotShiftControlFocused ||
                     _emergencyCisternPumpFocused ||
-                    _emergencyCisternPumpPresentationActive)
+                    _emergencyCisternPumpPresentationActive ||
+                    _dustFrontRelayFocused ||
+                    _dustFrontRelayPresentationActive)
                 {
                     ResetLocalSelection();
                 }
@@ -985,13 +1122,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 keyboard,
                 gamepad,
                 mouse);
+            UpdateDustFrontRelayInputArming(
+                keyboard,
+                gamepad,
+                mouse);
             bool operateEmergencyCisternPump =
+                keyboard?.eKey.wasPressedThisFrame == true ||
+                gamepad?.buttonSouth.wasPressedThisFrame == true;
+            bool operateDustFrontRelay =
                 keyboard?.eKey.wasPressedThisFrame == true ||
                 gamepad?.buttonSouth.wasPressedThisFrame == true;
             bool operateHotShift =
                 keyboard?.enterKey.wasPressedThisFrame == true ||
                 gamepad?.buttonSouth.wasPressedThisFrame == true;
-            if (operateEmergencyCisternPump &&
+            if (operateDustFrontRelay &&
+                IsDustFrontRelayFocused &&
+                _controller?.FieldDesk?.OwnsKeyboardFocus != true)
+            {
+                ClickDustFrontRelay();
+            }
+            else if (operateEmergencyCisternPump &&
                 IsEmergencyCisternPumpFocused &&
                 _controller?.FieldDesk?.OwnsKeyboardFocus != true)
             {
@@ -1036,9 +1186,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
             else if (target.Kind ==
                          InteractionKind.EmergencyCisternPumpControl &&
-                     !_emergencyCisternPumpFocused)
+                     !_emergencyCisternPumpFocused &&
+                     !_dustFrontRelayFocused &&
+                     _model != null &&
+                     (CanWorkDustFrontRelay(_model) ||
+                      ShouldShowEmergencyCisternPumpControl(_model)))
             {
-                FocusEmergencyCisternPump();
+                FocusSharedEmergencyControl();
             }
             else if (target.Kind != InteractionKind.Pad &&
                      _hoveredPadIndex != -1)
@@ -1113,13 +1267,42 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ClickHotShiftControl();
                     break;
                 case InteractionKind.EmergencyCisternPumpControl:
-                    if (!IsEmergencyCisternPumpFocused)
+                    if (_model != null &&
+                        CanWorkDustFrontRelay(_model))
                     {
-                        FocusEmergencyCisternPump();
-                    }
+                        if (!IsDustFrontRelayFocused)
+                        {
+                            FocusDustFrontRelay();
+                        }
 
-                    ClickEmergencyCisternPump();
+                        ClickDustFrontRelay();
+                    }
+                    else if (_model != null &&
+                             ShouldShowEmergencyCisternPumpControl(_model))
+                    {
+                        if (!IsEmergencyCisternPumpFocused)
+                        {
+                            FocusEmergencyCisternPump();
+                        }
+
+                        ClickEmergencyCisternPump();
+                    }
                     break;
+            }
+        }
+
+        private void FocusSharedEmergencyControl()
+        {
+            if (_model != null && CanWorkDustFrontRelay(_model))
+            {
+                FocusDustFrontRelay();
+                return;
+            }
+
+            if (_model != null &&
+                ShouldShowEmergencyCisternPumpControl(_model))
+            {
+                FocusEmergencyCisternPump();
             }
         }
 
@@ -1344,6 +1527,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool showEmergencyCisternPumpControl =
                 _model != null &&
                 ShouldShowEmergencyCisternPumpControl(_model);
+            bool showDustFrontRelayControl =
+                _model != null &&
+                ShouldShowDustFrontRelayControl(_model);
+            bool showSharedEmergencyControl =
+                showEmergencyCisternPumpControl ||
+                showDustFrontRelayControl;
             bool humanChoiceAvailable = staffingOpen &&
                 _controller?.CanAssignCityServiceHuman == true &&
                 !string.Equals(
@@ -1389,7 +1578,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 showHotShiftControl);
             SetActive(
                 _emergencyCisternPumpControl,
-                showEmergencyCisternPumpControl);
+                showSharedEmergencyControl);
 
             ScaleSelection(
                 _recyclerSelector,
@@ -1421,12 +1610,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 showHotShiftControl && _hotShiftControlFocused);
             ScaleSelection(
                 _emergencyCisternPumpControl,
-                showEmergencyCisternPumpControl &&
-                _emergencyCisternPumpFocused);
+                (showEmergencyCisternPumpControl &&
+                 _emergencyCisternPumpFocused) ||
+                (showDustFrontRelayControl &&
+                 _dustFrontRelayFocused));
             SetActive(
                 _emergencyCisternPumpFocusRail,
-                showEmergencyCisternPumpControl &&
-                _emergencyCisternPumpFocused);
+                (showEmergencyCisternPumpControl &&
+                 _emergencyCisternPumpFocused) ||
+                (showDustFrontRelayControl &&
+                 _dustFrontRelayFocused));
+            SetActive(
+                _dustFrontRelayHeldSignal,
+                showDustFrontRelayControl &&
+                _model?.DustFrontOutcome == DustFrontOutcome.Held);
+            SetActive(
+                _dustFrontRelayBreachedSignal,
+                showDustFrontRelayControl &&
+                _model?.DustFrontOutcome == DustFrontOutcome.Breached);
             if (_hotShiftMachineLabel != null && _model != null)
             {
                 string label = HotShiftControlLabel(_model);
@@ -1444,8 +1645,27 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (_emergencyCisternPumpLabel != null)
             {
-                string label =
-                    _controller?.IsEmergencyCisternPumpQueued == true
+                bool dustFrontQueued =
+                    _controller?.IsDustFrontAcknowledgementQueued == true;
+                bool dustFrontBreached =
+                    _model?.DustFrontOutcome == DustFrontOutcome.Breached;
+                string label = showDustFrontRelayControl
+                    ? _model?.IsDustFrontAcknowledgementRequired != true
+                        ? dustFrontBreached
+                            ? _model?.IsHotShiftStalledByDustFront == true
+                                ? "FRONT BREACHED\nSHUTTER DOWN"
+                                : "FRONT BREACHED\nREPAIR HOLDS"
+                            : "FRONT HELD\nCLOCKS RUNNING"
+                    : dustFrontQueued
+                        ? "DUST FRONT QUEUED\nCITY TICK PENDING"
+                        : !_dustFrontRelayFocused
+                            ? dustFrontBreached
+                                ? "FRONT BREACHED\nFACE RELAY"
+                                : "FRONT HELD\nFACE RELAY"
+                            : _dustFrontRelayInputArmed
+                                ? "FACE DUST FRONT\nE · GAMEPAD SOUTH"
+                                : "FACE DUST FRONT\nRELEASE CONTROLS"
+                    : _controller?.IsEmergencyCisternPumpQueued == true
                         ? "CISTERN PUMP QUEUED\nCITY TICK PENDING"
                         : !_emergencyCisternPumpFocused
                             ? "PUMP CISTERN\nSELECT LEVER"
@@ -1458,8 +1678,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 }
 
                 _emergencyCisternPumpLabel.color =
+                    dustFrontQueued ||
                     _controller?.IsEmergencyCisternPumpQueued == true
                         ? new Color32(255, 190, 104, 255)
+                        : showDustFrontRelayControl && dustFrontBreached
+                            ? new Color32(255, 116, 86, 255)
                         : new Color32(238, 221, 178, 255);
             }
 
@@ -1468,6 +1691,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _emergencyCisternPumpLever.transform.localRotation =
                     Quaternion.Euler(
                         _controller?.IsEmergencyCisternPumpQueued == true
+                        || _controller?.IsDustFrontAcknowledgementQueued == true
                             ? -32f
                             : 18f,
                         0f,
@@ -1642,6 +1866,20 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return model.IsEmergencyCisternPumpAvailable;
         }
 
+        private static bool ShouldShowDustFrontRelayControl(
+            LastBearingReadModel model)
+        {
+            return model.DustFrontOutcome != DustFrontOutcome.Unresolved &&
+                   model.EmergencyStoragePadIndex >= 0;
+        }
+
+        private static bool CanWorkDustFrontRelay(
+            LastBearingReadModel model)
+        {
+            return model.IsDustFrontAcknowledgementRequired &&
+                   ShouldShowDustFrontRelayControl(model);
+        }
+
         private static int SelectEmergencyCisternPumpQuarterTurns(
             LastBearingReadModel model)
         {
@@ -1720,6 +1958,51 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _emergencyCisternPumpInputArmed = false;
             _emergencyCisternPumpPresentationActive = false;
             _emergencyCisternPumpPresentationEntryFrame = -1;
+        }
+
+        private void UpdateDustFrontRelayInputArming(
+            Keyboard? keyboard,
+            Gamepad? gamepad,
+            Mouse? mouse)
+        {
+            if (!IsDustFrontRelayFocused)
+            {
+                _dustFrontRelayInputArmed = false;
+                _dustFrontRelayPresentationActive = false;
+                _dustFrontRelayPresentationEntryFrame = -1;
+                return;
+            }
+
+            if (!_dustFrontRelayPresentationActive)
+            {
+                _dustFrontRelayPresentationActive = true;
+                _dustFrontRelayPresentationEntryFrame = Time.frameCount;
+                _dustFrontRelayInputArmed = false;
+                return;
+            }
+
+            bool controlsReleased =
+                keyboard?.eKey.isPressed != true &&
+                gamepad?.buttonSouth.isPressed != true &&
+                mouse?.leftButton.isPressed != true;
+            if (!_dustFrontRelayInputArmed &&
+                Time.frameCount > _dustFrontRelayPresentationEntryFrame &&
+                controlsReleased)
+            {
+                _dustFrontRelayInputArmed = true;
+                SetFeedback(
+                    "DUST FRONT RELAY READY · E · GAMEPAD SOUTH · or pull the lever",
+                    rejected: false);
+                RefreshInteractionVisuals();
+            }
+        }
+
+        private void ResetDustFrontRelayFocus()
+        {
+            _dustFrontRelayFocused = false;
+            _dustFrontRelayInputArmed = false;
+            _dustFrontRelayPresentationActive = false;
+            _dustFrontRelayPresentationEntryFrame = -1;
         }
 
         private static string HotShiftControlLabel(

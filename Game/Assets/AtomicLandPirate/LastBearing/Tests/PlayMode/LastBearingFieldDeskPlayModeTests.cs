@@ -696,10 +696,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 projection.PrimaryAction.Intent,
                 Is.EqualTo(
-                    LastBearingFieldDeskIntent.AcknowledgeDustFront));
+                    LastBearingFieldDeskIntent.OpenDustFrontRelay));
             Assert.That(
                 projection.PrimaryAction.Label,
-                Is.EqualTo("ACKNOWLEDGE FRONT"));
+                Is.EqualTo(
+                    "OPEN EMERGENCY STORAGE · FACE DUST FRONT"));
             Assert.That(
                 projection.PrimaryAction.Tone,
                 Is.EqualTo(LastBearingFieldDeskActionTone.Hazard));
@@ -712,7 +713,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 root.Q<Button>("primary-action-button");
             Button pause =
                 root.Q<Button>("pause-button");
-            Assert.That(primary.text, Is.EqualTo("ACKNOWLEDGE FRONT"));
+            Assert.That(
+                primary.text,
+                Is.EqualTo(
+                    "OPEN EMERGENCY STORAGE · FACE DUST FRONT"));
             Assert.That(primary.enabledSelf, Is.True);
             Assert.That(pause.style.display.value, Is.EqualTo(DisplayStyle.Flex));
             Assert.That(pause.enabledSelf, Is.False);
@@ -725,11 +729,28 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             controller.ShowCityOverview();
             desk.Refresh(force: true);
-            Assert.That(primary.text, Is.EqualTo("ACKNOWLEDGE FRONT"));
+            Assert.That(
+                primary.text,
+                Is.EqualTo(
+                    "OPEN EMERGENCY STORAGE · FACE DUST FRONT"));
+            Assert.That(controller.CanAcknowledgeDustFront, Is.False);
             int generationsBeforeAcknowledgement =
                 GenerationCount(profileDirectory);
             Submit(primary);
+            Assert.That(controller.HasPendingPlayerCommands, Is.False);
+            Assert.That(controller.IsDustFrontRelayFocused, Is.True);
+            Assert.That(
+                controller.CanonicalHash,
+                Is.EqualTo(resolutionHash));
+
+            yield return null;
+            yield return null;
+            LastBearingCityServiceCellInteractor interactor =
+                controller.World!.CityServiceCellView!.Interactor!;
+            Assert.That(interactor.IsDustFrontRelayInputArmed, Is.True);
+            interactor.ClickDustFrontRelay();
             Assert.That(controller.HasPendingPlayerCommands, Is.True);
+            Assert.That(controller.IsDustFrontAcknowledgementQueued, Is.True);
             Assert.That(controller.CanAcknowledgeDustFront, Is.False);
 
             // The command is canonical and mode-agnostic: leaving the city

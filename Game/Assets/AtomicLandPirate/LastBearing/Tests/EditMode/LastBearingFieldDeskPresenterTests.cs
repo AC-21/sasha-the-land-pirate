@@ -92,6 +92,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 (int)LastBearingFieldDeskIntent.OpenEmergencyCisternPump,
                 Is.EqualTo(30));
+            Assert.That(
+                (int)LastBearingFieldDeskIntent.OpenDustFrontRelay,
+                Is.EqualTo(31));
         }
 
         [TestCase(
@@ -129,15 +132,17 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.ReadModel.PauseCause,
                 Is.EqualTo(PauseCause.DustFrontAlert));
-            Assert.That(controller.CanAcknowledgeDustFront, Is.True);
+            Assert.That(controller.CanAcknowledgeDustFront, Is.False);
+            Assert.That(controller.CanOpenDustFrontRelay, Is.True);
             Assert.That(projection.Pressure, Is.EqualTo(expectedPressure));
             Assert.That(
                 projection.PrimaryAction.Intent,
                 Is.EqualTo(
-                    LastBearingFieldDeskIntent.AcknowledgeDustFront));
+                    LastBearingFieldDeskIntent.OpenDustFrontRelay));
             Assert.That(
                 projection.PrimaryAction.Label,
-                Is.EqualTo("ACKNOWLEDGE FRONT"));
+                Is.EqualTo(
+                    "OPEN EMERGENCY STORAGE · FACE DUST FRONT"));
             Assert.That(
                 projection.PrimaryAction.Tone,
                 Is.EqualTo(LastBearingFieldDeskActionTone.Hazard));
@@ -152,8 +157,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 LastBearingFieldDeskPresenter.IsIntentAvailable(
                     controller,
-                    LastBearingFieldDeskIntent.AcknowledgeDustFront),
+                    LastBearingFieldDeskIntent.OpenDustFrontRelay),
                 Is.True);
+            Assert.That(
+                LastBearingFieldDeskPresenter.IsIntentAvailable(
+                    controller,
+                    LastBearingFieldDeskIntent.AcknowledgeDustFront),
+                Is.False);
         }
 
         [TestCase(PreparationChoice.CivicBuffer)]
