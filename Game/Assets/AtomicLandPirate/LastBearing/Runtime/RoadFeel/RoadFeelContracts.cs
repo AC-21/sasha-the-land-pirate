@@ -150,6 +150,51 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
             return Mathf.Lerp(lowSpeedDegrees, highSpeedDegrees, shaped);
         }
 
+        public static float AdvanceSteeringRack(
+            float currentNormalized,
+            float targetNormalized,
+            float deltaTimeSeconds,
+            float zeroToFullLockSeconds,
+            float returnToCenterSeconds)
+        {
+            if (deltaTimeSeconds < 0f)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(deltaTimeSeconds));
+            }
+
+            if (zeroToFullLockSeconds <= 0f)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(zeroToFullLockSeconds));
+            }
+
+            if (returnToCenterSeconds <= 0f)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(returnToCenterSeconds));
+            }
+
+            float current = Mathf.Clamp(currentNormalized, -1f, 1f);
+            float target = Mathf.Clamp(targetNormalized, -1f, 1f);
+            if (deltaTimeSeconds == 0f)
+            {
+                return current;
+            }
+
+            bool reversing = current * target < 0f;
+            float boundedTarget = reversing ? 0f : target;
+            bool returning =
+                Mathf.Abs(boundedTarget) < Mathf.Abs(current);
+            float travelSeconds = returning
+                ? returnToCenterSeconds
+                : zeroToFullLockSeconds;
+            return Mathf.MoveTowards(
+                current,
+                boundedTarget,
+                deltaTimeSeconds / travelSeconds);
+        }
+
         public static float SignedBodySlipDegrees(
             Vector3 velocity,
             Vector3 forward,

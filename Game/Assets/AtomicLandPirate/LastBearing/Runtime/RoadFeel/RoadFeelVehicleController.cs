@@ -83,6 +83,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
         [SerializeField, Range(0f, 60f)]
         private float _highSpeedSteeringDegrees = 9f;
 
+        [SerializeField, Min(0.01f)]
+        private float _zeroToFullLockSeconds = 0.22f;
+
+        [SerializeField, Min(0.01f)]
+        private float _returnToCenterSeconds = 0.16f;
+
         [SerializeField, Min(0f)]
         private float _antiRollForceNewtons = 13_500f;
 
@@ -120,6 +126,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
         private RoadFeelTelemetry _telemetry;
         private float _cargoMassKilograms;
         private RoadFeelDamageBand _damageBand = RoadFeelDamageBand.Healthy;
+        private float _steeringRackNormalized;
         private float _steeringAngleDegrees;
         private int _recoveryTicksRemaining;
         private float _reverseIntentSeconds;
@@ -213,6 +220,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
             }
 
             _controlInput = default;
+            _steeringRackNormalized = 0f;
             _steeringAngleDegrees = 0f;
             _recoveryTicksRemaining = 25;
             _reverseIntentSeconds = 0f;
@@ -259,7 +267,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
                 Mathf.Max(0.1f, _steeringReferenceSpeedMetresPerSecond),
                 _lowSpeedSteeringDegrees,
                 _highSpeedSteeringDegrees);
-            _steeringAngleDegrees = _controlInput.Steering *
+            _steeringRackNormalized = RoadFeelMath.AdvanceSteeringRack(
+                _steeringRackNormalized,
+                _controlInput.Steering,
+                fixedDeltaTime,
+                Mathf.Max(0.01f, _zeroToFullLockSeconds),
+                Mathf.Max(0.01f, _returnToCenterSeconds));
+            _steeringAngleDegrees = _steeringRackNormalized *
                                     availableSteering *
                                     DamageSteeringMultiplier();
 

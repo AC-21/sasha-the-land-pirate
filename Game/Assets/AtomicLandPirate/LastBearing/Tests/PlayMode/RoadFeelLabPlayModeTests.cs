@@ -192,6 +192,60 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator SteeringBuildsWeightAndCentersBeforeReversing()
+        {
+            yield return LoadLab();
+
+            RoadFeelLabController lab =
+                Object.FindAnyObjectByType<RoadFeelLabController>();
+            RoadFeelVehicleController vehicle =
+                Object.FindAnyObjectByType<RoadFeelVehicleController>();
+            Assert.That(lab, Is.Not.Null);
+            Assert.That(vehicle, Is.Not.Null);
+
+            lab.enabled = false;
+            Rigidbody body = vehicle.Body;
+            vehicle.ResetAt(Vector3.up * 2f, Quaternion.identity);
+            body.isKinematic = true;
+            body.useGravity = false;
+            vehicle.SetControlInput(new RoadFeelControlInput(
+                throttle: 0f,
+                brake: 0f,
+                steering: 1f,
+                handbrake: 0f));
+
+            yield return WaitFixedFrames(1);
+            Assert.That(
+                vehicle.Telemetry.SteeringAngleDegrees,
+                Is.InRange(2f, 4f));
+
+            yield return WaitFixedFrames(9);
+            Assert.That(
+                vehicle.Telemetry.SteeringAngleDegrees,
+                Is.InRange(28f, 31f));
+
+            yield return WaitFixedFrames(1);
+            Assert.That(
+                vehicle.Telemetry.SteeringAngleDegrees,
+                Is.EqualTo(32f).Within(0.05f));
+
+            vehicle.SetControlInput(new RoadFeelControlInput(
+                throttle: 0f,
+                brake: 0f,
+                steering: -1f,
+                handbrake: 0f));
+            yield return WaitFixedFrames(8);
+            Assert.That(
+                vehicle.Telemetry.SteeringAngleDegrees,
+                Is.EqualTo(0f).Within(0.05f));
+
+            yield return WaitFixedFrames(1);
+            Assert.That(
+                vehicle.Telemetry.SteeringAngleDegrees,
+                Is.LessThan(0f));
+        }
+
+        [UnityTest]
         public IEnumerator VehicleFindsRoadAndSupportsThrottleBrakeAndReverse()
         {
             yield return LoadLab();
