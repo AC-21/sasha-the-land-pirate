@@ -44,6 +44,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(
                     runtimeRoot,
                     "LastBearingDepotApproachRecoveryView.cs"));
+            string depotApproachInteractor = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "LastBearingDepotApproachInteractor.cs"));
             string wreckLine = File.ReadAllText(
                 Path.Combine(
                     runtimeRoot,
@@ -300,7 +304,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "public void OperateWreckLineModulePoint()");
             Require(
                 recoveryOperation,
-                "_readModel.IsDepotApproachRecoveryAvailable");
+                "IsDepotApproachRecoveryAvailable");
             Require(
                 recoveryOperation,
                 "new OperateDepotRecoveryPointCommand");
@@ -379,7 +383,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "IsWreckLineFrameRailRecoveryAvailable");
             Require(
                 globalShortcuts,
-                "_readModel.IsDepotApproachRecoveryAvailable");
+                "IsDepotApproachRecoveryAvailable");
             Require(
                 globalShortcuts,
                 "IsDepotRepairCargoLoadAvailable");
@@ -396,7 +400,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "_readModel.IsWreckLineModulePointAvailable",
                 StringComparison.Ordinal);
             int depotGate = globalShortcuts.IndexOf(
-                "_readModel.IsDepotApproachRecoveryAvailable",
+                "IsDepotApproachRecoveryAvailable",
                 StringComparison.Ordinal);
             int frameRailGate = globalShortcuts.IndexOf(
                 "IsWreckLineFrameRailRecoveryAvailable",
@@ -640,6 +644,8 @@ namespace AtomicLandPirate.LastBearingTests
                 "the canonical world must build exactly one strategy writer");
             Require(world, "LastBearingDepotApproachRecoveryView");
             Require(world, "DepotApproachRecoveryView.Build(");
+            Require(world, "ConfigureDepotApproachInteraction(");
+            Require(world, "ApplyDepotApproachInteraction(");
             Require(world, "LastBearingDepotCargoLoadingView");
             Require(world, "DepotCargoLoadingView.Build(");
             Require(world, "LastBearingDepotCargoInteractor");
@@ -1241,6 +1247,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(recovery, "Revision = \"R1\"");
             Require(recovery, "poi_depot_approach_recovery_a");
             Require(recovery, "ANCHOR_DEPOT_RECOVERY_INTERACTION");
+            Require(
+                recovery,
+                "LastBearingDepotApproachInteractor.RootName");
+            Require(recovery, "Interactor.Build(");
             Require(recovery, "collider.enabled = false");
             foreach (string forbidden in new[]
             {
@@ -1262,6 +1272,68 @@ namespace AtomicLandPirate.LastBearingTests
                 TestHarness.True(
                     recovery.IndexOf(forbidden, StringComparison.Ordinal) < 0,
                     "depot recovery view contains forbidden authority " +
+                    forbidden);
+            }
+
+            Require(
+                depotApproachInteractor,
+                "INTERACT_DEPOT_RECOVERY_BRIDLE_DOG");
+            Require(depotApproachInteractor, "InteractionLayer = 30");
+            Require(depotApproachInteractor, "ReferenceEquals(");
+            Require(
+                depotApproachInteractor,
+                "_controller.OperateDepotApproachRecoveryPoint();");
+            Require(
+                depotApproachInteractor,
+                "IsDepotApproachRecoveryAvailable");
+            Require(
+                depotApproachInteractor,
+                "IsDepotApproachRecoveryQueued");
+            Require(
+                depotApproachInteractor,
+                "public bool IsInputArmed");
+            Require(depotApproachInteractor, "OwnsKeyboardFocus");
+            Require(depotApproachInteractor, "RELEASE CONTROLS");
+            Require(
+                depotApproachInteractor,
+                "FieldDesk?.BlocksWorldPointer");
+            Require(
+                depotApproachInteractor,
+                "_controller?.Hud?.BlocksWorldPointer");
+            Require(
+                depotApproachInteractor,
+                "Physics.RaycastNonAlloc(");
+            Require(
+                depotApproachInteractor,
+                "_targetCollider.isTrigger = true");
+            Require(
+                depotApproachInteractor,
+                "collider.enabled = false");
+            Require(
+                depotApproachInteractor,
+                "keyboard?.eKey.wasPressedThisFrame");
+            Require(
+                depotApproachInteractor,
+                "gamepad?.buttonSouth.wasPressedThisFrame");
+            foreach (string forbidden in new[]
+            {
+                "new OperateDepotRecoveryPointCommand",
+                "LastBearingKernel",
+                "LastBearingStateBuilder",
+                "LastBearingCanonicalCodec",
+                "Save(",
+                "RoadFeelTelemetry",
+                "Rigidbody",
+                "OnTrigger",
+                "OnCollision",
+                "AddComponent<Camera>",
+            })
+            {
+                TestHarness.True(
+                    depotApproachInteractor.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "depot approach interactor contains forbidden authority " +
                     forbidden);
             }
 

@@ -119,6 +119,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool HasPendingPlayerCommands => _pendingCommands.Count != 0;
 
+        public bool IsDepotApproachRecoveryAvailable =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsDepotApproachRecoveryAvailable == true &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode == LastBearingPresentationMode.Driving;
+
+        public bool IsDepotApproachRecoveryQueued =>
+            _pendingCommands.Exists(command =>
+                command is OperateDepotRecoveryPointCommand);
+
         public bool IsDepotRepairCargoLoadQueued =>
             _pendingCommands.Exists(command =>
                 command is LoadDepotRepairCargoCommand);
@@ -481,6 +491,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _world.ConfigureCityServiceCellInteraction(this);
             _world.ConfigureWreckLineInteraction(this);
+            _world.ConfigureDepotApproachInteraction(this);
             _world.ConfigureDepotDecisionInteraction(this);
             _world.ConfigureDepotCargoInteraction(this);
             _world.ConfigureDepotReturnInteraction(this);
@@ -507,6 +518,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _fieldDesk?.ResetForLifecycle();
             _world?.ResetCityServiceCellInteraction();
             _world?.ResetWreckLineInteraction();
+            _world?.ResetDepotApproachInteraction();
             _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
@@ -565,6 +577,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ClearCityBuildingPreview();
             _world?.ResetCityServiceCellInteraction();
             _world?.ResetWreckLineInteraction();
+            _world?.ResetDepotApproachInteraction();
             _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
@@ -1365,8 +1378,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void OperateDepotApproachRecoveryPoint()
         {
-            if (_readModel == null ||
-                !_readModel.IsDepotApproachRecoveryAvailable)
+            if (!IsDepotApproachRecoveryAvailable)
             {
                 _status =
                     "The depot recovery point is not canonically available yet.";
@@ -1640,6 +1652,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _fieldDesk?.ResetForLifecycle();
             _world?.ResetCityServiceCellInteraction();
             _world?.ResetWreckLineInteraction();
+            _world?.ResetDepotApproachInteraction();
             _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
@@ -1698,6 +1711,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_readModel != null)
             {
                 _world?.ApplyWreckLineInteraction(_readModel);
+                _world?.ApplyDepotApproachInteraction(_readModel);
                 _world?.ApplyDepotDecisionInteraction(_readModel);
                 _world?.ApplyDepotCargoInteraction(_readModel);
                 _world?.ApplyDepotReturnInteraction(_readModel);
@@ -1778,8 +1792,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 RecoverWreckLineFrameRails();
             }
-            else if (_readModel != null &&
-                _readModel.IsDepotApproachRecoveryAvailable &&
+            else if (IsDepotApproachRecoveryAvailable &&
+                _world?.DepotApproachInteractor?.IsInputArmed == true &&
+                _fieldDesk?.OwnsKeyboardFocus != true &&
                 ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
                  (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
             {
@@ -2318,6 +2333,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? _garagePreparationIntent
                     : _readModel.PreparationChoice);
             _modeCoordinator?.ApplyCanonical(_readModel);
+            _world.ApplyDepotApproachInteraction(_readModel);
             _world.ApplyDepotDecisionInteraction(_readModel);
             _world.ApplyDepotCargoInteraction(_readModel);
             _world.ApplyCityServiceCell(
