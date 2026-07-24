@@ -248,7 +248,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingState serviceReady = CreateServiceReadyState(
                 ColonyComposition.Mixed,
                 ResidentRoster.HumanResidentId,
-                7321);
+                7321,
+                module: VehicleModule.SealedRangeTank,
+                installPatchworkSkidPlate: false);
             LastBearingState repeatReady = Apply(
                 serviceReady,
                 sequence => new ServiceScoutCommand(sequence));
@@ -422,8 +424,36 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.ModeCoordinator!.CurrentMode,
                 Is.EqualTo(LastBearingPresentationMode.Driving));
 
+            LastBearingState railsAvailable =
+                AdvanceRepeatToFrameRails(controller.State!);
+            LastBearingReadModel railsModel =
+                LastBearingReadModel.FromState(railsAvailable);
+            Assert.That(
+                railsModel.VehicleModule,
+                Is.EqualTo(VehicleModule.SealedRangeTank));
+            Assert.That(railsModel.RigUpgrade, Is.EqualTo(RigUpgrade.None));
+            LastBearingPermitJobPresentation railsJob =
+                LastBearingPermitJobPresenter.Present(
+                    railsModel,
+                    cityNeedInspected: true);
+            Assert.That(
+                railsJob.ChapterLabel,
+                Is.EqualTo("REPEAT RUN · THE WRECK LINE"));
+            Assert.That(
+                railsJob.Detail,
+                Does.Contain(
+                    railsModel.FrameRailSalvagePartsUnits +
+                    " reclaimed parts"));
+            Assert.That(railsJob.Detail, Does.Not.Contain("Patchwork"));
+            Assert.That(
+                railsJob.ProgressLabel,
+                Does.Contain(
+                    "+" +
+                    railsModel.FrameRailSalvagePartsUnits +
+                    " reclaimed parts"));
+
             LastBearingState atDepot =
-                AdvanceRepeatToDepot(controller.State!);
+                AdvanceRepeatToDepot(railsAvailable);
             InstallControllerState(controller, atDepot);
             Assert.That(controller.ReadModel!.IsRepeatExpedition, Is.True);
             Assert.That(
@@ -672,7 +702,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             ColonyComposition composition,
             string resident,
             int seed,
-            bool viaBarter = false)
+            bool viaBarter = false,
+            VehicleModule module = VehicleModule.WinchAssembly,
+            bool installPatchworkSkidPlate = true)
         {
             PreparationChoice preparation = viaBarter
                 ? PreparationChoice.CivicBuffer
@@ -686,22 +718,26 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 state,
                 sequence =>
                     new ActivateSliceInfrastructureCommand(sequence));
-            state = Apply(
-                state,
-                sequence => new InstallRigUpgradeCommand(
-                    sequence,
-                    RigUpgrade.PatchworkSkidPlate));
+            if (installPatchworkSkidPlate)
+            {
+                state = Apply(
+                    state,
+                    sequence => new InstallRigUpgradeCommand(
+                        sequence,
+                        RigUpgrade.PatchworkSkidPlate));
+            }
+
             state = Apply(
                 state,
                 sequence => new SelectPreparationCommand(
                     sequence,
                     preparation,
-                    VehicleModule.WinchAssembly));
+                    module));
             state = Apply(
                 state,
                 sequence => new InstallVehicleModuleCommand(
                     sequence,
-                    VehicleModule.WinchAssembly));
+                    module));
             while (LastBearingReadModel.FromState(state).PreparationPhase !=
                    PreparationPhase.Ready)
             {
@@ -762,6 +798,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             state = Apply(
                 state,
                 sequence => new LoadDepotRepairCargoCommand(sequence));
+            if (module == VehicleModule.SealedRangeTank)
+            {
+                state = Apply(
+                    state,
+                    sequence => new ChooseLiquidReturnCommand(
+                        sequence,
+                        LiquidCargoKind.Fuel));
+            }
+
             state = Apply(
                 state,
                 sequence => new FreezeReturnPayloadCommand(
@@ -1036,6 +1081,40 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             throw new InvalidOperationException(
                 "Repeat circuit did not reach the depot.");
+        }
+
+        private static LastBearingState AdvanceRepeatToFrameRails(
+            LastBearingState source)
+        {
+            LastBearingState state = source;
+            for (var ticks = 0; ticks < 7000; ticks++)
+            {
+                LastBearingReadModel model =
+                    LastBearingReadModel.FromState(state);
+                if (model.IsWreckLineFrameRailRecoveryAvailable)
+                {
+                    return state;
+                }
+
+                if (model.IsWreckLineModulePointAvailable)
+                {
+                    state = Apply(
+                        state,
+                        sequence =>
+                            new OperateWreckLineModuleCommand(
+                                sequence,
+                                model.RouteActionKind));
+                    continue;
+                }
+
+                state = Apply(
+                    state,
+                    sequence =>
+                        new DriveVehicleCommand(sequence, 1000, 0));
+            }
+
+            throw new InvalidOperationException(
+                "Repeat circuit did not reach the frame rails.");
         }
 
         private static LastBearingState AdvanceRepeatToHomeApron(

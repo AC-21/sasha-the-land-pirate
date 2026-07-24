@@ -372,6 +372,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
                 if (model.IsWreckLineFrameRailRecoveryAvailable)
                 {
+                    if (model.IsRepeatExpedition)
+                    {
+                        return Create(
+                            LastBearingPermitJobChapter.Outbound,
+                            3,
+                            "REPEAT RUN · THE WRECK LINE",
+                            "Strip the rails while the road is stopped",
+                            "The repeat route has opened one fixed frame-rail bundle. " +
+                            "It becomes " +
+                            model.FrameRailSalvagePartsUnits +
+                            " reclaimed parts only after home check-in.",
+                            "E — Recover frame rails · +" +
+                            model.FrameRailSalvagePartsUnits +
+                            " reclaimed parts at home",
+                            model.RouteProgressTicks,
+                            model.RouteTargetTicks);
+                    }
+
                     return Create(
                         LastBearingPermitJobChapter.Outbound,
                         3,
