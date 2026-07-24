@@ -2960,7 +2960,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     : NextCityDecision.ExpandEmergencyCistern;
             }
 
-            if (builder.VehicleModule == VehicleModule.SealedRangeTank
+            if (builder.PreparationChoice == PreparationChoice.CivicBuffer
                 && builder.PendingFactionOutcome
                     == FactionOutcomeKind.Cooperative
                 && builder.FactionAccessPolicy

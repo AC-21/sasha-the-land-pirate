@@ -14,6 +14,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "cooperative tank return records shared access without a false decision",
                 CooperativeReturnNeedsNoRestoration);
             harness.Run(
+                "Civic Buffer decision matrix matches both outcomes and modules",
+                CivicBufferDecisionMatrixIsExact);
+            harness.Run(
                 "forged SharedService does not erase the adverse decision",
                 SharedServiceAloneDoesNotClearAdverseDecision);
             harness.Run(
@@ -63,6 +66,76 @@ namespace AtomicLandPirate.LastBearingTests
                 "route-permit-recorded",
                 driver.View.NextObjective,
                 "cooperative objective");
+        }
+
+        private static void CivicBufferDecisionMatrixIsExact()
+        {
+            AssertDecisionMatrixCell(
+                EncounterChoice.Cooperate,
+                VehicleModule.WinchAssembly,
+                NextCityDecision.None,
+                3112);
+            AssertDecisionMatrixCell(
+                EncounterChoice.Cooperate,
+                VehicleModule.SealedRangeTank,
+                NextCityDecision.None,
+                3113);
+            AssertDecisionMatrixCell(
+                EncounterChoice.TakeBearing,
+                VehicleModule.WinchAssembly,
+                NextCityDecision.MachineSpareBearing,
+                3114);
+            AssertDecisionMatrixCell(
+                EncounterChoice.TakeBearing,
+                VehicleModule.SealedRangeTank,
+                NextCityDecision.RestoreDepotAccess,
+                3115);
+        }
+
+        private static void AssertDecisionMatrixCell(
+            EncounterChoice encounterChoice,
+            VehicleModule module,
+            NextCityDecision expectedDecision,
+            int worldSeed)
+        {
+            CoreTestDriver driver = ReachReturnedPending(
+                ColonyComposition.Mixed,
+                ResidentRoster.HumanResidentId,
+                encounterChoice,
+                worldSeed,
+                module);
+            string transactionId = "tx:fuel-bond:" + worldSeed;
+            string fingerprint = "fp:fuel-bond:" + worldSeed;
+
+            driver.Apply(sequence =>
+                new CreditCityReturnCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+
+            TestHarness.Equal(
+                expectedDecision,
+                driver.State.NextCityDecision,
+                encounterChoice + " " + module + " decision");
+            if (encounterChoice == EncounterChoice.Cooperate)
+            {
+                TestHarness.Equal(
+                    FactionAccessPolicy.SharedService,
+                    driver.State.FactionAccessPolicy,
+                    module + " cooperative access");
+                TestHarness.True(
+                    driver.State.RoutePermitGranted,
+                    module + " cooperative permit");
+                return;
+            }
+
+            TestHarness.Equal(
+                FactionAccessPolicy.Closed,
+                driver.State.FactionAccessPolicy,
+                module + " adverse access");
+            TestHarness.True(
+                !driver.State.RoutePermitGranted,
+                module + " adverse permit");
         }
 
         private static void FuelBondRestoresAccessExactly()
@@ -533,13 +606,14 @@ namespace AtomicLandPirate.LastBearingTests
             ColonyComposition composition,
             string residentId,
             EncounterChoice encounterChoice,
-            int worldSeed)
+            int worldSeed,
+            VehicleModule module = VehicleModule.SealedRangeTank)
         {
             var driver = new CoreTestDriver(composition, worldSeed);
             driver.StartPreparation(
                 residentId,
                 PreparationChoice.CivicBuffer,
-                VehicleModule.SealedRangeTank);
+                module);
             while (driver.View.PreparationPhase != PreparationPhase.Ready)
             {
                 driver.Advance(1);
@@ -570,10 +644,13 @@ namespace AtomicLandPirate.LastBearingTests
                 new ResolveDepotCommand(sequence, encounterChoice));
             driver.Apply(sequence =>
                 new LoadDepotRepairCargoCommand(sequence));
-            driver.Apply(sequence =>
-                new ChooseLiquidReturnCommand(
-                    sequence,
-                    LiquidCargoKind.Fuel));
+            if (module == VehicleModule.SealedRangeTank)
+            {
+                driver.Apply(sequence =>
+                    new ChooseLiquidReturnCommand(
+                        sequence,
+                        LiquidCargoKind.Fuel));
+            }
             driver.Apply(sequence =>
                 new FreezeReturnPayloadCommand(
                     sequence,
