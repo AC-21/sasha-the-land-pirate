@@ -872,7 +872,8 @@ Detailed contract:
 
 ## VGR-22 — Receive the Water Tender
 
-Status: current implementation target on the V0 feature branch.
+Status: implementation complete on the dependent V0 feature line; remote
+integration and canonical native smoke remain pending.
 
 Scope:
 
@@ -900,7 +901,8 @@ Detailed contract:
 
 ## VGR-23 — Service the Scout
 
-Status: current implementation target on the V0 feature branch.
+Status: implementation complete on the dependent V0 feature line; canonical
+native smoke remains pending.
 
 Scope:
 
