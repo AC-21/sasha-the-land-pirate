@@ -1020,12 +1020,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingGameController controller =
                 UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
             controller.enabled = false;
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Press(keyboard.eKey);
             LastBearingState gate = DriveUntilWreckLineAvailable(
                 CreateOutboundState());
             InstallControllerState(controller, gate);
             LastBearingWorldBuilder world = controller.World!;
             RoadFeelRigInstance roadRig = world.RoadFeelRig!;
             Rigidbody body = roadRig.Vehicle.Body;
+            LastBearingWreckLineInteractor interactor =
+                world.WreckLineInteractor!;
 
             AssertMode(
                 controller.ModeCoordinator!,
@@ -1038,10 +1042,31 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.ReadModel!.HeavyCargoCustody,
                 Is.EqualTo(HeavyCargoCustody.Depot));
+            Assert.That(interactor.HasDedicatedInteractionTarget, Is.True);
+            yield return null;
+            Assert.That(interactor.IsTargetVisible, Is.True);
+            Assert.That(interactor.IsFocused, Is.True);
+            Assert.That(interactor.IsInputArmed, Is.False);
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            Release(keyboard.eKey);
+            yield return null;
+            Assert.That(interactor.IsInputArmed, Is.True);
+            Assert.That(
+                interactor.CurrentStage,
+                Is.EqualTo(WreckLineInteractionStage.DeployWinch));
+            Assert.That(
+                Vector3.Distance(
+                    interactor.TargetWorldPosition,
+                    body.position),
+                Is.GreaterThan(2f),
+                "the winch work dog must sit clear of Sasha's chassis");
+            _ = RequireUnblockedScreenPoint(
+                controller,
+                interactor.TargetWorldPosition,
+                "winch Wreck Line work dog");
             string gateHash = controller.CanonicalHash;
 
             body.position += new Vector3(250f, 40f, -175f);
-            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Press(keyboard.eKey);
             yield return null;
             InvokeGlobalShortcuts(controller);
@@ -1049,6 +1074,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             yield return null;
 
             Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            Assert.That(
+                PendingCommands(controller)[0],
+                Is.TypeOf<OperateWreckLineModuleCommand>());
+            Assert.That(
+                interactor.QueuedStage,
+                Is.EqualTo(WreckLineInteractionStage.DeployWinch));
+            Assert.That(interactor.LastInteractionRejected, Is.False);
             Assert.That(controller.CanonicalHash, Is.EqualTo(gateHash));
             InvokeSimulationTick(controller);
 
@@ -1065,6 +1097,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 world.RouteModulePointView.State,
                 Is.EqualTo(RouteModulePointPresentationState.WinchRecovered));
             Assert.That(world.RouteModulePointView.IsPumpRotorVisible, Is.False);
+            Assert.That(interactor.IsTargetVisible, Is.False);
+            Assert.That(
+                interactor.CurrentStage,
+                Is.EqualTo(WreckLineInteractionStage.None));
+            Assert.That(
+                interactor.QueuedStage,
+                Is.EqualTo(WreckLineInteractionStage.None));
             AssertRoadPresentation(controller, roadRig, active: true);
             Assert.That(roadRig.Adapter.LastCargoMassKilograms, Is.EqualTo(1300));
             Assert.That(
@@ -1078,6 +1117,94 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(RoadFeelDamageBand.Healthy));
             Assert.That(roadRig.CargoVisuals[0].activeSelf, Is.False);
             Assert.That(roadRig.CargoVisuals[1].activeSelf, Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator WreckLineRangeTankPointerUsesFittedVerbAndFailsClosed()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            LastBearingState gate = DriveUntilWreckLineAvailable(
+                CreateOutboundState(
+                    module: VehicleModule.SealedRangeTank));
+            InstallControllerState(controller, gate);
+            LastBearingWreckLineInteractor interactor =
+                controller.World!.WreckLineInteractor!;
+
+            yield return null;
+            yield return null;
+            Assert.That(
+                interactor.CurrentStage,
+                Is.EqualTo(WreckLineInteractionStage.SealRangeTank));
+            Assert.That(interactor.IsTargetVisible, Is.True);
+            Assert.That(interactor.IsInputArmed, Is.True);
+            Assert.That(
+                Vector3.Distance(
+                    interactor.TargetWorldPosition,
+                    controller.World.RoadFeelRig!.Vehicle.Body.position),
+                Is.GreaterThan(2f),
+                "the tank-seal work dog must sit clear of Sasha's chassis");
+            Assert.That(
+                controller.ReadModel!.RouteActionKind,
+                Is.EqualTo(RouteActionKind.CrossExposedDustRoute));
+
+            LastBearingReadModel gateModel = controller.ReadModel;
+            InstallControllerState(
+                controller,
+                CreateAtHomeModuleState(VehicleModule.SealedRangeTank));
+            ApplyWreckLineModel(interactor, gateModel);
+            Assert.That(interactor.IsTargetVisible, Is.False);
+            Assert.That(interactor.ActivateCurrentStage(), Is.False);
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+
+            InstallControllerState(controller, gate);
+            yield return null;
+            yield return null;
+            Assert.That(interactor.IsInputArmed, Is.True);
+            Vector2 pointer = RequireUnblockedScreenPoint(
+                controller,
+                interactor.TargetWorldPosition,
+                "sealed range tank Wreck Line work dog");
+            string gateHash = controller.CanonicalHash;
+            Physics.SyncTransforms();
+
+            Assert.That(
+                interactor.TryActivateAtScreenPosition(pointer),
+                Is.True);
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            Assert.That(
+                PendingCommands(controller)[0],
+                Is.TypeOf<OperateWreckLineModuleCommand>());
+            var queued =
+                (OperateWreckLineModuleCommand)PendingCommands(controller)[0];
+            Assert.That(
+                queued.Action,
+                Is.EqualTo(RouteActionKind.CrossExposedDustRoute));
+            Assert.That(
+                interactor.TryActivateAtScreenPosition(pointer),
+                Is.False,
+                "a held work dog must not queue a second command");
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(gateHash));
+
+            InvokeSimulationTick(controller);
+
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            Assert.That(controller.CanonicalHash, Is.Not.EqualTo(gateHash));
+            Assert.That(controller.ReadModel!.RouteActionUsed, Is.True);
+            Assert.That(
+                controller.ReadModel.HeavyCargoCustody,
+                Is.EqualTo(HeavyCargoCustody.Depot));
+            Assert.That(controller.State!.TowSlotsUsed, Is.Zero);
+            Assert.That(interactor.IsTargetVisible, Is.False);
         }
 
         [UnityTest]
@@ -1101,6 +1228,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.World!.RouteModulePointView!;
             RoadFeelRigInstance roadRig = controller.World.RoadFeelRig!;
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            yield return null;
+            yield return null;
+            Assert.That(wreck.Interactor!.IsInputArmed, Is.True);
 
             Press(keyboard.eKey);
             yield return null;
@@ -1121,6 +1251,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(FrameRailSalvageCustody.WreckLine));
             Assert.That(wreck.IsFrameRailSourceVisible, Is.True);
             Assert.That(wreck.IsRoadFrameRailCargoVisible, Is.False);
+            Assert.That(wreck.Interactor!.IsTargetVisible, Is.False);
             AssertRoadModulePointHold(controller, roadRig);
 
             Press(keyboard.eKey);
@@ -2618,7 +2749,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
         private static LastBearingState CreateOutboundState(
             bool waitForFactionClaim = false,
-            bool installPatchworkSkidPlate = false)
+            bool installPatchworkSkidPlate = false,
+            VehicleModule module = VehicleModule.WinchAssembly)
         {
             var kernel = new LastBearingKernel();
             LastBearingState state = LastBearingScenarioFactory.CreateInitial(
@@ -2690,9 +2822,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 new SelectPreparationCommand(
                     sequence,
                     PreparationChoice.WorkshopPush,
-                    VehicleModule.WinchAssembly));
+                    module));
             state = Apply(kernel, state, sequence =>
-                new InstallVehicleModuleCommand(sequence, VehicleModule.WinchAssembly));
+                new InstallVehicleModuleCommand(sequence, module));
             var guard = 0;
             while (state.PreparationPhase != PreparationPhase.Ready && guard < 1000)
             {
@@ -3355,6 +3487,34 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 targetName + " cannot be activated through the world ray");
         }
 
+        private static Vector2 RequireUnblockedScreenPoint(
+            LastBearingGameController controller,
+            Vector3 worldPosition,
+            string context)
+        {
+            Camera camera = controller.World!.MainCamera!;
+            Vector3 screen = camera.WorldToScreenPoint(worldPosition);
+            var pointer = new Vector2(screen.x, screen.y);
+            Assert.That(screen.z, Is.GreaterThan(0f), context);
+            Assert.That(
+                screen.x,
+                Is.InRange(0f, (float)Screen.width),
+                context + " leaves the horizontal viewport");
+            Assert.That(
+                screen.y,
+                Is.InRange(0f, (float)Screen.height),
+                context + " leaves the vertical viewport");
+            Assert.That(
+                controller.FieldDesk!.BlocksWorldPointer(pointer),
+                Is.False,
+                context + " is hidden behind the Field Desk");
+            Assert.That(
+                controller.Hud!.BlocksWorldPointer(pointer),
+                Is.False,
+                context + " is hidden behind the legacy HUD");
+            return pointer;
+        }
+
         private static void AssertRenderedRootInsideViewport(
             Camera camera,
             Transform renderedRoot)
@@ -3465,6 +3625,17 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 BindingFlags.Instance | BindingFlags.NonPublic);
             Assert.That(shortcuts, Is.Not.Null);
             shortcuts!.Invoke(controller, null);
+        }
+
+        private static void ApplyWreckLineModel(
+            LastBearingWreckLineInteractor interactor,
+            LastBearingReadModel model)
+        {
+            MethodInfo? apply = typeof(LastBearingWreckLineInteractor).GetMethod(
+                "Apply",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(apply, Is.Not.Null);
+            apply!.Invoke(interactor, new object[] { model });
         }
 
         private string InstallTemporarySaveAdapter(

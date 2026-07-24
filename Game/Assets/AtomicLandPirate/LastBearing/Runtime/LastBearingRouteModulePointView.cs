@@ -48,6 +48,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public Transform? InteractionAnchor { get; private set; }
 
+        public LastBearingWreckLineInteractor? Interactor
+        {
+            get;
+            private set;
+        }
+
         public RouteModulePointPresentationState State { get; private set; }
 
         public bool IsPumpRotorVisible =>
@@ -179,6 +185,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 Quaternion.Euler(4f, -28f, -7f),
                 iron,
                 oxide);
+            BuildInteraction(
+                iron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
 
             ApplyState(RouteModulePointPresentationState.Dormant);
             ApplyFrameRailSalvage(
@@ -326,6 +338,32 @@ namespace AtomicLandPirate.Presentation.LastBearing
             light.range = 7f;
             light.shadows = LightShadows.None;
             return light;
+        }
+
+        private void BuildInteraction(
+            Material darkIron,
+            Material oxide,
+            Material bone,
+            Material tungsten,
+            Material signal)
+        {
+            if (InteractionAnchor == null)
+            {
+                throw new InvalidOperationException(
+                    "Wreck Line interaction requires its authored anchor.");
+            }
+
+            var control = new GameObject(
+                LastBearingWreckLineInteractor.RootName);
+            control.transform.SetParent(InteractionAnchor, false);
+            Interactor =
+                control.AddComponent<LastBearingWreckLineInteractor>();
+            Interactor.Build(
+                darkIron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
         }
 
         private void ApplyFrameRailVisibility()

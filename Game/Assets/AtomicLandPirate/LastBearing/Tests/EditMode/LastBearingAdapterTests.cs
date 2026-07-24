@@ -146,7 +146,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
-        public void WreckLineViewIsOnePhysicsFreeCoreIsolatedModulePoint()
+        public void WreckLineViewHasOneCoreIsolatedPhysicalModuleControl()
         {
             _root = new GameObject(LastBearingGameController.RuntimeRootName);
             var controller = _root.AddComponent<LastBearingGameController>();
@@ -169,7 +169,31 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(view.InteractionAnchor, Is.Not.Null);
             Assert.That(view.GetComponentsInChildren<Rigidbody>(true), Is.Empty);
             Assert.That(view.GetComponentsInChildren<Camera>(true), Is.Empty);
-            foreach (Collider collider in view.GetComponentsInChildren<Collider>(true))
+            Assert.That(view.Interactor, Is.Not.Null);
+            Assert.That(
+                _root.GetComponentsInChildren<LastBearingWreckLineInteractor>(
+                    includeInactive: true),
+                Has.Length.EqualTo(1));
+            LastBearingWreckLineInteractor interactor = view.Interactor!;
+            Assert.That(interactor.IsBuilt, Is.True);
+            Assert.That(interactor.HasDedicatedInteractionTarget, Is.True);
+            Assert.That(interactor.IsTargetVisible, Is.False);
+            Collider[] modulePointColliders =
+                view.GetComponentsInChildren<Collider>(true);
+            Assert.That(
+                modulePointColliders.Count(collider => collider.enabled),
+                Is.EqualTo(1));
+            Collider target = modulePointColliders.Single(
+                collider => collider.enabled);
+            Assert.That(
+                target.name,
+                Is.EqualTo(LastBearingWreckLineInteractor.TargetName));
+            Assert.That(target.isTrigger, Is.True);
+            Assert.That(
+                target.gameObject.layer,
+                Is.EqualTo(LastBearingWreckLineInteractor.InteractionLayer));
+            foreach (Collider collider in modulePointColliders.Where(
+                         collider => collider != target))
             {
                 Assert.That(collider.enabled, Is.False, collider.name);
             }

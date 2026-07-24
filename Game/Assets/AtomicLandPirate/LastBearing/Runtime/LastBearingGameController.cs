@@ -154,6 +154,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool CanRecoverRoadPresentation =>
             _modeCoordinator?.CanRecoverRoadPresentation ?? false;
 
+        public bool IsWreckLineModuleOperationAvailable =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsWreckLineModulePointAvailable == true &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode == LastBearingPresentationMode.Driving;
+
+        public bool IsWreckLineModuleOperationQueued =>
+            _pendingCommands.Exists(command =>
+                command is OperateWreckLineModuleCommand);
+
         public bool IsWreckLineFrameRailRecoveryAvailable =>
             _pendingCommands.Count == 0 &&
             _readModel?.IsWreckLineFrameRailRecoveryAvailable == true &&
@@ -470,6 +480,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             _world.ConfigureCityServiceCellInteraction(this);
+            _world.ConfigureWreckLineInteraction(this);
             _world.ConfigureDepotDecisionInteraction(this);
             _world.ConfigureDepotCargoInteraction(this);
             _world.ConfigureDepotReturnInteraction(this);
@@ -495,6 +506,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             _fieldDesk?.ResetForLifecycle();
             _world?.ResetCityServiceCellInteraction();
+            _world?.ResetWreckLineInteraction();
             _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
@@ -552,6 +564,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
             _world?.ResetCityServiceCellInteraction();
+            _world?.ResetWreckLineInteraction();
             _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
@@ -1369,7 +1382,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public void OperateWreckLineModulePoint()
         {
             if (_readModel == null ||
-                !_readModel.IsWreckLineModulePointAvailable)
+                !_readModel.IsWreckLineModulePointAvailable ||
+                _pendingCommands.Count != 0 ||
+                _modeCoordinator?.HasActiveMode != true ||
+                _modeCoordinator.CurrentMode !=
+                    LastBearingPresentationMode.Driving)
             {
                 _status = "The Wreck Line module point is not canonically available yet.";
                 return;
@@ -1622,6 +1639,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             _fieldDesk?.ResetForLifecycle();
             _world?.ResetCityServiceCellInteraction();
+            _world?.ResetWreckLineInteraction();
             _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
@@ -1679,6 +1697,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             if (_readModel != null)
             {
+                _world?.ApplyWreckLineInteraction(_readModel);
                 _world?.ApplyDepotDecisionInteraction(_readModel);
                 _world?.ApplyDepotCargoInteraction(_readModel);
                 _world?.ApplyDepotReturnInteraction(_readModel);
@@ -1744,7 +1763,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             if (_readModel != null &&
+                _pendingCommands.Count == 0 &&
                 _readModel.IsWreckLineModulePointAvailable &&
+                _world?.WreckLineInteractor?.IsInputArmed == true &&
+                _fieldDesk?.OwnsKeyboardFocus != true &&
                 ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
                  (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
             {
@@ -2265,6 +2287,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ApplyFrameRailSalvage(
                 _readModel.FrameRailSalvageCustody,
                 _readModel.IsWreckLineFrameRailRecoveryAvailable);
+            _world.ApplyWreckLineInteraction(_readModel);
             _world.ApplyRoadCargoPresentation(
                 _readModel.HeavyCargoKind,
                 _readModel.HeavyCargoCustody);
