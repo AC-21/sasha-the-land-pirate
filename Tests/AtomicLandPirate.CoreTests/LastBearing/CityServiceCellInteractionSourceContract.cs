@@ -24,6 +24,8 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(runtimeRoot, "LastBearingWorldBuilder.cs"));
             string controller = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingGameController.cs"));
+            string cameraRig = File.ReadAllText(
+                Path.Combine(runtimeRoot, "LastBearingCameraRig.cs"));
             string fieldDesk = File.ReadAllText(
                 Path.Combine(
                     runtimeRoot,
@@ -82,7 +84,6 @@ namespace AtomicLandPirate.LastBearingTests
             foreach (string cameraBinding in new[]
             {
                 "keyboard?.qKey",
-                "keyboard?.eKey",
                 "keyboard?.leftArrowKey",
                 "keyboard?.rightArrowKey",
             })
@@ -94,6 +95,21 @@ namespace AtomicLandPirate.LastBearingTests
                     "Hot Shift world input conflicts with city camera " +
                     cameraBinding);
             }
+            Require(
+                interactorUpdate,
+                "bool operateEmergencyCisternPump =");
+            Require(
+                interactorUpdate,
+                "keyboard?.eKey.wasPressedThisFrame == true");
+            Require(
+                cameraRig,
+                "public void SetCityServiceCellInteractor(");
+            Require(
+                cameraRig,
+                ".IsEmergencyCisternPumpFocused != true");
+            Require(
+                world,
+                "CameraRig?.SetCityServiceCellInteractor(");
 
             foreach (string target in new[]
             {

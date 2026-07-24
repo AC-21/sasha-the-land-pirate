@@ -38,7 +38,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         ReturnToTitle = 27,
         RunHotShift = 28,
         AcknowledgeDustFront = 29,
-        PumpEmergencyCistern = 30,
+        OpenEmergencyCisternPump = 30,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -821,7 +821,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 surveyVisible,
                 showSupplementalCityWork
                     ? supplementalCityWork.Intent ==
-                        LastBearingFieldDeskIntent.PumpEmergencyCistern
+                        LastBearingFieldDeskIntent.OpenEmergencyCisternPump
                         ? "EMERGENCY CISTERN · CITY WORK ORDER"
                         : "HOT SHIFT · CITY WORK ORDER"
                     : FormatServiceCellState(model, controller),
@@ -1207,15 +1207,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             return Action(
-                LastBearingFieldDeskIntent.PumpEmergencyCistern,
-                "PUMP EMERGENCY CISTERN · " +
-                model.EmergencyCisternFuelCostUnits +
-                " FUEL · +" +
-                FormatExactMilli(model.EmergencyCisternWaterMilli) +
-                " WATER · ONE FILL",
-                detail,
+                LastBearingFieldDeskIntent.OpenEmergencyCisternPump,
+                "OPEN EMERGENCY STORAGE · WORK CISTERN PUMP",
+                detail + " Open the physical pump station, then release and " +
+                "press E or gamepad south.",
                 true,
-                canDispatch && controller.CanPumpEmergencyCistern,
+                canDispatch && controller.CanOpenEmergencyCisternPump,
                 LastBearingFieldDeskActionTone.Hazard);
         }
 

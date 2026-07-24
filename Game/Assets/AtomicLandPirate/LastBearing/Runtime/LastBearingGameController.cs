@@ -353,10 +353,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _pendingCommands.Exists(command =>
                 command is RunHotShiftCommand);
 
-        public bool CanPumpEmergencyCistern =>
+        public bool IsEmergencyCisternPumpQueued =>
+            _pendingCommands.Exists(command =>
+                command is PumpEmergencyCisternCommand);
+
+        public bool CanOpenEmergencyCisternPump =>
             _pendingCommands.Count == 0 &&
             _readModel?.IsEmergencyCisternPumpAvailable == true &&
-            IsExactFieldDeskCityOverview;
+            IsExactFieldDeskCityOverview &&
+            _world?.CityServiceCellView?.Interactor
+                ?.IsEmergencyCisternPumpControlVisible == true;
+
+        public bool IsEmergencyCisternPumpFocused =>
+            _world?.CityServiceCellView?.Interactor
+                ?.IsEmergencyCisternPumpFocused == true;
+
+        public bool CanPumpEmergencyCistern =>
+            CanOpenEmergencyCisternPump &&
+            IsEmergencyCisternPumpFocused &&
+            _world?.CityServiceCellView?.Interactor
+                ?.IsEmergencyCisternPumpInputArmed == true;
 
         public bool CanAcknowledgeDustFront =>
             _pendingCommands.Count == 0 &&
@@ -896,34 +912,41 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 "Hot Shift queued: 1 fuel · 120 settlement ticks · +2 reclaimed parts.";
         }
 
+        public void OpenEmergencyCisternPump()
+        {
+            if (!CanOpenEmergencyCisternPump)
+            {
+                _status =
+                    "The emergency-cistern pump is available only at its physical control beside Emergency Storage.";
+                return;
+            }
+
+            LastBearingCityServiceCellInteractor? interactor =
+                _world?.CityServiceCellView?.Interactor;
+            interactor?.FocusEmergencyCisternPump();
+            if (interactor?.IsEmergencyCisternPumpFocused != true)
+            {
+                _status =
+                    "The emergency-cistern pump control could not take focus.";
+                return;
+            }
+
+            _status =
+                "Emergency-cistern pump focused. Release the controls, then pull the lever.";
+        }
+
         public void PumpEmergencyCistern()
         {
-            if (_readModel == null)
+            if (IsEmergencyCisternPumpQueued)
             {
-                _status =
-                    "Start or load Last Bearing before pumping the emergency cistern.";
                 return;
             }
 
-            if (_pendingCommands.Count != 0)
+            if (!CanPumpEmergencyCistern)
             {
-                _status =
-                    "Finish the queued city action before pumping the emergency cistern.";
-                return;
-            }
-
-            if (!IsExactFieldDeskCityOverview)
-            {
-                _status =
-                    "Pump the emergency cistern from the city Field Desk while Sasha is home.";
-                return;
-            }
-
-            if (!_readModel.IsEmergencyCisternPumpAvailable)
-            {
-                _status = _readModel.EmergencyCisternCharged
+                _status = _readModel?.EmergencyCisternCharged == true
                     ? "The emergency cistern already holds its one authorized fill."
-                    : "The emergency cistern needs the commissioned service cell, its operator, a committed rig plan, Sasha home, an unresolved Dust Front, ten units of free water capacity, and fuel beyond the route reserve.";
+                    : "Focus the physical emergency-cistern pump, release the controls, then pull its lever.";
                 return;
             }
 
@@ -1810,6 +1833,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 (gamepad != null && gamepad.buttonNorth.wasPressedThisFrame))
             {
                 RecoverRoadPresentation();
+            }
+
+            // The city pump owns the primary interaction while focused. Its
+            // release latch and exact command guard live on the physical
+            // control; allowing another global E/South verb to run first
+            // would turn one press into the wrong city action.
+            if (_world?.CityServiceCellView?.Interactor
+                    ?.IsEmergencyCisternPumpFocused == true)
+            {
+                return;
             }
 
             if (_readModel != null &&

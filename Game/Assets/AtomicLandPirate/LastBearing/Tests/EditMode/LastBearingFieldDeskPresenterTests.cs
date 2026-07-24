@@ -90,7 +90,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 (int)LastBearingFieldDeskIntent.AcknowledgeDustFront,
                 Is.EqualTo(29));
             Assert.That(
-                (int)LastBearingFieldDeskIntent.PumpEmergencyCistern,
+                (int)LastBearingFieldDeskIntent.OpenEmergencyCisternPump,
                 Is.EqualTo(30));
         }
 
@@ -315,7 +315,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
         [TestCase(PreparationChoice.CivicBuffer)]
         [TestCase(PreparationChoice.WorkshopPush)]
-        public void ReadyKeepsManifestAndGarageWhileHotShiftUsesSurveyAction(
+        public void ReadyRoutesCisternWorkToThePhysicalPumpWithoutMutation(
             PreparationChoice preparation)
         {
             LastBearingGameController controller =
@@ -351,48 +351,42 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 ready.Survey.AdvanceSled.Intent,
                 Is.EqualTo(
-                    LastBearingFieldDeskIntent.PumpEmergencyCistern));
+                    LastBearingFieldDeskIntent.OpenEmergencyCisternPump));
             Assert.That(
                 ready.Survey.AdvanceSled.Label,
-                Does.Contain(
-                    "PUMP EMERGENCY CISTERN · 1 FUEL · +10.000 WATER"));
+                Is.EqualTo(
+                    "OPEN EMERGENCY STORAGE · WORK CISTERN PUMP"));
             Assert.That(ready.Survey.AdvanceSled.IsEnabled, Is.True);
             Assert.That(
                 LastBearingFieldDeskPresenter.IsIntentAvailable(
                     controller,
-                    LastBearingFieldDeskIntent.PumpEmergencyCistern),
+                    LastBearingFieldDeskIntent.OpenEmergencyCisternPump),
                 Is.True);
+            Assert.That(controller.CanOpenEmergencyCisternPump, Is.True);
+            Assert.That(controller.CanPumpEmergencyCistern, Is.False);
 
+            string canonicalBefore = controller.CanonicalHash;
             long fuelBefore = controller.ReadModel.FuelUnits;
-            controller.PumpEmergencyCistern();
-            LastBearingCommand[] pending = PendingCommands(controller);
-            Assert.That(pending, Has.Length.EqualTo(1));
+            long waterBefore = controller.ReadModel.WaterMilli;
+            controller.OpenEmergencyCisternPump();
             Assert.That(
-                pending[0],
-                Is.TypeOf<PumpEmergencyCisternCommand>());
-            SimulateOneTick(controller);
+                PendingCommands(controller),
+                Is.Empty);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+            Assert.That(controller.ReadModel.FuelUnits, Is.EqualTo(fuelBefore));
+            Assert.That(controller.ReadModel.WaterMilli, Is.EqualTo(waterBefore));
+            LastBearingCityServiceCellInteractor interactor =
+                controller.World!.CityServiceCellView!.Interactor!;
             Assert.That(
-                controller.ReadModel.EmergencyCisternCharged,
+                interactor.IsEmergencyCisternPumpFocused,
                 Is.True);
             Assert.That(
-                controller.ReadModel.FuelUnits,
-                Is.EqualTo(
-                    fuelBefore
-                    - LastBearingBalanceV1
-                        .EmergencyCisternFuelCostUnits));
+                interactor.IsEmergencyCisternPumpInputArmed,
+                Is.False);
+            Assert.That(controller.CanPumpEmergencyCistern, Is.False);
             Assert.That(
                 controller.Status,
-                Does.Contain("Emergency cistern charged"));
-
-            LastBearingFieldDeskProjection charged =
-                LastBearingFieldDeskPresenter.Present(controller);
-            Assert.That(
-                charged.Survey.AdvanceSled.Intent,
-                Is.EqualTo(LastBearingFieldDeskIntent.RunHotShift));
-            Assert.That(
-                charged.Survey.AdvanceSled.Label,
-                Is.EqualTo(
-                    "RUN HOT SHIFT · 1 FUEL · 120 TICKS · +2 PARTS"));
+                Does.Contain("pump focused"));
         }
 
         [Test]
@@ -419,7 +413,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 WithWaterMilli(
                     controller.State!,
                     LastBearingBalanceV1.WaterCapacityMilli));
-            Assert.That(controller.CanPumpEmergencyCistern, Is.False);
+            Assert.That(controller.CanOpenEmergencyCisternPump, Is.False);
             Assert.That(controller.CanStartHotShift, Is.True);
 
             LastBearingFieldDeskProjection projection =

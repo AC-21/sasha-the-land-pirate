@@ -40,6 +40,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(runtimeRoot, "LastBearingCityGrammarComparison.cs"));
             string cityServiceCell = File.ReadAllText(
                 Path.Combine(runtimeRoot, "LastBearingCityServiceCellView.cs"));
+            string cityServiceInteractor = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "LastBearingCityServiceCellInteractor.cs"));
             string recovery = File.ReadAllText(
                 Path.Combine(
                     runtimeRoot,
@@ -129,7 +133,11 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "public bool CanStartHotShift");
             Require(controller, "public bool IsHotShiftStartQueued");
             Require(controller, "public void StartHotShift()");
+            Require(controller, "public bool IsEmergencyCisternPumpQueued");
+            Require(controller, "public bool CanOpenEmergencyCisternPump");
+            Require(controller, "public bool IsEmergencyCisternPumpFocused");
             Require(controller, "public bool CanPumpEmergencyCistern");
+            Require(controller, "public void OpenEmergencyCisternPump()");
             Require(controller, "public void PumpEmergencyCistern()");
             Require(controller, "public bool CanAcknowledgeDustFront");
             Require(controller, "public void AcknowledgeDustFront()");
@@ -139,16 +147,76 @@ namespace AtomicLandPirate.LastBearingTests
                 "public void AcknowledgeDustFront()");
             Require(hotShiftOperation, "_readModel.HotShiftCompletedCount");
             Require(hotShiftOperation, "new RunHotShiftCommand(");
+            string emergencyCisternRoute = Segment(
+                controller,
+                "public void OpenEmergencyCisternPump()",
+                "public void PumpEmergencyCistern()");
+            Require(
+                emergencyCisternRoute,
+                "if (!CanOpenEmergencyCisternPump)");
+            Require(
+                emergencyCisternRoute,
+                "interactor?.FocusEmergencyCisternPump();");
             string emergencyCisternOperation = Segment(
                 controller,
                 "public void PumpEmergencyCistern()",
                 "public void AcknowledgeDustFront()");
             Require(
                 emergencyCisternOperation,
-                "_readModel.IsEmergencyCisternPumpAvailable");
+                "if (IsEmergencyCisternPumpQueued)");
+            Require(
+                emergencyCisternOperation,
+                "if (!CanPumpEmergencyCistern)");
             Require(
                 emergencyCisternOperation,
                 "new PumpEmergencyCisternCommand(sequence)");
+            Require(
+                cityServiceInteractor,
+                "public const string EmergencyCisternPumpControlName");
+            Require(
+                cityServiceInteractor,
+                "public bool IsEmergencyCisternPumpControlVisible");
+            Require(
+                cityServiceInteractor,
+                "public bool IsEmergencyCisternPumpFocused");
+            Require(
+                cityServiceInteractor,
+                "public bool IsEmergencyCisternPumpInputArmed");
+            Require(
+                cityServiceInteractor,
+                "public void FocusEmergencyCisternPump()");
+            string physicalCisternOperation = Segment(
+                cityServiceInteractor,
+                "public void ClickEmergencyCisternPump()",
+                "public bool IsPadHighlighted(");
+            Require(
+                physicalCisternOperation,
+                "if (!_emergencyCisternPumpInputArmed)");
+            Require(
+                physicalCisternOperation,
+                "_controller.PumpEmergencyCistern();");
+            Require(
+                physicalCisternOperation,
+                "_controller.IsEmergencyCisternPumpQueued");
+            Require(
+                cityServiceInteractor,
+                "keyboard?.eKey.wasPressedThisFrame == true");
+            Require(
+                cityServiceInteractor,
+                "gamepad?.buttonSouth.wasPressedThisFrame == true");
+            Require(
+                cityServiceInteractor,
+                "Time.frameCount >");
+            Require(
+                cityServiceInteractor,
+                "controlsReleased");
+            string cisternGlobalShortcuts = Segment(
+                controller,
+                "private void HandleGlobalShortcuts()",
+                "private void SimulateOneTick()");
+            Require(
+                cisternGlobalShortcuts,
+                "IsEmergencyCisternPumpFocused == true");
             string dustFrontAcknowledgement = Segment(
                 controller,
                 "public void AcknowledgeDustFront()",
