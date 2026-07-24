@@ -51,6 +51,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 
         public const string FrontUpgradeSocketName = "SOCKET_UPGRADE_FRONT";
         public const string CargoUpgradeSocketName = "SOCKET_UPGRADE_CARGO_01";
+        public const string UnderbodyUpgradeSocketName =
+            "SOCKET_UPGRADE_UNDERBODY";
         public const string CargoSocket01Name = "SOCKET_CARGO_01";
         public const string CargoSocket02Name = "SOCKET_CARGO_02";
         public const string ToolDeploySocketName = "SOCKET_TOOL_DEPLOY";
@@ -58,6 +60,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         public const string DriverDoorTransformName = "DOOR_DRIVER";
         public const string WinchModuleName = "MODULE_WINCH_ASSEMBLY";
         public const string RangeTankModuleName = "MODULE_SEALED_RANGE_TANK";
+        public const string PatchworkSkidPlateUpgradeName =
+            "UPGRADE_PATCHWORK_SKID_PLATE";
 
         public static Vector3 ForwardAxis => Vector3.forward;
 

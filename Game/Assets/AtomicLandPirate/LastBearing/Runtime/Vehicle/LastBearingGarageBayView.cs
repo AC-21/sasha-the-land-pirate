@@ -20,6 +20,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
     {
         public const string RootName = "bld_service_bay_cutaway_a [C0 Blockout]";
         public const int PreparationGaugeSegmentCount = 8;
+        public const float RigUpgradeInstallPulseDurationSeconds = 0.45f;
+
+        private const float RigUpgradeInstallPulseIntensity = 620f;
+        private const float UnfittedModuleWorkLightIntensity = 180f;
+        private const float FittedModuleWorkLightIntensity = 110f;
 
         private GameObject? _winchStand;
         private GameObject? _tankStand;
@@ -29,6 +34,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         private readonly GameObject?[] _preparationGaugeSegments =
             new GameObject?[PreparationGaugeSegmentCount];
         private Light? _moduleWorkLight;
+        private float _moduleWorkLightBaseIntensity =
+            UnfittedModuleWorkLightIntensity;
+        private float _rigUpgradeInstallPulseEndsAtUnscaledTime;
         private bool _built;
 
         public Transform? VehicleDock { get; private set; }
@@ -65,6 +73,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         public int PreparationGaugeLitSegments { get; private set; }
 
         public float PreparationProgressNormalized { get; private set; }
+
+        public bool IsRigUpgradeInstallPulseActive =>
+            RigUpgradeInstallPulseRemainingSeconds > 0f;
+
+        public int RigUpgradeInstallPulseCount { get; private set; }
+
+        public float ModuleWorkLightIntensity =>
+            _moduleWorkLight?.intensity ?? 0f;
 
         internal void Build(
             Vector3 vehicleWorldPosition,
@@ -265,9 +281,37 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 
             if (_moduleWorkLight != null)
             {
-                _moduleWorkLight.intensity =
-                    module == SashaScoutModulePresentation.None ? 180f : 110f;
+                _moduleWorkLightBaseIntensity =
+                    module == SashaScoutModulePresentation.None
+                        ? UnfittedModuleWorkLightIntensity
+                        : FittedModuleWorkLightIntensity;
+                RefreshModuleWorkLight();
             }
+        }
+
+        public void PulseRigUpgradeInstall()
+        {
+            _rigUpgradeInstallPulseEndsAtUnscaledTime =
+                Time.unscaledTime + RigUpgradeInstallPulseDurationSeconds;
+            RigUpgradeInstallPulseCount++;
+            RefreshModuleWorkLight();
+        }
+
+        public void ResetRigUpgradeInstallPulse()
+        {
+            _rigUpgradeInstallPulseEndsAtUnscaledTime = 0f;
+            RefreshModuleWorkLight();
+        }
+
+        private void OnEnable()
+        {
+            if (_rigUpgradeInstallPulseEndsAtUnscaledTime <=
+                Time.unscaledTime)
+            {
+                _rigUpgradeInstallPulseEndsAtUnscaledTime = 0f;
+            }
+
+            RefreshModuleWorkLight();
         }
 
         /// <summary>
@@ -307,6 +351,44 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 _ => SashaScoutModulePresentation.None,
             });
         }
+
+        private void Update()
+        {
+            if (_rigUpgradeInstallPulseEndsAtUnscaledTime <= 0f)
+            {
+                return;
+            }
+
+            if (_rigUpgradeInstallPulseEndsAtUnscaledTime <=
+                Time.unscaledTime)
+            {
+                _rigUpgradeInstallPulseEndsAtUnscaledTime = 0f;
+            }
+
+            RefreshModuleWorkLight();
+        }
+
+        private void RefreshModuleWorkLight()
+        {
+            if (_moduleWorkLight == null)
+            {
+                return;
+            }
+
+            float pulseNormalized = Mathf.Clamp01(
+                RigUpgradeInstallPulseRemainingSeconds /
+                RigUpgradeInstallPulseDurationSeconds);
+            _moduleWorkLight.intensity = Mathf.Lerp(
+                _moduleWorkLightBaseIntensity,
+                RigUpgradeInstallPulseIntensity,
+                pulseNormalized);
+        }
+
+        private float RigUpgradeInstallPulseRemainingSeconds =>
+            Mathf.Max(
+                0f,
+                _rigUpgradeInstallPulseEndsAtUnscaledTime -
+                Time.unscaledTime);
 
         private GameObject CreateWinchStand(
             Vector3 position,

@@ -599,6 +599,27 @@ namespace AtomicLandPirate.Presentation.LastBearing
             GarageBayView?.ApplyPlanMarker(marker);
         }
 
+        public void ApplyRigUpgrade(RigUpgrade upgrade)
+        {
+            SashaScoutUpgradePresentation presentation =
+                upgrade == RigUpgrade.PatchworkSkidPlate
+                    ? SashaScoutUpgradePresentation.PatchworkSkidPlate
+                    : SashaScoutUpgradePresentation.None;
+            VehicleView?.ScoutVisual?.ApplyUpgrade(presentation);
+            RoadFeelRig?.ScoutVisual.ApplyUpgrade(presentation);
+        }
+
+        public void PulseRigUpgradeInstall()
+        {
+            GarageBayView?.PulseRigUpgradeInstall();
+        }
+
+        public void ResetRigUpgradePresentation()
+        {
+            ApplyRigUpgrade(RigUpgrade.None);
+            GarageBayView?.ResetRigUpgradeInstallPulse();
+        }
+
         public void SelectPumpHallCutaway()
         {
             PumpHallCutawayView?.gameObject.SetActive(true);
