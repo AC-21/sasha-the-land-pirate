@@ -164,6 +164,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 ComputeSpareBearingBatchStartAvailable(state);
             IsSpareBearingBarterAvailable =
                 ComputeSpareBearingBarterAvailable(state);
+            IsDepotAccessRestorationAvailable =
+                ComputeDepotAccessRestorationAvailable(state);
             SpareBearingRemainingTicks = Math.Max(
                 0,
                 state.SpareBearingRequiredTicks
@@ -326,6 +328,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long FutureRouteTollFuelUnits { get; private set; }
         public bool IsSpareBearingBatchStartAvailable { get; private set; }
         public bool IsSpareBearingBarterAvailable { get; private set; }
+        public bool IsDepotAccessRestorationAvailable { get; private set; }
         public long SpareBearingRemainingTicks { get; private set; }
         public PauseCause PauseCause { get; private set; }
         public bool IsDepotApproachRecoveryAvailable { get; private set; }
@@ -633,8 +636,26 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return "barter-spare-bearing-at-claims-counter";
             }
 
+            if (ComputeDepotAccessRestorationAvailable(state))
+            {
+                return "post-fuel-bond-at-claims-counter";
+            }
+
             if (state.SpareBearingBatchPhase
                 == SpareBearingBatchPhase.Settled)
+            {
+                return "route-permit-recorded";
+            }
+
+            if (state.NextCityDecision == NextCityDecision.None
+                && state.RoutePermitGranted
+                && state.PreparationChoice
+                    == PreparationChoice.CivicBuffer
+                && state.VehicleModule == VehicleModule.SealedRangeTank
+                && (state.FactionAccessPolicy
+                        == FactionAccessPolicy.PermitRequired
+                    || state.FactionAccessPolicy
+                        == FactionAccessPolicy.SharedService))
             {
                 return "route-permit-recorded";
             }
@@ -806,6 +827,79 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.FactionClaimState == FactionClaimState.Aggrieved
                 && state.FactionAccessPolicy == FactionAccessPolicy.Closed
                 && !state.RoutePermitGranted;
+        }
+
+        private static bool ComputeDepotAccessRestorationAvailable(
+            LastBearingState state)
+        {
+            long fuelBondUnits =
+                LastBearingBalanceV1.TankFuelReturnMilli / 1000;
+            return state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.Finalized
+                && state.TurbineCondition
+                    == TurbineCondition.BearingRepaired
+                && state.PreparationChoice
+                    == PreparationChoice.CivicBuffer
+                && state.VehicleModule == VehicleModule.SealedRangeTank
+                && state.RouteActionUsed
+                && state.LiquidCapacityMilli
+                    == LastBearingBalanceV1.TankLiquidCapacityMilli
+                && state.DepotResolution == EncounterChoice.TakeBearing
+                && state.DepotControl == DepotControl.Depleted
+                && state.DepotBearingDisposition
+                    == DepotBearingDisposition.InstalledAtTurbine
+                && state.FactionClaimState == FactionClaimState.Aggrieved
+                && state.FactionAccessPolicy == FactionAccessPolicy.Closed
+                && state.FactionAidPolicy == FactionAidPolicy.Withheld
+                && state.EmergencyAidWaterMilli == 0
+                && state.PendingFactionOutcome
+                    == FactionOutcomeKind.Adverse
+                && state.FactionTrust
+                    == LastBearingBalanceV1.TakeTrustDelta
+                && state.FactionGrievance
+                    == LastBearingBalanceV1.TakeGrievanceDelta
+                && state.FutureRouteTollFuelUnits
+                    == LastBearingBalanceV1.TakeFutureRouteTollFuelUnits
+                && state.FactionMemory != null
+                && string.Equals(
+                    state.FactionMemory.StableId,
+                    "memory:last-bearing:take:0001",
+                    StringComparison.Ordinal)
+                && string.Equals(
+                    state.FactionMemory.WitnessedAction,
+                    "TakeClaimedBearing",
+                    StringComparison.Ordinal)
+                && string.Equals(
+                    state.FactionMemory.AffectedFactionId,
+                    LastBearingState.LastBearingFactionId,
+                    StringComparison.Ordinal)
+                && state.FactionMemory.Magnitude
+                    == LastBearingBalanceV1.TakeGrievanceDelta
+                && string.Equals(
+                    state.FactionMemory.DoctrineTag,
+                    "custody-breach",
+                    StringComparison.Ordinal)
+                && state.FactionMemory.EncounterTick <= state.GlobalTick
+                && string.Equals(
+                    state.FactionMemory.ConsequenceCode,
+                    "DEPOT_ACCESS_CLOSED",
+                    StringComparison.Ordinal)
+                && state.DepotAccessFeePartsUnits
+                    == (state.FactionClaimProgressMilli
+                            == LastBearingBalanceV1
+                                .FactionClaimThresholdMilli
+                        ? LastBearingBalanceV1
+                            .ClaimedDepotAccessFeePartsUnits
+                        : 0)
+                && !state.RoutePermitGranted
+                && state.NextCityDecision
+                    == NextCityDecision.RestoreDepotAccess
+                && state.LiquidCargoKind == LiquidCargoKind.Fuel
+                && state.LiquidCargoQuantityMilli
+                    == LastBearingBalanceV1.TankFuelReturnMilli
+                && state.LiquidCargoCustody
+                    == LiquidCargoCustody.Settlement
+                && state.FuelUnits >= fuelBondUnits;
         }
 
         private static bool ComputeDepotApproachRecoveryAvailable(

@@ -480,6 +480,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
         }
     }
 
+    public sealed class RestoreDepotAccessCommand : LastBearingCommand
+    {
+        public RestoreDepotAccessCommand(long sequence)
+            : base(sequence)
+        {
+        }
+    }
+
     public sealed class ServiceFieldSleeveCommand : LastBearingCommand
     {
         public ServiceFieldSleeveCommand(long sequence)

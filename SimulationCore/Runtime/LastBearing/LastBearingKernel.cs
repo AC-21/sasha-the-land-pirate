@@ -281,6 +281,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 ApplyBarterSpareBearingLot(builder, barterLot, events);
             }
+            else if (command is RestoreDepotAccessCommand restoreAccess)
+            {
+                ApplyRestoreDepotAccess(
+                    builder,
+                    restoreAccess,
+                    events);
+            }
             else if (command is ServiceFieldSleeveCommand service)
             {
                 ApplyServiceSleeve(builder, service, events);
@@ -2324,6 +2331,157 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 1);
         }
 
+        private static void ApplyRestoreDepotAccess(
+            LastBearingStateBuilder builder,
+            RestoreDepotAccessCommand command,
+            LastBearingEventSink events)
+        {
+            bool exactAdverseLineage =
+                builder.ExpeditionPhase == ExpeditionPhase.AtHome
+                && builder.TransactionPhase == TransactionPhase.Finalized
+                && builder.TurbineCondition
+                    == TurbineCondition.BearingRepaired
+                && builder.PreparationChoice
+                    == PreparationChoice.CivicBuffer
+                && builder.VehicleModule
+                    == VehicleModule.SealedRangeTank
+                && builder.RouteActionUsed
+                && builder.LiquidCapacityMilli
+                    == LastBearingBalanceV1.TankLiquidCapacityMilli
+                && builder.DepotResolution == EncounterChoice.TakeBearing
+                && builder.DepotControl == DepotControl.Depleted
+                && builder.DepotBearingDisposition
+                    == DepotBearingDisposition.InstalledAtTurbine
+                && builder.FactionClaimState
+                    == FactionClaimState.Aggrieved
+                && builder.FactionAidPolicy == FactionAidPolicy.Withheld
+                && builder.EmergencyAidWaterMilli == 0
+                && builder.PendingFactionOutcome
+                    == FactionOutcomeKind.Adverse
+                && builder.FactionTrust
+                    == LastBearingBalanceV1.TakeTrustDelta
+                && builder.FactionGrievance
+                    == LastBearingBalanceV1.TakeGrievanceDelta
+                && builder.FutureRouteTollFuelUnits
+                    == LastBearingBalanceV1.TakeFutureRouteTollFuelUnits
+                && builder.FactionMemory != null
+                && string.Equals(
+                    builder.FactionMemory.StableId,
+                    "memory:last-bearing:take:0001",
+                    StringComparison.Ordinal)
+                && string.Equals(
+                    builder.FactionMemory.WitnessedAction,
+                    "TakeClaimedBearing",
+                    StringComparison.Ordinal)
+                && string.Equals(
+                    builder.FactionMemory.AffectedFactionId,
+                    LastBearingState.LastBearingFactionId,
+                    StringComparison.Ordinal)
+                && builder.FactionMemory.Magnitude
+                    == LastBearingBalanceV1.TakeGrievanceDelta
+                && string.Equals(
+                    builder.FactionMemory.DoctrineTag,
+                    "custody-breach",
+                    StringComparison.Ordinal)
+                && builder.FactionMemory.EncounterTick
+                    <= builder.GlobalTick
+                && string.Equals(
+                    builder.FactionMemory.ConsequenceCode,
+                    "DEPOT_ACCESS_CLOSED",
+                    StringComparison.Ordinal)
+                && builder.DepotAccessFeePartsUnits
+                    == (builder.FactionClaimProgressMilli
+                            == LastBearingBalanceV1
+                                .FactionClaimThresholdMilli
+                        ? LastBearingBalanceV1
+                            .ClaimedDepotAccessFeePartsUnits
+                        : 0)
+                && builder.LiquidCargoKind == LiquidCargoKind.Fuel
+                && builder.LiquidCargoQuantityMilli
+                    == LastBearingBalanceV1.TankFuelReturnMilli
+                && builder.LiquidCargoCustody
+                    == LiquidCargoCustody.Settlement;
+            if (exactAdverseLineage
+                && builder.NextCityDecision == NextCityDecision.None
+                && builder.RoutePermitGranted
+                && builder.FactionAccessPolicy
+                    == FactionAccessPolicy.PermitRequired)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (!exactAdverseLineage
+                || builder.NextCityDecision
+                    != NextCityDecision.RestoreDepotAccess
+                || builder.FactionAccessPolicy
+                    != FactionAccessPolicy.Closed
+                || builder.RoutePermitGranted)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_DEPOT_ACCESS_RESTORATION_NOT_ELIGIBLE");
+            }
+
+            long fuelBondUnits =
+                LastBearingBalanceV1.TankFuelReturnMilli / 1000;
+            if (builder.FuelUnits < fuelBondUnits)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_DEPOT_ACCESS_RESTORATION_FUEL_INSUFFICIENT");
+            }
+
+            long previousFuel = builder.FuelUnits;
+            FactionAccessPolicy previousAccess =
+                builder.FactionAccessPolicy;
+            NextCityDecision previousDecision = builder.NextCityDecision;
+            builder.FuelUnits = checked(builder.FuelUnits - fuelBondUnits);
+            builder.RoutePermitGranted = true;
+            builder.FactionAccessPolicy =
+                FactionAccessPolicy.PermitRequired;
+            builder.NextCityDecision = NextCityDecision.None;
+
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityResourcesCommitted,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                "settlement:last-bearing:fuel",
+                previousFuel,
+                builder.FuelUnits);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.DepotAccessTermsChanged,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.DepotCorridorRoutePermitId,
+                (long)previousAccess,
+                (long)builder.FactionAccessPolicy);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.RoutePermitGranted,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.DepotCorridorRoutePermitId,
+                0,
+                1);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.NextCityDecisionSet,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                "settlement:last-bearing:next-decision",
+                (long)previousDecision,
+                (long)builder.NextCityDecision);
+        }
+
         private static void ApplyServiceSleeve(
             LastBearingStateBuilder builder,
             ServiceFieldSleeveCommand command,
@@ -2800,6 +2958,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return builder.VehicleModule == VehicleModule.WinchAssembly
                     ? NextCityDecision.RefurbishAuxiliaryPump
                     : NextCityDecision.ExpandEmergencyCistern;
+            }
+
+            if (builder.VehicleModule == VehicleModule.SealedRangeTank
+                && builder.PendingFactionOutcome
+                    == FactionOutcomeKind.Cooperative
+                && builder.FactionAccessPolicy
+                    == FactionAccessPolicy.SharedService
+                && builder.RoutePermitGranted)
+            {
+                return NextCityDecision.None;
             }
 
             return builder.VehicleModule == VehicleModule.WinchAssembly
