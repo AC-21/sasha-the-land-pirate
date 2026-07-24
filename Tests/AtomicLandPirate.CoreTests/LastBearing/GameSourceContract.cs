@@ -110,6 +110,7 @@ namespace AtomicLandPirate.LastBearingTests
                 controller,
                 "public bool IsWreckLineFrameRailRecoveryAvailable");
             Require(controller, "public bool CanStartHotShift");
+            Require(controller, "public bool IsHotShiftStartQueued");
             Require(controller, "public void StartHotShift()");
             Require(controller, "public bool CanPumpEmergencyCistern");
             Require(controller, "public void PumpEmergencyCistern()");
@@ -193,7 +194,8 @@ namespace AtomicLandPirate.LastBearingTests
                 shortcuts.IndexOf(
                     "StartHotShift",
                     StringComparison.Ordinal) < 0,
-                "Hot Shift must remain a deliberate Field Desk action, not an E shortcut");
+                "Hot Shift submit belongs to the Field Desk and physical " +
+                "machine control, not the global shortcut owner");
             Require(controller, "public void BeginGaragePlan(");
             Require(controller, "public void CommitGaragePlan(");
             Require(controller, "public void InstallPatchworkSkidPlate()");

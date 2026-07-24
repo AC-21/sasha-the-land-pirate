@@ -281,6 +281,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _readModel?.IsHotShiftRunAvailable == true &&
             IsExactFieldDeskCityOverview;
 
+        public bool IsHotShiftStartQueued =>
+            _pendingCommands.Exists(command =>
+                command is RunHotShiftCommand);
+
         public bool CanPumpEmergencyCistern =>
             _pendingCommands.Count == 0 &&
             _readModel?.IsEmergencyCisternPumpAvailable == true &&
@@ -769,6 +773,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void StartHotShift()
         {
+            if (IsHotShiftStartQueued)
+            {
+                return;
+            }
+
             if (_readModel == null)
             {
                 _status = "Start or load Last Bearing before running the Hot Shift.";
@@ -785,7 +794,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (!IsExactFieldDeskCityOverview)
             {
                 _status =
-                    "Run the Hot Shift from the city Field Desk while Sasha is home.";
+                    "Run the Hot Shift from the physical Machine Shop or city Field Desk while Sasha is home.";
                 return;
             }
 

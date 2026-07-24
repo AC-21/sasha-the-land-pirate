@@ -37,6 +37,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             "INTERACT_CALIBRATION_SLED";
         public const string SledDestinationName =
             "SOCKET_CALIBRATION_SLED_DESTINATION";
+        public const string HotShiftMachineControlName =
+            "INTERACT_MACHINE_SHOP_HOT_SHIFT";
         public const string FeedbackLabelName =
             "WORKING_SERVICE_CELL_FEEDBACK";
 
@@ -73,10 +75,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private GameObject? _operatorSocket;
         private GameObject? _sledTarget;
         private GameObject? _sledDestination;
+        private GameObject? _hotShiftMachineControl;
+        private TextMesh? _hotShiftMachineLabel;
         private TextMesh? _feedbackLabel;
         private int _hoveredPadIndex = -1;
         private bool _linkSourceSelected;
         private string? _selectedResidentId;
+        private bool _hotShiftControlFocused;
         private bool _built;
 
         public string Feedback { get; private set; } =
@@ -108,8 +113,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool IsBuilt => _built;
 
+        public bool IsHotShiftControlFocused =>
+            _hotShiftControlFocused &&
+            _hotShiftMachineControl?.activeInHierarchy == true;
+
+        public bool IsHotShiftControlVisible =>
+            _hotShiftMachineControl?.activeInHierarchy == true;
+
+        public string HotShiftMachineLabel =>
+            _hotShiftMachineLabel?.text ?? string.Empty;
+
         public bool HasDedicatedInteractionTargets =>
-            _targets.Count >= 15;
+            _targets.Count >= 16;
 
         internal void Build(
             Material iron,
@@ -237,6 +252,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 -1,
                 tungsten,
                 "DELIVER");
+            _hotShiftMachineControl = CreateInteractionTarget(
+                HotShiftMachineControlName,
+                Vector3.zero,
+                new Vector3(1.12f, 0.62f, 0.86f),
+                InteractionKind.HotShiftMachineControl,
+                -1,
+                tungsten,
+                "CLOCK HOT SHIFT\nRETURN · GAMEPAD SOUTH");
+            _hotShiftMachineLabel =
+                _hotShiftMachineControl.GetComponentInChildren<TextMesh>();
 
             var feedbackObject = new GameObject(
                 FeedbackLabelName);
@@ -284,6 +309,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _selectedResidentId = null;
             }
 
+            if (!ShouldShowHotShiftControl(model))
+            {
+                _hotShiftControlFocused = false;
+            }
+            else if (!_hotShiftControlFocused)
+            {
+                _hotShiftControlFocused = true;
+            }
+
             bool interactionTargetMoved = PositionServiceSockets(model);
             if (_sledTarget != null)
             {
@@ -311,6 +345,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _hoveredPadIndex = -1;
             _linkSourceSelected = false;
             _selectedResidentId = null;
+            _hotShiftControlFocused = false;
             SetFeedback(
                 "CHOOSE A BUILDING · THEN A WORK PAD",
                 rejected: false);
@@ -675,6 +710,67 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 "COMMISSIONING DELIVERY QUEUED · returns 2 parts once");
         }
 
+        public void FocusHotShiftControl()
+        {
+            if (!IsInteractionActive() ||
+                _model == null ||
+                !ShouldShowHotShiftControl(_model))
+            {
+                _hotShiftControlFocused = false;
+                Reject("HOT SHIFT CONTROL UNAVAILABLE");
+                RefreshInteractionVisuals();
+                return;
+            }
+
+            _hotShiftControlFocused = true;
+            SetFeedback(HotShiftFeedback(_model), rejected: false);
+            RefreshInteractionVisuals();
+        }
+
+        public void ClickHotShiftControl()
+        {
+            if (!RequireCityOverview() ||
+                _model == null ||
+                !ShouldShowHotShiftControl(_model))
+            {
+                Reject("HOT SHIFT CONTROL UNAVAILABLE");
+                return;
+            }
+
+            _hotShiftControlFocused = true;
+            if (_controller!.HasPendingPlayerCommands)
+            {
+                SetFeedback(
+                    _controller.IsHotShiftStartQueued
+                        ? "HOT SHIFT ALREADY QUEUED · custody unchanged until the city tick"
+                        : "ACTION QUEUED · let the city record it first",
+                    rejected: !_controller.IsHotShiftStartQueued);
+                RefreshInteractionVisuals();
+                return;
+            }
+
+            if (!_controller.CanStartHotShift)
+            {
+                _controller.StartHotShift();
+                Reject(_controller.Status);
+                RefreshInteractionVisuals();
+                return;
+            }
+
+            _controller.StartHotShift();
+            if (!_controller.IsHotShiftStartQueued)
+            {
+                Reject(_controller.Status);
+                RefreshInteractionVisuals();
+                return;
+            }
+
+            SetFeedback(
+                "HOT SHIFT QUEUED · 1 fuel and machine motion begin on the authoritative tick",
+                rejected: false);
+            RefreshInteractionVisuals();
+        }
+
         public bool IsPadHighlighted(int padIndex)
         {
             return IsValidPad(padIndex) &&
@@ -714,7 +810,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 if (_hoveredPadIndex != -1 ||
                     _linkSourceSelected ||
-                    _selectedResidentId != null)
+                    _selectedResidentId != null ||
+                    _hotShiftControlFocused)
                 {
                     ResetLocalSelection();
                 }
@@ -726,6 +823,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (keyboard?.rKey.wasPressedThisFrame == true)
             {
                 RotatePreview();
+            }
+
+            var gamepad = Gamepad.current;
+            bool operateHotShift =
+                keyboard?.enterKey.wasPressedThisFrame == true ||
+                gamepad?.buttonSouth.wasPressedThisFrame == true;
+            if (operateHotShift &&
+                IsHotShiftControlFocused &&
+                _controller?.FieldDesk?.OwnsKeyboardFocus != true)
+            {
+                ClickHotShiftControl();
             }
 
             var mouse = Mouse.current;
@@ -827,6 +935,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 case InteractionKind.SledDestination:
                     ClickSledDestination();
                     break;
+                case InteractionKind.HotShiftMachineControl:
+                    FocusHotShiftControl();
+                    ClickHotShiftControl();
+                    break;
             }
         }
 
@@ -858,7 +970,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private bool RequireCityOverview()
         {
             if (_controller?.IsExactFieldDeskCityOverview == true &&
-                _model != null)
+                _model != null &&
+                ReferenceEquals(
+                    _model,
+                    _controller.RuntimeReadModel))
             {
                 return true;
             }
@@ -872,6 +987,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return _built &&
                    _controller?.IsExactFieldDeskCityOverview == true &&
                    _model != null &&
+                   ReferenceEquals(
+                       _model,
+                       _controller.RuntimeReadModel) &&
                    gameObject.activeInHierarchy;
         }
 
@@ -984,6 +1102,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     WithHeight(position, 0.38f));
             }
 
+            if (_hotShiftMachineControl != null &&
+                IsValidPad(model.MachineShopPadIndex))
+            {
+                Vector3 position =
+                    PadPositions[model.MachineShopPadIndex] +
+                    RotateOffset(
+                        new Vector3(0f, 0f, -0.82f),
+                        model.MachineShopQuarterTurns);
+                moved |= SetLocalPositionIfChanged(
+                    _hotShiftMachineControl,
+                    WithHeight(position, 0.58f));
+                _hotShiftMachineControl.transform.localRotation =
+                    Quaternion.Euler(
+                        0f,
+                        model.MachineShopQuarterTurns * 90f,
+                        0f);
+            }
+
             return moved;
         }
 
@@ -1001,6 +1137,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 CityDeliveryStage.DeliveredToWorkshop;
             bool staffingOpen = linked &&
                 _model?.CityDeliveryStage == CityDeliveryStage.AtRecycler;
+            bool showHotShiftControl =
+                _model != null &&
+                ShouldShowHotShiftControl(_model);
             bool humanChoiceAvailable = staffingOpen &&
                 _controller?.CanAssignCityServiceHuman == true &&
                 !string.Equals(
@@ -1041,6 +1180,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             SetActive(
                 _sledDestination,
                 linked && staffed && !sledComplete);
+            SetActive(
+                _hotShiftMachineControl,
+                showHotShiftControl);
 
             ScaleSelection(
                 _recyclerSelector,
@@ -1067,6 +1209,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _selectedResidentId,
                     ResidentRoster.RobotResidentId,
                     StringComparison.Ordinal));
+            ScaleSelection(
+                _hotShiftMachineControl,
+                showHotShiftControl && _hotShiftControlFocused);
+            if (_hotShiftMachineLabel != null && _model != null)
+            {
+                string label = HotShiftControlLabel(_model);
+                if (_hotShiftMachineLabel.text != label)
+                {
+                    _hotShiftMachineLabel.text = label;
+                }
+
+                _hotShiftMachineLabel.color =
+                    _model.IsHotShiftStalledByDustFront ||
+                    _model.IsHotShiftStalledByWorkshopPush
+                        ? new Color32(255, 154, 102, 255)
+                        : new Color32(238, 221, 178, 255);
+            }
 
             RefreshPadHighlights();
         }
@@ -1220,6 +1379,74 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return padIndex >= 0 && padIndex < PadCount;
         }
 
+        private static bool ShouldShowHotShiftControl(
+            LastBearingReadModel model)
+        {
+            return model.CityDeliveryStage ==
+                       CityDeliveryStage.DeliveredToWorkshop &&
+                   model.PreparationChoice !=
+                       PreparationChoice.Unselected &&
+                   model.PlannedModule != VehicleModule.None;
+        }
+
+        private static string HotShiftControlLabel(
+            LastBearingReadModel model)
+        {
+            if (model.IsHotShiftStalledByDustFront)
+            {
+                return "DUST FRONT STOP\nSHUTTER DOWN";
+            }
+
+            if (model.IsHotShiftStalledByWorkshopPush)
+            {
+                return "WORKSHOP PUSH\nOPERATOR AT GARAGE";
+            }
+
+            if (model.HotShiftPhase == HotShiftPhase.InProgress &&
+                model.PauseCause != PauseCause.None)
+            {
+                return "HOT SHIFT PAUSED\nCITY CLOCK HELD";
+            }
+
+            if (model.IsHotShiftActivelyWorking)
+            {
+                return "HOT SHIFT RUNNING\nSPINDLE + SLED";
+            }
+
+            return model.HotShiftCompletedCount > 0
+                ? "CLOCK ANOTHER HOT SHIFT\nRETURN · GAMEPAD SOUTH"
+                : "CLOCK HOT SHIFT\nRETURN · GAMEPAD SOUTH";
+        }
+
+        private static string HotShiftFeedback(
+            LastBearingReadModel model)
+        {
+            if (model.IsHotShiftStalledByDustFront)
+            {
+                return "DUST FRONT STOP · resident present · safety shutter down";
+            }
+
+            if (model.IsHotShiftStalledByWorkshopPush)
+            {
+                return "WORKSHOP PUSH STALL · operator borrowed by Sasha's rig";
+            }
+
+            if (model.HotShiftPhase == HotShiftPhase.InProgress &&
+                model.PauseCause != PauseCause.None)
+            {
+                return "HOT SHIFT PAUSED · city clock held · machinery stopped";
+            }
+
+            if (model.IsHotShiftActivelyWorking)
+            {
+                return "HOT SHIFT RUNNING · spindle and sled follow the city clock";
+            }
+
+            return model.HotShiftCompletedCount > 0
+                ? "SHIFT COMPLETE · two-notch output witness · clock another?"
+                : "CLOCK HOT SHIFT · 1 fuel · 120 ticks · +2 parts";
+        }
+
         private static Vector3 RotateOffset(
             Vector3 offset,
             int quarterTurns)
@@ -1304,6 +1531,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             OperatorSocket,
             Sled,
             SledDestination,
+            HotShiftMachineControl,
         }
     }
 }

@@ -33,6 +33,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private Transform? _sled;
         private GameObject? _humanOperator;
         private GameObject? _robotOperator;
+        private Transform? _hotShiftSpindle;
+        private GameObject? _hotShiftWorkPool;
+        private GameObject? _workshopPushTransferArm;
+        private GameObject? _dustFrontShutter;
+        private GameObject? _completionWitnessA;
+        private GameObject? _completionWitnessB;
+        private float _hotShiftSledProgress = 1f;
         private bool _built;
 
         public LastBearingCityServiceCellInteractor? Interactor
@@ -64,6 +71,27 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool IsRobotOperatorVisible =>
             _robotOperator?.activeSelf == true;
+
+        public bool IsHotShiftSpindleMoving =>
+            _hotShiftSpindle?.gameObject.activeInHierarchy == true;
+
+        public bool IsHotShiftWorkPoolVisible =>
+            _hotShiftWorkPool?.activeInHierarchy == true;
+
+        public bool IsWorkshopPushTransferArmVisible =>
+            _workshopPushTransferArm?.activeInHierarchy == true;
+
+        public bool IsDustFrontShutterVisible =>
+            _dustFrontShutter?.activeInHierarchy == true;
+
+        public bool IsHotShiftCompletionWitnessVisible =>
+            _completionWitnessA?.activeInHierarchy == true &&
+            _completionWitnessB?.activeInHierarchy == true;
+
+        public float HotShiftSledProgress => _hotShiftSledProgress;
+
+        public Quaternion HotShiftSpindleLocalRotation =>
+            _hotShiftSpindle?.localRotation ?? Quaternion.identity;
 
         internal void Build(
             Material concrete,
@@ -141,6 +169,42 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 Vector3.zero,
                 new Vector3(0.34f, 0.7f, 0.34f),
                 iron);
+            _hotShiftSpindle = CreateBlock(
+                "Hot Shift Machine Spindle",
+                _machineShop,
+                new Vector3(0f, 0.58f, -0.34f),
+                new Vector3(0.42f, 0.18f, 0.18f),
+                iron).transform;
+            _hotShiftWorkPool = CreateBlock(
+                "Hot Shift Tungsten Work Pool",
+                _machineShop,
+                new Vector3(0f, 0.66f, 0.22f),
+                new Vector3(0.72f, 0.06f, 0.48f),
+                tungsten);
+            _workshopPushTransferArm = CreateBlock(
+                "Workshop Push Garageward Transfer Arm",
+                _machineShop,
+                new Vector3(0.52f, 0.46f, 0f),
+                new Vector3(0.8f, 0.12f, 0.12f),
+                bone);
+            _dustFrontShutter = CreateBlock(
+                "Dust Front Physical Safety Shutter",
+                _machineShop,
+                new Vector3(0f, 0.48f, -0.48f),
+                new Vector3(0.9f, 0.8f, 0.08f),
+                oxide);
+            _completionWitnessA = CreateBlock(
+                "Hot Shift Output Witness Notch 01",
+                _machineShop,
+                new Vector3(-0.18f, 0.72f, 0.4f),
+                new Vector3(0.12f, 0.18f, 0.12f),
+                bone);
+            _completionWitnessB = CreateBlock(
+                "Hot Shift Output Witness Notch 02",
+                _machineShop,
+                new Vector3(0.18f, 0.72f, 0.4f),
+                new Vector3(0.12f, 0.18f, 0.12f),
+                bone);
             Interactor =
                 gameObject.AddComponent<LastBearingCityServiceCellInteractor>();
             Interactor.Build(
@@ -172,7 +236,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _link == null ||
                 _sled == null ||
                 _humanOperator == null ||
-                _robotOperator == null)
+                _robotOperator == null ||
+                _hotShiftSpindle == null ||
+                _hotShiftWorkPool == null ||
+                _workshopPushTransferArm == null ||
+                _dustFrontShutter == null ||
+                _completionWitnessA == null ||
+                _completionWitnessB == null)
             {
                 return;
             }
@@ -254,10 +324,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         : 1f;
                 }
 
+                _hotShiftSledProgress = sledProgress;
                 _sled.localPosition = Vector3.Lerp(
                     WithHeight(routeStart, 0.38f),
                     WithHeight(routeEnd, 0.38f),
                     sledProgress);
+            }
+            else
+            {
+                _hotShiftSledProgress = 0f;
             }
 
             bool humanAssigned = string.Equals(
@@ -268,8 +343,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 model.CityServiceResidentId,
                 ResidentRoster.RobotResidentId,
                 StringComparison.Ordinal);
-            _humanOperator.SetActive(humanAssigned);
-            _robotOperator.SetActive(robotAssigned);
+            bool operatorAtMachine =
+                !model.IsHotShiftStalledByWorkshopPush;
+            _humanOperator.SetActive(humanAssigned && operatorAtMachine);
+            _robotOperator.SetActive(robotAssigned && operatorAtMachine);
             if (IsValidPad(model.MachineShopPadIndex))
             {
                 Vector3 operatorPosition =
@@ -280,6 +357,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _humanOperator.transform.localPosition = operatorPosition;
                 _robotOperator.transform.localPosition = operatorPosition;
             }
+
+            bool activelyWorking =
+                model.IsHotShiftActivelyWorking &&
+                model.PauseCause == PauseCause.None;
+            _hotShiftSpindle.gameObject.SetActive(activelyWorking);
+            _hotShiftWorkPool.SetActive(activelyWorking);
+            _workshopPushTransferArm.SetActive(
+                model.IsHotShiftStalledByWorkshopPush);
+            _dustFrontShutter.SetActive(
+                model.IsHotShiftStalledByDustFront);
+            bool hasCompletedRun = model.HotShiftCompletedCount > 0;
+            _completionWitnessA.SetActive(hasCompletedRun);
+            _completionWitnessB.SetActive(hasCompletedRun);
+            _hotShiftSpindle.localRotation = Quaternion.Euler(
+                model.HotShiftElapsedTicks * 31f,
+                0f,
+                0f);
 
             Interactor?.Apply(model, _sled);
         }
