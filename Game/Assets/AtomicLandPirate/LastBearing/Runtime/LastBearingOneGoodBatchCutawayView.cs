@@ -79,6 +79,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public Transform? PermitAnchor { get; private set; }
 
+        public LastBearingFuelBondInteractor? FuelBondInteractor
+        {
+            get;
+            private set;
+        }
+
         public Transform? MachineSpindle => _machineSpindle;
 
         public GameObject? BearingLot => _bearingLot;
@@ -175,6 +181,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
             BuildInputStillage(darkIron, oxide, bone);
             BuildOutputLot(darkIron, oxide, bone);
             BuildClaimsWicket(darkIron, oxide, bone, tungsten, signal);
+            FuelBondInteractor =
+                gameObject.AddComponent<LastBearingFuelBondInteractor>();
+            FuelBondInteractor.Build(
+                darkIron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
             _humanWorker = CreateHumanWorker(oxide, bone);
             _robotWorker = CreateRobotWorker(darkIron, concrete, oxide);
 

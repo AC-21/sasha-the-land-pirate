@@ -135,6 +135,25 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "to continue the fixed profile.");
             }
 
+            if (IsFuelBondFinale(model))
+            {
+                return Create(
+                    LastBearingPermitJobChapter.Finale,
+                    JobStepCount,
+                    "FINALE · THE FUEL BOND",
+                    "Permit posted. Grievance retained.",
+                    "Five settlement fuel units crossed the claims wicket and " +
+                    "bought the depot-corridor permit. The sealed-tank fields " +
+                    "remain return provenance, not colony-owned spent cans. " +
+                    "The depot remains aggrieved, aid remains withheld, and " +
+                    "the next passage still costs " +
+                    model.FutureRouteTollFuelUnits + " fuel.",
+                    "Fuel bond complete.",
+                    phaseProgressCurrent: 1,
+                    phaseProgressTarget: 1,
+                    isFinale: true);
+            }
+
             if (IsPermitJobFinale(model))
             {
                 string water = model.IsWaterRecovering
@@ -504,6 +523,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     phaseProgressTarget: 1);
             }
 
+            if (model.IsDepotAccessRestorationAvailable)
+            {
+                return Create(
+                    LastBearingPermitJobChapter.Barter,
+                    8,
+                    "CHAPTER VIII · POST THE FUEL BOND",
+                    "Put the returned fuel behind the promise",
+                    "Exactly five settlement fuel units are ready at the claims " +
+                    "ledger. Posting them buys one corridor permit; it does not " +
+                    "erase the depot grievance, restore aid, or waive the " +
+                    "two-fuel future toll.",
+                    "Click OPEN CLAIMS WICKET, release the route input, then " +
+                    "use E, gamepad south, or the exact ledger stamp.",
+                    phaseProgressCurrent: 0,
+                    phaseProgressTarget: 1);
+            }
+
             if (model.MaintenanceDue)
             {
                 return Create(
@@ -523,6 +559,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private static LastBearingPermitJobPresentation PresentAlternateConclusion(
             LastBearingReadModel model)
         {
+            if (model.PreparationChoice == PreparationChoice.CivicBuffer
+                && model.TurbineCondition == TurbineCondition.SleeveRepaired
+                && model.FactionAccessPolicy ==
+                    FactionAccessPolicy.SharedService)
+            {
+                return Create(
+                    LastBearingPermitJobChapter.AlternateConclusion,
+                    JobStepCount,
+                    "ALTERNATE CONCLUSION · SHARED SERVICE",
+                    "The depot gate stayed open",
+                    "The cooperative field sleeve restored water and preserved " +
+                    "shared depot service. No paid fuel bond is pending; the " +
+                    "maintenance promise remains the cost of this agreement.",
+                    "This cooperative branch is complete for the current V0.",
+                    isAlternateConclusion: true,
+                    recommendedFirstRunCue: ReplayCue);
+            }
+
             if (model.TurbineCondition == TurbineCondition.SleeveRepaired
                 && model.InstalledCityImprovement
                     == CityImprovementKind.ExpandedEmergencyCistern)
@@ -655,11 +709,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return Create(
                     LastBearingPermitJobChapter.AlternateConclusion,
                     JobStepCount,
-                    "ALTERNATE CONCLUSION · RANGE-TANK RETURN",
-                    "Depot access needs another answer",
-                    "Civic Buffer + Range Tank preserved a different return " +
-                    "capacity. Restoring depot access is outside this V0.",
-                    "This branch is complete for the current V0.",
+                    "ALTERNATE WORK ORDER · FUEL BOND",
+                    "The claims ledger is not ready",
+                    "The returned range-tank fuel still points at the depot " +
+                    "access decision, but its exact posting terms are not " +
+                    "currently valid. No fuel or permit has moved.",
+                    "Return to the city state that produced the exact claims-wicket order.",
                     isAlternateConclusion: true,
                     recommendedFirstRunCue: ReplayCue);
             }
@@ -787,6 +842,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     == LastBearingBalanceV1.SpareBearingBatchOutputQuantity
                 && model.SpareBearingLotCustody
                     == SpareBearingLotCustody.LastBearingClaimsCounter;
+        }
+
+        private static bool IsFuelBondFinale(LastBearingReadModel model)
+        {
+            return LastBearingFuelBondInteractor.IsAcceptedWitness(model);
         }
 
         private static string DepotChoiceCue(LastBearingReadModel model)

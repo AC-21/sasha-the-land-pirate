@@ -109,6 +109,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 (int)LastBearingFieldDeskIntent.OpenDustFrontRelay,
                 Is.EqualTo(31));
+            Assert.That(
+                (int)LastBearingFieldDeskIntent.OpenFuelBondClaimsWicket,
+                Is.EqualTo(33));
         }
 
         [TestCase(

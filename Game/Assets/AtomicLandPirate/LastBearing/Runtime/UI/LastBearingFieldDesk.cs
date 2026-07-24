@@ -299,7 +299,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _controller.IsEmergencyCisternPumpFocused ||
                     _controller.IsDustFrontRelayFocused ||
                     _controller.IsEmergencyCisternExpansionFocused ||
-                    _controller.IsFieldSleeveServiceFocused;
+                    _controller.IsFieldSleeveServiceFocused ||
+                    _controller.IsFuelBondFocused;
                 if (physicalControlStillFocused)
                 {
                     HideAndResetTransient();
@@ -596,6 +597,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 case LastBearingFieldDeskIntent.CommitExpedition: _controller.CommitExpedition(); break;
                 case LastBearingFieldDeskIntent.OpenPumpHallRepair: _controller.OpenPumpHallRepair(); break;
                 case LastBearingFieldDeskIntent.OpenOneGoodBatchWorkshop: _controller.OpenOneGoodBatchWorkshop(); break;
+                case LastBearingFieldDeskIntent.OpenFuelBondClaimsWicket:
+                    _controller.OpenFuelBondClaimsWicket();
+                    _physicalWorkRouted =
+                        _controller.IsFuelBondFocused;
+                    HideAndResetTransient();
+                    break;
                 case LastBearingFieldDeskIntent.OpenPumpHallImprovement: _controller.OpenPumpHallImprovement(); break;
                 case LastBearingFieldDeskIntent.OpenEmergencyCisternExpansion:
                     _controller.OpenEmergencyCisternExpansion();

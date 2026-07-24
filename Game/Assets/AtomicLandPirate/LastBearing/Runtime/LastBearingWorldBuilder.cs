@@ -110,6 +110,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             private set;
         }
 
+        public LastBearingFuelBondInteractor? FuelBondInteractor =>
+            OneGoodBatchCutawayView?.FuelBondInteractor;
+
         public Transform? SelectedBuildingCutawayCameraAnchor { get; private set; }
 
         public Transform? SelectedBuildingCutawayFocusAnchor { get; private set; }
@@ -483,6 +486,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingReadModel model)
         {
             PumpHallMaintenanceInteractor?.Apply(model);
+        }
+
+        public void ConfigureFuelBondInteraction(
+            LastBearingGameController controller)
+        {
+            if (MainCamera == null || FuelBondInteractor == null)
+            {
+                throw new InvalidOperationException(
+                    "The fuel bond requires the shared claims-wicket camera.");
+            }
+
+            FuelBondInteractor.Configure(controller, MainCamera);
+        }
+
+        public void ResetFuelBondInteraction()
+        {
+            FuelBondInteractor?.ResetLocalFocus();
+        }
+
+        public void ApplyFuelBondInteraction(
+            LastBearingReadModel? model)
+        {
+            FuelBondInteractor?.Apply(model);
         }
 
         public void ConfigureDepotDecisionInteraction(

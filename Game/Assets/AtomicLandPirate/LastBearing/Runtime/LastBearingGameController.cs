@@ -315,6 +315,28 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 LastBearingPresentationMode.BuildingCutaway &&
             _world?.IsOneGoodBatchCutawaySelected == true;
 
+        public bool IsFuelBondQueued =>
+            _pendingCommands.Exists(command =>
+                command is RestoreDepotAccessCommand);
+
+        public bool CanOpenFuelBondClaimsWicket =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsDepotAccessRestorationAvailable == true &&
+            IsExactFieldDeskCityOverview &&
+            _world?.FuelBondInteractor != null;
+
+        public bool IsFuelBondFocused =>
+            _world?.FuelBondInteractor?.IsControlFocused == true;
+
+        public bool CanPostFuelBond =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsDepotAccessRestorationAvailable == true &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.BuildingCutaway &&
+            _world?.IsOneGoodBatchCutawaySelected == true &&
+            _world.FuelBondInteractor?.IsInputArmed == true;
+
         public string Status => _status;
 
         public string SaveStatus => _saveStatus;
@@ -634,6 +656,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ConfigureGarageModuleInteraction(this);
             _world.ConfigureGarageDepartureInteraction(this);
             _world.ConfigurePumpHallMaintenanceInteraction(this);
+            _world.ConfigureFuelBondInteraction(this);
             _hud = gameObject.AddComponent<LastBearingHud>();
             _hud.Configure(this, _fieldDesk);
             SetLegacyHudSuppressedByFieldDesk(
@@ -663,6 +686,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
+            _world?.ResetFuelBondInteraction();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
@@ -724,6 +748,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
+            _world?.ResetFuelBondInteraction();
             _state = null;
             _readModel = null;
             ResetPublicSnapshotsToRuntime();
@@ -785,6 +810,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 futureRouteTollFuelUnits: 0,
                 humanVisible: true,
                 robotVisible: true);
+            _world?.ApplyFuelBondInteraction(null);
             _world?.HideCityServiceCell();
             _fieldDesk?.ResetForLifecycle();
         }
@@ -1818,6 +1844,36 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
         }
 
+        public void OpenFuelBondClaimsWicket()
+        {
+            if (!CanOpenFuelBondClaimsWicket ||
+                !TryRouteToFuelBondClaimsWicket(
+                    "Five returned fuel cans are framed at the claims ledger. Release the route input, then post the bond at the physical stamp."))
+            {
+                _status =
+                    "The fuel-bond wicket opens only for the exact returned Civic Buffer range-tank fuel load.";
+            }
+        }
+
+        public void PostFuelBond()
+        {
+            if (IsFuelBondQueued)
+            {
+                return;
+            }
+
+            if (!CanPostFuelBond)
+            {
+                _status =
+                    "Post the fuel bond only from the focused claims ledger after releasing the route input.";
+                return;
+            }
+
+            Queue(sequence => new RestoreDepotAccessCommand(sequence));
+            _status =
+                "Fuel bond queued. The five returned fuel units remain with Last Bearing until the authoritative city tick accepts the posting.";
+        }
+
         public void OpenFieldSleeveService()
         {
             if (!TryRouteToPumpHallMaintenance(
@@ -1931,6 +1987,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
+            _world?.ResetFuelBondInteraction();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
             if (_saveAdapter == null)
@@ -1973,8 +2030,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         if (!TryRouteToPumpHallMaintenance(
                                 "Exact field-sleeve maintenance restored at its physical pump-hall control."))
                         {
-                            TryRouteToOneGoodBatchWorkshop(
-                                "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                            if (!TryRouteToFuelBondClaimsWicket(
+                                    "Exact unposted fuel bond restored at the claims ledger. Release the load input before posting."))
+                            {
+                                TryRouteToOneGoodBatchWorkshop(
+                                    "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                            }
                         }
                     }
                 }
@@ -1999,6 +2060,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.ApplyGarageModuleInteraction(_readModel);
                 _world?.ApplyGarageDepartureInteraction(_readModel);
                 _world?.ApplyPumpHallMaintenanceInteraction(_readModel);
+                _world?.ApplyFuelBondInteraction(_readModel);
             }
         }
 
@@ -2074,6 +2136,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ?.EmergencyCisternExpansionInteractor
                     ?.IsControlFocused == true ||
                 _world?.PumpHallMaintenanceInteractor
+                    ?.IsControlFocused == true ||
+                _world?.FuelBondInteractor
                     ?.IsControlFocused == true)
             {
                 return;
@@ -2221,6 +2285,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 bool spareBearingLotBartered = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.SpareBearingLotBartered);
+                bool fuelBondPosted =
+                    _readModel.IsDepotAccessRestorationAvailable &&
+                    ContainsEvent(
+                        result.DomainEvents,
+                        LastBearingEventKind.RoutePermitGranted);
                 bool cityBuildingChanged = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.CityBuildingPlaced) ||
@@ -2305,6 +2374,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 {
                     _status =
                         "Barter accepted. The physical lot crossed the claims wicket and the route permit is recorded.";
+                }
+
+                if (fuelBondPosted)
+                {
+                    _status =
+                        "Fuel bond posted. Five returned fuel units crossed the claims wicket; the depot route permit is recorded while the grievance and two-fuel future toll remain.";
                 }
 
                 if (rigUpgradeInstalled)
@@ -2653,6 +2728,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 humanVisible,
                 robotVisible,
                 simulationPaused: _readModel.PauseCause != PauseCause.None);
+            _world.ApplyFuelBondInteraction(_readModel);
             _world.ApplyGaragePreparationProgress(
                 _readModel.PreparationElapsedTicks,
                 _readModel.PreparationRequiredTicks);
@@ -2874,6 +2950,20 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return true;
         }
 
+        private bool TryRouteToFuelBondClaimsWicket(string successStatus)
+        {
+            if (_pendingCommands.Count != 0 ||
+                _readModel?.IsDepotAccessRestorationAvailable != true ||
+                !TryRouteToOneGoodBatchWorkshop(successStatus) ||
+                _world?.FuelBondInteractor?.FocusControl() != true)
+            {
+                return false;
+            }
+
+            _status = successStatus;
+            return true;
+        }
+
         private bool IsOneGoodBatchWorkshopRelevant()
         {
             return _pendingCommands.Count == 0 &&
@@ -2883,7 +2973,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         SpareBearingBatchPhase.InProgress ||
                     _readModel.IsSpareBearingBarterAvailable ||
                     _readModel.SpareBearingBatchPhase ==
-                        SpareBearingBatchPhase.Settled);
+                        SpareBearingBatchPhase.Settled ||
+                    _readModel.IsDepotAccessRestorationAvailable);
         }
 
         private static bool ContainsEvent(

@@ -694,7 +694,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             PreparationChoice.CivicBuffer,
             VehicleModule.WinchAssembly,
             EncounterChoice.Cooperate,
-            "promise came home")]
+            "depot gate stayed open")]
         [TestCase(
             PreparationChoice.WorkshopPush,
             VehicleModule.WinchAssembly,
@@ -719,12 +719,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             PreparationChoice.CivicBuffer,
             VehicleModule.SealedRangeTank,
             EncounterChoice.Cooperate,
-            "Depot access waits")]
+            "depot gate stayed open")]
         [TestCase(
             PreparationChoice.CivicBuffer,
             VehicleModule.SealedRangeTank,
             EncounterChoice.TakeBearing,
-            "Depot access needs")]
+            "claims ledger is not ready")]
         public void AlternateBranchesCloseHonestlyWithoutFalsePermitFinale(
             PreparationChoice preparation,
             VehicleModule module,
@@ -782,7 +782,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Assert.That(presentation.Detail, Does.Contain("field sleeve"));
                 Assert.That(presentation.Detail, Does.Contain("maintenance promise"));
             }
-            else if (module == VehicleModule.SealedRangeTank
+            else if (preparation == PreparationChoice.WorkshopPush
+                     && module == VehicleModule.SealedRangeTank
                      && encounter == EncounterChoice.Cooperate)
             {
                 Assert.That(
@@ -790,6 +791,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     Does.Contain("range tank").IgnoreCase);
                 Assert.That(presentation.Detail, Does.Contain("field sleeve"));
                 Assert.That(presentation.Detail, Does.Contain("maintenance promise"));
+            }
+            else if (preparation == PreparationChoice.CivicBuffer
+                     && encounter == EncounterChoice.Cooperate)
+            {
+                Assert.That(
+                    presentation.Detail,
+                    Does.Contain("shared depot service"));
+                Assert.That(
+                    presentation.Detail,
+                    Does.Contain("No paid fuel bond is pending"));
             }
 
             AssertLegible(presentation);
@@ -829,7 +840,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 serviced.Chapter,
                 Is.EqualTo(LastBearingPermitJobChapter.AlternateConclusion));
             Assert.That(serviced.IsAlternateConclusion, Is.True);
-            Assert.That(serviced.Headline, Does.Contain("promise came home"));
+            Assert.That(
+                serviced.Headline,
+                Does.Contain("depot gate stayed open").IgnoreCase);
             AssertLegible(serviced);
         }
 
