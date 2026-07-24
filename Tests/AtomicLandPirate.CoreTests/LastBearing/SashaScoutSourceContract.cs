@@ -20,6 +20,9 @@ namespace AtomicLandPirate.LastBearingTests
             string departure = Read(
                 vehicleRoot,
                 "LastBearingGarageDepartureInteractor.cs");
+            string moduleChoice = Read(
+                vehicleRoot,
+                "LastBearingGarageModuleInteractor.cs");
             string vehicleView = Read(runtimeRoot, "LastBearingVehicleView.cs");
             string world = Read(runtimeRoot, "LastBearingWorldBuilder.cs");
             string controller = Read(
@@ -108,6 +111,10 @@ namespace AtomicLandPirate.LastBearingTests
                 garage,
                 "LastBearingGarageDepartureInteractor.RootName");
             Require(garage, "DepartureInteractor.Build(");
+            Require(
+                garage,
+                "LastBearingGarageModuleInteractor.RootName");
+            Require(garage, "ModuleInteractor.Build(");
             TestHarness.True(
                 garage.IndexOf("AddComponent<Camera>", StringComparison.Ordinal) < 0,
                 "garage cutaway must reuse the one Last Bearing camera");
@@ -206,6 +213,11 @@ namespace AtomicLandPirate.LastBearingTests
             Require(departure, "INTERACT_SASHA_SCOUT_DEPARTURE_CLAMP");
             Require(departure, "_controller.CommitExpedition();");
             Require(departure, "_controller?.Hud?.BlocksWorldPointer");
+            Require(moduleChoice, "INTERACT_GARAGE_MODULE_WINCH_ASSEMBLY");
+            Require(moduleChoice, "INTERACT_GARAGE_MODULE_SEALED_RANGE_TANK");
+            Require(moduleChoice, "_controller.CommitGaragePlan(module);");
+            Require(moduleChoice, "_controller?.Hud?.BlocksWorldPointer");
+            Require(moduleChoice, "Time.frameCount > _garageEntryFrame");
             Require(controller, "public bool CanCommitExpedition");
             Require(controller, "public bool IsGarageDepartureAvailable");
             Require(controller, "public bool IsExpeditionCommitQueued");
@@ -234,6 +246,24 @@ namespace AtomicLandPirate.LastBearingTests
                         forbidden,
                         StringComparison.Ordinal) < 0,
                     "garage departure interactor contains forbidden authority " +
+                    forbidden);
+            }
+
+            foreach (string forbidden in new[]
+                     {
+                         "new SelectPreparationCommand",
+                         "new InstallVehicleModuleCommand",
+                         "LastBearingKernel",
+                         "LastBearingStateBuilder",
+                         "LastBearingCanonicalCodec",
+                         "Save(",
+                     })
+            {
+                TestHarness.True(
+                    moduleChoice.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "garage module interactor contains forbidden authority " +
                     forbidden);
             }
 

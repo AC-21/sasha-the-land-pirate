@@ -28,6 +28,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 
         private GameObject? _winchStand;
         private GameObject? _tankStand;
+        private GameObject? _winchPayload;
+        private GameObject? _tankPayload;
         private GameObject? _workshopPushPlanMarker;
         private GameObject? _civicBufferPlanMarker;
         private GameObject? _preparationGaugeRoot;
@@ -51,6 +53,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             private set;
         }
 
+        public LastBearingGarageModuleInteractor? ModuleInteractor
+        {
+            get;
+            private set;
+        }
+
         public bool IsDollhouseCutaway => true;
 
         public bool HasRoof => false;
@@ -58,10 +66,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         public bool HasNearWall => false;
 
         public bool IsWinchStaged =>
-            _winchStand != null && _winchStand.activeSelf;
+            _winchPayload != null && _winchPayload.activeSelf;
 
         public bool IsRangeTankStaged =>
-            _tankStand != null && _tankStand.activeSelf;
+            _tankPayload != null && _tankPayload.activeSelf;
 
         public bool IsPreparationGaugeVisible =>
             _preparationGaugeRoot != null && _preparationGaugeRoot.activeSelf;
@@ -204,13 +212,20 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 signal);
 
             _winchStand = CreateWinchStand(
-                new Vector3(3.05f, 0f, -2.9f),
+                new Vector3(3.05f, 0f, 0.6f),
                 darkIron,
                 oxide);
             _tankStand = CreateTankStand(
-                new Vector3(3.05f, 0f, -0.65f),
+                new Vector3(3.05f, 0f, 2.85f),
+                darkIron,
                 bone,
                 oxide);
+            BuildModuleControls(
+                darkIron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
 
             CreatePart(
                 "LEGACY_ALIGNMENT_GAUGE",
@@ -233,7 +248,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 8f);
             _moduleWorkLight = CreatePracticalLight(
                 "MODULE_STAGING_WORKLIGHT",
-                new Vector3(3.1f, 2.8f, -1.75f),
+                new Vector3(3.1f, 2.8f, 1.725f),
                 new Color(1f, 0.72f, 0.38f, 1f),
                 180f,
                 5f);
@@ -253,15 +268,43 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 LastBearingGarageDepartureInteractor.RootName);
             control.transform.SetParent(VehicleDock, false);
             control.transform.localPosition =
-                new Vector3(2.55f, 0.48f, 0.65f);
+                new Vector3(-2.55f, 0.48f, 0.65f);
             control.transform.localRotation =
-                Quaternion.Euler(0f, -16f, 0f);
+                Quaternion.Euler(0f, 16f, 0f);
             DepartureInteractor =
                 control.AddComponent<
                     LastBearingGarageDepartureInteractor>();
             DepartureInteractor.Build(
                 darkIron,
                 oxide,
+                tungsten,
+                signal);
+        }
+
+        private void BuildModuleControls(
+            Material darkIron,
+            Material oxide,
+            Material bone,
+            Material tungsten,
+            Material signal)
+        {
+            if (_winchStand == null || _tankStand == null)
+            {
+                throw new System.InvalidOperationException(
+                    "Garage module controls require both fixed stands.");
+            }
+
+            var controls = new GameObject(
+                LastBearingGarageModuleInteractor.RootName);
+            controls.transform.SetParent(transform, false);
+            ModuleInteractor =
+                controls.AddComponent<LastBearingGarageModuleInteractor>();
+            ModuleInteractor.Build(
+                _winchStand.transform,
+                _tankStand.transform,
+                darkIron,
+                oxide,
+                bone,
                 tungsten,
                 signal);
         }
@@ -301,15 +344,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 
         public void ApplyModule(SashaScoutModulePresentation module)
         {
-            if (_winchStand != null)
+            if (_winchPayload != null)
             {
-                _winchStand.SetActive(
+                _winchPayload.SetActive(
                     module != SashaScoutModulePresentation.WinchAssembly);
             }
 
-            if (_tankStand != null)
+            if (_tankPayload != null)
             {
-                _tankStand.SetActive(
+                _tankPayload.SetActive(
                     module != SashaScoutModulePresentation.SealedRangeTank);
             }
 
@@ -435,25 +478,47 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             CreatePart(
                 "WINCH_STAND_PLINTH",
                 PrimitiveType.Cube,
-                new Vector3(position.x, 0.34f, position.z),
+                new Vector3(0f, 0.34f, 0f),
                 new Vector3(2f, 0.68f, 1.5f),
                 oxide,
-                stand.transform,
-                useParentLocalPosition: true);
+                stand.transform);
+            _winchPayload = new GameObject("WINCH_MODULE_PAYLOAD");
+            _winchPayload.transform.SetParent(stand.transform, false);
+            CreatePart(
+                "WINCH_STEEL_JAW",
+                PrimitiveType.Cube,
+                new Vector3(0f, 0.86f, -0.18f),
+                new Vector3(1.55f, 0.38f, 0.78f),
+                iron,
+                _winchPayload.transform);
             CreatePart(
                 "STAGED_WINCH_DRUM",
                 PrimitiveType.Cylinder,
-                new Vector3(position.x, 0.92f, position.z),
+                new Vector3(0f, 0.92f, 0f),
                 new Vector3(0.46f, 0.75f, 0.46f),
                 iron,
-                stand.transform,
-                useParentLocalPosition: true).transform.localRotation =
+                _winchPayload.transform).transform.localRotation =
                 Quaternion.Euler(0f, 0f, 90f);
+            CreatePart(
+                "WINCH_CHEEK_LEFT",
+                PrimitiveType.Cube,
+                new Vector3(-0.7f, 0.92f, 0f),
+                new Vector3(0.16f, 0.72f, 0.72f),
+                oxide,
+                _winchPayload.transform);
+            CreatePart(
+                "WINCH_CHEEK_RIGHT",
+                PrimitiveType.Cube,
+                new Vector3(0.7f, 0.92f, 0f),
+                new Vector3(0.16f, 0.72f, 0.72f),
+                oxide,
+                _winchPayload.transform);
             return stand;
         }
 
         private GameObject CreateTankStand(
             Vector3 position,
+            Material iron,
             Material bone,
             Material oxide)
         {
@@ -463,20 +528,42 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             CreatePart(
                 "TANK_STAND_PLINTH",
                 PrimitiveType.Cube,
-                new Vector3(position.x, 0.34f, position.z),
+                new Vector3(0f, 0.34f, 0f),
                 new Vector3(2f, 0.68f, 1.5f),
                 oxide,
-                stand.transform,
-                useParentLocalPosition: true);
+                stand.transform);
+            _tankPayload = new GameObject("RANGE_TANK_MODULE_PAYLOAD");
+            _tankPayload.transform.SetParent(stand.transform, false);
             CreatePart(
                 "STAGED_RANGE_TANK",
                 PrimitiveType.Cylinder,
-                new Vector3(position.x, 1.05f, position.z),
+                new Vector3(0f, 1.05f, 0f),
                 new Vector3(0.66f, 0.85f, 0.66f),
                 bone,
-                stand.transform,
-                useParentLocalPosition: true).transform.localRotation =
+                _tankPayload.transform).transform.localRotation =
                 Quaternion.Euler(0f, 0f, 90f);
+            CreatePart(
+                "RANGE_TANK_SERVICE_BAND",
+                PrimitiveType.Cylinder,
+                new Vector3(0f, 1.05f, 0f),
+                new Vector3(0.72f, 0.16f, 0.72f),
+                oxide,
+                _tankPayload.transform).transform.localRotation =
+                Quaternion.Euler(0f, 0f, 90f);
+            CreatePart(
+                "RANGE_TANK_CRADLE_FORE",
+                PrimitiveType.Cube,
+                new Vector3(-0.46f, 0.7f, 0f),
+                new Vector3(0.16f, 0.34f, 0.82f),
+                iron,
+                stand.transform);
+            CreatePart(
+                "RANGE_TANK_CRADLE_AFT",
+                PrimitiveType.Cube,
+                new Vector3(0.46f, 0.7f, 0f),
+                new Vector3(0.16f, 0.34f, 0.82f),
+                iron,
+                stand.transform);
             return stand;
         }
 
@@ -612,16 +699,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             Vector3 localPosition,
             Vector3 localScale,
             Material material,
-            Transform? explicitParent = null,
-            bool useParentLocalPosition = false)
+            Transform? explicitParent = null)
         {
             GameObject part = GameObject.CreatePrimitive(primitiveType);
             part.name = name;
             Transform parent = explicitParent ?? transform;
             part.transform.SetParent(parent, false);
-            part.transform.localPosition = useParentLocalPosition
-                ? localPosition - parent.localPosition
-                : localPosition;
+            part.transform.localPosition = localPosition;
             part.transform.localScale = localScale;
             part.GetComponent<Renderer>().sharedMaterial = material;
             Collider collider = part.GetComponent<Collider>();
