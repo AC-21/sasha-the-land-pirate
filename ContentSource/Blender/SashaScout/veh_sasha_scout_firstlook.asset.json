@@ -1,0 +1,67 @@
+{
+  "artifact_outputs": {
+    "canonical_blend": null,
+    "derived_glb": null,
+    "render_contact_sheet": null,
+    "validation_report": null
+  },
+  "axis_and_scale": {
+    "blender_forward": "+Y",
+    "blender_up": "+Z",
+    "pivot": "ground center between axles at origin",
+    "runtime_forward": "+Z",
+    "runtime_to_blender_mapping": "(x,y,z) -> (x,z,y)",
+    "runtime_up": "+Y",
+    "units": "1 Blender unit = 1 metre"
+  },
+  "content_id": "veh_sasha_scout_a",
+  "counts": {
+    "collision_box_count_authored": 4,
+    "material_family_count_authored": 3,
+    "render_triangles_observed": null,
+    "semantic_socket_count_authored": 9,
+    "wheel_count_authored": 4
+  },
+  "generation_attempt": {
+    "attempts": 2,
+    "failure_boundary": "before generator Python execution",
+    "failure_kind": "Blender process exit 139",
+    "observed_backtrace_frames": [
+      "_platform_strstr",
+      "blender::gpu::supports_barycentric_whitelist",
+      "blender::gpu::MTLBackend::metal_is_supported"
+    ],
+    "status": "blocked-harness-quarantined"
+  },
+  "hard_cuts": [
+    "No Unity runtime, scene, package, project-setting, schema, or balance changes.",
+    "No final UVs, textures, baked maps, decals, wear, LOD1/LOD2, module art, animation, or production suspension rig.",
+    "No Tripo FBX or zip member was extracted or imported.",
+    "No generated binary or rendered artifact is represented as present.",
+    "No creator acceptance, Unity import acceptance, or ship-cleared claim."
+  ],
+  "provenance": {
+    "authorship": "deterministic Blender primitive generator authored for this repository",
+    "generator_sha256": "0caed8331fb6548cc082d1786859b1293a82c796a0d7e1a2d87e75b58cc2e862",
+    "readme_sha256": "d43c16b95d9dfdb99ba054a18337a1886f0b36f96781576713ed6996895b7d62",
+    "reference_audit": {
+      "image_files_inspected_read_only": 10,
+      "mesh_archives_inspected_as_zip_metadata_only": 7,
+      "source": "user-provided /Users/sasha/Downloads/vehicles",
+      "use": "broad function and mood only; no pixels, marks, or geometry imported"
+    }
+  },
+  "source_version": "0.1.0-firstlook",
+  "status": "prototype-source-authored-generation-blocked",
+  "tool": {
+    "build_hash": "ec6e62d40fa9",
+    "name": "Blender",
+    "version": "5.1.2"
+  },
+  "validation": {
+    "blend_reopen": "not-run-no-blend-output",
+    "generator_python_compile": "pass",
+    "glb_reimport": "not-run-no-glb-output",
+    "semantic_runtime_assertions": "authored-in-generator-not-executed"
+  }
+}
