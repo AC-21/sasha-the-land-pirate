@@ -1594,7 +1594,7 @@ def validate_game_baseline() -> None:
         "projectName": identity["project_name"],
         "organizationId": identity["organization_id"],
         "cloudEnabled": "0",
-        "activeInputHandler": "1",
+        "activeInputHandler": "2",
         "m_ActiveColorSpace": "1",
         "submitAnalytics": "0",
         "cloudServicesEnabled": "{}",
