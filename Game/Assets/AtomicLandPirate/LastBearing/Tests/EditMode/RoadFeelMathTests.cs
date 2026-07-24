@@ -137,6 +137,32 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
+        public void SteeringRackSnapsNegligibleReversalResidueToCenter()
+        {
+            float rack = 1f;
+            for (var tick = 0; tick < 8; tick++)
+            {
+                rack = RoadFeelMath.AdvanceSteeringRack(
+                    rack,
+                    targetNormalized: -1f,
+                    deltaTimeSeconds: 0.02f,
+                    zeroToFullLockSeconds: 0.22f,
+                    returnToCenterSeconds: 0.16000001f);
+            }
+
+            Assert.That(rack, Is.EqualTo(0f));
+
+            rack = RoadFeelMath.AdvanceSteeringRack(
+                rack,
+                targetNormalized: -1f,
+                deltaTimeSeconds: 0.02f,
+                zeroToFullLockSeconds: 0.22f,
+                returnToCenterSeconds: 0.16000001f);
+
+            Assert.That(rack, Is.LessThan(0f));
+        }
+
+        [Test]
         public void BodySlipPreservesDirection()
         {
             float rightSlip = RoadFeelMath.SignedBodySlipDegrees(
