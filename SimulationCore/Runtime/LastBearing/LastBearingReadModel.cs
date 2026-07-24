@@ -169,6 +169,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 ComputeDepotAccessRestorationAvailable(state);
             IsEmergencyAidReceptionAvailable =
                 ComputeEmergencyAidReceptionAvailable(state);
+            IsEmergencyAidReceptionComplete =
+                ComputeEmergencyAidReceptionComplete(state);
             SpareBearingRemainingTicks = Math.Max(
                 0,
                 state.SpareBearingRequiredTicks
@@ -334,6 +336,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public bool IsSpareBearingBarterAvailable { get; private set; }
         public bool IsDepotAccessRestorationAvailable { get; private set; }
         public bool IsEmergencyAidReceptionAvailable { get; private set; }
+        public bool IsEmergencyAidReceptionComplete { get; private set; }
         public long SpareBearingRemainingTicks { get; private set; }
         public PauseCause PauseCause { get; private set; }
         public bool IsDepotApproachRecoveryAvailable { get; private set; }
@@ -915,6 +918,22 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static bool ComputeEmergencyAidReceptionAvailable(
             LastBearingState state)
         {
+            return state.FactionAidPolicy
+                    == FactionAidPolicy.EmergencyWaterQueued
+                && HasExactEmergencyAidLineage(state);
+        }
+
+        private static bool ComputeEmergencyAidReceptionComplete(
+            LastBearingState state)
+        {
+            return state.FactionAidPolicy
+                    == FactionAidPolicy.EmergencyWaterDelivered
+                && HasExactEmergencyAidLineage(state);
+        }
+
+        private static bool HasExactEmergencyAidLineage(
+            LastBearingState state)
+        {
             return state.ExpeditionPhase == ExpeditionPhase.AtHome
                 && state.TransactionPhase == TransactionPhase.Finalized
                 && state.TurbineCondition
@@ -930,8 +949,6 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     == FactionClaimState.Cooperating
                 && state.FactionAccessPolicy
                     == FactionAccessPolicy.SharedService
-                && state.FactionAidPolicy
-                    == FactionAidPolicy.EmergencyWaterQueued
                 && state.EmergencyAidWaterMilli
                     == LastBearingBalanceV1.CooperateAidWaterMilli
                 && state.PendingFactionOutcome

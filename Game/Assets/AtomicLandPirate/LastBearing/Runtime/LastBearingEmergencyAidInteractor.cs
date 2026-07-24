@@ -398,31 +398,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         internal static bool IsAcceptedWitness(LastBearingReadModel model)
         {
-            return model.ExpeditionPhase == ExpeditionPhase.AtHome &&
-                   model.TransactionPhase == TransactionPhase.Finalized &&
-                   model.TurbineCondition ==
-                       TurbineCondition.SleeveRepaired &&
-                   model.RepairCargoKind == RepairCargoKind.FieldSleeve &&
-                   model.RepairCargoCustody ==
-                       RepairCargoCustody.Consumed &&
-                   model.FactionClaimState ==
-                       FactionClaimState.Cooperating &&
-                   model.DepotControl ==
-                       DepotControl.SharedAccess &&
-                   model.FactionAccessPolicy ==
-                       FactionAccessPolicy.SharedService &&
-                   model.FactionAidPolicy ==
-                       FactionAidPolicy.EmergencyWaterDelivered &&
-                   model.EmergencyAidWaterMilli ==
-                       LastBearingBalanceV1.CooperateAidWaterMilli &&
-                   model.FactionTrust ==
-                       LastBearingBalanceV1.CooperateTrustDelta &&
-                   model.FactionGrievance == 0 &&
-                   model.RoutePermitGranted &&
-                   model.FutureRouteTollFuelUnits == 0 &&
-                   model.MaintenanceRecipe ==
-                       MaintenanceRecipe.FieldSleeveService &&
-                   model.MaintenanceObligationActive;
+            return model.IsEmergencyAidReceptionComplete;
         }
 
         private void Update()

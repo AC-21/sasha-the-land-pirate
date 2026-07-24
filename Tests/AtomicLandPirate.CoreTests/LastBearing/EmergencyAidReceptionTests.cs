@@ -29,6 +29,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "queued and delivered aid round trip in schema 9",
                 QueuedAndDeliveredStatesRoundTrip);
             harness.Run(
+                "delivered tender witness requires exact cooperative lineage",
+                DeliveredWitnessRequiresExactCooperativeLineage);
+            harness.Run(
                 "water tender is composition and module invariant",
                 CompositionsAndModulesShareMechanics);
             harness.Run(
@@ -328,13 +331,18 @@ namespace AtomicLandPirate.LastBearingTests
                 PreparationChoice.CivicBuffer,
                 VehicleModule.WinchAssembly,
                 3209).State;
-            AssertRoundTrip(queued, expectedAvailable: true, "queued");
+            AssertRoundTrip(
+                queued,
+                expectedAvailable: true,
+                expectedComplete: false,
+                "queued");
 
             LastBearingState delivered =
                 ApplyReceipt(queued).State;
             AssertRoundTrip(
                 delivered,
                 expectedAvailable: false,
+                expectedComplete: true,
                 "delivered");
             TestHarness.Equal(
                 FactionAidPolicy.EmergencyWaterDelivered,
@@ -344,6 +352,89 @@ namespace AtomicLandPirate.LastBearingTests
                 LastBearingBalanceV1.CooperateAidWaterMilli,
                 delivered.EmergencyAidWaterMilli,
                 "delivered provenance");
+        }
+
+        private static void DeliveredWitnessRequiresExactCooperativeLineage()
+        {
+            LastBearingState delivered = ApplyReceipt(
+                ReachReceptionReady(
+                    ColonyComposition.Mixed,
+                    ResidentRoster.HumanResidentId,
+                    PreparationChoice.CivicBuffer,
+                    VehicleModule.WinchAssembly,
+                    3212).State).State;
+            LastBearingReadModel natural =
+                LastBearingReadModel.FromState(delivered);
+            TestHarness.True(
+                natural.IsEmergencyAidReceptionComplete,
+                "natural delivered tender witness missing");
+
+            (string Label, LastBearingState State)[] forgeries =
+            {
+                (
+                    "bearing disposition",
+                    new LastBearingStateBuilder(delivered)
+                    {
+                        DepotBearingDisposition =
+                            DepotBearingDisposition.AtDepot,
+                    }.Build()),
+                (
+                    "pending outcome",
+                    new LastBearingStateBuilder(delivered)
+                    {
+                        PendingFactionOutcome =
+                            FactionOutcomeKind.Adverse,
+                    }.Build()),
+                (
+                    "outcome maturation",
+                    new LastBearingStateBuilder(delivered)
+                    {
+                        FactionOutcomeElapsedTicks =
+                            LastBearingBalanceV1
+                                .FactionOutcomeMaturationTicks - 1,
+                    }.Build()),
+                (
+                    "depot fee",
+                    new LastBearingStateBuilder(delivered)
+                    {
+                        DepotAccessFeePartsUnits = 1,
+                    }.Build()),
+                (
+                    "maintenance parts",
+                    new LastBearingStateBuilder(delivered)
+                    {
+                        MaintenancePartsUnits =
+                            LastBearingBalanceV1
+                                .SleeveMaintenancePartsUnits + 1,
+                    }.Build()),
+                (
+                    "faction memory",
+                    new LastBearingStateBuilder(delivered)
+                    {
+                        FactionMemory = new FactionMemoryRecord(
+                            "memory:last-bearing:cooperate:forged",
+                            "CooperateAtBearingDepot",
+                            LastBearingState.LastBearingFactionId,
+                            LastBearingBalanceV1.CooperateTrustDelta,
+                            "shared-maintenance",
+                            delivered.GlobalTick,
+                            "FIELD_SLEEVE_SERVICE"),
+                    }.Build()),
+            };
+
+            foreach (var forgery in forgeries)
+            {
+                LastBearingReadModel forged =
+                    LastBearingReadModel.FromState(forgery.State);
+                TestHarness.True(
+                    !forged.IsEmergencyAidReceptionComplete,
+                    forgery.Label +
+                    " produced a completed tender witness");
+                TestHarness.True(
+                    !forged.IsEmergencyAidReceptionAvailable,
+                    forgery.Label +
+                    " reopened the queued tender");
+            }
         }
 
         private static void CompositionsAndModulesShareMechanics()
@@ -497,11 +588,15 @@ namespace AtomicLandPirate.LastBearingTests
             TestHarness.True(
                 !result.ReadModel.IsEmergencyAidReceptionAvailable,
                 label + " remained available");
+            TestHarness.True(
+                result.ReadModel.IsEmergencyAidReceptionComplete,
+                label + " missing exact completed witness");
         }
 
         private static void AssertRoundTrip(
             LastBearingState state,
             bool expectedAvailable,
+            bool expectedComplete,
             string label)
         {
             TestHarness.Equal(
@@ -532,6 +627,10 @@ namespace AtomicLandPirate.LastBearingTests
                 expectedAvailable,
                 view.IsEmergencyAidReceptionAvailable,
                 label + " restored availability");
+            TestHarness.Equal(
+                expectedComplete,
+                view.IsEmergencyAidReceptionComplete,
+                label + " restored completion witness");
             TestHarness.Equal(
                 LastBearingBalanceV1.CooperateAidWaterMilli,
                 view.EmergencyAidWaterMilli,

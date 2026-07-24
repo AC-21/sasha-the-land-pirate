@@ -550,6 +550,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 IsAcceptedTenderWitness(natural),
                 Is.True);
+            Assert.That(
+                LastBearingPermitJobPresenter
+                    .Present(natural, cityNeedInspected: true)
+                    .Detail,
+                Does.Contain("tender was received"));
 
             (string Field, object Value)[] forgeries =
             {
@@ -572,6 +577,33 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     "FutureRouteTollFuelUnits",
                     LastBearingBalanceV1
                         .TakeFutureRouteTollFuelUnits),
+                (
+                    "DepotBearingDisposition",
+                    DepotBearingDisposition.AtDepot),
+                (
+                    "PendingFactionOutcome",
+                    FactionOutcomeKind.Adverse),
+                (
+                    "FactionOutcomeElapsedTicks",
+                    LastBearingBalanceV1
+                        .FactionOutcomeMaturationTicks - 1),
+                (
+                    "DepotAccessFeePartsUnits",
+                    1L),
+                (
+                    "MaintenancePartsUnits",
+                    LastBearingBalanceV1
+                        .SleeveMaintenancePartsUnits + 1),
+                (
+                    "FactionMemory",
+                    new FactionMemoryRecord(
+                        "memory:last-bearing:cooperate:forged",
+                        "CooperateAtBearingDepot",
+                        LastBearingState.LastBearingFactionId,
+                        LastBearingBalanceV1.CooperateTrustDelta,
+                        "shared-maintenance",
+                        delivered.GlobalTick,
+                        "FIELD_SLEEVE_SERVICE")),
             };
 
             foreach (var forgery in forgeries)
@@ -598,6 +630,21 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     Is.False,
                     "Forged " + forgery.Field +
                     " still produced an accepted tender.");
+                string forgedDetail =
+                    LastBearingPermitJobPresenter
+                        .Present(forgedModel, cityNeedInspected: true)
+                        .Detail;
+                Assert.That(
+                    forgedDetail,
+                    Does.Not.Contain("tender was received"),
+                    "Forged " + forgery.Field +
+                    " still produced accepted Permit Job copy.");
+                Assert.That(
+                    forgedDetail,
+                    Does.Contain(
+                        "waits beside Emergency Storage for physical receipt"),
+                    "Forged " + forgery.Field +
+                    " did not fail closed in Permit Job copy.");
             }
         }
 

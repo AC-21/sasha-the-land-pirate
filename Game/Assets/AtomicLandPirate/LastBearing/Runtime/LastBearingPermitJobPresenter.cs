@@ -580,10 +580,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     FactionAccessPolicy.SharedService)
             {
                 bool aidDelivered =
-                    model.FactionAidPolicy ==
-                        FactionAidPolicy.EmergencyWaterDelivered &&
-                    model.EmergencyAidWaterMilli ==
-                        LastBearingBalanceV1.CooperateAidWaterMilli;
+                    model.IsEmergencyAidReceptionComplete;
                 return Create(
                     LastBearingPermitJobChapter.AlternateConclusion,
                     JobStepCount,

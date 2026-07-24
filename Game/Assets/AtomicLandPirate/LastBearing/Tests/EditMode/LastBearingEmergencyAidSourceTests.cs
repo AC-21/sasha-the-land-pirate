@@ -30,6 +30,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Does.Contain("IsEmergencyAidReceptionAvailable"));
             Assert.That(
                 interactor,
+                Does.Contain("IsEmergencyAidReceptionComplete"));
+            Assert.That(
+                interactor,
                 Does.Contain("model.EmergencyAidWaterMilli"));
             Assert.That(
                 interactor,
