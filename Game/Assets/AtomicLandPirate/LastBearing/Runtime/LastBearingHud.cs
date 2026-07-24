@@ -881,9 +881,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (model.MaintenanceDue)
             {
-                if (GUILayout.Button("SERVICE FIELD SLEEVE · 2 PARTS", _buttonStyle))
+                if (_controller.IsFieldSleeveServiceQueued)
                 {
-                    _controller!.ServiceFieldSleeve();
+                    GUILayout.Label(
+                        "KEEP THE PROMISE QUEUED · two parts move only when the next city tick accepts the work.",
+                        _mutedStyle);
+                }
+                else if (_controller.IsFieldSleeveServiceFocused)
+                {
+                    GUILayout.Label(
+                        "PUMP HALL CONTROL FOCUSED · release the route input, then press E or gamepad south at the physical field-sleeve lever.",
+                        _bodyStyle);
+                }
+                else if (GUILayout.Button(
+                             "OPEN PUMP HALL · KEEP THE PROMISE",
+                             _buttonStyle))
+                {
+                    _controller!.OpenFieldSleeveService();
                 }
 
                 return;

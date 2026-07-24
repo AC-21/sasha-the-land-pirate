@@ -664,10 +664,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 primary = Action(
                     LastBearingFieldDeskIntent.ServiceFieldSleeve,
-                    "SERVICE THE FIELD SLEEVE",
-                    "Keep the cooperative maintenance obligation legible.",
+                    "OPEN PUMP HALL · KEEP THE PROMISE",
+                    "Route to the physical field-sleeve control, release the route input, then press E or gamepad south.",
                     true,
-                    canDispatch,
+                    canDispatch &&
+                    controller.CanOpenFieldSleeveService,
                     LastBearingFieldDeskActionTone.Primary);
                 return;
             }

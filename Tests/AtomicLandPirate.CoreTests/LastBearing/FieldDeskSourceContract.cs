@@ -171,7 +171,7 @@ namespace AtomicLandPirate.LastBearingTests
                 ".OpenPumpHallRepair(",
                 ".OpenPumpHallImprovement(",
                 ".OpenOneGoodBatchWorkshop(",
-                ".ServiceFieldSleeve(",
+                ".OpenFieldSleeveService(",
                 ".TogglePause(",
                 ".Save(",
                 ".Load(",
@@ -186,11 +186,30 @@ namespace AtomicLandPirate.LastBearingTests
                     ".InstallCityImprovement(",
                     StringComparison.Ordinal) < 0,
                 "Field Desk must route to the physical pump-hall socket instead of submitting the installation");
+            TestHarness.True(
+                fieldDesk.IndexOf(
+                    ".ServiceFieldSleeve(",
+                    StringComparison.Ordinal) < 0,
+                "Field Desk must route to the physical field-sleeve service control instead of submitting maintenance");
 
             Require(fieldDeskPresenter, "OpenPumpHallImprovement = 22");
             Require(
                 fieldDeskPresenter,
                 "OPEN PUMP HALL · SEAT AUXILIARY PUMP");
+            Require(
+                fieldDeskPresenter,
+                "OPEN PUMP HALL · KEEP THE PROMISE");
+            Require(
+                fieldDeskPresenter,
+                "controller.CanOpenFieldSleeveService");
+            Require(
+                hud,
+                "_controller!.OpenFieldSleeveService();");
+            TestHarness.True(
+                hud.IndexOf(
+                    ".ServiceFieldSleeve(",
+                    StringComparison.Ordinal) < 0,
+                "legacy HUD must route to the physical field-sleeve service control instead of submitting maintenance");
             Require(fieldDeskPresenter, "RunHotShift = 28");
             Require(fieldDeskPresenter, "AcknowledgeDustFront = 29");
             Require(

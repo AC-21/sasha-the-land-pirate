@@ -217,6 +217,50 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 LastBearingPresentationMode.BuildingCutaway &&
             _world?.IsPumpHallCutawaySelected == true;
 
+        public bool IsFieldSleeveServiceQueued =>
+            _pendingCommands.Exists(command =>
+                command is ServiceFieldSleeveCommand);
+
+        public bool IsFieldSleeveMaintenanceDue =>
+            _readModel != null &&
+            _readModel.RepairCargoKind == RepairCargoKind.FieldSleeve &&
+            _readModel.TurbineCondition ==
+                TurbineCondition.SleeveRepaired &&
+            _readModel.MaintenanceRecipe ==
+                MaintenanceRecipe.FieldSleeveService &&
+            _readModel.MaintenanceObligationActive &&
+            _readModel.MaintenanceDue &&
+            _readModel.ExpeditionPhase == ExpeditionPhase.AtHome &&
+            _readModel.TransactionPhase == TransactionPhase.Finalized &&
+            _readModel.PauseCause == PauseCause.None;
+
+        public bool CanOpenFieldSleeveService =>
+            _pendingCommands.Count == 0 &&
+            IsFieldSleeveMaintenanceDue &&
+            IsExactFieldDeskCityOverview &&
+            _world?.PumpHallMaintenanceInteractor?.IsBuilt == true;
+
+        public bool IsFieldSleeveServiceFocused =>
+            _world?.PumpHallMaintenanceInteractor
+                ?.IsControlFocused == true;
+
+        public long NextFieldSleeveMaintenanceDueSettlementTick =>
+            _state?.NextMaintenanceDueSettlementTick ?? 0;
+
+        public bool CanServiceFieldSleeve =>
+            _pendingCommands.Count == 0 &&
+            IsFieldSleeveMaintenanceDue &&
+            _readModel!.PartsUnits >=
+                LastBearingBalanceV1.SleeveMaintenancePartsUnits &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.BuildingCutaway &&
+            _world?.IsPumpHallCutawaySelected == true &&
+            _world.PumpHallMaintenanceInteractor
+                ?.IsControlFocused == true &&
+            _world.PumpHallMaintenanceInteractor
+                ?.IsInputArmed == true;
+
         public bool IsCityImprovementInstallationAvailable =>
             _pendingCommands.Count == 0 &&
             _readModel?.IsCityImprovementInstallationAvailable == true &&
@@ -559,6 +603,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ConfigureDepotReturnInteraction(this);
             _world.ConfigureGarageModuleInteraction(this);
             _world.ConfigureGarageDepartureInteraction(this);
+            _world.ConfigurePumpHallMaintenanceInteraction(this);
             _hud = gameObject.AddComponent<LastBearingHud>();
             _hud.Configure(this, _fieldDesk);
             SetLegacyHudSuppressedByFieldDesk(
@@ -587,6 +632,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotReturnInteraction();
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
+            _world?.ResetPumpHallMaintenanceInteraction();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
@@ -647,6 +693,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotReturnInteraction();
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
+            _world?.ResetPumpHallMaintenanceInteraction();
             _state = null;
             _readModel = null;
             ResetPublicSnapshotsToRuntime();
@@ -1693,10 +1740,31 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
         }
 
+        public void OpenFieldSleeveService()
+        {
+            if (!TryRouteToPumpHallMaintenance(
+                    "The field-sleeve collar and two service parts are framed. Release the route input, then keep the promise at the physical control."))
+            {
+                _status =
+                    "The field-sleeve service line is available only while its cooperative maintenance is due.";
+            }
+        }
+
         public void ServiceFieldSleeve()
         {
+            if (!CanServiceFieldSleeve)
+            {
+                _status = IsFieldSleeveMaintenanceDue &&
+                          _readModel!.PartsUnits <
+                          LastBearingBalanceV1.SleeveMaintenancePartsUnits
+                    ? "Field-sleeve service needs two reclaimed parts."
+                    : "Work the focused pump-hall service control after releasing the route input.";
+                return;
+            }
+
             Queue(sequence => new ServiceFieldSleeveCommand(sequence));
-            _status = "Field sleeve serviced. The cooperative obligation remains legible.";
+            _status =
+                "Field-sleeve service queued. Parts move only when the city tick accepts the work.";
         }
 
         public void TogglePause()
@@ -1784,6 +1852,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotReturnInteraction();
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
+            _world?.ResetPumpHallMaintenanceInteraction();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
             if (_saveAdapter == null)
@@ -1823,8 +1892,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     if (!TryRouteToPumpHallImprovement(
                             "Exact staged rotor restored at the fixed auxiliary-pump socket."))
                     {
-                        TryRouteToOneGoodBatchWorkshop(
-                            "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                        if (!TryRouteToPumpHallMaintenance(
+                                "Exact field-sleeve maintenance restored at its physical pump-hall control."))
+                        {
+                            TryRouteToOneGoodBatchWorkshop(
+                                "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                        }
                     }
                 }
             }
@@ -1847,6 +1920,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.ApplyDepotReturnInteraction(_readModel);
                 _world?.ApplyGarageModuleInteraction(_readModel);
                 _world?.ApplyGarageDepartureInteraction(_readModel);
+                _world?.ApplyPumpHallMaintenanceInteraction(_readModel);
             }
         }
 
@@ -1917,7 +1991,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_world?.CityServiceCellView?.Interactor
                     ?.IsEmergencyCisternPumpFocused == true ||
                 _world?.CityServiceCellView?.Interactor
-                    ?.IsDustFrontRelayFocused == true)
+                    ?.IsDustFrontRelayFocused == true ||
+                _world?.PumpHallMaintenanceInteractor
+                    ?.IsControlFocused == true)
             {
                 return;
             }
@@ -2094,6 +2170,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 bool dustFrontAcknowledged = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.DustFrontAcknowledged);
+                bool maintenanceServiced = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.MaintenanceServiced);
                 _state = result.State;
                 _readModel = result.ReadModel;
                 if (cityBuildingChanged || cityPlacementSubmitted)
@@ -2199,6 +2278,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                               DustFrontOutcome.Held
                         ? "Dust Front verdict acknowledged: HELD. Settlement clocks resumed."
                         : "Dust Front verdict acknowledged: BREACHED. Settlement clocks resumed; Hot Shift remains stalled until turbine repair.";
+                }
+
+                if (maintenanceServiced)
+                {
+                    _status =
+                        "Promise kept. Two reclaimed parts serviced the field sleeve; the cooperative obligation remains due again at settlement tick " +
+                        NextFieldSleeveMaintenanceDueSettlementTick + ".";
                 }
             }
             catch (Exception exception)
@@ -2502,6 +2588,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ApplyDepotReturnInteraction(_readModel);
             _world.ApplyGarageModuleInteraction(_readModel);
             _world.ApplyGarageDepartureInteraction(_readModel);
+            _world.ApplyPumpHallMaintenanceInteraction(_readModel);
             _world.SetCityServiceCellFocus(
                 IsExactFieldDeskCityOverview &&
                 !_readModel.SliceInfrastructureActive);
@@ -2550,7 +2637,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     || kind == LastBearingEventKind.HotShiftCompleted
                     || kind == LastBearingEventKind.EmergencyCisternPumped
                     || kind == LastBearingEventKind.DustFrontResolved
-                    || kind == LastBearingEventKind.DustFrontAcknowledged)
+                    || kind == LastBearingEventKind.DustFrontAcknowledged
+                    || kind == LastBearingEventKind.MaintenanceServiced)
                 {
                     Save();
                     return;
@@ -2609,6 +2697,36 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (!_modeCoordinator.TryShowCityMode(
                     LastBearingPresentationMode.BuildingCutaway,
                     _readModel))
+            {
+                return false;
+            }
+
+            _status = successStatus;
+            return true;
+        }
+
+        private bool TryRouteToPumpHallMaintenance(string successStatus)
+        {
+            if (!CanOpenFieldSleeveService ||
+                _readModel == null ||
+                _world == null ||
+                _modeCoordinator == null)
+            {
+                return false;
+            }
+
+            _world.SelectPumpHallCutaway();
+            ApplySelectedBuildingCutawayPose();
+            if (!_modeCoordinator.TryShowCityMode(
+                    LastBearingPresentationMode.BuildingCutaway,
+                    _readModel))
+            {
+                return false;
+            }
+
+            _world.ApplyPumpHallMaintenanceInteraction(_readModel);
+            if (_world.PumpHallMaintenanceInteractor
+                    ?.FocusServiceControl() != true)
             {
                 return false;
             }
