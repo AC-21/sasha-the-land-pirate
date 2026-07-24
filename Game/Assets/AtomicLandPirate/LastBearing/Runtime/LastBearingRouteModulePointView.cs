@@ -273,6 +273,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             FrameRailCustody = custody;
             _frameRailRecoveryAvailable = recoveryAvailable;
+            ApplyInteractionAnchorPosition();
             ApplyFrameRailVisibility();
         }
 
@@ -299,12 +300,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _crossedSignal?.SetActive(
                 state == RouteModulePointPresentationState.TankCrossed);
 
-            if (InteractionAnchor != null)
-            {
-                InteractionAnchor.localPosition = winch
-                    ? new Vector3(-0.9f, 0.75f, 13f)
-                    : new Vector3(8.1f, 0.75f, 12.5f);
-            }
+            ApplyInteractionAnchorPosition();
 
             if (_winchLight != null)
             {
@@ -376,6 +372,28 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 FrameRailSalvageCustody.Vehicle;
             _canonicalFrameRails?.SetActive(vehicleCargo);
             _roadFrameRails?.SetActive(vehicleCargo);
+        }
+
+        private void ApplyInteractionAnchorPosition()
+        {
+            if (InteractionAnchor == null)
+            {
+                return;
+            }
+
+            if (_frameRailRecoveryAvailable)
+            {
+                InteractionAnchor.localPosition =
+                    new Vector3(0.5f, 0.75f, 13.8f);
+                return;
+            }
+
+            bool winch =
+                State == RouteModulePointPresentationState.WinchAvailable ||
+                State == RouteModulePointPresentationState.WinchRecovered;
+            InteractionAnchor.localPosition = winch
+                ? new Vector3(-0.9f, 0.75f, 13f)
+                : new Vector3(8.1f, 0.75f, 12.5f);
         }
 
         private static GameObject CreateFrameRailBundle(

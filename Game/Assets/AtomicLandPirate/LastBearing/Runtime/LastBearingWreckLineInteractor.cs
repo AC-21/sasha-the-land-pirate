@@ -12,6 +12,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         None = 0,
         DeployWinch = 1,
         SealRangeTank = 2,
+        RecoverFrameRails = 3,
     }
 
     /// <summary>
@@ -203,12 +204,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         internal void Apply(LastBearingReadModel model)
         {
+            WreckLineInteractionStage previousStage = ResolveStage();
             _model = model ??
                 throw new ArgumentNullException(nameof(model));
+            WreckLineInteractionStage currentStage = ResolveStage();
             if (!ReferenceEquals(
                     _model,
                     _controller?.RuntimeReadModel) ||
-                ResolveStage() == WreckLineInteractionStage.None)
+                currentStage == WreckLineInteractionStage.None ||
+                currentStage != previousStage)
             {
                 _presentationEntryFrame = -1;
                 _wasPresentationActive = false;
@@ -297,13 +301,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return false;
             }
 
-            if (!_controller.IsWreckLineModuleOperationAvailable)
+            if (stage == WreckLineInteractionStage.RecoverFrameRails)
             {
-                Reject("MODULE OPERATION STALE");
-                return false;
-            }
+                if (!_controller.IsWreckLineFrameRailRecoveryAvailable)
+                {
+                    Reject("FRAME-RAIL RECOVERY STALE");
+                    return false;
+                }
 
-            _controller.OperateWreckLineModulePoint();
+                _controller.RecoverWreckLineFrameRails();
+            }
+            else
+            {
+                if (!_controller.IsWreckLineModuleOperationAvailable)
+                {
+                    Reject("MODULE OPERATION STALE");
+                    return false;
+                }
+
+                _controller.OperateWreckLineModulePoint();
+            }
 
             if (!IsStageQueued(stage))
             {
@@ -498,6 +515,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private WreckLineInteractionStage ResolveStage()
         {
+            if (_model?.IsWreckLineFrameRailRecoveryAvailable == true)
+            {
+                return WreckLineInteractionStage.RecoverFrameRails;
+            }
+
             if (_model?.IsWreckLineModulePointAvailable != true)
             {
                 return WreckLineInteractionStage.None;
@@ -520,9 +542,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return false;
             }
 
-            return (stage == WreckLineInteractionStage.DeployWinch ||
-                    stage == WreckLineInteractionStage.SealRangeTank) &&
-                   _controller.IsWreckLineModuleOperationQueued;
+            return stage switch
+            {
+                WreckLineInteractionStage.DeployWinch or
+                WreckLineInteractionStage.SealRangeTank =>
+                    _controller.IsWreckLineModuleOperationQueued,
+                WreckLineInteractionStage.RecoverFrameRails =>
+                    _controller.IsWreckLineFrameRailRecoveryQueued,
+                _ => false,
+            };
         }
 
         private void NormalizeState()
@@ -558,6 +586,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "SEAT WINCH · WORK THE WRECK LINE\nE / A OR POINTER",
                 WreckLineInteractionStage.SealRangeTank =>
                     "LOCK TANK SEALS · CROSS THE DUST LINE\nE / A OR POINTER",
+                WreckLineInteractionStage.RecoverFrameRails =>
+                    "STRAP FRAME RAILS · TAKE THEM ABOARD\nE / A OR POINTER",
                 _ => string.Empty,
             };
         }
@@ -571,6 +601,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "WINCH DOG THROWN\nLEDGER POSTS NEXT TICK",
                 WreckLineInteractionStage.SealRangeTank =>
                     "TANK SEALS CLAMPED\nLEDGER POSTS NEXT TICK",
+                WreckLineInteractionStage.RecoverFrameRails =>
+                    "FRAME RAIL LIFT QUEUED\nCUSTODY POSTS NEXT TICK",
                 _ => "WRECK LINE ACTION QUEUED",
             };
         }
@@ -597,15 +629,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         new Vector3(2.6f, 0f, 0f),
                     WreckLineInteractionStage.SealRangeTank =>
                         new Vector3(2.6f, 0f, 0f),
+                    WreckLineInteractionStage.RecoverFrameRails =>
+                        new Vector3(2.6f, 0f, 0f),
                     _ => Vector3.zero,
                 };
             }
 
             _focusRail?.SetActive(visible && IsFocused);
             _winchGlyph?.SetActive(
-                visible && stage == WreckLineInteractionStage.DeployWinch);
+                visible &&
+                (stage == WreckLineInteractionStage.DeployWinch ||
+                 stage == WreckLineInteractionStage.RecoverFrameRails));
             _tankGlyph?.SetActive(
-                visible && stage == WreckLineInteractionStage.SealRangeTank);
+                visible &&
+                (stage == WreckLineInteractionStage.SealRangeTank ||
+                 stage == WreckLineInteractionStage.RecoverFrameRails));
             if (_workDog != null)
             {
                 _workDog.localRotation =
