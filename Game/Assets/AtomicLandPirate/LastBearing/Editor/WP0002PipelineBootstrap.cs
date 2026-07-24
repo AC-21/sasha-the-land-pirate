@@ -61,6 +61,17 @@ namespace AtomicLandPirate.Presentation.LastBearing.Editor
                 return;
             }
 
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+            {
+                EditorApplication.update -=
+                    ConfigureAndStartAfterDomainReload;
+                EditorApplication.update +=
+                    ConfigureAndStartAfterDomainReload;
+                return;
+            }
+
+            EditorApplication.update -= ConfigureAndStartAfterDomainReload;
+
             try
             {
                 if (AssetDatabase.IsAssetImportWorkerProcess())
