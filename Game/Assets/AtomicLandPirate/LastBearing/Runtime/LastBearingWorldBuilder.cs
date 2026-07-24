@@ -144,6 +144,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             private set;
         }
 
+        public LastBearingWreckLineInteractor? WreckLineInteractor =>
+            RouteModulePointView?.Interactor;
+
         public Transform? TurbineRotor => _turbineRotor;
 
         public Transform? WaterFill => _waterFill;
@@ -631,6 +634,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             RouteModulePointView?.ApplyState(state);
+        }
+
+        public void ConfigureWreckLineInteraction(
+            LastBearingGameController controller)
+        {
+            if (MainCamera == null || WreckLineInteractor == null)
+            {
+                throw new InvalidOperationException(
+                    "Wreck Line interaction requires Sasha's shared camera.");
+            }
+
+            WreckLineInteractor.Configure(controller, MainCamera);
+        }
+
+        public void ResetWreckLineInteraction()
+        {
+            WreckLineInteractor?.ResetLocalFocus();
+        }
+
+        public void ApplyWreckLineInteraction(
+            LastBearingReadModel model)
+        {
+            WreckLineInteractor?.Apply(model);
         }
 
         public void ApplyRoadCargoPresentation(

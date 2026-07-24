@@ -48,6 +48,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(
                     runtimeRoot,
                     "LastBearingRouteModulePointView.cs"));
+            string wreckLineInteractor = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "LastBearingWreckLineInteractor.cs"));
             string depotCargoLoading = File.ReadAllText(
                 Path.Combine(
                     runtimeRoot,
@@ -106,6 +110,12 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 controller,
                 "public bool IsPatchworkSkidPlateInstallQueued");
+            Require(
+                controller,
+                "public bool IsWreckLineModuleOperationAvailable");
+            Require(
+                controller,
+                "public bool IsWreckLineModuleOperationQueued");
             Require(
                 controller,
                 "public bool IsWreckLineFrameRailRecoveryAvailable");
@@ -1266,6 +1276,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(wreckLine, "ApplyFrameRailSalvage(");
             Require(wreckLine, "Canonical Scout Wreck-Line Frame Rails");
             Require(wreckLine, "Road Scout Wreck-Line Frame Rails");
+            Require(
+                wreckLine,
+                "LastBearingWreckLineInteractor.RootName");
+            Require(wreckLine, "Interactor.Build(");
             Require(wreckLine, "collider.enabled = false");
             foreach (string forbidden in new[]
             {
@@ -1287,6 +1301,45 @@ namespace AtomicLandPirate.LastBearingTests
                 TestHarness.True(
                     wreckLine.IndexOf(forbidden, StringComparison.Ordinal) < 0,
                     "Wreck Line view contains forbidden authority " +
+                    forbidden);
+            }
+
+            Require(
+                wreckLineInteractor,
+                "INTERACT_WRECK_LINE_WORK_DOG");
+            Require(
+                wreckLineInteractor,
+                "ReferenceEquals(");
+            Require(
+                wreckLineInteractor,
+                "_controller.OperateWreckLineModulePoint();");
+            Require(
+                wreckLineInteractor,
+                "IsWreckLineModuleOperationAvailable");
+            Require(
+                wreckLineInteractor,
+                "IsWreckLineModuleOperationQueued");
+            Require(wreckLineInteractor, "public bool IsInputArmed");
+            Require(wreckLineInteractor, "OwnsKeyboardFocus");
+            Require(wreckLineInteractor, "RELEASE CONTROLS");
+            Require(
+                wreckLineInteractor,
+                "_controller?.Hud?.BlocksWorldPointer");
+            foreach (string forbidden in new[]
+                     {
+                         "new OperateWreckLineModuleCommand",
+                         "LastBearingKernel",
+                         "LastBearingStateBuilder",
+                         "LastBearingCanonicalCodec",
+                         "Save(",
+                         "RoadFeelTelemetry",
+                     })
+            {
+                TestHarness.True(
+                    wreckLineInteractor.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "Wreck Line interactor contains forbidden authority " +
                     forbidden);
             }
 
