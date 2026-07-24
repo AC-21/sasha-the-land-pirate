@@ -140,6 +140,9 @@ namespace AtomicLandPirate.LastBearingTests
                 case "vgr21-post-fuel-bond":
                     DepotAccessRestorationTests.Run(harness);
                     break;
+                case "vgr22-receive-water-tender":
+                    EmergencyAidReceptionTests.Run(harness);
+                    break;
                 case "v0-hands-on-service-cell":
                     harness.Run(
                         "world service-cell source contract",

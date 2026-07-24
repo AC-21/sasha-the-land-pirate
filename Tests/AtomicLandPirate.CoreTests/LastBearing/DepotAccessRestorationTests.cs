@@ -63,7 +63,7 @@ namespace AtomicLandPirate.LastBearingTests
                 !driver.View.IsDepotAccessRestorationAvailable,
                 "cooperative fuel bond availability");
             TestHarness.Equal(
-                "route-permit-recorded",
+                "receive-emergency-aid-at-water-tender",
                 driver.View.NextObjective,
                 "cooperative objective");
         }

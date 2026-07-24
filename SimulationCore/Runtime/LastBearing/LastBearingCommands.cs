@@ -488,6 +488,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
         }
     }
 
+    public sealed class ReceiveEmergencyAidCommand : LastBearingCommand
+    {
+        public ReceiveEmergencyAidCommand(long sequence)
+            : base(sequence)
+        {
+        }
+    }
+
     public sealed class ServiceFieldSleeveCommand : LastBearingCommand
     {
         public ServiceFieldSleeveCommand(long sequence)

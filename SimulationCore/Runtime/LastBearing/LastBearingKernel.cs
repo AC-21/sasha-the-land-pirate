@@ -288,6 +288,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     restoreAccess,
                     events);
             }
+            else if (command is ReceiveEmergencyAidCommand receiveAid)
+            {
+                ApplyReceiveEmergencyAid(
+                    builder,
+                    receiveAid,
+                    events);
+            }
             else if (command is ServiceFieldSleeveCommand service)
             {
                 ApplyServiceSleeve(builder, service, events);
@@ -2482,6 +2489,106 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 (long)builder.NextCityDecision);
         }
 
+        private static void ApplyReceiveEmergencyAid(
+            LastBearingStateBuilder builder,
+            ReceiveEmergencyAidCommand command,
+            LastBearingEventSink events)
+        {
+            bool exactCooperativeLineage =
+                builder.ExpeditionPhase == ExpeditionPhase.AtHome
+                && builder.TransactionPhase == TransactionPhase.Finalized
+                && builder.TurbineCondition
+                    == TurbineCondition.SleeveRepaired
+                && builder.RepairCargoKind == RepairCargoKind.FieldSleeve
+                && builder.RepairCargoCustody
+                    == RepairCargoCustody.Consumed
+                && builder.DepotResolution == EncounterChoice.Cooperate
+                && builder.DepotBearingDisposition
+                    == DepotBearingDisposition.FactionHeld
+                && builder.DepotControl == DepotControl.SharedAccess
+                && builder.FactionClaimState
+                    == FactionClaimState.Cooperating
+                && builder.FactionAccessPolicy
+                    == FactionAccessPolicy.SharedService
+                && builder.PendingFactionOutcome
+                    == FactionOutcomeKind.Cooperative
+                && builder.FactionTrust
+                    == LastBearingBalanceV1.CooperateTrustDelta
+                && builder.FactionGrievance == 0
+                && builder.FactionOutcomeElapsedTicks
+                    >= LastBearingBalanceV1.FactionOutcomeMaturationTicks
+                && builder.EmergencyAidWaterMilli
+                    == LastBearingBalanceV1.CooperateAidWaterMilli
+                && builder.DepotAccessFeePartsUnits == 0
+                && builder.FutureRouteTollFuelUnits == 0
+                && builder.RoutePermitGranted
+                && builder.MaintenanceRecipe
+                    == MaintenanceRecipe.FieldSleeveService
+                && builder.MaintenanceObligationActive
+                && builder.MaintenancePartsUnits
+                    == LastBearingBalanceV1.SleeveMaintenancePartsUnits
+                && builder.FactionMemory != null
+                && string.Equals(
+                    builder.FactionMemory.StableId,
+                    "memory:last-bearing:cooperate:0001",
+                    StringComparison.Ordinal)
+                && string.Equals(
+                    builder.FactionMemory.WitnessedAction,
+                    "CooperateAtBearingDepot",
+                    StringComparison.Ordinal)
+                && string.Equals(
+                    builder.FactionMemory.AffectedFactionId,
+                    LastBearingState.LastBearingFactionId,
+                    StringComparison.Ordinal)
+                && builder.FactionMemory.Magnitude
+                    == LastBearingBalanceV1.CooperateTrustDelta
+                && string.Equals(
+                    builder.FactionMemory.DoctrineTag,
+                    "shared-maintenance",
+                    StringComparison.Ordinal)
+                && builder.FactionMemory.EncounterTick
+                    <= builder.GlobalTick
+                && string.Equals(
+                    builder.FactionMemory.ConsequenceCode,
+                    "FIELD_SLEEVE_SERVICE",
+                    StringComparison.Ordinal);
+            if (exactCooperativeLineage
+                && builder.FactionAidPolicy
+                    == FactionAidPolicy.EmergencyWaterDelivered)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (!exactCooperativeLineage
+                || builder.FactionAidPolicy
+                    != FactionAidPolicy.EmergencyWaterQueued)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_EMERGENCY_AID_NOT_READY");
+            }
+
+            long previousWater = builder.WaterMilli;
+            builder.WaterMilli = Math.Min(
+                LastBearingBalanceV1.EffectiveWaterCapacityMilli(
+                    builder.InstalledCityImprovement),
+                checked(
+                    builder.WaterMilli
+                    + builder.EmergencyAidWaterMilli));
+            builder.FactionAidPolicy =
+                FactionAidPolicy.EmergencyWaterDelivered;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.EmergencyAidDelivered,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                "settlement:last-bearing:water",
+                previousWater,
+                builder.WaterMilli);
+        }
+
         private static void ApplyServiceSleeve(
             LastBearingStateBuilder builder,
             ServiceFieldSleeveCommand command,
@@ -2927,27 +3034,6 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     builder.NextMaintenanceDueSettlementTick);
             }
 
-            if (builder.FactionAidPolicy == FactionAidPolicy.EmergencyWaterQueued)
-            {
-                var before = builder.WaterMilli;
-                builder.WaterMilli = Math.Min(
-                    LastBearingBalanceV1.EffectiveWaterCapacityMilli(
-                        builder.InstalledCityImprovement),
-                    checked(
-                        builder.WaterMilli + builder.EmergencyAidWaterMilli));
-                builder.FactionAidPolicy =
-                    FactionAidPolicy.EmergencyWaterDelivered;
-                Emit(
-                    builder,
-                    events,
-                    LastBearingEventKind.EmergencyAidDelivered,
-                    LastBearingEventCause.PlayerCommand,
-                    builder.SettlementTick,
-                    commandSequence,
-                    "settlement:last-bearing:water",
-                    before,
-                    builder.WaterMilli);
-            }
         }
 
         private static NextCityDecision DetermineNextCityDecision(

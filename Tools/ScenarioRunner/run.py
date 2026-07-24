@@ -28,6 +28,7 @@ NAMED_TESTS = frozenset(
         "dev-save-boundary",
         "vgr05-one-good-batch",
         "vgr21-post-fuel-bond",
+        "vgr22-receive-water-tender",
         "v0-hands-on-service-cell",
     }
 )
