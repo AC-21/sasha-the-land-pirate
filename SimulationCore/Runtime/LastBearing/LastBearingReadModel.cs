@@ -180,6 +180,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 ComputeEmergencyAidReceptionAvailable(state);
             IsEmergencyAidReceptionComplete =
                 ComputeEmergencyAidReceptionComplete(state);
+            IsEmergencyAidWorkResolved =
+                ComputeEmergencyAidWorkResolved(state);
             SpareBearingRemainingTicks = Math.Max(
                 0,
                 state.SpareBearingRequiredTicks
@@ -350,6 +352,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public bool IsDepotAccessRestorationAvailable { get; private set; }
         public bool IsEmergencyAidReceptionAvailable { get; private set; }
         public bool IsEmergencyAidReceptionComplete { get; private set; }
+        public bool IsEmergencyAidWorkResolved { get; private set; }
         public long SpareBearingRemainingTicks { get; private set; }
         public PauseCause PauseCause { get; private set; }
         public bool IsDepotApproachRecoveryAvailable { get; private set; }
@@ -716,7 +719,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.PartsUnits >= requiredParts
                 && state.HotShiftPhase == HotShiftPhase.Idle
                 && state.NextCityDecision == NextCityDecision.None
-                && IsEmergencyAidWorkResolved(state)
+                && ComputeEmergencyAidWorkResolved(state)
                 && !state.MaintenanceDue
                 && state.SpareBearingBatchPhase
                     != SpareBearingBatchPhase.InProgress
@@ -975,7 +978,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && HasExactEmergencyAidLineage(state);
         }
 
-        internal static bool IsEmergencyAidWorkResolved(
+        internal static bool ComputeEmergencyAidWorkResolved(
             LastBearingState state)
         {
             return state.FactionAidPolicy

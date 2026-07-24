@@ -36,7 +36,8 @@ Scout service is the final return obligation. It remains unavailable while any
 of these higher-priority facts are active:
 
 - unfinalized return or an uninstalled turbine repair;
-- queued cooperative emergency aid;
+- queued cooperative emergency aid, or delivered-looking aid without the exact
+  cooperative completion lineage;
 - an unresolved city improvement;
 - an unposted fuel bond;
 - One Good Batch in progress, complete, or awaiting barter;
@@ -74,8 +75,9 @@ toll remain exactly as authored.
 
 ## Authority, events, save, and autosave
 
-Core owns readiness, the exact two-part cost, the exact two-part minimum
-post-return reserve, command sequence, idempotency, and atomic rejection.
+Core owns readiness, including VGR-22's exact delivered-aid completion witness,
+the exact two-part cost, the exact two-part minimum post-return reserve, command
+sequence, idempotency, and atomic rejection.
 Accepted service changes only settlement parts and vehicle condition. It emits,
 in this order and under one player-command sequence:
 
@@ -95,10 +97,10 @@ general interaction framework.
 ## Rejection contract
 
 Held entry input, title, city, wrong mode, stale read-model identity, pending
-work, duplicate requests, insufficient parts, an already healthy scout, and
-every unresolved higher-priority return obligation fail closed. Rejection
-leaves canonical bytes, hash, parts, condition, module, upgrade, cargo, faction,
-city, clocks, and save truth unchanged.
+work, duplicate requests, insufficient parts, an already healthy scout, forged
+delivered-aid lineage, and every unresolved higher-priority return obligation
+fail closed. Rejection leaves canonical bytes, hash, parts, condition, module,
+upgrade, cargo, faction, city, clocks, and save truth unchanged.
 
 ## Acceptance evidence
 
@@ -110,6 +112,8 @@ Focused core, source, EditMode, and PlayMode coverage proves:
   release;
 - stale, pending, duplicate, wrong-mode, insufficient, healthy, and
   higher-priority states queue none;
+- invariant-valid delivered-looking aid states without VGR-22's exact
+  completion lineage neither expose the service objective nor accept service;
 - the ready receipt shows actual worn condition, exact cost, and exact reserve;
 - accepted service shows 1000 / 1000 through the existing hoist, worklight, and
   scout condition telltale;

@@ -359,8 +359,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                        model.VehicleServiceReservePartsUnits &&
                    model.HotShiftPhase == HotShiftPhase.Idle &&
                    model.NextCityDecision == NextCityDecision.None &&
-                   model.FactionAidPolicy !=
-                       FactionAidPolicy.EmergencyWaterQueued &&
+                   model.IsEmergencyAidWorkResolved &&
                    !model.MaintenanceDue &&
                    model.SpareBearingBatchPhase !=
                        SpareBearingBatchPhase.InProgress &&

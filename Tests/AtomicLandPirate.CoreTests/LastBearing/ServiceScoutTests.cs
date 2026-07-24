@@ -331,6 +331,9 @@ namespace AtomicLandPirate.LastBearingTests
                 natural.IsEmergencyAidReceptionComplete,
                 "natural delivered aid lineage");
             TestHarness.True(
+                natural.IsEmergencyAidWorkResolved,
+                "natural delivered aid remained unresolved");
+            TestHarness.True(
                 natural.IsVehicleServiceAvailable,
                 "natural delivered aid blocked service");
 
@@ -395,6 +398,9 @@ namespace AtomicLandPirate.LastBearingTests
                     !forged.IsEmergencyAidReceptionComplete,
                     forgery.Label +
                     " retained the exact delivered-aid witness");
+                TestHarness.True(
+                    !forged.IsEmergencyAidWorkResolved,
+                    forgery.Label + " resolved forged aid work");
                 TestHarness.True(
                     !forged.IsVehicleServiceAvailable,
                     forgery.Label + " exposed scout service");

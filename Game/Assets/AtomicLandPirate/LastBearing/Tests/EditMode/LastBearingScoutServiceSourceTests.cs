@@ -29,6 +29,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 interactor,
                 Does.Contain("_controller.RuntimeReadModel"));
             Assert.That(
+                interactor,
+                Does.Contain("model.IsEmergencyAidWorkResolved"));
+            Assert.That(
                 Count(
                     interactor,
                     "_controller.ServiceScout()"),

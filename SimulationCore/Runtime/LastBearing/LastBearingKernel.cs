@@ -2611,7 +2611,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     == CityDeliveryStage.DeliveredToWorkshop
                 && builder.HotShiftPhase == HotShiftPhase.Idle
                 && builder.NextCityDecision == NextCityDecision.None
-                && LastBearingReadModel.IsEmergencyAidWorkResolved(
+                && LastBearingReadModel.ComputeEmergencyAidWorkResolved(
                     currentState)
                 && !builder.MaintenanceDue
                 && builder.SpareBearingBatchPhase
