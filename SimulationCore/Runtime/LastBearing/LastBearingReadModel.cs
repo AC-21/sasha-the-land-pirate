@@ -716,8 +716,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.PartsUnits >= requiredParts
                 && state.HotShiftPhase == HotShiftPhase.Idle
                 && state.NextCityDecision == NextCityDecision.None
-                && state.FactionAidPolicy
-                    != FactionAidPolicy.EmergencyWaterQueued
+                && IsEmergencyAidWorkResolved(state)
                 && !state.MaintenanceDue
                 && state.SpareBearingBatchPhase
                     != SpareBearingBatchPhase.InProgress
@@ -974,6 +973,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
             return state.FactionAidPolicy
                     == FactionAidPolicy.EmergencyWaterDelivered
                 && HasExactEmergencyAidLineage(state);
+        }
+
+        internal static bool IsEmergencyAidWorkResolved(
+            LastBearingState state)
+        {
+            return state.FactionAidPolicy
+                    != FactionAidPolicy.EmergencyWaterQueued
+                && (state.FactionAidPolicy
+                        != FactionAidPolicy.EmergencyWaterDelivered
+                    || HasExactEmergencyAidLineage(state));
         }
 
         private static bool HasExactEmergencyAidLineage(

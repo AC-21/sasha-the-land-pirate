@@ -20,6 +20,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "scout service waits for every urgent return task",
                 UrgentReturnWorkHasPriority);
             harness.Run(
+                "scout service rejects forged delivered aid lineage",
+                ForgedDeliveredAidCannotUnlockService);
+            harness.Run(
                 "scout service is preparation module outcome and composition neutral",
                 FullChoiceMatrixSharesMechanics);
             harness.Run(
@@ -311,6 +314,99 @@ namespace AtomicLandPirate.LastBearingTests
                     PauseCause = PauseCause.DustFrontAlert,
                 }.Build());
             AssertBlocked(dust, "unacknowledged dust front");
+        }
+
+        private static void ForgedDeliveredAidCannotUnlockService()
+        {
+            LastBearingState delivered = ReachServiceReady(
+                ColonyComposition.Mixed,
+                ResidentRoster.HumanResidentId,
+                PreparationChoice.CivicBuffer,
+                VehicleModule.WinchAssembly,
+                EncounterChoice.Cooperate,
+                3311).State;
+            LastBearingReadModel natural =
+                LastBearingReadModel.FromState(delivered);
+            TestHarness.True(
+                natural.IsEmergencyAidReceptionComplete,
+                "natural delivered aid lineage");
+            TestHarness.True(
+                natural.IsVehicleServiceAvailable,
+                "natural delivered aid blocked service");
+
+            (string Label, LastBearingState State)[] forgeries =
+            {
+                (
+                    "bearing disposition",
+                    new LastBearingStateBuilder(delivered)
+                    {
+                        DepotBearingDisposition =
+                            DepotBearingDisposition.AtDepot,
+                    }.Build()),
+                (
+                    "pending outcome",
+                    new LastBearingStateBuilder(delivered)
+                    {
+                        PendingFactionOutcome =
+                            FactionOutcomeKind.Adverse,
+                    }.Build()),
+                (
+                    "outcome maturation",
+                    new LastBearingStateBuilder(delivered)
+                    {
+                        FactionOutcomeElapsedTicks =
+                            LastBearingBalanceV1
+                                .FactionOutcomeMaturationTicks - 1,
+                    }.Build()),
+                (
+                    "depot fee",
+                    new LastBearingStateBuilder(delivered)
+                    {
+                        DepotAccessFeePartsUnits = 1,
+                    }.Build()),
+                (
+                    "maintenance parts",
+                    new LastBearingStateBuilder(delivered)
+                    {
+                        MaintenancePartsUnits =
+                            LastBearingBalanceV1
+                                .SleeveMaintenancePartsUnits + 1,
+                    }.Build()),
+                (
+                    "faction memory",
+                    new LastBearingStateBuilder(delivered)
+                    {
+                        FactionMemory = new FactionMemoryRecord(
+                            "memory:last-bearing:cooperate:forged",
+                            "CooperateAtBearingDepot",
+                            LastBearingState.LastBearingFactionId,
+                            LastBearingBalanceV1.CooperateTrustDelta,
+                            "shared-maintenance",
+                            delivered.GlobalTick,
+                            "FIELD_SLEEVE_SERVICE"),
+                    }.Build()),
+            };
+
+            foreach (var forgery in forgeries)
+            {
+                LastBearingReadModel forged =
+                    LastBearingReadModel.FromState(forgery.State);
+                TestHarness.True(
+                    !forged.IsEmergencyAidReceptionComplete,
+                    forgery.Label +
+                    " retained the exact delivered-aid witness");
+                TestHarness.True(
+                    !forged.IsVehicleServiceAvailable,
+                    forgery.Label + " exposed scout service");
+                TestHarness.True(
+                    forged.NextObjective != "service-scout-in-garage",
+                    forgery.Label + " exposed the service objective");
+                AssertRejected(
+                    forgery.State,
+                    forgery.State.NextCommandSequence,
+                    "LAST_BEARING_VEHICLE_SERVICE_NOT_READY",
+                    forgery.Label);
+            }
         }
 
         private static void FullChoiceMatrixSharesMechanics()

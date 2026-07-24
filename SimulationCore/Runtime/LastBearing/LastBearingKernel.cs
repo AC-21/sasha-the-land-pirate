@@ -2601,6 +2601,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             ServiceScoutCommand command,
             LastBearingEventSink events)
         {
+            var currentState = new LastBearingState(builder);
             bool urgentReturnWorkResolved =
                 builder.ExpeditionPhase == ExpeditionPhase.AtHome
                 && builder.TransactionPhase == TransactionPhase.Finalized
@@ -2610,8 +2611,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     == CityDeliveryStage.DeliveredToWorkshop
                 && builder.HotShiftPhase == HotShiftPhase.Idle
                 && builder.NextCityDecision == NextCityDecision.None
-                && builder.FactionAidPolicy
-                    != FactionAidPolicy.EmergencyWaterQueued
+                && LastBearingReadModel.IsEmergencyAidWorkResolved(
+                    currentState)
                 && !builder.MaintenanceDue
                 && builder.SpareBearingBatchPhase
                     != SpareBearingBatchPhase.InProgress
