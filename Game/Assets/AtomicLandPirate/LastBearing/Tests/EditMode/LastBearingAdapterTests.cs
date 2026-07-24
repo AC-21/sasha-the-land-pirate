@@ -1178,7 +1178,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
-        public void RoadFeelAdapterAcceptsOnlyQuantizedInputsAndReturnsNoOutcome()
+        public void RoadFeelAdapterAcceptsBoundedInputsAndReturnsNoOutcome()
         {
             _root = new GameObject("Road Feel Mode Adapter Test");
             var vehicleRoot = new GameObject("Road Feel Vehicle");
@@ -1203,6 +1203,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             adapter.SetRoadModeActive(true);
 
+            adapter.ApplyPresentationInputSample(500, 600, -400, 1000);
+            Assert.That(adapter.CommandReceiptCount, Is.Zero);
+            Assert.That(adapter.LastThrottleMilli, Is.EqualTo(500));
+            Assert.That(adapter.LastSteeringMilli, Is.EqualTo(-400));
+            Assert.That(adapter.LastBrakeMilli, Is.EqualTo(600));
+            Assert.That(adapter.LastHandbrakeMilli, Is.EqualTo(1000));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
             adapter.ApplyQuantizedCommandShadow(750, -250);
             adapter.ApplyPresentationOnlyControls(600, 1000);
             adapter.ApplyDerivedPresentationLoad(
@@ -1210,6 +1218,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 LastBearingRoadDamageBand.Worn);
 
             Assert.That(adapter.IsRoadModeActive, Is.True);
+            Assert.That(adapter.CommandReceiptCount, Is.EqualTo(1));
             Assert.That(adapter.LastThrottleMilli, Is.EqualTo(750));
             Assert.That(adapter.LastSteeringMilli, Is.EqualTo(-250));
             Assert.That(adapter.LastBrakeMilli, Is.EqualTo(600));
@@ -1233,6 +1242,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 adapter.ApplyPresentationOnlyControls(0, 1001));
             Assert.Throws<ArgumentOutOfRangeException>(() =>
+                adapter.ApplyPresentationInputSample(-1, 0, 0, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                adapter.ApplyPresentationInputSample(0, 0, 1001, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                adapter.ApplyPresentationInputSample(0, -1, 0, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                adapter.ApplyPresentationInputSample(0, 0, 0, 1001));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
                 adapter.ApplyDerivedPresentationLoad(
                     3001,
                     LastBearingRoadDamageBand.Healthy));
@@ -1248,6 +1265,44 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Assert.That(method.ReturnType, Is.Not.EqualTo(typeof(Rigidbody)));
                 Assert.That(method.ReturnType, Is.Not.EqualTo(typeof(LastBearingState)));
             }
+        }
+
+        [Test]
+        public void RoadPresentationInputHotPathAllocatesNoManagedMemory()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            PrepareControllerForGaragePlan(controller);
+            LastBearingState outbound = CreateOutboundState(controller.State!);
+            SynchronizeControllerState(controller, outbound);
+            LastBearingModeCoordinator coordinator = controller.ModeCoordinator!;
+
+            Assert.That(coordinator.IsRoadPresentationActive, Is.True);
+            Assert.That(
+                coordinator.TryApplyRoadPresentationInput(
+                    750,
+                    250,
+                    -500,
+                    1000),
+                Is.True);
+            _ = GC.GetAllocatedBytesForCurrentThread();
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            for (var sample = 0; sample < 128; sample++)
+            {
+                coordinator.TryApplyRoadPresentationInput(
+                    750,
+                    250,
+                    -500,
+                    1000);
+            }
+
+            long allocated =
+                GC.GetAllocatedBytesForCurrentThread() - before;
+            Assert.That(
+                allocated,
+                Is.Zero,
+                "The per-frame RoadFeel input bridge allocated managed memory.");
         }
 
         [Test]

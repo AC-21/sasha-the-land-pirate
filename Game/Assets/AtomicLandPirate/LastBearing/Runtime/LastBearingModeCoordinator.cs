@@ -42,6 +42,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             int brakeMilli,
             int handbrakeMilli);
 
+        void ApplyPresentationInputSample(
+            int throttleMilli,
+            int brakeMilli,
+            int steeringMilli,
+            int handbrakeMilli);
+
         void ApplyDerivedPresentationLoad(
             int cargoMassKilograms,
             LastBearingRoadDamageBand damageBand);
@@ -444,6 +450,70 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     handbrakeMilli));
         }
 
+        public bool TryApplyRoadPresentationInput(
+            int throttleMilli,
+            int brakeMilli,
+            int steeringMilli,
+            int handbrakeMilli)
+        {
+            if (!HasActiveMode ||
+                CurrentMode != LastBearingPresentationMode.Driving ||
+                !_roadPresentationActive)
+            {
+                return false;
+            }
+
+            ILastBearingRoadModeAdapter? adapter = _roadAdapter;
+            if (adapter == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                adapter.ApplyPresentationInputSample(
+                    throttleMilli,
+                    brakeMilli,
+                    steeringMilli,
+                    handbrakeMilli);
+                return true;
+            }
+            catch (Exception exception)
+            {
+                DisableFaultedRoadAdapter(
+                    "apply-presentation-input",
+                    adapter,
+                    exception);
+                return false;
+            }
+        }
+
+        public void ClearRoadPresentationInput()
+        {
+            if (!_roadPresentationActive)
+            {
+                return;
+            }
+
+            ILastBearingRoadModeAdapter? adapter = _roadAdapter;
+            if (adapter == null)
+            {
+                return;
+            }
+
+            try
+            {
+                adapter.ResetPresentation();
+            }
+            catch (Exception exception)
+            {
+                DisableFaultedRoadAdapter(
+                    "clear-presentation-input",
+                    adapter,
+                    exception);
+            }
+        }
+
         public bool TryRecoverRoadPresentation()
         {
             if (!CanRecoverRoadPresentation)
@@ -667,36 +737,44 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
             catch (Exception exception)
             {
-                Debug.LogWarning(
-                    "LAST_BEARING_ROAD_PRESENTATION_DISABLED " +
-                    operation + " " + exception.GetType().Name,
-                    this);
-                try
-                {
-                    adapter.ResetPresentation();
-                }
-                catch (Exception)
-                {
-                    // The canonical core must keep progressing even if cleanup fails.
-                }
-
-                try
-                {
-                    adapter.SetRoadModeActive(false);
-                }
-                catch (Exception)
-                {
-                    // Detaching below is the final fail-closed boundary.
-                }
-
-                _roadAdapter = null;
-                _roadPresentationActive = false;
-                IsRoadPresentationHeldAtRecovery = false;
-                IsRoadPresentationHeldAtModulePoint = false;
-                RoadAdapterFaulted = true;
-                ApplyPresentationOwnership();
+                DisableFaultedRoadAdapter(operation, adapter, exception);
                 return false;
             }
+        }
+
+        private void DisableFaultedRoadAdapter(
+            string operation,
+            ILastBearingRoadModeAdapter adapter,
+            Exception exception)
+        {
+            Debug.LogWarning(
+                "LAST_BEARING_ROAD_PRESENTATION_DISABLED " +
+                operation + " " + exception.GetType().Name,
+                this);
+            try
+            {
+                adapter.ResetPresentation();
+            }
+            catch (Exception)
+            {
+                // The canonical core must keep progressing even if cleanup fails.
+            }
+
+            try
+            {
+                adapter.SetRoadModeActive(false);
+            }
+            catch (Exception)
+            {
+                // Detaching below is the final fail-closed boundary.
+            }
+
+            _roadAdapter = null;
+            _roadPresentationActive = false;
+            IsRoadPresentationHeldAtRecovery = false;
+            IsRoadPresentationHeldAtModulePoint = false;
+            RoadAdapterFaulted = true;
+            ApplyPresentationOwnership();
         }
 
         private void ApplyPresentationOwnership()
