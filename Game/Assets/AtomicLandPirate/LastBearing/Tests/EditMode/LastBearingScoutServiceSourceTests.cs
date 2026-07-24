@@ -149,6 +149,93 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(interactor, Does.Not.Contain("SceneManager"));
         }
 
+        [Test]
+        public void RepeatCircuitReusesTheExactDeskLaunchAndReturnControls()
+        {
+            string controller = RuntimeSource(
+                "LastBearingGameController.cs");
+            string presenter = RuntimeSource(
+                Path.Combine("UI", "LastBearingFieldDeskPresenter.cs"));
+            string launchDog = RuntimeSource(
+                Path.Combine(
+                    "Vehicle",
+                    "LastBearingGarageDepartureInteractor.cs"));
+            string depot = RuntimeSource(
+                "LastBearingDepotReturnInteractor.cs");
+            string returnService = RuntimeSource(
+                "LastBearingReturnServiceView.cs");
+
+            Assert.That(
+                presenter,
+                Does.Contain("model.IsRepeatExpeditionAvailable"));
+            Assert.That(
+                presenter,
+                Does.Contain("LastBearingFieldDeskIntent.OpenGarage"));
+            Assert.That(
+                presenter,
+                Does.Contain("model.FutureRouteTollFuelUnits"));
+            Assert.That(
+                presenter,
+                Does.Contain(
+                    "model.ProjectedRoundTripConditionLossMilli"));
+            Assert.That(
+                presenter,
+                Does.Contain("model.FrameRailSalvagePartsUnits"));
+            Assert.That(
+                presenter,
+                Does.Not.Contain(
+                    "PrepareRepeatExpeditionTransactionCommand"));
+
+            Assert.That(
+                controller,
+                Does.Contain(
+                    "command is PrepareRepeatExpeditionTransactionCommand"));
+            Assert.That(
+                controller,
+                Does.Contain(
+                    "new PrepareRepeatExpeditionTransactionCommand("));
+            Assert.That(
+                controller,
+                Does.Contain("CultureInfo.InvariantCulture"));
+            Assert.That(controller, Does.Contain("\"tx:repeat:\""));
+            Assert.That(controller, Does.Contain("\"fp:repeat:\""));
+            Assert.That(
+                controller,
+                Does.Contain("_state.TransactionId!"));
+            Assert.That(
+                controller,
+                Does.Contain("_state.TransactionFingerprint!"));
+
+            Assert.That(launchDog, Does.Contain("ReferenceEquals("));
+            Assert.That(
+                launchDog,
+                Does.Contain("_controller.RuntimeReadModel"));
+            Assert.That(
+                launchDog,
+                Does.Contain("_model.IsRepeatExpeditionAvailable"));
+            Assert.That(launchDog, Does.Contain("keyboard?.eKey"));
+            Assert.That(launchDog, Does.Contain("gamepad?.buttonSouth"));
+            Assert.That(
+                launchDog,
+                Does.Contain("Physics.RaycastNonAlloc("));
+            Assert.That(
+                launchDog,
+                Does.Contain("if (!_inputArmed)"));
+
+            Assert.That(depot, Does.Contain("_model.IsRepeatExpedition"));
+            Assert.That(
+                depot,
+                Does.Contain(
+                    "FrameRailSalvageCustody.Vehicle"));
+            Assert.That(
+                returnService,
+                Does.Contain("HasVehicleFrameRailSalvage"));
+            Assert.That(
+                returnService,
+                Does.Contain(
+                    "LAST_BEARING_RETURN_SERVICE_READINESS_INVALID"));
+        }
+
         private static int Count(string source, string needle)
         {
             int count = 0;

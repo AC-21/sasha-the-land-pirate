@@ -73,6 +73,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 checkInReady: true,
                 RepairCargoKind.CeramicBearing,
                 RepairCargoCustody.Vehicle,
+                FrameRailSalvageCustody.None,
                 humanVisible: true,
                 robotVisible: true);
             Assert.That(view.IsCheckInMarkerVisible, Is.True);

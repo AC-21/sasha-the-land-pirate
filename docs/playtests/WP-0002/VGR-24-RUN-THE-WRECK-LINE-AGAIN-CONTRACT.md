@@ -1,4 +1,4 @@
-# VGR-24 — Run the Wreck Line Again Core Contract
+# VGR-24 — Run the Wreck Line Again Contract
 
 ## Player outcome
 
@@ -45,6 +45,32 @@ The four-part bundle reuses `WreckLineFrameRailSalvagePartsUnits`; fuel uses
 `RouteFuelCost` plus the already-saved `FutureRouteTollFuelUnits`, and condition
 uses `RouteConditionLoss`. No balance value changes.
 
+## Unity presentation
+
+- At exact repeat readiness, the Field Desk reuses its `OpenGarage` intent and
+  reports the current route fuel, persistent toll, projected round-trip
+  condition loss, and frame-rail parts yield from the read model.
+- The existing garage launch dog is the only departure control. After the
+  entry-frame release it accepts E, gamepad South, or an exact pointer hit.
+  Exact runtime-read-model identity rejects stale presentation.
+- The controller alone queues the compare-and-swap prepare, matching manifest
+  debit, and departure. The prepare command is part of the queued-launch
+  witness, duplicate presentation input is inert, and the accepted departure
+  uses the existing autosave seam.
+- City-to-garage routing changes presentation only. The same camera, listener,
+  launch dog, garage, and authoritative state survive repeated routes.
+- Outbound and returning repeat states use Driving, the recovered depot state
+  uses Depot Encounter, and the returned state uses City Return.
+- At the depot, the existing return ratchet appears only when repeat frame rails
+  are in Vehicle custody. Liquid valves remain unavailable, and the freeze
+  command names the current repeat transaction and fingerprint.
+- At home, the existing return apron accepts Vehicle-custody frame rails,
+  credits the read-model parts yield, finalizes the transaction, and routes
+  directly to Scout service rather than reopening first-run pump-hall work.
+- The Permit Job uses repeat-specific copy at readiness, the Wreck Line module
+  point, depot, return road, and homecoming without inventing a second faction
+  or repair-cargo story.
+
 ## Persistence and replay
 
 Schema 9 and the existing canonical fields are unchanged. Ready, prepared,
@@ -56,8 +82,22 @@ Schema 9 has no accumulated road-edge-damage witness, so active and credited
 lineage accepts only the deterministic condition range reachable from a 1.000
 service, route progress, edge-loss rate, and the exact fixed return charge.
 
+## Direct coverage
+
+- One source contract binds the existing Field Desk, launch dog, controller,
+  return ratchet, and return apron seams and proves the desk cannot construct
+  repeat commands.
+- One end-to-end PlayMode path covers repeat-ready, prepared, outbound,
+  recovered-at-depot, returning, returned, and finalized states; four pure
+  city-to-garage routes; stale and fresh launch presentation; the exact queued
+  composite; paired autosave/reload; depot freeze; home credit; and the
+  post-check-in Scout-service route.
+- The deterministic VGR-24 core scenarios remain the authority for both
+  modules, all colony compositions, toll accounting, bounded salvage,
+  invariant rejection, history preservation, and consecutive circuits.
+
 ## Hard cuts
 
 No saved field, schema, migration, event kind, balance constant, generalized
 expedition framework, second faction choice, second repair cargo, second rotor,
-Unity presentation, scene, asset, package, or dependency.
+new intent, control, mode, scene, asset, package, or dependency.

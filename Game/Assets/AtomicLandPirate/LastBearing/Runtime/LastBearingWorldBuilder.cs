@@ -863,6 +863,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool checkInReady,
             RepairCargoKind kind,
             RepairCargoCustody custody,
+            FrameRailSalvageCustody frameRailSalvageCustody,
             bool humanVisible,
             bool robotVisible)
         {
@@ -870,6 +871,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 checkInReady,
                 kind,
                 custody,
+                frameRailSalvageCustody,
                 humanVisible,
                 robotVisible);
         }

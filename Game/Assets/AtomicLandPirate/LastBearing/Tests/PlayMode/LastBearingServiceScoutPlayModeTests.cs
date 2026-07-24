@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -237,6 +238,301 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(interactor.IsAcceptedReceiptVisible, Is.True);
             Assert.That(garage.IsScoutServiceHoistRaised, Is.True);
             Assert.That(garage.IsScoutConditionTelltaleHealthy, Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator RepeatCircuitRoutesLaunchesReturnsAndReloads()
+        {
+            LastBearingGameController controller =
+                CreateController(ColonyComposition.Mixed);
+            LastBearingState serviceReady = CreateServiceReadyState(
+                ColonyComposition.Mixed,
+                ResidentRoster.HumanResidentId,
+                7321);
+            LastBearingState repeatReady = Apply(
+                serviceReady,
+                sequence => new ServiceScoutCommand(sequence));
+            InstallControllerState(controller, repeatReady);
+            controller.ShowCityOverview();
+            yield return null;
+
+            LastBearingReadModel readyModel = controller.ReadModel!;
+            Assert.That(readyModel.IsRepeatExpeditionAvailable, Is.True);
+            Assert.That(readyModel.IsRepeatExpedition, Is.False);
+            LastBearingFieldDeskProjection desk =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                desk.PrimaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.OpenGarage));
+            Assert.That(
+                desk.PrimaryAction.Label,
+                Is.EqualTo(
+                    "OPEN GARAGE · RUN THE WRECK LINE AGAIN"));
+            Assert.That(
+                desk.PrimaryAction.Detail,
+                Does.Contain(
+                    readyModel.FutureRouteTollFuelUnits + " toll"));
+            Assert.That(
+                desk.PrimaryAction.Detail,
+                Does.Contain(
+                    readyModel.ProjectedRoundTripConditionLossMilli +
+                    " condition"));
+            Assert.That(
+                desk.PrimaryAction.Detail,
+                Does.Contain(
+                    "+" +
+                    readyModel.FrameRailSalvagePartsUnits +
+                    " parts"));
+
+            byte[] repeatReadyBytes =
+                LastBearingCanonicalCodec.Encode(repeatReady);
+            string repeatReadyHash = controller.CanonicalHash;
+            controller.Save();
+            controller.ReturnToTitle();
+            controller.Load();
+            Assert.That(controller.CanonicalHash, Is.EqualTo(repeatReadyHash));
+            CollectionAssert.AreEqual(
+                repeatReadyBytes,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            long preparedSequence = repeatReady.NextCommandSequence;
+            string repeatSuffix = preparedSequence.ToString(
+                CultureInfo.InvariantCulture);
+            string repeatTransactionId = "tx:repeat:" + repeatSuffix;
+            string repeatFingerprint = "fp:repeat:" + repeatSuffix;
+            LastBearingState prepared = Apply(
+                repeatReady,
+                sequence =>
+                    new PrepareRepeatExpeditionTransactionCommand(
+                        sequence,
+                        repeatReady.TransactionId!,
+                        repeatReady.TransactionFingerprint!,
+                        repeatTransactionId,
+                        repeatFingerprint));
+            InstallControllerState(controller, prepared);
+            controller.Save();
+            string preparedHash = controller.CanonicalHash;
+            controller.ReturnToTitle();
+            controller.Load();
+            Assert.That(controller.CanonicalHash, Is.EqualTo(preparedHash));
+            Assert.That(
+                controller.ReadModel!.TransactionPhase,
+                Is.EqualTo(TransactionPhase.Prepared));
+            Assert.That(controller.ReadModel.IsRepeatExpedition, Is.True);
+            Assert.That(
+                controller.State!.TransactionId,
+                Is.EqualTo(repeatTransactionId));
+            Assert.That(
+                controller.State.TransactionFingerprint,
+                Is.EqualTo(repeatFingerprint));
+
+            InstallControllerState(controller, repeatReady);
+            controller.Save();
+            controller.ShowCityOverview();
+            LastBearingGarageDepartureInteractor launchDog =
+                controller.World!.GarageDepartureInteractor!;
+            Camera camera = controller.World.MainCamera!;
+            AudioListener listener =
+                controller.GetComponentInChildren<AudioListener>(true)!;
+            for (var cycle = 0; cycle < 4; cycle++)
+            {
+                controller.OpenGarageBay();
+                Assert.That(
+                    controller.ModeCoordinator!.CurrentMode,
+                    Is.EqualTo(LastBearingPresentationMode.GarageBay));
+                Assert.That(
+                    controller.World.GarageDepartureInteractor,
+                    Is.SameAs(launchDog));
+                Assert.That(
+                    controller.World.MainCamera,
+                    Is.SameAs(camera));
+                Assert.That(
+                    controller.GetComponentInChildren<AudioListener>(true),
+                    Is.SameAs(listener));
+                Assert.That(launchDog.IsTargetVisible, Is.True);
+                Assert.That(launchDog.IsFocused, Is.True);
+                CollectionAssert.AreEqual(
+                    repeatReadyBytes,
+                    LastBearingCanonicalCodec.Encode(controller.State!));
+                controller.ShowCityOverview();
+                CollectionAssert.AreEqual(
+                    repeatReadyBytes,
+                    LastBearingCanonicalCodec.Encode(controller.State!));
+            }
+
+            controller.OpenGarageBay();
+            LastBearingReadModel currentModel = RuntimeReadModel(controller);
+            ReplaceRuntimeReadModel(
+                controller,
+                LastBearingReadModel.FromState(controller.State!));
+            Assert.That(launchDog.OperateFocused(), Is.False);
+            Assert.That(PendingCommands(controller), Is.Empty);
+            ReplaceRuntimeReadModel(controller, currentModel);
+            InvokeApplyPresentation(controller);
+            controller.ShowCityOverview();
+
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Press(keyboard.eKey);
+            controller.OpenGarageBay();
+            yield return null;
+            InvokeGarageDepartureUpdate(launchDog);
+            Assert.That(launchDog.IsInputArmed, Is.False);
+            Assert.That(PendingCommands(controller), Is.Empty);
+            Release(keyboard.eKey);
+            yield return null;
+            InvokeGarageDepartureUpdate(launchDog);
+            Assert.That(launchDog.IsInputArmed, Is.True);
+
+            long launchSequence = controller.State!.NextCommandSequence;
+            string completedTransactionId =
+                controller.State.TransactionId!;
+            string completedFingerprint =
+                controller.State.TransactionFingerprint!;
+            Press(keyboard.eKey);
+            InvokeGarageDepartureUpdate(launchDog);
+            Release(keyboard.eKey);
+            AssertExactRepeatLaunch(
+                controller,
+                launchSequence,
+                completedTransactionId,
+                completedFingerprint);
+            controller.CommitExpedition();
+            Assert.That(
+                PendingCommands(controller),
+                Has.Count.EqualTo(3),
+                "Duplicate presentation input queued another launch.");
+            CollectionAssert.AreEqual(
+                repeatReadyBytes,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel!.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.Outbound));
+            Assert.That(controller.ReadModel.IsRepeatExpedition, Is.True);
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.Driving));
+            string outboundHash = controller.CanonicalHash;
+            controller.ReturnToTitle();
+            controller.Load();
+            Assert.That(controller.CanonicalHash, Is.EqualTo(outboundHash));
+            Assert.That(controller.ReadModel!.IsRepeatExpedition, Is.True);
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.Driving));
+
+            LastBearingState atDepot =
+                AdvanceRepeatToDepot(controller.State!);
+            InstallControllerState(controller, atDepot);
+            Assert.That(controller.ReadModel!.IsRepeatExpedition, Is.True);
+            Assert.That(
+                controller.ReadModel.FrameRailSalvageCustody,
+                Is.EqualTo(FrameRailSalvageCustody.Vehicle));
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.DepotEncounter));
+            LastBearingDepotReturnInteractor returnRatchet =
+                controller.World!.DepotReturnInteractor!;
+            Assert.That(returnRatchet.IsWaterValveVisible, Is.False);
+            Assert.That(returnRatchet.IsFuelValveVisible, Is.False);
+            Assert.That(returnRatchet.IsReturnLatchVisible, Is.True);
+            Assert.That(returnRatchet.ActivateReturnLatch(), Is.True);
+            LastBearingCommand[] returnCommands =
+                PendingCommands(controller).ToArray();
+            Assert.That(returnCommands, Has.Length.EqualTo(1));
+            Assert.That(
+                returnCommands[0],
+                Is.TypeOf<FreezeReturnPayloadCommand>());
+            var freeze =
+                (FreezeReturnPayloadCommand)returnCommands[0];
+            Assert.That(
+                freeze.TransactionId,
+                Is.EqualTo(atDepot.TransactionId));
+            Assert.That(
+                freeze.Fingerprint,
+                Is.EqualTo(atDepot.TransactionFingerprint));
+
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel!.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.Returning));
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.Driving));
+
+            LastBearingState returned =
+                AdvanceRepeatToHomeApron(controller.State!);
+            long partsBeforeCheckIn = returned.PartsUnits;
+            InstallControllerState(controller, returned);
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.CityReturn));
+            Assert.That(controller.IsReturnCheckInAvailable, Is.True);
+            LastBearingReturnServiceView returnService =
+                controller.World!.ReturnServiceView!;
+            Assert.That(returnService.IsCheckInMarkerVisible, Is.True);
+            Assert.That(returnService.HasVehicleRepairCargo, Is.False);
+            Assert.That(
+                returnService.HasVehicleFrameRailSalvage,
+                Is.True);
+
+            controller.Save();
+            string returnedHash = controller.CanonicalHash;
+            controller.ReturnToTitle();
+            controller.Load();
+            Assert.That(controller.CanonicalHash, Is.EqualTo(returnedHash));
+            Assert.That(controller.IsReturnCheckInAvailable, Is.True);
+            controller.CompleteReturn();
+            LastBearingCommand[] checkIn =
+                PendingCommands(controller).ToArray();
+            Assert.That(checkIn, Has.Length.EqualTo(2));
+            Assert.That(checkIn[0], Is.TypeOf<CreditCityReturnCommand>());
+            Assert.That(
+                checkIn[1],
+                Is.TypeOf<FinalizeExpeditionTransactionCommand>());
+            controller.CompleteReturn();
+            Assert.That(PendingCommands(controller), Has.Count.EqualTo(2));
+
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel!.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.AtHome));
+            Assert.That(
+                controller.ReadModel.TransactionPhase,
+                Is.EqualTo(TransactionPhase.Finalized));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(
+                    partsBeforeCheckIn +
+                    readyModel.FrameRailSalvagePartsUnits));
+            Assert.That(
+                controller.Status,
+                Does.Contain("Repeat circuit checked in."));
+            Assert.That(controller.Status, Does.Contain("service Sasha's Scout"));
+            Assert.That(controller.Status, Does.Not.Contain("pump hall"));
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.CityOverview));
+            Assert.That(
+                LastBearingFieldDeskPresenter
+                    .Present(controller)
+                    .PrimaryAction.Intent,
+                Is.EqualTo(
+                    LastBearingFieldDeskIntent.OpenScoutServiceBay));
+
+            string finalizedHash = controller.CanonicalHash;
+            controller.ReturnToTitle();
+            controller.Load();
+            Assert.That(controller.CanonicalHash, Is.EqualTo(finalizedHash));
+            Assert.That(
+                controller.ReadModel!.FrameRailSalvageCustody,
+                Is.EqualTo(FrameRailSalvageCustody.Credited));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(
+                    partsBeforeCheckIn +
+                    readyModel.FrameRailSalvagePartsUnits));
         }
 
         [UnityTest]
@@ -639,6 +935,133 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             return command;
         }
 
+        private static void AssertExactRepeatLaunch(
+            LastBearingGameController controller,
+            long firstSequence,
+            string completedTransactionId,
+            string completedFingerprint)
+        {
+            LastBearingCommand[] queued =
+                PendingCommands(controller).ToArray();
+            Assert.That(queued, Has.Length.EqualTo(3));
+            Assert.That(
+                queued[0],
+                Is.TypeOf<PrepareRepeatExpeditionTransactionCommand>());
+            Assert.That(
+                queued[1],
+                Is.TypeOf<DebitCityManifestCommand>());
+            Assert.That(
+                queued[2],
+                Is.TypeOf<DepartExpeditionCommand>());
+
+            var prepare =
+                (PrepareRepeatExpeditionTransactionCommand)queued[0];
+            var debit = (DebitCityManifestCommand)queued[1];
+            string suffix = firstSequence.ToString(
+                CultureInfo.InvariantCulture);
+            Assert.That(prepare.Sequence, Is.EqualTo(firstSequence));
+            Assert.That(
+                prepare.CompletedTransactionId,
+                Is.EqualTo(completedTransactionId));
+            Assert.That(
+                prepare.CompletedFingerprint,
+                Is.EqualTo(completedFingerprint));
+            Assert.That(
+                prepare.TransactionId,
+                Is.EqualTo("tx:repeat:" + suffix));
+            Assert.That(
+                prepare.Fingerprint,
+                Is.EqualTo("fp:repeat:" + suffix));
+            Assert.That(
+                debit.Sequence,
+                Is.EqualTo(firstSequence + 1));
+            Assert.That(
+                debit.TransactionId,
+                Is.EqualTo(prepare.TransactionId));
+            Assert.That(
+                debit.Fingerprint,
+                Is.EqualTo(prepare.Fingerprint));
+            Assert.That(
+                queued[2].Sequence,
+                Is.EqualTo(firstSequence + 2));
+            Assert.That(controller.IsExpeditionCommitQueued, Is.True);
+        }
+
+        private static LastBearingState AdvanceRepeatToDepot(
+            LastBearingState source)
+        {
+            LastBearingState state = source;
+            for (var ticks = 0; ticks < 7000; ticks++)
+            {
+                LastBearingReadModel model =
+                    LastBearingReadModel.FromState(state);
+                if (model.IsDepotApproachRecoveryAvailable)
+                {
+                    state = Apply(
+                        state,
+                        sequence =>
+                            new OperateDepotRecoveryPointCommand(sequence));
+                    Assert.That(
+                        LastBearingReadModel
+                            .FromState(state)
+                            .ExpeditionPhase,
+                        Is.EqualTo(ExpeditionPhase.AtDepot));
+                    return state;
+                }
+
+                if (model.IsWreckLineModulePointAvailable)
+                {
+                    state = Apply(
+                        state,
+                        sequence =>
+                            new OperateWreckLineModuleCommand(
+                                sequence,
+                                model.RouteActionKind));
+                    model = LastBearingReadModel.FromState(state);
+                }
+
+                if (model.IsWreckLineFrameRailRecoveryAvailable)
+                {
+                    state = Apply(
+                        state,
+                        sequence =>
+                            new RecoverWreckLineFrameRailsCommand(sequence));
+                }
+
+                state = Apply(
+                    state,
+                    sequence =>
+                        new DriveVehicleCommand(sequence, 1000, 0));
+            }
+
+            throw new InvalidOperationException(
+                "Repeat circuit did not reach the depot.");
+        }
+
+        private static LastBearingState AdvanceRepeatToHomeApron(
+            LastBearingState source)
+        {
+            LastBearingState state = source;
+            for (var ticks = 0; ticks < 7000; ticks++)
+            {
+                if (LastBearingReadModel
+                        .FromState(state)
+                        .ExpeditionPhase ==
+                    ExpeditionPhase.Returned)
+                {
+                    return state;
+                }
+
+                state = Apply(
+                    state,
+                    sequence =>
+                        new DriveVehicleCommand(sequence, 1000, 0));
+            }
+
+            throw new InvalidOperationException(
+                "Repeat circuit did not reach the home apron.");
+        }
+
         private static List<LastBearingCommand> PendingCommands(
             LastBearingGameController controller)
         {
@@ -719,6 +1142,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingScoutServiceInteractor interactor)
         {
             typeof(LastBearingScoutServiceInteractor)
+                .GetMethod(
+                    "Update",
+                    BindingFlags.Instance | BindingFlags.NonPublic)!
+                .Invoke(interactor, null);
+        }
+
+        private static void InvokeGarageDepartureUpdate(
+            LastBearingGarageDepartureInteractor interactor)
+        {
+            typeof(LastBearingGarageDepartureInteractor)
                 .GetMethod(
                     "Update",
                     BindingFlags.Instance | BindingFlags.NonPublic)!

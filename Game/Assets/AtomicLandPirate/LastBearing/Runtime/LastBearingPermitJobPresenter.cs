@@ -157,6 +157,36 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "service pendant.");
             }
 
+            if (model.IsRepeatExpeditionAvailable)
+            {
+                long baseFuel =
+                    LastBearingBalanceV1.RouteFuelCost(model.VehicleModule);
+                long repeatFuel = checked(
+                    baseFuel + model.FutureRouteTollFuelUnits);
+                return Create(
+                    LastBearingPermitJobChapter.Finale,
+                    JobStepCount,
+                    "NEXT RUN · THE WRECK LINE",
+                    "The serviced Scout can run it again",
+                    "The urgent return work is settled, Sasha's Scout is at " +
+                    model.VehicleConditionMilli +
+                    " / " +
+                    LastBearingBalanceV1.StartingVehicleConditionMilli +
+                    " condition. The run spends " +
+                    repeatFuel +
+                    " fuel (" +
+                    baseFuel +
+                    " route + " +
+                    model.FutureRouteTollFuelUnits +
+                    " toll), risks " +
+                    model.ProjectedRoundTripConditionLossMilli +
+                    " condition, and can return +" +
+                    model.FrameRailSalvagePartsUnits +
+                    " parts.",
+                    "Click OPEN GARAGE · RUN THE WRECK LINE AGAIN, release " +
+                    "the route input, then pull the existing launch dog.");
+            }
+
             if (IsFuelBondFinale(model))
             {
                 return Create(
@@ -302,6 +332,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 if (model.IsWreckLineModulePointAvailable)
                 {
                     bool winch = model.RouteActionKind == RouteActionKind.DeployWinch;
+                    if (model.IsRepeatExpedition)
+                    {
+                        return Create(
+                            LastBearingPermitJobChapter.Outbound,
+                            3,
+                            "REPEAT RUN · THE WRECK LINE",
+                            winch
+                                ? "Set the winch for the frame-rail stop"
+                                : "Seal the Scout for the frame-rail stop",
+                            "The first-run rotor and faction outcome stay settled. " +
+                            "Operate the fitted module to reach the repeat salvage bundle.",
+                            "Press E / gamepad south; operate the existing rig " +
+                            "control and reopen the road to the frame rails.",
+                            model.RouteProgressTicks,
+                            model.RouteTargetTicks);
+                    }
+
                     return Create(
                         LastBearingPermitJobChapter.Outbound,
                         3,
@@ -366,6 +413,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (model.ExpeditionPhase == ExpeditionPhase.AtDepot)
             {
+                if (model.IsRepeatExpedition)
+                {
+                    return Create(
+                        LastBearingPermitJobChapter.Depot,
+                        4,
+                        "REPEAT RUN · THE RETURN LOAD",
+                        "Ratchet the frame rails into the home manifest",
+                        "The first faction decision and repair cargo remain settled. " +
+                        "This circuit carries only the recovered frame-rail bundle worth " +
+                        model.FrameRailSalvagePartsUnits +
+                        " reclaimed parts.",
+                        "Use the existing RETURN RATCHET with E, gamepad south, " +
+                        "or its exact pointer target; freeze the repeat salvage and head home.");
+                }
+
                 if (model.RepairCargoKind == RepairCargoKind.None)
                 {
                     return Create(
@@ -442,9 +504,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     LastBearingPermitJobChapter.Returning,
                     5,
                     "CHAPTER V · THE ROAD HOME",
-                    "Bring the consequence back intact",
-                    "The frozen payload, vehicle condition, faction memory, " +
-                    "and recovered cargo all travel together.",
+                    model.IsRepeatExpedition
+                        ? "Bring the frame rails back intact"
+                        : "Bring the consequence back intact",
+                    model.IsRepeatExpedition
+                        ? "The frozen repeat salvage, vehicle condition, and " +
+                          "settled first-run history travel together."
+                        : "The frozen payload, vehicle condition, faction memory, " +
+                          "and recovered cargo all travel together.",
                     "Hold W / right trigger to drive home; steer with A/D / " +
                     "left stick · " + FormatRouteProgress(model),
                     model.RouteProgressTicks,
@@ -458,11 +525,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     LastBearingPermitJobChapter.Homecoming,
                     6,
                     "CHAPTER VI · HOMECOMING",
-                    "Credit the road back to Last Bearing",
-                    "Move the frozen return payload into settlement custody and " +
-                    "finalize the one expedition transaction.",
-                    "Press E / gamepad south at the fixed return apron; credit " +
-                    "the cargo to Last Bearing and open the repair route.");
+                    model.IsRepeatExpedition
+                        ? "Credit the repeat salvage to Last Bearing"
+                        : "Credit the road back to Last Bearing",
+                    model.IsRepeatExpedition
+                        ? "Move the frozen frame rails into settlement custody, " +
+                          "credit exactly " +
+                          model.FrameRailSalvagePartsUnits +
+                          " reclaimed parts, and close this circuit."
+                        : "Move the frozen return payload into settlement custody and " +
+                          "finalize the one expedition transaction.",
+                    model.IsRepeatExpedition
+                        ? "Press E / gamepad south at the fixed return apron; " +
+                          "credit the frame rails, then service Sasha's Scout."
+                        : "Press E / gamepad south at the fixed return apron; credit " +
+                          "the cargo to Last Bearing and open the repair route.");
             }
 
             if (model.TurbineCondition == TurbineCondition.Failing

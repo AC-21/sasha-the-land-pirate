@@ -130,6 +130,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     < LastBearingBalanceV1.StartingVehicleConditionMilli;
             IsVehicleServiceAvailable =
                 ComputeVehicleServiceAvailable(state);
+            IsRepeatExpedition =
+                LastBearingRepeatExpedition.IsLineage(state);
             IsRepeatExpeditionAvailable =
                 ComputeRepeatExpeditionAvailable(state);
             RepairCargoKind = state.RepairCargoKind;
@@ -312,6 +314,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long VehicleServiceReservePartsUnits { get; private set; }
         public bool IsVehicleServiceNeeded { get; private set; }
         public bool IsVehicleServiceAvailable { get; private set; }
+        public bool IsRepeatExpedition { get; private set; }
         public bool IsRepeatExpeditionAvailable { get; private set; }
         public RepairCargoKind RepairCargoKind { get; private set; }
         public RepairCargoCustody RepairCargoCustody { get; private set; }

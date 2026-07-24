@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using AtomicLandPirate.Simulation.LastBearing;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -196,8 +197,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _readModel != null &&
             _readModel.ExpeditionPhase == ExpeditionPhase.Returned &&
             _readModel.TransactionPhase == TransactionPhase.ReturnPending &&
-            _readModel.RepairCargoKind != RepairCargoKind.None &&
-            _readModel.RepairCargoCustody == RepairCargoCustody.Vehicle &&
+            (_readModel.IsRepeatExpedition
+                ? _readModel.FrameRailSalvageCustody ==
+                    FrameRailSalvageCustody.Vehicle
+                : _readModel.RepairCargoKind != RepairCargoKind.None &&
+                  _readModel.RepairCargoCustody ==
+                    RepairCargoCustody.Vehicle) &&
             _modeCoordinator?.HasActiveMode == true &&
             _modeCoordinator.CurrentMode == LastBearingPresentationMode.CityReturn;
 
@@ -413,6 +418,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool IsExpeditionCommitQueued =>
             _pendingCommands.Exists(command =>
                 command is PrepareExpeditionTransactionCommand ||
+                command is PrepareRepeatExpeditionTransactionCommand ||
                 command is DebitCityManifestCommand ||
                 command is DepartExpeditionCommand);
 
@@ -435,8 +441,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 LastBearingBalanceV1.RouteFuelCost(
                     _readModel.PlannedModule);
 
+        public bool CanRepeatExpedition =>
+            _pendingCommands.Count == 0 &&
+            _state != null &&
+            _readModel?.IsRepeatExpeditionAvailable == true;
+
         public bool IsGarageDepartureAvailable =>
-            CanCommitExpedition &&
+            (CanCommitExpedition || CanRepeatExpedition) &&
             _modeCoordinator?.HasActiveMode == true &&
             _modeCoordinator.CurrentMode ==
                 LastBearingPresentationMode.GarageBay;
@@ -838,6 +849,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 checkInReady: false,
                 RepairCargoKind.None,
                 RepairCargoCustody.None,
+                FrameRailSalvageCustody.None,
                 humanVisible: false,
                 robotVisible: false);
             _world?.ApplyCityImprovement(
@@ -1546,6 +1558,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void OpenGarageBay()
         {
+            bool focusRepeatDeparture =
+                IsExactFieldDeskCityOverview &&
+                CanRepeatExpedition;
             _world?.LeaveCityGrammarComparison();
             TryShowCityMode(
                 LastBearingPresentationMode.GarageBay,
@@ -1555,6 +1570,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.ApplyGarageModuleInteraction(_readModel);
                 _world?.ApplyGarageDepartureInteraction(_readModel);
                 _world?.ApplyScoutServiceInteraction(_readModel);
+            }
+
+            if (focusRepeatDeparture)
+            {
+                _world?.GarageDepartureInteractor?.FocusControl();
             }
         }
 
@@ -1615,6 +1635,33 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (!IsGarageDepartureAvailable)
             {
                 _status = ExpeditionCommitUnavailableStatus();
+                return;
+            }
+
+            if (CanRepeatExpedition)
+            {
+                string predecessorTransactionId = _state!.TransactionId!;
+                string predecessorFingerprint =
+                    _state.TransactionFingerprint!;
+                string identitySuffix = _state.NextCommandSequence.ToString(
+                    CultureInfo.InvariantCulture);
+                string transactionId = "tx:repeat:" + identitySuffix;
+                string fingerprint = "fp:repeat:" + identitySuffix;
+                Queue(
+                    sequence =>
+                        new PrepareRepeatExpeditionTransactionCommand(
+                            sequence,
+                            predecessorTransactionId,
+                            predecessorFingerprint,
+                            transactionId,
+                            fingerprint),
+                    sequence => new DebitCityManifestCommand(
+                        sequence,
+                        transactionId,
+                        fingerprint),
+                    sequence => new DepartExpeditionCommand(sequence));
+                _status =
+                    "Repeat departure queued. The serviced Scout takes the Wreck Line again on the authoritative tick.";
                 return;
             }
 
@@ -1733,20 +1780,33 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void BeginReturn()
         {
-            if (_readModel == null ||
+            if (_state == null ||
+                _readModel == null ||
                 _readModel.ExpeditionPhase != ExpeditionPhase.AtDepot)
             {
                 _status = "The return payload can only be frozen at the depot.";
                 return;
             }
 
-            if (_readModel.RepairCargoCustody != RepairCargoCustody.Vehicle)
+            if (_readModel.IsRepeatExpedition)
+            {
+                if (_readModel.FrameRailSalvageCustody !=
+                    FrameRailSalvageCustody.Vehicle)
+                {
+                    _status =
+                        "Recover the Wreck Line frame rails before freezing the repeat return.";
+                    return;
+                }
+            }
+            else if (_readModel.RepairCargoCustody !=
+                     RepairCargoCustody.Vehicle)
             {
                 _status = "Load the repair cargo into Sasha's scout before freezing the return payload.";
                 return;
             }
 
-            if (_readModel.VehicleModule == VehicleModule.SealedRangeTank &&
+            if (!_readModel.IsRepeatExpedition &&
+                _readModel.VehicleModule == VehicleModule.SealedRangeTank &&
                 _readModel.LiquidCargoKind == LiquidCargoKind.None)
             {
                 _status = "Choose water or fuel before sealing the range tank.";
@@ -1755,8 +1815,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             Queue(sequence => new FreezeReturnPayloadCommand(
                 sequence,
-                TransactionId,
-                TransactionFingerprint));
+                _state.TransactionId!,
+                _state.TransactionFingerprint!));
             _status = "Return payload frozen. Nothing can duplicate between road and home.";
         }
 
@@ -2473,11 +2533,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 ApplyPresentation();
                 if (returnCheckInAccepted)
                 {
-                    TryRouteToPumpHallRepair(
-                        _readModel.FrameRailSalvageCustody ==
-                            FrameRailSalvageCustody.Credited
-                            ? "Return checked in. +4 reclaimed parts from the Wreck Line frame rails; seat the loaded repair at the pump hall."
-                            : "Return checked in. Seat the loaded repair at the pump hall.");
+                    if (_readModel.IsRepeatExpedition)
+                    {
+                        _status =
+                            "Repeat circuit checked in. +" +
+                            _readModel.FrameRailSalvagePartsUnits +
+                            " reclaimed parts are home; service Sasha's Scout before another run.";
+                    }
+                    else
+                    {
+                        TryRouteToPumpHallRepair(
+                            _readModel.FrameRailSalvageCustody ==
+                                FrameRailSalvageCustody.Credited
+                                ? "Return checked in. +4 reclaimed parts from the Wreck Line frame rails; seat the loaded repair at the pump hall."
+                                : "Return checked in. Seat the loaded repair at the pump hall.");
+                    }
                 }
 
                 if (turbineRepairAccepted &&
@@ -2912,6 +2982,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 IsReturnCheckInAvailable,
                 _readModel.RepairCargoKind,
                 _readModel.RepairCargoCustody,
+                _readModel.IsRepeatExpedition
+                    ? _readModel.FrameRailSalvageCustody
+                    : FrameRailSalvageCustody.None,
                 humanVisible,
                 robotVisible);
             _fieldDesk?.Refresh();
@@ -3339,6 +3412,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_readModel.ExpeditionPhase != ExpeditionPhase.AtHome)
             {
                 return "Sasha is already away from the garage.";
+            }
+
+            if (_readModel.TransactionPhase ==
+                    TransactionPhase.Finalized &&
+                !_readModel.IsRepeatExpeditionAvailable)
+            {
+                return "Finish the return work and service Sasha's Scout before running the Wreck Line again.";
             }
 
             if (_readModel.PreparationPhase != PreparationPhase.Ready ||

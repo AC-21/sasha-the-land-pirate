@@ -843,6 +843,36 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            if (model.IsRepeatExpeditionAvailable)
+            {
+                long baseFuel =
+                    LastBearingBalanceV1.RouteFuelCost(model.VehicleModule);
+                long repeatFuel = checked(
+                    baseFuel + model.FutureRouteTollFuelUnits);
+                primary = Action(
+                    LastBearingFieldDeskIntent.OpenGarage,
+                    "OPEN GARAGE · RUN THE WRECK LINE AGAIN",
+                    "Sasha's Scout is serviced to " +
+                    model.VehicleConditionMilli +
+                    " / " +
+                    LastBearingBalanceV1.StartingVehicleConditionMilli +
+                    ". Spend " +
+                    repeatFuel +
+                    " fuel (" +
+                    baseFuel +
+                    " route + " +
+                    model.FutureRouteTollFuelUnits +
+                    " toll), risk " +
+                    model.ProjectedRoundTripConditionLossMilli +
+                    " condition, and bring home +" +
+                    model.FrameRailSalvagePartsUnits +
+                    " parts. Release the desk input, then use E, gamepad south, or the exact clamp.",
+                    true,
+                    canDispatch,
+                    LastBearingFieldDeskActionTone.Primary);
+                return;
+            }
+
             if (IsWorkshopRelevant(model))
             {
                 primary = Action(

@@ -930,8 +930,8 @@ Detailed contract:
 
 ## VGR-24 — Run the Wreck Line Again
 
-Status: core implementation target after VGR-23 Scout service; Unity
-presentation remains a separate integration step.
+Status: integrated implementation complete after VGR-23 Scout service, with
+focused source/EditMode coverage and one end-to-end PlayMode repeat circuit.
 
 Scope:
 
@@ -955,9 +955,26 @@ Scope:
   return charge; preserve installed auxiliary-pump history.
 - Preserve schema 9, deterministic save/load, stale/duplicate atomic rejection,
   and require a fresh Scout service between consecutive circuits.
+- At exact repeat readiness, reuse the Field Desk's existing Open Garage route
+  and show the authored route fuel, persistent toll, condition risk, and
+  frame-rail parts bargain from the read model.
+- Reuse the existing launch dog after a fresh input release for E, gamepad
+  South, and exact pointer activation. The controller alone owns the exact
+  prepare/debit/depart composite and existing autosave seam.
+- Keep four city-to-garage routes presentation-pure with one camera, listener,
+  garage, launch dog, and unchanged canonical state; reject stale runtime
+  presentation before command creation.
+- Reuse Driving, Depot Encounter, and City Return modes; expose only the
+  existing depot return ratchet for Vehicle-custody repeat frame rails and
+  freeze the current repeat transaction identity.
+- Reuse the home return apron to credit the frame-rail bundle, finalize, and
+  route directly to Scout service. Permit Job copy follows the repeat run
+  without reopening the first faction, repair-cargo, or pump-hall story.
+- Round-trip repeat-ready, prepared, outbound, returned, and finalized
+  presentation states through the existing schema and save adapter.
 
 Exclude: new save field, schema, migration, event kind, balance value,
-generalized expedition system, Unity presentation, scene, asset, package,
+generalized expedition system, intent, control, mode, scene, asset, package,
 dependency, or normal-PR performance soak.
 
 Detailed contract:
