@@ -5,9 +5,9 @@ using UnityEngine;
 namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
 {
     /// <summary>
-    /// Presentation-only road material used by the Road Feel Lab. The values
-    /// are fixed presets so authoring a surface kind cannot create a hidden
-    /// per-collider handling variant.
+    /// Presentation-only road material shared by the authored corridor and
+    /// Road Feel Lab. The values are fixed presets so authoring a surface kind
+    /// cannot create a hidden per-collider handling variant.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class RoadFeelSurface : MonoBehaviour

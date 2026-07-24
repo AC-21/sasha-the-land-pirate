@@ -611,8 +611,8 @@ Detailed contract:
 Objective: replace the reversible city comparison with one small, canonical,
 saved city-building and local-logistics task that a first-time player can finish.
 
-Status: current implementation target under creator-delegated `HYBRID-CITY`
-selection for the V0 slice.
+Status: released on protected `main`; the current baseline includes direct
+physical service-cell operation.
 
 Scope:
 
@@ -651,8 +651,7 @@ Detailed contract:
 Objective: turn the placed emergency-storage building into one clear survival
 decision before Sasha leaves.
 
-Status: implemented on the V0 feature branch; native visual verification remains
-an integration gate.
+Status: released on protected `main` in PR #113.
 
 Scope:
 
@@ -687,7 +686,7 @@ Detailed contract:
 Objective: turn the resolved Dust Front verdict into one physical colony action
 instead of a direct Field Desk acknowledgement.
 
-Status: current implementation target on the V0 feature branch.
+Status: released on protected `main` in PR #114.
 
 Scope:
 
@@ -728,6 +727,41 @@ Acceptance:
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-16-FACE-THE-DUST-FRONT-CONTRACT.md`.
+
+## VGR-17 — Make the Wreck Line Bite
+
+Objective: make the existing Wreck Line corridor communicate route choice
+through the rig's existing four-contact handling and telemetry.
+
+Status: current implementation target on the V0 feature branch.
+
+Scope:
+
+- Tag the launch apron, collapsed shortcut, and exposed long route with the
+  existing fixed concrete, washboard, sand, and gravel presets.
+- Keep the existing rig, input adapter, chase camera, canonical driving
+  commands, authored corridor geometry, and scavenging interactions.
+- Prove each actual corridor segment reaches dominant-surface telemetry while
+  physics remains presentation-only.
+- Preserve camera ownership, explicit recovery, deterministic state, and save
+  boundaries.
+
+Acceptance:
+
+- the apron reads concrete, the collapsed branch reads washboard, and the
+  exposed long route reads sand then gravel under Sasha's grounded rig;
+- surface sampling cannot change canonical state, command sequence, saves, or
+  recovery availability;
+- the shared camera and AudioListener remain singular;
+- focused PlayMode tests and a short native drive cover the changed dependency
+  surface.
+
+Exclude: simulation or save changes, new commands, route balance, vehicle
+physics tuning, generalized terrain, new scenes/packages/dependencies,
+production art, new scavenging interactions, or a normal-PR performance soak.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-17-MAKE-THE-WRECK-LINE-BITE-CONTRACT.md`.
 
 ## Visual constitution
 
