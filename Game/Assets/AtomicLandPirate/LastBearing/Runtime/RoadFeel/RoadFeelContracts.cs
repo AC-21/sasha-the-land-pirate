@@ -86,6 +86,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
     public static class RoadFeelMath
     {
         public const float ExpectedFixedDeltaTimeSeconds = 1f / 50f;
+        private const float SteeringCenterEpsilon = 0.00001f;
 
         public static float SpringRateFromSag(
             float supportedMassKilograms,
@@ -189,10 +190,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
             float travelSeconds = returning
                 ? returnToCenterSeconds
                 : zeroToFullLockSeconds;
-            return Mathf.MoveTowards(
+            float advanced = Mathf.MoveTowards(
                 current,
                 boundedTarget,
                 deltaTimeSeconds / travelSeconds);
+            return reversing &&
+                   Mathf.Abs(advanced) <= SteeringCenterEpsilon
+                ? 0f
+                : advanced;
         }
 
         public static float SignedBodySlipDegrees(
