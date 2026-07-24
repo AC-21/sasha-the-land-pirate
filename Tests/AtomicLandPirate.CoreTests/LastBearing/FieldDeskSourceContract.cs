@@ -33,6 +33,11 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "public bool IsEmergencyCisternPumpFocused");
             Require(controller, "public bool CanPumpEmergencyCistern");
             Require(controller, "public bool IsEmergencyCisternPumpQueued");
+            Require(
+                controller,
+                "public bool IsDustFrontAcknowledgementQueued");
+            Require(controller, "public bool CanOpenDustFrontRelay");
+            Require(controller, "public bool IsDustFrontRelayFocused");
 
             const string addDesk =
                 "gameObject.AddComponent<LastBearingFieldDesk>()";
@@ -157,7 +162,8 @@ namespace AtomicLandPirate.LastBearingTests
                 ".AdvanceCityServiceSled(",
                 ".CancelCityBuildingPreview(",
                 ".StartHotShift(",
-                ".AcknowledgeDustFront(",
+                ".OpenDustFrontRelay(",
+                ".AcknowledgeDustFrontFallback(",
                 ".OpenEmergencyCisternPump(",
                 ".BeginGaragePlan(",
                 ".OpenGarageBay(",
@@ -190,7 +196,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 fieldDeskPresenter,
                 "OpenEmergencyCisternPump = 30");
-            Require(fieldDeskPresenter, "\"ACKNOWLEDGE FRONT\"");
+            Require(fieldDeskPresenter, "OpenDustFrontRelay = 31");
+            Require(
+                fieldDeskPresenter,
+                "OPEN EMERGENCY STORAGE · FACE DUST FRONT");
             Require(
                 fieldDeskPresenter,
                 "model.IsDustFrontAcknowledgementRequired");
@@ -199,8 +208,18 @@ namespace AtomicLandPirate.LastBearingTests
                 fieldDeskPresenter,
                 "LastBearingFieldDeskActionTone.Hazard");
             Require(hud, "DUST FRONT · GLOBAL ALERT");
-            Require(hud, "GUILayout.Button(\"ACKNOWLEDGE FRONT\"");
-            Require(hud, "_controller.AcknowledgeDustFront();");
+            Require(hud, "_controller.OpenDustFrontRelay();");
+            Require(
+                hud,
+                "_controller.AcknowledgeDustFrontFallback();");
+            Require(
+                hud,
+                "\"OPEN EMERGENCY STORAGE · FACE DUST FRONT\"");
+            TestHarness.True(
+                fieldDesk.IndexOf(
+                    ".AcknowledgeDustFront(",
+                    StringComparison.Ordinal) < 0,
+                "Field Desk must route to the physical Dust Front relay instead of submitting the command");
             Require(
                 fieldDeskPresenter,
                 "OPEN EMERGENCY STORAGE · WORK CISTERN PUMP");

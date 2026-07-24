@@ -139,8 +139,20 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "public bool CanPumpEmergencyCistern");
             Require(controller, "public void OpenEmergencyCisternPump()");
             Require(controller, "public void PumpEmergencyCistern()");
+            Require(
+                controller,
+                "public bool IsDustFrontAcknowledgementQueued");
+            Require(controller, "public bool CanOpenDustFrontRelay");
+            Require(
+                controller,
+                "public bool CanAcknowledgeDustFrontFallback");
+            Require(controller, "public bool IsDustFrontRelayFocused");
+            Require(controller, "public void OpenDustFrontRelay()");
             Require(controller, "public bool CanAcknowledgeDustFront");
             Require(controller, "public void AcknowledgeDustFront()");
+            Require(
+                controller,
+                "public void AcknowledgeDustFrontFallback()");
             string hotShiftOperation = Segment(
                 controller,
                 "public void StartHotShift()",
@@ -210,6 +222,44 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 cityServiceInteractor,
                 "controlsReleased");
+            Require(
+                cityServiceInteractor,
+                "public const string DustFrontRelayControlName");
+            Require(
+                cityServiceInteractor,
+                "public const string DustFrontRelayHeldSignalName");
+            Require(
+                cityServiceInteractor,
+                "public const string DustFrontRelayBreachedSignalName");
+            Require(
+                cityServiceInteractor,
+                "public bool IsDustFrontRelayControlVisible");
+            Require(
+                cityServiceInteractor,
+                "public bool IsDustFrontRelayFocused");
+            Require(
+                cityServiceInteractor,
+                "public bool IsDustFrontRelayInputArmed");
+            Require(
+                cityServiceInteractor,
+                "public bool HasDustFrontRelayControl");
+            Require(
+                cityServiceInteractor,
+                "public string DustFrontRelayLabel");
+            Require(
+                cityServiceInteractor,
+                "public void FocusDustFrontRelay()");
+            Require(
+                cityServiceInteractor,
+                "public void ClickDustFrontRelay()");
+            Require(
+                cityServiceInteractor,
+                "_controller.AcknowledgeDustFront();");
+            TestHarness.True(
+                cityServiceInteractor.IndexOf(
+                    "new AcknowledgeDustFrontCommand",
+                    StringComparison.Ordinal) < 0,
+                "physical Dust Front relay must delegate instead of owning command authority");
             string cisternGlobalShortcuts = Segment(
                 controller,
                 "private void HandleGlobalShortcuts()",
@@ -217,6 +267,19 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 cisternGlobalShortcuts,
                 "IsEmergencyCisternPumpFocused == true");
+            Require(
+                cisternGlobalShortcuts,
+                "IsDustFrontRelayFocused == true");
+            string dustFrontRoute = Segment(
+                controller,
+                "public void OpenDustFrontRelay()",
+                "public void AcknowledgeDustFront()");
+            Require(
+                dustFrontRoute,
+                "if (!CanOpenDustFrontRelay)");
+            Require(
+                dustFrontRoute,
+                "interactor?.FocusDustFrontRelay();");
             string dustFrontAcknowledgement = Segment(
                 controller,
                 "public void AcknowledgeDustFront()",
@@ -224,6 +287,18 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 dustFrontAcknowledgement,
                 "_readModel.IsDustFrontAcknowledgementRequired");
+            Require(
+                dustFrontAcknowledgement,
+                "if (RequiresPhysicalDustFrontRelay &&");
+            Require(
+                controller,
+                "?.HasDustFrontRelayControl == true");
+            Require(
+                dustFrontAcknowledgement,
+                "!IsDustFrontRelayFocused");
+            Require(
+                dustFrontAcknowledgement,
+                "?.IsDustFrontRelayInputArmed != true");
             Require(
                 dustFrontAcknowledgement,
                 "new AcknowledgeDustFrontCommand(sequence)");
@@ -239,7 +314,15 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "LastBearingEventKind.DustFrontAcknowledged");
             Require(controller, "PauseCause.DustFrontAlert");
             Require(hud, "DUST FRONT · GLOBAL ALERT");
-            Require(hud, "GUILayout.Button(\"ACKNOWLEDGE FRONT\"");
+            Require(hud, "bool usePhysicalRelay =");
+            Require(
+                hud,
+                "\"OPEN EMERGENCY STORAGE · FACE DUST FRONT\"");
+            Require(hud, "\"ACKNOWLEDGE FRONT\"");
+            Require(hud, "_controller.OpenDustFrontRelay();");
+            Require(
+                hud,
+                "_controller.AcknowledgeDustFrontFallback();");
             string harnessUpdate = Segment(
                 nativePerformanceHarness,
                 "private void Update()",
@@ -265,6 +348,12 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 harnessDustFrontAcknowledgement,
                 "if (controller.CanAcknowledgeDustFront)");
+            Require(
+                harnessDustFrontAcknowledgement,
+                "if (controller.CanOpenDustFrontRelay &&");
+            Require(
+                harnessDustFrontAcknowledgement,
+                "controller.OpenDustFrontRelay();");
             TestHarness.Equal(
                 1,
                 CountOccurrences(

@@ -357,6 +357,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _pendingCommands.Exists(command =>
                 command is PumpEmergencyCisternCommand);
 
+        public bool IsDustFrontAcknowledgementQueued =>
+            _pendingCommands.Exists(command =>
+                command is AcknowledgeDustFrontCommand);
+
         public bool CanOpenEmergencyCisternPump =>
             _pendingCommands.Count == 0 &&
             _readModel?.IsEmergencyCisternPumpAvailable == true &&
@@ -376,7 +380,34 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool CanAcknowledgeDustFront =>
             _pendingCommands.Count == 0 &&
-            _readModel?.IsDustFrontAcknowledgementRequired == true;
+            _readModel?.IsDustFrontAcknowledgementRequired == true &&
+            (!RequiresPhysicalDustFrontRelay ||
+             (IsDustFrontRelayFocused &&
+              _world?.CityServiceCellView?.Interactor
+                  ?.IsDustFrontRelayInputArmed == true));
+
+        public bool CanOpenDustFrontRelay =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsDustFrontAcknowledgementRequired == true &&
+            IsExactFieldDeskCityOverview &&
+            _world?.CityServiceCellView?.Interactor
+                ?.IsDustFrontRelayControlVisible == true;
+
+        public bool CanAcknowledgeDustFrontFallback =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsDustFrontAcknowledgementRequired == true &&
+            !RequiresPhysicalDustFrontRelay;
+
+        public bool IsDustFrontRelayFocused =>
+            _world?.CityServiceCellView?.Interactor
+                ?.IsDustFrontRelayFocused == true;
+
+        private bool RequiresPhysicalDustFrontRelay =>
+            IsExactFieldDeskCityOverview &&
+            _readModel?.IsDustFrontAcknowledgementRequired == true &&
+            _readModel.EmergencyStoragePadIndex >= 0 &&
+            _world?.CityServiceCellView?.Interactor
+                ?.HasDustFrontRelayControl == true;
 
         public bool CanAssignCityServiceHuman =>
             _readModel != null &&
@@ -956,6 +987,28 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 "Emergency cistern queued: 1 fuel · +10.000 water · one full fill.";
         }
 
+        public void OpenDustFrontRelay()
+        {
+            if (!CanOpenDustFrontRelay)
+            {
+                _status =
+                    "The Dust Front verdict can be faced only at its physical relay beside Emergency Storage.";
+                return;
+            }
+
+            LastBearingCityServiceCellInteractor? interactor =
+                _world?.CityServiceCellView?.Interactor;
+            interactor?.FocusDustFrontRelay();
+            if (interactor?.IsDustFrontRelayFocused != true)
+            {
+                _status = "The Dust Front relay could not take focus.";
+                return;
+            }
+
+            _status =
+                "Dust Front relay focused. Release the controls, then face the verdict.";
+        }
+
         public void AcknowledgeDustFront()
         {
             if (_readModel == null)
@@ -978,8 +1031,30 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            if (RequiresPhysicalDustFrontRelay &&
+                (!IsDustFrontRelayFocused ||
+                 _world?.CityServiceCellView?.Interactor
+                     ?.IsDustFrontRelayInputArmed != true))
+            {
+                _status =
+                    "Open Emergency Storage, focus the Dust Front relay, release the controls, then face the verdict.";
+                return;
+            }
+
             Queue(sequence => new AcknowledgeDustFrontCommand(sequence));
             _status = "Dust Front verdict acknowledgement queued.";
+        }
+
+        public void AcknowledgeDustFrontFallback()
+        {
+            if (!CanAcknowledgeDustFrontFallback)
+            {
+                _status =
+                    "The Dust Front fallback is reserved for non-city modes or a genuinely missing relay.";
+                return;
+            }
+
+            AcknowledgeDustFront();
         }
 
         public void BeginGaragePlan(PreparationChoice preparation)
@@ -1840,7 +1915,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             // control; allowing another global E/South verb to run first
             // would turn one press into the wrong city action.
             if (_world?.CityServiceCellView?.Interactor
-                    ?.IsEmergencyCisternPumpFocused == true)
+                    ?.IsEmergencyCisternPumpFocused == true ||
+                _world?.CityServiceCellView?.Interactor
+                    ?.IsDustFrontRelayFocused == true)
             {
                 return;
             }

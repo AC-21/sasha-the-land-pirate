@@ -682,6 +682,53 @@ Acceptance:
 Detailed contract:
 `docs/playtests/WP-0002/VGR-15-EMERGENCY-CISTERN-CONTRACT.md`.
 
+## VGR-16 — Face the Dust Front
+
+Objective: turn the resolved Dust Front verdict into one physical colony action
+instead of a direct Field Desk acknowledgement.
+
+Status: current implementation target on the V0 feature branch.
+
+Scope:
+
+- Make the Field Desk route to a physical Dust Front relay beside Emergency
+  Storage without queuing a command, mutating canonical state, or writing a
+  save.
+- Require a fresh `E`, gamepad South, or pointer activation at the focused relay
+  before queuing exactly the existing `AcknowledgeDustFrontCommand`.
+- Show a Held verdict as a full tungsten signal and resume existing settlement
+  clocks after acknowledgement.
+- Show a Breached verdict as a stop-red signal with the physical safety shutter
+  closed; preserve the existing Hot Shift stall until the existing turbine
+  repair.
+- Retain the existing acknowledgement fallback outside city overview or when
+  the derived physical relay control is genuinely unmaterialized, preventing
+  a global pause deadlock without treating stale presentation as missing.
+- Derive relay placement and verdict presentation from Emergency Storage and
+  the current read model; persist no focus or input state.
+
+Acceptance:
+
+- route-only actions preserve pending commands, canonical hash, resource state,
+  and save bytes;
+- held, stale, wrong-mode, duplicate, and lifecycle requests fail closed;
+- a missing-control route fails closed while the explicit fallback remains
+  reachable and queues exactly once;
+- the fresh physical action delegates exactly one existing acknowledgement
+  command, and the accepted tick retains the existing autosave behavior;
+- Held and Breached presentations remain distinct by label and silhouette as
+  well as color after acknowledgement and reload, and the Breached Hot Shift
+  stall remains exact; after repair, the historical stop-red witness remains
+  while its label and shutter truthfully show that the repair holds;
+- save/load, four city-to-garage transitions, collision-safe placement, pointer
+  targeting, fallback availability, and input ownership are directly tested;
+- no SimulationCore, SaveContracts, schema, migration, balance, scene, package,
+  dependency, production asset, or everyday performance-soak change is
+  introduced.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-16-FACE-THE-DUST-FRONT-CONTRACT.md`.
+
 ## Visual constitution
 
 - **Texas iron is the scale of work:** cast housings, plate steel, oilfield,

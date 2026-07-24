@@ -163,6 +163,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _controller.IsCityImprovementInstallationAvailable,
                     _controller.IsEmergencyCisternPumpFocused,
                     _controller.IsEmergencyCisternPumpQueued,
+                    _controller.CanOpenDustFrontRelay,
+                    _controller.IsDustFrontRelayFocused,
+                    _controller.IsDustFrontAcknowledgementQueued,
                     _controller.IsWorkshopBatchStartAvailable,
                     _controller.IsWorkshopBarterAvailable,
                     _controller.IsGaragePlanIntentActive,
@@ -204,12 +207,28 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? "HELD · Last Bearing kept the reserve above the recoverable line."
                     : "BREACHED · The failing turbine could not hold the dry line. Hot Shift stays stalled until turbine repair.",
                 _bodyStyle);
+            bool usePhysicalRelay =
+                _controller!.CanOpenDustFrontRelay ||
+                _controller.IsDustFrontRelayFocused;
             bool wasEnabled = GUI.enabled;
             GUI.enabled = wasEnabled &&
-                          _controller!.CanAcknowledgeDustFront;
-            if (GUILayout.Button("ACKNOWLEDGE FRONT", _buttonStyle))
+                          (usePhysicalRelay
+                              ? _controller.CanOpenDustFrontRelay
+                              : _controller.CanAcknowledgeDustFrontFallback);
+            if (GUILayout.Button(
+                    usePhysicalRelay
+                        ? "OPEN EMERGENCY STORAGE · FACE DUST FRONT"
+                        : "ACKNOWLEDGE FRONT",
+                    _buttonStyle))
             {
-                _controller.AcknowledgeDustFront();
+                if (usePhysicalRelay)
+                {
+                    _controller.OpenDustFrontRelay();
+                }
+                else
+                {
+                    _controller.AcknowledgeDustFrontFallback();
+                }
             }
 
             GUI.enabled = wasEnabled;
@@ -1405,6 +1424,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool isCityImprovementInstallationAvailable,
             bool isEmergencyCisternPumpFocused,
             bool isEmergencyCisternPumpQueued,
+            bool canOpenDustFrontRelay,
+            bool isDustFrontRelayFocused,
+            bool isDustFrontAcknowledgementQueued,
             bool isWorkshopBatchStartAvailable,
             bool isWorkshopBarterAvailable,
             bool isGaragePlanIntentActive,
@@ -1414,9 +1436,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 "\nP · pause  F5 · save  F9 · load";
             if (model.IsDustFrontAcknowledgementRequired)
             {
-                return "Click ACKNOWLEDGE FRONT above · accept the Held or " +
-                       "Breached verdict before settlement clocks resume." +
-                       serviceControls;
+                if (isDustFrontAcknowledgementQueued)
+                {
+                    return "Dust Front verdict queued · clocks resume on the " +
+                           "authoritative city tick." + serviceControls;
+                }
+
+                if (isDustFrontRelayFocused)
+                {
+                    return "Release, then press E / gamepad south or pull the " +
+                           "physical relay · face the Held or Breached verdict." +
+                           serviceControls;
+                }
+
+                return canOpenDustFrontRelay
+                    ? "Click OPEN EMERGENCY STORAGE · FACE DUST FRONT above · " +
+                      "then work the physical relay." + serviceControls
+                    : "Click ACKNOWLEDGE FRONT above · fallback acknowledgement " +
+                      "keeps non-city modes from deadlocking." + serviceControls;
             }
 
             if (model.AssignedResidentId == null)

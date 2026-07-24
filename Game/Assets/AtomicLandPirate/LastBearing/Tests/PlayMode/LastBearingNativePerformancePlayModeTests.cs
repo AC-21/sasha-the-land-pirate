@@ -167,6 +167,25 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 acknowledge!.Invoke(null, new object[] { controller }),
                 Is.EqualTo(true));
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            Assert.That(controller.IsDustFrontRelayFocused, Is.True);
+            Assert.That(
+                acknowledge.Invoke(null, new object[] { controller }),
+                Is.EqualTo(true));
+            Assert.That(
+                PendingCommandCount(controller),
+                Is.Zero,
+                "held route input must not queue the acknowledgement");
+
+            yield return null;
+            yield return null;
+            Assert.That(
+                controller.World!.CityServiceCellView!.Interactor!
+                    .IsDustFrontRelayInputArmed,
+                Is.True);
+            Assert.That(
+                acknowledge.Invoke(null, new object[] { controller }),
+                Is.EqualTo(true));
             Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
             Assert.That(
                 acknowledge.Invoke(null, new object[] { controller }),
