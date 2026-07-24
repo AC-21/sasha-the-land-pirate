@@ -109,6 +109,19 @@
     margin-bottom: 6px;
 }
 
+.dry-line-forecast {
+    min-height: 32px;
+    margin-bottom: 7px;
+    padding: 5px 6px;
+    border-left-width: 3px;
+    border-left-color: var(--vermilion);
+    background-color: #302720;
+    color: var(--bone);
+    font-size: 12px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
 .instrument-row,
 .section-heading-row,
 .button-row {

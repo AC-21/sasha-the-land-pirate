@@ -13,6 +13,7 @@
                 <ui:VisualElement class="section plate civic-instruments">
                     <ui:Label text="CIVIC INSTRUMENTS" class="section-kicker" />
                     <ui:Label name="pressure-label" class="instrument-state hazard-copy" />
+                    <ui:Label name="front-forecast-label" class="dry-line-forecast" />
                     <ui:VisualElement class="instrument-row">
                         <ui:VisualElement class="instrument-cell instrument-cell-wide">
                             <ui:Label text="RESERVE" class="instrument-label" />

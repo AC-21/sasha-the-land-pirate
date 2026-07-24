@@ -50,6 +50,20 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(projection.Turbine, Does.Contain("FAILING"));
             Assert.That(projection.Pressure, Does.Contain("FALLING"));
             Assert.That(
+                projection.DryLine.Forecast,
+                Is.EqualTo(
+                    "FRONT IN 6000 TICKS · DRY LINE 60.000 · " +
+                    "PROJECTED BREACHED IF CURRENT DRAW CONTINUES"));
+            Assert.That(projection.DryLine.FrontTicks, Is.EqualTo(6000));
+            Assert.That(projection.DryLine.DryLineMilli, Is.EqualTo(60000));
+            Assert.That(
+                projection.DryLine.ProjectedWaterMilli,
+                Is.EqualTo(60000));
+            Assert.That(
+                projection.DryLine.ProjectedOutcome,
+                Is.EqualTo(DustFrontOutcome.Breached));
+            Assert.That(projection.DryLine.IsApproaching, Is.True);
+            Assert.That(
                 projection.PrimaryAction.Intent,
                 Is.EqualTo(LastBearingFieldDeskIntent.InspectCityNeed));
             Assert.That(projection.PrimaryAction.IsEnabled, Is.True);
@@ -135,6 +149,19 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.CanAcknowledgeDustFront, Is.False);
             Assert.That(controller.CanOpenDustFrontRelay, Is.True);
             Assert.That(projection.Pressure, Is.EqualTo(expectedPressure));
+            Assert.That(
+                projection.DryLine.Forecast,
+                Is.EqualTo(expectedPressure));
+            Assert.That(
+                projection.DryLine.ProjectedOutcome,
+                Is.EqualTo(expectedOutcome));
+            Assert.That(projection.DryLine.IsApproaching, Is.False);
+            Assert.That(
+                projection.DryLine.Telltale,
+                Is.EqualTo(
+                    expectedOutcome == DustFrontOutcome.Held
+                        ? "FRONT HELD"
+                        : "FRONT BREACHED"));
             Assert.That(
                 projection.PrimaryAction.Intent,
                 Is.EqualTo(
@@ -223,6 +250,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     active.SecondaryAction.Detail,
                     Does.Contain("adds no water penalty"));
                 Assert.That(controller.Status, Does.Contain("borrowed the operator"));
+                Assert.That(
+                    active.DryLine.ProjectedWaterMilli,
+                    Is.EqualTo(60000));
             }
             else
             {
@@ -233,6 +263,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     active.SecondaryAction.Detail,
                     Does.Contain("-0.010 water"));
                 Assert.That(controller.Status, Does.Contain("operator is working"));
+                Assert.That(
+                    active.DryLine.ProjectedWaterMilli,
+                    Is.LessThan(60000));
+                Assert.That(
+                    active.DryLine.Forecast,
+                    Does.Contain(
+                        "PROJECTED BREACHED IF CURRENT DRAW CONTINUES"));
             }
         }
 

@@ -81,6 +81,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private Label? _fuel;
         private Label? _turbine;
         private Label? _pressure;
+        private Label? _frontForecast;
         private Label? _permitChapter;
         private Label? _permitStep;
         private Label? _permitHeadline;
@@ -308,17 +309,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _physicalWorkRouted = false;
             }
 
+            LastBearingFieldDeskStamp stamp =
+                LastBearingFieldDeskPresenter.CaptureStamp(_controller);
+            SetDeskVisible(true);
+            bool projectionChanged =
+                !_hasStamp || _lastStamp != stamp.Value;
             float now = Time.unscaledTime;
-            if (!force && now < _nextRefreshTime)
+            if (!force && !projectionChanged && now < _nextRefreshTime)
             {
                 return;
             }
 
             _nextRefreshTime = now + RefreshIntervalSeconds;
-            LastBearingFieldDeskStamp stamp =
-                LastBearingFieldDeskPresenter.CaptureStamp(_controller);
-            SetDeskVisible(true);
-            if (!force && _hasStamp && _lastStamp == stamp.Value)
+            if (!force && !projectionChanged)
             {
                 return;
             }
@@ -403,6 +406,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _fuel = Require<Label>(root, "fuel-label");
             _turbine = Require<Label>(root, "turbine-label");
             _pressure = Require<Label>(root, "pressure-label");
+            _frontForecast = Require<Label>(
+                root,
+                "front-forecast-label");
             _permitChapter = Require<Label>(root, "permit-chapter-label");
             _permitStep = Require<Label>(root, "permit-step-label");
             _permitHeadline = Require<Label>(root, "permit-headline-label");
@@ -483,6 +489,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             SetText(_fuel!, projection.Fuel);
             SetText(_turbine!, projection.Turbine);
             SetText(_pressure!, projection.Pressure);
+            SetText(_frontForecast!, projection.DryLine.Forecast);
 
             LastBearingPermitJobPresentation job = projection.PermitJob;
             SetText(_permitChapter!, job.ChapterLabel);

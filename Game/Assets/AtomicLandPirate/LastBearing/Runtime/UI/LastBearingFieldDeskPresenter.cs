@@ -149,6 +149,41 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public LastBearingFieldDeskActionProjection CancelPreview { get; }
     }
 
+    public readonly struct LastBearingDryLineProjection
+    {
+        internal LastBearingDryLineProjection(
+            long frontTicks,
+            long dryLineMilli,
+            long projectedWaterMilli,
+            DustFrontOutcome projectedOutcome,
+            bool approaching,
+            string forecast,
+            string telltale)
+        {
+            FrontTicks = frontTicks;
+            DryLineMilli = dryLineMilli;
+            ProjectedWaterMilli = projectedWaterMilli;
+            ProjectedOutcome = projectedOutcome;
+            IsApproaching = approaching;
+            Forecast = forecast;
+            Telltale = telltale;
+        }
+
+        public long FrontTicks { get; }
+
+        public long DryLineMilli { get; }
+
+        public long ProjectedWaterMilli { get; }
+
+        public DustFrontOutcome ProjectedOutcome { get; }
+
+        public bool IsApproaching { get; }
+
+        public string Forecast { get; }
+
+        public string Telltale { get; }
+    }
+
     public sealed class LastBearingFieldDeskProjection
     {
         internal LastBearingFieldDeskProjection(
@@ -160,6 +195,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             string fuel,
             string turbine,
             string pressure,
+            LastBearingDryLineProjection dryLine,
             LastBearingPermitJobPresentation permitJob,
             LastBearingFieldDeskActionProjection primaryAction,
             LastBearingFieldDeskActionProjection secondaryAction,
@@ -179,6 +215,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Fuel = fuel;
             Turbine = turbine;
             Pressure = pressure;
+            DryLine = dryLine;
             PermitJob = permitJob;
             PrimaryAction = primaryAction;
             SecondaryAction = secondaryAction;
@@ -206,6 +243,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public string Turbine { get; }
 
         public string Pressure { get; }
+
+        public LastBearingDryLineProjection DryLine { get; }
 
         public LastBearingPermitJobPresentation PermitJob { get; }
 
@@ -281,6 +320,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "--",
                     "--",
                     "CITY DESK STOWED",
+                    new LastBearingDryLineProjection(
+                        0,
+                        LastBearingBalanceV1.MinimumRecoverableWaterMilli,
+                        0,
+                        DustFrontOutcome.Unresolved,
+                        false,
+                        "CURRENT-DRAW FORECAST OFFLINE",
+                        "FRONT OFFLINE"),
                     permitJob,
                     unavailable,
                     unavailable,
@@ -311,6 +358,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 model.FuelUnits + " UNITS",
                 FormatTurbine(model.TurbineCondition),
                 FormatPressure(model),
+                ProjectDryLine(model),
                 permitJob,
                 primary,
                 secondary,
@@ -479,8 +527,61 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.PauseCause.GetHashCode());
             Mix(ref hash, model.DustFrontOutcome.GetHashCode());
             Mix(ref hash, model.IsDustFrontAcknowledgementRequired);
+            Mix(ref hash, model.DustFrontCrisisTicks);
             Mix(ref hash, model.NextObjective);
             return new LastBearingFieldDeskStamp(hash);
+        }
+
+        public static LastBearingDryLineProjection ProjectDryLine(
+            LastBearingReadModel model)
+        {
+            if (model == null)
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
+
+            const long dryLine =
+                LastBearingBalanceV1.MinimumRecoverableWaterMilli;
+            if (model.DustFrontOutcome != DustFrontOutcome.Unresolved)
+            {
+                return new LastBearingDryLineProjection(
+                    0,
+                    dryLine,
+                    ClampWater(model.WaterMilli),
+                    model.DustFrontOutcome,
+                    false,
+                    FormatPressure(model),
+                    model.DustFrontOutcome == DustFrontOutcome.Held
+                        ? "FRONT HELD"
+                        : "FRONT BREACHED");
+            }
+
+            long frontTicks = Math.Max(0, model.DustFrontCrisisTicks);
+            long projectedWater = ProjectWaterAtConstantDraw(
+                model.WaterMilli,
+                model.WaterTrendMilliPerSettlementTick,
+                frontTicks);
+            DustFrontOutcome projectedOutcome =
+                model.TurbineCondition != TurbineCondition.Failing ||
+                projectedWater > dryLine
+                    ? DustFrontOutcome.Held
+                    : DustFrontOutcome.Breached;
+            string verdict = projectedOutcome == DustFrontOutcome.Held
+                ? "HELD"
+                : "BREACHED";
+            return new LastBearingDryLineProjection(
+                frontTicks,
+                dryLine,
+                projectedWater,
+                projectedOutcome,
+                true,
+                "FRONT IN " + frontTicks +
+                " TICKS · DRY LINE " + FormatExactMilli(dryLine) +
+                " · PROJECTED " + verdict +
+                " IF CURRENT DRAW CONTINUES",
+                "FRONT " + frontTicks +
+                "\nDRY " + FormatExactMilli(dryLine) +
+                " · " + verdict);
         }
 
         private static void DeriveCurrentOrder(
@@ -1343,6 +1444,50 @@ namespace AtomicLandPirate.Presentation.LastBearing
             long whole = milli / 1000;
             long fraction = Math.Abs(milli % 1000);
             return whole + "." + fraction.ToString("D3");
+        }
+
+        private static long ProjectWaterAtConstantDraw(
+            long waterMilli,
+            long trendMilliPerTick,
+            long frontTicks)
+        {
+            long water = ClampWater(waterMilli);
+            long ticks = Math.Max(0, frontTicks);
+            if (trendMilliPerTick == 0 || ticks == 0)
+            {
+                return water;
+            }
+
+            if (trendMilliPerTick > 0)
+            {
+                long headroom =
+                    LastBearingBalanceV1.WaterCapacityMilli - water;
+                return ticks > headroom / trendMilliPerTick
+                    ? LastBearingBalanceV1.WaterCapacityMilli
+                    : water + (trendMilliPerTick * ticks);
+            }
+
+            if (trendMilliPerTick == long.MinValue)
+            {
+                return 0;
+            }
+
+            long drawMilliPerTick = -trendMilliPerTick;
+            long ticksUntilEmpty = water == 0
+                ? 0
+                : 1 + ((water - 1) / drawMilliPerTick);
+            return ticks >= ticksUntilEmpty
+                ? 0
+                : water - (drawMilliPerTick * ticks);
+        }
+
+        private static long ClampWater(long waterMilli)
+        {
+            return Math.Max(
+                0,
+                Math.Min(
+                    LastBearingBalanceV1.WaterCapacityMilli,
+                    waterMilli));
         }
 
         private static string FormatTrend(long trendMilli)
