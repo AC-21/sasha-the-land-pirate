@@ -117,6 +117,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool HasPendingPlayerCommands => _pendingCommands.Count != 0;
 
+        public bool IsDepotDecisionAvailable =>
+            _pendingCommands.Count == 0 &&
+            _state?.DepotResolution == EncounterChoice.Unresolved &&
+            _readModel != null &&
+            _readModel.ExpeditionPhase == ExpeditionPhase.AtDepot &&
+            _readModel.TransactionPhase == TransactionPhase.RoadOwned &&
+            _readModel.RepairCargoKind == RepairCargoKind.None &&
+            (_readModel.PauseCause == PauseCause.None ||
+             _readModel.PauseCause == PauseCause.AutoAlert) &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.DepotEncounter;
+
         internal int PendingPlayerCommandCountForPerformance =>
             _pendingCommands.Count;
 
@@ -404,6 +417,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             _world.ConfigureCityServiceCellInteraction(this);
+            _world.ConfigureDepotDecisionInteraction(this);
             _world.ConfigureDepotReturnInteraction(this);
             _hud = gameObject.AddComponent<LastBearingHud>();
             _hud.Configure(this, _fieldDesk);
@@ -425,6 +439,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             _fieldDesk?.ResetForLifecycle();
             _world?.ResetCityServiceCellInteraction();
+            _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotReturnInteraction();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
@@ -478,6 +493,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
             _world?.ResetCityServiceCellInteraction();
+            _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotReturnInteraction();
             _state = null;
             _readModel = null;
@@ -1210,6 +1226,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void ResolveDepot(bool cooperate)
         {
+            if (!IsDepotDecisionAvailable)
+            {
+                _status =
+                    "The depot response is unavailable or already queued.";
+                return;
+            }
+
             Queue(sequence => new ResolveDepotCommand(
                 sequence,
                 cooperate ? EncounterChoice.Cooperate : EncounterChoice.TakeBearing));
@@ -1506,6 +1529,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             _fieldDesk?.ResetForLifecycle();
             _world?.ResetCityServiceCellInteraction();
+            _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotReturnInteraction();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
@@ -1559,6 +1583,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             if (_readModel != null)
             {
+                _world?.ApplyDepotDecisionInteraction(_readModel);
                 _world?.ApplyDepotReturnInteraction(_readModel);
             }
         }
@@ -2172,6 +2197,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? _garagePreparationIntent
                     : _readModel.PreparationChoice);
             _modeCoordinator?.ApplyCanonical(_readModel);
+            _world.ApplyDepotDecisionInteraction(_readModel);
             _world.ApplyCityServiceCell(
                 _readModel,
                 _cityPreviewBuilding,

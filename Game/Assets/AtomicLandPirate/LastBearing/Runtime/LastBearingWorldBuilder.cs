@@ -114,6 +114,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             private set;
         }
 
+        public LastBearingDepotDecisionInteractor? DepotDecisionInteractor
+        {
+            get;
+            private set;
+        }
+
         public LastBearingDepotReturnInteractor? DepotReturnInteractor
         {
             get;
@@ -399,6 +405,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public void ResetCityServiceCellInteraction()
         {
             CityServiceCellView?.Interactor?.ResetLocalSelection();
+        }
+
+        public void ConfigureDepotDecisionInteraction(
+            LastBearingGameController controller)
+        {
+            if (MainCamera == null || DepotDecisionInteractor == null)
+            {
+                throw new InvalidOperationException(
+                    "Depot decision interaction requires the shared camera.");
+            }
+
+            DepotDecisionInteractor.Configure(controller, MainCamera);
+        }
+
+        public void ResetDepotDecisionInteraction()
+        {
+            DepotDecisionInteractor?.ResetLocalFocus();
+        }
+
+        public void ApplyDepotDecisionInteraction(
+            LastBearingReadModel model)
+        {
+            DepotDecisionInteractor?.Apply(model);
         }
 
         public void ConfigureDepotReturnInteraction(
@@ -1036,6 +1065,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
             DepotCargoLoadingView =
                 cargoLoading.AddComponent<LastBearingDepotCargoLoadingView>();
             DepotCargoLoadingView.Build(
+                iron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
+
+            var depotDecision = new GameObject(
+                LastBearingDepotDecisionInteractor.RootName);
+            depotDecision.transform.SetParent(depot, false);
+            DepotDecisionInteractor =
+                depotDecision.AddComponent<
+                    LastBearingDepotDecisionInteractor>();
+            DepotDecisionInteractor.Build(
                 iron,
                 oxide,
                 bone,

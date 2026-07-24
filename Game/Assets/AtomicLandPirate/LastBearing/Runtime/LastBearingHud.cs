@@ -573,6 +573,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (model.ExpeditionPhase == ExpeditionPhase.AtDepot &&
                 model.RepairCargoKind == RepairCargoKind.None)
             {
+                if (!_controller!.IsDepotDecisionAvailable)
+                {
+                    GUILayout.Label(
+                        "DEPOT RESPONSE UNAVAILABLE · finish the queued action " +
+                        "or return to the depot encounter.",
+                        _mutedStyle);
+                    return;
+                }
+
                 if (GUILayout.Button(
                         "COOPERATE · FIELD SLEEVE + OBLIGATION\nALTERNATE CONCLUSION",
                         _buttonStyle))
@@ -1446,9 +1455,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 if (model.RepairCargoKind == RepairCargoKind.None)
                 {
-                    return "Click one depot decision above · COOPERATE brings " +
-                           "a maintenance promise; TAKE brings the ceramic " +
-                           "bearing and a grievance." + serviceControls;
+                    return "Face the two depot stations · LEFT / RIGHT or " +
+                           "D-pad chooses; E / gamepad south commits. " +
+                           "COOPERATE brings a maintenance promise; TAKE " +
+                           "brings the ceramic bearing and a grievance." +
+                           serviceControls;
                 }
 
                 if (model.VehicleModule == VehicleModule.SealedRangeTank &&
