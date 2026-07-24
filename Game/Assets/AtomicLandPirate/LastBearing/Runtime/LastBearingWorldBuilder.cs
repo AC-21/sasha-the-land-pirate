@@ -97,6 +97,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             private set;
         }
 
+        public LastBearingPumpHallMaintenanceInteractor?
+            PumpHallMaintenanceInteractor
+        {
+            get;
+            private set;
+        }
+
         public LastBearingOneGoodBatchCutawayView? OneGoodBatchCutawayView
         {
             get;
@@ -440,6 +447,32 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public void ResetCityServiceCellInteraction()
         {
             CityServiceCellView?.Interactor?.ResetLocalSelection();
+        }
+
+        public void ConfigurePumpHallMaintenanceInteraction(
+            LastBearingGameController controller)
+        {
+            if (MainCamera == null ||
+                PumpHallMaintenanceInteractor == null)
+            {
+                throw new InvalidOperationException(
+                    "Field-sleeve service requires the shared pump-hall camera.");
+            }
+
+            PumpHallMaintenanceInteractor.Configure(
+                controller,
+                MainCamera);
+        }
+
+        public void ResetPumpHallMaintenanceInteraction()
+        {
+            PumpHallMaintenanceInteractor?.ResetLocalFocus();
+        }
+
+        public void ApplyPumpHallMaintenanceInteraction(
+            LastBearingReadModel model)
+        {
+            PumpHallMaintenanceInteractor?.Apply(model);
         }
 
         public void ConfigureDepotDecisionInteraction(
@@ -1404,6 +1437,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 tungsten,
                 signal,
                 _waterMaterial!);
+
+            var maintenance = new GameObject(
+                LastBearingPumpHallMaintenanceInteractor.RootName);
+            maintenance.transform.SetParent(pumpHall.transform, false);
+            PumpHallMaintenanceInteractor =
+                maintenance.AddComponent<
+                    LastBearingPumpHallMaintenanceInteractor>();
+            PumpHallMaintenanceInteractor.Build(
+                PumpHallCutawayView.FixedTurbineRepairSocket ??
+                    throw new MissingReferenceException(
+                        "Field-sleeve service requires the turbine repair socket."),
+                darkIron,
+                oxide,
+                bone,
+                tungsten);
         }
 
         private void BuildOneGoodBatchCutaway(

@@ -733,7 +733,7 @@ Detailed contract:
 Objective: make the existing Wreck Line corridor communicate route choice
 through the rig's existing four-contact handling and telemetry.
 
-Status: current implementation target on the V0 feature branch.
+Status: released on protected `main` in PR #115.
 
 Scope:
 
@@ -762,6 +762,31 @@ production art, new scavenging interactions, or a normal-PR performance soak.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-17-MAKE-THE-WRECK-LINE-BITE-CONTRACT.md`.
+
+## VGR-18 — Keep the Promise
+
+Objective: turn the existing cooperative field-sleeve maintenance obligation
+into physical pump-hall work.
+
+Status: current implementation target on the V0 feature branch.
+
+Scope:
+
+- Route Field Desk and HUD maintenance actions to a dedicated pump-hall
+  service control without directly submitting maintenance.
+- Require a fresh `E`, gamepad South, or pointer operation before delegating
+  the exact existing `ServiceFieldSleeveCommand`.
+- Preserve the existing two-part cost, 600-settlement-tick renewal,
+  continuing obligation, and `MaintenanceServiced` autosave boundary.
+- Keep focus, input arming, targeting, lever pose, and material witnesses
+  derived and unsaved.
+
+Exclude: SimulationCore, SaveContracts, schema, migration, balance, scene,
+package, dependency, generalized interaction framework, production asset,
+audio, or normal-PR performance-soak changes.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-18-KEEP-THE-PROMISE-CONTRACT.md`.
 
 ## Visual constitution
 

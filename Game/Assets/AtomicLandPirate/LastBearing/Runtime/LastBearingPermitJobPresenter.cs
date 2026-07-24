@@ -511,8 +511,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Service the field sleeve",
                     "The cooperative repair kept the water moving, and its " +
                     "two-part maintenance promise is now due.",
-                    "Click SERVICE FIELD SLEEVE; spend two parts and settle the " +
-                    "due maintenance obligation.");
+                    "Open the pump hall, release the route input, then operate " +
+                    "the physical field-sleeve control with E or gamepad south.");
             }
 
             return PresentAlternateConclusion(model);

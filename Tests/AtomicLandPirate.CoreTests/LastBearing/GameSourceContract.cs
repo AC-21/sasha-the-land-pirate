@@ -72,6 +72,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(
                     runtimeRoot,
                     "LastBearingPumpHallCutawayView.cs"));
+            string pumpHallMaintenance = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "LastBearingPumpHallMaintenanceInteractor.cs"));
             string oneGoodBatch = File.ReadAllText(
                 Path.Combine(
                     runtimeRoot,
@@ -153,6 +157,42 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 controller,
                 "public void AcknowledgeDustFrontFallback()");
+            Require(controller, "public bool IsFieldSleeveServiceQueued");
+            Require(controller, "public bool IsFieldSleeveMaintenanceDue");
+            Require(controller, "public bool CanOpenFieldSleeveService");
+            Require(controller, "public bool IsFieldSleeveServiceFocused");
+            Require(controller, "public bool CanServiceFieldSleeve");
+            Require(controller, "public void OpenFieldSleeveService()");
+            Require(controller, "public void ServiceFieldSleeve()");
+            string maintenanceRouteAvailability = Segment(
+                controller,
+                "public bool CanOpenFieldSleeveService =>",
+                "public bool IsFieldSleeveServiceFocused =>");
+            Require(
+                maintenanceRouteAvailability,
+                "IsExactFieldDeskCityOverview");
+            string maintenanceRoute = Segment(
+                controller,
+                "public void OpenFieldSleeveService()",
+                "public void ServiceFieldSleeve()");
+            Require(
+                maintenanceRoute,
+                "TryRouteToPumpHallMaintenance(");
+            TestHarness.True(
+                maintenanceRoute.IndexOf(
+                    "new ServiceFieldSleeveCommand",
+                    StringComparison.Ordinal) < 0,
+                "opening the pump hall must not submit maintenance");
+            string maintenanceOperation = Segment(
+                controller,
+                "public void ServiceFieldSleeve()",
+                "public void TogglePause()");
+            Require(
+                maintenanceOperation,
+                "if (!CanServiceFieldSleeve)");
+            Require(
+                maintenanceOperation,
+                "new ServiceFieldSleeveCommand(sequence)");
             string hotShiftOperation = Segment(
                 controller,
                 "public void StartHotShift()",
@@ -751,6 +791,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "EmergencyCisternPumped",
                 "DustFrontResolved",
                 "DustFrontAcknowledged",
+                "MaintenanceServiced",
             })
             {
                 Require(autosave, "LastBearingEventKind." + criticalEvent);
@@ -865,6 +906,12 @@ namespace AtomicLandPirate.LastBearingTests
                 pumpHallBuild,
                 "PumpHallCutawayView.Build(\n" +
                 "                LastBearingState.AuxiliaryPumpSocketId,");
+            Require(
+                pumpHallBuild,
+                "LastBearingPumpHallMaintenanceInteractor.RootName");
+            Require(
+                pumpHallBuild,
+                "PumpHallMaintenanceInteractor.Build(");
             Require(comparison, "RestrainedSnapGrid");
             Require(comparison, "DistrictStamp");
             Require(comparison, "ResetComparison");
@@ -896,6 +943,47 @@ namespace AtomicLandPirate.LastBearingTests
                 TestHarness.True(
                     comparison.IndexOf(forbidden, StringComparison.Ordinal) < 0,
                     "city comparison contains forbidden authority " + forbidden);
+            }
+
+            Require(
+                pumpHallMaintenance,
+                "INTERACT_FIELD_SLEEVE_SERVICE_CONTROL");
+            Require(pumpHallMaintenance, "InteractionLayer = 30");
+            Require(
+                pumpHallMaintenance,
+                "keyboard?.eKey.wasPressedThisFrame");
+            Require(
+                pumpHallMaintenance,
+                "gamepad?.buttonSouth.wasPressedThisFrame");
+            Require(
+                pumpHallMaintenance,
+                "TryActivateAtScreenPosition(");
+            Require(
+                pumpHallMaintenance,
+                "_controller.ServiceFieldSleeve();");
+            Require(
+                pumpHallMaintenance,
+                "ReferenceEquals(");
+            foreach (string forbidden in new[]
+            {
+                "new ServiceFieldSleeveCommand",
+                "LastBearingKernel",
+                "LastBearingState",
+                "SaveContracts",
+                "System.IO",
+                "Application.persistentDataPath",
+                "Rigidbody",
+                "OnTrigger",
+                "OnCollision",
+                "AddComponent<Camera>",
+            })
+            {
+                TestHarness.True(
+                    pumpHallMaintenance.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "pump-hall maintenance interactor contains forbidden authority " +
+                    forbidden);
             }
             Require(world, "LastBearingCityServiceCellView");
             Require(world, "BuildCityServiceCell(");
