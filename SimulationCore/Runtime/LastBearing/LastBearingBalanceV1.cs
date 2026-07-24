@@ -100,6 +100,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
             MinimumPostReturnPartsUnits;
         public const long AuxiliaryPumpWaterModifierMilliPerSettlementTick =
             CivicBufferWaterModifierMilliPerSettlementTick;
+        public const long EmergencyCisternExpansionPartsUnits =
+            MinimumPostReturnPartsUnits;
+        public const long EmergencyCisternExpansionCapacityMilli =
+            TankLiquidCapacityMilli;
 
         // VGR-05 is one authored proof, not a reusable manufacturing balance
         // surface. These values apply only to the fixed One Good Batch recipe.
@@ -117,6 +121,25 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 case CityImprovementKind.RefurbishedAuxiliaryPump:
                     return AuxiliaryPumpInstallationPartsUnits;
+                case CityImprovementKind.ExpandedEmergencyCistern:
+                    return EmergencyCisternExpansionPartsUnits;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(improvement));
+            }
+        }
+
+        internal static long EffectiveWaterCapacityMilli(
+            CityImprovementKind improvement)
+        {
+            switch (improvement)
+            {
+                case CityImprovementKind.None:
+                case CityImprovementKind.RefurbishedAuxiliaryPump:
+                    return WaterCapacityMilli;
+                case CityImprovementKind.ExpandedEmergencyCistern:
+                    return checked(
+                        WaterCapacityMilli
+                        + EmergencyCisternExpansionCapacityMilli);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(improvement));
             }
@@ -146,6 +169,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     return 0;
                 case CityImprovementKind.RefurbishedAuxiliaryPump:
                     return AuxiliaryPumpWaterModifierMilliPerSettlementTick;
+                case CityImprovementKind.ExpandedEmergencyCistern:
+                    return 0;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(improvement));
             }

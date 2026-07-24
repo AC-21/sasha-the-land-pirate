@@ -19,6 +19,7 @@ namespace AtomicLandPirate.LastBearingTests
                 RepairCargoCheckpointsRoundTrip(repoRoot));
             harness.Run("installed auxiliary pump checkpoint round trips", () =>
                 InstalledAuxiliaryPumpCheckpointRoundTrips(repoRoot));
+            RunEmergencyCisternExpansion(harness, repoRoot);
             harness.Run("atomic current and immediately preceding last-good", () =>
                 CurrentAndLastGood(repoRoot));
             harness.Run("corrupt current recovers only verified last-good", () =>
@@ -36,6 +37,16 @@ namespace AtomicLandPirate.LastBearingTests
             harness.Run("load does not create a missing profile", () =>
                 MissingLoadIsReadOnly(repoRoot));
             RunOneGoodBatch(harness, repoRoot);
+        }
+
+        internal static void RunEmergencyCisternExpansion(
+            TestHarness harness,
+            string repoRoot)
+        {
+            harness.Run(
+                "expanded Emergency Cistern checkpoint round trips",
+                () => ExpandedEmergencyCisternCheckpointRoundTrips(
+                    repoRoot));
         }
 
         internal static void RunOneGoodBatch(
@@ -346,6 +357,72 @@ namespace AtomicLandPirate.LastBearingTests
                 LastBearingCanonicalCodec.ComputeMechanicalSha256(installed),
                 LastBearingCanonicalCodec.ComputeMechanicalSha256(decoded.State),
                 "restored installation mechanics");
+        }
+
+        private static void ExpandedEmergencyCisternCheckpointRoundTrips(
+            string repoRoot)
+        {
+            LastBearingState installed =
+                EmergencyCisternExpansionTests
+                    .CreateExpandedStateForSaveTests();
+            byte[] canonical = LastBearingCanonicalCodec.Encode(installed);
+            string profile = FreshProfile(
+                repoRoot,
+                "checkpoint-expanded-emergency-cistern");
+            LastBearingProfileStore store =
+                LastBearingProfileStore.OpenFixedProfileDirectory(profile);
+
+            LastBearingPersistResult persisted = store.TryPersist(canonical);
+            TestHarness.True(
+                persisted.Succeeded,
+                "expanded Emergency Cistern checkpoint persist failed");
+            LastBearingLoadResult loaded = store.TryLoad(payload =>
+                LastBearingCanonicalCodec.TryDecode(payload).Succeeded);
+            TestHarness.True(
+                loaded.Succeeded && loaded.CanonicalPayload != null,
+                "expanded Emergency Cistern checkpoint load failed");
+            TestHarness.True(
+                canonical.SequenceEqual(loaded.CanonicalPayload!),
+                "expanded Emergency Cistern canonical bytes changed");
+            LastBearingDecodeResult decoded =
+                LastBearingCanonicalCodec.TryDecode(
+                    loaded.CanonicalPayload!);
+            TestHarness.True(
+                decoded.Succeeded && decoded.State != null,
+                "expanded Emergency Cistern canonical decode failed");
+            TestHarness.Equal(
+                9,
+                decoded.State!.SchemaVersion,
+                "restored schema version");
+            TestHarness.Equal(
+                CityImprovementKind.ExpandedEmergencyCistern,
+                decoded.State.InstalledCityImprovement,
+                "restored city improvement");
+            TestHarness.Equal(
+                LiquidCargoKind.Water,
+                decoded.State.LiquidCargoKind,
+                "restored liquid kind");
+            TestHarness.Equal(
+                LastBearingBalanceV1.TankWaterReturnMilli,
+                decoded.State.LiquidCargoQuantityMilli,
+                "restored liquid quantity");
+            TestHarness.Equal(
+                LiquidCargoCustody.Settlement,
+                decoded.State.LiquidCargoCustody,
+                "restored liquid custody");
+            TestHarness.Equal(
+                checked(
+                    LastBearingBalanceV1.WaterCapacityMilli
+                    + LastBearingBalanceV1
+                        .EmergencyCisternExpansionCapacityMilli),
+                LastBearingReadModel.FromState(decoded.State)
+                    .WaterCapacityMilli,
+                "restored expanded capacity");
+            TestHarness.Equal(
+                LastBearingCanonicalCodec.ComputeMechanicalSha256(installed),
+                LastBearingCanonicalCodec.ComputeMechanicalSha256(
+                    decoded.State),
+                "restored expansion mechanics");
         }
 
         private static void OneGoodBatchCheckpointsRoundTrip(string repoRoot)

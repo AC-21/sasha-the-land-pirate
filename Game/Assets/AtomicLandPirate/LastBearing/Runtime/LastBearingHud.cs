@@ -794,26 +794,45 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (model.IsCityImprovementInstallationAvailable)
             {
-                GUILayout.Label(
-                    "The returned pump rotor is staged at the exact civic socket. " +
-                    "This one-shot installation costs " +
-                    LastBearingBalanceV1.AuxiliaryPumpInstallationPartsUnits +
-                    " parts and preserves the minimum reserve.",
-                    _bodyStyle);
-                if (!_controller.IsCityImprovementInstallationAvailable)
+                if (model.NextCityDecision ==
+                    NextCityDecision.ExpandEmergencyCistern)
                 {
+                    GUILayout.Label(
+                        "The returned range tank is staged at Emergency Storage's exact expansion saddle. " +
+                        "This one-shot installation costs " +
+                        model.CityImprovementPartsCostUnits +
+                        " parts and adds 30.000 water capacity.",
+                        _bodyStyle);
                     if (GUILayout.Button(
-                            "OPEN PUMP HALL · AUXILIARY SOCKET",
+                            "OPEN EMERGENCY STORAGE · EXPANSION SOCKET",
                             _buttonStyle))
                     {
-                        _controller.OpenPumpHallImprovement();
+                        _controller.OpenEmergencyCisternExpansion();
                     }
                 }
                 else
                 {
                     GUILayout.Label(
-                        "SEAT AUXILIARY PUMP · E / GAMEPAD SOUTH",
-                        _mutedStyle);
+                        "The returned pump rotor is staged at the exact civic socket. " +
+                        "This one-shot installation costs " +
+                        model.CityImprovementPartsCostUnits +
+                        " parts and preserves the minimum reserve.",
+                        _bodyStyle);
+                    if (!_controller.IsCityImprovementInstallationAvailable)
+                    {
+                        if (GUILayout.Button(
+                                "OPEN PUMP HALL · AUXILIARY SOCKET",
+                                _buttonStyle))
+                        {
+                            _controller.OpenPumpHallImprovement();
+                        }
+                    }
+                    else
+                    {
+                        GUILayout.Label(
+                            "SEAT AUXILIARY PUMP · E / GAMEPAD SOUTH",
+                            _mutedStyle);
+                    }
                 }
 
                 return;

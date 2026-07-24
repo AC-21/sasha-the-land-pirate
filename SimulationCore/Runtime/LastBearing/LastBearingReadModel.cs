@@ -73,6 +73,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.WorkshopServiceSlotsReserved == 0
                 && !IsHotShiftStalledByDustFront;
             WaterMilli = state.WaterMilli;
+            WaterCapacityMilli =
+                LastBearingBalanceV1.EffectiveWaterCapacityMilli(
+                    state.InstalledCityImprovement);
             WaterTrendMilliPerSettlementTick = ComputeWaterTrend(state);
             IsWaterRecovering = WaterTrendMilliPerSettlementTick > 0;
             PartsUnits = state.PartsUnits;
@@ -145,6 +148,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             MaintenanceDue = state.MaintenanceDue;
             NextCityDecision = state.NextCityDecision;
             InstalledCityImprovement = state.InstalledCityImprovement;
+            CityImprovementPartsCostUnits =
+                ComputeCityImprovementPartsCostUnits(state);
             IsCityImprovementInstallationAvailable =
                 ComputeCityImprovementInstallationAvailable(state);
             SpareBearingRecipe = state.SpareBearingRecipe;
@@ -255,6 +260,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long EmergencyCisternWaterMilli { get; private set; }
         public bool IsEmergencyCisternPumpAvailable { get; private set; }
         public long WaterMilli { get; private set; }
+        public long WaterCapacityMilli { get; private set; }
         public long WaterTrendMilliPerSettlementTick { get; private set; }
         public bool IsWaterRecovering { get; private set; }
         public long PartsUnits { get; private set; }
@@ -308,6 +314,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public bool MaintenanceDue { get; private set; }
         public NextCityDecision NextCityDecision { get; private set; }
         public CityImprovementKind InstalledCityImprovement { get; private set; }
+        public long CityImprovementPartsCostUnits { get; private set; }
         public bool IsCityImprovementInstallationAvailable { get; private set; }
         public SpareBearingRecipe SpareBearingRecipe { get; private set; }
         public SpareBearingBatchPhase SpareBearingBatchPhase { get; private set; }
@@ -437,7 +444,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 || state.WorkshopServiceSlotsReserved != 0
                 || state.WaterMilli
                     > checked(
-                        LastBearingBalanceV1.WaterCapacityMilli
+                        LastBearingBalanceV1.EffectiveWaterCapacityMilli(
+                            state.InstalledCityImprovement)
                         - LastBearingBalanceV1.EmergencyCisternWaterMilli))
             {
                 return false;
@@ -603,7 +611,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             if (ComputeCityImprovementInstallationAvailable(state))
             {
-                return "install-refurbished-auxiliary-pump";
+                return state.NextCityDecision
+                        == NextCityDecision.ExpandEmergencyCistern
+                    ? "expand-emergency-cistern"
+                    : "install-refurbished-auxiliary-pump";
             }
 
             if (ComputeSpareBearingBatchStartAvailable(state))
@@ -640,21 +651,61 @@ namespace AtomicLandPirate.Simulation.LastBearing
             LastBearingState state)
         {
             long requiredParts = checked(
-                LastBearingBalanceV1.AuxiliaryPumpInstallationPartsUnits
+                ComputeCityImprovementPartsCostUnits(state)
                 + LastBearingBalanceV1.MinimumPostReturnPartsUnits);
-            return state.ExpeditionPhase == ExpeditionPhase.AtHome
+            bool commonAvailable =
+                state.ExpeditionPhase == ExpeditionPhase.AtHome
                 && state.TransactionPhase == TransactionPhase.Finalized
                 && state.TurbineCondition != TurbineCondition.Failing
-                && state.NextCityDecision
-                    == NextCityDecision.RefurbishAuxiliaryPump
                 && state.InstalledCityImprovement == CityImprovementKind.None
                 && state.PreparationChoice == PreparationChoice.WorkshopPush
-                && state.VehicleModule == VehicleModule.WinchAssembly
                 && state.RouteActionUsed
-                && state.HeavyCargoKind == HeavyCargoKind.PumpRotor
-                && state.HeavyCargoCustody == HeavyCargoCustody.Settlement
-                && state.TowSlotsUsed == 1
                 && state.PartsUnits >= requiredParts;
+            if (!commonAvailable)
+            {
+                return false;
+            }
+
+            if (state.NextCityDecision
+                == NextCityDecision.RefurbishAuxiliaryPump)
+            {
+                return state.VehicleModule == VehicleModule.WinchAssembly
+                    && state.HeavyCargoKind == HeavyCargoKind.PumpRotor
+                    && state.HeavyCargoCustody
+                        == HeavyCargoCustody.Settlement
+                    && state.TowSlotsUsed == 1;
+            }
+
+            if (state.NextCityDecision
+                != NextCityDecision.ExpandEmergencyCistern)
+            {
+                return false;
+            }
+
+            return state.VehicleModule == VehicleModule.SealedRangeTank
+                && state.LiquidCapacityMilli
+                    == LastBearingBalanceV1.TankLiquidCapacityMilli
+                && state.LiquidCargoKind == LiquidCargoKind.Water
+                && state.LiquidCargoQuantityMilli
+                    == LastBearingBalanceV1.TankWaterReturnMilli
+                && state.LiquidCargoCustody
+                    == LiquidCargoCustody.Settlement;
+        }
+
+        private static long ComputeCityImprovementPartsCostUnits(
+            LastBearingState state)
+        {
+            switch (state.NextCityDecision)
+            {
+                case NextCityDecision.RefurbishAuxiliaryPump:
+                    return LastBearingBalanceV1.CityImprovementPartsCost(
+                        CityImprovementKind.RefurbishedAuxiliaryPump);
+                case NextCityDecision.ExpandEmergencyCistern:
+                    return LastBearingBalanceV1.CityImprovementPartsCost(
+                        CityImprovementKind.ExpandedEmergencyCistern);
+                default:
+                    return 0;
+            }
         }
 
         private static bool ComputePatchworkSkidPlateInstallAvailable(

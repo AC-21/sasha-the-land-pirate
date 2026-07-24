@@ -40,6 +40,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         AcknowledgeDustFront = 29,
         OpenEmergencyCisternPump = 30,
         OpenDustFrontRelay = 31,
+        OpenEmergencyCisternExpansion = 32,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -515,6 +516,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.NextCityDecision.GetHashCode());
             Mix(ref hash, model.InstalledCityImprovement.GetHashCode());
             Mix(ref hash, model.IsCityImprovementInstallationAvailable);
+            Mix(ref hash, model.WaterCapacityMilli);
+            Mix(ref hash, model.CityImprovementPartsCostUnits);
             Mix(ref hash, model.SpareBearingBatchPhase.GetHashCode());
             Mix(ref hash, model.SpareBearingElapsedTicks);
             Mix(ref hash, model.SpareBearingRequiredTicks);
@@ -542,12 +545,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             const long dryLine =
                 LastBearingBalanceV1.MinimumRecoverableWaterMilli;
+            long capacity = Math.Max(1, model.WaterCapacityMilli);
             if (model.DustFrontOutcome != DustFrontOutcome.Unresolved)
             {
                 return new LastBearingDryLineProjection(
                     0,
                     dryLine,
-                    ClampWater(model.WaterMilli),
+                    ClampWater(model.WaterMilli, capacity),
                     model.DustFrontOutcome,
                     false,
                     FormatPressure(model),
@@ -560,7 +564,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             long projectedWater = ProjectWaterAtConstantDraw(
                 model.WaterMilli,
                 model.WaterTrendMilliPerSettlementTick,
-                frontTicks);
+                frontTicks,
+                capacity);
             DustFrontOutcome projectedOutcome =
                 model.TurbineCondition != TurbineCondition.Failing ||
                 projectedWater > dryLine
@@ -739,13 +744,32 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (model.IsCityImprovementInstallationAvailable)
             {
-                primary = Action(
-                    LastBearingFieldDeskIntent.OpenPumpHallImprovement,
-                    "OPEN PUMP HALL · SEAT AUXILIARY PUMP",
-                    "Frame the returned rotor at its physical civic socket, then release and press E or gamepad south.",
-                    true,
-                    canDispatch,
-                    LastBearingFieldDeskActionTone.Primary);
+                if (model.NextCityDecision ==
+                    NextCityDecision.ExpandEmergencyCistern)
+                {
+                    primary = Action(
+                        LastBearingFieldDeskIntent
+                            .OpenEmergencyCisternExpansion,
+                        "OPEN EMERGENCY STORAGE · EXPAND CISTERN",
+                        "Route to the distinct saddle-cistern handwheel. The exact " +
+                        model.CityImprovementPartsCostUnits +
+                        "-part expansion adds 30.000 water capacity only after a fresh E, gamepad south, or pointer action.",
+                        true,
+                        canDispatch &&
+                        controller.CanOpenEmergencyCisternExpansion,
+                        LastBearingFieldDeskActionTone.Primary);
+                }
+                else
+                {
+                    primary = Action(
+                        LastBearingFieldDeskIntent.OpenPumpHallImprovement,
+                        "OPEN PUMP HALL · SEAT AUXILIARY PUMP",
+                        "Frame the returned rotor at its physical civic socket, then release and press E or gamepad south.",
+                        true,
+                        canDispatch,
+                        LastBearingFieldDeskActionTone.Primary);
+                }
+
                 return;
             }
 
@@ -1309,7 +1333,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Workshop Push has borrowed the operator. Finish preparation before pumping.";
             }
             else if (model.WaterMilli >
-                LastBearingBalanceV1.WaterCapacityMilli -
+                model.WaterCapacityMilli -
                 model.EmergencyCisternWaterMilli)
             {
                 detail =
@@ -1449,9 +1473,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private static long ProjectWaterAtConstantDraw(
             long waterMilli,
             long trendMilliPerTick,
-            long frontTicks)
+            long frontTicks,
+            long capacityMilli)
         {
-            long water = ClampWater(waterMilli);
+            long capacity = Math.Max(1, capacityMilli);
+            long water = ClampWater(waterMilli, capacity);
             long ticks = Math.Max(0, frontTicks);
             if (trendMilliPerTick == 0 || ticks == 0)
             {
@@ -1461,9 +1487,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (trendMilliPerTick > 0)
             {
                 long headroom =
-                    LastBearingBalanceV1.WaterCapacityMilli - water;
+                    capacity - water;
                 return ticks > headroom / trendMilliPerTick
-                    ? LastBearingBalanceV1.WaterCapacityMilli
+                    ? capacity
                     : water + (trendMilliPerTick * ticks);
             }
 
@@ -1481,12 +1507,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 : water - (drawMilliPerTick * ticks);
         }
 
-        private static long ClampWater(long waterMilli)
+        private static long ClampWater(
+            long waterMilli,
+            long capacityMilli)
         {
             return Math.Max(
                 0,
                 Math.Min(
-                    LastBearingBalanceV1.WaterCapacityMilli,
+                    Math.Max(1, capacityMilli),
                     waterMilli));
         }
 

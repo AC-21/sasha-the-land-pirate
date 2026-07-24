@@ -216,7 +216,6 @@ namespace AtomicLandPirate.LastBearingTests
                 2204);
             foreach (NextCityDecision decision in new[]
             {
-                NextCityDecision.ExpandEmergencyCistern,
                 NextCityDecision.MachineSpareBearing,
                 NextCityDecision.RestoreDepotAccess,
             })

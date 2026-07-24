@@ -441,7 +441,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "south; install the carried repair and reverse the water loss.");
             }
 
-            if (model.IsCityImprovementInstallationAvailable)
+            if (model.IsCityImprovementInstallationAvailable &&
+                model.NextCityDecision ==
+                    NextCityDecision.RefurbishAuxiliaryPump)
             {
                 return Create(
                     LastBearingPermitJobChapter.Homecoming,
@@ -523,6 +525,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             if (model.TurbineCondition == TurbineCondition.SleeveRepaired
                 && model.InstalledCityImprovement
+                    == CityImprovementKind.ExpandedEmergencyCistern)
+            {
+                return Create(
+                    LastBearingPermitJobChapter.AlternateConclusion,
+                    JobStepCount,
+                    "ALTERNATE CONCLUSION · SADDLE TANKS AND A PROMISE",
+                    "The cistern grew. The promise remains.",
+                    "The returned range tank now expands Emergency Storage to " +
+                    "210.000 water capacity, while the cooperative field sleeve " +
+                    "keeps the turbine moving and carries its maintenance promise.",
+                    "This branch is complete for the current V0.",
+                    isAlternateConclusion: true,
+                    recommendedFirstRunCue: ReplayCue);
+            }
+
+            if (model.TurbineCondition == TurbineCondition.SleeveRepaired
+                && model.InstalledCityImprovement
                     == CityImprovementKind.RefurbishedAuxiliaryPump)
             {
                 return Create(
@@ -601,16 +620,32 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     recommendedFirstRunCue: ReplayCue);
             }
 
+            if (model.InstalledCityImprovement
+                == CityImprovementKind.ExpandedEmergencyCistern)
+            {
+                return Create(
+                    LastBearingPermitJobChapter.AlternateConclusion,
+                    JobStepCount,
+                    "ALTERNATE CONCLUSION · EMERGENCY STORAGE EXPANDED",
+                    "The returned range tank joined the city",
+                    "Workshop Push converted the sealed Water return into visible " +
+                    "saddle tanks and a permanent 210.000 water ceiling.",
+                    "This branch is complete for the current V0.",
+                    isAlternateConclusion: true,
+                    recommendedFirstRunCue: ReplayCue);
+            }
+
             if (model.NextCityDecision == NextCityDecision.ExpandEmergencyCistern)
             {
                 return Create(
                     LastBearingPermitJobChapter.AlternateConclusion,
                     JobStepCount,
-                    "ALTERNATE CONCLUSION · RANGE-TANK RETURN",
-                    "The cistern question remains open",
-                    "Workshop Push + Range Tank returned a different resource " +
-                    "story. Emergency-cistern expansion is outside this V0.",
-                    "This branch is complete for the current V0.",
+                    "ALTERNATE WORK ORDER · RANGE-TANK RETURN",
+                    "Expand Emergency Storage",
+                    "Workshop Push + Range Tank returned one sealed Water load. " +
+                    "Route to the physical expansion handwheel and commit two parts.",
+                    "Open Emergency Storage, release the control, then use E, " +
+                    "gamepad south, or the exact pointer target.",
                     isAlternateConclusion: true,
                     recommendedFirstRunCue: ReplayCue);
             }

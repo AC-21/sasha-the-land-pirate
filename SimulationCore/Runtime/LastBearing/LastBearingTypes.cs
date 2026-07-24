@@ -254,6 +254,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
     {
         None = 0,
         RefurbishedAuxiliaryPump = 1,
+        ExpandedEmergencyCistern = 2,
     }
 
     public enum CityBuildingKind
