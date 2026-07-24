@@ -841,7 +841,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             if (builder.WaterMilli
                 > checked(
-                    LastBearingBalanceV1.WaterCapacityMilli
+                    LastBearingBalanceV1.EffectiveWaterCapacityMilli(
+                        builder.InstalledCityImprovement)
                     - LastBearingBalanceV1.EmergencyCisternWaterMilli))
             {
                 throw new InvalidOperationException(
@@ -1956,11 +1957,28 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     StringComparison.Ordinal)
                 && command.OrientationQuarterTurns
                     == LastBearingState.AuxiliaryPumpOrientationQuarterTurns;
+            bool exactEmergencyCisternExpansionRequest =
+                command.Decision == NextCityDecision.ExpandEmergencyCistern
+                && string.Equals(
+                    command.SocketId,
+                    LastBearingState.EmergencyStorageExpansionSocketId,
+                    StringComparison.Ordinal)
+                && command.OrientationQuarterTurns
+                    == LastBearingState
+                        .EmergencyStorageExpansionOrientationQuarterTurns;
             if (builder.InstalledCityImprovement != CityImprovementKind.None)
             {
                 if (builder.InstalledCityImprovement
                         == CityImprovementKind.RefurbishedAuxiliaryPump
                     && exactAuxiliaryPumpRequest)
+                {
+                    EmitReplay(builder, command.Sequence, events);
+                    return;
+                }
+
+                if (builder.InstalledCityImprovement
+                        == CityImprovementKind.ExpandedEmergencyCistern
+                    && exactEmergencyCisternExpansionRequest)
                 {
                     EmitReplay(builder, command.Sequence, events);
                     return;
@@ -1974,6 +1992,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 throw new InvalidOperationException(
                     "LAST_BEARING_CITY_IMPROVEMENT_DECISION_MISMATCH");
+            }
+
+            if (command.Decision == NextCityDecision.ExpandEmergencyCistern)
+            {
+                ApplyExpandEmergencyCistern(builder, command, events);
+                return;
             }
 
             if (command.Decision != NextCityDecision.RefurbishAuxiliaryPump)
@@ -2062,6 +2086,90 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 builder.SettlementTick,
                 command.Sequence,
                 LastBearingState.AuxiliaryPumpSocketId,
+                (long)CityImprovementKind.None,
+                (long)builder.InstalledCityImprovement);
+        }
+
+        private static void ApplyExpandEmergencyCistern(
+            LastBearingStateBuilder builder,
+            InstallCityImprovementCommand command,
+            LastBearingEventSink events)
+        {
+            if (!string.Equals(
+                    command.SocketId,
+                    LastBearingState.EmergencyStorageExpansionSocketId,
+                    StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_SOCKET_INVALID");
+            }
+
+            if (command.OrientationQuarterTurns
+                != LastBearingState
+                    .EmergencyStorageExpansionOrientationQuarterTurns)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_ORIENTATION_INVALID");
+            }
+
+            if (builder.ExpeditionPhase != ExpeditionPhase.AtHome
+                || builder.TransactionPhase != TransactionPhase.Finalized
+                || builder.TurbineCondition == TurbineCondition.Failing)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_PHASE_INVALID");
+            }
+
+            bool carriesReturnedWater =
+                builder.LiquidCargoKind == LiquidCargoKind.Water
+                && builder.LiquidCargoQuantityMilli
+                    == LastBearingBalanceV1.TankWaterReturnMilli
+                && builder.LiquidCargoCustody
+                    == LiquidCargoCustody.Settlement;
+            if (builder.PreparationChoice != PreparationChoice.WorkshopPush
+                || builder.VehicleModule != VehicleModule.SealedRangeTank
+                || !builder.RouteActionUsed
+                || builder.LiquidCapacityMilli
+                    != LastBearingBalanceV1.TankLiquidCapacityMilli
+                || !carriesReturnedWater)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_CARGO_INVALID");
+            }
+
+            long partsCost = LastBearingBalanceV1.CityImprovementPartsCost(
+                CityImprovementKind.ExpandedEmergencyCistern);
+            long requiredParts = checked(
+                partsCost + LastBearingBalanceV1.MinimumPostReturnPartsUnits);
+            if (builder.PartsUnits < requiredParts)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_CITY_IMPROVEMENT_PARTS_INSUFFICIENT");
+            }
+
+            long previousParts = builder.PartsUnits;
+            builder.PartsUnits = checked(builder.PartsUnits - partsCost);
+            builder.InstalledCityImprovement =
+                CityImprovementKind.ExpandedEmergencyCistern;
+            builder.NextCityDecision = NextCityDecision.None;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityResourcesCommitted,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                "settlement:last-bearing:parts",
+                previousParts,
+                builder.PartsUnits);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityImprovementInstalled,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.EmergencyStorageExpansionSocketId,
                 (long)CityImprovementKind.None,
                 (long)builder.InstalledCityImprovement);
         }
@@ -2590,7 +2698,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             if (builder.LiquidCargoKind == LiquidCargoKind.Water)
             {
                 builder.WaterMilli = Math.Min(
-                    LastBearingBalanceV1.WaterCapacityMilli,
+                    LastBearingBalanceV1.EffectiveWaterCapacityMilli(
+                        builder.InstalledCityImprovement),
                     checked(builder.WaterMilli + quantity));
             }
             else
@@ -2664,7 +2773,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 var before = builder.WaterMilli;
                 builder.WaterMilli = Math.Min(
-                    LastBearingBalanceV1.WaterCapacityMilli,
+                    LastBearingBalanceV1.EffectiveWaterCapacityMilli(
+                        builder.InstalledCityImprovement),
                     checked(
                         builder.WaterMilli + builder.EmergencyAidWaterMilli));
                 builder.FactionAidPolicy =
@@ -2723,7 +2833,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             builder.WaterMilli = Math.Max(
                 0,
                 Math.Min(
-                    LastBearingBalanceV1.WaterCapacityMilli,
+                    LastBearingBalanceV1.EffectiveWaterCapacityMilli(
+                        builder.InstalledCityImprovement),
                     checked(
                         builder.WaterMilli
                         + ComputeWaterTrend(

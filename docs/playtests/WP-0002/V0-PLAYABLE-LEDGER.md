@@ -792,7 +792,7 @@ Detailed contract:
 
 Objective: make the existing Dust Front threshold readable before it resolves.
 
-Status: current implementation target on the V0 feature branch.
+Status: released to protected `main` through PR #117.
 
 Scope:
 
@@ -812,6 +812,35 @@ audio, or normal-PR performance-soak changes.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-19-READ-THE-DRY-LINE-CONTRACT.md`.
+
+## VGR-20 — Expand Emergency Cistern
+
+Objective: turn the Workshop Push range-tank return into visible, durable
+settlement water capacity.
+
+Status: current implementation target on the V0 feature branch.
+
+Scope:
+
+- Route the exact `ExpandEmergencyCistern` Field Desk order to one distinct
+  physical handwheel beside placed Emergency Storage without opening the pump
+  hall or mutating canonical state.
+- Require fresh E, gamepad South, or exact pointer input before delegating the
+  existing exact installation command; fail closed for stale, pending,
+  duplicate, wrong-mode, wrong-branch, and forged-fuel states.
+- Add a derived saddle-tank silhouette after acceptance and normalize the
+  VGR-19 water column, dry-line marker, and forecast clamp against effective
+  read-model capacity.
+- Preserve the auxiliary-pump route, existing pump/front relay, returned Water
+  custody, composition neutrality, save/load, and one camera/listener.
+
+Exclude: new command, SaveContracts, schema, migration, independent numeric
+tuning, scene, package, dependency, production asset, generalized interaction
+framework, audio, or normal-PR performance-soak changes. Named cost and capacity
+aliases reuse existing authored balance constants.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-20-EXPAND-EMERGENCY-CISTERN-CONTRACT.md`.
 
 ## Visual constitution
 

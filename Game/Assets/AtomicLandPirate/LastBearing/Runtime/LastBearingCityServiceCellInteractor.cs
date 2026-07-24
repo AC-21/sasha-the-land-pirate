@@ -1812,9 +1812,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             LastBearingDryLineProjection projection =
                 LastBearingFieldDeskPresenter.ProjectDryLine(model);
+            long capacity = Math.Max(1, model.WaterCapacityMilli);
             float waterNormalized = Mathf.Clamp01(
                 (float)model.WaterMilli /
-                LastBearingBalanceV1.WaterCapacityMilli);
+                capacity);
             float columnHeight =
                 DryLineColumnMaxHeight * waterNormalized;
             if (_dryLineWaterColumn != null)
@@ -1826,6 +1827,20 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         0f,
                         DryLineColumnBaseY + (columnHeight * 0.5f),
                         -0.04f);
+            }
+
+            if (_dryLineMarker != null)
+            {
+                float markerNormalized = Mathf.Clamp01(
+                    (float)LastBearingBalanceV1
+                        .MinimumRecoverableWaterMilli /
+                    capacity);
+                _dryLineMarker.transform.localPosition =
+                    new Vector3(
+                        0f,
+                        DryLineColumnBaseY +
+                        (DryLineColumnMaxHeight * markerNormalized),
+                        -0.2f);
             }
 
             SetActive(
@@ -2024,7 +2039,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                    ShouldShowDustFrontRelayControl(model);
         }
 
-        private static int SelectEmergencyCisternPumpQuarterTurns(
+        internal static int SelectEmergencyCisternPumpQuarterTurns(
             LastBearingReadModel model)
         {
             int preferred = model.EmergencyStorageQuarterTurns;

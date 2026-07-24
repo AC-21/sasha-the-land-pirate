@@ -264,10 +264,40 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool IsCityImprovementInstallationAvailable =>
             _pendingCommands.Count == 0 &&
             _readModel?.IsCityImprovementInstallationAvailable == true &&
+            _readModel.NextCityDecision ==
+                NextCityDecision.RefurbishAuxiliaryPump &&
             _modeCoordinator?.HasActiveMode == true &&
             _modeCoordinator.CurrentMode ==
                 LastBearingPresentationMode.BuildingCutaway &&
             _world?.IsPumpHallCutawaySelected == true;
+
+        public bool IsEmergencyCisternExpansionQueued =>
+            _pendingCommands.Exists(command =>
+                command is InstallCityImprovementCommand installation &&
+                installation.Decision ==
+                    NextCityDecision.ExpandEmergencyCistern);
+
+        public bool CanOpenEmergencyCisternExpansion =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsCityImprovementInstallationAvailable == true &&
+            _readModel.NextCityDecision ==
+                NextCityDecision.ExpandEmergencyCistern &&
+            IsExactFieldDeskCityOverview &&
+            _world?.CityServiceCellView
+                ?.EmergencyCisternExpansionInteractor
+                ?.IsControlVisible == true;
+
+        public bool IsEmergencyCisternExpansionFocused =>
+            _world?.CityServiceCellView
+                ?.EmergencyCisternExpansionInteractor
+                ?.IsControlFocused == true;
+
+        public bool CanInstallEmergencyCisternExpansion =>
+            CanOpenEmergencyCisternExpansion &&
+            IsEmergencyCisternExpansionFocused &&
+            _world?.CityServiceCellView
+                ?.EmergencyCisternExpansionInteractor
+                ?.IsInputArmed == true;
 
         public bool IsWorkshopBatchStartAvailable =>
             _pendingCommands.Count == 0 &&
@@ -1684,6 +1714,30 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
         }
 
+        public void OpenEmergencyCisternExpansion()
+        {
+            if (!CanOpenEmergencyCisternExpansion)
+            {
+                _status =
+                    "The Emergency Storage expansion route is available only for the exact returned range-tank plan.";
+                return;
+            }
+
+            LastBearingEmergencyCisternExpansionInteractor? interactor =
+                _world?.CityServiceCellView
+                    ?.EmergencyCisternExpansionInteractor;
+            interactor?.FocusControl();
+            if (interactor?.IsControlFocused != true)
+            {
+                _status =
+                    "The Emergency Storage expansion socket could not take focus.";
+                return;
+            }
+
+            _status =
+                "The Field Desk points to the physical Emergency Storage expansion handwheel.";
+        }
+
         public void InstallCityImprovement()
         {
             if (!IsCityImprovementInstallationAvailable)
@@ -1700,6 +1754,30 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 LastBearingState.AuxiliaryPumpOrientationQuarterTurns));
             _status =
                 "The returned rotor is committed to the auxiliary pump hall.";
+        }
+
+        public void InstallEmergencyCisternExpansion()
+        {
+            if (IsEmergencyCisternExpansionQueued)
+            {
+                return;
+            }
+
+            if (!CanInstallEmergencyCisternExpansion)
+            {
+                _status =
+                    "Turn the Emergency Storage expansion handwheel only after a fresh release at its exact city control.";
+                return;
+            }
+
+            Queue(sequence => new InstallCityImprovementCommand(
+                sequence,
+                NextCityDecision.ExpandEmergencyCistern,
+                LastBearingState.EmergencyStorageExpansionSocketId,
+                LastBearingState
+                    .EmergencyStorageExpansionOrientationQuarterTurns));
+            _status =
+                "The returned range tank is committed to Emergency Storage's expansion saddle.";
         }
 
         public void StartSpareBearingBatch()
@@ -1992,6 +2070,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ?.IsEmergencyCisternPumpFocused == true ||
                 _world?.CityServiceCellView?.Interactor
                     ?.IsDustFrontRelayFocused == true ||
+                _world?.CityServiceCellView
+                    ?.EmergencyCisternExpansionInteractor
+                    ?.IsControlFocused == true ||
                 _world?.PumpHallMaintenanceInteractor
                     ?.IsControlFocused == true)
             {
@@ -2513,7 +2594,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 LastBearingBalanceV1.RoadLateralLimitMilli,
                 -1f,
                 1f);
-            float waterNormalized = Mathf.Clamp01(_readModel.WaterMilli / 180000f);
+            float waterNormalized = Mathf.Clamp01(
+                _readModel.WaterCapacityMilli <= 0
+                    ? 0f
+                    : (float)_readModel.WaterMilli /
+                      _readModel.WaterCapacityMilli);
             bool humanVisible = _readModel.Composition != ColonyComposition.RobotOnly;
             bool robotVisible = _readModel.Composition != ColonyComposition.HumanOnly;
             bool factionClaimed =
@@ -2686,6 +2771,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             if (_pendingCommands.Count != 0 ||
                 _readModel?.IsCityImprovementInstallationAvailable != true ||
+                _readModel.NextCityDecision !=
+                    NextCityDecision.RefurbishAuxiliaryPump ||
                 _world == null ||
                 _modeCoordinator == null)
             {

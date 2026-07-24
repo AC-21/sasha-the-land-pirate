@@ -14,6 +14,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const string AuxiliaryPumpSocketId =
             "city:last-bearing:socket:pump-hall-auxiliary";
         public const int AuxiliaryPumpOrientationQuarterTurns = 0;
+        public const string EmergencyStorageExpansionSocketId =
+            "city:last-bearing:socket:emergency-storage-cistern-expansion";
+        public const int EmergencyStorageExpansionOrientationQuarterTurns = 0;
         public const string SpareBearingRecipeId =
             "recipe:last-bearing:spare-bearing:0001";
         public const string SpareBearingBatchId =

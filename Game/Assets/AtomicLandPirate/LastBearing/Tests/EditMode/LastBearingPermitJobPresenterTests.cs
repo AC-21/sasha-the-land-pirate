@@ -648,6 +648,48 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 "presenter mutated the settled canonical state");
         }
 
+        [Test]
+        public void ExpandedCisternConclusionNamesCompletedCapacity()
+        {
+            LastBearingState state = CompleteExpedition(
+                PreparationChoice.WorkshopPush,
+                VehicleModule.SealedRangeTank,
+                EncounterChoice.TakeBearing,
+                worldSeed: 3420);
+            state = ApplyOne(
+                state,
+                sequence => new InstallTurbineRepairCommand(sequence));
+
+            LastBearingPermitJobPresentation ready = Present(state, true);
+            Assert.That(
+                ready.Headline,
+                Is.EqualTo(
+                    "ALTERNATE WORK ORDER · RANGE-TANK RETURN"));
+            Assert.That(ready.Detail, Does.Contain("sealed Water load"));
+            Assert.That(ready.Detail, Does.Not.Contain("outside this V0"));
+
+            state = ApplyOne(
+                state,
+                sequence => new InstallCityImprovementCommand(
+                    sequence,
+                    NextCityDecision.ExpandEmergencyCistern,
+                    LastBearingState.EmergencyStorageExpansionSocketId,
+                    LastBearingState
+                        .EmergencyStorageExpansionOrientationQuarterTurns));
+            LastBearingPermitJobPresentation installed = Present(state, true);
+
+            Assert.That(
+                installed.Headline,
+                Is.EqualTo(
+                    "ALTERNATE CONCLUSION · EMERGENCY STORAGE EXPANDED"));
+            Assert.That(installed.Detail, Does.Contain("saddle tanks"));
+            Assert.That(installed.Detail, Does.Contain("210.000"));
+            Assert.That(installed.IsAlternateConclusion, Is.True);
+            Assert.That(
+                LastBearingReadModel.FromState(state).WaterCapacityMilli,
+                Is.EqualTo(210000));
+        }
+
         [TestCase(
             PreparationChoice.CivicBuffer,
             VehicleModule.WinchAssembly,
@@ -667,12 +709,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             PreparationChoice.WorkshopPush,
             VehicleModule.SealedRangeTank,
             EncounterChoice.Cooperate,
-            "cistern waits")]
+            "cistern grew")]
         [TestCase(
             PreparationChoice.WorkshopPush,
             VehicleModule.SealedRangeTank,
             EncounterChoice.TakeBearing,
-            "cistern question remains")]
+            "returned range tank joined")]
         [TestCase(
             PreparationChoice.CivicBuffer,
             VehicleModule.SealedRangeTank,
@@ -700,13 +742,25 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingReadModel model = LastBearingReadModel.FromState(state);
             if (model.IsCityImprovementInstallationAvailable)
             {
+                bool expand =
+                    model.NextCityDecision ==
+                    NextCityDecision.ExpandEmergencyCistern;
                 state = ApplyOne(
                     state,
                     sequence => new InstallCityImprovementCommand(
                         sequence,
-                        NextCityDecision.RefurbishAuxiliaryPump,
-                        LastBearingState.AuxiliaryPumpSocketId,
-                        LastBearingState.AuxiliaryPumpOrientationQuarterTurns));
+                        expand
+                            ? NextCityDecision.ExpandEmergencyCistern
+                            : NextCityDecision.RefurbishAuxiliaryPump,
+                        expand
+                            ? LastBearingState
+                                .EmergencyStorageExpansionSocketId
+                            : LastBearingState.AuxiliaryPumpSocketId,
+                        expand
+                            ? LastBearingState
+                                .EmergencyStorageExpansionOrientationQuarterTurns
+                            : LastBearingState
+                                .AuxiliaryPumpOrientationQuarterTurns));
             }
 
             string before = LastBearingCanonicalCodec.ComputeSha256(state);
@@ -731,7 +785,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             else if (module == VehicleModule.SealedRangeTank
                      && encounter == EncounterChoice.Cooperate)
             {
-                Assert.That(presentation.Detail, Does.Contain("range-tank return"));
+                Assert.That(
+                    presentation.Detail,
+                    Does.Contain("range tank").IgnoreCase);
                 Assert.That(presentation.Detail, Does.Contain("field sleeve"));
                 Assert.That(presentation.Detail, Does.Contain("maintenance promise"));
             }

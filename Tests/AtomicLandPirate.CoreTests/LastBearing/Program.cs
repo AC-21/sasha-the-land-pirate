@@ -131,6 +131,12 @@ namespace AtomicLandPirate.LastBearingTests
                 case "v0-emergency-cistern":
                     EmergencyCisternTests.Run(harness);
                     break;
+                case "vgr20-expand-emergency-cistern":
+                    EmergencyCisternExpansionTests.Run(harness);
+                    SaveAtomicTests.RunEmergencyCisternExpansion(
+                        harness,
+                        repoRoot);
+                    break;
                 case "v0-hands-on-service-cell":
                     harness.Run(
                         "world service-cell source contract",

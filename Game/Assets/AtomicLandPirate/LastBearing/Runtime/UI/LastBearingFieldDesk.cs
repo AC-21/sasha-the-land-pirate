@@ -298,6 +298,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 bool physicalControlStillFocused =
                     _controller.IsEmergencyCisternPumpFocused ||
                     _controller.IsDustFrontRelayFocused ||
+                    _controller.IsEmergencyCisternExpansionFocused ||
                     _controller.IsFieldSleeveServiceFocused;
                 if (physicalControlStillFocused)
                 {
@@ -596,6 +597,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 case LastBearingFieldDeskIntent.OpenPumpHallRepair: _controller.OpenPumpHallRepair(); break;
                 case LastBearingFieldDeskIntent.OpenOneGoodBatchWorkshop: _controller.OpenOneGoodBatchWorkshop(); break;
                 case LastBearingFieldDeskIntent.OpenPumpHallImprovement: _controller.OpenPumpHallImprovement(); break;
+                case LastBearingFieldDeskIntent.OpenEmergencyCisternExpansion:
+                    _controller.OpenEmergencyCisternExpansion();
+                    _physicalWorkRouted =
+                        _controller.IsEmergencyCisternExpansionFocused;
+                    HideAndResetTransient();
+                    break;
                 case LastBearingFieldDeskIntent.ServiceFieldSleeve:
                     _controller.OpenFieldSleeveService();
                     _physicalWorkRouted =

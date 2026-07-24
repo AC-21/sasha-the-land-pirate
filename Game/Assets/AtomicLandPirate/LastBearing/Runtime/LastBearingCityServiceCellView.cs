@@ -29,6 +29,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private Transform? _machineShop;
         private Transform? _emergencyStorage;
         private GameObject? _emergencyCisternFill;
+        private GameObject? _emergencyCisternExpansionSaddle;
         private GameObject? _link;
         private Transform? _sled;
         private GameObject? _humanOperator;
@@ -48,6 +49,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             private set;
         }
 
+        public LastBearingEmergencyCisternExpansionInteractor?
+            EmergencyCisternExpansionInteractor
+        {
+            get;
+            private set;
+        }
+
         public bool IsVisible => gameObject.activeSelf;
 
         public bool IsRecyclerVisible =>
@@ -61,6 +69,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool IsEmergencyCisternFillVisible =>
             _emergencyCisternFill?.activeInHierarchy == true;
+
+        public bool IsEmergencyCisternExpansionSaddleVisible =>
+            _emergencyCisternExpansionSaddle?.activeInHierarchy == true;
 
         public bool IsLinkVisible => _link?.activeSelf == true;
 
@@ -145,6 +156,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 new Vector3(0f, 0.46f, 0f),
                 new Vector3(0.86f, 0.08f, 0.86f),
                 bone);
+            _emergencyCisternExpansionSaddle =
+                CreateEmergencyCisternExpansionSaddle(
+                    _emergencyStorage,
+                    iron,
+                    oxide,
+                    bone);
             _link = CreateBlock(
                 "Canonical Recycler Workshop Link",
                 transform,
@@ -213,6 +230,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 bone,
                 tungsten,
                 signal);
+            EmergencyCisternExpansionInteractor =
+                gameObject.AddComponent<
+                    LastBearingEmergencyCisternExpansionInteractor>();
+            EmergencyCisternExpansionInteractor.Build(
+                iron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
             gameObject.SetActive(false);
         }
 
@@ -233,6 +259,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _machineShop == null ||
                 _emergencyStorage == null ||
                 _emergencyCisternFill == null ||
+                _emergencyCisternExpansionSaddle == null ||
                 _link == null ||
                 _sled == null ||
                 _humanOperator == null ||
@@ -277,6 +304,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 previewActive);
             _emergencyCisternFill.SetActive(
                 model.EmergencyCisternCharged &&
+                _emergencyStorage.gameObject.activeSelf);
+            _emergencyCisternExpansionSaddle.SetActive(
+                model.InstalledCityImprovement ==
+                    CityImprovementKind.ExpandedEmergencyCistern &&
                 _emergencyStorage.gameObject.activeSelf);
 
             bool linked = model.CityServiceLinkConnected &&
@@ -376,6 +407,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 0f);
 
             Interactor?.Apply(model, _sled);
+            EmergencyCisternExpansionInteractor?.Apply(model);
         }
 
         public void Hide()
@@ -456,6 +488,62 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             return block;
+        }
+
+        private static GameObject CreateEmergencyCisternExpansionSaddle(
+            Transform parent,
+            Material iron,
+            Material oxide,
+            Material bone)
+        {
+            var saddle = new GameObject(
+                "Emergency Cistern Expansion Saddle");
+            saddle.transform.SetParent(parent, false);
+
+            CreateTank(
+                "Expanded Cistern Saddle Tank A",
+                saddle.transform,
+                new Vector3(-0.72f, 0.32f, 0f),
+                iron);
+            CreateTank(
+                "Expanded Cistern Saddle Tank B",
+                saddle.transform,
+                new Vector3(0.72f, 0.32f, 0f),
+                iron);
+            CreateBlock(
+                "Expanded Cistern Saddle Spine",
+                saddle.transform,
+                new Vector3(0f, 0.52f, 0f),
+                new Vector3(1.62f, 0.12f, 0.18f),
+                bone);
+            CreateBlock(
+                "Expanded Cistern Saddle Service Band",
+                saddle.transform,
+                new Vector3(0f, 0.32f, -0.34f),
+                new Vector3(1.7f, 0.12f, 0.12f),
+                oxide);
+            saddle.SetActive(false);
+            return saddle;
+        }
+
+        private static void CreateTank(
+            string objectName,
+            Transform parent,
+            Vector3 position,
+            Material material)
+        {
+            var tank = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            tank.name = objectName;
+            tank.transform.SetParent(parent, false);
+            tank.transform.localPosition = position;
+            tank.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+            tank.transform.localScale = new Vector3(0.32f, 0.48f, 0.32f);
+            tank.GetComponent<Renderer>().sharedMaterial = material;
+            Collider? collider = tank.GetComponent<Collider>();
+            if (collider != null)
+            {
+                collider.enabled = false;
+            }
         }
     }
 }

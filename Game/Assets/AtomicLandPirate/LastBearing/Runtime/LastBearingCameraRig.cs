@@ -33,6 +33,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private RoadFeelChaseCamera? _roadChaseCamera;
         private LastBearingCityServiceCellInteractor?
             _cityServiceCellInteractor;
+        private LastBearingEmergencyCisternExpansionInteractor?
+            _emergencyCisternExpansionInteractor;
         private float _cityYaw = ComparisonYaw;
         private float _cityDistance = ComparisonDistance;
         private bool _roadMode;
@@ -96,6 +98,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingCityServiceCellInteractor interactor)
         {
             _cityServiceCellInteractor = interactor != null
+                ? interactor
+                : throw new System.ArgumentNullException(nameof(interactor));
+        }
+
+        public void SetEmergencyCisternExpansionInteractor(
+            LastBearingEmergencyCisternExpansionInteractor interactor)
+        {
+            _emergencyCisternExpansionInteractor = interactor != null
                 ? interactor
                 : throw new System.ArgumentNullException(nameof(interactor));
         }
@@ -257,7 +267,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _cityServiceCellInteractor?
                         .IsEmergencyCisternPumpFocused != true &&
                     _cityServiceCellInteractor?
-                        .IsDustFrontRelayFocused != true)
+                        .IsDustFrontRelayFocused != true &&
+                    _emergencyCisternExpansionInteractor?
+                        .IsControlFocused != true)
                 {
                     _cityYaw += 48f * deltaTime;
                 }

@@ -61,20 +61,21 @@ namespace AtomicLandPirate.Simulation.LastBearing
             RequireAccumulator(state.CrisisAccumulatorMilli, "CRISIS");
             RequireAccumulator(state.RoadAccumulatorMilli, "ROAD");
             RequireEnum(state.PauseCause, "PAUSE_CAUSE");
+            RequireEnum(state.NextCityDecision, "NEXT_CITY_DECISION");
+            RequireEnum(
+                state.InstalledCityImprovement,
+                "INSTALLED_CITY_IMPROVEMENT");
 
             RequireRange(
                 state.WaterMilli,
                 0,
-                LastBearingBalanceV1.WaterCapacityMilli,
+                LastBearingBalanceV1.EffectiveWaterCapacityMilli(
+                    state.InstalledCityImprovement),
                 "WATER");
             RequireNonnegative(state.PartsUnits, "PARTS");
             RequireNonnegative(state.FuelUnits, "FUEL");
             RequireRange(state.VehicleConditionMilli, 0, 1000, "VEHICLE_CONDITION");
             RequireEnum(state.TurbineCondition, "TURBINE_CONDITION");
-            RequireEnum(state.NextCityDecision, "NEXT_CITY_DECISION");
-            RequireEnum(
-                state.InstalledCityImprovement,
-                "INSTALLED_CITY_IMPROVEMENT");
 
             ValidatePreparation(state);
             ValidateCityConstruction(state);
@@ -960,17 +961,38 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return;
             }
 
-            Require(
+            bool commonInstalledState =
                 state.ExpeditionPhase == ExpeditionPhase.AtHome
                 && state.TransactionPhase == TransactionPhase.Finalized
                 && state.TurbineCondition != TurbineCondition.Failing
                 && state.NextCityDecision == NextCityDecision.None
                 && state.PreparationChoice == PreparationChoice.WorkshopPush
-                && state.VehicleModule == VehicleModule.WinchAssembly
                 && state.RouteActionUsed
-                && state.TowSlotsUsed == 0
                 && state.PartsUnits
-                    >= LastBearingBalanceV1.MinimumPostReturnPartsUnits,
+                    >= LastBearingBalanceV1.MinimumPostReturnPartsUnits;
+            if (state.InstalledCityImprovement
+                == CityImprovementKind.RefurbishedAuxiliaryPump)
+            {
+                Require(
+                    commonInstalledState
+                    && state.VehicleModule == VehicleModule.WinchAssembly
+                    && state.TowSlotsUsed == 0,
+                    "LAST_BEARING_CITY_IMPROVEMENT_STATE_INVALID");
+                return;
+            }
+
+            Require(
+                state.InstalledCityImprovement
+                    == CityImprovementKind.ExpandedEmergencyCistern
+                && commonInstalledState
+                && state.VehicleModule == VehicleModule.SealedRangeTank
+                && state.LiquidCapacityMilli
+                    == LastBearingBalanceV1.TankLiquidCapacityMilli
+                && state.LiquidCargoKind == LiquidCargoKind.Water
+                && state.LiquidCargoQuantityMilli
+                    == LastBearingBalanceV1.TankWaterReturnMilli
+                && state.LiquidCargoCustody
+                    == LiquidCargoCustody.Settlement,
                 "LAST_BEARING_CITY_IMPROVEMENT_STATE_INVALID");
         }
 

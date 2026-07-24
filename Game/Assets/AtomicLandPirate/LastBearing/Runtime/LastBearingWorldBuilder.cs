@@ -431,7 +431,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingGameController controller)
         {
             if (MainCamera == null ||
-                CityServiceCellView?.Interactor == null)
+                CityServiceCellView?.Interactor == null ||
+                CityServiceCellView
+                    .EmergencyCisternExpansionInteractor == null)
             {
                 throw new InvalidOperationException(
                     "Working service-cell interaction requires its shared city camera.");
@@ -440,13 +442,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
             CityServiceCellView.Interactor.Configure(
                 controller,
                 MainCamera);
+            CityServiceCellView.EmergencyCisternExpansionInteractor.Configure(
+                controller,
+                MainCamera);
             CameraRig?.SetCityServiceCellInteractor(
                 CityServiceCellView.Interactor);
+            CameraRig?.SetEmergencyCisternExpansionInteractor(
+                CityServiceCellView.EmergencyCisternExpansionInteractor);
         }
 
         public void ResetCityServiceCellInteraction()
         {
             CityServiceCellView?.Interactor?.ResetLocalSelection();
+            CityServiceCellView
+                ?.EmergencyCisternExpansionInteractor
+                ?.ResetLocalFocus();
         }
 
         public void ConfigurePumpHallMaintenanceInteraction(
