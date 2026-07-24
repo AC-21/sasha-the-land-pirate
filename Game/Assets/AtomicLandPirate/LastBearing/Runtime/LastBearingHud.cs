@@ -160,6 +160,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _controller.IsDepotRepairCargoLoadQueued,
                     _controller.IsReturnCheckInAvailable,
                     _controller.IsPumpHallRepairAvailable,
+                    _controller.IsCityImprovementInstallationAvailable,
                     _controller.IsWorkshopBatchStartAvailable,
                     _controller.IsWorkshopBarterAvailable,
                     _controller.IsGaragePlanIntentActive,
@@ -761,11 +762,20 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     LastBearingBalanceV1.AuxiliaryPumpInstallationPartsUnits +
                     " parts and preserves the minimum reserve.",
                     _bodyStyle);
-                if (GUILayout.Button(
-                        "INSTALL REFURBISHED AUXILIARY PUMP",
-                        _buttonStyle))
+                if (!_controller.IsCityImprovementInstallationAvailable)
                 {
-                    _controller!.InstallCityImprovement();
+                    if (GUILayout.Button(
+                            "OPEN PUMP HALL · AUXILIARY SOCKET",
+                            _buttonStyle))
+                    {
+                        _controller.OpenPumpHallImprovement();
+                    }
+                }
+                else
+                {
+                    GUILayout.Label(
+                        "SEAT AUXILIARY PUMP · E / GAMEPAD SOUTH",
+                        _mutedStyle);
                 }
 
                 return;
@@ -1373,6 +1383,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool isDepotCargoLoadQueued,
             bool isReturnCheckInAvailable,
             bool isPumpHallRepairAvailable,
+            bool isCityImprovementInstallationAvailable,
             bool isWorkshopBatchStartAvailable,
             bool isWorkshopBarterAvailable,
             bool isGaragePlanIntentActive,
@@ -1473,6 +1484,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 return "Press E / gamepad south · install the carried repair " +
                        "and reverse the failing water trend." +
+                       serviceControls;
+            }
+
+            if (isCityImprovementInstallationAvailable)
+            {
+                return "Press E / gamepad south · seat the staged rotor in " +
+                       "the fixed civic socket and wake the auxiliary pump." +
                        serviceControls;
             }
 

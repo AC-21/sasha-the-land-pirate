@@ -223,13 +223,25 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "LastBearingEventKind.SpareBearingBatchCompleted");
             Require(controller, "LastBearingEventKind.SpareBearingLotBartered");
             Require(controller, "LastBearingEventKind.RoutePermitGranted");
+            Require(
+                controller,
+                "public bool IsCityImprovementInstallationAvailable =>");
+            Require(
+                controller,
+                "_modeCoordinator.CurrentMode ==\n" +
+                "                LastBearingPresentationMode.BuildingCutaway");
+            Require(
+                controller,
+                "_world?.IsPumpHallCutawaySelected == true");
+            Require(controller, "public void OpenPumpHallImprovement()");
+            Require(controller, "TryRouteToPumpHallImprovement(");
             string installationOperation = Segment(
                 controller,
                 "public void InstallCityImprovement()",
                 "public void ServiceFieldSleeve()");
             Require(
                 installationOperation,
-                "_readModel.IsCityImprovementInstallationAvailable");
+                "if (!IsCityImprovementInstallationAvailable)");
             Require(
                 installationOperation,
                 "new InstallCityImprovementCommand");
@@ -387,6 +399,21 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 globalShortcuts,
                 "IsDepotRepairCargoLoadAvailable");
+            Require(
+                globalShortcuts,
+                "UpdateCityImprovementInputArming(primaryInteractionHeld);");
+            Require(
+                globalShortcuts,
+                "IsCityImprovementInstallationAvailable");
+            Require(globalShortcuts, "_cityImprovementInputArmed");
+            Require(globalShortcuts, "InstallCityImprovement();");
+            Require(
+                controller,
+                "_cityImprovementPresentationEntryFrame = Time.frameCount;");
+            Require(
+                controller,
+                "Time.frameCount > _cityImprovementPresentationEntryFrame");
+            Require(controller, "ResetCityImprovementInteraction();");
             Require(globalShortcuts, "LoadDepotRepairCargo();");
             Require(globalShortcuts, "keyboard.eKey.wasPressedThisFrame");
             Require(globalShortcuts, "gamepad.buttonSouth.wasPressedThisFrame");
@@ -1186,7 +1213,14 @@ namespace AtomicLandPirate.LastBearingTests
             Require(hud, "LOAD CERAMIC BEARING · E / GAMEPAD SOUTH");
             Require(hud, ".Append(model.RepairCargoCustody)");
             Require(hud, "IsCityImprovementInstallationAvailable");
-            Require(hud, "INSTALL REFURBISHED AUXILIARY PUMP");
+            Require(hud, "OPEN PUMP HALL · AUXILIARY SOCKET");
+            Require(hud, "SEAT AUXILIARY PUMP · E / GAMEPAD SOUTH");
+            Require(hud, "_controller.OpenPumpHallImprovement();");
+            TestHarness.True(
+                hud.IndexOf(
+                    ".InstallCityImprovement(",
+                    StringComparison.Ordinal) < 0,
+                "the legacy HUD may route to the pump hall but must not submit the installation");
             Require(hud, "LastBearingPermitJobPresenter.Present(");
             Require(hud, "DrawPermitJob(permitJob)");
             Require(hud, "DrawContextActions(model, permitJob)");

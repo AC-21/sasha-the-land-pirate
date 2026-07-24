@@ -80,6 +80,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That((int)LastBearingFieldDeskIntent.AdvanceCityServiceSled, Is.EqualTo(13));
             Assert.That((int)LastBearingFieldDeskIntent.CancelCityBuildingPreview, Is.EqualTo(14));
             Assert.That((int)LastBearingFieldDeskIntent.ActivateInfrastructure, Is.EqualTo(15));
+            Assert.That(
+                (int)LastBearingFieldDeskIntent.OpenPumpHallImprovement,
+                Is.EqualTo(22));
             Assert.That((int)LastBearingFieldDeskIntent.TogglePause, Is.EqualTo(24));
             Assert.That((int)LastBearingFieldDeskIntent.ReturnToTitle, Is.EqualTo(27));
             Assert.That((int)LastBearingFieldDeskIntent.RunHotShift, Is.EqualTo(28));

@@ -556,7 +556,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 case LastBearingFieldDeskIntent.CommitExpedition: _controller.CommitExpedition(); break;
                 case LastBearingFieldDeskIntent.OpenPumpHallRepair: _controller.OpenPumpHallRepair(); break;
                 case LastBearingFieldDeskIntent.OpenOneGoodBatchWorkshop: _controller.OpenOneGoodBatchWorkshop(); break;
-                case LastBearingFieldDeskIntent.InstallCityImprovement: _controller.InstallCityImprovement(); break;
+                case LastBearingFieldDeskIntent.OpenPumpHallImprovement: _controller.OpenPumpHallImprovement(); break;
                 case LastBearingFieldDeskIntent.ServiceFieldSleeve: _controller.ServiceFieldSleeve(); break;
                 case LastBearingFieldDeskIntent.TogglePause: _controller.TogglePause(); break;
                 case LastBearingFieldDeskIntent.Save: _controller.Save(); break;

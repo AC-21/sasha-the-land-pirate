@@ -78,6 +78,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private CityBuildingKind _cityPreviewBuilding = CityBuildingKind.None;
         private int _cityPreviewPadIndex;
         private int _cityPreviewQuarterTurns;
+        private bool _cityImprovementInputArmed;
+        private bool _cityImprovementPresentationActive;
+        private int _cityImprovementPresentationEntryFrame = -1;
         private string _status = "Choose who calls Last Bearing home.";
         private string _saveStatus = "No local profile loaded.";
 
@@ -205,6 +208,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool IsPumpHallRepairAvailable =>
             _pendingCommands.Count == 0 &&
             IsTurbineRepairReady &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.BuildingCutaway &&
+            _world?.IsPumpHallCutawaySelected == true;
+
+        public bool IsCityImprovementInstallationAvailable =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsCityImprovementInstallationAvailable == true &&
             _modeCoordinator?.HasActiveMode == true &&
             _modeCoordinator.CurrentMode ==
                 LastBearingPresentationMode.BuildingCutaway &&
@@ -515,6 +526,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void StartNewGame(ColonyComposition composition)
         {
+            ResetCityImprovementInteraction();
             _fieldDesk?.ResetForLifecycle();
             _world?.ResetCityServiceCellInteraction();
             _world?.ResetWreckLineInteraction();
@@ -572,6 +584,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void ReturnToTitle()
         {
+            ResetCityImprovementInteraction();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
@@ -1511,13 +1524,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
         }
 
-        public void InstallCityImprovement()
+        public void OpenPumpHallImprovement()
         {
-            if (_readModel == null
-                || !_readModel.IsCityImprovementInstallationAvailable)
+            if (!TryRouteToPumpHallImprovement(
+                    "The returned rotor is framed at the fixed auxiliary-pump socket."))
             {
                 _status =
-                    "The fixed pump-hall civic socket is not canonically ready.";
+                    "The auxiliary-pump socket route is available only after the turbine repair.";
+            }
+        }
+
+        public void InstallCityImprovement()
+        {
+            if (!IsCityImprovementInstallationAvailable)
+            {
+                _status =
+                    "Seat the auxiliary pump only from its selected pump-hall socket.";
                 return;
             }
 
@@ -1649,6 +1671,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void Load()
         {
+            ResetCityImprovementInteraction();
             _fieldDesk?.ResetForLifecycle();
             _world?.ResetCityServiceCellInteraction();
             _world?.ResetWreckLineInteraction();
@@ -1694,8 +1717,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 if (!TryRouteToPumpHallRepair(
                         "Exact finalized return restored at the pump-hall service line."))
                 {
-                    TryRouteToOneGoodBatchWorkshop(
-                        "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                    if (!TryRouteToPumpHallImprovement(
+                            "Exact staged rotor restored at the fixed auxiliary-pump socket."))
+                    {
+                        TryRouteToOneGoodBatchWorkshop(
+                            "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                    }
                 }
             }
             catch (Exception exception)
@@ -1754,6 +1781,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             var keyboard = Keyboard.current;
             var gamepad = Gamepad.current;
+            bool primaryInteractionHeld =
+                keyboard?.eKey.isPressed == true ||
+                gamepad?.buttonSouth.isPressed == true;
+            UpdateCityImprovementInputArming(primaryInteractionHeld);
 
             if (keyboard != null && keyboard.pKey.wasPressedThisFrame)
             {
@@ -1817,6 +1848,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                  (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
             {
                 RepairTurbine();
+            }
+            else if (IsCityImprovementInstallationAvailable &&
+                _cityImprovementInputArmed &&
+                _fieldDesk?.OwnsKeyboardFocus != true &&
+                ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
+                 (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
+            {
+                _cityImprovementInputArmed = false;
+                InstallCityImprovement();
             }
             else if (IsWorkshopBatchStartAvailable &&
                 ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
@@ -2435,6 +2475,59 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _status = successStatus;
             return true;
+        }
+
+        private bool TryRouteToPumpHallImprovement(string successStatus)
+        {
+            if (_pendingCommands.Count != 0 ||
+                _readModel?.IsCityImprovementInstallationAvailable != true ||
+                _world == null ||
+                _modeCoordinator == null)
+            {
+                return false;
+            }
+
+            _world.SelectPumpHallCutaway();
+            ApplySelectedBuildingCutawayPose();
+            if (!_modeCoordinator.TryShowCityMode(
+                    LastBearingPresentationMode.BuildingCutaway,
+                    _readModel))
+            {
+                return false;
+            }
+
+            _status = successStatus;
+            return true;
+        }
+
+        private void UpdateCityImprovementInputArming(bool inputHeld)
+        {
+            if (!IsCityImprovementInstallationAvailable)
+            {
+                ResetCityImprovementInteraction();
+                return;
+            }
+
+            if (!_cityImprovementPresentationActive)
+            {
+                _cityImprovementPresentationActive = true;
+                _cityImprovementPresentationEntryFrame = Time.frameCount;
+                _cityImprovementInputArmed = false;
+                return;
+            }
+
+            if (Time.frameCount > _cityImprovementPresentationEntryFrame &&
+                !inputHeld)
+            {
+                _cityImprovementInputArmed = true;
+            }
+        }
+
+        private void ResetCityImprovementInteraction()
+        {
+            _cityImprovementInputArmed = false;
+            _cityImprovementPresentationActive = false;
+            _cityImprovementPresentationEntryFrame = -1;
         }
 
         private bool TryRouteToOneGoodBatchWorkshop(string successStatus)

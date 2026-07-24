@@ -2745,6 +2745,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.ReadModel!.IsCityImprovementInstallationAvailable,
                 Is.True);
+            Assert.That(
+                controller.IsCityImprovementInstallationAvailable,
+                Is.False);
             Assert.That(pumpHall.IsStagedRotorVisible, Is.True);
             Assert.That(pumpHall.IsInstalledPumpVisible, Is.False);
             Assert.That(
@@ -2776,8 +2779,26 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Has.Length.EqualTo(1));
             Assert.That(controller.CanonicalHash, Is.EqualTo(readyHash));
 
+            Assert.That(
+                controller.IsCityImprovementInstallationAvailable,
+                Is.True);
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            InvokeGlobalShortcuts(controller);
+            yield return null;
+            InvokeGlobalShortcuts(controller);
+            Press(keyboard.eKey);
+            yield return null;
+            InvokeGlobalShortcuts(controller);
+            InvokeGlobalShortcuts(controller);
+            Release(keyboard.eKey);
+            yield return null;
+
+            AssertExactCityImprovementCommand(PendingCommands(controller));
             controller.InstallCityImprovement();
-            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            AssertExactCityImprovementCommand(PendingCommands(controller));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(readyHash));
+            Assert.That(pumpHall.IsStagedRotorVisible, Is.True);
+            Assert.That(pumpHall.IsInstalledPumpVisible, Is.False);
             InvokeSimulationTick(controller);
 
             Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
@@ -2800,6 +2821,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(1),
                 "one critical installation tick must publish one generation");
             string installedHash = controller.CanonicalHash;
+            controller.InstallCityImprovement();
+            Assert.That(PendingCommands(controller), Is.Empty);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(installedHash));
+            Assert.That(
+                Directory.GetFiles(profileDirectory, "gen-*.lbg").Length,
+                Is.EqualTo(1));
 
             controller.ReturnToTitle();
             Assert.That(pumpHall.IsStagedRotorVisible, Is.False);
@@ -2818,6 +2845,119 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 Directory.GetFiles(profileDirectory, "gen-*.lbg").Length,
                 Is.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator PumpHallInstallationRequiresFreshInputAcrossFourViewCycles()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            InstallControllerState(controller, CreateInstallationReadyState());
+            LastBearingWorldBuilder world = controller.World!;
+            string readyHash = controller.CanonicalHash;
+            string profileDirectory =
+                _temporaryProfilesByController[controller];
+            Gamepad gamepad = InputSystem.AddDevice<Gamepad>();
+
+            world.SelectOneGoodBatchCutaway();
+            controller.OpenBuildingCutaway();
+            Assert.That(
+                controller.IsCityImprovementInstallationAvailable,
+                Is.False);
+            controller.InstallCityImprovement();
+            Assert.That(PendingCommands(controller), Is.Empty);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(readyHash));
+
+            Press(gamepad.buttonSouth);
+            yield return null;
+            InvokeGlobalShortcuts(controller);
+            Assert.That(PendingCommands(controller), Is.Empty);
+
+            controller.OpenPumpHallImprovement();
+            Assert.That(
+                controller.IsCityImprovementInstallationAvailable,
+                Is.True);
+            InvokeGlobalShortcuts(controller);
+            yield return null;
+            InvokeGlobalShortcuts(controller);
+            Assert.That(
+                PendingCommands(controller),
+                Is.Empty,
+                "entering the pump hall while South is held must remain inert");
+
+            Release(gamepad.buttonSouth);
+            yield return null;
+            InvokeGlobalShortcuts(controller);
+
+            controller.Save();
+            Assert.That(
+                Directory.GetFiles(profileDirectory, "gen-*.lbg").Length,
+                Is.EqualTo(1));
+            controller.ReturnToTitle();
+            Press(gamepad.buttonSouth);
+            yield return null;
+            controller.Load();
+
+            Assert.That(controller.CanonicalHash, Is.EqualTo(readyHash));
+            Assert.That(
+                controller.ReadModel!.HeavyCargoCustody,
+                Is.EqualTo(HeavyCargoCustody.Settlement));
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.BuildingCutaway));
+            Assert.That(world.IsPumpHallCutawaySelected, Is.True);
+            Assert.That(PendingCommands(controller), Is.Empty);
+            Assert.That(
+                controller.IsCityImprovementInstallationAvailable,
+                Is.True);
+            InvokeGlobalShortcuts(controller);
+            yield return null;
+            InvokeGlobalShortcuts(controller);
+            Assert.That(
+                PendingCommands(controller),
+                Is.Empty,
+                "loading the staged socket while South is held must remain inert");
+            Release(gamepad.buttonSouth);
+            yield return null;
+            InvokeGlobalShortcuts(controller);
+
+            for (var cycle = 0; cycle < 4; cycle++)
+            {
+                controller.ShowCityOverview();
+                Assert.That(
+                    controller.IsCityImprovementInstallationAvailable,
+                    Is.False,
+                    "city cycle " + cycle);
+                InvokeGlobalShortcuts(controller);
+                world.SelectPumpHallCutaway();
+                controller.OpenBuildingCutaway();
+                Assert.That(
+                    controller.IsCityImprovementInstallationAvailable,
+                    Is.True,
+                    "pump-hall cycle " + cycle);
+                InvokeGlobalShortcuts(controller);
+                yield return null;
+                InvokeGlobalShortcuts(controller);
+                Assert.That(PendingCommands(controller), Is.Empty);
+            }
+
+            Press(gamepad.buttonSouth);
+            yield return null;
+            InvokeGlobalShortcuts(controller);
+            InvokeGlobalShortcuts(controller);
+            Release(gamepad.buttonSouth);
+            yield return null;
+
+            Assert.That(controller.CanonicalHash, Is.EqualTo(readyHash));
+            AssertExactCityImprovementCommand(PendingCommands(controller));
         }
 
         [UnityTest]
@@ -3554,6 +3694,26 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 IEnumerable<LastBearingCommand>;
             Assert.That(pending, Is.Not.Null);
             return pending!.ToArray();
+        }
+
+        private static void AssertExactCityImprovementCommand(
+            IReadOnlyList<LastBearingCommand> commands)
+        {
+            Assert.That(commands, Has.Count.EqualTo(1));
+            Assert.That(
+                commands[0],
+                Is.TypeOf<InstallCityImprovementCommand>());
+            var install = (InstallCityImprovementCommand)commands[0];
+            Assert.That(
+                install.Decision,
+                Is.EqualTo(NextCityDecision.RefurbishAuxiliaryPump));
+            Assert.That(
+                install.SocketId,
+                Is.EqualTo(LastBearingState.AuxiliaryPumpSocketId));
+            Assert.That(
+                install.OrientationQuarterTurns,
+                Is.EqualTo(
+                    LastBearingState.AuxiliaryPumpOrientationQuarterTurns));
         }
 
         private static void AssertRecoveryUnavailableWithoutWrites(

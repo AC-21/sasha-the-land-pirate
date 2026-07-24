@@ -160,8 +160,8 @@ namespace AtomicLandPirate.LastBearingTests
                 ".OpenGarageBay(",
                 ".CommitExpedition(",
                 ".OpenPumpHallRepair(",
+                ".OpenPumpHallImprovement(",
                 ".OpenOneGoodBatchWorkshop(",
-                ".InstallCityImprovement(",
                 ".ServiceFieldSleeve(",
                 ".TogglePause(",
                 ".Save(",
@@ -172,6 +172,16 @@ namespace AtomicLandPirate.LastBearingTests
                 Require(fieldDesk, delegation);
             }
 
+            TestHarness.True(
+                fieldDesk.IndexOf(
+                    ".InstallCityImprovement(",
+                    StringComparison.Ordinal) < 0,
+                "Field Desk must route to the physical pump-hall socket instead of submitting the installation");
+
+            Require(fieldDeskPresenter, "OpenPumpHallImprovement = 22");
+            Require(
+                fieldDeskPresenter,
+                "OPEN PUMP HALL · SEAT AUXILIARY PUMP");
             Require(fieldDeskPresenter, "RunHotShift = 28");
             Require(fieldDeskPresenter, "AcknowledgeDustFront = 29");
             Require(fieldDeskPresenter, "PumpEmergencyCistern = 30");

@@ -450,8 +450,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Seat the recovered rotor",
                     "Workshop Push + Winch returned the physical pump rotor. " +
                     "Install it at the fixed auxiliary-pump socket to close this branch.",
-                    "Click INSTALL REFURBISHED AUXILIARY PUMP; the returned " +
-                    "rotor becomes permanent civic infrastructure.");
+                    "Open the pump hall, release the controls, then press E / " +
+                    "gamepad south; the returned rotor becomes permanent civic infrastructure.");
             }
 
             if (model.IsSpareBearingBatchStartAvailable)
