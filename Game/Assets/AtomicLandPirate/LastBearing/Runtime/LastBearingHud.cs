@@ -136,6 +136,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 BuildControlsText(
                     model,
                     _controller.CanRecoverRoadPresentation,
+                    _controller.IsDepotRepairCargoLoadAvailable,
+                    _controller.IsDepotRepairCargoLoadQueued,
                     _controller.IsReturnCheckInAvailable,
                     _controller.IsPumpHallRepairAvailable,
                     _controller.IsWorkshopBatchStartAvailable,
@@ -615,6 +617,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
                             ? "The faction-held ceramic bearing remains on the service stand. Cargo custody has not changed yet."
                             : "The unclaimed ceramic bearing remains in the depot cradle. Cargo custody has not changed yet.",
                     _bodyStyle);
+                if (_controller!.IsDepotRepairCargoLoadQueued)
+                {
+                    GUILayout.Label(
+                        "REPAIR CARGO LOAD QUEUED · custody changes on the authoritative tick.",
+                        _mutedStyle);
+                    return;
+                }
+
+                if (!_controller.IsDepotRepairCargoLoadAvailable)
+                {
+                    GUILayout.Label(
+                        "REPAIR CARGO LOAD UNAVAILABLE · return to the depot source after the current action.",
+                        _mutedStyle);
+                    return;
+                }
+
                 if (GUILayout.Button(
                         fieldSleeve
                             ? "LOAD FIELD SLEEVE · E / GAMEPAD SOUTH"
@@ -1329,6 +1347,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private static string BuildControlsText(
             LastBearingReadModel model,
             bool canRecoverRoadPresentation,
+            bool isDepotCargoLoadAvailable,
+            bool isDepotCargoLoadQueued,
             bool isReturnCheckInAvailable,
             bool isPumpHallRepairAvailable,
             bool isWorkshopBatchStartAvailable,
@@ -1399,6 +1419,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (model.IsRepairCargoLoadAvailable)
             {
+                if (isDepotCargoLoadQueued)
+                {
+                    return "Repair cargo lift queued · custody changes on " +
+                           "the authoritative tick." + serviceControls;
+                }
+
+                if (!isDepotCargoLoadAvailable)
+                {
+                    return "Return to the physical depot source after the " +
+                           "current action." + serviceControls;
+                }
+
                 return model.RepairCargoKind == RepairCargoKind.FieldSleeve
                     ? "Press E / gamepad south · move the field sleeve from " +
                       "the faction stand into Sasha's cargo socket." +

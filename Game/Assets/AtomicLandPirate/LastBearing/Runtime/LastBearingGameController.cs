@@ -117,6 +117,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool HasPendingPlayerCommands => _pendingCommands.Count != 0;
 
+        public bool IsDepotRepairCargoLoadQueued =>
+            _pendingCommands.Exists(command =>
+                command is LoadDepotRepairCargoCommand);
+
+        public bool IsDepotRepairCargoLoadAvailable =>
+            _pendingCommands.Count == 0 &&
+            _state != null &&
+            _state.DepotResolution != EncounterChoice.Unresolved &&
+            _readModel?.IsRepairCargoLoadAvailable == true &&
+            _readModel.ExpeditionPhase == ExpeditionPhase.AtDepot &&
+            _readModel.TransactionPhase == TransactionPhase.RoadOwned &&
+            _readModel.PauseCause == PauseCause.None &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.DepotEncounter;
+
         public bool IsDepotDecisionAvailable =>
             _pendingCommands.Count == 0 &&
             _state?.DepotResolution == EncounterChoice.Unresolved &&
@@ -418,6 +434,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _world.ConfigureCityServiceCellInteraction(this);
             _world.ConfigureDepotDecisionInteraction(this);
+            _world.ConfigureDepotCargoInteraction(this);
             _world.ConfigureDepotReturnInteraction(this);
             _hud = gameObject.AddComponent<LastBearingHud>();
             _hud.Configure(this, _fieldDesk);
@@ -440,6 +457,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _fieldDesk?.ResetForLifecycle();
             _world?.ResetCityServiceCellInteraction();
             _world?.ResetDepotDecisionInteraction();
+            _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
@@ -494,6 +512,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ClearCityBuildingPreview();
             _world?.ResetCityServiceCellInteraction();
             _world?.ResetDepotDecisionInteraction();
+            _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
             _state = null;
             _readModel = null;
@@ -1243,8 +1262,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void LoadDepotRepairCargo()
         {
-            if (_readModel == null ||
-                !_readModel.IsRepairCargoLoadAvailable)
+            if (IsDepotRepairCargoLoadQueued)
+            {
+                return;
+            }
+
+            if (!IsDepotRepairCargoLoadAvailable ||
+                _readModel == null)
             {
                 _status = "No depot repair cargo is canonically available to load.";
                 return;
@@ -1253,8 +1277,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             RepairCargoKind cargoKind = _readModel.RepairCargoKind;
             Queue(sequence => new LoadDepotRepairCargoCommand(sequence));
             _status = cargoKind == RepairCargoKind.FieldSleeve
-                ? "Field sleeve secured at Sasha's cargo socket. The maintenance promise rides home too."
-                : "Ceramic bearing secured at Sasha's cargo socket. The depot grievance rides home too.";
+                ? "Field sleeve lift queued for Sasha's cargo socket. Custody changes on the authoritative tick; the maintenance promise rides home once secured."
+                : "Ceramic bearing lift queued for Sasha's cargo socket. Custody changes on the authoritative tick; the depot grievance rides home once secured.";
         }
 
         public void OperateDepotApproachRecoveryPoint()
@@ -1530,13 +1554,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _fieldDesk?.ResetForLifecycle();
             _world?.ResetCityServiceCellInteraction();
             _world?.ResetDepotDecisionInteraction();
+            _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
             if (_saveAdapter == null)
             {
                 _saveStatus = "Save boundary unavailable.";
-                RestoreDepotReturnInteractionAfterFailedLoad();
+                RestoreDepotInteractionsAfterFailedLoad();
                 return;
             }
 
@@ -1546,7 +1571,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 if (!result.Succeeded || result.State == null)
                 {
                     _saveStatus = "Load refused: " + result.Code;
-                    RestoreDepotReturnInteractionAfterFailedLoad();
+                    RestoreDepotInteractionsAfterFailedLoad();
                     return;
                 }
 
@@ -1574,16 +1599,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
             catch (Exception exception)
             {
                 _saveStatus = "Load failed closed: " + exception.GetType().Name;
-                RestoreDepotReturnInteractionAfterFailedLoad();
+                RestoreDepotInteractionsAfterFailedLoad();
                 Debug.LogException(exception, this);
             }
         }
 
-        private void RestoreDepotReturnInteractionAfterFailedLoad()
+        private void RestoreDepotInteractionsAfterFailedLoad()
         {
             if (_readModel != null)
             {
                 _world?.ApplyDepotDecisionInteraction(_readModel);
+                _world?.ApplyDepotCargoInteraction(_readModel);
                 _world?.ApplyDepotReturnInteraction(_readModel);
             }
         }
@@ -1664,8 +1690,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 OperateDepotApproachRecoveryPoint();
             }
-            else if (_readModel != null &&
-                _readModel.IsRepairCargoLoadAvailable &&
+            else if (IsDepotRepairCargoLoadAvailable &&
                 ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
                  (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
             {
@@ -2198,6 +2223,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     : _readModel.PreparationChoice);
             _modeCoordinator?.ApplyCanonical(_readModel);
             _world.ApplyDepotDecisionInteraction(_readModel);
+            _world.ApplyDepotCargoInteraction(_readModel);
             _world.ApplyCityServiceCell(
                 _readModel,
                 _cityPreviewBuilding,

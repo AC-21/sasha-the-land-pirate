@@ -52,6 +52,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(
                     runtimeRoot,
                     "LastBearingDepotCargoLoadingView.cs"));
+            string depotCargoInteractor = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "LastBearingDepotCargoInteractor.cs"));
             string pumpHall = File.ReadAllText(
                 Path.Combine(
                     runtimeRoot,
@@ -311,7 +315,10 @@ namespace AtomicLandPirate.LastBearingTests
                 "public void OperateDepotApproachRecoveryPoint()");
             Require(
                 depotCargoLoadOperation,
-                "_readModel.IsRepairCargoLoadAvailable");
+                "IsDepotRepairCargoLoadAvailable");
+            Require(
+                depotCargoLoadOperation,
+                "IsDepotRepairCargoLoadQueued");
             Require(
                 depotCargoLoadOperation,
                 "new LoadDepotRepairCargoCommand(sequence)");
@@ -363,7 +370,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "_readModel.IsDepotApproachRecoveryAvailable");
             Require(
                 globalShortcuts,
-                "_readModel.IsRepairCargoLoadAvailable");
+                "IsDepotRepairCargoLoadAvailable");
             Require(globalShortcuts, "LoadDepotRepairCargo();");
             Require(globalShortcuts, "keyboard.eKey.wasPressedThisFrame");
             Require(globalShortcuts, "gamepad.buttonSouth.wasPressedThisFrame");
@@ -395,7 +402,7 @@ namespace AtomicLandPirate.LastBearingTests
                 frameRailGate,
                 StringComparison.Ordinal);
             int cargoGate = globalShortcuts.IndexOf(
-                "_readModel.IsRepairCargoLoadAvailable",
+                "IsDepotRepairCargoLoadAvailable",
                 StringComparison.Ordinal);
             int cargoHotkey = globalShortcuts.IndexOf(
                 "keyboard.eKey.wasPressedThisFrame",
@@ -623,6 +630,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(world, "DepotApproachRecoveryView.Build(");
             Require(world, "LastBearingDepotCargoLoadingView");
             Require(world, "DepotCargoLoadingView.Build(");
+            Require(world, "LastBearingDepotCargoInteractor");
+            Require(world, "DepotCargoInteractor.Build(");
+            Require(world, "ConfigureDepotCargoInteraction(");
+            Require(world, "ApplyDepotCargoInteraction(");
             Require(world, "ApplyRepairCargoPresentation(");
             Require(world, "BindVehicleCargoSockets(");
             Require(world, "SashaScoutSemanticContract.CargoSocket01Name");
@@ -1150,6 +1161,8 @@ namespace AtomicLandPirate.LastBearingTests
                 "E — Recover frame rails · +4 reclaimed parts at home");
             Require(hud, "model.FrameRailSalvageCustody");
             Require(hud, "model.IsRepairCargoLoadAvailable");
+            Require(hud, "_controller.IsDepotRepairCargoLoadAvailable");
+            Require(hud, "_controller.IsDepotRepairCargoLoadQueued");
             Require(hud, "_controller!.LoadDepotRepairCargo();");
             Require(hud, "LOAD FIELD SLEEVE · E / GAMEPAD SOUTH");
             Require(hud, "LOAD CERAMIC BEARING · E / GAMEPAD SOUTH");
@@ -1320,6 +1333,50 @@ namespace AtomicLandPirate.LastBearingTests
                         forbidden,
                         StringComparison.Ordinal) < 0,
                     "depot cargo-loading view contains forbidden authority " +
+                    forbidden);
+            }
+
+            Require(
+                depotCargoInteractor,
+                "INTERACT_DEPOT_REPAIR_CARGO_SOURCE");
+            Require(depotCargoInteractor, "InteractionLayer = 30");
+            Require(
+                depotCargoInteractor,
+                "_controller.IsDepotRepairCargoLoadAvailable");
+            Require(
+                depotCargoInteractor,
+                "_controller.IsDepotRepairCargoLoadQueued");
+            Require(depotCargoInteractor, "_controller.LoadDepotRepairCargo();");
+            Require(depotCargoInteractor, "ReferenceEquals(");
+            Require(
+                depotCargoInteractor,
+                "FieldDesk?.BlocksWorldPointer");
+            Require(depotCargoInteractor, "Physics.RaycastNonAlloc(");
+            Require(depotCargoInteractor, "collider.isTrigger = true");
+            Require(depotCargoInteractor, "collider.enabled = false");
+            Require(depotCargoInteractor, "keyboard?.eKey.wasPressedThisFrame");
+            Require(
+                depotCargoInteractor,
+                "gamepad?.buttonSouth.wasPressedThisFrame");
+            foreach (string forbidden in new[]
+            {
+                "new LoadDepotRepairCargoCommand",
+                "LastBearingKernel",
+                "LastBearingState",
+                "SaveContracts",
+                "System.IO",
+                "Application.persistentDataPath",
+                "Rigidbody",
+                "OnTrigger",
+                "OnCollision",
+                "AddComponent<Camera>",
+            })
+            {
+                TestHarness.True(
+                    depotCargoInteractor.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "depot cargo interactor contains forbidden authority " +
                     forbidden);
             }
 
