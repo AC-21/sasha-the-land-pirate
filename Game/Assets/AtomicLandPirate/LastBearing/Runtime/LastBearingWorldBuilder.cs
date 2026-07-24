@@ -192,7 +192,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 concrete,
                 iron,
                 oxide,
-                bone);
+                bone,
+                tungsten,
+                signal);
             BuildVehicle(
                 iron,
                 oxide,
@@ -364,6 +366,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public void SetCityServiceCellFocus(bool focused)
         {
             CameraRig?.SetComparisonMode(focused);
+        }
+
+        public void ConfigureCityServiceCellInteraction(
+            LastBearingGameController controller)
+        {
+            if (MainCamera == null ||
+                CityServiceCellView?.Interactor == null)
+            {
+                throw new InvalidOperationException(
+                    "Working service-cell interaction requires its shared city camera.");
+            }
+
+            CityServiceCellView.Interactor.Configure(
+                controller,
+                MainCamera);
+        }
+
+        public void ResetCityServiceCellInteraction()
+        {
+            CityServiceCellView?.Interactor?.ResetLocalSelection();
         }
 
         public void SelectCityGrammarHypothesis(
@@ -1160,14 +1182,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Material concrete,
             Material iron,
             Material oxide,
-            Material bone)
+            Material bone,
+            Material tungsten,
+            Material signal)
         {
             var serviceCell = new GameObject(
                 "Working Service Cell [Derived Only]");
             serviceCell.transform.SetParent(cityScaffoldRoot, false);
             CityServiceCellView =
                 serviceCell.AddComponent<LastBearingCityServiceCellView>();
-            CityServiceCellView.Build(concrete, iron, oxide, bone);
+            CityServiceCellView.Build(
+                concrete,
+                iron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
         }
 
         private void BuildCamera()

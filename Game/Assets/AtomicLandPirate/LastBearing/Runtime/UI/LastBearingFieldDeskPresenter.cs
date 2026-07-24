@@ -933,8 +933,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     : alreadyPlaced
                     ? CityBuildingLabel(building) + " is on pad " +
                       (pad + 1) +
-                      "; repositioning stays free until the link is locked."
-                    : "Preview across five pads before committing " +
+                      "; click its world selector to reposition free before lock."
+                    : "Click its world selector or use this accessibility " +
+                      "fallback; preview across five pads before committing " +
                       FormatReclaimedParts(cost) + ".",
                 visible,
                 canUse && !locked,
@@ -951,7 +952,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return Action(
                 intent,
                 label,
-                "Cycle the preview across five authored pads for free.",
+                "Keyboard/accessibility fallback: cycle the world ghost across " +
+                "five authored pads for free.",
                 visible,
                 canUse && !linkConnected,
                 LastBearingFieldDeskActionTone.Quiet);
@@ -1013,7 +1015,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     : model.PartsUnits <
                       LastBearingBalanceV1.CityServiceLinkPartsUnits
                     ? "The permanent link needs 1 reclaimed part; none remain."
-                    : "Permanent: locks all three pads and orientations for 1 " +
+                    : "World: click Recycler output, then Machine Shop intake. " +
+                      "Permanent: locks all three pads and orientations for 1 " +
                       "part; V0 has no demolition or refund.";
             return Action(
                 LastBearingFieldDeskIntent.ConnectCityServiceLink,
@@ -1046,7 +1049,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? "Lock the permanent service link before staffing."
                     : assigned
                         ? "The human cohort is the current neutral operator."
-                        : "Assign the human cohort to the one operator slot; " +
+                        : "World: click the human token, then the Machine Shop " +
+                          "socket. Assign the human cohort to the one operator slot; " +
                           "no V0 bonus.",
                 visible,
                 canUse && controller.CanAssignCityServiceHuman && !assigned,
@@ -1073,7 +1077,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? "Lock the permanent service link before staffing."
                     : assigned
                         ? "The utility robot is the current neutral operator."
-                        : "Assign the utility robot to the one operator slot; " +
+                        : "World: click the utility-robot token, then the Machine " +
+                          "Shop socket. Assign it to the one operator slot; " +
                           "no V0 bonus.",
                 visible,
                 canUse && controller.CanAssignCityServiceRobot && !assigned,
@@ -1101,7 +1106,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? "Permanently lock the service link before moving the sled."
                     : model.CityServiceResidentId == null
                         ? "Assign one neutral human or utility-robot operator first."
-                        : "Two advances complete the route. Commissioning pays " +
+                        : "World: click the sled, then its Machine Shop destination. " +
+                          "Two advances complete the route. Commissioning pays " +
                           "+2 PARTS · ONCE.",
                 visible,
                 canUse && controller.CanAdvanceCityServiceSled,
@@ -1117,7 +1123,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return Action(
                 LastBearingFieldDeskIntent.CancelCityBuildingPreview,
                 "CANCEL PREVIEW",
-                "Discard only the unsaved preview; no parts are spent.",
+                "Accessibility fallback: discard only the world ghost; no parts are spent.",
                 visible,
                 canUse && controller.HasCityBuildingPreview,
                 LastBearingFieldDeskActionTone.Quiet);

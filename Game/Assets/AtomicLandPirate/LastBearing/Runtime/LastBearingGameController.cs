@@ -380,6 +380,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 Debug.LogException(exception, this);
             }
 
+            _world.ConfigureCityServiceCellInteraction(this);
             _hud = gameObject.AddComponent<LastBearingHud>();
             _hud.Configure(this, _fieldDesk);
             SetLegacyHudSuppressedByFieldDesk(
@@ -399,6 +400,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public void StartNewGame(ColonyComposition composition)
         {
             _fieldDesk?.ResetForLifecycle();
+            _world?.ResetCityServiceCellInteraction();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
@@ -450,6 +452,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
+            _world?.ResetCityServiceCellInteraction();
             _state = null;
             _readModel = null;
             ResetPublicSnapshotsToRuntime();
@@ -1471,6 +1474,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public void Load()
         {
             _fieldDesk?.ResetForLifecycle();
+            _world?.ResetCityServiceCellInteraction();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
             if (_saveAdapter == null)
@@ -1651,6 +1655,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 ? Array.Empty<LastBearingCommand>()
                 : _pendingCommands.ToArray();
             bool hasCommands = commands.Length != 0;
+            bool cityPlacementSubmitted = Array.Exists(
+                commands,
+                command => command is PlaceCityBuildingCommand);
             _pendingCommands.Clear();
 
             try
@@ -1727,7 +1734,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     LastBearingEventKind.DustFrontAcknowledged);
                 _state = result.State;
                 _readModel = result.ReadModel;
-                if (cityBuildingChanged)
+                if (cityBuildingChanged || cityPlacementSubmitted)
                 {
                     ClearCityBuildingPreview();
                 }

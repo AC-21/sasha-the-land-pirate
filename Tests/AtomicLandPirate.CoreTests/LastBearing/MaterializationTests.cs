@@ -44,6 +44,8 @@ namespace AtomicLandPirate.LastBearingTests
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCityGrammarComparison.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCityServiceCellView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCityServiceCellView.cs.meta",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCityServiceCellInteractor.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCityServiceCellInteractor.cs.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingDepotApproachRecoveryView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingRouteModulePointView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingPumpHallCutawayView.cs",
@@ -105,6 +107,7 @@ namespace AtomicLandPirate.LastBearingTests
             VerifyBuildScene(repoRoot);
             VerifyGameMetadata(repoRoot);
             GameSourceContract.Verify(repoRoot);
+            CityServiceCellInteractionSourceContract.Verify(repoRoot);
             FieldDeskSourceContract.Verify(repoRoot);
             RoadFeelSourceContract.Verify(repoRoot);
             SashaScoutSourceContract.Verify(repoRoot);
