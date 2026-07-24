@@ -7,7 +7,9 @@ Run from the repository root:
     --factory-startup --python \
     ContentSource/Blender/SashaScout/generate_sasha_scout.py
 
-Then prove the saved source and interchange artifact by reopening the blend:
+Generation stages every output, reopens the staged source, validates the GLB
+round trip, and promotes the manifest last. Independently revalidate the
+published source and interchange artifact with:
 
   /Applications/Blender.app/Contents/MacOS/Blender --background \
     ContentSource/Blender/SashaScout/veh_sasha_scout_firstlook.blend \
@@ -23,10 +25,11 @@ from __future__ import annotations
 
 import argparse
 from array import array
+from dataclasses import dataclass
 import hashlib
 import json
 import math
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import sys
 from typing import Iterable, Sequence
 
@@ -36,16 +39,77 @@ from mathutils import Euler, Vector
 
 CONTENT_ID = "veh_sasha_scout_a"
 SOURCE_VERSION = "0.1.0-firstlook"
+SOURCE_STAGE = "C1_FIRST_LOOK_PROTOTYPE"
 LOD0_BASE_MINIMUM_TRIANGLES = 24_000
 LOD0_BASE_MAXIMUM_TRIANGLES = 28_000
 ROOT_NAME = CONTENT_ID
-PACKAGE_DIR = Path(__file__).resolve().parent
+LOD0_NAME = "LOD0_FIRSTLOOK"
+GENERATOR_PATH = Path(__file__).resolve()
+PACKAGE_DIR = GENERATOR_PATH.parent
+REPO_ROOT = PACKAGE_DIR.parents[2]
+RUNTIME_CONTRACT_PATH = (
+    REPO_ROOT
+    / "Game/Assets/AtomicLandPirate/LastBearing/Runtime/Vehicle"
+    / "SashaScoutSemanticContract.cs"
+)
 BLEND_PATH = PACKAGE_DIR / "veh_sasha_scout_firstlook.blend"
 MANIFEST_PATH = PACKAGE_DIR / "veh_sasha_scout_firstlook.asset.json"
 DERIVED_DIR = PACKAGE_DIR / "Derived" / "Quarantine"
 GLB_PATH = DERIVED_DIR / "veh_sasha_scout_firstlook.glb"
 VALIDATION_PATH = DERIVED_DIR / "validation_report.json"
 CONTACT_SHEET_PATH = DERIVED_DIR / "veh_sasha_scout_turntable_contact.png"
+STAGING_ROOT = DERIVED_DIR / "Staging"
+CURRENT_STAGING_DIR = STAGING_ROOT / "Current"
+FAILED_STAGING_ROOT = DERIVED_DIR / "Failed"
+README_PATH = PACKAGE_DIR / "README.md"
+
+RUNTIME_COMPATIBILITY = {
+    "contract": "SashaScoutSemanticContract",
+    "integration_status": "explicit-import-remap-required-not-yet-integrated",
+    "runtime_lod0": "LOD0_C0_BLOCKOUT",
+    "runtime_root": "veh_sasha_scout_a [C0 Blockout]",
+    "source_lod0": LOD0_NAME,
+    "source_root": ROOT_NAME,
+    "wheel_hierarchy": (
+        "C1 source inserts SUSPENSION_* between each steering/hub pivot and "
+        "stable WHEEL_* transform; a future importer must bind by semantic name"
+    ),
+}
+GENERATION_TRANSACTION = {
+    "failure_retention": "Derived/Quarantine/Failed/attempt-NNN",
+    "manifest_commit_marker": "promoted last after complete staged validation",
+    "staging_path": "Derived/Quarantine/Staging/Current",
+    "status": "complete-staged-validation-before-promotion",
+}
+
+TURN_TABLE_ANGLES = (25, 85, 145, 205, 265, 325)
+DECISION_RENDER_NAMES = ("strategy_read.png", "garage_read.png")
+EXPECTED_RENDER_NAMES = tuple(
+    f"turntable_{index:02d}_{angle:03d}deg.png"
+    for index, angle in enumerate(TURN_TABLE_ANGLES)
+) + DECISION_RENDER_NAMES
+
+
+@dataclass(frozen=True)
+class ArtifactPaths:
+    root: Path
+    blend: Path
+    manifest: Path
+    derived_dir: Path
+    glb: Path
+    validation: Path
+    contact_sheet: Path
+
+
+PUBLISHED_PATHS = ArtifactPaths(
+    root=PACKAGE_DIR,
+    blend=BLEND_PATH,
+    manifest=MANIFEST_PATH,
+    derived_dir=DERIVED_DIR,
+    glb=GLB_PATH,
+    validation=VALIDATION_PATH,
+    contact_sheet=CONTACT_SHEET_PATH,
+)
 
 MATERIAL_SPECS = {
     "MAT_IRON_CHARCOAL": {
@@ -99,6 +163,24 @@ SOCKET_POSITIONS = {
     "DOOR_DRIVER": (-1.08, 1.45, 0.38),
     "SOCKET_SERVICE_ENGINE": (0.72, 1.16, 1.36),
     "SOCKET_SERVICE_REAR": (0.88, 1.25, -1.72),
+}
+COLLISION_PROXY_SPECS = {
+    "COL_CHASSIS": {
+        "location": (0.0, 0.0, 0.60),
+        "dimensions": (2.10, 4.10, 0.52),
+    },
+    "COL_CAB": {
+        "location": (0.0, 0.35, 1.50),
+        "dimensions": (1.96, 1.72, 1.48),
+    },
+    "COL_BED": {
+        "location": (0.0, -1.45, 1.18),
+        "dimensions": (2.04, 1.50, 0.68),
+    },
+    "COL_RECOVERY_YOKE": {
+        "location": (0.0, 2.36, 1.10),
+        "dimensions": (2.48, 0.32, 1.10),
+    },
 }
 
 REFERENCE_INPUTS = [
@@ -237,6 +319,86 @@ def sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def blender_build_hash() -> str:
+    return (
+        bpy.app.build_hash.decode("utf-8")
+        if isinstance(bpy.app.build_hash, bytes)
+        else str(bpy.app.build_hash)
+    )
+
+
+def staging_paths() -> ArtifactPaths:
+    return ArtifactPaths(
+        root=CURRENT_STAGING_DIR,
+        blend=CURRENT_STAGING_DIR / BLEND_PATH.name,
+        manifest=CURRENT_STAGING_DIR / MANIFEST_PATH.name,
+        derived_dir=CURRENT_STAGING_DIR / "Derived",
+        glb=CURRENT_STAGING_DIR / "Derived" / GLB_PATH.name,
+        validation=CURRENT_STAGING_DIR / "Derived" / VALIDATION_PATH.name,
+        contact_sheet=CURRENT_STAGING_DIR / "Derived" / CONTACT_SHEET_PATH.name,
+    )
+
+
+def prepare_staging_paths() -> ArtifactPaths:
+    if CURRENT_STAGING_DIR.exists():
+        FAILED_STAGING_ROOT.mkdir(parents=True, exist_ok=True)
+        attempt = 1
+        while True:
+            archived = FAILED_STAGING_ROOT / f"attempt-{attempt:03d}"
+            if not archived.exists():
+                CURRENT_STAGING_DIR.replace(archived)
+                break
+            attempt += 1
+    paths = staging_paths()
+    paths.derived_dir.mkdir(parents=True, exist_ok=False)
+    return paths
+
+
+def published_path(actual_path: Path, paths: ArtifactPaths) -> Path:
+    if actual_path == paths.blend:
+        return BLEND_PATH
+    if actual_path == paths.validation:
+        return VALIDATION_PATH
+    if actual_path == paths.contact_sheet:
+        return CONTACT_SHEET_PATH
+    if actual_path == paths.glb:
+        return GLB_PATH
+    try:
+        relative = actual_path.relative_to(paths.derived_dir)
+    except ValueError as error:
+        raise AssertionError(
+            f"artifact path is outside the declared package: {actual_path}"
+        ) from error
+    return DERIVED_DIR / relative
+
+
+def actual_path_for_published(
+    candidate: Path,
+    paths: ArtifactPaths,
+) -> Path:
+    if candidate == BLEND_PATH:
+        return paths.blend
+    if candidate == VALIDATION_PATH:
+        return paths.validation
+    try:
+        relative = candidate.relative_to(DERIVED_DIR)
+    except ValueError as error:
+        raise AssertionError(
+            f"manifest output is outside the published artifact roots: {candidate}"
+        ) from error
+    return paths.derived_dir / relative
+
+
+def write_json(path: Path, payload: dict[str, object], atomic: bool) -> None:
+    serialized = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    if not atomic:
+        path.write_text(serialized, encoding="utf-8")
+        return
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(serialized, encoding="utf-8")
+    temporary.replace(path)
 
 
 def clear_scene() -> None:
@@ -557,7 +719,7 @@ def build_vehicle(
     root = create_empty(ROOT_NAME, None, (0.0, 0.0, 0.0), "ARROWS", 0.4)
     root["content_id"] = CONTENT_ID
     root["source_version"] = SOURCE_VERSION
-    root["stage"] = "C1_FIRST_LOOK_PROTOTYPE"
+    root["stage"] = SOURCE_STAGE
     root["units"] = "metres"
     root["blender_forward_axis"] = "+Y"
     root["blender_up_axis"] = "+Z"
@@ -566,7 +728,7 @@ def build_vehicle(
     root["pivot_contract"] = "ground center between axles"
 
     geometry = create_empty("GEO", root)
-    lod0 = create_empty("LOD0_FIRSTLOOK", geometry)
+    lod0 = create_empty(LOD0_NAME, geometry)
     create_empty("LOD1_RESERVED", geometry)
     create_empty("LOD2_RESERVED", geometry)
     rig = create_empty("RIG", root)
@@ -813,13 +975,15 @@ def build_vehicle(
 
     # Simple, render-disabled collision proxy. It is intentionally not derived
     # from decorative meshes and remains cheap to replace in Unity.
-    for name, location, dimensions in (
-        ("COL_CHASSIS", (0.0, 0.0, 0.60), (2.10, 4.10, 0.52)),
-        ("COL_CAB", (0.0, 0.35, 1.50), (1.96, 1.72, 1.48)),
-        ("COL_BED", (0.0, -1.45, 1.18), (2.04, 1.50, 0.68)),
-        ("COL_RECOVERY_YOKE", (0.0, 2.36, 1.10), (2.48, 0.32, 1.10)),
-    ):
-        obj = create_box(name, collision, location, dimensions, iron, bevel=0.0)
+    for name, spec in COLLISION_PROXY_SPECS.items():
+        obj = create_box(
+            name,
+            collision,
+            spec["location"],
+            spec["dimensions"],
+            iron,
+            bevel=0.0,
+        )
         obj["asset_role"] = "collision"
         obj.display_type = "WIRE"
         obj.hide_render = True
@@ -901,12 +1065,15 @@ def point_camera(camera: bpy.types.Object, target: Sequence[float]) -> None:
     camera.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
 
 
-def render_turntable(camera: bpy.types.Object) -> list[Path]:
-    DERIVED_DIR.mkdir(parents=True, exist_ok=True)
+def render_turntable(
+    camera: bpy.types.Object,
+    paths: ArtifactPaths,
+) -> list[Path]:
+    paths.derived_dir.mkdir(parents=True, exist_ok=True)
     scene = bpy.context.scene
-    paths: list[Path] = []
-    angles = [25.0, 85.0, 145.0, 205.0, 265.0, 325.0]
-    for index, angle_degrees in enumerate(angles):
+    render_paths: list[Path] = []
+    for index, angle_value in enumerate(TURN_TABLE_ANGLES):
+        angle_degrees = float(angle_value)
         angle = math.radians(angle_degrees)
         radius = 7.7
         camera.location = (
@@ -915,10 +1082,13 @@ def render_turntable(camera: bpy.types.Object) -> list[Path]:
             4.6,
         )
         point_camera(camera, (0.0, 0.0, 1.08))
-        path = DERIVED_DIR / f"turntable_{index:02d}_{int(angle_degrees):03d}deg.png"
+        path = (
+            paths.derived_dir
+            / f"turntable_{index:02d}_{int(angle_degrees):03d}deg.png"
+        )
         scene.render.filepath = str(path)
         bpy.ops.render.render(write_still=True)
-        paths.append(path)
+        render_paths.append(path)
 
     # Two decision views exercise the intended camera reads directly.
     for name, location, target, lens in (
@@ -928,13 +1098,13 @@ def render_turntable(camera: bpy.types.Object) -> list[Path]:
         camera.location = location
         camera.data.lens = lens
         point_camera(camera, target)
-        path = DERIVED_DIR / f"{name}.png"
+        path = paths.derived_dir / f"{name}.png"
         scene.render.filepath = str(path)
         bpy.ops.render.render(write_still=True)
-        paths.append(path)
+        render_paths.append(path)
 
-    create_contact_sheet(paths[:6], CONTACT_SHEET_PATH, columns=3)
-    return paths
+    create_contact_sheet(render_paths[:6], paths.contact_sheet, columns=3)
+    return render_paths
 
 
 def create_contact_sheet(
@@ -980,14 +1150,14 @@ def create_contact_sheet(
     bpy.data.images.remove(sheet)
 
 
-def export_glb(root: bpy.types.Object) -> None:
+def export_glb(root: bpy.types.Object, output_path: Path) -> None:
     bpy.ops.object.select_all(action="DESELECT")
     export_objects = [root] + descendants(root)
     for obj in export_objects:
         obj.select_set(True)
     bpy.context.view_layer.objects.active = root
     bpy.ops.export_scene.gltf(
-        filepath=str(GLB_PATH),
+        filepath=str(output_path),
         check_existing=False,
         export_format="GLB",
         use_selection=True,
@@ -1000,9 +1170,21 @@ def export_glb(root: bpy.types.Object) -> None:
     bpy.ops.object.select_all(action="DESELECT")
 
 
-def relative_output_record(path: Path) -> dict[str, object]:
+def relative_output_record(
+    path: Path,
+    published: Path | None = None,
+) -> dict[str, object]:
+    published = path if published is None else published
     return {
-        "path": path.relative_to(PACKAGE_DIR).as_posix(),
+        "path": published.relative_to(PACKAGE_DIR).as_posix(),
+        "bytes": path.stat().st_size,
+        "sha256": sha256(path),
+    }
+
+
+def repo_source_record(path: Path) -> dict[str, object]:
+    return {
+        "repo_path": path.relative_to(REPO_ROOT).as_posix(),
         "bytes": path.stat().st_size,
         "sha256": sha256(path),
     }
@@ -1047,13 +1229,17 @@ def collect_counts(root: bpy.types.Object) -> dict[str, object]:
 def write_manifest(
     counts: dict[str, object],
     render_paths: Sequence[Path],
+    paths: ArtifactPaths,
 ) -> None:
     outputs = [
-        relative_output_record(BLEND_PATH),
-        relative_output_record(GLB_PATH),
-        relative_output_record(CONTACT_SHEET_PATH),
+        relative_output_record(paths.blend, BLEND_PATH),
+        relative_output_record(paths.glb, GLB_PATH),
+        relative_output_record(paths.contact_sheet, CONTACT_SHEET_PATH),
     ]
-    outputs.extend(relative_output_record(path) for path in render_paths)
+    outputs.extend(
+        relative_output_record(path, published_path(path, paths))
+        for path in render_paths
+    )
     manifest = {
         "schema": "atomic-land-pirate.asset-first-look.v1",
         "content_id": CONTENT_ID,
@@ -1063,11 +1249,14 @@ def write_manifest(
         "tool": {
             "name": "Blender",
             "version": bpy.app.version_string,
-            "build_hash": bpy.app.build_hash.decode("utf-8")
-            if isinstance(bpy.app.build_hash, bytes)
-            else str(bpy.app.build_hash),
-            "generator": Path(__file__).name,
-            "generator_sha256": sha256(Path(__file__)),
+            "build_hash": blender_build_hash(),
+            "generator": GENERATOR_PATH.name,
+            "generator_sha256": sha256(GENERATOR_PATH),
+        },
+        "source_bindings": {
+            "generator": relative_output_record(GENERATOR_PATH, GENERATOR_PATH),
+            "readme": relative_output_record(README_PATH, README_PATH),
+            "runtime_contract": repo_source_record(RUNTIME_CONTRACT_PATH),
         },
         "axis_and_scale": {
             "units": "1 Blender unit = 1 metre",
@@ -1078,6 +1267,8 @@ def write_manifest(
             "runtime_up": "+Y",
             "mapping": "runtime (x,y,z) -> Blender (x,z,y)",
         },
+        "generation_transaction": GENERATION_TRANSACTION,
+        "runtime_compatibility": RUNTIME_COMPATIBILITY,
         "design_intent": {
             "silhouette": "broad compact scout with a recovery proscenium",
             "function": "field service, cargo return, and recoverable roadside work",
@@ -1112,10 +1303,7 @@ def write_manifest(
             "No creator acceptance, Unity import acceptance, or ship-cleared claim.",
         ],
     }
-    MANIFEST_PATH.write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    write_json(paths.manifest, manifest, atomic=paths == PUBLISHED_PATHS)
 
 
 def assert_vector(
@@ -1133,9 +1321,13 @@ def assert_vector(
 
 def assert_identity_rotation(label: str, obj: bpy.types.Object) -> None:
     identity = Euler((0.0, 0.0, 0.0)).to_quaternion()
-    observed = obj.rotation_euler.to_quaternion()
+    observed = obj.matrix_basis.to_quaternion()
     if observed.rotation_difference(identity).angle > 0.0001:
         raise AssertionError(f"{label}: expected identity local rotation")
+
+
+def assert_unit_scale(label: str, obj: bpy.types.Object) -> None:
+    assert_vector(label + " scale", obj.scale, (1.0, 1.0, 1.0))
 
 
 def assert_parent(
@@ -1150,25 +1342,11 @@ def assert_parent(
         )
 
 
-def validate_scene(root: bpy.types.Object) -> dict[str, object]:
-    checks: list[str] = []
-    if bpy.context.scene.unit_settings.system != "METRIC":
-        raise AssertionError("scene unit system must be METRIC")
-    if abs(bpy.context.scene.unit_settings.scale_length - 1.0) > 0.0001:
-        raise AssertionError("scene scale must be 1 metre")
-    checks.append("metric unit scale is 1 metre")
-
-    assert_vector("root pivot", root.location, (0.0, 0.0, 0.0))
-    if root["blender_forward_axis"] != "+Y":
-        raise AssertionError("Blender forward-axis contract drifted")
-    if root["runtime_forward_axis"] != "+Z":
-        raise AssertionError("runtime forward-axis contract drifted")
-    checks.append("ground-center pivot and forward-axis mapping are explicit")
-
-    objects = {obj.name: obj for obj in [root] + descendants(root)}
-    required_names = {
+def required_semantic_names() -> set[str]:
+    return {
+        ROOT_NAME,
         "GEO",
-        "LOD0_FIRSTLOOK",
+        LOD0_NAME,
         "LOD1_RESERVED",
         "LOD2_RESERVED",
         "RIG",
@@ -1178,6 +1356,7 @@ def validate_scene(root: bpy.types.Object) -> dict[str, object]:
         "SOCKETS",
         "MODULES",
         "COLLISION",
+        "FORWARD_CALIBRATION_POSITIVE_Y",
         "DOOR_DRIVER",
         "MODULE_WINCH_ASSEMBLY",
         "MODULE_SEALED_RANGE_TANK",
@@ -1187,7 +1366,48 @@ def validate_scene(root: bpy.types.Object) -> dict[str, object]:
         *WHEEL_NAMES.values(),
         *SUSPENSION_NAMES.values(),
         *SOCKET_POSITIONS.keys(),
+        *COLLISION_PROXY_SPECS.keys(),
     }
+
+
+def validate_scene(
+    root: bpy.types.Object,
+    require_source_render_flags: bool = True,
+) -> dict[str, object]:
+    checks: list[str] = []
+    if bpy.context.scene.unit_settings.system != "METRIC":
+        raise AssertionError("scene unit system must be METRIC")
+    if abs(bpy.context.scene.unit_settings.scale_length - 1.0) > 0.0001:
+        raise AssertionError("scene scale must be 1 metre")
+    checks.append("metric unit scale is 1 metre")
+
+    assert_vector("root pivot", root.location, (0.0, 0.0, 0.0))
+    assert_identity_rotation("root", root)
+    assert_unit_scale("root", root)
+    expected_root_properties = {
+        "content_id": CONTENT_ID,
+        "source_version": SOURCE_VERSION,
+        "stage": SOURCE_STAGE,
+        "units": "metres",
+        "blender_forward_axis": "+Y",
+        "blender_up_axis": "+Z",
+        "runtime_forward_axis": "+Z",
+        "runtime_up_axis": "+Y",
+        "pivot_contract": "ground center between axles",
+    }
+    for property_name, expected in expected_root_properties.items():
+        observed = root.get(property_name)
+        if observed != expected:
+            raise AssertionError(
+                f"root property {property_name}: expected {expected!r}, "
+                f"observed {observed!r}"
+            )
+    checks.append(
+        "source identity, version, stage, root transform, and axis mapping are bound"
+    )
+
+    objects = {obj.name: obj for obj in [root] + descendants(root)}
+    required_names = required_semantic_names()
     missing = sorted(required_names - set(objects))
     if missing:
         raise AssertionError(f"required object names missing: {missing}")
@@ -1232,14 +1452,14 @@ def validate_scene(root: bpy.types.Object) -> dict[str, object]:
         assert_vector(WHEEL_NAMES[contact_name], wheel.location, (0.0, 0.0, 0.0))
         assert_identity_rotation(PIVOT_NAMES[contact_name], pivot)
         assert_identity_rotation(SUSPENSION_NAMES[contact_name], suspension)
-        wheel_rotation = wheel.rotation_euler.to_quaternion()
+        wheel_rotation = wheel.matrix_basis.to_quaternion()
         if wheel_rotation.rotation_difference(expected_wheel_rotation).angle > 0.0001:
             raise AssertionError(
                 f"{WHEEL_NAMES[contact_name]}: axle orientation drifted"
             )
     checks.append(
         "four contact, axle, steering/hub, suspension, and wheel transforms "
-        "match runtime hierarchy"
+        "match the explicit C1 source hierarchy"
     )
 
     sockets_root = objects["SOCKETS"]
@@ -1269,11 +1489,34 @@ def validate_scene(root: bpy.types.Object) -> dict[str, object]:
         assert_identity_rotation(module_name, module)
     checks.append("three module roots remain bound to their upgrade sockets")
 
+    collision_root = objects["COLLISION"]
+    for proxy_name, spec in COLLISION_PROXY_SPECS.items():
+        proxy = objects[proxy_name]
+        assert_parent(proxy_name, proxy, collision_root)
+        assert_vector(proxy_name, proxy.location, spec["location"])
+        assert_vector(proxy_name + " dimensions", proxy.dimensions, spec["dimensions"])
+        assert_identity_rotation(proxy_name, proxy)
+        assert_unit_scale(proxy_name, proxy)
+        if proxy.type != "MESH" or proxy.get("asset_role") != "collision":
+            raise AssertionError(f"{proxy_name}: collision role or mesh type drifted")
+        if require_source_render_flags and not proxy.hide_render:
+            raise AssertionError(f"{proxy_name}: source collision proxy became renderable")
+        if count_triangles([proxy]) != 12:
+            raise AssertionError(f"{proxy_name}: expected a simple 12-triangle box")
+    checks.append(
+        "four named simple-box collision proxies are exact"
+        + (" and render-disabled" if require_source_render_flags else "")
+    )
+
     counts = collect_counts(root)
     if counts["wheel_count"] != 4:
         raise AssertionError(f"expected 4 wheels, observed {counts['wheel_count']}")
-    if counts["material_count"] > 3:
-        raise AssertionError(f"material family cap exceeded: {counts['materials']}")
+    expected_materials = sorted(MATERIAL_SPECS)
+    if counts["materials"] != expected_materials:
+        raise AssertionError(
+            f"material families drifted: expected {expected_materials}, "
+            f"observed {counts['materials']}"
+        )
     if counts["render_triangles"] > LOD0_BASE_MAXIMUM_TRIANGLES:
         raise AssertionError(
             f"LOD0 first-look exceeds semantic base budget: {counts['render_triangles']}"
@@ -1285,6 +1528,10 @@ def validate_scene(root: bpy.types.Object) -> dict[str, object]:
         )
     if counts["collision_mesh_objects"] != 4:
         raise AssertionError("collision proxy must remain four simple boxes")
+    if counts["collision_triangles"] != 48:
+        raise AssertionError(
+            "four collision proxy boxes must remain exactly 48 triangles"
+        )
     checks.append(
         f"{counts['render_triangles']} render triangles, "
         f"{counts['material_count']} materials, and 4 collision boxes are bounded"
@@ -1292,30 +1539,293 @@ def validate_scene(root: bpy.types.Object) -> dict[str, object]:
     return {"checks": checks, "counts": counts}
 
 
-def validate_export_names(required_names: set[str]) -> dict[str, object]:
-    if not GLB_PATH.exists() or GLB_PATH.stat().st_size <= 20:
+def expected_published_outputs() -> set[Path]:
+    return {
+        BLEND_PATH,
+        GLB_PATH,
+        CONTACT_SHEET_PATH,
+        *(DERIVED_DIR / name for name in EXPECTED_RENDER_NAMES),
+    }
+
+
+def checked_manifest_path(relative_path: object) -> Path:
+    if not isinstance(relative_path, str):
+        raise AssertionError("manifest output path must be a string")
+    parsed = PurePosixPath(relative_path)
+    if parsed.is_absolute() or ".." in parsed.parts:
+        raise AssertionError(f"unsafe manifest output path: {relative_path}")
+    candidate = (PACKAGE_DIR / Path(*parsed.parts)).resolve()
+    if not candidate.is_relative_to(PACKAGE_DIR):
+        raise AssertionError(f"manifest output escapes package root: {relative_path}")
+    return candidate
+
+
+def validate_file_record(
+    label: str,
+    record: object,
+    actual_path: Path,
+    expected_published_path: Path,
+) -> None:
+    if not isinstance(record, dict):
+        raise AssertionError(f"{label}: expected an object record")
+    observed_published = checked_manifest_path(record.get("path"))
+    if observed_published != expected_published_path.resolve():
+        raise AssertionError(
+            f"{label}: expected path {expected_published_path}, "
+            f"observed {observed_published}"
+        )
+    if actual_path.is_symlink():
+        raise AssertionError(f"{label}: symlink artifacts are forbidden")
+    if not actual_path.is_file():
+        raise AssertionError(f"{label}: artifact is missing: {actual_path}")
+    if record.get("bytes") != actual_path.stat().st_size:
+        raise AssertionError(f"{label}: byte-size binding drifted")
+    if record.get("sha256") != sha256(actual_path):
+        raise AssertionError(f"{label}: SHA-256 binding drifted")
+
+
+def validate_runtime_contract_binding(record: object) -> None:
+    if not isinstance(record, dict):
+        raise AssertionError("runtime contract source binding is missing")
+    expected_path = RUNTIME_CONTRACT_PATH.relative_to(REPO_ROOT).as_posix()
+    if record.get("repo_path") != expected_path:
+        raise AssertionError("runtime contract repository path drifted")
+    if RUNTIME_CONTRACT_PATH.is_symlink() or not RUNTIME_CONTRACT_PATH.is_file():
+        raise AssertionError("runtime contract must be a regular repository file")
+    if record.get("bytes") != RUNTIME_CONTRACT_PATH.stat().st_size:
+        raise AssertionError("runtime contract byte-size binding drifted")
+    if record.get("sha256") != sha256(RUNTIME_CONTRACT_PATH):
+        raise AssertionError("runtime contract SHA-256 binding drifted")
+    source = RUNTIME_CONTRACT_PATH.read_text(encoding="utf-8")
+    required_tokens = (
+        f'ContentId = "{CONTENT_ID}"',
+        'Stage = "C0Blockout"',
+        f'RootName = "{RUNTIME_COMPATIBILITY["runtime_root"]}"',
+        f'Lod0RootName = "{RUNTIME_COMPATIBILITY["runtime_lod0"]}"',
+        'return "WHEEL_FL"',
+        'return "WHEEL_FR"',
+        'return "WHEEL_RL"',
+        'return "WHEEL_RR"',
+        'return (index < FrontWheelCount ? "STEER_" : "HUB_")',
+    )
+    missing = [token for token in required_tokens if token not in source]
+    if missing:
+        raise AssertionError(
+            f"runtime compatibility tokens drifted: {missing}"
+        )
+
+
+def validate_manifest_binding(
+    paths: ArtifactPaths,
+    expected_counts: dict[str, object],
+    require_validation: bool,
+) -> dict[str, object]:
+    manifest = json.loads(paths.manifest.read_text(encoding="utf-8"))
+    expected_scalars = {
+        "schema": "atomic-land-pirate.asset-first-look.v1",
+        "content_id": CONTENT_ID,
+        "source_version": SOURCE_VERSION,
+        "status": "prototype-only",
+        "canonical_source": BLEND_PATH.name,
+    }
+    for key, expected in expected_scalars.items():
+        if manifest.get(key) != expected:
+            raise AssertionError(
+                f"manifest {key}: expected {expected!r}, "
+                f"observed {manifest.get(key)!r}"
+            )
+    if manifest.get("counts") != expected_counts:
+        raise AssertionError("manifest scene counts do not bind the reopened source")
+    if manifest.get("runtime_compatibility") != RUNTIME_COMPATIBILITY:
+        raise AssertionError("manifest runtime compatibility mapping drifted")
+    if manifest.get("generation_transaction") != GENERATION_TRANSACTION:
+        raise AssertionError("manifest generation transaction policy drifted")
+
+    tool = manifest.get("tool")
+    if not isinstance(tool, dict):
+        raise AssertionError("manifest tool binding is missing")
+    expected_tool = {
+        "name": "Blender",
+        "version": bpy.app.version_string,
+        "build_hash": blender_build_hash(),
+        "generator": GENERATOR_PATH.name,
+        "generator_sha256": sha256(GENERATOR_PATH),
+    }
+    if tool != expected_tool:
+        raise AssertionError(
+            f"manifest tool/generator binding drifted: {tool!r}"
+        )
+
+    source_bindings = manifest.get("source_bindings")
+    if not isinstance(source_bindings, dict):
+        raise AssertionError("manifest source bindings are missing")
+    validate_file_record(
+        "generator source",
+        source_bindings.get("generator"),
+        GENERATOR_PATH,
+        GENERATOR_PATH,
+    )
+    validate_file_record(
+        "package README",
+        source_bindings.get("readme"),
+        README_PATH,
+        README_PATH,
+    )
+    validate_runtime_contract_binding(source_bindings.get("runtime_contract"))
+
+    output_records = manifest.get("outputs")
+    if not isinstance(output_records, list):
+        raise AssertionError("manifest outputs must be a list")
+    records_by_path: dict[Path, object] = {}
+    for record in output_records:
+        if not isinstance(record, dict):
+            raise AssertionError("manifest output entry must be an object")
+        candidate = checked_manifest_path(record.get("path"))
+        if candidate in records_by_path:
+            raise AssertionError(f"duplicate manifest output path: {candidate}")
+        records_by_path[candidate] = record
+    expected_outputs = {path.resolve() for path in expected_published_outputs()}
+    if set(records_by_path) != expected_outputs:
+        missing = sorted(str(path) for path in expected_outputs - set(records_by_path))
+        extra = sorted(str(path) for path in set(records_by_path) - expected_outputs)
+        raise AssertionError(
+            f"manifest output set drifted; missing={missing}, extra={extra}"
+        )
+    for published in expected_published_outputs():
+        actual = actual_path_for_published(published, paths)
+        validate_file_record(
+            "published output",
+            records_by_path[published.resolve()],
+            actual,
+            published,
+        )
+
+    validation_record = manifest.get("validation")
+    if require_validation or validation_record is not None:
+        validate_file_record(
+            "validation report",
+            validation_record,
+            paths.validation,
+            VALIDATION_PATH,
+        )
+    return manifest
+
+
+def snapshot_semantic_transforms(
+    objects: dict[str, bpy.types.Object],
+    required_names: set[str],
+) -> dict[str, dict[str, object]]:
+    snapshot: dict[str, dict[str, object]] = {}
+    for name in sorted(required_names):
+        obj = objects[name]
+        snapshot[name] = {
+            "parent": obj.parent.name if obj.parent is not None else None,
+            "location": obj.location.copy(),
+            "rotation": obj.matrix_basis.to_quaternion(),
+            "scale": obj.scale.copy(),
+        }
+    return snapshot
+
+
+def validate_snapshot_transform(
+    name: str,
+    obj: bpy.types.Object,
+    expected: dict[str, object],
+) -> None:
+    observed_parent = obj.parent.name if obj.parent is not None else None
+    if observed_parent != expected["parent"]:
+        raise AssertionError(
+            f"{name}: export parent drifted from {expected['parent']} "
+            f"to {observed_parent}"
+        )
+    assert_vector(
+        name + " exported location",
+        obj.location,
+        expected["location"],
+        tolerance=0.001,
+    )
+    assert_vector(
+        name + " exported scale",
+        obj.scale,
+        expected["scale"],
+        tolerance=0.001,
+    )
+    observed_rotation = obj.matrix_basis.to_quaternion()
+    if (
+        observed_rotation.rotation_difference(expected["rotation"]).angle
+        > 0.001
+    ):
+        raise AssertionError(f"{name}: exported local rotation drifted")
+
+
+def validate_export_semantics(
+    paths: ArtifactPaths,
+    required_names: set[str],
+    source_snapshot: dict[str, dict[str, object]],
+    source_counts: dict[str, object],
+) -> dict[str, object]:
+    if not paths.glb.exists() or paths.glb.stat().st_size <= 20:
         raise AssertionError("GLB export is absent or empty")
-    with GLB_PATH.open("rb") as handle:
+    with paths.glb.open("rb") as handle:
         if handle.read(4) != b"glTF":
             raise AssertionError("derived export does not have a GLB header")
 
-    # Blender object names are global across scenes. Clear the reopened source
-    # only after its validation is complete, then import into the now-empty
-    # process so an exact exported name cannot be hidden behind a `.001` suffix.
-    # This validation process never saves the cleared scene.
-    for obj in list(bpy.data.objects):
-        bpy.data.objects.remove(obj, do_unlink=True)
-    bpy.ops.import_scene.gltf(filepath=str(GLB_PATH))
+    # Clear source objects and their material/mesh datablocks only after source
+    # validation. The validation process never saves this cleared scene.
+    clear_scene()
+    bpy.ops.import_scene.gltf(filepath=str(paths.glb))
     imported_objects = list(bpy.context.scene.objects)
-    imported_names = {obj.name for obj in imported_objects}
-    missing = sorted(required_names - imported_names)
+    imported_by_name = {obj.name: obj for obj in imported_objects}
+    missing = sorted(required_names - set(imported_by_name))
     if missing:
         raise AssertionError(f"GLB import lost semantic names: {missing}")
+    for name in sorted(required_names):
+        validate_snapshot_transform(
+            name,
+            imported_by_name[name],
+            source_snapshot[name],
+        )
+
+    imported_root = imported_by_name[ROOT_NAME]
+    imported_validation = validate_scene(
+        imported_root,
+        require_source_render_flags=False,
+    )
+    imported_counts = imported_validation["counts"]
+    compared_count_fields = (
+        "render_mesh_objects",
+        "render_triangles",
+        "collision_mesh_objects",
+        "collision_triangles",
+        "material_count",
+        "materials",
+        "socket_count",
+        "sockets",
+        "wheel_count",
+    )
+    for field in compared_count_fields:
+        if imported_counts[field] != source_counts[field]:
+            raise AssertionError(
+                f"GLB {field}: expected {source_counts[field]!r}, "
+                f"observed {imported_counts[field]!r}"
+            )
     imported_triangles = count_triangles(imported_objects)
+    expected_triangles = (
+        source_counts["render_triangles"] + source_counts["collision_triangles"]
+    )
+    if imported_triangles != expected_triangles:
+        raise AssertionError(
+            f"GLB total triangle count: expected {expected_triangles}, "
+            f"observed {imported_triangles}"
+        )
     return {
         "glb_header": "glTF",
         "imported_object_count": len(imported_objects),
         "imported_triangles_including_collision": imported_triangles,
+        "material_count": imported_counts["material_count"],
+        "collision_proxy_count": imported_counts["collision_mesh_objects"],
+        "collision_triangles": imported_counts["collision_triangles"],
+        "hierarchy_and_local_transforms": "pass",
         "required_names_preserved": len(required_names),
     }
 
@@ -1323,6 +1833,7 @@ def validate_export_names(required_names: set[str]) -> dict[str, object]:
 def write_validation_report(
     scene_validation: dict[str, object],
     export_validation: dict[str, object],
+    paths: ArtifactPaths,
 ) -> None:
     report = {
         "schema": "atomic-land-pirate.asset-validation.v1",
@@ -1330,44 +1841,140 @@ def write_validation_report(
         "source_version": SOURCE_VERSION,
         "status": "pass",
         "blender_version": bpy.app.version_string,
-        "canonical_source": relative_output_record(BLEND_PATH),
-        "derived_export": relative_output_record(GLB_PATH),
+        "blender_build_hash": blender_build_hash(),
+        "generator_sha256": sha256(GENERATOR_PATH),
+        "runtime_compatibility": RUNTIME_COMPATIBILITY,
+        "canonical_source": relative_output_record(paths.blend, BLEND_PATH),
+        "derived_export": relative_output_record(paths.glb, GLB_PATH),
         "scene": scene_validation,
         "export_reimport": export_validation,
     }
-    VALIDATION_PATH.write_text(
-        json.dumps(report, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+    write_json(
+        paths.validation,
+        report,
+        atomic=paths == PUBLISHED_PATHS,
     )
 
-    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-    manifest["validation"] = relative_output_record(VALIDATION_PATH)
-    MANIFEST_PATH.write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+    manifest = json.loads(paths.manifest.read_text(encoding="utf-8"))
+    manifest["validation"] = relative_output_record(
+        paths.validation,
+        VALIDATION_PATH,
     )
+    write_json(
+        paths.manifest,
+        manifest,
+        atomic=paths == PUBLISHED_PATHS,
+    )
+
+
+def validate_open_artifacts(
+    paths: ArtifactPaths,
+) -> tuple[dict[str, object], dict[str, object]]:
+    if not bpy.app.background:
+        raise AssertionError("Scout validation must run in a background process")
+    if Path(bpy.data.filepath).resolve() != paths.blend.resolve():
+        raise AssertionError(
+            f"validation opened {bpy.data.filepath}, expected {paths.blend}"
+        )
+    root = bpy.data.objects.get(ROOT_NAME)
+    if root is None:
+        raise AssertionError(f"{ROOT_NAME} root is missing")
+    scene_validation = validate_scene(root)
+    validate_manifest_binding(
+        paths,
+        scene_validation["counts"],
+        require_validation=False,
+    )
+    required_names = required_semantic_names()
+    source_objects = {
+        obj.name: obj
+        for obj in [root] + descendants(root)
+    }
+    source_snapshot = snapshot_semantic_transforms(
+        source_objects,
+        required_names,
+    )
+    export_validation = validate_export_semantics(
+        paths,
+        required_names,
+        source_snapshot,
+        scene_validation["counts"],
+    )
+    write_validation_report(scene_validation, export_validation, paths)
+    validate_manifest_binding(
+        paths,
+        scene_validation["counts"],
+        require_validation=True,
+    )
+    return scene_validation, export_validation
+
+
+def promote_staged_artifacts(
+    paths: ArtifactPaths,
+    expected_counts: dict[str, object],
+) -> None:
+    if paths == PUBLISHED_PATHS:
+        raise AssertionError("published artifacts cannot be promoted over themselves")
+    manifest = validate_manifest_binding(
+        paths,
+        expected_counts,
+        require_validation=True,
+    )
+    output_records = manifest["outputs"]
+    for record in output_records:
+        destination = checked_manifest_path(record["path"])
+        source = actual_path_for_published(destination, paths)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        source.replace(destination)
+    paths.validation.replace(VALIDATION_PATH)
+    # The manifest is the commit marker. Promoting it last means an interrupted
+    # replacement can only leave a hash mismatch, never a valid mixed package.
+    paths.manifest.replace(MANIFEST_PATH)
+    try:
+        paths.derived_dir.rmdir()
+        paths.root.rmdir()
+    except OSError:
+        # Unexpected leftovers remain quarantined for inspection.
+        pass
 
 
 def generate() -> None:
+    if not bpy.app.background:
+        raise AssertionError("Scout generation must run in a background process")
+    if bpy.data.filepath:
+        raise AssertionError(
+            "Scout generation requires --factory-startup with no open .blend"
+        )
     PACKAGE_DIR.mkdir(parents=True, exist_ok=True)
-    DERIVED_DIR.mkdir(parents=True, exist_ok=True)
+    paths = prepare_staging_paths()
     clear_scene()
     configure_scene()
     materials = create_materials()
     root = build_vehicle(materials)
     _, camera = create_review_scene(materials)
     scene_validation = validate_scene(root)
-    render_paths = render_turntable(camera)
-    export_glb(root)
-    bpy.ops.wm.save_as_mainfile(filepath=str(BLEND_PATH), compress=True)
-    write_manifest(scene_validation["counts"], render_paths)
+    render_paths = render_turntable(camera, paths)
+    export_glb(root, paths.glb)
+    # Keep the editable source free of a stale staging output path.
+    bpy.context.scene.render.filepath = str(
+        published_path(render_paths[-1], paths)
+    )
+    bpy.ops.wm.save_as_mainfile(filepath=str(paths.blend), compress=True)
+    write_manifest(scene_validation["counts"], render_paths, paths)
+
+    # Reopen the staged canonical source before any published path changes.
+    bpy.ops.wm.open_mainfile(filepath=str(paths.blend))
+    scene_validation, export_validation = validate_open_artifacts(paths)
+    promote_staged_artifacts(paths, scene_validation["counts"])
     print(
-        "SASHA_SCOUT_GENERATED "
+        "SASHA_SCOUT_GENERATED_AND_VALIDATED "
         + json.dumps(
             {
                 "blend": str(BLEND_PATH),
+                "export_names": export_validation["required_names_preserved"],
                 "glb": str(GLB_PATH),
                 "render_triangles": scene_validation["counts"]["render_triangles"],
+                "status": "pass",
             },
             sort_keys=True,
         )
@@ -1375,39 +1982,7 @@ def generate() -> None:
 
 
 def validate_existing() -> None:
-    if Path(bpy.data.filepath).resolve() != BLEND_PATH.resolve():
-        raise AssertionError(
-            f"validation opened {bpy.data.filepath}, expected {BLEND_PATH}"
-        )
-    root = bpy.data.objects.get(ROOT_NAME)
-    if root is None:
-        raise AssertionError(f"{ROOT_NAME} root is missing")
-    scene_validation = validate_scene(root)
-    required_export_names = {
-        ROOT_NAME,
-        "GEO",
-        "LOD0_FIRSTLOOK",
-        "LOD1_RESERVED",
-        "LOD2_RESERVED",
-        "RIG",
-        "CONTACTS",
-        "AXLE_FRONT",
-        "AXLE_REAR",
-        "SOCKETS",
-        "MODULES",
-        "COLLISION",
-        "DOOR_DRIVER",
-        "MODULE_WINCH_ASSEMBLY",
-        "MODULE_SEALED_RANGE_TANK",
-        "UPGRADE_PATCHWORK_SKID_PLATE",
-        *CONTACT_POSITIONS.keys(),
-        *PIVOT_NAMES.values(),
-        *WHEEL_NAMES.values(),
-        *SUSPENSION_NAMES.values(),
-        *SOCKET_POSITIONS.keys(),
-    }
-    export_validation = validate_export_names(required_export_names)
-    write_validation_report(scene_validation, export_validation)
+    scene_validation, export_validation = validate_open_artifacts(PUBLISHED_PATHS)
     print(
         "SASHA_SCOUT_VALIDATED "
         + json.dumps(

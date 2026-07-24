@@ -24,6 +24,12 @@ history without strategy-camera clutter.
 - Contact stations, steering/hub pivots, suspension transforms, cargo/tool/
   upgrade sockets, `DOOR_DRIVER`, and module roots match
   `SashaScoutSemanticContract`.
+- C1 source keeps the stable content ID but deliberately uses
+  `LOD0_FIRSTLOOK` and inserts `SUSPENSION_*` transforms. Its manifest binds an
+  explicit, not-yet-integrated compatibility map to the current C0 runtime root
+  (`veh_sasha_scout_a [C0 Blockout]`), LOD
+  (`LOD0_C0_BLOCKOUT`), and wheel-name binding. No drop-in Unity compatibility
+  is claimed.
 - Collision is four simple render-disabled boxes, independent of presentation
   geometry.
 
@@ -42,10 +48,20 @@ From the repository root:
   --validate-existing
 ```
 
-The second command reopens the saved `.blend`, validates names and local
-transforms, enforces triangle/material/collision bounds, checks the GLB header,
-clears the unsaved validation process, reimports the GLB without global-name
-collisions, and verifies semantic names survive export.
+The first command generates only under `Derived/Quarantine/Staging/Current`,
+reopens the staged `.blend`, validates its manifest and generator/README hashes,
+binds the compatibility map to the current runtime C# contract, reimports the
+staged GLB, and promotes the complete package with the manifest last. A failed
+attempt remains quarantined; the next attempt moves it under
+`Derived/Quarantine/Failed/` before starting clean. Published outputs therefore
+cannot be mistaken for a valid mixed generation after an interrupted run.
+
+The second command independently reopens the published `.blend`, binds its
+content ID/source version/root properties and current generator hash to the
+manifest, then repeats the export proof. It verifies semantic names, parent
+hierarchy, local transforms, material and triangle counts, plus all four named
+12-triangle collision proxies after GLB reimport. Revalidation clears only its
+unsaved background process.
 
 ## Deliberate hard cuts
 
