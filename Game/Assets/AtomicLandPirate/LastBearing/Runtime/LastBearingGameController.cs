@@ -473,6 +473,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ConfigureDepotDecisionInteraction(this);
             _world.ConfigureDepotCargoInteraction(this);
             _world.ConfigureDepotReturnInteraction(this);
+            _world.ConfigureGarageModuleInteraction(this);
             _world.ConfigureGarageDepartureInteraction(this);
             _hud = gameObject.AddComponent<LastBearingHud>();
             _hud.Configure(this, _fieldDesk);
@@ -497,6 +498,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
+            _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
@@ -553,6 +555,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
+            _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
             _state = null;
             _readModel = null;
@@ -951,6 +954,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _garagePreparationIntent = preparation;
             _world?.ApplyGaragePlanIntent(_garagePreparationIntent);
+            if (_readModel != null)
+            {
+                _world?.ApplyGarageModuleInteraction(_readModel);
+            }
             _status = preparation == PreparationChoice.WorkshopPush
                 ? "Workshop Push is penciled in. Choose Sasha's rig module in the garage to commit it."
                 : "Civic Buffer is penciled in. Choose Sasha's rig module in the garage to commit it.";
@@ -1256,6 +1263,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 "Sasha Scout service-bay cutaway active; the vehicle state is unchanged.");
             if (_readModel != null)
             {
+                _world?.ApplyGarageModuleInteraction(_readModel);
                 _world?.ApplyGarageDepartureInteraction(_readModel);
             }
         }
@@ -1617,6 +1625,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
+            _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
@@ -1673,6 +1682,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.ApplyDepotDecisionInteraction(_readModel);
                 _world?.ApplyDepotCargoInteraction(_readModel);
                 _world?.ApplyDepotReturnInteraction(_readModel);
+                _world?.ApplyGarageModuleInteraction(_readModel);
                 _world?.ApplyGarageDepartureInteraction(_readModel);
             }
         }
@@ -2294,6 +2304,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _cityPreviewQuarterTurns,
                 HasCityBuildingPreview);
             _world.ApplyDepotReturnInteraction(_readModel);
+            _world.ApplyGarageModuleInteraction(_readModel);
             _world.ApplyGarageDepartureInteraction(_readModel);
             _world.SetCityServiceCellFocus(
                 IsExactFieldDeskCityOverview &&
@@ -2504,6 +2515,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _garagePreparationIntent = PreparationChoice.Unselected;
             _world?.ApplyGaragePlanIntent(
                 _readModel?.PreparationChoice ?? PreparationChoice.Unselected);
+            if (_readModel != null)
+            {
+                _world?.ApplyGarageModuleInteraction(_readModel);
+            }
         }
 
         private string ExpeditionCommitUnavailableStatus()

@@ -69,6 +69,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public LastBearingGarageDepartureInteractor? GarageDepartureInteractor =>
             GarageBayView?.DepartureInteractor;
 
+        public LastBearingGarageModuleInteractor? GarageModuleInteractor =>
+            GarageBayView?.ModuleInteractor;
+
         public Transform? CityScaffoldRoot { get; private set; }
 
         public LastBearingReturnServiceView? ReturnServiceView { get; private set; }
@@ -504,6 +507,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingReadModel model)
         {
             GarageDepartureInteractor?.Apply(model);
+        }
+
+        public void ConfigureGarageModuleInteraction(
+            LastBearingGameController controller)
+        {
+            if (MainCamera == null || GarageModuleInteractor == null)
+            {
+                throw new InvalidOperationException(
+                    "Garage module interaction requires Sasha's shared camera.");
+            }
+
+            GarageModuleInteractor.Configure(controller, MainCamera);
+        }
+
+        public void ResetGarageModuleInteraction()
+        {
+            GarageModuleInteractor?.ResetLocalFocus();
+        }
+
+        public void ApplyGarageModuleInteraction(
+            LastBearingReadModel model)
+        {
+            GarageModuleInteractor?.Apply(model);
         }
 
         public void SelectCityGrammarHypothesis(
