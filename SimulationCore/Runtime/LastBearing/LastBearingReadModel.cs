@@ -762,7 +762,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     >= LastBearingRepeatExpedition.FuelCost(state)
                 && state.HotShiftPhase == HotShiftPhase.Idle
                 && state.NextCityDecision == NextCityDecision.None
-                && IsEmergencyAidWorkResolved(state)
+                && ComputeEmergencyAidWorkResolved(state)
                 && !state.MaintenanceDue
                 && state.SpareBearingBatchPhase
                     != SpareBearingBatchPhase.InProgress
