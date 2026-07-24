@@ -82,15 +82,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
             int throttleMilli,
             int steeringMilli)
         {
-            if (throttleMilli < 0 || throttleMilli > 1000)
-            {
-                throw new ArgumentOutOfRangeException(nameof(throttleMilli));
-            }
-
-            if (steeringMilli < -1000 || steeringMilli > 1000)
-            {
-                throw new ArgumentOutOfRangeException(nameof(steeringMilli));
-            }
+            ValidateDriveControls(throttleMilli, steeringMilli);
 
             LastThrottleMilli = throttleMilli;
             LastSteeringMilli = steeringMilli;
@@ -107,17 +99,30 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
             int brakeMilli,
             int handbrakeMilli)
         {
-            if (brakeMilli < 0 || brakeMilli > 1000)
-            {
-                throw new ArgumentOutOfRangeException(nameof(brakeMilli));
-            }
-
-            if (handbrakeMilli < 0 || handbrakeMilli > 1000)
-            {
-                throw new ArgumentOutOfRangeException(nameof(handbrakeMilli));
-            }
+            ValidateLocalControls(brakeMilli, handbrakeMilli);
 
             LastBrakeMilli = brakeMilli;
+            LastHandbrakeMilli = handbrakeMilli;
+            if (!IsRoadModeActive || _vehicle == null)
+            {
+                return;
+            }
+
+            ApplyPresentationControls();
+        }
+
+        public void ApplyPresentationInputSample(
+            int throttleMilli,
+            int brakeMilli,
+            int steeringMilli,
+            int handbrakeMilli)
+        {
+            ValidateDriveControls(throttleMilli, steeringMilli);
+            ValidateLocalControls(brakeMilli, handbrakeMilli);
+
+            LastThrottleMilli = throttleMilli;
+            LastBrakeMilli = brakeMilli;
+            LastSteeringMilli = steeringMilli;
             LastHandbrakeMilli = handbrakeMilli;
             if (!IsRoadModeActive || _vehicle == null)
             {
@@ -177,6 +182,36 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
                 LastBrakeMilli / 1000f,
                 LastSteeringMilli / 1000f,
                 LastHandbrakeMilli / 1000f));
+        }
+
+        private static void ValidateDriveControls(
+            int throttleMilli,
+            int steeringMilli)
+        {
+            if (throttleMilli < 0 || throttleMilli > 1000)
+            {
+                throw new ArgumentOutOfRangeException(nameof(throttleMilli));
+            }
+
+            if (steeringMilli < -1000 || steeringMilli > 1000)
+            {
+                throw new ArgumentOutOfRangeException(nameof(steeringMilli));
+            }
+        }
+
+        private static void ValidateLocalControls(
+            int brakeMilli,
+            int handbrakeMilli)
+        {
+            if (brakeMilli < 0 || brakeMilli > 1000)
+            {
+                throw new ArgumentOutOfRangeException(nameof(brakeMilli));
+            }
+
+            if (handbrakeMilli < 0 || handbrakeMilli > 1000)
+            {
+                throw new ArgumentOutOfRangeException(nameof(handbrakeMilli));
+            }
         }
 
         private static RoadFeelDamageBand ToRoadFeelDamageBand(

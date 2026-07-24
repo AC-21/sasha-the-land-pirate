@@ -29,6 +29,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private const string TransactionId = "transaction:last-bearing:unity:0001";
         private const string TransactionFingerprint = "fingerprint:last-bearing:unity:0001";
 
+        private readonly struct RoadInputSample
+        {
+            public RoadInputSample(
+                int throttleMilli,
+                int brakeMilli,
+                int steeringMilli,
+                int handbrakeMilli)
+            {
+                ThrottleMilli = throttleMilli;
+                BrakeMilli = brakeMilli;
+                SteeringMilli = steeringMilli;
+                HandbrakeMilli = handbrakeMilli;
+            }
+
+            public int ThrottleMilli { get; }
+
+            public int BrakeMilli { get; }
+
+            public int SteeringMilli { get; }
+
+            public int HandbrakeMilli { get; }
+        }
+
         private readonly List<LastBearingCommand> _pendingCommands =
             new List<LastBearingCommand>();
         private readonly LastBearingKernel _kernel = new LastBearingKernel();
@@ -1424,6 +1447,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             bool pause = _readModel.PauseCause == PauseCause.None;
+            if (pause)
+            {
+                _modeCoordinator?.ClearRoadPresentationInput();
+            }
+
             Queue(sequence => new SetPauseCommand(sequence, pause));
             _status = pause ? "Simulation paused." : "Simulation resumed.";
         }
@@ -1524,11 +1552,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             if (!HasActiveGame)
             {
+                _modeCoordinator?.ClearRoadPresentationInput();
                 _fieldDesk?.Refresh();
                 return;
             }
 
             HandleGlobalShortcuts();
+            ApplyRoadPresentationInput();
             AdvanceSimulation(Time.unscaledDeltaTime);
             _fieldDesk?.Refresh();
         }
@@ -1860,6 +1890,71 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            RoadInputSample input = ReadRoadInputSample();
+            _modeCoordinator?.ApplyQuantizedRoadCommandShadow(
+                input.ThrottleMilli,
+                input.SteeringMilli);
+            _modeCoordinator?.ApplyPresentationOnlyRoadControls(
+                input.BrakeMilli,
+                input.HandbrakeMilli);
+            if (input.ThrottleMilli == 0 && input.SteeringMilli == 0)
+            {
+                return;
+            }
+
+            Queue(sequence => new DriveVehicleCommand(
+                sequence,
+                input.ThrottleMilli,
+                input.SteeringMilli));
+        }
+
+        private void ApplyRoadPresentationInput()
+        {
+            if (!CanApplyRoadPresentationInput())
+            {
+                _modeCoordinator?.ClearRoadPresentationInput();
+                return;
+            }
+
+            RoadInputSample input = ReadRoadInputSample();
+            _modeCoordinator?.TryApplyRoadPresentationInput(
+                input.ThrottleMilli,
+                input.BrakeMilli,
+                input.SteeringMilli,
+                input.HandbrakeMilli);
+        }
+
+        private bool CanApplyRoadPresentationInput()
+        {
+            LastBearingModeCoordinator? coordinator = _modeCoordinator;
+            if (_readModel == null ||
+                _readModel.PauseCause != PauseCause.None ||
+                (_readModel.ExpeditionPhase != ExpeditionPhase.Outbound &&
+                 _readModel.ExpeditionPhase != ExpeditionPhase.Returning) ||
+                coordinator == null ||
+                !coordinator.HasActiveMode ||
+                coordinator.CurrentMode !=
+                    LastBearingPresentationMode.Driving ||
+                !coordinator.IsRoadPresentationActive ||
+                coordinator.RoadAdapterFaulted)
+            {
+                return false;
+            }
+
+            for (var index = 0; index < _pendingCommands.Count; index++)
+            {
+                if (_pendingCommands[index] is SetPauseCommand pause &&
+                    pause.IsPaused)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static RoadInputSample ReadRoadInputSample()
+        {
             float throttle = 0f;
             float brake = 0f;
             float steering = 0f;
@@ -1913,21 +2008,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             int steeringMilli = Mathf.RoundToInt(clampedSteering * 1000f);
             int handbrakeMilli = Mathf.RoundToInt(
                 Mathf.Clamp01(handbrake) * 1000f);
-            _modeCoordinator?.ApplyQuantizedRoadCommandShadow(
+            return new RoadInputSample(
                 throttleMilli,
-                steeringMilli);
-            _modeCoordinator?.ApplyPresentationOnlyRoadControls(
                 brakeMilli,
+                steeringMilli,
                 handbrakeMilli);
-            if (throttleMilli == 0 && steeringMilli == 0)
-            {
-                return;
-            }
-
-            Queue(sequence => new DriveVehicleCommand(
-                sequence,
-                throttleMilli,
-                steeringMilli));
         }
 
         private void ApplyPresentation()
