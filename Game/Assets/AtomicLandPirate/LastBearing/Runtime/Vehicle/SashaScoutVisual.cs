@@ -5,6 +5,12 @@ using UnityEngine;
 
 namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 {
+    public enum SashaScoutUpgradePresentation
+    {
+        None = 0,
+        PatchworkSkidPlate = 1,
+    }
+
     /// <summary>
     /// Stable presentation handles for the C0 scout. The component contains
     /// no input, Rigidbody, canonical state, save state, or asset loading.
@@ -17,6 +23,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         private Transform[] _wheelPivots = Array.Empty<Transform>();
         private Transform? _winchModule;
         private Transform? _rangeTankModule;
+        private Transform? _patchworkSkidPlateUpgrade;
 
         public string DirectionStage => SashaScoutSemanticContract.Stage;
 
@@ -56,6 +63,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 
         public SashaScoutModulePresentation Module { get; private set; }
 
+        public bool IsPatchworkSkidPlateVisible =>
+            _patchworkSkidPlateUpgrade != null &&
+            _patchworkSkidPlateUpgrade.gameObject.activeSelf;
+
+        public Transform? PatchworkSkidPlateUpgradeRoot =>
+            _patchworkSkidPlateUpgrade;
+
+        public SashaScoutUpgradePresentation Upgrade { get; private set; }
+
         internal void Configure(
             SashaScoutBlockoutMaterials materials,
             Transform geometryRoot,
@@ -70,7 +86,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             Transform[] wheelVisuals,
             Transform[] wheelPivots,
             Transform winchModule,
-            Transform rangeTankModule)
+            Transform rangeTankModule,
+            Transform patchworkSkidPlateUpgrade)
         {
             if (contactStations == null ||
                 wheelVisuals == null ||
@@ -103,7 +120,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                            throw new ArgumentNullException(nameof(winchModule));
             _rangeTankModule = rangeTankModule ??
                                throw new ArgumentNullException(nameof(rangeTankModule));
+            _patchworkSkidPlateUpgrade = patchworkSkidPlateUpgrade ??
+                throw new ArgumentNullException(
+                    nameof(patchworkSkidPlateUpgrade));
             ApplyModule(SashaScoutModulePresentation.None);
+            ApplyUpgrade(SashaScoutUpgradePresentation.None);
         }
 
         public Transform[] CopyContactStations()
@@ -139,6 +160,17 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             {
                 _rangeTankModule.gameObject.SetActive(
                     module == SashaScoutModulePresentation.SealedRangeTank);
+            }
+        }
+
+        public void ApplyUpgrade(SashaScoutUpgradePresentation upgrade)
+        {
+            Upgrade = upgrade;
+            if (_patchworkSkidPlateUpgrade != null)
+            {
+                _patchworkSkidPlateUpgrade.gameObject.SetActive(
+                    upgrade ==
+                    SashaScoutUpgradePresentation.PatchworkSkidPlate);
             }
         }
 

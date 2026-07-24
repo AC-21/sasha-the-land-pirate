@@ -143,6 +143,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 SashaScoutSemanticContract.FrontUpgradeSocketName)!;
             Transform rangeTankSocket = socketsRoot.Find(
                 SashaScoutSemanticContract.CargoUpgradeSocketName)!;
+            Transform underbodyUpgradeSocket = socketsRoot.Find(
+                SashaScoutSemanticContract.UnderbodyUpgradeSocketName)!;
             Transform winch = BuildWinchModule(
                 modulesRoot,
                 winchSocket,
@@ -150,6 +152,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             Transform tank = BuildRangeTankModule(
                 modulesRoot,
                 rangeTankSocket,
+                materials);
+            Transform patchworkSkidPlate = BuildPatchworkSkidPlateUpgrade(
+                modulesRoot,
+                underbodyUpgradeSocket,
                 materials);
             if (includeRoadCollisionShell)
             {
@@ -170,7 +176,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 wheelVisuals,
                 wheelPivots,
                 winch,
-                tank);
+                tank,
+                patchworkSkidPlate);
             return visual;
         }
 
@@ -272,6 +279,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 root,
                 new Vector3(0f, 1.42f, -1.38f));
             CreateSocket(
+                SashaScoutSemanticContract.UnderbodyUpgradeSocketName,
+                root,
+                new Vector3(0f, 0.39f, 0.08f));
+            CreateSocket(
                 SashaScoutSemanticContract.CargoSocket01Name,
                 root,
                 new Vector3(-0.47f, 1.42f, -1.45f));
@@ -343,6 +354,58 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 Quaternion.Euler(0f, 0f, 90f),
                 materials.Oxide);
             return module;
+        }
+
+        private static Transform BuildPatchworkSkidPlateUpgrade(
+            Transform root,
+            Transform socket,
+            SashaScoutBlockoutMaterials materials)
+        {
+            Transform upgrade = CreateRoot(
+                SashaScoutSemanticContract.PatchworkSkidPlateUpgradeName,
+                root);
+            CopySocketPose(upgrade, socket);
+            CreateRenderPrimitive(
+                "SKID_PLATE_CENTER",
+                PrimitiveType.Cube,
+                upgrade,
+                Vector3.zero,
+                new Vector3(1.68f, 0.1f, 1.42f),
+                Quaternion.identity,
+                materials.Iron);
+            CreateRenderPrimitive(
+                "SKID_PLATE_FORE",
+                PrimitiveType.Cube,
+                upgrade,
+                new Vector3(0f, 0.04f, 1.02f),
+                new Vector3(1.5f, 0.1f, 0.72f),
+                Quaternion.Euler(-8f, 0f, 0f),
+                materials.Bone);
+            CreateRenderPrimitive(
+                "SKID_PLATE_AFT",
+                PrimitiveType.Cube,
+                upgrade,
+                new Vector3(0f, 0.04f, -1.02f),
+                new Vector3(1.5f, 0.1f, 0.72f),
+                Quaternion.Euler(8f, 0f, 0f),
+                materials.Oxide);
+            CreateRenderPrimitive(
+                "SKID_BRACE_LEFT",
+                PrimitiveType.Cube,
+                upgrade,
+                new Vector3(-0.74f, 0.13f, 0f),
+                new Vector3(0.12f, 0.18f, 2.38f),
+                Quaternion.identity,
+                materials.Oxide);
+            CreateRenderPrimitive(
+                "SKID_BRACE_RIGHT",
+                PrimitiveType.Cube,
+                upgrade,
+                new Vector3(0.74f, 0.13f, 0f),
+                new Vector3(0.12f, 0.18f, 2.38f),
+                Quaternion.identity,
+                materials.Oxide);
+            return upgrade;
         }
 
         private static void CopySocketPose(

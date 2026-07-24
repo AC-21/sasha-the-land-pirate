@@ -411,6 +411,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.SetCityNeedInspected(false);
             _world?.BeginCityGrammarComparisonSession();
             _world?.SelectPumpHallCutaway();
+            _world?.ResetRigUpgradePresentation();
             _modeCoordinator?.ClearSession();
 
             AssignDefaultLeadResident();
@@ -458,6 +459,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.SetCityNeedInspected(false);
             _world?.BeginCityGrammarComparisonSession();
             _world?.SelectPumpHallCutaway();
+            _world?.ResetRigUpgradePresentation();
             _modeCoordinator?.ClearSession();
             _world?.Apply(new LastBearingVisualSnapshot(
                 LastBearingVisualPhase.Title,
@@ -1496,6 +1498,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.SetCityNeedInspected(true);
                 _world?.BeginCityGrammarComparisonSession();
                 _world?.SelectPumpHallCutaway();
+                _world?.ResetRigUpgradePresentation();
                 _saveStatus = result.Code + " · " + CanonicalHash.Substring(0, 12);
                 _status = "Exact city, vehicle, custody, crisis, and faction state restored.";
                 ApplyPresentation();
@@ -1777,6 +1780,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
                 if (rigUpgradeInstalled)
                 {
+                    _world?.PulseRigUpgradeInstall();
                     _status =
                         "Patchwork Skid Plate installed. Round-trip condition loss is reduced by " +
                         _readModel.PatchworkSkidPlateProtectionMilli + ".";
@@ -2020,6 +2024,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     == CityImprovementKind.RefurbishedAuxiliaryPump,
                 humanVisible,
                 robotVisible));
+            _world.ApplyRigUpgrade(_readModel.RigUpgrade);
             _world.ApplyDepotApproachRecovery(
                 _readModel.IsDepotApproachRecoveryAvailable,
                 _readModel.ExpeditionPhase == ExpeditionPhase.AtDepot);
