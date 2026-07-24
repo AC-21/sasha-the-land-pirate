@@ -143,7 +143,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
-        public void BootstrapDefersAssetValidationUntilDomainReloadPostprocess()
+        public void BootstrapWaitsForPostReloadEditorReadiness()
         {
             string source = File.ReadAllText(Path.Combine(
                 Application.dataPath,
@@ -215,6 +215,18 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 source);
             StringAssert.Contains("s_Attempted = true;", source);
             StringAssert.Contains(
+                "EditorApplication.update +=\n" +
+                "                    ConfigureAndStartAfterDomainReload;",
+                source);
+            StringAssert.Contains(
+                "if (EditorApplication.isCompiling || " +
+                "EditorApplication.isUpdating)",
+                source);
+            StringAssert.Contains(
+                "EditorApplication.update -=\n" +
+                "                    ConfigureAndStartAfterDomainReload;",
+                source);
+            StringAssert.Contains(
                 "WP0002PipelineBootstrap.ConfigureAndStartAfterDomainReload();",
                 source);
             StringAssert.Contains(
@@ -276,10 +288,40 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 "WP0002PipelineBootstrap.ConfigureAndStartAfterDomainReload();",
                 attempted,
                 StringComparison.Ordinal);
+            int readinessGuard = configure.IndexOf(
+                "if (EditorApplication.isCompiling || " +
+                "EditorApplication.isUpdating)",
+                StringComparison.Ordinal);
+            int busyUnsubscribe = configure.IndexOf(
+                "EditorApplication.update -=\n" +
+                "                    ConfigureAndStartAfterDomainReload;",
+                readinessGuard,
+                StringComparison.Ordinal);
+            int schedule = configure.IndexOf(
+                "EditorApplication.update +=\n" +
+                "                    ConfigureAndStartAfterDomainReload;",
+                busyUnsubscribe,
+                StringComparison.Ordinal);
+            int guardedReturn = configure.IndexOf(
+                "return;",
+                schedule,
+                StringComparison.Ordinal);
+            int readyUnsubscribe = configure.IndexOf(
+                "EditorApplication.update -= ConfigureAndStartAfterDomainReload;",
+                guardedReturn,
+                StringComparison.Ordinal);
             Assert.That(postprocess, Is.GreaterThanOrEqualTo(0));
             Assert.That(domainGuard, Is.GreaterThan(postprocess));
             Assert.That(attempted, Is.GreaterThan(domainGuard));
             Assert.That(configureCall, Is.GreaterThan(attempted));
+            Assert.That(readinessGuard, Is.GreaterThanOrEqualTo(0));
+            Assert.That(busyUnsubscribe, Is.GreaterThan(readinessGuard));
+            Assert.That(schedule, Is.GreaterThan(busyUnsubscribe));
+            Assert.That(guardedReturn, Is.GreaterThan(schedule));
+            Assert.That(readyUnsubscribe, Is.GreaterThan(guardedReturn));
+            Assert.That(
+                rejectPreexistingServer,
+                Is.GreaterThan(readyUnsubscribe));
 
             string preAssetCleanup = Segment(
                 source,
