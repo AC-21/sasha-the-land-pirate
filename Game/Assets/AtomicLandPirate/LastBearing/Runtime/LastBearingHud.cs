@@ -32,6 +32,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _fieldDesk = fieldDesk;
         }
 
+        public bool BlocksWorldPointer(Vector2 screenPosition)
+        {
+            if (!enabled ||
+                _controller == null ||
+                _fieldDesk?.OwnsCityOverview == true)
+            {
+                return false;
+            }
+
+            var panelRect = new Rect(
+                18f,
+                18f,
+                PanelWidth,
+                Screen.height - 36f);
+            var guiPosition = new Vector2(
+                screenPosition.x,
+                Screen.height - screenPosition.y);
+            return panelRect.Contains(guiPosition);
+        }
+
         private void OnGUI()
         {
             if (_controller == null)
@@ -489,7 +509,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 model.TurbineCondition == TurbineCondition.Failing &&
                 model.RepairCargoKind == RepairCargoKind.None)
             {
-                if (GUILayout.Button("COMMIT MANIFEST + DEPART", _buttonStyle))
+                if (GUILayout.Button(
+                        "LEGACY DEPARTURE FALLBACK · COMMIT MANIFEST",
+                        _buttonStyle))
                 {
                     _controller!.CommitExpedition();
                 }
@@ -1521,8 +1543,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 model.TurbineCondition == TurbineCondition.Failing &&
                 model.RepairCargoKind == RepairCargoKind.None)
             {
-                return "Click COMMIT MANIFEST + DEPART above · debit the exact " +
-                       "fuel and cargo manifest and begin the outbound route." +
+                return "Primary: focus and pull the physical garage launch dog. " +
+                       "Legacy fallback above debits the same exact manifest." +
                        serviceControls;
             }
 

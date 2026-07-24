@@ -45,6 +45,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 
         public Transform? FocusAnchor { get; private set; }
 
+        public LastBearingGarageDepartureInteractor? DepartureInteractor
+        {
+            get;
+            private set;
+        }
+
         public bool IsDollhouseCutaway => true;
 
         public bool HasRoof => false;
@@ -191,6 +197,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 tungsten);
             BuildPreparationGauge(darkIron, signal);
             BuildPlanMarkers(darkIron, tungsten, signal);
+            BuildDepartureControl(
+                darkIron,
+                oxide,
+                tungsten,
+                signal);
 
             _winchStand = CreateWinchStand(
                 new Vector3(3.05f, 0f, -2.9f),
@@ -230,6 +241,29 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             ApplyModule(SashaScoutModulePresentation.None);
             ApplyPreparationProgress(0, 0);
             ApplyPlanMarker(GaragePlanMarkerPresentation.None);
+        }
+
+        private void BuildDepartureControl(
+            Material darkIron,
+            Material oxide,
+            Material tungsten,
+            Material signal)
+        {
+            var control = new GameObject(
+                LastBearingGarageDepartureInteractor.RootName);
+            control.transform.SetParent(VehicleDock, false);
+            control.transform.localPosition =
+                new Vector3(2.55f, 0.48f, 0.65f);
+            control.transform.localRotation =
+                Quaternion.Euler(0f, -16f, 0f);
+            DepartureInteractor =
+                control.AddComponent<
+                    LastBearingGarageDepartureInteractor>();
+            DepartureInteractor.Build(
+                darkIron,
+                oxide,
+                tungsten,
+                signal);
         }
 
         /// <summary>

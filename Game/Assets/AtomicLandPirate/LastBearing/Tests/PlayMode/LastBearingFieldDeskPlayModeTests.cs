@@ -369,10 +369,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             desk.Refresh(force: true);
             Assert.That(
                 root.Q<Button>("primary-action-button").text,
-                Is.EqualTo("COMMIT THE MANIFEST"));
+                Is.EqualTo("OPEN GARAGE · PULL LAUNCH DOG"));
             Assert.That(
-                root.Q<Button>("secondary-action-button").text,
-                Is.EqualTo("INSPECT THE GARAGE"));
+                root.Q<Button>("secondary-action-button")
+                    .style.display.value,
+                Is.EqualTo(DisplayStyle.None));
             Assert.That(
                 advanceAction.style.display.value,
                 Is.EqualTo(DisplayStyle.Flex));
