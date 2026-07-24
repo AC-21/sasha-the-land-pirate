@@ -28,6 +28,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private Transform? _recycler;
         private Transform? _machineShop;
         private Transform? _emergencyStorage;
+        private GameObject? _emergencyCisternFill;
         private GameObject? _link;
         private Transform? _sled;
         private GameObject? _humanOperator;
@@ -44,6 +45,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool IsEmergencyStorageVisible =>
             _emergencyStorage?.gameObject.activeSelf == true;
+
+        public bool IsEmergencyCisternFillVisible =>
+            _emergencyCisternFill?.activeInHierarchy == true;
 
         public bool IsLinkVisible => _link?.activeSelf == true;
 
@@ -99,6 +103,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 Vector3.zero,
                 new Vector3(1.25f, 0.9f, 1.25f),
                 concrete).transform;
+            _emergencyCisternFill = CreateBlock(
+                "Emergency Cistern Full Marker",
+                _emergencyStorage,
+                new Vector3(0f, 0.46f, 0f),
+                new Vector3(0.86f, 0.08f, 0.86f),
+                bone);
             _link = CreateBlock(
                 "Canonical Recycler Workshop Link",
                 transform,
@@ -142,6 +152,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _recycler == null ||
                 _machineShop == null ||
                 _emergencyStorage == null ||
+                _emergencyCisternFill == null ||
                 _link == null ||
                 _sled == null ||
                 _humanOperator == null ||
@@ -178,6 +189,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 previewPadIndex,
                 previewQuarterTurns,
                 previewActive);
+            _emergencyCisternFill.SetActive(
+                model.EmergencyCisternCharged &&
+                _emergencyStorage.gameObject.activeSelf);
 
             bool linked = model.CityServiceLinkConnected &&
                 IsValidPad(model.RecyclerPadIndex) &&

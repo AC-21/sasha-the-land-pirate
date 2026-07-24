@@ -509,6 +509,19 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo("select-preparation-and-module"));
             Assert.That(view.IsSledVisible, Is.True);
             Assert.That(controller.CanAdvanceCityServiceSled, Is.False);
+
+            controller.BeginGaragePlan(PreparationChoice.CivicBuffer);
+            controller.CommitGaragePlan(VehicleModule.WinchAssembly);
+            SimulateOneTick(controller);
+            controller.ShowCityOverview();
+            Assert.That(controller.CanPumpEmergencyCistern, Is.True);
+            Assert.That(view.IsEmergencyCisternFillVisible, Is.False);
+            controller.PumpEmergencyCistern();
+            SimulateOneTick(controller);
+            Assert.That(
+                controller.ReadModel.EmergencyCisternCharged,
+                Is.True);
+            Assert.That(view.IsEmergencyCisternFillVisible, Is.True);
         }
 
         [Test]

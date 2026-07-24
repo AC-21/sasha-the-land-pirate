@@ -229,6 +229,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _readModel?.IsHotShiftRunAvailable == true &&
             IsExactFieldDeskCityOverview;
 
+        public bool CanPumpEmergencyCistern =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsEmergencyCisternPumpAvailable == true &&
+            IsExactFieldDeskCityOverview;
+
         public bool CanAcknowledgeDustFront =>
             _pendingCommands.Count == 0 &&
             _readModel?.IsDustFrontAcknowledgementRequired == true;
@@ -732,6 +737,43 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 expectedCompletedCount));
             _status =
                 "Hot Shift queued: 1 fuel · 120 settlement ticks · +2 reclaimed parts.";
+        }
+
+        public void PumpEmergencyCistern()
+        {
+            if (_readModel == null)
+            {
+                _status =
+                    "Start or load Last Bearing before pumping the emergency cistern.";
+                return;
+            }
+
+            if (_pendingCommands.Count != 0)
+            {
+                _status =
+                    "Finish the queued city action before pumping the emergency cistern.";
+                return;
+            }
+
+            if (!IsExactFieldDeskCityOverview)
+            {
+                _status =
+                    "Pump the emergency cistern from the city Field Desk while Sasha is home.";
+                return;
+            }
+
+            if (!_readModel.IsEmergencyCisternPumpAvailable)
+            {
+                _status = _readModel.EmergencyCisternCharged
+                    ? "The emergency cistern already holds its one authorized fill."
+                    : "The emergency cistern needs the commissioned service cell, its operator, a committed rig plan, Sasha home, an unresolved Dust Front, ten units of free water capacity, and fuel beyond the route reserve.";
+                return;
+            }
+
+            Queue(sequence =>
+                new PumpEmergencyCisternCommand(sequence));
+            _status =
+                "Emergency cistern queued: 1 fuel · +10.000 water · one full fill.";
         }
 
         public void AcknowledgeDustFront()
@@ -1671,6 +1713,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 bool hotShiftCompleted = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.HotShiftCompleted);
+                bool emergencyCisternPumped = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.EmergencyCisternPumped);
                 bool dustFrontResolved = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.DustFrontResolved);
@@ -1756,6 +1801,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 {
                     _status =
                         "Hot Shift complete. +2 reclaimed parts; the service sled is parked at the machine shop.";
+                }
+
+                if (emergencyCisternPumped)
+                {
+                    _status =
+                        "Emergency cistern charged. One fuel became +10.000 water; Sasha's planned route reserve remains intact.";
                 }
 
                 // Verdict handling stays after production status so an
@@ -2060,6 +2111,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     || kind == LastBearingEventKind.HotShiftStarted
                     || kind == LastBearingEventKind.HotShiftCheckpointReached
                     || kind == LastBearingEventKind.HotShiftCompleted
+                    || kind == LastBearingEventKind.EmergencyCisternPumped
                     || kind == LastBearingEventKind.DustFrontResolved
                     || kind == LastBearingEventKind.DustFrontAcknowledged)
                 {

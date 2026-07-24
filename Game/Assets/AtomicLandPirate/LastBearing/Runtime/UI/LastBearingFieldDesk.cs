@@ -514,6 +514,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 case LastBearingFieldDeskIntent.CancelCityBuildingPreview: _controller.CancelCityBuildingPreview(); break;
                 case LastBearingFieldDeskIntent.RunHotShift: _controller.StartHotShift(); break;
                 case LastBearingFieldDeskIntent.AcknowledgeDustFront: _controller.AcknowledgeDustFront(); break;
+                case LastBearingFieldDeskIntent.PumpEmergencyCistern: _controller.PumpEmergencyCistern(); break;
                 case LastBearingFieldDeskIntent.BeginWorkshopPush: _controller.BeginGaragePlan(PreparationChoice.WorkshopPush); break;
                 case LastBearingFieldDeskIntent.BeginCivicBuffer: _controller.BeginGaragePlan(PreparationChoice.CivicBuffer); break;
                 case LastBearingFieldDeskIntent.OpenGarage: _controller.OpenGarageBay(); break;

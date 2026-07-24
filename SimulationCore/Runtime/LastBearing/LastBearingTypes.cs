@@ -344,6 +344,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         HotShiftCheckpointReached = 56,
         DustFrontResolved = 57,
         DustFrontAcknowledged = 58,
+        EmergencyCisternPumped = 59,
     }
 
     public enum LastBearingEventCause

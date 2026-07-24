@@ -6,7 +6,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public sealed class LastBearingState
     {
-        public const int CurrentSchemaVersion = 8;
+        public const int CurrentSchemaVersion = 9;
         public const int CityConstructionPadCount = 5;
         public const int UnplacedCityPadIndex = -1;
         public const string SashaProtagonistId = "sasha";
@@ -46,6 +46,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             "city:last-bearing:delivery:parts-batch:0001";
         public const string HotShiftId =
             "city:last-bearing:production:hot-shift";
+        public const string EmergencyCisternId =
+            "city:last-bearing:storage:emergency-cistern";
         public const string DustFrontId =
             "crisis:last-bearing:dust-front";
 
@@ -100,6 +102,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             HotShiftFuelCommittedUnits =
                 builder.HotShiftFuelCommittedUnits;
             HotShiftCompletedCount = builder.HotShiftCompletedCount;
+            EmergencyCisternCharged = builder.EmergencyCisternCharged;
 
             WaterMilli = builder.WaterMilli;
             PartsUnits = builder.PartsUnits;
@@ -257,6 +260,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long HotShiftFuelCommittedUnits { get; private set; }
 
         public long HotShiftCompletedCount { get; private set; }
+
+        public bool EmergencyCisternCharged { get; private set; }
 
         public long WaterMilli { get; private set; }
 
@@ -474,6 +479,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             HotShiftFuelCommittedUnits =
                 state.HotShiftFuelCommittedUnits;
             HotShiftCompletedCount = state.HotShiftCompletedCount;
+            EmergencyCisternCharged = state.EmergencyCisternCharged;
             WaterMilli = state.WaterMilli;
             PartsUnits = state.PartsUnits;
             FuelUnits = state.FuelUnits;
@@ -590,6 +596,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         internal long HotShiftRequiredTicks;
         internal long HotShiftFuelCommittedUnits;
         internal long HotShiftCompletedCount;
+        internal bool EmergencyCisternCharged;
         internal long WaterMilli;
         internal long PartsUnits;
         internal long FuelUnits;

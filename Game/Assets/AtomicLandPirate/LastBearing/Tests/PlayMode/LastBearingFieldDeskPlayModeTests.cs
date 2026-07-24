@@ -191,6 +191,83 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator EmergencyCisternDelegatesOnceMarksStorageAndAutosaves()
+        {
+            LastBearingGameController controller = BuildController();
+            LastBearingFieldDesk desk = RequireDesk(controller);
+            string profileDirectory = InstallTemporarySaveAdapter(controller);
+            CompleteWorkingServiceCell(controller);
+            controller.BeginGaragePlan(PreparationChoice.CivicBuffer);
+            controller.CommitGaragePlan(VehicleModule.WinchAssembly);
+            InvokeSimulationTick(controller);
+            controller.ShowCityOverview();
+            yield return null;
+            desk.Refresh(force: true);
+
+            LastBearingFieldDeskProjection available =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                available.Survey.AdvanceSled.Intent,
+                Is.EqualTo(
+                    LastBearingFieldDeskIntent.PumpEmergencyCistern));
+            Button action = RequireDocument(controller)
+                .rootVisualElement.Q<Button>("leave-trial-button");
+            Assert.That(
+                action.style.display.value,
+                Is.EqualTo(DisplayStyle.Flex));
+            Assert.That(
+                action.text,
+                Is.EqualTo(
+                    "PUMP EMERGENCY CISTERN · 1 FUEL · +10.000 WATER · ONE FILL"));
+            Assert.That(action.enabledSelf, Is.True);
+            LastBearingCityServiceCellView view =
+                controller.World!.CityServiceCellView!;
+            Assert.That(view.IsEmergencyCisternFillVisible, Is.False);
+
+            int generationsBefore = GenerationCount(profileDirectory);
+            string hashBefore = controller.CanonicalHash;
+            long fuelBefore = controller.ReadModel!.FuelUnits;
+            Submit(action);
+            Assert.That(controller.HasPendingPlayerCommands, Is.True);
+            InvokeSimulationTick(controller);
+            desk.Refresh(force: true);
+
+            Assert.That(
+                controller.ReadModel.EmergencyCisternCharged,
+                Is.True);
+            Assert.That(
+                controller.ReadModel.FuelUnits,
+                Is.EqualTo(
+                    fuelBefore
+                    - LastBearingBalanceV1
+                        .EmergencyCisternFuelCostUnits));
+            Assert.That(view.IsEmergencyCisternFillVisible, Is.True);
+            string chargedHash = AssertAutosaveBoundary(
+                controller,
+                profileDirectory,
+                generationsBefore,
+                hashBefore);
+
+            controller.ReturnToTitle();
+            controller.Load();
+            Assert.That(controller.CanonicalHash, Is.EqualTo(chargedHash));
+            Assert.That(
+                controller.ReadModel!.EmergencyCisternCharged,
+                Is.True);
+            controller.ShowCityOverview();
+            desk.Refresh(force: true);
+            Assert.That(view.IsEmergencyCisternFillVisible, Is.True);
+
+            int generationsAfterLoad =
+                GenerationCount(profileDirectory);
+            controller.PumpEmergencyCistern();
+            Assert.That(controller.HasPendingPlayerCommands, Is.False);
+            Assert.That(
+                GenerationCount(profileDirectory),
+                Is.EqualTo(generationsAfterLoad));
+        }
+
+        [UnityTest]
         public IEnumerator HotShiftStallsThenMovesTheCommissioningSledAndAutosaves()
         {
             LastBearingGameController controller = BuildController();
@@ -223,7 +300,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 RequireDocument(controller).rootVisualElement;
             Button secondaryAction =
                 root.Q<Button>("secondary-action-button");
-            Button advanceAction = root.Q<Button>("advance-button");
+            Button advanceAction = root.Q<Button>("leave-trial-button");
             long partsBefore = controller.ReadModel!.PartsUnits;
             long fuelBefore = controller.ReadModel.FuelUnits;
             int generationsBeforeStart =
@@ -435,7 +512,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 root.Q<Button>("primary-action-button").text,
                 Is.EqualTo("OPEN THE PUMP HALL"));
-            Button advanceAction = root.Q<Button>("advance-button");
+            Button advanceAction = root.Q<Button>("leave-trial-button");
             Assert.That(advanceAction.enabledSelf, Is.True);
             Submit(advanceAction);
             Assert.That(controller.HasPendingPlayerCommands, Is.True);
@@ -463,7 +540,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             yield return null;
             VisualElement root =
                 RequireDocument(controller).rootVisualElement;
-            Button advanceAction = root.Q<Button>("advance-button");
+            Button advanceAction = root.Q<Button>("leave-trial-button");
 
             foreach (SpareBearingBatchPhase phase in new[]
                      {

@@ -47,6 +47,7 @@ namespace AtomicLandPirate.LastBearingTests
             FrameRailSalvageTests.RunSave(harness, repoRoot);
             HotShiftTests.RunSave(harness, repoRoot);
             DustFrontVerdictTests.Run(harness);
+            EmergencyCisternTests.Run(harness);
             SaveAtomicTests.Run(harness, repoRoot);
             HomecomingTests.RunSave(harness, repoRoot);
             SaveBoundaryTests.Run(harness, repoRoot);
@@ -126,6 +127,9 @@ namespace AtomicLandPirate.LastBearingTests
                     break;
                 case "v0-dust-front-verdict":
                     DustFrontVerdictTests.Run(harness);
+                    break;
+                case "v0-emergency-cistern":
+                    EmergencyCisternTests.Run(harness);
                     break;
                 default:
                     Console.Error.WriteLine("unknown protected test: " + id);

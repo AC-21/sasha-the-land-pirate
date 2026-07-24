@@ -175,6 +175,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 ApplyRunHotShift(builder, runHotShift, events);
             }
+            else if (command is PumpEmergencyCisternCommand pumpCistern)
+            {
+                ApplyPumpEmergencyCistern(
+                    builder,
+                    pumpCistern,
+                    events);
+            }
             else if (command is SelectPreparationCommand selectPreparation)
             {
                 ApplySelectPreparation(builder, selectPreparation, events);
@@ -773,6 +780,123 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 LastBearingState.HotShiftId,
                 previousFuel,
                 builder.FuelUnits);
+        }
+
+        private static void ApplyPumpEmergencyCistern(
+            LastBearingStateBuilder builder,
+            PumpEmergencyCisternCommand command,
+            LastBearingEventSink events)
+        {
+            if (builder.EmergencyCisternCharged)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (!builder.SliceInfrastructureActive
+                || builder.EmergencyStoragePadIndex
+                    == LastBearingState.UnplacedCityPadIndex
+                || !builder.CityServiceLinkConnected
+                || builder.CityServiceResidentId == null
+                || builder.CityDeliveryStage
+                    != CityDeliveryStage.DeliveredToWorkshop)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_EMERGENCY_CISTERN_SERVICE_CELL_REQUIRED");
+            }
+
+            if (builder.PreparationChoice
+                    == PreparationChoice.Unselected
+                || builder.PlannedModule == VehicleModule.None
+                || builder.ModuleInstallationState
+                    == ModuleInstallationState.None)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_EMERGENCY_CISTERN_RIG_PLAN_REQUIRED");
+            }
+
+            if (builder.ExpeditionPhase != ExpeditionPhase.AtHome)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_EMERGENCY_CISTERN_HOME_REQUIRED");
+            }
+
+            if (builder.DustFrontOutcome != DustFrontOutcome.Unresolved)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_EMERGENCY_CISTERN_DUST_FRONT_RESOLVED");
+            }
+
+            if (builder.HotShiftPhase != HotShiftPhase.Idle)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_EMERGENCY_CISTERN_HOT_SHIFT_ACTIVE");
+            }
+
+            if (builder.WorkshopServiceSlotsReserved != 0)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_EMERGENCY_CISTERN_OPERATOR_UNAVAILABLE");
+            }
+
+            if (builder.WaterMilli
+                > checked(
+                    LastBearingBalanceV1.WaterCapacityMilli
+                    - LastBearingBalanceV1.EmergencyCisternWaterMilli))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_EMERGENCY_CISTERN_CAPACITY_REQUIRED");
+            }
+
+            if (builder.FuelUnits
+                < LastBearingBalanceV1.EmergencyCisternFuelCostUnits)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_EMERGENCY_CISTERN_FUEL_INSUFFICIENT");
+            }
+
+            long routeFuelReserve =
+                LastBearingBalanceV1.RouteFuelCost(
+                    builder.PlannedModule);
+            if (checked(
+                    builder.FuelUnits
+                    - LastBearingBalanceV1.EmergencyCisternFuelCostUnits)
+                < routeFuelReserve)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_EMERGENCY_CISTERN_ROUTE_FUEL_RESERVE_REQUIRED");
+            }
+
+            long previousFuel = builder.FuelUnits;
+            long previousWater = builder.WaterMilli;
+            builder.FuelUnits = checked(
+                builder.FuelUnits
+                - LastBearingBalanceV1.EmergencyCisternFuelCostUnits);
+            builder.WaterMilli = checked(
+                builder.WaterMilli
+                + LastBearingBalanceV1.EmergencyCisternWaterMilli);
+            builder.EmergencyCisternCharged = true;
+
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityResourcesCommitted,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.EmergencyCisternId,
+                previousFuel,
+                builder.FuelUnits);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.EmergencyCisternPumped,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                LastBearingState.EmergencyCisternId,
+                previousWater,
+                builder.WaterMilli);
         }
 
         private static void ApplyInstallModule(

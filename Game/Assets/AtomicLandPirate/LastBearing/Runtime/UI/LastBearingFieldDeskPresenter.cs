@@ -38,6 +38,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         ReturnToTitle = 27,
         RunHotShift = 28,
         AcknowledgeDustFront = 29,
+        PumpEmergencyCistern = 30,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -282,7 +283,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     permitJob,
                     unavailable,
                     unavailable,
-                    CreateSurvey(controller, null, false, false),
+                    CreateSurvey(controller, null, false, false, false),
                     unavailable,
                     unavailable,
                     unavailable,
@@ -320,7 +321,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     IsServiceCellObjective(model.NextObjective),
                     !model.IsDustFrontAcknowledgementRequired &&
                     primary.Intent != LastBearingFieldDeskIntent.RunHotShift &&
-                    secondary.Intent != LastBearingFieldDeskIntent.RunHotShift),
+                    secondary.Intent != LastBearingFieldDeskIntent.RunHotShift,
+                    !model.IsDustFrontAcknowledgementRequired &&
+                    controller.CityNeedInspected),
                 Action(
                     LastBearingFieldDeskIntent.TogglePause,
                     model.PauseCause == PauseCause.None ? "PAUSE" : "RESUME",
@@ -442,6 +445,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.IsHotShiftStalledByWorkshopPush);
             Mix(ref hash, model.IsHotShiftStalledByDustFront);
             Mix(ref hash, model.IsHotShiftActivelyWorking);
+            Mix(ref hash, model.EmergencyCisternCharged);
+            Mix(ref hash, model.IsEmergencyCisternPumpAvailable);
             Mix(ref hash, model.WaterMilli);
             Mix(ref hash, model.WaterTrendMilliPerSettlementTick);
             Mix(ref hash, model.PartsUnits);
@@ -764,7 +769,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingGameController controller,
             LastBearingReadModel? model,
             bool serviceControlsVisible,
-            bool allowSupplementalHotShift)
+            bool allowSupplementalHotShift,
+            bool allowEmergencyCistern)
         {
             if (model == null)
             {
@@ -790,23 +796,43 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool canDispatch =
                 controller.IsExactFieldDeskCityOverview &&
                 !controller.HasPendingPlayerCommands;
+            LastBearingFieldDeskActionProjection supplementalCistern =
+                allowEmergencyCistern && !serviceControlsVisible
+                    ? CreateEmergencyCisternAction(
+                        controller,
+                        model,
+                        canDispatch)
+                    : Hidden();
+            bool cisternOwnsSharedSlot =
+                supplementalCistern.IsVisible &&
+                supplementalCistern.IsEnabled;
             LastBearingFieldDeskActionProjection supplementalHotShift =
                 allowSupplementalHotShift && !serviceControlsVisible
+                && !cisternOwnsSharedSlot
                     ? CreateHotShiftAction(controller, model, canDispatch)
                     : Hidden();
-            bool showSupplementalHotShift =
-                supplementalHotShift.IsVisible;
+            LastBearingFieldDeskActionProjection supplementalCityWork =
+                cisternOwnsSharedSlot
+                    ? supplementalCistern
+                    : supplementalHotShift.IsVisible
+                        ? supplementalHotShift
+                        : supplementalCistern;
+            bool showSupplementalCityWork =
+                supplementalCityWork.IsVisible;
             bool surveyVisible =
-                serviceControlsVisible || showSupplementalHotShift;
+                serviceControlsVisible || showSupplementalCityWork;
             bool canUseService = serviceControlsVisible && canDispatch;
             bool hasPreview = controller.HasCityBuildingPreview;
             return new LastBearingFieldDeskSurveyProjection(
                 surveyVisible,
-                showSupplementalHotShift
-                    ? "HOT SHIFT · CITY WORK ORDER"
+                showSupplementalCityWork
+                    ? supplementalCityWork.Intent ==
+                        LastBearingFieldDeskIntent.PumpEmergencyCistern
+                        ? "EMERGENCY CISTERN · CITY WORK ORDER"
+                        : "HOT SHIFT · CITY WORK ORDER"
                     : FormatServiceCellState(model, controller),
-                showSupplementalHotShift
-                    ? supplementalHotShift.Detail
+                showSupplementalCityWork
+                    ? supplementalCityWork.Detail
                     : "COSTS: RECYCLER 2 · SHOP 3 · STORAGE 1 PART · " +
                       "MOVES FREE BEFORE LINK · " +
                       "LINK LOCKS PERMANENTLY FOR 1 PART · OPERATOR IS NEUTRAL · " +
@@ -868,8 +894,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     canUseService,
                     serviceControlsVisible &&
                     model.Composition != ColonyComposition.HumanOnly),
-                showSupplementalHotShift
-                    ? supplementalHotShift
+                showSupplementalCityWork
+                    ? supplementalCityWork
                     : CreateAdvanceSledAction(
                         controller,
                         model,
@@ -1141,6 +1167,59 @@ namespace AtomicLandPirate.Presentation.LastBearing
         }
 
         private static LastBearingFieldDeskActionProjection
+            CreateEmergencyCisternAction(
+                LastBearingGameController controller,
+                LastBearingReadModel model,
+                bool canDispatch)
+        {
+            bool configuredAtHome =
+                model.ExpeditionPhase == ExpeditionPhase.AtHome &&
+                model.SliceInfrastructureActive &&
+                model.EmergencyStoragePadIndex >= 0 &&
+                model.PreparationChoice != PreparationChoice.Unselected &&
+                model.PlannedModule != VehicleModule.None &&
+                model.DustFrontOutcome == DustFrontOutcome.Unresolved &&
+                model.HotShiftPhase == HotShiftPhase.Idle &&
+                !model.EmergencyCisternCharged;
+            if (!configuredAtHome)
+            {
+                return Hidden();
+            }
+
+            string detail;
+            if (model.PreparationChoice == PreparationChoice.WorkshopPush &&
+                model.PreparationPhase == PreparationPhase.Preparing)
+            {
+                detail =
+                    "Workshop Push has borrowed the operator. Finish preparation before pumping.";
+            }
+            else if (model.WaterMilli >
+                LastBearingBalanceV1.WaterCapacityMilli -
+                model.EmergencyCisternWaterMilli)
+            {
+                detail =
+                    "The full 10.000-water fill will not fit. The cistern never spills or accepts a partial fill.";
+            }
+            else
+            {
+                detail =
+                    "Commit one fuel only after Sasha's planned route reserve; the commissioned operator adds one full 10.000-water emergency fill.";
+            }
+
+            return Action(
+                LastBearingFieldDeskIntent.PumpEmergencyCistern,
+                "PUMP EMERGENCY CISTERN · " +
+                model.EmergencyCisternFuelCostUnits +
+                " FUEL · +" +
+                FormatExactMilli(model.EmergencyCisternWaterMilli) +
+                " WATER · ONE FILL",
+                detail,
+                true,
+                canDispatch && controller.CanPumpEmergencyCistern,
+                LastBearingFieldDeskActionTone.Hazard);
+        }
+
+        private static LastBearingFieldDeskActionProjection
             CreateHotShiftAction(
                 LastBearingGameController controller,
                 LastBearingReadModel model,
@@ -1246,6 +1325,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             long whole = milli / 1000;
             long tenths = (milli < 0 ? -milli : milli) % 1000 / 100;
             return whole + "." + tenths + " WATER";
+        }
+
+        private static string FormatExactMilli(long milli)
+        {
+            long whole = milli / 1000;
+            long fraction = Math.Abs(milli % 1000);
+            return whole + "." + fraction.ToString("D3");
         }
 
         private static string FormatTrend(long trendMilli)

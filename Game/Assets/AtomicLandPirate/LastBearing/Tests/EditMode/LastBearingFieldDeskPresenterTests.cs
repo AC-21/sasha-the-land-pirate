@@ -86,6 +86,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 (int)LastBearingFieldDeskIntent.AcknowledgeDustFront,
                 Is.EqualTo(29));
+            Assert.That(
+                (int)LastBearingFieldDeskIntent.PumpEmergencyCistern,
+                Is.EqualTo(30));
         }
 
         [TestCase(
@@ -259,12 +262,90 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(ready.Survey.IsVisible, Is.True);
             Assert.That(
                 ready.Survey.AdvanceSled.Intent,
-                Is.EqualTo(LastBearingFieldDeskIntent.RunHotShift));
+                Is.EqualTo(
+                    LastBearingFieldDeskIntent.PumpEmergencyCistern));
             Assert.That(
                 ready.Survey.AdvanceSled.Label,
+                Does.Contain(
+                    "PUMP EMERGENCY CISTERN · 1 FUEL · +10.000 WATER"));
+            Assert.That(ready.Survey.AdvanceSled.IsEnabled, Is.True);
+            Assert.That(
+                LastBearingFieldDeskPresenter.IsIntentAvailable(
+                    controller,
+                    LastBearingFieldDeskIntent.PumpEmergencyCistern),
+                Is.True);
+
+            long fuelBefore = controller.ReadModel.FuelUnits;
+            controller.PumpEmergencyCistern();
+            LastBearingCommand[] pending = PendingCommands(controller);
+            Assert.That(pending, Has.Length.EqualTo(1));
+            Assert.That(
+                pending[0],
+                Is.TypeOf<PumpEmergencyCisternCommand>());
+            SimulateOneTick(controller);
+            Assert.That(
+                controller.ReadModel.EmergencyCisternCharged,
+                Is.True);
+            Assert.That(
+                controller.ReadModel.FuelUnits,
+                Is.EqualTo(
+                    fuelBefore
+                    - LastBearingBalanceV1
+                        .EmergencyCisternFuelCostUnits));
+            Assert.That(
+                controller.Status,
+                Does.Contain("Emergency cistern charged"));
+
+            LastBearingFieldDeskProjection charged =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                charged.Survey.AdvanceSled.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.RunHotShift));
+            Assert.That(
+                charged.Survey.AdvanceSled.Label,
                 Is.EqualTo(
                     "RUN HOT SHIFT · 1 FUEL · 120 TICKS · +2 PARTS"));
-            Assert.That(ready.Survey.AdvanceSled.IsEnabled, Is.True);
+        }
+
+        [Test]
+        public void UnavailableCisternDoesNotHideAvailableHotShift()
+        {
+            LastBearingGameController controller =
+                BuildController(ColonyComposition.Mixed);
+            PrepareForHotShift(
+                controller,
+                PreparationChoice.CivicBuffer);
+            long preparationBound =
+                controller.ReadModel!.PreparationRemainingTicks + 2;
+            for (var guard = 0L;
+                 controller.ReadModel!.PreparationPhase ==
+                     PreparationPhase.Preparing &&
+                 guard < preparationBound;
+                 guard++)
+            {
+                SimulateOneTick(controller);
+            }
+
+            InstallControllerState(
+                controller,
+                WithWaterMilli(
+                    controller.State!,
+                    LastBearingBalanceV1.WaterCapacityMilli));
+            Assert.That(controller.CanPumpEmergencyCistern, Is.False);
+            Assert.That(controller.CanStartHotShift, Is.True);
+
+            LastBearingFieldDeskProjection projection =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                projection.Survey.AdvanceSled.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.RunHotShift));
+            Assert.That(
+                projection.Survey.AdvanceSled.IsEnabled,
+                Is.True);
+            Assert.That(
+                projection.Survey.AdvanceSled.Label,
+                Is.EqualTo(
+                    "RUN HOT SHIFT · 1 FUEL · 120 TICKS · +2 PARTS"));
         }
 
         [Test]
@@ -562,6 +643,37 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 builder,
                 LastBearingBalanceV1.DustFrontThresholdCrisisTicks - 1);
             water!.SetValue(builder, holds ? 60020L : 0L);
+            var result = build!.Invoke(builder, null) as LastBearingState;
+            Assert.That(result, Is.Not.Null);
+            return result!;
+        }
+
+        private static LastBearingState WithWaterMilli(
+            LastBearingState state,
+            long waterMilli)
+        {
+            System.Type? builderType =
+                typeof(LastBearingState).Assembly.GetType(
+                    "AtomicLandPirate.Simulation.LastBearing." +
+                    "LastBearingStateBuilder");
+            Assert.That(builderType, Is.Not.Null);
+            const BindingFlags flags =
+                BindingFlags.Instance |
+                BindingFlags.NonPublic |
+                BindingFlags.Public;
+            ConstructorInfo? constructor = builderType!.GetConstructor(
+                flags,
+                binder: null,
+                new[] { typeof(LastBearingState) },
+                modifiers: null);
+            FieldInfo? water = builderType.GetField("WaterMilli", flags);
+            MethodInfo? build = builderType.GetMethod("Build", flags);
+            Assert.That(constructor, Is.Not.Null);
+            Assert.That(water, Is.Not.Null);
+            Assert.That(build, Is.Not.Null);
+
+            object builder = constructor!.Invoke(new object[] { state });
+            water!.SetValue(builder, waterMilli);
             var result = build!.Invoke(builder, null) as LastBearingState;
             Assert.That(result, Is.Not.Null);
             return result!;

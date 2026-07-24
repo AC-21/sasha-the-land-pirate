@@ -79,6 +79,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             ValidatePreparation(state);
             ValidateCityConstruction(state);
             ValidateHotShift(state);
+            ValidateEmergencyCistern(state);
             ValidateDustFront(state);
             ValidateVehicleAndTransaction(state);
             ValidateCargo(state);
@@ -237,6 +238,25 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.HotShiftFuelCommittedUnits
                     == LastBearingBalanceV1.HotShiftFuelCostUnits,
                 "LAST_BEARING_HOT_SHIFT_PROGRESS_STATE_INVALID");
+        }
+
+        private static void ValidateEmergencyCistern(
+            LastBearingState state)
+        {
+            if (!state.EmergencyCisternCharged)
+            {
+                return;
+            }
+
+            Require(
+                state.SliceInfrastructureActive
+                && state.EmergencyStoragePadIndex
+                    != LastBearingState.UnplacedCityPadIndex
+                && state.CityServiceLinkConnected
+                && state.CityServiceResidentId != null
+                && state.CityDeliveryStage
+                    == CityDeliveryStage.DeliveredToWorkshop,
+                "LAST_BEARING_EMERGENCY_CISTERN_STATE_INVALID");
         }
 
         private static void ValidateDustFront(LastBearingState state)
