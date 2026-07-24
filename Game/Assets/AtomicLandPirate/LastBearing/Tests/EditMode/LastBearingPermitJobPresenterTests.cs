@@ -337,6 +337,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 false,
                 false,
                 false,
+                false,
+                false,
+                false,
                 true);
             string outboundLedger = InvokeHudString(
                 "BuildJourneyLedgerText",
@@ -393,6 +396,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 false,
                 false,
                 false,
+                false,
+                false,
+                false,
                 true);
             Assert.That(railControls, Does.Contain("+4 reclaimed parts"));
             state = ApplyOne(
@@ -420,6 +426,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             string loadControls = InvokeHudString(
                 "BuildControlsText",
                 awaitingLoad,
+                false,
+                false,
+                false,
                 false,
                 false,
                 false,
@@ -787,6 +796,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             string hudControls = InvokeHudString(
                 "BuildControlsText",
                 model,
+                false,
+                false,
+                false,
                 false,
                 false,
                 false,

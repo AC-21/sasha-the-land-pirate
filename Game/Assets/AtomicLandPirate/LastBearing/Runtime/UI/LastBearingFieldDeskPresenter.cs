@@ -30,7 +30,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         CommitExpedition = 19,
         OpenPumpHallRepair = 20,
         OpenOneGoodBatchWorkshop = 21,
-        InstallCityImprovement = 22,
+        OpenPumpHallImprovement = 22,
         ServiceFieldSleeve = 23,
         TogglePause = 24,
         Save = 25,
@@ -626,9 +626,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (model.IsCityImprovementInstallationAvailable)
             {
                 primary = Action(
-                    LastBearingFieldDeskIntent.InstallCityImprovement,
-                    "SEAT THE AUXILIARY PUMP",
-                    "Commit the returned rotor to the existing civic socket.",
+                    LastBearingFieldDeskIntent.OpenPumpHallImprovement,
+                    "OPEN PUMP HALL · SEAT AUXILIARY PUMP",
+                    "Frame the returned rotor at its physical civic socket, then release and press E or gamepad south.",
                     true,
                     canDispatch,
                     LastBearingFieldDeskActionTone.Primary);

@@ -533,6 +533,44 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator AuxiliaryPumpOrderRoutesToPhysicalSocketWithoutSubmitting()
+        {
+            LastBearingGameController controller = BuildController();
+            LastBearingFieldDesk desk = RequireDesk(controller);
+            InstallControllerState(
+                controller,
+                CreatePostReturnState(repairTurbine: true));
+            controller.ShowCityOverview();
+            yield return null;
+            desk.Refresh(force: true);
+
+            LastBearingFieldDeskProjection projection =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                projection.PrimaryAction.Intent,
+                Is.EqualTo(
+                    LastBearingFieldDeskIntent.OpenPumpHallImprovement));
+            Assert.That(
+                projection.PrimaryAction.Label,
+                Is.EqualTo("OPEN PUMP HALL · SEAT AUXILIARY PUMP"));
+            string readyHash = controller.CanonicalHash;
+            Button primary = RequireDocument(controller)
+                .rootVisualElement.Q<Button>("primary-action-button");
+
+            Submit(primary);
+
+            Assert.That(controller.HasPendingPlayerCommands, Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(readyHash));
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.BuildingCutaway));
+            Assert.That(controller.World!.IsPumpHallCutawaySelected, Is.True);
+            Assert.That(
+                controller.IsCityImprovementInstallationAvailable,
+                Is.True);
+        }
+
+        [UnityTest]
         public IEnumerator OneGoodBatchKeepsWorkshopPrimaryWithSupplementalHotShift()
         {
             LastBearingGameController controller = BuildController();
