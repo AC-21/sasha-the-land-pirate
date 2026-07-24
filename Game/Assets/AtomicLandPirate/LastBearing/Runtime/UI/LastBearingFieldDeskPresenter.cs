@@ -601,19 +601,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                  model.PreparationPhase == PreparationPhase.Committed))
             {
                 primary = Action(
-                    LastBearingFieldDeskIntent.CommitExpedition,
-                    "COMMIT THE MANIFEST",
-                    "Take responsibility for the bounded fuel and cargo load.",
+                    LastBearingFieldDeskIntent.OpenGarage,
+                    "OPEN GARAGE · PULL LAUNCH DOG",
+                    "Return to Sasha's fixed garage and throw the physical departure control.",
                     true,
                     canDispatch,
                     LastBearingFieldDeskActionTone.Primary);
-                secondary = Action(
-                    LastBearingFieldDeskIntent.OpenGarage,
-                    "INSPECT THE GARAGE",
-                    "Review the fitted Sasha Scout before departure.",
-                    true,
-                    canDispatch,
-                    LastBearingFieldDeskActionTone.Quiet);
+                secondary = Hidden();
                 return;
             }
 

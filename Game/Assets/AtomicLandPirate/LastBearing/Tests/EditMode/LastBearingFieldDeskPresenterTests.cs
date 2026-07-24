@@ -336,16 +336,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 LastBearingFieldDeskPresenter.Present(controller);
             Assert.That(
                 ready.PrimaryAction.Intent,
-                Is.EqualTo(LastBearingFieldDeskIntent.CommitExpedition));
-            Assert.That(
-                ready.PrimaryAction.Label,
-                Is.EqualTo("COMMIT THE MANIFEST"));
-            Assert.That(
-                ready.SecondaryAction.Intent,
                 Is.EqualTo(LastBearingFieldDeskIntent.OpenGarage));
             Assert.That(
-                ready.SecondaryAction.Label,
-                Is.EqualTo("INSPECT THE GARAGE"));
+                ready.PrimaryAction.Label,
+                Is.EqualTo("OPEN GARAGE · PULL LAUNCH DOG"));
+            Assert.That(
+                ready.SecondaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.None));
+            Assert.That(ready.SecondaryAction.IsVisible, Is.False);
             Assert.That(ready.Survey.IsVisible, Is.True);
             Assert.That(
                 ready.Survey.AdvanceSled.Intent,

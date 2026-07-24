@@ -804,10 +804,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.HasCompletedCityGrammarObservation,
                 Is.True,
-                "queuing a departure attempt is not a canonical phase transition");
-            LogAssert.Expect(
-                LogType.Exception,
-                new Regex("LAST_BEARING_TRANSACTION_PREREQUISITES_MISSING"));
+                "a wrong-mode departure attempt is not a canonical phase transition");
+            Assert.That(
+                controller.HasPendingPlayerCommands,
+                Is.False,
+                "wrong-mode departure must fail before a core command is queued");
             InvokeSimulationTick(controller);
 
             Assert.That(
@@ -818,6 +819,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             InstallControllerState(
                 controller,
                 CreateAtHomeModuleState(VehicleModule.WinchAssembly));
+            controller.OpenGarageBay();
             controller.CommitExpedition();
             InvokeSimulationTick(controller);
 

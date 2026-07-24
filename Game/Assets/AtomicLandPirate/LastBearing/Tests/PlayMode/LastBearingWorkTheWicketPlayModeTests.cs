@@ -523,6 +523,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.ReadModel!.VehicleModule,
                 Is.EqualTo(VehicleModule.WinchAssembly));
+            controller.OpenGarageBay();
             controller.CommitExpedition();
             InvokeSimulationTick(controller);
             Assert.That(

@@ -109,6 +109,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public LastBearingFieldDesk? FieldDesk => _fieldDesk;
 
+        public LastBearingHud? Hud => _hud;
+
         public bool IsExactFieldDeskCityOverview =>
             HasActiveGame &&
             _modeCoordinator?.HasActiveMode == true &&
@@ -235,6 +237,37 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _pendingCommands.Exists(command =>
                 command is InstallRigUpgradeCommand install &&
                 install.Upgrade == RigUpgrade.PatchworkSkidPlate);
+
+        public bool IsExpeditionCommitQueued =>
+            _pendingCommands.Exists(command =>
+                command is PrepareExpeditionTransactionCommand ||
+                command is DebitCityManifestCommand ||
+                command is DepartExpeditionCommand);
+
+        public bool CanCommitExpedition =>
+            _pendingCommands.Count == 0 &&
+            _state != null &&
+            _readModel != null &&
+            _readModel.ExpeditionPhase == ExpeditionPhase.AtHome &&
+            _readModel.TransactionPhase == TransactionPhase.None &&
+            _readModel.PreparationPhase == PreparationPhase.Ready &&
+            _readModel.PreparationChoice != PreparationChoice.Unselected &&
+            _readModel.PlannedModule != VehicleModule.None &&
+            _state.ModuleInstallationState ==
+                ModuleInstallationState.Installed &&
+            _readModel.AssignedResidentId != null &&
+            _readModel.SliceInfrastructureActive &&
+            _readModel.PauseCause == PauseCause.None &&
+            !_readModel.IsDustFrontAcknowledgementRequired &&
+            _readModel.FuelUnits >=
+                LastBearingBalanceV1.RouteFuelCost(
+                    _readModel.PlannedModule);
+
+        public bool IsGarageDepartureAvailable =>
+            CanCommitExpedition &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.GarageBay;
 
         public CityBuildingKind CityPreviewBuilding => _cityPreviewBuilding;
 
@@ -440,6 +473,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ConfigureDepotDecisionInteraction(this);
             _world.ConfigureDepotCargoInteraction(this);
             _world.ConfigureDepotReturnInteraction(this);
+            _world.ConfigureGarageDepartureInteraction(this);
             _hud = gameObject.AddComponent<LastBearingHud>();
             _hud.Configure(this, _fieldDesk);
             SetLegacyHudSuppressedByFieldDesk(
@@ -463,6 +497,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
+            _world?.ResetGarageDepartureInteraction();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
@@ -518,6 +553,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
+            _world?.ResetGarageDepartureInteraction();
             _state = null;
             _readModel = null;
             ResetPublicSnapshotsToRuntime();
@@ -1218,6 +1254,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             TryShowCityMode(
                 LastBearingPresentationMode.GarageBay,
                 "Sasha Scout service-bay cutaway active; the vehicle state is unchanged.");
+            if (_readModel != null)
+            {
+                _world?.ApplyGarageDepartureInteraction(_readModel);
+            }
         }
 
         public void AttachRoadModeAdapter(ILastBearingRoadModeAdapter adapter)
@@ -1239,6 +1279,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void CommitExpedition()
         {
+            if (IsExpeditionCommitQueued)
+            {
+                return;
+            }
+
+            if (!IsGarageDepartureAvailable)
+            {
+                _status = ExpeditionCommitUnavailableStatus();
+                return;
+            }
+
             Queue(
                 sequence => new PrepareExpeditionTransactionCommand(
                     sequence,
@@ -1249,7 +1300,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     TransactionId,
                     TransactionFingerprint),
                 sequence => new DepartExpeditionCommand(sequence));
-            _status = "Manifest committed. Sasha owns the road consequence now.";
+            _status =
+                "Departure queued. Fuel and road custody change on the authoritative tick.";
         }
 
         public void ResolveDepot(bool cooperate)
@@ -1565,6 +1617,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotDecisionInteraction();
             _world?.ResetDepotCargoInteraction();
             _world?.ResetDepotReturnInteraction();
+            _world?.ResetGarageDepartureInteraction();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
             if (_saveAdapter == null)
@@ -1620,6 +1673,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.ApplyDepotDecisionInteraction(_readModel);
                 _world?.ApplyDepotCargoInteraction(_readModel);
                 _world?.ApplyDepotReturnInteraction(_readModel);
+                _world?.ApplyGarageDepartureInteraction(_readModel);
             }
         }
 
@@ -2240,6 +2294,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _cityPreviewQuarterTurns,
                 HasCityBuildingPreview);
             _world.ApplyDepotReturnInteraction(_readModel);
+            _world.ApplyGarageDepartureInteraction(_readModel);
             _world.SetCityServiceCellFocus(
                 IsExactFieldDeskCityOverview &&
                 !_readModel.SliceInfrastructureActive);
@@ -2449,6 +2504,52 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _garagePreparationIntent = PreparationChoice.Unselected;
             _world?.ApplyGaragePlanIntent(
                 _readModel?.PreparationChoice ?? PreparationChoice.Unselected);
+        }
+
+        private string ExpeditionCommitUnavailableStatus()
+        {
+            if (_pendingCommands.Count != 0)
+            {
+                return "Another player action is queued; departure was not added.";
+            }
+
+            if (_readModel == null || _state == null)
+            {
+                return "Start or load Last Bearing before departure.";
+            }
+
+            if (_readModel.IsDustFrontAcknowledgementRequired ||
+                _readModel.PauseCause == PauseCause.DustFrontAlert)
+            {
+                return "Acknowledge the Dust Front verdict before departure.";
+            }
+
+            if (_readModel.PauseCause != PauseCause.None)
+            {
+                return "Resume the settlement clock before departure.";
+            }
+
+            if (_readModel.ExpeditionPhase != ExpeditionPhase.AtHome)
+            {
+                return "Sasha is already away from the garage.";
+            }
+
+            if (_readModel.PreparationPhase != PreparationPhase.Ready ||
+                _state.ModuleInstallationState !=
+                    ModuleInstallationState.Installed)
+            {
+                return "Sasha's preparation and fitted module are not ready.";
+            }
+
+            if (_readModel.PlannedModule == VehicleModule.None ||
+                _readModel.FuelUnits <
+                    LastBearingBalanceV1.RouteFuelCost(
+                        _readModel.PlannedModule))
+            {
+                return "The route manifest does not have enough fuel.";
+            }
+
+            return "Operate Sasha's launch clamp or the retained legacy departure button inside the fixed garage.";
         }
 
         private void ClearCityBuildingPreview()

@@ -17,6 +17,9 @@ namespace AtomicLandPirate.LastBearingTests
             string visual = Read(vehicleRoot, "SashaScoutVisual.cs");
             string factory = Read(vehicleRoot, "SashaScoutBlockoutFactory.cs");
             string garage = Read(vehicleRoot, "LastBearingGarageBayView.cs");
+            string departure = Read(
+                vehicleRoot,
+                "LastBearingGarageDepartureInteractor.cs");
             string vehicleView = Read(runtimeRoot, "LastBearingVehicleView.cs");
             string world = Read(runtimeRoot, "LastBearingWorldBuilder.cs");
             string controller = Read(
@@ -101,6 +104,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(garage, "RigUpgradeInstallPulseDurationSeconds");
             Require(garage, "public void PulseRigUpgradeInstall()");
             Require(garage, "public void ResetRigUpgradeInstallPulse()");
+            Require(
+                garage,
+                "LastBearingGarageDepartureInteractor.RootName");
+            Require(garage, "DepartureInteractor.Build(");
             TestHarness.True(
                 garage.IndexOf("AddComponent<Camera>", StringComparison.Ordinal) < 0,
                 "garage cutaway must reuse the one Last Bearing camera");
@@ -196,6 +203,39 @@ namespace AtomicLandPirate.LastBearingTests
             Require(coordinator, "SetInspectionPose");
             Require(camera, "IsInspectionMode");
             Require(camera, "SetInspectionPose");
+            Require(departure, "INTERACT_SASHA_SCOUT_DEPARTURE_CLAMP");
+            Require(departure, "_controller.CommitExpedition();");
+            Require(departure, "_controller?.Hud?.BlocksWorldPointer");
+            Require(controller, "public bool CanCommitExpedition");
+            Require(controller, "public bool IsGarageDepartureAvailable");
+            Require(controller, "public bool IsExpeditionCommitQueued");
+            string commit = Segment(
+                controller,
+                "public void CommitExpedition()",
+                "public void ResolveDepot(");
+            Require(commit, "if (IsExpeditionCommitQueued)");
+            Require(commit, "if (!IsGarageDepartureAvailable)");
+            Require(commit, "new PrepareExpeditionTransactionCommand(");
+            Require(commit, "new DebitCityManifestCommand(");
+            Require(commit, "new DepartExpeditionCommand(sequence)");
+            foreach (string forbidden in new[]
+                     {
+                         "new PrepareExpeditionTransactionCommand",
+                         "new DebitCityManifestCommand",
+                         "new DepartExpeditionCommand",
+                         "LastBearingKernel",
+                         "LastBearingStateBuilder",
+                         "LastBearingCanonicalCodec",
+                         "Save(",
+                     })
+            {
+                TestHarness.True(
+                    departure.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "garage departure interactor contains forbidden authority " +
+                    forbidden);
+            }
 
             foreach (string source in new[] { contract, visual, factory, garage })
             {
