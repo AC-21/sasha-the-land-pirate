@@ -27,6 +27,7 @@ NAMED_TESTS = frozenset(
         "dev-save-atomic",
         "dev-save-boundary",
         "vgr05-one-good-batch",
+        "v0-hands-on-service-cell",
     }
 )
 

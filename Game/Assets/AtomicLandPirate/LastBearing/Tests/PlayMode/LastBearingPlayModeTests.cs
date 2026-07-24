@@ -270,6 +270,378 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator HandsOnServiceCellRunsFromWorldAndSurvivesFourModeTransitions()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            _ = InstallTemporarySaveAdapter(controller);
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            controller.InspectCityNeed();
+            yield return null;
+
+            LastBearingCityServiceCellInteractor interactor =
+                controller.World!.CityServiceCellView!.Interactor!;
+            Assert.That(interactor, Is.Not.Null);
+            Assert.That(interactor.IsBuilt, Is.True);
+            Assert.That(interactor.HasDedicatedInteractionTargets, Is.True);
+            AssertRenderedRootInsideViewport(
+                controller.World.MainCamera!,
+                interactor.transform);
+            long startingParts = controller.ReadModel!.PartsUnits;
+            string canonicalBeforePreview = controller.CanonicalHash;
+
+            Assert.That(
+                controller.FieldDesk!.BlocksWorldPointer(
+                    new Vector2(30f, Screen.height * 0.5f)),
+                Is.True);
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.RecyclerSelectorName);
+            interactor.HoverPad(0);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBeforePreview));
+            Assert.That(interactor.HighlightedPadIndex, Is.EqualTo(0));
+            Assert.That(interactor.IsPadHighlighted(0), Is.True);
+
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Press(keyboard.rKey);
+            yield return null;
+            Release(keyboard.rKey);
+            Assert.That(controller.CityPreviewQuarterTurns, Is.EqualTo(1));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBeforePreview));
+
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                "INTERACT_WORK_PAD_01");
+            Assert.That(controller.HasPendingPlayerCommands, Is.True);
+            InvokeSimulationTick(controller);
+            Assert.That(controller.ReadModel!.RecyclerPadIndex, Is.EqualTo(0));
+            Assert.That(controller.ReadModel.RecyclerQuarterTurns, Is.EqualTo(1));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(startingParts - 2));
+
+            long partsBeforeFreeMove = controller.ReadModel.PartsUnits;
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.RecyclerSelectorName);
+            interactor.HoverPad(4);
+            interactor.RotatePreview();
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                "INTERACT_WORK_PAD_05");
+            InvokeSimulationTick(controller);
+            Assert.That(controller.ReadModel.RecyclerPadIndex, Is.EqualTo(4));
+            Assert.That(controller.ReadModel.RecyclerQuarterTurns, Is.EqualTo(2));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(partsBeforeFreeMove),
+                "pre-lock reposition must remain free");
+
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.MachineShopSelectorName);
+            interactor.HoverPad(4);
+            Assert.That(interactor.LastInteractionRejected, Is.True);
+            Assert.That(interactor.Feedback, Does.Contain("OCCUPIED"));
+            TextMesh feedbackLabel = RequireNamed(
+                    interactor.transform,
+                    LastBearingCityServiceCellInteractor.FeedbackLabelName)
+                .GetComponent<TextMesh>();
+            Assert.That(feedbackLabel.text, Is.EqualTo(interactor.Feedback));
+            Assert.That(
+                feedbackLabel.color.r,
+                Is.GreaterThan(feedbackLabel.color.g));
+            interactor.HoverPad(1);
+            Assert.That(interactor.LastInteractionRejected, Is.False);
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                "INTERACT_WORK_PAD_02");
+            InvokeSimulationTick(controller);
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.EmergencyStorageSelectorName);
+            interactor.HoverPad(2);
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                "INTERACT_WORK_PAD_03");
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(startingParts - 6));
+
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.MachineShopIntakeSocketName);
+            Assert.That(interactor.LastInteractionRejected, Is.True);
+            Assert.That(interactor.Feedback, Does.Contain("OUTPUT FIRST"));
+            Assert.That(controller.HasPendingPlayerCommands, Is.False);
+            long partsBeforeLink = controller.ReadModel.PartsUnits;
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.RecyclerOutputSocketName);
+            Assert.That(interactor.IsLinkSourceSelected, Is.True);
+            controller.SelectCityBuildingPreview(CityBuildingKind.MachineShop);
+            Assert.That(interactor.IsLinkSourceSelected, Is.False);
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                "INTERACT_WORK_PAD_02");
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.HasCityBuildingPreview,
+                Is.False,
+                "An accepted same-pad placement should close the preview so world sockets are operable again.");
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(partsBeforeLink));
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.RecyclerOutputSocketName);
+            Assert.That(
+                interactor.IsLinkSourceSelected,
+                Is.True,
+                interactor.Feedback);
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.MachineShopIntakeSocketName);
+            Assert.That(
+                controller.HasPendingPlayerCommands,
+                Is.True,
+                interactor.Feedback + " · " + controller.Status);
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.CityServiceLinkConnected,
+                Is.True,
+                interactor.Feedback + " · " + controller.Status);
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(partsBeforeLink - 1));
+
+            interactor.SelectBuilding(CityBuildingKind.Recycler);
+            Assert.That(interactor.LastInteractionRejected, Is.True);
+            Assert.That(interactor.Feedback, Does.Contain("LAYOUT LOCKED"));
+            Assert.That(controller.HasCityBuildingPreview, Is.False);
+
+            interactor.SelectResident(ResidentRoster.RobotResidentId);
+            Assert.That(interactor.LastInteractionRejected, Is.True);
+            Assert.That(interactor.Feedback, Does.Contain("not in this colony"));
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.HumanResidentTokenName);
+            Assert.That(
+                interactor.SelectedResidentId,
+                Is.EqualTo(ResidentRoster.HumanResidentId));
+            controller.OpenBuildingCutaway(); // City → Building
+            Assert.That(
+                controller.ModeCoordinator!.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.BuildingCutaway));
+            yield return null;
+            Assert.That(interactor.SelectedResidentId, Is.Null);
+            controller.ShowCityOverview(); // Building → City
+            Assert.That(
+                controller.ModeCoordinator.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.CityOverview));
+            Transform returningHumanToken = RequireNamed(
+                interactor.transform,
+                LastBearingCityServiceCellInteractor.HumanResidentTokenName);
+            Transform returningOperatorSocket = RequireNamed(
+                interactor.transform,
+                LastBearingCityServiceCellInteractor.OperatorSocketName);
+            Camera returningCityCamera = controller.World.MainCamera!;
+            float cityCameraDeadline = Time.realtimeSinceStartup + 2f;
+            while (Time.realtimeSinceStartup < cityCameraDeadline)
+            {
+                Vector3 tokenScreen = returningCityCamera
+                    .WorldToScreenPoint(returningHumanToken.position);
+                Vector3 socketScreen = returningCityCamera
+                    .WorldToScreenPoint(returningOperatorSocket.position);
+                bool tokenVisible = tokenScreen.z > 0f &&
+                    tokenScreen.x >= 0f &&
+                    tokenScreen.x <= Screen.width &&
+                    tokenScreen.y >= 0f &&
+                    tokenScreen.y <= Screen.height;
+                bool socketVisible = socketScreen.z > 0f &&
+                    socketScreen.x >= 0f &&
+                    socketScreen.x <= Screen.width &&
+                    socketScreen.y >= 0f &&
+                    socketScreen.y <= Screen.height;
+                if (tokenVisible && socketVisible)
+                {
+                    break;
+                }
+
+                yield return null;
+            }
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.HumanResidentTokenName);
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.OperatorSocketName);
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.CityServiceResidentId,
+                Is.EqualTo(ResidentRoster.HumanResidentId));
+            AssertRenderedRootInsideViewport(
+                controller.World.MainCamera!,
+                interactor.transform);
+
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.SledDestinationName);
+            Assert.That(interactor.LastInteractionRejected, Is.True);
+            Assert.That(interactor.Feedback, Does.Contain("RECYCLER FIRST"));
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.SledInteractionName);
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.CityDeliveryStage,
+                Is.EqualTo(CityDeliveryStage.InTransit));
+            AssertRenderedRootInsideViewport(
+                controller.World.MainCamera!,
+                interactor.transform);
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.SledInteractionName);
+            Assert.That(interactor.LastInteractionRejected, Is.True);
+            Assert.That(interactor.Feedback, Does.Contain("IN TRANSIT"));
+            long partsBeforeDelivery = controller.ReadModel.PartsUnits;
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor.SledDestinationName);
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.CityDeliveryStage,
+                Is.EqualTo(CityDeliveryStage.DeliveredToWorkshop));
+            Assert.That(controller.ReadModel.CityDeliveryCount, Is.EqualTo(1));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(partsBeforeDelivery + 2));
+            interactor.ClickSledDestination();
+            Assert.That(controller.HasPendingPlayerCommands, Is.False);
+            Assert.That(controller.ReadModel.CityDeliveryCount, Is.EqualTo(1));
+
+            controller.Save();
+            string savedHash = controller.CanonicalHash;
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"));
+
+            controller.ReturnToTitle(); // City → Title
+            Assert.That(controller.HasActiveGame, Is.False);
+            controller.Load(); // Title → City
+            yield return null;
+
+            Assert.That(controller.CanonicalHash, Is.EqualTo(savedHash));
+            Assert.That(
+                controller.ModeCoordinator.CurrentMode,
+                Is.EqualTo(LastBearingPresentationMode.CityOverview));
+            Assert.That(controller.ReadModel!.RecyclerPadIndex, Is.EqualTo(4));
+            Assert.That(controller.ReadModel.RecyclerQuarterTurns, Is.EqualTo(2));
+            Assert.That(controller.ReadModel.CityServiceLinkConnected, Is.True);
+            Assert.That(
+                controller.ReadModel.CityServiceResidentId,
+                Is.EqualTo(ResidentRoster.HumanResidentId));
+            Assert.That(controller.ReadModel.CityDeliveryCount, Is.EqualTo(1));
+            Assert.That(interactor.IsLinkSourceSelected, Is.False);
+            Assert.That(interactor.SelectedResidentId, Is.Null);
+        }
+
+        [UnityTest]
+        public IEnumerator HandsOnServiceCellMouseInputPlacesRecyclerOnNaturalTick()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            _ = InstallTemporarySaveAdapter(controller);
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            controller.InspectCityNeed();
+            yield return null;
+
+            LastBearingCityServiceCellInteractor interactor =
+                controller.World!.CityServiceCellView!.Interactor!;
+            Camera camera = controller.World.MainCamera!;
+            long startingParts = controller.ReadModel!.PartsUnits;
+            var mouse = InputSystem.AddDevice<Mouse>();
+
+            Transform recyclerSelector = RequireNamed(
+                interactor.transform,
+                LastBearingCityServiceCellInteractor.RecyclerSelectorName);
+            Vector3 selectorScreen = camera.WorldToScreenPoint(
+                recyclerSelector.position);
+            Set(
+                mouse.position,
+                new Vector2(selectorScreen.x, selectorScreen.y));
+            yield return null;
+            Press(mouse.leftButton);
+            yield return null;
+            Release(mouse.leftButton);
+            yield return null;
+
+            Assert.That(controller.HasCityBuildingPreview, Is.True);
+            Assert.That(
+                controller.CityPreviewBuilding,
+                Is.EqualTo(CityBuildingKind.Recycler));
+
+            Transform firstPad = RequireNamed(
+                interactor.transform,
+                "INTERACT_WORK_PAD_01");
+            Vector3 padScreen = camera.WorldToScreenPoint(firstPad.position);
+            Set(mouse.position, new Vector2(padScreen.x, padScreen.y));
+            yield return null;
+            Assert.That(interactor.IsPadHighlighted(0), Is.True);
+            Press(mouse.leftButton);
+            yield return null;
+            Release(mouse.leftButton);
+
+            float placementDeadline = Time.realtimeSinceStartup + 2f;
+            while (controller.ReadModel!.RecyclerPadIndex != 0 &&
+                   Time.realtimeSinceStartup < placementDeadline)
+            {
+                yield return null;
+            }
+
+            Assert.That(controller.ReadModel!.RecyclerPadIndex, Is.EqualTo(0));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(startingParts - 2));
+        }
+
+        [UnityTest]
         public IEnumerator StrategyCameraRespondsToInputWithoutChangingCoreState()
         {
             AsyncOperation? load = SceneManager.LoadSceneAsync(
@@ -2829,6 +3201,35 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             }
 
             throw new AssertionException("Missing authored transform: " + name);
+        }
+
+        private static void ActivateWorldTarget(
+            LastBearingGameController controller,
+            LastBearingCityServiceCellInteractor interactor,
+            string targetName)
+        {
+            Transform target = RequireNamed(interactor.transform, targetName);
+            Vector3 screen =
+                controller.World!.MainCamera!.WorldToScreenPoint(
+                    target.position);
+            var pointer = new Vector2(screen.x, screen.y);
+            Assert.That(screen.z, Is.GreaterThan(0f), targetName);
+            Assert.That(
+                screen.x,
+                Is.InRange(0f, (float)Screen.width),
+                targetName + " leaves the horizontal viewport");
+            Assert.That(
+                screen.y,
+                Is.InRange(0f, (float)Screen.height),
+                targetName + " leaves the vertical viewport");
+            Assert.That(
+                controller.FieldDesk!.BlocksWorldPointer(pointer),
+                Is.False,
+                targetName + " is hidden behind the Field Desk");
+            Assert.That(
+                interactor.TryActivateAtScreenPosition(pointer),
+                Is.True,
+                targetName + " cannot be activated through the world ray");
         }
 
         private static void AssertRenderedRootInsideViewport(

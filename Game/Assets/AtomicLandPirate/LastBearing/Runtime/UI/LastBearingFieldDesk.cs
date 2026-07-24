@@ -69,6 +69,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private PanelSettings? _panelSettings;
         private UIDocument? _document;
         private VisualElement? _overlay;
+        private VisualElement? _desk;
         private ScrollView? _scroll;
         private Foldout? _audit;
         private Label? _auditHash;
@@ -111,6 +112,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _visible &&
             _overlay != null &&
             _controller?.IsExactFieldDeskCityOverview == true;
+
+        public bool BlocksWorldPointer(Vector2 screenPosition)
+        {
+            if (!OwnsCityOverview ||
+                _desk?.panel == null)
+            {
+                return false;
+            }
+
+            Vector2 panelPosition = RuntimePanelUtils.ScreenToPanel(
+                _desk.panel,
+                new Vector2(
+                    screenPosition.x,
+                    Screen.height - screenPosition.y));
+            return _desk.worldBound.Contains(panelPosition);
+        }
 
         public LastBearingFieldDeskPerformanceTopology
             CapturePerformanceTopology()
@@ -338,6 +355,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private void CacheElements()
         {
             VisualElement root = _document!.rootVisualElement;
+            _desk = Require<VisualElement>(root, "field-desk");
             _scroll = Require<ScrollView>(root, "desk-scroll");
             _audit = Require<Foldout>(root, "audit-foldout");
             _auditHash = Require<Label>(root, "audit-hash-label");

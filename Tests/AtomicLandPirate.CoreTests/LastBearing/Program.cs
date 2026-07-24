@@ -131,6 +131,13 @@ namespace AtomicLandPirate.LastBearingTests
                 case "v0-emergency-cistern":
                     EmergencyCisternTests.Run(harness);
                     break;
+                case "v0-hands-on-service-cell":
+                    harness.Run(
+                        "world service-cell source contract",
+                        () => CityServiceCellInteractionSourceContract.Verify(
+                            repoRoot));
+                    CityConstructionTests.Run(harness);
+                    break;
                 default:
                     Console.Error.WriteLine("unknown protected test: " + id);
                     return 2;

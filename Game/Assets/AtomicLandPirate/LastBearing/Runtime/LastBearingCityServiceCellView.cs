@@ -35,6 +35,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private GameObject? _robotOperator;
         private bool _built;
 
+        public LastBearingCityServiceCellInteractor? Interactor
+        {
+            get;
+            private set;
+        }
+
         public bool IsVisible => gameObject.activeSelf;
 
         public bool IsRecyclerVisible =>
@@ -63,7 +69,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Material concrete,
             Material iron,
             Material oxide,
-            Material bone)
+            Material bone,
+            Material tungsten,
+            Material signal)
         {
             if (_built)
             {
@@ -133,6 +141,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 Vector3.zero,
                 new Vector3(0.34f, 0.7f, 0.34f),
                 iron);
+            Interactor =
+                gameObject.AddComponent<LastBearingCityServiceCellInteractor>();
+            Interactor.Build(
+                iron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
             gameObject.SetActive(false);
         }
 
@@ -201,10 +217,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (linked)
             {
                 Vector3 routeStart = WithHeight(
-                    PadPositions[model.RecyclerPadIndex],
+                    PadPositions[model.RecyclerPadIndex] +
+                    RotateOffset(
+                        new Vector3(0.45f, 0f, 0f),
+                        model.RecyclerQuarterTurns),
                     0.18f);
                 Vector3 routeEnd = WithHeight(
-                    PadPositions[model.MachineShopPadIndex],
+                    PadPositions[model.MachineShopPadIndex] +
+                    RotateOffset(
+                        new Vector3(-0.45f, 0f, 0f),
+                        model.MachineShopQuarterTurns),
                     0.18f);
                 Vector3 routeDirection = routeEnd - routeStart;
                 _link.transform.localPosition =
@@ -252,10 +274,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 Vector3 operatorPosition =
                     PadPositions[model.MachineShopPadIndex] +
-                    new Vector3(0.55f, 0f, 0.55f);
+                    RotateOffset(
+                        new Vector3(0.55f, 0f, 0.55f),
+                        model.MachineShopQuarterTurns);
                 _humanOperator.transform.localPosition = operatorPosition;
                 _robotOperator.transform.localPosition = operatorPosition;
             }
+
+            Interactor?.Apply(model, _sled);
         }
 
         public void Hide()
@@ -304,6 +330,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private static Vector3 WithHeight(Vector3 position, float height)
         {
             return new Vector3(position.x, height, position.z);
+        }
+
+        private static Vector3 RotateOffset(
+            Vector3 offset,
+            int quarterTurns)
+        {
+            return Quaternion.Euler(
+                0f,
+                quarterTurns * 90f,
+                0f) * offset;
         }
 
         private static GameObject CreateBlock(
