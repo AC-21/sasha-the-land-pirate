@@ -29,6 +29,7 @@ NAMED_TESTS = frozenset(
         "vgr05-one-good-batch",
         "vgr21-post-fuel-bond",
         "vgr22-receive-water-tender",
+        "vgr23-service-the-scout",
         "v0-hands-on-service-cell",
     }
 )

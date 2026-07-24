@@ -121,6 +121,15 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     state.VehicleModule);
             VehicleLateralMilli = state.VehicleLateralMilli;
             VehicleConditionMilli = state.VehicleConditionMilli;
+            VehicleServicePartsCostUnits =
+                LastBearingBalanceV1.HotShiftOutputPartsUnits;
+            VehicleServiceReservePartsUnits =
+                LastBearingBalanceV1.MinimumPostReturnPartsUnits;
+            IsVehicleServiceNeeded =
+                state.VehicleConditionMilli
+                    < LastBearingBalanceV1.StartingVehicleConditionMilli;
+            IsVehicleServiceAvailable =
+                ComputeVehicleServiceAvailable(state);
             RepairCargoKind = state.RepairCargoKind;
             RepairCargoCustody = state.RepairCargoCustody;
             FrameRailSalvageCustody =
@@ -295,6 +304,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long WreckLineGateTicks { get; private set; }
         public int VehicleLateralMilli { get; private set; }
         public long VehicleConditionMilli { get; private set; }
+        public long VehicleServicePartsCostUnits { get; private set; }
+        public long VehicleServiceReservePartsUnits { get; private set; }
+        public bool IsVehicleServiceNeeded { get; private set; }
+        public bool IsVehicleServiceAvailable { get; private set; }
         public RepairCargoKind RepairCargoKind { get; private set; }
         public RepairCargoCustody RepairCargoCustody { get; private set; }
         public FrameRailSalvageCustody FrameRailSalvageCustody
@@ -654,6 +667,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return "post-fuel-bond-at-claims-counter";
             }
 
+            if (ComputeVehicleServiceAvailable(state))
+            {
+                return "service-scout-in-garage";
+            }
+
             if (state.SpareBearingBatchPhase
                 == SpareBearingBatchPhase.Settled)
             {
@@ -679,6 +697,33 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             return "observe-recovering-waterworks";
+        }
+
+        private static bool ComputeVehicleServiceAvailable(
+            LastBearingState state)
+        {
+            long requiredParts = checked(
+                LastBearingBalanceV1.HotShiftOutputPartsUnits
+                + LastBearingBalanceV1.MinimumPostReturnPartsUnits);
+            return state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.Finalized
+                && state.TurbineCondition != TurbineCondition.Failing
+                && state.SliceInfrastructureActive
+                && state.CityDeliveryStage
+                    == CityDeliveryStage.DeliveredToWorkshop
+                && state.VehicleConditionMilli
+                    < LastBearingBalanceV1.StartingVehicleConditionMilli
+                && state.PartsUnits >= requiredParts
+                && state.HotShiftPhase == HotShiftPhase.Idle
+                && state.NextCityDecision == NextCityDecision.None
+                && state.FactionAidPolicy
+                    != FactionAidPolicy.EmergencyWaterQueued
+                && !state.MaintenanceDue
+                && state.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.InProgress
+                && state.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.Complete
+                && !state.IsDustFrontAcknowledgementRequired;
         }
 
         private static bool ComputeCityImprovementInstallationAvailable(

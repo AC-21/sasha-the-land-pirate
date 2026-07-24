@@ -295,6 +295,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     receiveAid,
                     events);
             }
+            else if (command is ServiceScoutCommand serviceScout)
+            {
+                ApplyServiceScout(
+                    builder,
+                    serviceScout,
+                    events);
+            }
             else if (command is ServiceFieldSleeveCommand service)
             {
                 ApplyServiceSleeve(builder, service, events);
@@ -2587,6 +2594,84 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 "settlement:last-bearing:water",
                 previousWater,
                 builder.WaterMilli);
+        }
+
+        private static void ApplyServiceScout(
+            LastBearingStateBuilder builder,
+            ServiceScoutCommand command,
+            LastBearingEventSink events)
+        {
+            bool urgentReturnWorkResolved =
+                builder.ExpeditionPhase == ExpeditionPhase.AtHome
+                && builder.TransactionPhase == TransactionPhase.Finalized
+                && builder.TurbineCondition != TurbineCondition.Failing
+                && builder.SliceInfrastructureActive
+                && builder.CityDeliveryStage
+                    == CityDeliveryStage.DeliveredToWorkshop
+                && builder.HotShiftPhase == HotShiftPhase.Idle
+                && builder.NextCityDecision == NextCityDecision.None
+                && builder.FactionAidPolicy
+                    != FactionAidPolicy.EmergencyWaterQueued
+                && !builder.MaintenanceDue
+                && builder.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.InProgress
+                && builder.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.Complete
+                && !builder.IsDustFrontAcknowledgementRequired;
+            if (builder.VehicleConditionMilli
+                    == LastBearingBalanceV1.StartingVehicleConditionMilli
+                && urgentReturnWorkResolved
+                && builder.PartsUnits
+                    >= LastBearingBalanceV1.MinimumPostReturnPartsUnits)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            if (!urgentReturnWorkResolved
+                || builder.VehicleConditionMilli
+                    >= LastBearingBalanceV1.StartingVehicleConditionMilli)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_VEHICLE_SERVICE_NOT_READY");
+            }
+
+            long serviceCost =
+                LastBearingBalanceV1.HotShiftOutputPartsUnits;
+            long requiredParts = checked(
+                serviceCost
+                + LastBearingBalanceV1.MinimumPostReturnPartsUnits);
+            if (builder.PartsUnits < requiredParts)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_VEHICLE_SERVICE_PARTS_INSUFFICIENT");
+            }
+
+            long previousParts = builder.PartsUnits;
+            long previousCondition = builder.VehicleConditionMilli;
+            builder.PartsUnits = checked(builder.PartsUnits - serviceCost);
+            builder.VehicleConditionMilli =
+                LastBearingBalanceV1.StartingVehicleConditionMilli;
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.CityResourcesCommitted,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                "settlement:last-bearing:parts",
+                previousParts,
+                builder.PartsUnits);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.VehicleConditionChanged,
+                LastBearingEventCause.PlayerCommand,
+                builder.GlobalTick,
+                command.Sequence,
+                "vehicle:sasha:service-cell",
+                previousCondition,
+                builder.VehicleConditionMilli);
         }
 
         private static void ApplyServiceSleeve(

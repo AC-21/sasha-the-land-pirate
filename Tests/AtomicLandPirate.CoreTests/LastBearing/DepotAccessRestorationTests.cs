@@ -282,9 +282,9 @@ namespace AtomicLandPirate.LastBearingTests
                     item.Kind != LastBearingEventKind.LiquidCargoTransferred),
                 "fuel bond re-transferred liquid");
             TestHarness.Equal(
-                "route-permit-recorded",
+                "service-scout-in-garage",
                 result.ReadModel.NextObjective,
-                "settled objective");
+                "post-bond objective");
         }
 
         private static void SharedServiceAloneDoesNotClearAdverseDecision()
