@@ -768,6 +768,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(wreck.IsCanonicalFrameRailCargoVisible, Is.True);
             Assert.That(wreck.IsRoadFrameRailCargoVisible, Is.True);
             AssertRoadPresentation(controller, roadRig, active: true);
+            int rotorAndRailMass =
+                LastBearingModeCoordinator.PumpRotorPresentationMassKilograms +
+                LastBearingModeCoordinator.FrameRailPresentationMassKilograms;
+            Assert.That(
+                roadRig.Adapter.LastCargoMassKilograms,
+                Is.EqualTo(rotorAndRailMass));
+            Assert.That(
+                roadRig.Vehicle.Telemetry.CargoMassKilograms,
+                Is.EqualTo((float)rotorAndRailMass));
             Assert.That(
                 controller.SaveStatus,
                 Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"));
@@ -782,6 +791,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.ReadModel!.FrameRailSalvageCustody,
                 Is.EqualTo(FrameRailSalvageCustody.Vehicle));
             Assert.That(wreck.IsRoadFrameRailCargoVisible, Is.True);
+            Assert.That(
+                roadRig.Adapter.LastCargoMassKilograms,
+                Is.EqualTo(rotorAndRailMass),
+                "canonical reload must reconstruct the same road load");
 
             var kernel = new LastBearingKernel();
             LastBearingState state = DriveUntilDepotRecoveryAvailable(
@@ -802,9 +815,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             state = DriveUntilPhase(state, ExpeditionPhase.Returned);
             InstallControllerState(controller, state);
             long partsBeforeCheckIn = controller.ReadModel!.PartsUnits;
+            int loadedReturnMass =
+                rotorAndRailMass +
+                LastBearingModeCoordinator
+                    .CeramicBearingPresentationMassKilograms;
 
             Assert.That(controller.IsReturnCheckInAvailable, Is.True);
             Assert.That(wreck.IsCanonicalFrameRailCargoVisible, Is.True);
+            Assert.That(
+                roadRig.Adapter.LastCargoMassKilograms,
+                Is.EqualTo(loadedReturnMass));
             controller.CompleteReturn();
             Assert.That(PendingCommandCount(controller), Is.EqualTo(2));
             InvokeSimulationTick(controller);
@@ -821,6 +841,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.ReadModel.RepairCargoCustody,
                 Is.EqualTo(RepairCargoCustody.Vehicle));
+            Assert.That(
+                roadRig.Adapter.LastCargoMassKilograms,
+                Is.EqualTo(
+                    LastBearingModeCoordinator
+                        .CeramicBearingPresentationMassKilograms),
+                "credited rails and unloaded rotor must stop weighing on the rig");
             Assert.That(wreck.IsCanonicalFrameRailCargoVisible, Is.False);
             Assert.That(wreck.IsRoadFrameRailCargoVisible, Is.False);
             Assert.That(controller.Status, Does.Contain("+4 reclaimed parts"));

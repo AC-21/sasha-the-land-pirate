@@ -889,6 +889,50 @@ namespace AtomicLandPirate.LastBearingTests
                 modeCoordinator,
                 "readModel.IsWreckLineFrameRailRecoveryAvailable");
             Require(modeCoordinator, "ApplyDerivedPresentationLoad");
+            Require(
+                modeCoordinator,
+                "DerivePresentationCargoMassKilograms(readModel)");
+            string presentationCargoMass = Segment(
+                modeCoordinator,
+                "public static int DerivePresentationCargoMassKilograms(",
+                "public static LastBearingRoadDamageBand " +
+                "DerivePresentationDamageBand(");
+            Require(
+                presentationCargoMass,
+                "readModel.HeavyCargoCustody == HeavyCargoCustody.Vehicle");
+            Require(
+                presentationCargoMass,
+                "FrameRailSalvageCustody.Vehicle");
+            Require(
+                presentationCargoMass,
+                "readModel.RepairCargoCustody == RepairCargoCustody.Vehicle");
+            Require(
+                presentationCargoMass,
+                "readModel.LiquidCargoCustody == LiquidCargoCustody.Vehicle");
+            Require(
+                presentationCargoMass,
+                "readModel.LiquidCargoQuantityMilli");
+            Require(
+                presentationCargoMass,
+                "MaximumPresentationCargoMassKilograms");
+            foreach (string forbidden in new[]
+            {
+                "LastBearingState",
+                "LastBearingKernel",
+                "LastBearingCommand",
+                "LastBearingCanonicalCodec",
+                "RoadFeelTelemetry",
+                "Rigidbody",
+                "ApplyDerivedPresentationLoad",
+            })
+            {
+                TestHarness.True(
+                    presentationCargoMass.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "presentation cargo derivation contains forbidden authority " +
+                    forbidden);
+            }
             Require(modeCoordinator, "readModel.VehicleConditionMilli");
             Require(modeCoordinator, "DerivePresentationDamageBand");
             Require(modeCoordinator, "LastBearingRoadDamageBand.Critical");
