@@ -1,0 +1,116 @@
+#!/bin/sh
+
+set -eu
+
+CANONICAL_REPOSITORY='/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate'
+CANONICAL_PROJECT="$CANONICAL_REPOSITORY/Game"
+DEFAULT_UNITY_CLI="$CANONICAL_REPOSITORY/.scratch/unity-cli/bin/unity"
+UNITY_CLI_BIN=${UNITY_CLI_BIN:-$DEFAULT_UNITY_CLI}
+
+fail()
+{
+    printf '%s\n' "unity-canonical: $*" >&2
+    exit 64
+}
+
+[ -d "$CANONICAL_PROJECT/Assets" ] ||
+    fail "canonical project is unavailable: $CANONICAL_PROJECT"
+[ -f "$CANONICAL_PROJECT/ProjectSettings/ProjectVersion.txt" ] ||
+    fail "canonical project metadata is unavailable"
+[ -x "$UNITY_CLI_BIN" ] ||
+    fail "Unity CLI is unavailable: $UNITY_CLI_BIN"
+
+# This launcher owns project and Editor selection. Explicit selectors are
+# either redundant or a path-scope escape, so fail before Unity can import or
+# connect to anything outside the canonical Game.
+for argument in "$@"
+do
+    lower_argument=$(printf '%s' "$argument" | tr '[:upper:]' '[:lower:]')
+    case "$lower_argument" in
+        *-projectpath*|*--project-path*|*--project*)
+            fail "do not pass project selectors; this launcher pins the canonical Game"
+            ;;
+        --runtime|--runtime=*|--runtime-path|--runtime-path=*)
+            fail "do not pass runtime selectors; this launcher pins the canonical Editor"
+            ;;
+    esac
+
+    if [ -d "$argument/Assets" ] &&
+       [ -f "$argument/ProjectSettings/ProjectVersion.txt" ]
+    then
+        fail "do not pass a Unity project path; this launcher pins the canonical Game"
+    fi
+
+    if [ -d "$CANONICAL_PROJECT/$argument/Assets" ] &&
+       [ -f "$CANONICAL_PROJECT/$argument/ProjectSettings/ProjectVersion.txt" ]
+    then
+        fail "do not pass a relative Unity project path; this launcher pins the canonical Game"
+    fi
+done
+
+export UNITY_PROJECT_PATH="$CANONICAL_PROJECT"
+cd "$CANONICAL_PROJECT"
+
+command_name=${1:-status}
+if [ "$#" -gt 0 ]
+then
+    shift
+fi
+
+case "$command_name" in
+    open|build|run|test)
+        exec "$UNITY_CLI_BIN" "$command_name" "$CANONICAL_PROJECT" "$@"
+        ;;
+    command|cmd)
+        exec "$UNITY_CLI_BIN" "$command_name" \
+            --project-path "$CANONICAL_PROJECT" "$@"
+        ;;
+    pipeline|pipe)
+        pipeline_command=${1:-list}
+        if [ "$#" -gt 0 ]
+        then
+            shift
+        fi
+        case "$pipeline_command" in
+            install|upgrade)
+                exec "$UNITY_CLI_BIN" "$command_name" "$pipeline_command" \
+                    --project-path "$CANONICAL_PROJECT" "$@"
+                ;;
+            *)
+                exec "$UNITY_CLI_BIN" "$command_name" "$pipeline_command" "$@"
+                ;;
+        esac
+        ;;
+    projects|p)
+        projects_command=${1:-list}
+        if [ "$#" -gt 0 ]
+        then
+            shift
+        fi
+        case "$projects_command" in
+            list)
+                exec "$UNITY_CLI_BIN" "$command_name" "$projects_command" \
+                    "$@"
+                ;;
+            open|info|require|upgrade)
+                exec "$UNITY_CLI_BIN" "$command_name" "$projects_command" \
+                    "$CANONICAL_PROJECT" "$@"
+                ;;
+            *)
+                fail "unsupported or mutating Hub project command: $projects_command"
+                ;;
+        esac
+        ;;
+    status)
+        exec "$UNITY_CLI_BIN" status --project "$CANONICAL_PROJECT" "$@"
+        ;;
+    list)
+        exec "$UNITY_CLI_BIN" list --project-path "$CANONICAL_PROJECT" "$@"
+        ;;
+    -* )
+        fail "put the Unity command first; pass global options after it"
+        ;;
+    *)
+        fail "unsupported command outside the canonical project allowlist: $command_name"
+        ;;
+esac

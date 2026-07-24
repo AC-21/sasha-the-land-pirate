@@ -66,6 +66,69 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
+        public void DirectCargoTargetIsOneDerivedTriggerOutsideTheCargoView()
+        {
+            LastBearingGameController controller = BuildController();
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingDepotCargoLoadingView view =
+                world.DepotCargoLoadingView!;
+            LastBearingDepotCargoInteractor interactor =
+                world.DepotCargoInteractor!;
+            string canonicalBefore = controller.CanonicalHash;
+
+            Assert.That(interactor.IsBuilt, Is.True);
+            Assert.That(
+                interactor.HasDedicatedInteractionTarget,
+                Is.True);
+            Assert.That(interactor.IsSourceTargetVisible, Is.False);
+            Assert.That(interactor.IsSourceFocused, Is.False);
+            Assert.That(
+                Vector3.Distance(
+                    interactor.SourceTargetWorldPosition,
+                    view.InteractionAnchor!.position),
+                Is.LessThan(0.0001f));
+            Assert.That(
+                interactor.transform.parent,
+                Is.EqualTo(view.transform.parent),
+                "the input trigger must remain a sibling of the physics-free cargo view");
+            Assert.That(
+                interactor.GetComponentsInChildren<Rigidbody>(true),
+                Is.Empty);
+            Assert.That(
+                interactor.GetComponentsInChildren<Camera>(true),
+                Is.Empty);
+
+            Collider[] colliders =
+                interactor.GetComponentsInChildren<Collider>(true);
+            Assert.That(colliders, Has.Length.GreaterThanOrEqualTo(1));
+            foreach (Collider collider in colliders)
+            {
+                if (collider.name ==
+                    LastBearingDepotCargoInteractor.SourceTargetName)
+                {
+                    Assert.That(collider.enabled, Is.True);
+                    Assert.That(collider.isTrigger, Is.True);
+                    Assert.That(
+                        collider.gameObject.layer,
+                        Is.EqualTo(
+                            LastBearingDepotCargoInteractor.InteractionLayer));
+                }
+                else
+                {
+                    Assert.That(collider.enabled, Is.False, collider.name);
+                }
+            }
+
+            foreach (Collider collider in
+                     view.GetComponentsInChildren<Collider>(true))
+            {
+                Assert.That(collider.enabled, Is.False, collider.name);
+            }
+
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+        }
+
+        [Test]
         public void ExactCargoAndCustodySelectOneTruthfulPhysicalSourceOrScoutLoad()
         {
             LastBearingGameController controller = BuildController();

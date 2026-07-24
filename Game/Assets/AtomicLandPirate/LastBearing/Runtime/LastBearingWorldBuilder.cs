@@ -114,6 +114,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             private set;
         }
 
+        public LastBearingDepotCargoInteractor? DepotCargoInteractor
+        {
+            get;
+            private set;
+        }
+
         public LastBearingDepotDecisionInteractor? DepotDecisionInteractor
         {
             get;
@@ -428,6 +434,28 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingReadModel model)
         {
             DepotDecisionInteractor?.Apply(model);
+        }
+
+        public void ConfigureDepotCargoInteraction(
+            LastBearingGameController controller)
+        {
+            if (MainCamera == null || DepotCargoInteractor == null)
+            {
+                throw new InvalidOperationException(
+                    "Depot cargo interaction requires the shared camera.");
+            }
+
+            DepotCargoInteractor.Configure(controller, MainCamera);
+        }
+
+        public void ResetDepotCargoInteraction()
+        {
+            DepotCargoInteractor?.ResetLocalFocus();
+        }
+
+        public void ApplyDepotCargoInteraction(LastBearingReadModel model)
+        {
+            DepotCargoInteractor?.Apply(model);
         }
 
         public void ConfigureDepotReturnInteraction(
@@ -1068,6 +1096,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 iron,
                 oxide,
                 bone,
+                tungsten,
+                signal);
+
+            var depotCargoInteraction = new GameObject(
+                LastBearingDepotCargoInteractor.RootName);
+            depotCargoInteraction.transform.SetParent(depot, false);
+            DepotCargoInteractor =
+                depotCargoInteraction.AddComponent<
+                    LastBearingDepotCargoInteractor>();
+            DepotCargoInteractor.Build(
+                DepotCargoLoadingView.InteractionAnchor ??
+                    throw new MissingReferenceException(
+                        "Depot cargo interaction requires its source anchor."),
                 tungsten,
                 signal);
 
