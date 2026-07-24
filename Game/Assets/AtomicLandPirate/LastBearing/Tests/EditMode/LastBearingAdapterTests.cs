@@ -281,7 +281,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
-        public void DepotRecoveryViewIsReadablePhysicsFreeAndCoreIsolated()
+        public void DepotRecoveryViewHasOneCoreIsolatedPhysicalBridleControl()
         {
             _root = new GameObject(LastBearingGameController.RuntimeRootName);
             var controller = _root.AddComponent<LastBearingGameController>();
@@ -311,11 +311,34 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 recovery.GetComponentsInChildren<Camera>(true),
                 Is.Empty);
+            Assert.That(recovery.Interactor, Is.Not.Null);
             Assert.That(
-                recovery.GetComponentsInChildren<Collider>(true),
-                Is.Not.Empty);
-            foreach (Collider collider in
-                     recovery.GetComponentsInChildren<Collider>(true))
+                _root.GetComponentsInChildren<
+                    LastBearingDepotApproachInteractor>(
+                    includeInactive: true),
+                Has.Length.EqualTo(1));
+            LastBearingDepotApproachInteractor interactor =
+                recovery.Interactor!;
+            Assert.That(interactor.IsBuilt, Is.True);
+            Assert.That(interactor.HasDedicatedInteractionTarget, Is.True);
+            Assert.That(interactor.IsTargetVisible, Is.False);
+            Collider[] recoveryColliders =
+                recovery.GetComponentsInChildren<Collider>(true);
+            Assert.That(
+                recoveryColliders.Count(collider => collider.enabled),
+                Is.EqualTo(1));
+            Collider target = recoveryColliders.Single(
+                collider => collider.enabled);
+            Assert.That(
+                target.name,
+                Is.EqualTo(LastBearingDepotApproachInteractor.TargetName));
+            Assert.That(target.isTrigger, Is.True);
+            Assert.That(
+                target.gameObject.layer,
+                Is.EqualTo(
+                    LastBearingDepotApproachInteractor.InteractionLayer));
+            foreach (Collider collider in recoveryColliders.Where(
+                         collider => collider != target))
             {
                 Assert.That(collider.enabled, Is.False, collider.name);
             }

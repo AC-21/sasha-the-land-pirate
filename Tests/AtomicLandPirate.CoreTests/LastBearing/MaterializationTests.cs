@@ -47,6 +47,8 @@ namespace AtomicLandPirate.LastBearingTests
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCityServiceCellInteractor.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingCityServiceCellInteractor.cs.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingDepotApproachRecoveryView.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingDepotApproachInteractor.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingDepotApproachInteractor.cs.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingRouteModulePointView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingWreckLineInteractor.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingWreckLineInteractor.cs.meta",

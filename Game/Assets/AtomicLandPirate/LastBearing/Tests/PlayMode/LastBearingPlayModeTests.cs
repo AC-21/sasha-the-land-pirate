@@ -941,11 +941,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingGameController controller =
                 UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
             controller.enabled = false;
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Press(keyboard.eKey);
             LastBearingState outbound = CreateOutboundState();
             InstallControllerState(controller, outbound);
             LastBearingWorldBuilder world = controller.World!;
             RoadFeelRigInstance roadRig = world.RoadFeelRig!;
             Rigidbody body = roadRig.Vehicle.Body;
+            LastBearingDepotApproachInteractor interactor =
+                world.DepotApproachInteractor!;
             Transform interactionAnchor =
                 world.DepotApproachRecoveryView!.InteractionAnchor!;
             string outboundHash = controller.CanonicalHash;
@@ -963,6 +967,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingState recoveryGate =
                 DriveUntilDepotRecoveryAvailable(outbound);
             InstallControllerState(controller, recoveryGate);
+            yield return null;
+            Assert.That(interactor.IsTargetVisible, Is.True);
+            Assert.That(interactor.IsFocused, Is.True);
+            Assert.That(interactor.IsInputArmed, Is.False);
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            Release(keyboard.eKey);
+            yield return null;
+            Assert.That(interactor.IsInputArmed, Is.True);
             AssertRoadRecoveryHold(controller, roadRig);
             long arrivalProgress =
                 controller.State!.ArrivalFactionClaimProgressMilli;
@@ -983,11 +995,31 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.True);
             AssertRoadRecoveryHold(controller, roadRig);
             string gateHash = controller.CanonicalHash;
+            Assert.That(
+                Vector3.Distance(
+                    interactor.TargetWorldPosition,
+                    body.position),
+                Is.GreaterThan(2f),
+                "the depot bridle dog must sit clear of Sasha's chassis");
+            _ = RequireUnblockedScreenPoint(
+                controller,
+                interactor.TargetWorldPosition,
+                "depot recovery bridle dog");
 
             body.position += new Vector3(400f, 40f, -300f);
-            controller.OperateDepotApproachRecoveryPoint();
+            Press(keyboard.eKey);
+            yield return null;
+            InvokeGlobalShortcuts(controller);
+            Release(keyboard.eKey);
+            yield return null;
 
             Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            Assert.That(
+                PendingCommands(controller)[0],
+                Is.TypeOf<OperateDepotRecoveryPointCommand>());
+            Assert.That(interactor.IsOperationQueued, Is.True);
+            Assert.That(interactor.LastInteractionRejected, Is.False);
+            Assert.That(interactor.IsTargetVisible, Is.True);
             Assert.That(controller.CanonicalHash, Is.EqualTo(gateHash));
             InvokeSimulationTick(controller);
 
@@ -1005,6 +1037,104 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 world.DepotApproachRecoveryView.State,
                 Is.EqualTo(DepotApproachRecoveryPresentationState.Unlocked));
+            Assert.That(interactor.IsTargetVisible, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator DepotRecoveryPointerAndGamepadUseOneRangeTankBridle()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
+            controller.enabled = false;
+            LastBearingState gate = DriveUntilDepotRecoveryAvailable(
+                CreateOutboundState(
+                    module: VehicleModule.SealedRangeTank));
+            InstallControllerState(controller, gate);
+            LastBearingDepotApproachInteractor interactor =
+                controller.World!.DepotApproachInteractor!;
+
+            yield return null;
+            yield return null;
+            Assert.That(interactor.IsInputArmed, Is.True);
+            Assert.That(interactor.IsTargetVisible, Is.True);
+            Assert.That(
+                controller.ReadModel!.VehicleModule,
+                Is.EqualTo(VehicleModule.SealedRangeTank));
+            LastBearingReadModel gateModel = controller.ReadModel;
+            Vector2 pointer = RequireUnblockedScreenPoint(
+                controller,
+                interactor.TargetWorldPosition,
+                "range tank depot recovery bridle dog");
+
+            InstallControllerState(
+                controller,
+                CreateAtHomeModuleState(VehicleModule.SealedRangeTank));
+            ApplyDepotApproachModel(interactor, gateModel);
+            Assert.That(interactor.IsTargetVisible, Is.False);
+            Assert.That(
+                interactor.TryActivateAtScreenPosition(pointer),
+                Is.False);
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+
+            InstallControllerState(controller, gate);
+            yield return null;
+            yield return null;
+            Assert.That(interactor.IsInputArmed, Is.True);
+            pointer = RequireUnblockedScreenPoint(
+                controller,
+                interactor.TargetWorldPosition,
+                "range tank depot recovery bridle dog");
+            Physics.SyncTransforms();
+            string gateHash = controller.CanonicalHash;
+
+            Assert.That(
+                interactor.TryActivateAtScreenPosition(pointer),
+                Is.True);
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            Assert.That(
+                interactor.TryActivateAtScreenPosition(pointer),
+                Is.False,
+                "a held bridle dog must not queue a second command");
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(gateHash));
+
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel!.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.AtDepot));
+            Assert.That(interactor.IsTargetVisible, Is.False);
+
+            Gamepad gamepad = InputSystem.AddDevice<Gamepad>();
+            Press(gamepad.buttonSouth);
+            InstallControllerState(controller, gate);
+            yield return null;
+            Assert.That(interactor.IsInputArmed, Is.False);
+            Release(gamepad.buttonSouth);
+            yield return null;
+            Assert.That(interactor.IsInputArmed, Is.True);
+
+            Press(gamepad.buttonSouth);
+            InvokeGlobalShortcuts(controller);
+            yield return null;
+            Release(gamepad.buttonSouth);
+            yield return null;
+
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            Assert.That(
+                PendingCommands(controller)[0],
+                Is.TypeOf<OperateDepotRecoveryPointCommand>());
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel!.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.AtDepot));
+            Assert.That(interactor.IsTargetVisible, Is.False);
         }
 
         [UnityTest]
@@ -3634,6 +3764,18 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             MethodInfo? apply = typeof(LastBearingWreckLineInteractor).GetMethod(
                 "Apply",
                 BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(apply, Is.Not.Null);
+            apply!.Invoke(interactor, new object[] { model });
+        }
+
+        private static void ApplyDepotApproachModel(
+            LastBearingDepotApproachInteractor interactor,
+            LastBearingReadModel model)
+        {
+            MethodInfo? apply =
+                typeof(LastBearingDepotApproachInteractor).GetMethod(
+                    "Apply",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
             Assert.That(apply, Is.Not.Null);
             apply!.Invoke(interactor, new object[] { model });
         }

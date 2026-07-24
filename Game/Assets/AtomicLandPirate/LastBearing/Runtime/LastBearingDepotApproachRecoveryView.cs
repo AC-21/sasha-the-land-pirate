@@ -14,8 +14,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
     /// <summary>
     /// C0 blockout for the depot-threshold recovery point. It presents a
-    /// canonical read-model state and deliberately owns no input, physics, or
-    /// save authority.
+    /// canonical read-model state while its derived child interactor delegates
+    /// input without gaining simulation, physics, or save authority.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class LastBearingDepotApproachRecoveryView : MonoBehaviour
@@ -37,6 +37,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private bool _built;
 
         public Transform? InteractionAnchor { get; private set; }
+
+        public LastBearingDepotApproachInteractor? Interactor
+        {
+            get;
+            private set;
+        }
 
         public DepotApproachRecoveryPresentationState State { get; private set; }
 
@@ -168,6 +174,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _routePermitLight.type = LightType.Point;
             _routePermitLight.range = 5f;
             _routePermitLight.shadows = LightShadows.None;
+            BuildInteraction(iron, bone, tungsten, signal);
             ApplyState(DepotApproachRecoveryPresentationState.Dormant);
             ApplyRoutePermit(granted: false);
         }
@@ -218,6 +225,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     : new Color32(255, 196, 107, 255);
                 _routePermitLight.intensity = granted ? 180f : 28f;
             }
+        }
+
+        private void BuildInteraction(
+            Material iron,
+            Material bone,
+            Material tungsten,
+            Material signal)
+        {
+            if (InteractionAnchor == null)
+            {
+                throw new InvalidOperationException(
+                    "Depot recovery interaction requires its authored anchor.");
+            }
+
+            var control = new GameObject(
+                LastBearingDepotApproachInteractor.RootName);
+            control.transform.SetParent(InteractionAnchor, false);
+            Interactor =
+                control.AddComponent<LastBearingDepotApproachInteractor>();
+            Interactor.Build(iron, bone, tungsten, signal);
         }
 
         private static GameObject CreatePrimitive(

@@ -114,6 +114,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             private set;
         }
 
+        public LastBearingDepotApproachInteractor? DepotApproachInteractor =>
+            DepotApproachRecoveryView?.Interactor;
+
         public LastBearingDepotCargoLoadingView? DepotCargoLoadingView
         {
             get;
@@ -608,6 +611,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? DepotApproachRecoveryPresentationState.Available
                     : DepotApproachRecoveryPresentationState.Dormant;
             DepotApproachRecoveryView?.ApplyState(state);
+        }
+
+        public void ConfigureDepotApproachInteraction(
+            LastBearingGameController controller)
+        {
+            if (MainCamera == null || DepotApproachInteractor == null)
+            {
+                throw new InvalidOperationException(
+                    "Depot bridle interaction requires Sasha's shared camera.");
+            }
+
+            DepotApproachInteractor.Configure(controller, MainCamera);
+        }
+
+        public void ResetDepotApproachInteraction()
+        {
+            DepotApproachInteractor?.ResetLocalFocus();
+        }
+
+        public void ApplyDepotApproachInteraction(
+            LastBearingReadModel model)
+        {
+            DepotApproachInteractor?.Apply(model);
         }
 
         public void ApplyRouteModulePoint(
