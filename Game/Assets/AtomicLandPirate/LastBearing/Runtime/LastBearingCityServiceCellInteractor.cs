@@ -1429,6 +1429,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             return _built &&
                    _controller?.IsExactFieldDeskCityOverview == true &&
+                   _controller.IsEmergencyAidReceptionFocused != true &&
                    _model != null &&
                    ReferenceEquals(
                        _model,

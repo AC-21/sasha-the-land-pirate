@@ -423,6 +423,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 state,
                 sequence =>
                     new InstallTurbineRepairCommand(sequence));
+            state = ApplyOne(
+                state,
+                sequence =>
+                    new ReceiveEmergencyAidCommand(sequence));
             state = AdvanceUntil(
                 state,
                 model => model.MaintenanceDue);

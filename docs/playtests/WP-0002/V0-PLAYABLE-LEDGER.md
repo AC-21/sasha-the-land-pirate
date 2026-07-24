@@ -844,7 +844,8 @@ Detailed contract:
 
 ## VGR-21 — Post the Fuel Bond
 
-Status: current implementation target on the V0 feature branch.
+Status: released on protected `main` in PR #119 at
+`01d789d225c3d70ec8c2ef33490b8aabd93aeed8`.
 
 Scope:
 
@@ -868,6 +869,34 @@ production asset, audio, or normal-PR performance soak.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-21-POST-THE-FUEL-BOND-CONTRACT.md`.
+
+## VGR-22 — Receive the Water Tender
+
+Status: current implementation target on the V0 feature branch.
+
+Scope:
+
+- Stop cooperative emergency aid from becoming an invisible return credit;
+  expose its existing authored 10.000-milli amount as a physical water tender
+  beside canonical Emergency Storage after the field sleeve is installed.
+- Make the Field Desk route-only and higher priority than simultaneous
+  Workshop Push city-improvement work; require fresh E / gamepad South / exact
+  tender-valve input before delegating the bounded receipt command.
+- Show a queued tank, then an empty tender with coiled hose and a receipt that
+  distinguishes the authored 10.000-milli offer from actual capacity-clamped
+  stored water.
+- Preserve Shared Service, the field-sleeve maintenance promise, both vehicle
+  modules, all colony compositions, nondefault rotated city layouts, queued and
+  delivered save/load, and one shared camera/listener.
+- Reuse the existing `EmergencyAidDelivered` event as the critical autosave
+  witness and support receipt before or after the existing city improvement.
+
+Exclude: new saved field, schema, migration, event kind, balance value, scene,
+mode, camera, package, dependency, production asset, audio, generalized
+interaction framework, or normal-PR performance soak.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-22-RECEIVE-THE-WATER-TENDER-CONTRACT.md`.
 
 ## Visual constitution
 

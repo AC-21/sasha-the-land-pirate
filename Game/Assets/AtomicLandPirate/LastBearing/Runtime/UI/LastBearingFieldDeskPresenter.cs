@@ -42,6 +42,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         OpenDustFrontRelay = 31,
         OpenEmergencyCisternExpansion = 32,
         OpenFuelBondClaimsWicket = 33,
+        OpenEmergencyAidWaterTender = 34,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -529,6 +530,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.IsSpareBearingBatchStartAvailable);
             Mix(ref hash, model.IsSpareBearingBarterAvailable);
             Mix(ref hash, model.IsDepotAccessRestorationAvailable);
+            Mix(ref hash, model.FactionAidPolicy.GetHashCode());
+            Mix(ref hash, model.EmergencyAidWaterMilli);
+            Mix(ref hash, model.IsEmergencyAidReceptionAvailable);
             Mix(ref hash, model.PauseCause.GetHashCode());
             Mix(ref hash, model.DustFrontOutcome.GetHashCode());
             Mix(ref hash, model.IsDustFrontAcknowledgementRequired);
@@ -741,6 +745,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     true,
                     canDispatch,
                     LastBearingFieldDeskActionTone.Hazard);
+                return;
+            }
+
+            if (model.IsEmergencyAidReceptionAvailable)
+            {
+                primary = Action(
+                    LastBearingFieldDeskIntent
+                        .OpenEmergencyAidWaterTender,
+                    "OPEN EMERGENCY STORAGE · RECEIVE WATER TENDER",
+                    "Route to the cooperative 10.000-milli tender beside " +
+                    "Emergency Storage. Release the route input, then use E, " +
+                    "gamepad south, or the exact valve. Current storage capacity " +
+                    "clamps what enters; Shared Service and the field-sleeve " +
+                    "maintenance promise remain.",
+                    true,
+                    canDispatch &&
+                    controller.CanOpenEmergencyAidWaterTender,
+                    LastBearingFieldDeskActionTone.Signal);
                 return;
             }
 

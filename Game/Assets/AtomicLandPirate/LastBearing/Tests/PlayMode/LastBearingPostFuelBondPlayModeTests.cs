@@ -426,13 +426,35 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     LastBearingFieldDeskPresenter.Present(controller);
                 Assert.That(
                     projection.PrimaryAction.Intent,
-                    Is.Not.EqualTo(
+                    Is.EqualTo(
                         LastBearingFieldDeskIntent
-                            .OpenFuelBondClaimsWicket));
+                            .OpenEmergencyAidWaterTender));
                 LastBearingPermitJobPresentation job =
                     LastBearingPermitJobPresenter.Present(
                         model,
                         cityNeedInspected: true);
+                Assert.That(
+                    job.Headline,
+                    Does.Contain("WATER TENDER"));
+
+                cooperative = Apply(
+                    cooperative,
+                    sequence =>
+                        new ReceiveEmergencyAidCommand(sequence));
+                InstallControllerState(controller, cooperative);
+                controller.ShowCityOverview();
+                yield return null;
+                model = controller.ReadModel!;
+                projection =
+                    LastBearingFieldDeskPresenter.Present(controller);
+                Assert.That(
+                    projection.PrimaryAction.Intent,
+                    Is.Not.EqualTo(
+                        LastBearingFieldDeskIntent
+                            .OpenFuelBondClaimsWicket));
+                job = LastBearingPermitJobPresenter.Present(
+                    model,
+                    cityNeedInspected: true);
                 Assert.That(
                     job.Headline,
                     Is.EqualTo("The depot gate stayed open"));

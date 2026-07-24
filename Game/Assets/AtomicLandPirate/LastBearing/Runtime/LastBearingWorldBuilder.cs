@@ -113,6 +113,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public LastBearingFuelBondInteractor? FuelBondInteractor =>
             OneGoodBatchCutawayView?.FuelBondInteractor;
 
+        public LastBearingEmergencyAidInteractor? EmergencyAidInteractor =>
+            CityServiceCellView?.EmergencyAidInteractor;
+
         public Transform? SelectedBuildingCutawayCameraAnchor { get; private set; }
 
         public Transform? SelectedBuildingCutawayFocusAnchor { get; private set; }
@@ -249,7 +252,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 oxide,
                 bone,
                 tungsten,
-                signal);
+                signal,
+                _waterMaterial!);
             BuildVehicle(
                 iron,
                 oxide,
@@ -436,7 +440,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (MainCamera == null ||
                 CityServiceCellView?.Interactor == null ||
                 CityServiceCellView
-                    .EmergencyCisternExpansionInteractor == null)
+                    .EmergencyCisternExpansionInteractor == null ||
+                CityServiceCellView.EmergencyAidInteractor == null)
             {
                 throw new InvalidOperationException(
                     "Working service-cell interaction requires its shared city camera.");
@@ -448,13 +453,27 @@ namespace AtomicLandPirate.Presentation.LastBearing
             CityServiceCellView.EmergencyCisternExpansionInteractor.Configure(
                 controller,
                 MainCamera);
+            CityServiceCellView.EmergencyAidInteractor.Configure(
+                controller,
+                MainCamera);
             CameraRig?.SetCityServiceCellInteractor(
                 CityServiceCellView.Interactor);
             CameraRig?.SetEmergencyCisternExpansionInteractor(
                 CityServiceCellView.EmergencyCisternExpansionInteractor);
+            CameraRig?.SetEmergencyAidInteractor(
+                CityServiceCellView.EmergencyAidInteractor);
         }
 
         public void ResetCityServiceCellInteraction()
+        {
+            CityServiceCellView?.Interactor?.ResetLocalSelection();
+            CityServiceCellView
+                ?.EmergencyCisternExpansionInteractor
+                ?.ResetLocalFocus();
+            CityServiceCellView?.EmergencyAidInteractor?.ResetLocalFocus();
+        }
+
+        public void ResetEmergencyAidSiblingInteractions()
         {
             CityServiceCellView?.Interactor?.ResetLocalSelection();
             CityServiceCellView
@@ -1535,7 +1554,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Material oxide,
             Material bone,
             Material tungsten,
-            Material signal)
+            Material signal,
+            Material water)
         {
             var serviceCell = new GameObject(
                 "Working Service Cell [Derived Only]");
@@ -1548,7 +1568,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 oxide,
                 bone,
                 tungsten,
-                signal);
+                signal,
+                water);
         }
 
         private void BuildCamera()

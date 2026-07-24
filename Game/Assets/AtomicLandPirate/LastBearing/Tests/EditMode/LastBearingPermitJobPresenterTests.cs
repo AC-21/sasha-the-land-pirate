@@ -763,6 +763,21 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                                 .AuxiliaryPumpOrientationQuarterTurns));
             }
 
+            if (encounter == EncounterChoice.Cooperate)
+            {
+                LastBearingPermitJobPresentation tender =
+                    Present(state, true);
+                Assert.That(
+                    tender.Chapter,
+                    Is.EqualTo(LastBearingPermitJobChapter.Homecoming));
+                Assert.That(
+                    tender.Headline,
+                    Does.Contain("WATER TENDER"));
+                state = ApplyOne(
+                    state,
+                    sequence => new ReceiveEmergencyAidCommand(sequence));
+            }
+
             string before = LastBearingCanonicalCodec.ComputeSha256(state);
             LastBearingPermitJobPresentation presentation = Present(state, true);
             Assert.That(
@@ -821,6 +836,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             state = ApplyOne(
                 state,
                 sequence => new InstallTurbineRepairCommand(sequence));
+            state = ApplyOne(
+                state,
+                sequence => new ReceiveEmergencyAidCommand(sequence));
             state = AdvanceUntil(state, model => model.MaintenanceDue);
 
             LastBearingPermitJobPresentation due = Present(state, true);

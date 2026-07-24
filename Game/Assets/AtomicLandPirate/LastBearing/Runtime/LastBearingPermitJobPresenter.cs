@@ -460,6 +460,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "south; install the carried repair and reverse the water loss.");
             }
 
+            if (model.IsEmergencyAidReceptionAvailable)
+            {
+                return Create(
+                    LastBearingPermitJobChapter.Homecoming,
+                    6,
+                    "COOPERATIVE HOMECOMING · THE WATER TENDER",
+                    "Receive the offered water physically",
+                    "Shared Service sent one 10.000-milli tender beside " +
+                    "Emergency Storage. Current storage capacity clamps what " +
+                    "enters; the field-sleeve maintenance promise remains.",
+                    "Click OPEN EMERGENCY STORAGE · RECEIVE WATER TENDER, " +
+                    "release the route input, then use E, gamepad south, or " +
+                    "the exact delivery valve.");
+            }
+
             if (model.IsCityImprovementInstallationAvailable &&
                 model.NextCityDecision ==
                     NextCityDecision.RefurbishAuxiliaryPump)
@@ -564,14 +579,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 && model.FactionAccessPolicy ==
                     FactionAccessPolicy.SharedService)
             {
+                bool aidDelivered =
+                    model.FactionAidPolicy ==
+                        FactionAidPolicy.EmergencyWaterDelivered &&
+                    model.EmergencyAidWaterMilli ==
+                        LastBearingBalanceV1.CooperateAidWaterMilli;
                 return Create(
                     LastBearingPermitJobChapter.AlternateConclusion,
                     JobStepCount,
                     "ALTERNATE CONCLUSION · SHARED SERVICE",
                     "The depot gate stayed open",
                     "The cooperative field sleeve restored water and preserved " +
-                    "shared depot service. No paid fuel bond is pending; the " +
-                    "maintenance promise remains the cost of this agreement.",
+                    "shared depot service. " +
+                    (aidDelivered
+                        ? "The 10.000-milli tender was received under the current storage cap. "
+                        : "The 10.000-milli tender waits beside Emergency " +
+                          "Storage for physical receipt. ") +
+                    "No paid fuel bond is pending; the maintenance promise " +
+                    "remains the cost of this agreement.",
                     "This cooperative branch is complete for the current V0.",
                     isAlternateConclusion: true,
                     recommendedFirstRunCue: ReplayCue);

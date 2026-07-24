@@ -283,6 +283,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _readModel.NextCityDecision ==
                 NextCityDecision.ExpandEmergencyCistern &&
             IsExactFieldDeskCityOverview &&
+            !IsEmergencyAidReceptionFocused &&
             _world?.CityServiceCellView
                 ?.EmergencyCisternExpansionInteractor
                 ?.IsControlVisible == true;
@@ -336,6 +337,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 LastBearingPresentationMode.BuildingCutaway &&
             _world?.IsOneGoodBatchCutawaySelected == true &&
             _world.FuelBondInteractor?.IsInputArmed == true;
+
+        public bool IsEmergencyAidReceptionQueued =>
+            _pendingCommands.Exists(command =>
+                command is ReceiveEmergencyAidCommand);
+
+        public bool CanOpenEmergencyAidWaterTender =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsEmergencyAidReceptionAvailable == true &&
+            IsExactFieldDeskCityOverview &&
+            _world?.EmergencyAidInteractor?.IsControlVisible == true;
+
+        public bool IsEmergencyAidReceptionFocused =>
+            _world?.EmergencyAidInteractor?.IsControlFocused == true;
+
+        public bool CanReceiveEmergencyAid =>
+            CanOpenEmergencyAidWaterTender &&
+            IsEmergencyAidReceptionFocused &&
+            _world?.EmergencyAidInteractor?.IsInputArmed == true;
 
         public string Status => _status;
 
@@ -1874,6 +1893,35 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 "Fuel bond queued. The five returned fuel units remain with Last Bearing until the authoritative city tick accepts the posting.";
         }
 
+        public void OpenEmergencyAidWaterTender()
+        {
+            if (!TryRouteToEmergencyAidWaterTender(
+                    "The cooperative 10.000-milli water tender is framed beside Emergency Storage. Release the route input, then receive it at the physical valve."))
+            {
+                _status =
+                    "The water tender opens only for exact queued cooperative aid after the field sleeve is installed.";
+            }
+        }
+
+        public void ReceiveEmergencyAid()
+        {
+            if (IsEmergencyAidReceptionQueued)
+            {
+                return;
+            }
+
+            if (!CanReceiveEmergencyAid)
+            {
+                _status =
+                    "Receive emergency aid only from the focused water-tender valve after releasing the route input.";
+                return;
+            }
+
+            Queue(sequence => new ReceiveEmergencyAidCommand(sequence));
+            _status =
+                "Emergency water receipt queued. The 10.000-milli offer enters only on the authoritative city tick and cannot exceed current storage capacity.";
+        }
+
         public void OpenFieldSleeveService()
         {
             if (!TryRouteToPumpHallMaintenance(
@@ -2024,17 +2072,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 if (!TryRouteToPumpHallRepair(
                         "Exact finalized return restored at the pump-hall service line."))
                 {
-                    if (!TryRouteToPumpHallImprovement(
-                            "Exact staged rotor restored at the fixed auxiliary-pump socket."))
+                    if (!TryRouteToEmergencyAidWaterTender(
+                            "Exact queued cooperative water restored at the tender beside Emergency Storage. Release the load input before receiving it."))
                     {
-                        if (!TryRouteToPumpHallMaintenance(
-                                "Exact field-sleeve maintenance restored at its physical pump-hall control."))
+                        if (!TryRouteToPumpHallImprovement(
+                                "Exact staged rotor restored at the fixed auxiliary-pump socket."))
                         {
-                            if (!TryRouteToFuelBondClaimsWicket(
-                                    "Exact unposted fuel bond restored at the claims ledger. Release the load input before posting."))
+                            if (!TryRouteToPumpHallMaintenance(
+                                    "Exact field-sleeve maintenance restored at its physical pump-hall control."))
                             {
-                                TryRouteToOneGoodBatchWorkshop(
-                                    "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                                if (!TryRouteToFuelBondClaimsWicket(
+                                        "Exact unposted fuel bond restored at the claims ledger. Release the load input before posting."))
+                                {
+                                    TryRouteToOneGoodBatchWorkshop(
+                                        "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                                }
                             }
                         }
                     }
@@ -2061,6 +2113,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.ApplyGarageDepartureInteraction(_readModel);
                 _world?.ApplyPumpHallMaintenanceInteraction(_readModel);
                 _world?.ApplyFuelBondInteraction(_readModel);
+                _world?.EmergencyAidInteractor?.Apply(_readModel);
             }
         }
 
@@ -2138,6 +2191,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.PumpHallMaintenanceInteractor
                     ?.IsControlFocused == true ||
                 _world?.FuelBondInteractor
+                    ?.IsControlFocused == true ||
+                _world?.EmergencyAidInteractor
                     ?.IsControlFocused == true)
             {
                 return;
@@ -2290,6 +2345,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ContainsEvent(
                         result.DomainEvents,
                         LastBearingEventKind.RoutePermitGranted);
+                bool emergencyAidReceived =
+                    _readModel.IsEmergencyAidReceptionAvailable &&
+                    ContainsEvent(
+                        result.DomainEvents,
+                        LastBearingEventKind.EmergencyAidDelivered);
                 bool cityBuildingChanged = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.CityBuildingPlaced) ||
@@ -2380,6 +2440,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 {
                     _status =
                         "Fuel bond posted. Five returned fuel units crossed the claims wicket; the depot route permit is recorded while the grievance and two-fuel future toll remain.";
+                }
+
+                if (emergencyAidReceived)
+                {
+                    _status =
+                        "Emergency aid received. The 10.000-milli tender is empty, Emergency Storage holds " +
+                        _readModel.WaterMilli + " / " +
+                        _readModel.WaterCapacityMilli +
+                        " milli after the capacity clamp, and Shared Service plus its maintenance promise remain.";
                 }
 
                 if (rigUpgradeInstalled)
@@ -2797,6 +2866,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     || kind == LastBearingEventKind.HotShiftCheckpointReached
                     || kind == LastBearingEventKind.HotShiftCompleted
                     || kind == LastBearingEventKind.EmergencyCisternPumped
+                    || kind == LastBearingEventKind.EmergencyAidDelivered
                     || kind == LastBearingEventKind.DustFrontResolved
                     || kind == LastBearingEventKind.DustFrontAcknowledged
                     || kind == LastBearingEventKind.MaintenanceServiced)
@@ -2840,6 +2910,20 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             _status = successStatus;
+            return true;
+        }
+
+        private bool TryRouteToEmergencyAidWaterTender(
+            string successStatus)
+        {
+            if (!CanOpenEmergencyAidWaterTender ||
+                _world?.EmergencyAidInteractor?.FocusControl() != true)
+            {
+                return false;
+            }
+
+            _status = successStatus;
+            _fieldDesk?.TrackPhysicalWorkRoute(true);
             return true;
         }
 
@@ -3268,6 +3352,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_modeCoordinator?.TryShowCityMode(mode, _readModel) == true)
             {
                 _status = successStatus;
+                _world?.EmergencyAidInteractor?.Apply(_readModel);
                 _fieldDesk?.Refresh(force: true);
                 return;
             }
