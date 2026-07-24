@@ -1798,8 +1798,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     return;
                 }
             }
-            else if (_readModel.RepairCargoCustody !=
-                     RepairCargoCustody.Vehicle)
+            else if (_readModel.RepairCargoCustody != RepairCargoCustody.Vehicle)
             {
                 _status = "Load the repair cargo into Sasha's scout before freezing the return payload.";
                 return;
