@@ -41,6 +41,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         OpenEmergencyCisternPump = 30,
         OpenDustFrontRelay = 31,
         OpenEmergencyCisternExpansion = 32,
+        OpenFuelBondClaimsWicket = 33,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -527,6 +528,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.FutureRouteTollFuelUnits);
             Mix(ref hash, model.IsSpareBearingBatchStartAvailable);
             Mix(ref hash, model.IsSpareBearingBarterAvailable);
+            Mix(ref hash, model.IsDepotAccessRestorationAvailable);
             Mix(ref hash, model.PauseCause.GetHashCode());
             Mix(ref hash, model.DustFrontOutcome.GetHashCode());
             Mix(ref hash, model.IsDustFrontAcknowledgementRequired);
@@ -770,6 +772,20 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         LastBearingFieldDeskActionTone.Primary);
                 }
 
+                return;
+            }
+
+            if (model.IsDepotAccessRestorationAvailable)
+            {
+                primary = Action(
+                    LastBearingFieldDeskIntent.OpenFuelBondClaimsWicket,
+                    "OPEN CLAIMS WICKET · POST FUEL BOND",
+                    "Route five returned fuel units to the physical claims ledger. " +
+                    "Release the route input, then use E, gamepad south, or the exact ledger stamp; the grievance and two-fuel future toll remain.",
+                    true,
+                    canDispatch &&
+                    controller.CanOpenFuelBondClaimsWicket,
+                    LastBearingFieldDeskActionTone.Signal);
                 return;
             }
 

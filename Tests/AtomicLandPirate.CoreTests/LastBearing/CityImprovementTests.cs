@@ -17,7 +17,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "auxiliary pump installation rejects invalid intents atomically",
                 InvalidInstallationIntentsFailAtomically);
             harness.Run(
-                "unsupported city decisions remain pending",
+                "machine spare bearing remains outside city improvement installation",
                 UnsupportedDecisionRemainsPending);
             harness.Run(
                 "city improvement survives v7 canonical round trip",
@@ -214,31 +214,24 @@ namespace AtomicLandPirate.LastBearingTests
                 ColonyComposition.HumanOnly,
                 ResidentRoster.HumanResidentId,
                 2204);
-            foreach (NextCityDecision decision in new[]
+            var builder = new LastBearingStateBuilder(ready.State)
             {
-                NextCityDecision.MachineSpareBearing,
-                NextCityDecision.RestoreDepotAccess,
-            })
-            {
-                var builder = new LastBearingStateBuilder(ready.State)
-                {
-                    NextCityDecision = decision,
-                };
-                LastBearingState unsupported = builder.Build();
-                AssertRejectedWithoutMutation(
-                    unsupported,
-                    new InstallCityImprovementCommand(
-                        unsupported.NextCommandSequence,
-                        decision,
-                        LastBearingState.AuxiliaryPumpSocketId,
-                        LastBearingState.AuxiliaryPumpOrientationQuarterTurns),
-                    "LAST_BEARING_CITY_IMPROVEMENT_UNSUPPORTED",
-                    "unsupported city decision " + decision);
-                TestHarness.Equal(
-                    "await-next-city-decision-authority",
-                    LastBearingReadModel.FromState(unsupported).NextObjective,
-                    "unsupported decision objective " + decision);
-            }
+                NextCityDecision = NextCityDecision.MachineSpareBearing,
+            };
+            LastBearingState unsupported = builder.Build();
+            AssertRejectedWithoutMutation(
+                unsupported,
+                new InstallCityImprovementCommand(
+                    unsupported.NextCommandSequence,
+                    NextCityDecision.MachineSpareBearing,
+                    LastBearingState.AuxiliaryPumpSocketId,
+                    LastBearingState.AuxiliaryPumpOrientationQuarterTurns),
+                "LAST_BEARING_CITY_IMPROVEMENT_UNSUPPORTED",
+                "machine spare bearing city improvement");
+            TestHarness.Equal(
+                "await-next-city-decision-authority",
+                LastBearingReadModel.FromState(unsupported).NextObjective,
+                "machine spare bearing objective");
         }
 
         private static void ForgedImprovementStatesFailInvariants()

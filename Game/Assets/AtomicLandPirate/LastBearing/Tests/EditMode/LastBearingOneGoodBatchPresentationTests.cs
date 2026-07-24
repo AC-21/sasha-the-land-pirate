@@ -80,9 +80,23 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 view.GetComponentsInChildren<CharacterController>(true),
                 Is.Empty);
-            foreach (Collider collider in view.GetComponentsInChildren<Collider>(true))
+            Collider[] colliders =
+                view.GetComponentsInChildren<Collider>(true);
+            Transform fuelBondTargetTransform = view.transform.Find(
+                LastBearingFuelBondInteractor.RootName + "/" +
+                LastBearingFuelBondInteractor.ControlName);
+            Assert.That(fuelBondTargetTransform, Is.Not.Null);
+            Collider fuelBondTarget =
+                fuelBondTargetTransform.GetComponent<BoxCollider>();
+            Assert.That(fuelBondTarget, Is.Not.Null);
+            Assert.That(fuelBondTarget.isTrigger, Is.True);
+            Assert.That(fuelBondTarget.enabled, Is.False);
+            foreach (Collider collider in colliders)
             {
-                Assert.That(collider.enabled, Is.False, collider.name);
+                if (collider != fuelBondTarget)
+                {
+                    Assert.That(collider.enabled, Is.False, collider.name);
+                }
             }
             Assert.That(
                 CountNamedParts(view, "PHYSICAL_INPUT_PART_"),
@@ -90,6 +104,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 CountNamedParts(view, "FUTURE_TOLL_FUEL_UNIT_"),
                 Is.EqualTo(2));
+            Assert.That(
+                CountNamedParts(view, "RETURNED_FUEL_CAN_"),
+                Is.EqualTo(LastBearingFuelBondInteractor.FuelCanCount));
 
             Camera[] runtimeCameras =
                 controller.GetComponentsInChildren<Camera>(true);

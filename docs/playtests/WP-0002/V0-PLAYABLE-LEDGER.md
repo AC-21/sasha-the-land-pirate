@@ -818,7 +818,7 @@ Detailed contract:
 Objective: turn the Workshop Push range-tank return into visible, durable
 settlement water capacity.
 
-Status: current implementation target on the V0 feature branch.
+Status: released on protected `main` in PR #118.
 
 Scope:
 
@@ -841,6 +841,33 @@ aliases reuse existing authored balance constants.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-20-EXPAND-EMERGENCY-CISTERN-CONTRACT.md`.
+
+## VGR-21 — Post the Fuel Bond
+
+Status: current implementation target on the V0 feature branch.
+
+Scope:
+
+- Close the adverse Civic Buffer plus Sealed Range Tank branch at the existing
+  physical claims wicket by posting exactly five returned fuel units for the
+  existing route permit.
+- Make the Field Desk route-only, require fresh E / gamepad South / exact
+  ledger-pointer input, and fail closed for wrong mode, stale state, pending
+  work, duplicate requests, and every other plan row.
+- Show exactly five fuel cans, no spare-bearing lot, `LOCKED` to `PERMIT`, and
+  the persistent two-fuel future toll in the fixed Texas-iron cutaway.
+- Preserve grievance, withheld aid, liquid-return provenance, human / utility-
+  robot / mixed neutrality, save/load, and the existing route-permit autosave.
+- Preserve the full 2×2 decision matrix: adverse Winch makes One Good Batch,
+  adverse Range Tank alone posts the paid fuel bond, and exact SharedService
+  clears false pending city decisions for both Civic Buffer modules.
+
+Exclude: new saved field, schema, migration, event kind, resource, currency,
+market, generalized barter, camera, mode, scene, package, dependency,
+production asset, audio, or normal-PR performance soak.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-21-POST-THE-FUEL-BOND-CONTRACT.md`.
 
 ## Visual constitution
 
