@@ -236,7 +236,66 @@ namespace AtomicLandPirate.Simulation.LastBearing
         {
             TransactionId = RequireToken(transactionId, nameof(transactionId));
             Fingerprint = RequireToken(fingerprint, nameof(fingerprint));
+            if (LastBearingRepeatExpedition.IsReservedIdentity(
+                    TransactionId,
+                    Fingerprint))
+            {
+                throw new ArgumentException(
+                    "LAST_BEARING_REPEAT_TRANSACTION_IDENTITY_RESERVED",
+                    nameof(transactionId));
+            }
         }
+
+        public string TransactionId { get; }
+
+        public string Fingerprint { get; }
+    }
+
+    public sealed class PrepareRepeatExpeditionTransactionCommand
+        : LastBearingCommand
+    {
+        public PrepareRepeatExpeditionTransactionCommand(
+            long sequence,
+            string completedTransactionId,
+            string completedFingerprint,
+            string transactionId,
+            string fingerprint)
+            : base(sequence)
+        {
+            CompletedTransactionId = RequireToken(
+                completedTransactionId,
+                nameof(completedTransactionId));
+            CompletedFingerprint = RequireToken(
+                completedFingerprint,
+                nameof(completedFingerprint));
+            TransactionId = RequireToken(
+                transactionId,
+                nameof(transactionId));
+            Fingerprint = RequireToken(
+                fingerprint,
+                nameof(fingerprint));
+            LastBearingRepeatExpedition.RequireFreshIdentity(
+                sequence,
+                TransactionId,
+                Fingerprint);
+            if (string.Equals(
+                    CompletedTransactionId,
+                    TransactionId,
+                    StringComparison.Ordinal)
+                || string.Equals(
+                    CompletedFingerprint,
+                    Fingerprint,
+                    StringComparison.Ordinal))
+            {
+                throw new ArgumentException(
+                    "LAST_BEARING_REPEAT_TRANSACTION_NOT_FRESH",
+                    nameof(transactionId));
+            }
+        }
+
+        public string CompletedTransactionId { get; }
+
+        public string CompletedFingerprint { get; }
 
         public string TransactionId { get; }
 
@@ -483,6 +542,22 @@ namespace AtomicLandPirate.Simulation.LastBearing
     public sealed class RestoreDepotAccessCommand : LastBearingCommand
     {
         public RestoreDepotAccessCommand(long sequence)
+            : base(sequence)
+        {
+        }
+    }
+
+    public sealed class ReceiveEmergencyAidCommand : LastBearingCommand
+    {
+        public ReceiveEmergencyAidCommand(long sequence)
+            : base(sequence)
+        {
+        }
+    }
+
+    public sealed class ServiceScoutCommand : LastBearingCommand
+    {
+        public ServiceScoutCommand(long sequence)
             : base(sequence)
         {
         }

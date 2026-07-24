@@ -56,6 +56,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             private set;
         }
 
+        public LastBearingEmergencyAidInteractor? EmergencyAidInteractor
+        {
+            get;
+            private set;
+        }
+
         public bool IsVisible => gameObject.activeSelf;
 
         public bool IsRecyclerVisible =>
@@ -110,7 +116,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Material oxide,
             Material bone,
             Material tungsten,
-            Material signal)
+            Material signal,
+            Material water)
         {
             if (_built)
             {
@@ -239,6 +246,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 bone,
                 tungsten,
                 signal);
+            EmergencyAidInteractor =
+                gameObject.AddComponent<LastBearingEmergencyAidInteractor>();
+            EmergencyAidInteractor.Build(
+                concrete,
+                iron,
+                oxide,
+                bone,
+                tungsten,
+                signal,
+                water);
             gameObject.SetActive(false);
         }
 
@@ -408,6 +425,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             Interactor?.Apply(model, _sled);
             EmergencyCisternExpansionInteractor?.Apply(model);
+            EmergencyAidInteractor?.Apply(model);
         }
 
         public void Hide()

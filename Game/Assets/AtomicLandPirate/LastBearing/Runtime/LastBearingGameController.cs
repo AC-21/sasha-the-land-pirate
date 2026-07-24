@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using AtomicLandPirate.Simulation.LastBearing;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -196,8 +197,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _readModel != null &&
             _readModel.ExpeditionPhase == ExpeditionPhase.Returned &&
             _readModel.TransactionPhase == TransactionPhase.ReturnPending &&
-            _readModel.RepairCargoKind != RepairCargoKind.None &&
-            _readModel.RepairCargoCustody == RepairCargoCustody.Vehicle &&
+            (_readModel.IsRepeatExpedition
+                ? _readModel.FrameRailSalvageCustody ==
+                    FrameRailSalvageCustody.Vehicle
+                : _readModel.RepairCargoKind != RepairCargoKind.None &&
+                  _readModel.RepairCargoCustody ==
+                    RepairCargoCustody.Vehicle) &&
             _modeCoordinator?.HasActiveMode == true &&
             _modeCoordinator.CurrentMode == LastBearingPresentationMode.CityReturn;
 
@@ -283,6 +288,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _readModel.NextCityDecision ==
                 NextCityDecision.ExpandEmergencyCistern &&
             IsExactFieldDeskCityOverview &&
+            !IsEmergencyAidReceptionFocused &&
             _world?.CityServiceCellView
                 ?.EmergencyCisternExpansionInteractor
                 ?.IsControlVisible == true;
@@ -337,6 +343,46 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.IsOneGoodBatchCutawaySelected == true &&
             _world.FuelBondInteractor?.IsInputArmed == true;
 
+        public bool IsEmergencyAidReceptionQueued =>
+            _pendingCommands.Exists(command =>
+                command is ReceiveEmergencyAidCommand);
+
+        public bool CanOpenEmergencyAidWaterTender =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsEmergencyAidReceptionAvailable == true &&
+            IsExactFieldDeskCityOverview &&
+            _world?.EmergencyAidInteractor?.IsControlVisible == true;
+
+        public bool IsEmergencyAidReceptionFocused =>
+            _world?.EmergencyAidInteractor?.IsControlFocused == true;
+
+        public bool CanReceiveEmergencyAid =>
+            CanOpenEmergencyAidWaterTender &&
+            IsEmergencyAidReceptionFocused &&
+            _world?.EmergencyAidInteractor?.IsInputArmed == true;
+
+        public bool IsScoutServiceQueued =>
+            _pendingCommands.Exists(command =>
+                command is ServiceScoutCommand);
+
+        public bool CanOpenScoutServiceBay =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsVehicleServiceAvailable == true &&
+            IsExactFieldDeskCityOverview &&
+            _world?.ScoutServiceInteractor != null;
+
+        public bool IsScoutServiceFocused =>
+            _world?.ScoutServiceInteractor?.IsControlFocused == true;
+
+        public bool CanServiceScout =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsVehicleServiceAvailable == true &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.GarageBay &&
+            _world?.ScoutServiceInteractor?.IsControlFocused == true &&
+            _world.ScoutServiceInteractor.IsInputArmed;
+
         public string Status => _status;
 
         public string SaveStatus => _saveStatus;
@@ -372,6 +418,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool IsExpeditionCommitQueued =>
             _pendingCommands.Exists(command =>
                 command is PrepareExpeditionTransactionCommand ||
+                command is PrepareRepeatExpeditionTransactionCommand ||
                 command is DebitCityManifestCommand ||
                 command is DepartExpeditionCommand);
 
@@ -394,8 +441,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 LastBearingBalanceV1.RouteFuelCost(
                     _readModel.PlannedModule);
 
+        public bool CanRepeatExpedition =>
+            _pendingCommands.Count == 0 &&
+            _state != null &&
+            _readModel?.IsRepeatExpeditionAvailable == true;
+
         public bool IsGarageDepartureAvailable =>
-            CanCommitExpedition &&
+            (CanCommitExpedition || CanRepeatExpedition) &&
             _modeCoordinator?.HasActiveMode == true &&
             _modeCoordinator.CurrentMode ==
                 LastBearingPresentationMode.GarageBay;
@@ -655,6 +707,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ConfigureDepotReturnInteraction(this);
             _world.ConfigureGarageModuleInteraction(this);
             _world.ConfigureGarageDepartureInteraction(this);
+            _world.ConfigureScoutServiceInteraction(this);
             _world.ConfigurePumpHallMaintenanceInteraction(this);
             _world.ConfigureFuelBondInteraction(this);
             _hud = gameObject.AddComponent<LastBearingHud>();
@@ -685,6 +738,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotReturnInteraction();
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
+            _world?.ResetScoutServiceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
             _world?.ResetFuelBondInteraction();
             _pendingCommands.Clear();
@@ -747,6 +801,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotReturnInteraction();
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
+            _world?.ResetScoutServiceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
             _world?.ResetFuelBondInteraction();
             _state = null;
@@ -794,6 +849,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 checkInReady: false,
                 RepairCargoKind.None,
                 RepairCargoCustody.None,
+                FrameRailSalvageCustody.None,
                 humanVisible: false,
                 robotVisible: false);
             _world?.ApplyCityImprovement(
@@ -811,6 +867,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 humanVisible: true,
                 robotVisible: true);
             _world?.ApplyFuelBondInteraction(null);
+            _world?.ApplyScoutServiceInteraction(null);
             _world?.HideCityServiceCell();
             _fieldDesk?.ResetForLifecycle();
         }
@@ -1501,6 +1558,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void OpenGarageBay()
         {
+            bool focusRepeatDeparture =
+                IsExactFieldDeskCityOverview &&
+                CanRepeatExpedition;
             _world?.LeaveCityGrammarComparison();
             TryShowCityMode(
                 LastBearingPresentationMode.GarageBay,
@@ -1509,7 +1569,43 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 _world?.ApplyGarageModuleInteraction(_readModel);
                 _world?.ApplyGarageDepartureInteraction(_readModel);
+                _world?.ApplyScoutServiceInteraction(_readModel);
             }
+
+            if (focusRepeatDeparture)
+            {
+                _world?.GarageDepartureInteractor?.FocusControl();
+            }
+        }
+
+        public void OpenScoutServiceBay()
+        {
+            if (!CanOpenScoutServiceBay ||
+                !TryRouteToScoutServiceBay(
+                    "Sasha's worn scout is framed under the service hoist. Release the route input, then pull the physical pendant; two parts move and two remain in reserve only on the city tick."))
+            {
+                _status =
+                    "Scout service opens only after the higher-priority return work is settled and the two-part reserve can be preserved.";
+            }
+        }
+
+        public void ServiceScout()
+        {
+            if (IsScoutServiceQueued)
+            {
+                return;
+            }
+
+            if (!CanServiceScout)
+            {
+                _status =
+                    "Service Sasha's scout only from the focused garage pendant after releasing the route input.";
+                return;
+            }
+
+            Queue(sequence => new ServiceScoutCommand(sequence));
+            _status =
+                "Scout service queued. Two parts remain in Last Bearing until the authoritative city tick accepts the work and preserves two in reserve.";
         }
 
         public void AttachRoadModeAdapter(ILastBearingRoadModeAdapter adapter)
@@ -1539,6 +1635,33 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (!IsGarageDepartureAvailable)
             {
                 _status = ExpeditionCommitUnavailableStatus();
+                return;
+            }
+
+            if (CanRepeatExpedition)
+            {
+                string predecessorTransactionId = _state!.TransactionId!;
+                string predecessorFingerprint =
+                    _state.TransactionFingerprint!;
+                string identitySuffix = _state.NextCommandSequence.ToString(
+                    CultureInfo.InvariantCulture);
+                string transactionId = "tx:repeat:" + identitySuffix;
+                string fingerprint = "fp:repeat:" + identitySuffix;
+                Queue(
+                    sequence =>
+                        new PrepareRepeatExpeditionTransactionCommand(
+                            sequence,
+                            predecessorTransactionId,
+                            predecessorFingerprint,
+                            transactionId,
+                            fingerprint),
+                    sequence => new DebitCityManifestCommand(
+                        sequence,
+                        transactionId,
+                        fingerprint),
+                    sequence => new DepartExpeditionCommand(sequence));
+                _status =
+                    "Repeat departure queued. The serviced Scout takes the Wreck Line again on the authoritative tick.";
                 return;
             }
 
@@ -1657,20 +1780,32 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void BeginReturn()
         {
-            if (_readModel == null ||
+            if (_state == null ||
+                _readModel == null ||
                 _readModel.ExpeditionPhase != ExpeditionPhase.AtDepot)
             {
                 _status = "The return payload can only be frozen at the depot.";
                 return;
             }
 
-            if (_readModel.RepairCargoCustody != RepairCargoCustody.Vehicle)
+            if (_readModel.IsRepeatExpedition)
+            {
+                if (_readModel.FrameRailSalvageCustody !=
+                    FrameRailSalvageCustody.Vehicle)
+                {
+                    _status =
+                        "Recover the Wreck Line frame rails before freezing the repeat return.";
+                    return;
+                }
+            }
+            else if (_readModel.RepairCargoCustody != RepairCargoCustody.Vehicle)
             {
                 _status = "Load the repair cargo into Sasha's scout before freezing the return payload.";
                 return;
             }
 
-            if (_readModel.VehicleModule == VehicleModule.SealedRangeTank &&
+            if (!_readModel.IsRepeatExpedition &&
+                _readModel.VehicleModule == VehicleModule.SealedRangeTank &&
                 _readModel.LiquidCargoKind == LiquidCargoKind.None)
             {
                 _status = "Choose water or fuel before sealing the range tank.";
@@ -1679,8 +1814,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             Queue(sequence => new FreezeReturnPayloadCommand(
                 sequence,
-                TransactionId,
-                TransactionFingerprint));
+                _state.TransactionId!,
+                _state.TransactionFingerprint!));
             _status = "Return payload frozen. Nothing can duplicate between road and home.";
         }
 
@@ -1874,6 +2009,35 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 "Fuel bond queued. The five returned fuel units remain with Last Bearing until the authoritative city tick accepts the posting.";
         }
 
+        public void OpenEmergencyAidWaterTender()
+        {
+            if (!TryRouteToEmergencyAidWaterTender(
+                    "The cooperative 10.000-milli water tender is framed beside Emergency Storage. Release the route input, then receive it at the physical valve."))
+            {
+                _status =
+                    "The water tender opens only for exact queued cooperative aid after the field sleeve is installed.";
+            }
+        }
+
+        public void ReceiveEmergencyAid()
+        {
+            if (IsEmergencyAidReceptionQueued)
+            {
+                return;
+            }
+
+            if (!CanReceiveEmergencyAid)
+            {
+                _status =
+                    "Receive emergency aid only from the focused water-tender valve after releasing the route input.";
+                return;
+            }
+
+            Queue(sequence => new ReceiveEmergencyAidCommand(sequence));
+            _status =
+                "Emergency water receipt queued. The 10.000-milli offer enters only on the authoritative city tick and cannot exceed current storage capacity.";
+        }
+
         public void OpenFieldSleeveService()
         {
             if (!TryRouteToPumpHallMaintenance(
@@ -1986,6 +2150,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotReturnInteraction();
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
+            _world?.ResetScoutServiceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
             _world?.ResetFuelBondInteraction();
             ClearGaragePlanIntent();
@@ -2024,17 +2189,25 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 if (!TryRouteToPumpHallRepair(
                         "Exact finalized return restored at the pump-hall service line."))
                 {
-                    if (!TryRouteToPumpHallImprovement(
-                            "Exact staged rotor restored at the fixed auxiliary-pump socket."))
+                    if (!TryRouteToEmergencyAidWaterTender(
+                            "Exact queued cooperative water restored at the tender beside Emergency Storage. Release the load input before receiving it."))
                     {
-                        if (!TryRouteToPumpHallMaintenance(
-                                "Exact field-sleeve maintenance restored at its physical pump-hall control."))
+                        if (!TryRouteToPumpHallImprovement(
+                                "Exact staged rotor restored at the fixed auxiliary-pump socket."))
                         {
-                            if (!TryRouteToFuelBondClaimsWicket(
-                                    "Exact unposted fuel bond restored at the claims ledger. Release the load input before posting."))
+                            if (!TryRouteToPumpHallMaintenance(
+                                    "Exact field-sleeve maintenance restored at its physical pump-hall control."))
                             {
-                                TryRouteToOneGoodBatchWorkshop(
-                                    "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                                if (!TryRouteToFuelBondClaimsWicket(
+                                        "Exact unposted fuel bond restored at the claims ledger. Release the load input before posting."))
+                                {
+                                    if (!TryRouteToScoutServiceBay(
+                                            "Exact worn scout restored under the garage hoist. Release the load input, then service it at the physical pendant."))
+                                    {
+                                        TryRouteToOneGoodBatchWorkshop(
+                                            "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                                    }
+                                }
                             }
                         }
                     }
@@ -2059,8 +2232,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.ApplyDepotReturnInteraction(_readModel);
                 _world?.ApplyGarageModuleInteraction(_readModel);
                 _world?.ApplyGarageDepartureInteraction(_readModel);
+                _world?.ApplyScoutServiceInteraction(_readModel);
                 _world?.ApplyPumpHallMaintenanceInteraction(_readModel);
                 _world?.ApplyFuelBondInteraction(_readModel);
+                _world?.EmergencyAidInteractor?.Apply(_readModel);
             }
         }
 
@@ -2138,6 +2313,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.PumpHallMaintenanceInteractor
                     ?.IsControlFocused == true ||
                 _world?.FuelBondInteractor
+                    ?.IsControlFocused == true ||
+                _world?.EmergencyAidInteractor
+                    ?.IsControlFocused == true ||
+                _world?.ScoutServiceInteractor
                     ?.IsControlFocused == true)
             {
                 return;
@@ -2290,6 +2469,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ContainsEvent(
                         result.DomainEvents,
                         LastBearingEventKind.RoutePermitGranted);
+                bool emergencyAidReceived =
+                    _readModel.IsEmergencyAidReceptionAvailable &&
+                    ContainsEvent(
+                        result.DomainEvents,
+                        LastBearingEventKind.EmergencyAidDelivered);
+                bool scoutServiced =
+                    _readModel.IsVehicleServiceAvailable &&
+                    ContainsScoutServiceEventPair(
+                        result.DomainEvents);
                 bool cityBuildingChanged = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.CityBuildingPlaced) ||
@@ -2344,11 +2532,21 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 ApplyPresentation();
                 if (returnCheckInAccepted)
                 {
-                    TryRouteToPumpHallRepair(
-                        _readModel.FrameRailSalvageCustody ==
-                            FrameRailSalvageCustody.Credited
-                            ? "Return checked in. +4 reclaimed parts from the Wreck Line frame rails; seat the loaded repair at the pump hall."
-                            : "Return checked in. Seat the loaded repair at the pump hall.");
+                    if (_readModel.IsRepeatExpedition)
+                    {
+                        _status =
+                            "Repeat circuit checked in. +" +
+                            _readModel.FrameRailSalvagePartsUnits +
+                            " reclaimed parts are home; service Sasha's Scout before another run.";
+                    }
+                    else
+                    {
+                        TryRouteToPumpHallRepair(
+                            _readModel.FrameRailSalvageCustody ==
+                                FrameRailSalvageCustody.Credited
+                                ? "Return checked in. +4 reclaimed parts from the Wreck Line frame rails; seat the loaded repair at the pump hall."
+                                : "Return checked in. Seat the loaded repair at the pump hall.");
+                    }
                 }
 
                 if (turbineRepairAccepted &&
@@ -2380,6 +2578,31 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 {
                     _status =
                         "Fuel bond posted. Five returned fuel units crossed the claims wicket; the depot route permit is recorded while the grievance and two-fuel future toll remain.";
+                }
+
+                if (emergencyAidReceived)
+                {
+                    _status =
+                        "Emergency aid received. The 10.000-milli tender is empty, Emergency Storage holds " +
+                        _readModel.WaterMilli + " / " +
+                        _readModel.WaterCapacityMilli +
+                        " milli after the capacity clamp, and Shared Service plus its maintenance promise remain.";
+                }
+
+                if (scoutServiced)
+                {
+                    _status =
+                        "Sasha's scout is serviced to " +
+                        _readModel.VehicleConditionMilli +
+                        " / " +
+                        LastBearingBalanceV1.StartingVehicleConditionMilli +
+                        ". " +
+                        _readModel.VehicleServicePartsCostUnits +
+                        " parts were spent, the civic " +
+                        _readModel.VehicleServiceReservePartsUnits +
+                        "-part reserve remains, and every fitted module, " +
+                        "upgrade, cargo record, faction term, and city fact " +
+                        "is unchanged.";
                 }
 
                 if (rigUpgradeInstalled)
@@ -2749,6 +2972,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ApplyDepotReturnInteraction(_readModel);
             _world.ApplyGarageModuleInteraction(_readModel);
             _world.ApplyGarageDepartureInteraction(_readModel);
+            _world.ApplyScoutServiceInteraction(_readModel);
             _world.ApplyPumpHallMaintenanceInteraction(_readModel);
             _world.SetCityServiceCellFocus(
                 IsExactFieldDeskCityOverview &&
@@ -2757,6 +2981,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 IsReturnCheckInAvailable,
                 _readModel.RepairCargoKind,
                 _readModel.RepairCargoCustody,
+                _readModel.IsRepeatExpedition
+                    ? _readModel.FrameRailSalvageCustody
+                    : FrameRailSalvageCustody.None,
                 humanVisible,
                 robotVisible);
             _fieldDesk?.Refresh();
@@ -2765,6 +2992,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private void TryAutosave(
             IReadOnlyList<LastBearingDomainEvent> domainEvents)
         {
+            if (ContainsScoutServiceEventPair(domainEvents))
+            {
+                Save();
+                return;
+            }
+
             for (var index = 0; index < domainEvents.Count; index++)
             {
                 LastBearingEventKind kind = domainEvents[index].Kind;
@@ -2797,6 +3030,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     || kind == LastBearingEventKind.HotShiftCheckpointReached
                     || kind == LastBearingEventKind.HotShiftCompleted
                     || kind == LastBearingEventKind.EmergencyCisternPumped
+                    || kind == LastBearingEventKind.EmergencyAidDelivered
                     || kind == LastBearingEventKind.DustFrontResolved
                     || kind == LastBearingEventKind.DustFrontAcknowledged
                     || kind == LastBearingEventKind.MaintenanceServiced)
@@ -2840,6 +3074,20 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             _status = successStatus;
+            return true;
+        }
+
+        private bool TryRouteToEmergencyAidWaterTender(
+            string successStatus)
+        {
+            if (!CanOpenEmergencyAidWaterTender ||
+                _world?.EmergencyAidInteractor?.FocusControl() != true)
+            {
+                return false;
+            }
+
+            _status = successStatus;
+            _fieldDesk?.TrackPhysicalWorkRoute(true);
             return true;
         }
 
@@ -2964,6 +3212,37 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return true;
         }
 
+        private bool TryRouteToScoutServiceBay(string successStatus)
+        {
+            if (_pendingCommands.Count != 0 ||
+                _readModel?.IsVehicleServiceAvailable != true ||
+                _world == null ||
+                _modeCoordinator == null)
+            {
+                return false;
+            }
+
+            _world.LeaveCityGrammarComparison();
+            if (!_modeCoordinator.TryShowCityMode(
+                    LastBearingPresentationMode.GarageBay,
+                    _readModel))
+            {
+                return false;
+            }
+
+            _world.ApplyGarageModuleInteraction(_readModel);
+            _world.ApplyGarageDepartureInteraction(_readModel);
+            _world.ApplyScoutServiceInteraction(_readModel);
+            if (_world.ScoutServiceInteractor?.FocusControl() != true)
+            {
+                return false;
+            }
+
+            _status = successStatus;
+            _fieldDesk?.Refresh(force: true);
+            return true;
+        }
+
         private bool IsOneGoodBatchWorkshopRelevant()
         {
             return _pendingCommands.Count == 0 &&
@@ -2984,6 +3263,46 @@ namespace AtomicLandPirate.Presentation.LastBearing
             for (var index = 0; index < domainEvents.Count; index++)
             {
                 if (domainEvents[index].Kind == eventKind)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool ContainsScoutServiceEventPair(
+            IReadOnlyList<LastBearingDomainEvent> domainEvents)
+        {
+            for (var index = 0;
+                 index + 1 < domainEvents.Count;
+                 index++)
+            {
+                LastBearingDomainEvent resources = domainEvents[index];
+                LastBearingDomainEvent condition =
+                    domainEvents[index + 1];
+                if (resources.Cause ==
+                        LastBearingEventCause.PlayerCommand &&
+                    resources.Kind ==
+                        LastBearingEventKind.CityResourcesCommitted &&
+                    string.Equals(
+                        resources.SubjectId,
+                        "settlement:last-bearing:parts",
+                        StringComparison.Ordinal) &&
+                    resources.BeforeValue - resources.AfterValue ==
+                        LastBearingBalanceV1.HotShiftOutputPartsUnits &&
+                    condition.Cause ==
+                        LastBearingEventCause.PlayerCommand &&
+                    condition.Kind ==
+                        LastBearingEventKind.VehicleConditionChanged &&
+                    string.Equals(
+                        condition.SubjectId,
+                        "vehicle:sasha:service-cell",
+                        StringComparison.Ordinal) &&
+                    condition.CommandSequence ==
+                        resources.CommandSequence &&
+                    condition.AfterValue ==
+                        LastBearingBalanceV1.StartingVehicleConditionMilli)
                 {
                     return true;
                 }
@@ -3092,6 +3411,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_readModel.ExpeditionPhase != ExpeditionPhase.AtHome)
             {
                 return "Sasha is already away from the garage.";
+            }
+
+            if (_readModel.TransactionPhase ==
+                    TransactionPhase.Finalized &&
+                !_readModel.IsRepeatExpeditionAvailable)
+            {
+                return "Finish the return work and service Sasha's Scout before running the Wreck Line again.";
             }
 
             if (_readModel.PreparationPhase != PreparationPhase.Ready ||
@@ -3268,6 +3594,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_modeCoordinator?.TryShowCityMode(mode, _readModel) == true)
             {
                 _status = successStatus;
+                _world?.EmergencyAidInteractor?.Apply(_readModel);
                 _fieldDesk?.Refresh(force: true);
                 return;
             }

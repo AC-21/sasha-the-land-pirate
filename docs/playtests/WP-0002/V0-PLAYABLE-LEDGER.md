@@ -844,7 +844,8 @@ Detailed contract:
 
 ## VGR-21 — Post the Fuel Bond
 
-Status: current implementation target on the V0 feature branch.
+Status: released on protected `main` in PR #119 at
+`01d789d225c3d70ec8c2ef33490b8aabd93aeed8`.
 
 Scope:
 
@@ -868,6 +869,116 @@ production asset, audio, or normal-PR performance soak.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-21-POST-THE-FUEL-BOND-CONTRACT.md`.
+
+## VGR-22 — Receive the Water Tender
+
+Status: implementation complete on the dependent V0 feature line; remote
+integration and canonical native smoke remain pending.
+
+Scope:
+
+- Stop cooperative emergency aid from becoming an invisible return credit;
+  expose its existing authored 10.000-milli amount as a physical water tender
+  beside canonical Emergency Storage after the field sleeve is installed.
+- Make the Field Desk route-only and higher priority than simultaneous
+  Workshop Push city-improvement work; require fresh E / gamepad South / exact
+  tender-valve input before delegating the bounded receipt command.
+- Show a queued tank, then an empty tender with coiled hose and a receipt that
+  distinguishes the authored 10.000-milli offer from actual capacity-clamped
+  stored water.
+- Preserve Shared Service, the field-sleeve maintenance promise, both vehicle
+  modules, all colony compositions, nondefault rotated city layouts, queued and
+  delivered save/load, and one shared camera/listener.
+- Reuse the existing `EmergencyAidDelivered` event as the critical autosave
+  witness and support receipt before or after the existing city improvement.
+
+Exclude: new saved field, schema, migration, event kind, balance value, scene,
+mode, camera, package, dependency, production asset, audio, generalized
+interaction framework, or normal-PR performance soak.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-22-RECEIVE-THE-WATER-TENDER-CONTRACT.md`.
+
+## VGR-23 — Service the Scout
+
+Status: implementation complete on the dependent V0 feature line; canonical
+native smoke remains pending.
+
+Scope:
+
+- Make Sasha's actual return-road wear a final physical homecoming obligation
+  after repair, aid, improvement, fuel-bond, manufacturing/barter, maintenance,
+  Hot Shift, and Dust Front work has settled.
+- Make the Field Desk route-only into the existing garage mode; require fresh E,
+  gamepad South, or exact pendant-pointer input before delegating one bounded
+  service command.
+- Show actual worn condition, the exact two-part cost, and the separately
+  preserved two-part civic reserve; after acceptance reuse the existing service
+  hoist, module worklight, and scout condition telltale to show 1000 / 1000.
+- Preserve module, Patchwork Skid Plate, cargo, faction, city, improvement,
+  permit, future toll, all colony compositions, ready/accepted save-load, and
+  one shared camera/listener.
+- Autosave only on the exact paired parts-commit plus service-cell condition
+  events, so ordinary road-edge condition damage does not broaden the save seam.
+
+Exclude: new saved field, schema, migration, event kind, independent balance
+value, scene, mode, camera, package, dependency, production asset, audio,
+generalized interaction framework, or normal-PR performance soak.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-23-SERVICE-THE-SCOUT-CONTRACT.md`.
+
+## VGR-24 — Run the Wreck Line Again
+
+Status: integrated implementation complete after VGR-23 Scout service, with
+focused source/EditMode coverage and one end-to-end PlayMode repeat circuit.
+
+Scope:
+
+- After exact urgent-work closure and a full 1.000-condition Scout service,
+  compare-and-swap the finalized predecessor into one fresh repeat transaction.
+- Reuse the existing road, Wreck Line operation, depot recovery, freeze,
+  homecoming, credit, and finalize path for both modules and all colony
+  compositions.
+- Recover and credit one bounded repeat frame-rail bundle worth the existing
+  four parts, while applying the selected module's normal route fuel, any
+  persistent authored future-route toll, and normal condition cost.
+- Preserve first-run faction, turbine repair, city improvement, emergency aid,
+  maintenance, route-permit, rotor, and liquid-return history; create no second
+  faction choice, repair cargo, rotor, or liquid return.
+- Reserve repeat transaction identities whose suffix is exactly the canonical
+  command sequence, preventing immediate and nonadjacent reuse, and bind every
+  invariant exception to exact repeat lineage. Repaired turbine state by itself
+  never relaxes custody or phase law.
+- Bound active repeat condition to the deterministic road-edge damage reachable
+  from the 1.000 service and route progress, then require the existing fixed
+  return charge; preserve installed auxiliary-pump history.
+- Preserve schema 9, deterministic save/load, stale/duplicate atomic rejection,
+  and require a fresh Scout service between consecutive circuits.
+- At exact repeat readiness, reuse the Field Desk's existing Open Garage route
+  and show the authored route fuel, persistent toll, condition risk, and
+  frame-rail parts bargain from the read model.
+- Reuse the existing launch dog after a fresh input release for E, gamepad
+  South, and exact pointer activation. The controller alone owns the exact
+  prepare/debit/depart composite and existing autosave seam.
+- Keep four city-to-garage routes presentation-pure with one camera, listener,
+  garage, launch dog, and unchanged canonical state; reject stale runtime
+  presentation before command creation.
+- Reuse Driving, Depot Encounter, and City Return modes; expose only the
+  existing depot return ratchet for Vehicle-custody repeat frame rails and
+  freeze the current repeat transaction identity.
+- Reuse the home return apron to credit the frame-rail bundle, finalize, and
+  route directly to Scout service. Permit Job copy follows the repeat run
+  without reopening the first faction, repair-cargo, or pump-hall story.
+- Round-trip repeat-ready, prepared, outbound, returned, and finalized
+  presentation states through the existing schema and save adapter.
+
+Exclude: new save field, schema, migration, event kind, balance value,
+generalized expedition system, intent, control, mode, scene, asset, package,
+dependency, or normal-PR performance soak.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-24-RUN-THE-WRECK-LINE-AGAIN-CONTRACT.md`.
 
 ## Visual constitution
 

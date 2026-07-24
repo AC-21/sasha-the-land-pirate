@@ -60,6 +60,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool HasVehicleRepairCargo { get; private set; }
 
+        public bool HasVehicleFrameRailSalvage { get; private set; }
+
         public RepairCargoKind CargoKind { get; private set; }
 
         public RepairCargoCustody CargoCustody { get; private set; }
@@ -167,6 +169,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 checkInReady: false,
                 RepairCargoKind.None,
                 RepairCargoCustody.None,
+                FrameRailSalvageCustody.None,
                 humanVisible: false,
                 robotVisible: false);
         }
@@ -175,6 +178,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool checkInReady,
             RepairCargoKind repairCargoKind,
             RepairCargoCustody repairCargoCustody,
+            FrameRailSalvageCustody frameRailSalvageCustody,
             bool humanVisible,
             bool robotVisible)
         {
@@ -185,11 +189,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             ValidateRepairCargo(repairCargoKind, repairCargoCustody);
+            if (!Enum.IsDefined(
+                    typeof(FrameRailSalvageCustody),
+                    frameRailSalvageCustody))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(frameRailSalvageCustody));
+            }
+
             bool hasVehicleRepairCargo =
                 (repairCargoKind == RepairCargoKind.CeramicBearing ||
                  repairCargoKind == RepairCargoKind.FieldSleeve) &&
                 repairCargoCustody == RepairCargoCustody.Vehicle;
-            if (checkInReady && !hasVehicleRepairCargo)
+            bool hasVehicleFrameRailSalvage =
+                frameRailSalvageCustody ==
+                FrameRailSalvageCustody.Vehicle;
+            if (checkInReady &&
+                !hasVehicleRepairCargo &&
+                !hasVehicleFrameRailSalvage)
             {
                 throw new InvalidOperationException(
                     "LAST_BEARING_RETURN_SERVICE_READINESS_INVALID");
@@ -197,6 +214,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             IsCheckInReady = checkInReady;
             HasVehicleRepairCargo = hasVehicleRepairCargo;
+            HasVehicleFrameRailSalvage = hasVehicleFrameRailSalvage;
             CargoKind = repairCargoKind;
             CargoCustody = repairCargoCustody;
 

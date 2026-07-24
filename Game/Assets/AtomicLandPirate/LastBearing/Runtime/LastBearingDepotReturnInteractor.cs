@@ -431,6 +431,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private bool AreLiquidValvesAvailable()
         {
             return IsDepotRoadOwned() &&
+                   _model?.IsRepeatExpedition == false &&
                    HasLoadedRepairCargo() &&
                    _model!.VehicleModule == VehicleModule.SealedRangeTank &&
                    _model.LiquidCargoKind == LiquidCargoKind.None &&
@@ -441,9 +442,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private bool IsReturnLatchAvailable()
         {
             if (!IsDepotRoadOwned() ||
-                !HasLoadedRepairCargo() ||
                 !_model!.RouteActionUsed ||
                 _model.PauseCause != PauseCause.None)
+            {
+                return false;
+            }
+
+            if (_model.IsRepeatExpedition)
+            {
+                return _model.FrameRailSalvageCustody ==
+                    FrameRailSalvageCustody.Vehicle;
+            }
+
+            if (!HasLoadedRepairCargo())
             {
                 return false;
             }

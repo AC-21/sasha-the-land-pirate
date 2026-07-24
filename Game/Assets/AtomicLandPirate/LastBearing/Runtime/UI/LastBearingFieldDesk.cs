@@ -148,6 +148,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return _desk.worldBound.Contains(panelPosition);
         }
 
+        internal void TrackPhysicalWorkRoute(bool routed)
+        {
+            _physicalWorkRouted = routed;
+            if (routed)
+            {
+                HideAndResetTransient();
+            }
+        }
+
         public LastBearingFieldDeskPerformanceTopology
             CapturePerformanceTopology()
         {
@@ -300,7 +309,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _controller.IsDustFrontRelayFocused ||
                     _controller.IsEmergencyCisternExpansionFocused ||
                     _controller.IsFieldSleeveServiceFocused ||
-                    _controller.IsFuelBondFocused;
+                    _controller.IsFuelBondFocused ||
+                    _controller.IsEmergencyAidReceptionFocused;
                 if (physicalControlStillFocused)
                 {
                     HideAndResetTransient();
@@ -601,6 +611,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _controller.OpenFuelBondClaimsWicket();
                     _physicalWorkRouted =
                         _controller.IsFuelBondFocused;
+                    HideAndResetTransient();
+                    break;
+                case LastBearingFieldDeskIntent.OpenEmergencyAidWaterTender:
+                    _controller.OpenEmergencyAidWaterTender();
+                    _physicalWorkRouted =
+                        _controller.IsEmergencyAidReceptionFocused;
+                    HideAndResetTransient();
+                    break;
+                case LastBearingFieldDeskIntent.OpenScoutServiceBay:
+                    _controller.OpenScoutServiceBay();
+                    _physicalWorkRouted =
+                        _controller.IsScoutServiceFocused;
                     HideAndResetTransient();
                     break;
                 case LastBearingFieldDeskIntent.OpenPumpHallImprovement: _controller.OpenPumpHallImprovement(); break;

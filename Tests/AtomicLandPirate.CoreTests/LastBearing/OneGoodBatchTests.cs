@@ -262,9 +262,9 @@ namespace AtomicLandPirate.LastBearingTests
                         == LastBearingState.DepotCorridorRoutePermitId),
                 "permit event");
             TestHarness.Equal(
-                "route-permit-recorded",
+                "service-scout-in-garage",
                 barter.ReadModel.NextObjective,
-                "settled objective");
+                "post-barter objective");
         }
 
         private static void InvalidTransitionsFailAtomically()

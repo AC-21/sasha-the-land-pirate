@@ -63,7 +63,7 @@ namespace AtomicLandPirate.LastBearingTests
                 !driver.View.IsDepotAccessRestorationAvailable,
                 "cooperative fuel bond availability");
             TestHarness.Equal(
-                "route-permit-recorded",
+                "receive-emergency-aid-at-water-tender",
                 driver.View.NextObjective,
                 "cooperative objective");
         }
@@ -282,9 +282,9 @@ namespace AtomicLandPirate.LastBearingTests
                     item.Kind != LastBearingEventKind.LiquidCargoTransferred),
                 "fuel bond re-transferred liquid");
             TestHarness.Equal(
-                "route-permit-recorded",
+                "service-scout-in-garage",
                 result.ReadModel.NextObjective,
-                "settled objective");
+                "post-bond objective");
         }
 
         private static void SharedServiceAloneDoesNotClearAdverseDecision()

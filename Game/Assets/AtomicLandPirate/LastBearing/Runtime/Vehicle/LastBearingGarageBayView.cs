@@ -25,6 +25,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         private const float RigUpgradeInstallPulseIntensity = 620f;
         private const float UnfittedModuleWorkLightIntensity = 180f;
         private const float FittedModuleWorkLightIntensity = 110f;
+        private const float ScoutServiceReadyWorkLightIntensity = 480f;
+        private const float ScoutServiceAcceptedWorkLightIntensity = 640f;
 
         private GameObject? _winchStand;
         private GameObject? _tankStand;
@@ -35,10 +37,20 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         private GameObject? _preparationGaugeRoot;
         private readonly GameObject?[] _preparationGaugeSegments =
             new GameObject?[PreparationGaugeSegmentCount];
+        private Transform? _serviceHoist;
+        private Transform? _hoistCable;
+        private Vector3 _serviceHoistRestPosition;
+        private Vector3 _hoistCableRestPosition;
+        private Vector3 _hoistCableRestScale;
+        private Renderer? _scoutConditionTelltale;
+        private Material? _healthyConditionMaterial;
+        private Material? _wornConditionMaterial;
         private Light? _moduleWorkLight;
         private float _moduleWorkLightBaseIntensity =
             UnfittedModuleWorkLightIntensity;
         private float _rigUpgradeInstallPulseEndsAtUnscaledTime;
+        private bool _scoutServicePresentationActive;
+        private bool _scoutServiceAccepted;
         private bool _built;
 
         public Transform? VehicleDock { get; private set; }
@@ -54,6 +66,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         }
 
         public LastBearingGarageModuleInteractor? ModuleInteractor
+        {
+            get;
+            private set;
+        }
+
+        public LastBearingScoutServiceInteractor? ScoutServiceInteractor
         {
             get;
             private set;
@@ -96,8 +114,20 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         public float ModuleWorkLightIntensity =>
             _moduleWorkLight?.intensity ?? 0f;
 
+        public bool IsScoutServiceHoistRaised =>
+            _scoutServicePresentationActive &&
+            _scoutServiceAccepted;
+
+        public bool IsScoutConditionTelltaleHealthy =>
+            _scoutConditionTelltale != null &&
+            _healthyConditionMaterial != null &&
+            ReferenceEquals(
+                _scoutConditionTelltale.sharedMaterial,
+                _healthyConditionMaterial);
+
         internal void Build(
             Vector3 vehicleWorldPosition,
+            Renderer scoutConditionTelltale,
             Material concrete,
             Material darkIron,
             Material oxide,
@@ -113,6 +143,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             _built = true;
             gameObject.name = RootName;
             transform.position = vehicleWorldPosition;
+            _scoutConditionTelltale = scoutConditionTelltale ??
+                throw new System.ArgumentNullException(
+                    nameof(scoutConditionTelltale));
+            _healthyConditionMaterial = signal;
+            _wornConditionMaterial = oxide;
 
             VehicleDock = CreateAnchor("ANCHOR_VEHICLE_DOCK", Vector3.zero);
             FocusAnchor = CreateAnchor(
@@ -178,12 +213,17 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 new Vector3(0.42f, 0.68f, 0.42f),
                 darkIron);
             hoist.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
-            CreatePart(
+            _serviceHoist = hoist.transform;
+            _serviceHoistRestPosition = _serviceHoist.localPosition;
+            GameObject hoistCable = CreatePart(
                 "HOIST_CABLE",
                 PrimitiveType.Cylinder,
                 new Vector3(0f, 2.75f, -1.15f),
                 new Vector3(0.045f, 1f, 0.045f),
                 darkIron);
+            _hoistCable = hoistCable.transform;
+            _hoistCableRestPosition = _hoistCable.localPosition;
+            _hoistCableRestScale = _hoistCable.localScale;
 
             CreatePart(
                 "TOOL_BENCH",
@@ -252,10 +292,20 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 new Color(1f, 0.72f, 0.38f, 1f),
                 180f,
                 5f);
+            BuildScoutServiceControl(
+                darkIron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
 
             ApplyModule(SashaScoutModulePresentation.None);
             ApplyPreparationProgress(0, 0);
             ApplyPlanMarker(GaragePlanMarkerPresentation.None);
+            ApplyScoutServicePresentation(
+                active: false,
+                accepted: false,
+                conditionHealthy: true);
         }
 
         private void BuildDepartureControl(
@@ -302,6 +352,31 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             ModuleInteractor.Build(
                 _winchStand.transform,
                 _tankStand.transform,
+                darkIron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
+        }
+
+        private void BuildScoutServiceControl(
+            Material darkIron,
+            Material oxide,
+            Material bone,
+            Material tungsten,
+            Material signal)
+        {
+            var service = new GameObject(
+                LastBearingScoutServiceInteractor.RootName);
+            service.transform.SetParent(transform, false);
+            service.transform.localPosition =
+                new Vector3(-2.75f, 0.08f, -2.55f);
+            service.transform.localRotation =
+                Quaternion.Euler(0f, 8f, 0f);
+            ScoutServiceInteractor =
+                service.AddComponent<LastBearingScoutServiceInteractor>();
+            ScoutServiceInteractor.Build(
+                this,
                 darkIron,
                 oxide,
                 bone,
@@ -380,6 +455,50 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             RefreshModuleWorkLight();
         }
 
+        internal void ApplyScoutServicePresentation(
+            bool active,
+            bool accepted,
+            bool conditionHealthy)
+        {
+            _scoutServicePresentationActive = active;
+            _scoutServiceAccepted =
+                _scoutServicePresentationActive &&
+                accepted;
+
+            if (_serviceHoist != null)
+            {
+                _serviceHoist.localPosition =
+                    _serviceHoistRestPosition +
+                    (_scoutServiceAccepted
+                        ? new Vector3(0f, 0.56f, 0f)
+                        : Vector3.zero);
+            }
+
+            if (_hoistCable != null)
+            {
+                _hoistCable.localPosition =
+                    _hoistCableRestPosition +
+                    (_scoutServiceAccepted
+                        ? new Vector3(0f, 0.48f, 0f)
+                        : Vector3.zero);
+                _hoistCable.localScale = _scoutServiceAccepted
+                    ? new Vector3(
+                        _hoistCableRestScale.x,
+                        _hoistCableRestScale.y * 0.52f,
+                        _hoistCableRestScale.z)
+                    : _hoistCableRestScale;
+            }
+
+            if (_scoutConditionTelltale != null)
+            {
+                _scoutConditionTelltale.sharedMaterial = conditionHealthy
+                    ? _healthyConditionMaterial!
+                    : _wornConditionMaterial!;
+            }
+
+            RefreshModuleWorkLight();
+        }
+
         private void OnEnable()
         {
             if (_rigUpgradeInstallPulseEndsAtUnscaledTime <=
@@ -449,6 +568,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         {
             if (_moduleWorkLight == null)
             {
+                return;
+            }
+
+            if (_scoutServicePresentationActive)
+            {
+                _moduleWorkLight.intensity = _scoutServiceAccepted
+                    ? ScoutServiceAcceptedWorkLightIntensity
+                    : ScoutServiceReadyWorkLightIntensity;
                 return;
             }
 

@@ -444,11 +444,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                        _model,
                        _controller.RuntimeReadModel) &&
                    _model.ExpeditionPhase == ExpeditionPhase.AtHome &&
-                   _model.TransactionPhase == TransactionPhase.None &&
-                   _model.PreparationPhase == PreparationPhase.Ready &&
-                   _model.PreparationChoice !=
-                       PreparationChoice.Unselected &&
-                   _model.PlannedModule != VehicleModule.None;
+                   (_model.IsRepeatExpeditionAvailable ||
+                    (_model.TransactionPhase == TransactionPhase.None &&
+                     _model.PreparationPhase == PreparationPhase.Ready &&
+                     _model.PreparationChoice !=
+                         PreparationChoice.Unselected &&
+                     _model.PlannedModule != VehicleModule.None));
         }
 
         private void NormalizeState()
@@ -475,10 +476,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 return "DEPARTURE QUEUED · AUTHORITATIVE TICK PENDING";
             }
 
-            if (_controller?.CanCommitExpedition == true)
+            if (_controller?.IsGarageDepartureAvailable == true)
             {
+                string ready = _model?.IsRepeatExpeditionAvailable == true
+                    ? "WRECK LINE READY"
+                    : "LAUNCH DOG READY";
                 return IsFocused
-                    ? "LAUNCH DOG READY\nPULL · E / A"
+                    ? ready + "\nPULL · E / A"
                     : "LAUNCH DOG\nFOCUS · POINTER / D-PAD";
             }
 

@@ -42,6 +42,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         OpenDustFrontRelay = 31,
         OpenEmergencyCisternExpansion = 32,
         OpenFuelBondClaimsWicket = 33,
+        OpenEmergencyAidWaterTender = 34,
+        OpenScoutServiceBay = 35,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -513,6 +515,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.TransactionPhase.GetHashCode());
             Mix(ref hash, model.RepairCargoKind.GetHashCode());
             Mix(ref hash, model.RepairCargoCustody.GetHashCode());
+            Mix(ref hash, model.VehicleConditionMilli);
+            Mix(ref hash, model.IsVehicleServiceNeeded);
+            Mix(ref hash, model.IsVehicleServiceAvailable);
+            Mix(ref hash, model.VehicleServicePartsCostUnits);
+            Mix(ref hash, model.VehicleServiceReservePartsUnits);
             Mix(ref hash, model.MaintenanceDue);
             Mix(ref hash, model.NextCityDecision.GetHashCode());
             Mix(ref hash, model.InstalledCityImprovement.GetHashCode());
@@ -529,6 +536,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.IsSpareBearingBatchStartAvailable);
             Mix(ref hash, model.IsSpareBearingBarterAvailable);
             Mix(ref hash, model.IsDepotAccessRestorationAvailable);
+            Mix(ref hash, model.FactionAidPolicy.GetHashCode());
+            Mix(ref hash, model.EmergencyAidWaterMilli);
+            Mix(ref hash, model.IsEmergencyAidReceptionAvailable);
             Mix(ref hash, model.PauseCause.GetHashCode());
             Mix(ref hash, model.DustFrontOutcome.GetHashCode());
             Mix(ref hash, model.IsDustFrontAcknowledgementRequired);
@@ -744,6 +754,24 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            if (model.IsEmergencyAidReceptionAvailable)
+            {
+                primary = Action(
+                    LastBearingFieldDeskIntent
+                        .OpenEmergencyAidWaterTender,
+                    "OPEN EMERGENCY STORAGE · RECEIVE WATER TENDER",
+                    "Route to the cooperative 10.000-milli tender beside " +
+                    "Emergency Storage. Release the route input, then use E, " +
+                    "gamepad south, or the exact valve. Current storage capacity " +
+                    "clamps what enters; Shared Service and the field-sleeve " +
+                    "maintenance promise remain.",
+                    true,
+                    canDispatch &&
+                    controller.CanOpenEmergencyAidWaterTender,
+                    LastBearingFieldDeskActionTone.Signal);
+                return;
+            }
+
             if (model.IsCityImprovementInstallationAvailable)
             {
                 if (model.NextCityDecision ==
@@ -786,6 +814,62 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     canDispatch &&
                     controller.CanOpenFuelBondClaimsWicket,
                     LastBearingFieldDeskActionTone.Signal);
+                return;
+            }
+
+            // Core exposes this only after every urgent return obligation has
+            // settled. Check it before the workshop's durable Settled receipt,
+            // which otherwise remains relevant after a completed barter.
+            if (model.IsVehicleServiceAvailable)
+            {
+                primary = Action(
+                    LastBearingFieldDeskIntent.OpenScoutServiceBay,
+                    "OPEN GARAGE · SERVICE SASHA'S SCOUT",
+                    "Scout condition " +
+                    model.VehicleConditionMilli +
+                    " / " +
+                    LastBearingBalanceV1.StartingVehicleConditionMilli +
+                    ". Spend " +
+                    model.VehicleServicePartsCostUnits +
+                    " parts and preserve " +
+                    model.VehicleServiceReservePartsUnits +
+                    " in civic reserve at the physical service pendant; " +
+                    "release the route input, then use E, gamepad south, " +
+                    "or the exact pendant.",
+                    true,
+                    canDispatch &&
+                    controller.CanOpenScoutServiceBay,
+                    LastBearingFieldDeskActionTone.Signal);
+                return;
+            }
+
+            if (model.IsRepeatExpeditionAvailable)
+            {
+                long baseFuel =
+                    LastBearingBalanceV1.RouteFuelCost(model.VehicleModule);
+                long repeatFuel = checked(
+                    baseFuel + model.FutureRouteTollFuelUnits);
+                primary = Action(
+                    LastBearingFieldDeskIntent.OpenGarage,
+                    "OPEN GARAGE · RUN THE WRECK LINE AGAIN",
+                    "Sasha's Scout is serviced to " +
+                    model.VehicleConditionMilli +
+                    " / " +
+                    LastBearingBalanceV1.StartingVehicleConditionMilli +
+                    ". Spend " +
+                    repeatFuel +
+                    " fuel (" +
+                    baseFuel +
+                    " route + " +
+                    model.FutureRouteTollFuelUnits +
+                    " toll), risk " +
+                    model.ProjectedRoundTripConditionLossMilli +
+                    " condition, and bring home +" +
+                    model.FrameRailSalvagePartsUnits +
+                    " parts. Release the desk input, then use E, gamepad south, or the exact clamp.",
+                    true,
+                    canDispatch,
+                    LastBearingFieldDeskActionTone.Primary);
                 return;
             }
 
@@ -1318,7 +1402,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return model.IsSpareBearingBatchStartAvailable ||
                    model.SpareBearingBatchPhase == SpareBearingBatchPhase.InProgress ||
                    model.IsSpareBearingBarterAvailable ||
-                   model.SpareBearingBatchPhase == SpareBearingBatchPhase.Settled;
+                   (model.SpareBearingBatchPhase ==
+                        SpareBearingBatchPhase.Settled &&
+                    !model.MaintenanceDue &&
+                    !model.IsVehicleServiceAvailable);
         }
 
         private static LastBearingFieldDeskActionProjection

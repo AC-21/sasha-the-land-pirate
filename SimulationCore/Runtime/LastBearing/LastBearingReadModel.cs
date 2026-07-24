@@ -121,6 +121,19 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     state.VehicleModule);
             VehicleLateralMilli = state.VehicleLateralMilli;
             VehicleConditionMilli = state.VehicleConditionMilli;
+            VehicleServicePartsCostUnits =
+                LastBearingBalanceV1.HotShiftOutputPartsUnits;
+            VehicleServiceReservePartsUnits =
+                LastBearingBalanceV1.MinimumPostReturnPartsUnits;
+            IsVehicleServiceNeeded =
+                state.VehicleConditionMilli
+                    < LastBearingBalanceV1.StartingVehicleConditionMilli;
+            IsVehicleServiceAvailable =
+                ComputeVehicleServiceAvailable(state);
+            IsRepeatExpedition =
+                LastBearingRepeatExpedition.IsLineage(state);
+            IsRepeatExpeditionAvailable =
+                ComputeRepeatExpeditionAvailable(state);
             RepairCargoKind = state.RepairCargoKind;
             RepairCargoCustody = state.RepairCargoCustody;
             FrameRailSalvageCustody =
@@ -141,6 +154,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             DepotControl = state.DepotControl;
             FactionAccessPolicy = state.FactionAccessPolicy;
             FactionAidPolicy = state.FactionAidPolicy;
+            EmergencyAidWaterMilli = state.EmergencyAidWaterMilli;
             FactionTrust = state.FactionTrust;
             FactionGrievance = state.FactionGrievance;
             MaintenanceRecipe = state.MaintenanceRecipe;
@@ -166,6 +180,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 ComputeSpareBearingBarterAvailable(state);
             IsDepotAccessRestorationAvailable =
                 ComputeDepotAccessRestorationAvailable(state);
+            IsEmergencyAidReceptionAvailable =
+                ComputeEmergencyAidReceptionAvailable(state);
+            IsEmergencyAidReceptionComplete =
+                ComputeEmergencyAidReceptionComplete(state);
+            IsEmergencyAidWorkResolved =
+                ComputeEmergencyAidWorkResolved(state);
             SpareBearingRemainingTicks = Math.Max(
                 0,
                 state.SpareBearingRequiredTicks
@@ -290,6 +310,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long WreckLineGateTicks { get; private set; }
         public int VehicleLateralMilli { get; private set; }
         public long VehicleConditionMilli { get; private set; }
+        public long VehicleServicePartsCostUnits { get; private set; }
+        public long VehicleServiceReservePartsUnits { get; private set; }
+        public bool IsVehicleServiceNeeded { get; private set; }
+        public bool IsVehicleServiceAvailable { get; private set; }
+        public bool IsRepeatExpedition { get; private set; }
+        public bool IsRepeatExpeditionAvailable { get; private set; }
         public RepairCargoKind RepairCargoKind { get; private set; }
         public RepairCargoCustody RepairCargoCustody { get; private set; }
         public FrameRailSalvageCustody FrameRailSalvageCustody
@@ -309,6 +335,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public DepotControl DepotControl { get; private set; }
         public FactionAccessPolicy FactionAccessPolicy { get; private set; }
         public FactionAidPolicy FactionAidPolicy { get; private set; }
+        public long EmergencyAidWaterMilli { get; private set; }
         public long FactionTrust { get; private set; }
         public long FactionGrievance { get; private set; }
         public MaintenanceRecipe MaintenanceRecipe { get; private set; }
@@ -329,6 +356,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public bool IsSpareBearingBatchStartAvailable { get; private set; }
         public bool IsSpareBearingBarterAvailable { get; private set; }
         public bool IsDepotAccessRestorationAvailable { get; private set; }
+        public bool IsEmergencyAidReceptionAvailable { get; private set; }
+        public bool IsEmergencyAidReceptionComplete { get; private set; }
+        public bool IsEmergencyAidWorkResolved { get; private set; }
         public long SpareBearingRemainingTicks { get; private set; }
         public PauseCause PauseCause { get; private set; }
         public bool IsDepotApproachRecoveryAvailable { get; private set; }
@@ -612,6 +642,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return "install-turbine-repair";
             }
 
+            if (ComputeEmergencyAidReceptionAvailable(state))
+            {
+                return "receive-emergency-aid-at-water-tender";
+            }
+
             if (ComputeCityImprovementInstallationAvailable(state))
             {
                 return state.NextCityDecision
@@ -641,6 +676,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return "post-fuel-bond-at-claims-counter";
             }
 
+            if (ComputeVehicleServiceAvailable(state))
+            {
+                return "service-scout-in-garage";
+            }
+
+            if (ComputeRepeatExpeditionAvailable(state))
+            {
+                return "prepare-repeat-expedition";
+            }
+
             if (state.SpareBearingBatchPhase
                 == SpareBearingBatchPhase.Settled)
             {
@@ -666,6 +711,67 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             return "observe-recovering-waterworks";
+        }
+
+        private static bool ComputeVehicleServiceAvailable(
+            LastBearingState state)
+        {
+            long requiredParts = checked(
+                LastBearingBalanceV1.HotShiftOutputPartsUnits
+                + LastBearingBalanceV1.MinimumPostReturnPartsUnits);
+            return state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.Finalized
+                && state.TurbineCondition != TurbineCondition.Failing
+                && state.SliceInfrastructureActive
+                && state.CityDeliveryStage
+                    == CityDeliveryStage.DeliveredToWorkshop
+                && state.VehicleConditionMilli
+                    < LastBearingBalanceV1.StartingVehicleConditionMilli
+                && state.PartsUnits >= requiredParts
+                && state.HotShiftPhase == HotShiftPhase.Idle
+                && state.NextCityDecision == NextCityDecision.None
+                && ComputeEmergencyAidWorkResolved(state)
+                && !state.MaintenanceDue
+                && state.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.InProgress
+                && state.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.Complete
+                && !state.IsDustFrontAcknowledgementRequired;
+        }
+
+        internal static bool CanPrepareRepeatExpedition(
+            LastBearingState state)
+        {
+            return ComputeRepeatExpeditionAvailable(state);
+        }
+
+        private static bool ComputeRepeatExpeditionAvailable(
+            LastBearingState state)
+        {
+            return state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.Finalized
+                && LastBearingRepeatExpedition
+                    .CanLaunchFromCompletedReturn(state)
+                && state.SliceInfrastructureActive
+                && state.AssignedResidentId != null
+                && state.CityDeliveryStage
+                    == CityDeliveryStage.DeliveredToWorkshop
+                && state.ModuleInstallationState
+                    == ModuleInstallationState.Installed
+                && state.PreparationPhase == PreparationPhase.Committed
+                && state.PartsUnits
+                    >= LastBearingBalanceV1.MinimumPostReturnPartsUnits
+                && state.FuelUnits
+                    >= LastBearingRepeatExpedition.FuelCost(state)
+                && state.HotShiftPhase == HotShiftPhase.Idle
+                && state.NextCityDecision == NextCityDecision.None
+                && ComputeEmergencyAidWorkResolved(state)
+                && !state.MaintenanceDue
+                && state.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.InProgress
+                && state.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.Complete
+                && !state.IsDustFrontAcknowledgementRequired;
         }
 
         private static bool ComputeCityImprovementInstallationAvailable(
@@ -902,6 +1008,93 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.FuelUnits >= fuelBondUnits;
         }
 
+        private static bool ComputeEmergencyAidReceptionAvailable(
+            LastBearingState state)
+        {
+            return state.FactionAidPolicy
+                    == FactionAidPolicy.EmergencyWaterQueued
+                && HasExactEmergencyAidLineage(state);
+        }
+
+        private static bool ComputeEmergencyAidReceptionComplete(
+            LastBearingState state)
+        {
+            return state.FactionAidPolicy
+                    == FactionAidPolicy.EmergencyWaterDelivered
+                && HasExactEmergencyAidLineage(state);
+        }
+
+        internal static bool ComputeEmergencyAidWorkResolved(
+            LastBearingState state)
+        {
+            return state.FactionAidPolicy
+                    != FactionAidPolicy.EmergencyWaterQueued
+                && (state.FactionAidPolicy
+                        != FactionAidPolicy.EmergencyWaterDelivered
+                    || HasExactEmergencyAidLineage(state));
+        }
+
+        private static bool HasExactEmergencyAidLineage(
+            LastBearingState state)
+        {
+            return state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.Finalized
+                && state.TurbineCondition
+                    == TurbineCondition.SleeveRepaired
+                && state.RepairCargoKind == RepairCargoKind.FieldSleeve
+                && state.RepairCargoCustody
+                    == RepairCargoCustody.Consumed
+                && state.DepotResolution == EncounterChoice.Cooperate
+                && state.DepotBearingDisposition
+                    == DepotBearingDisposition.FactionHeld
+                && state.DepotControl == DepotControl.SharedAccess
+                && state.FactionClaimState
+                    == FactionClaimState.Cooperating
+                && state.FactionAccessPolicy
+                    == FactionAccessPolicy.SharedService
+                && state.EmergencyAidWaterMilli
+                    == LastBearingBalanceV1.CooperateAidWaterMilli
+                && state.PendingFactionOutcome
+                    == FactionOutcomeKind.Cooperative
+                && state.FactionTrust
+                    == LastBearingBalanceV1.CooperateTrustDelta
+                && state.FactionGrievance == 0
+                && state.FactionOutcomeElapsedTicks
+                    >= LastBearingBalanceV1.FactionOutcomeMaturationTicks
+                && state.DepotAccessFeePartsUnits == 0
+                && state.FutureRouteTollFuelUnits == 0
+                && state.RoutePermitGranted
+                && state.MaintenanceRecipe
+                    == MaintenanceRecipe.FieldSleeveService
+                && state.MaintenanceObligationActive
+                && state.MaintenancePartsUnits
+                    == LastBearingBalanceV1.SleeveMaintenancePartsUnits
+                && state.FactionMemory != null
+                && string.Equals(
+                    state.FactionMemory.StableId,
+                    "memory:last-bearing:cooperate:0001",
+                    StringComparison.Ordinal)
+                && string.Equals(
+                    state.FactionMemory.WitnessedAction,
+                    "CooperateAtBearingDepot",
+                    StringComparison.Ordinal)
+                && string.Equals(
+                    state.FactionMemory.AffectedFactionId,
+                    LastBearingState.LastBearingFactionId,
+                    StringComparison.Ordinal)
+                && state.FactionMemory.Magnitude
+                    == LastBearingBalanceV1.CooperateTrustDelta
+                && string.Equals(
+                    state.FactionMemory.DoctrineTag,
+                    "shared-maintenance",
+                    StringComparison.Ordinal)
+                && state.FactionMemory.EncounterTick <= state.GlobalTick
+                && string.Equals(
+                    state.FactionMemory.ConsequenceCode,
+                    "FIELD_SLEEVE_SERVICE",
+                    StringComparison.Ordinal);
+        }
+
         private static bool ComputeDepotApproachRecoveryAvailable(
             LastBearingState state)
         {
@@ -930,7 +1123,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         {
             return state.ExpeditionPhase == ExpeditionPhase.Outbound
                 && state.TransactionPhase == TransactionPhase.RoadOwned
-                && state.RigUpgrade == RigUpgrade.PatchworkSkidPlate
+                && (state.RigUpgrade == RigUpgrade.PatchworkSkidPlate
+                    || LastBearingRepeatExpedition.IsLineage(state))
                 && state.RouteActionUsed
                 && state.FrameRailSalvageCustody
                     == FrameRailSalvageCustody.WreckLine

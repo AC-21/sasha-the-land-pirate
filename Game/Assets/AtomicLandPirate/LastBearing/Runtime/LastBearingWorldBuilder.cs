@@ -87,6 +87,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public LastBearingGarageModuleInteractor? GarageModuleInteractor =>
             GarageBayView?.ModuleInteractor;
 
+        public LastBearingScoutServiceInteractor? ScoutServiceInteractor =>
+            GarageBayView?.ScoutServiceInteractor;
+
         public Transform? CityScaffoldRoot { get; private set; }
 
         public LastBearingReturnServiceView? ReturnServiceView { get; private set; }
@@ -112,6 +115,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public LastBearingFuelBondInteractor? FuelBondInteractor =>
             OneGoodBatchCutawayView?.FuelBondInteractor;
+
+        public LastBearingEmergencyAidInteractor? EmergencyAidInteractor =>
+            CityServiceCellView?.EmergencyAidInteractor;
 
         public Transform? SelectedBuildingCutawayCameraAnchor { get; private set; }
 
@@ -249,7 +255,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 oxide,
                 bone,
                 tungsten,
-                signal);
+                signal,
+                _waterMaterial!);
             BuildVehicle(
                 iron,
                 oxide,
@@ -436,7 +443,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (MainCamera == null ||
                 CityServiceCellView?.Interactor == null ||
                 CityServiceCellView
-                    .EmergencyCisternExpansionInteractor == null)
+                    .EmergencyCisternExpansionInteractor == null ||
+                CityServiceCellView.EmergencyAidInteractor == null)
             {
                 throw new InvalidOperationException(
                     "Working service-cell interaction requires its shared city camera.");
@@ -448,13 +456,27 @@ namespace AtomicLandPirate.Presentation.LastBearing
             CityServiceCellView.EmergencyCisternExpansionInteractor.Configure(
                 controller,
                 MainCamera);
+            CityServiceCellView.EmergencyAidInteractor.Configure(
+                controller,
+                MainCamera);
             CameraRig?.SetCityServiceCellInteractor(
                 CityServiceCellView.Interactor);
             CameraRig?.SetEmergencyCisternExpansionInteractor(
                 CityServiceCellView.EmergencyCisternExpansionInteractor);
+            CameraRig?.SetEmergencyAidInteractor(
+                CityServiceCellView.EmergencyAidInteractor);
         }
 
         public void ResetCityServiceCellInteraction()
+        {
+            CityServiceCellView?.Interactor?.ResetLocalSelection();
+            CityServiceCellView
+                ?.EmergencyCisternExpansionInteractor
+                ?.ResetLocalFocus();
+            CityServiceCellView?.EmergencyAidInteractor?.ResetLocalFocus();
+        }
+
+        public void ResetEmergencyAidSiblingInteractions()
         {
             CityServiceCellView?.Interactor?.ResetLocalSelection();
             CityServiceCellView
@@ -622,6 +644,33 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingReadModel model)
         {
             GarageModuleInteractor?.Apply(model);
+        }
+
+        public void ConfigureScoutServiceInteraction(
+            LastBearingGameController controller)
+        {
+            if (MainCamera == null || ScoutServiceInteractor == null)
+            {
+                throw new InvalidOperationException(
+                    "Scout service interaction requires Sasha's shared garage camera.");
+            }
+
+            ScoutServiceInteractor.Configure(controller, MainCamera);
+        }
+
+        public void ResetScoutServiceInteraction()
+        {
+            ScoutServiceInteractor?.ResetLocalFocus();
+            GarageBayView?.ApplyScoutServicePresentation(
+                active: false,
+                accepted: false,
+                conditionHealthy: true);
+        }
+
+        public void ApplyScoutServiceInteraction(
+            LastBearingReadModel? model)
+        {
+            ScoutServiceInteractor?.Apply(model);
         }
 
         public void SelectCityGrammarHypothesis(
@@ -814,6 +863,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool checkInReady,
             RepairCargoKind kind,
             RepairCargoCustody custody,
+            FrameRailSalvageCustody frameRailSalvageCustody,
             bool humanVisible,
             bool robotVisible)
         {
@@ -821,6 +871,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 checkInReady,
                 kind,
                 custody,
+                frameRailSalvageCustody,
                 humanVisible,
                 robotVisible);
         }
@@ -1414,11 +1465,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Material tungsten,
             Material signal)
         {
+            Transform? conditionTelltale =
+                VehicleView?.ScoutVisual?.Lod0Root?.Find(
+                    "SCOUT_CONDITION_TELL_TALE");
+            Renderer? conditionRenderer =
+                conditionTelltale?.GetComponent<Renderer>();
+            if (conditionRenderer == null)
+            {
+                throw new MissingReferenceException(
+                    "Sasha's scout condition telltale is required by the fixed garage service bay.");
+            }
+
             var garage = new GameObject(LastBearingGarageBayView.RootName);
             garage.transform.SetParent(garageModeRoot, false);
             GarageBayView = garage.AddComponent<LastBearingGarageBayView>();
             GarageBayView.Build(
                 VehicleView!.transform.position,
+                conditionRenderer,
                 concrete,
                 darkIron,
                 oxide,
@@ -1535,7 +1598,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Material oxide,
             Material bone,
             Material tungsten,
-            Material signal)
+            Material signal,
+            Material water)
         {
             var serviceCell = new GameObject(
                 "Working Service Cell [Derived Only]");
@@ -1548,7 +1612,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 oxide,
                 bone,
                 tungsten,
-                signal);
+                signal,
+                water);
         }
 
         private void BuildCamera()

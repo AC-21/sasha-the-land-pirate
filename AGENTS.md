@@ -146,7 +146,7 @@ Rules:
   action.
 - Before a gate, verify the exact project path, branch, Unity version, and
   active scene.
-- Open only `/Users/sasha/Documents/Sasha the Atomic Land Pirate/Development/sasha-the-land-pirate/Game` in Unity or Unity Hub; keep one Editor session and all parallel Git worktrees code-only.
+- Keep one Unity Editor session per checkout. Close the old project before opening another worktree.
 - On zero tests, duplicate TypeDB registration, or stale attestation, restart
   once in a clean session and rerun only the affected gate.
 - Commit `ProjectSettings` changes only when intentional and reviewed.
