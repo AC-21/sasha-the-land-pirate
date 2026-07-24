@@ -19,7 +19,7 @@ using UnityEngine.TestTools;
 
 namespace AtomicLandPirate.Presentation.LastBearing.Tests
 {
-    public sealed class LastBearingPlayModeTests : InputTestFixture
+    public sealed partial class LastBearingPlayModeTests : InputTestFixture
     {
         private const string SceneName = "LastBearing";
         private readonly List<string> _temporarySaveRoots = new List<string>();
@@ -1350,7 +1350,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingGameController controller =
                 UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
             controller.enabled = false;
-            _ = InstallTemporarySaveAdapter(controller);
+            string profileDirectory =
+                InstallTemporarySaveAdapter(controller);
             LastBearingState gate = DriveUntilWreckLineAvailable(
                 CreateOutboundState(installPatchworkSkidPlate: true));
             InstallControllerState(controller, gate);
@@ -1361,16 +1362,26 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             yield return null;
             yield return null;
             Assert.That(wreck.Interactor!.IsInputArmed, Is.True);
+            Assert.That(wreck.IsFrameRailSourceVisible, Is.False);
 
+            long moduleSequence = controller.State!.NextCommandSequence;
             Press(keyboard.eKey);
             yield return null;
             InvokeGlobalShortcuts(controller);
-            Release(keyboard.eKey);
-            yield return null;
-            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            AssertExactWreckLineCommand<
+                OperateWreckLineModuleCommand>(
+                controller,
+                moduleSequence);
             Assert.That(
-                PendingCommands(controller)[0],
-                Is.TypeOf<OperateWreckLineModuleCommand>());
+                ((OperateWreckLineModuleCommand)
+                    PendingCommands(controller)[0]).Action,
+                Is.EqualTo(RouteActionKind.DeployWinch));
+            Assert.That(
+                wreck.Interactor!.ActivateCurrentStage(),
+                Is.False,
+                "same-frame physical input must not duplicate the command");
+            controller.OperateWreckLineModulePoint();
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
             InvokeSimulationTick(controller);
 
             Assert.That(
@@ -1381,18 +1392,55 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(FrameRailSalvageCustody.WreckLine));
             Assert.That(wreck.IsFrameRailSourceVisible, Is.True);
             Assert.That(wreck.IsRoadFrameRailCargoVisible, Is.False);
-            Assert.That(wreck.Interactor!.IsTargetVisible, Is.False);
+            Assert.That(
+                wreck.Interactor!.CurrentStage,
+                Is.EqualTo(WreckLineInteractionStage.RecoverFrameRails));
+            Assert.That(wreck.Interactor.IsTargetVisible, Is.True);
+            Assert.That(wreck.Interactor.IsInputArmed, Is.False);
             AssertRoadModulePointHold(controller, roadRig);
 
+            yield return null;
+            Assert.That(
+                wreck.Interactor.IsInputArmed,
+                Is.False,
+                "the held module input must not recover the rails");
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            Release(keyboard.eKey);
+            yield return null;
+            Assert.That(wreck.Interactor.IsInputArmed, Is.True);
+
+            byte[] recoverySource =
+                LastBearingCanonicalCodec.Encode(controller.State!);
+            string recoverySourceHash = controller.CanonicalHash;
+            long recoverySequence =
+                controller.State!.NextCommandSequence;
+            Dictionary<string, string> recoverySourceSave =
+                SnapshotSaveFiles(profileDirectory);
             Press(keyboard.eKey);
             yield return null;
             InvokeGlobalShortcuts(controller);
+            AssertExactWreckLineCommand<
+                RecoverWreckLineFrameRailsCommand>(
+                controller,
+                recoverySequence);
+            Assert.That(
+                wreck.Interactor.ActivateCurrentStage(),
+                Is.False,
+                "same-frame recovery input must not duplicate the command");
+            controller.RecoverWreckLineFrameRails();
+            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
+            CollectionAssert.AreEqual(
+                recoverySource,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(recoverySourceHash));
+            Assert.That(wreck.IsFrameRailSourceVisible, Is.True);
+            Assert.That(wreck.IsCanonicalFrameRailCargoVisible, Is.False);
+            Assert.That(wreck.IsRoadFrameRailCargoVisible, Is.False);
+            AssertSaveSnapshot(
+                recoverySourceSave,
+                SnapshotSaveFiles(profileDirectory));
             Release(keyboard.eKey);
             yield return null;
-            Assert.That(PendingCommandCount(controller), Is.EqualTo(1));
-            Assert.That(
-                PendingCommands(controller)[0],
-                Is.TypeOf<RecoverWreckLineFrameRailsCommand>());
             InvokeSimulationTick(controller);
 
             Assert.That(
@@ -1407,6 +1455,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 LastBearingModeCoordinator.PumpRotorPresentationMassKilograms +
                 LastBearingModeCoordinator.FrameRailPresentationMassKilograms;
             Assert.That(
+                LastBearingModeCoordinator
+                    .FrameRailPresentationMassKilograms,
+                Is.EqualTo(400));
+            Assert.That(
                 roadRig.Adapter.LastCargoMassKilograms,
                 Is.EqualTo(rotorAndRailMass));
             Assert.That(
@@ -1415,6 +1467,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.SaveStatus,
                 Does.StartWith(LastBearingSaveCodes.SaveOk + " ·"));
+            AssertSaveSnapshotChanged(
+                recoverySourceSave,
+                SnapshotSaveFiles(profileDirectory));
+            byte[] loadedCargoCanonical =
+                LastBearingCanonicalCodec.Encode(controller.State!);
             string loadedCargoHash = controller.CanonicalHash;
 
             controller.ReturnToTitle();
@@ -1422,6 +1479,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             yield return null;
 
             Assert.That(controller.CanonicalHash, Is.EqualTo(loadedCargoHash));
+            CollectionAssert.AreEqual(
+                loadedCargoCanonical,
+                LastBearingCanonicalCodec.Encode(controller.State!));
             Assert.That(
                 controller.ReadModel!.FrameRailSalvageCustody,
                 Is.EqualTo(FrameRailSalvageCustody.Vehicle));
@@ -1487,6 +1547,25 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.Status, Does.Contain("+4 reclaimed parts"));
 
             long partsAfterCheckIn = controller.ReadModel.PartsUnits;
+            controller.CompleteReturn();
+            Assert.That(PendingCommandCount(controller), Is.Zero);
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(partsAfterCheckIn));
+
+            byte[] creditedCanonical =
+                LastBearingCanonicalCodec.Encode(controller.State!);
+            string creditedHash = controller.CanonicalHash;
+            controller.ReturnToTitle();
+            controller.Load();
+            yield return null;
+
+            CollectionAssert.AreEqual(
+                creditedCanonical,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(creditedHash));
+            Assert.That(
+                controller.ReadModel!.FrameRailSalvageCustody,
+                Is.EqualTo(FrameRailSalvageCustody.Credited));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(partsAfterCheckIn));
             controller.CompleteReturn();
             Assert.That(PendingCommandCount(controller), Is.Zero);
             Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(partsAfterCheckIn));
@@ -4010,16 +4089,22 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             MethodInfo? applyPresentation = typeof(LastBearingGameController).GetMethod(
                 "ApplyPresentation",
                 flags);
+            MethodInfo? resetSnapshots =
+                typeof(LastBearingGameController).GetMethod(
+                    "ResetPublicSnapshotsToRuntime",
+                    flags);
             Assert.That(stateField, Is.Not.Null);
             Assert.That(readModelField, Is.Not.Null);
             Assert.That(pendingField, Is.Not.Null);
             Assert.That(applyPresentation, Is.Not.Null);
+            Assert.That(resetSnapshots, Is.Not.Null);
 
             stateField!.SetValue(controller, state);
             readModelField!.SetValue(controller, LastBearingReadModel.FromState(state));
             var pending = pendingField!.GetValue(controller) as List<LastBearingCommand>;
             Assert.That(pending, Is.Not.Null);
             pending!.Clear();
+            resetSnapshots!.Invoke(controller, null);
             applyPresentation!.Invoke(controller, null);
         }
 

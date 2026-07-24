@@ -183,6 +183,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _modeCoordinator?.HasActiveMode == true &&
             _modeCoordinator.CurrentMode == LastBearingPresentationMode.Driving;
 
+        public bool IsWreckLineFrameRailRecoveryQueued =>
+            _pendingCommands.Exists(command =>
+                command is RecoverWreckLineFrameRailsCommand);
+
         public bool IsReturnCheckInAvailable =>
             _pendingCommands.Count == 0 &&
             _state != null &&
@@ -1438,7 +1442,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Queue(sequence =>
                 new RecoverWreckLineFrameRailsCommand(sequence));
             _status =
-                "Frame rails strapped to Sasha's scout. Last Bearing will reclaim four parts at home.";
+                "Frame-rail lift queued. Custody transfers on the authoritative " +
+                "tick; Last Bearing will reclaim four parts at home.";
         }
 
         public void ChooseLiquidReturn(LiquidCargoKind kind)
@@ -1818,6 +1823,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 OperateWreckLineModulePoint();
             }
             else if (IsWreckLineFrameRailRecoveryAvailable &&
+                _world?.WreckLineInteractor?.IsInputArmed == true &&
+                _fieldDesk?.OwnsKeyboardFocus != true &&
                 ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
                  (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
             {

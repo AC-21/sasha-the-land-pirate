@@ -123,6 +123,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 controller,
                 "public bool IsWreckLineFrameRailRecoveryAvailable");
+            Require(
+                controller,
+                "public bool IsWreckLineFrameRailRecoveryQueued");
             Require(controller, "public bool CanStartHotShift");
             Require(controller, "public bool IsHotShiftStartQueued");
             Require(controller, "public void StartHotShift()");
@@ -393,6 +396,12 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 globalShortcuts,
                 "IsWreckLineFrameRailRecoveryAvailable");
+            TestHarness.Equal(
+                2,
+                CountOccurrences(
+                    globalShortcuts,
+                    "_world?.WreckLineInteractor?.IsInputArmed == true"),
+                "both physical Wreck Line stages require released local input");
             Require(
                 globalShortcuts,
                 "IsDepotApproachRecoveryAvailable");
@@ -1380,6 +1389,7 @@ namespace AtomicLandPirate.LastBearingTests
             Require(wreckLine, "Recoverable Wreck-Line Frame Rails");
             Require(wreckLine, "BindFrameRailCargoSockets(");
             Require(wreckLine, "ApplyFrameRailSalvage(");
+            Require(wreckLine, "ApplyInteractionAnchorPosition();");
             Require(wreckLine, "Canonical Scout Wreck-Line Frame Rails");
             Require(wreckLine, "Road Scout Wreck-Line Frame Rails");
             Require(
@@ -1425,6 +1435,21 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 wreckLineInteractor,
                 "IsWreckLineModuleOperationQueued");
+            Require(
+                wreckLineInteractor,
+                "WreckLineInteractionStage.RecoverFrameRails");
+            Require(
+                wreckLineInteractor,
+                "_controller.RecoverWreckLineFrameRails();");
+            Require(
+                wreckLineInteractor,
+                "IsWreckLineFrameRailRecoveryAvailable");
+            Require(
+                wreckLineInteractor,
+                "IsWreckLineFrameRailRecoveryQueued");
+            Require(
+                wreckLineInteractor,
+                "currentStage != previousStage");
             Require(wreckLineInteractor, "public bool IsInputArmed");
             Require(wreckLineInteractor, "OwnsKeyboardFocus");
             Require(wreckLineInteractor, "RELEASE CONTROLS");
@@ -1434,6 +1459,7 @@ namespace AtomicLandPirate.LastBearingTests
             foreach (string forbidden in new[]
                      {
                          "new OperateWreckLineModuleCommand",
+                         "new RecoverWreckLineFrameRailsCommand",
                          "LastBearingKernel",
                          "LastBearingStateBuilder",
                          "LastBearingCanonicalCodec",
