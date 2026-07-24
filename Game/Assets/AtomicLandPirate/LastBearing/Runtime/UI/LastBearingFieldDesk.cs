@@ -113,6 +113,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _overlay != null &&
             _controller?.IsExactFieldDeskCityOverview == true;
 
+        public bool OwnsKeyboardFocus
+        {
+            get
+            {
+                if (!OwnsCityOverview || _desk == null)
+                {
+                    return false;
+                }
+
+                var focused = _document?.rootVisualElement.panel
+                    ?.focusController.focusedElement as VisualElement;
+                return focused != null &&
+                       (ReferenceEquals(focused, _desk) ||
+                        _desk.Contains(focused));
+            }
+        }
+
         public bool BlocksWorldPointer(Vector2 screenPosition)
         {
             if (!OwnsCityOverview ||

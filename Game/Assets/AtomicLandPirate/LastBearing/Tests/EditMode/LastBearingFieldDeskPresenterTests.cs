@@ -223,6 +223,93 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             }
         }
 
+        [TestCase(
+            ColonyComposition.HumanOnly,
+            PreparationChoice.CivicBuffer,
+            true)]
+        [TestCase(
+            ColonyComposition.RobotOnly,
+            PreparationChoice.CivicBuffer,
+            true)]
+        [TestCase(
+            ColonyComposition.Mixed,
+            PreparationChoice.WorkshopPush,
+            false)]
+        public void PhysicalMachineShopProjectsTheExistingHotShiftTruth(
+            ColonyComposition composition,
+            PreparationChoice preparation,
+            bool expectedWorking)
+        {
+            LastBearingGameController controller =
+                BuildController(composition);
+            PrepareForHotShift(controller, preparation);
+            LastBearingCityServiceCellView view =
+                controller.World!.CityServiceCellView!;
+            LastBearingCityServiceCellInteractor interactor =
+                view.Interactor!;
+            string canonicalBefore = controller.CanonicalHash;
+
+            Assert.That(interactor.IsHotShiftControlVisible, Is.True);
+            Assert.That(interactor.IsHotShiftControlFocused, Is.True);
+            Assert.That(view.IsHotShiftSpindleMoving, Is.False);
+            Assert.That(view.IsHotShiftWorkPoolVisible, Is.False);
+            Assert.That(view.IsWorkshopPushTransferArmVisible, Is.False);
+            Assert.That(view.IsDustFrontShutterVisible, Is.False);
+            Assert.That(
+                view.IsHotShiftCompletionWitnessVisible,
+                Is.False);
+
+            controller.StartHotShift();
+            Assert.That(controller.IsHotShiftStartQueued, Is.True);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+            SimulateOneTick(controller);
+
+            Assert.That(
+                view.IsHotShiftSpindleMoving,
+                Is.EqualTo(expectedWorking));
+            Assert.That(
+                view.IsHotShiftWorkPoolVisible,
+                Is.EqualTo(expectedWorking));
+            Assert.That(
+                view.IsWorkshopPushTransferArmVisible,
+                Is.EqualTo(!expectedWorking));
+            Assert.That(view.IsDustFrontShutterVisible, Is.False);
+            Assert.That(
+                view.IsHumanOperatorVisible ||
+                view.IsRobotOperatorVisible,
+                Is.EqualTo(expectedWorking));
+            Assert.That(view.HotShiftSledProgress, Is.EqualTo(0f));
+
+            if (expectedWorking)
+            {
+                long partsBefore = controller.ReadModel!.PartsUnits;
+                for (var tick = 0;
+                     tick <
+                     LastBearingBalanceV1
+                         .HotShiftRequiredSettlementTicks;
+                     tick++)
+                {
+                    SimulateOneTick(controller);
+                }
+
+                Assert.That(
+                    controller.ReadModel!.HotShiftCompletedCount,
+                    Is.EqualTo(1));
+                Assert.That(
+                    controller.ReadModel.PartsUnits,
+                    Is.EqualTo(
+                        partsBefore +
+                        LastBearingBalanceV1
+                            .HotShiftOutputPartsUnits));
+                Assert.That(view.IsHotShiftSpindleMoving, Is.False);
+                Assert.That(view.IsHotShiftWorkPoolVisible, Is.False);
+                Assert.That(
+                    view.IsHotShiftCompletionWitnessVisible,
+                    Is.True);
+                Assert.That(view.HotShiftSledProgress, Is.EqualTo(1f));
+            }
+        }
+
         [TestCase(PreparationChoice.CivicBuffer)]
         [TestCase(PreparationChoice.WorkshopPush)]
         public void ReadyKeepsManifestAndGarageWhileHotShiftUsesSurveyAction(

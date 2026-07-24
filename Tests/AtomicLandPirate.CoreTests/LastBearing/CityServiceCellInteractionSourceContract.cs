@@ -37,6 +37,11 @@ namespace AtomicLandPirate.LastBearingTests
                     repoRoot,
                     "Game/Assets/AtomicLandPirate/LastBearing/Tests/" +
                     "PlayMode/LastBearingPlayModeTests.cs"));
+            string hotShiftPlayMode = File.ReadAllText(
+                Path.Combine(
+                    repoRoot,
+                    "Game/Assets/AtomicLandPirate/LastBearing/Tests/" +
+                    "PlayMode/LastBearingClockHotShiftPlayModeTests.cs"));
 
             Require(
                 interactor,
@@ -50,7 +55,11 @@ namespace AtomicLandPirate.LastBearingTests
             Require(interactor, "Mouse.current");
             Require(interactor, "Keyboard.current");
             Require(interactor, "keyboard?.rKey.wasPressedThisFrame");
+            Require(interactor, "keyboard?.enterKey.wasPressedThisFrame");
+            Require(interactor, "gamepad?.buttonSouth.wasPressedThisFrame");
+            Require(interactor, "FieldDesk?.OwnsKeyboardFocus != true");
             Require(interactor, "BlocksWorldPointer(");
+            Require(interactor, "ReferenceEquals(");
             Require(interactor, "private void OnDisable()");
             Require(interactor, "ResetLocalSelection();");
             Require(interactor, "_linkSourceSelected ||");
@@ -66,6 +75,25 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 interactor,
                 "public bool TryActivateAtScreenPosition(Vector2 screenPosition)");
+            string interactorUpdate = Segment(
+                interactor,
+                "private void Update()",
+                "private void LateUpdate()");
+            foreach (string cameraBinding in new[]
+            {
+                "keyboard?.qKey",
+                "keyboard?.eKey",
+                "keyboard?.leftArrowKey",
+                "keyboard?.rightArrowKey",
+            })
+            {
+                TestHarness.True(
+                    interactorUpdate.IndexOf(
+                        cameraBinding,
+                        StringComparison.Ordinal) < 0,
+                    "Hot Shift world input conflicts with city camera " +
+                    cameraBinding);
+            }
 
             foreach (string target in new[]
             {
@@ -80,6 +108,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "SOCKET_MACHINE_SHOP_OPERATOR_INTERACTION",
                 "INTERACT_CALIBRATION_SLED",
                 "SOCKET_CALIBRATION_SLED_DESTINATION",
+                "INTERACT_MACHINE_SHOP_HOT_SHIFT",
                 "WORKING_SERVICE_CELL_FEEDBACK",
             })
             {
@@ -95,6 +124,7 @@ namespace AtomicLandPirate.LastBearingTests
                 ".ConnectCityServiceLink(",
                 ".AssignCityServiceResident(",
                 ".AdvanceCityServiceSled(",
+                ".StartHotShift(",
             })
             {
                 Require(interactor, delegation);
@@ -109,6 +139,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "new ConnectCityServiceLinkCommand",
                 "new AssignCityServiceResidentCommand",
                 "new AdvanceCityServiceSledCommand",
+                "new RunHotShiftCommand",
                 "Queue(",
                 "SaveContracts",
                 "LastBearingSaveAdapter",
@@ -137,6 +168,18 @@ namespace AtomicLandPirate.LastBearingTests
             Require(view, "Interactor?.Apply(model, _sled);");
             Require(view, "model.RecyclerQuarterTurns");
             Require(view, "model.MachineShopQuarterTurns");
+            Require(view, "model.IsHotShiftActivelyWorking");
+            Require(view, "model.IsHotShiftStalledByWorkshopPush");
+            Require(view, "model.IsHotShiftStalledByDustFront");
+            Require(view, "model.HotShiftCompletedCount");
+            Require(interactor, "HOT SHIFT PAUSED");
+            Require(interactor, "model.PauseCause != PauseCause.None");
+            Require(view, "Hot Shift Machine Spindle");
+            Require(view, "Hot Shift Tungsten Work Pool");
+            Require(view, "Workshop Push Garageward Transfer Arm");
+            Require(view, "Dust Front Physical Safety Shutter");
+            Require(view, "Hot Shift Output Witness Notch 01");
+            Require(view, "Hot Shift Output Witness Notch 02");
             Require(view, "collider.enabled = false;");
             Require(world, "ConfigureCityServiceCellInteraction(");
             Require(world, "ResetCityServiceCellInteraction()");
@@ -209,6 +252,41 @@ namespace AtomicLandPirate.LastBearingTests
             Require(playMode, "controller.Save();");
             Require(playMode, "controller.ReturnToTitle();");
             Require(playMode, "controller.Load();");
+            Require(
+                hotShiftPlayMode,
+                "PointerDeskReturnAndGamepadQueueOneExactShift");
+            Require(
+                hotShiftPlayMode,
+                "GuardsAndStallsFailClosedAtThePhysicalMachine");
+            Require(
+                hotShiftPlayMode,
+                "ColonyOperatorsActiveSaveLoadAndCompletionReproject");
+            Require(
+                hotShiftPlayMode,
+                "HotShiftMachineControlName");
+            Require(
+                hotShiftPlayMode,
+                "interactor.TryActivateAtScreenPosition(");
+            Require(
+                hotShiftPlayMode,
+                "controller.FieldDesk!.BlocksWorldPointer(");
+            Require(hotShiftPlayMode, "controller.StartHotShift();");
+            Require(hotShiftPlayMode, "interactor.ClickHotShiftControl();");
+            Require(hotShiftPlayMode, "keyboard.enterKey");
+            Require(hotShiftPlayMode, "gamepad.buttonSouth");
+            Require(hotShiftPlayMode, "keyboard.qKey");
+            Require(hotShiftPlayMode, "keyboard.eKey");
+            Require(hotShiftPlayMode, "keyboard.leftArrowKey");
+            Require(hotShiftPlayMode, "keyboard.rightArrowKey");
+            Require(hotShiftPlayMode, "NavigationSubmitEvent");
+            Require(hotShiftPlayMode, "OwnsKeyboardFocus");
+            Require(hotShiftPlayMode, "HotShiftMachineLabel");
+            Require(hotShiftPlayMode, "PauseCause.Explicit");
+            Require(hotShiftPlayMode, "controller.OpenGarageBay();");
+            Require(hotShiftPlayMode, "controller.ShowCityOverview();");
+            Require(hotShiftPlayMode, "controller.Save();");
+            Require(hotShiftPlayMode, "controller.ReturnToTitle();");
+            Require(hotShiftPlayMode, "controller.Load();");
         }
 
         private static void Require(string source, string fragment)
@@ -216,6 +294,27 @@ namespace AtomicLandPirate.LastBearingTests
             TestHarness.True(
                 source.IndexOf(fragment, StringComparison.Ordinal) >= 0,
                 "world service-cell interaction is missing " + fragment);
+        }
+
+        private static string Segment(
+            string source,
+            string start,
+            string end)
+        {
+            int startIndex = source.IndexOf(
+                start,
+                StringComparison.Ordinal);
+            int endIndex = source.IndexOf(
+                end,
+                startIndex >= 0 ? startIndex + start.Length : 0,
+                StringComparison.Ordinal);
+            TestHarness.True(
+                startIndex >= 0 && endIndex > startIndex,
+                "world service-cell interaction cannot segment " +
+                start + " -> " + end);
+            return source.Substring(
+                startIndex,
+                endIndex - startIndex);
         }
     }
 }
