@@ -107,6 +107,8 @@ namespace AtomicLandPirate.LastBearingTests
                 "public bool IsWreckLineFrameRailRecoveryAvailable");
             Require(controller, "public bool CanStartHotShift");
             Require(controller, "public void StartHotShift()");
+            Require(controller, "public bool CanPumpEmergencyCistern");
+            Require(controller, "public void PumpEmergencyCistern()");
             Require(controller, "public bool CanAcknowledgeDustFront");
             Require(controller, "public void AcknowledgeDustFront()");
             string hotShiftOperation = Segment(
@@ -115,6 +117,16 @@ namespace AtomicLandPirate.LastBearingTests
                 "public void AcknowledgeDustFront()");
             Require(hotShiftOperation, "_readModel.HotShiftCompletedCount");
             Require(hotShiftOperation, "new RunHotShiftCommand(");
+            string emergencyCisternOperation = Segment(
+                controller,
+                "public void PumpEmergencyCistern()",
+                "public void AcknowledgeDustFront()");
+            Require(
+                emergencyCisternOperation,
+                "_readModel.IsEmergencyCisternPumpAvailable");
+            Require(
+                emergencyCisternOperation,
+                "new PumpEmergencyCisternCommand(sequence)");
             string dustFrontAcknowledgement = Segment(
                 controller,
                 "public void AcknowledgeDustFront()",
@@ -130,6 +142,9 @@ namespace AtomicLandPirate.LastBearingTests
                 controller,
                 "LastBearingEventKind.HotShiftCheckpointReached");
             Require(controller, "LastBearingEventKind.HotShiftCompleted");
+            Require(
+                controller,
+                "LastBearingEventKind.EmergencyCisternPumped");
             Require(controller, "LastBearingEventKind.DustFrontResolved");
             Require(controller, "LastBearingEventKind.DustFrontAcknowledged");
             Require(controller, "PauseCause.DustFrontAlert");
@@ -517,6 +532,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "HotShiftStarted",
                 "HotShiftCheckpointReached",
                 "HotShiftCompleted",
+                "EmergencyCisternPumped",
                 "DustFrontResolved",
                 "DustFrontAcknowledged",
             })
@@ -532,6 +548,12 @@ namespace AtomicLandPirate.LastBearingTests
                     StringComparison.Ordinal) < 0,
                 "idempotent replay alone must not trigger autosave");
             Require(vehicle, "snapshot.VehicleLateralNormalized");
+            Require(
+                cityServiceCell,
+                "Emergency Cistern Full Marker");
+            Require(
+                cityServiceCell,
+                "model.EmergencyCisternCharged");
             Require(vehicle, "VisibleLateralOffset");
             Require(vehicle, "FrontWheelSteerDegrees");
             Require(vehicle, "SnapToCanonicalRoadPose");

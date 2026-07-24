@@ -29,6 +29,7 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "public bool IsExactFieldDeskCityOverview");
             Require(controller, "public bool HasPendingPlayerCommands");
             Require(controller, "public bool CanAcknowledgeDustFront");
+            Require(controller, "public bool CanPumpEmergencyCistern");
 
             const string addDesk =
                 "gameObject.AddComponent<LastBearingFieldDesk>()";
@@ -154,6 +155,7 @@ namespace AtomicLandPirate.LastBearingTests
                 ".CancelCityBuildingPreview(",
                 ".StartHotShift(",
                 ".AcknowledgeDustFront(",
+                ".PumpEmergencyCistern(",
                 ".BeginGaragePlan(",
                 ".OpenGarageBay(",
                 ".CommitExpedition(",
@@ -172,6 +174,7 @@ namespace AtomicLandPirate.LastBearingTests
 
             Require(fieldDeskPresenter, "RunHotShift = 28");
             Require(fieldDeskPresenter, "AcknowledgeDustFront = 29");
+            Require(fieldDeskPresenter, "PumpEmergencyCistern = 30");
             Require(fieldDeskPresenter, "\"ACKNOWLEDGE FRONT\"");
             Require(
                 fieldDeskPresenter,
@@ -183,6 +186,18 @@ namespace AtomicLandPirate.LastBearingTests
             Require(hud, "DUST FRONT · GLOBAL ALERT");
             Require(hud, "GUILayout.Button(\"ACKNOWLEDGE FRONT\"");
             Require(hud, "_controller.AcknowledgeDustFront();");
+            Require(
+                fieldDeskPresenter,
+                "PUMP EMERGENCY CISTERN · ");
+            Require(
+                fieldDeskPresenter,
+                "controller.CanPumpEmergencyCistern");
+            Require(
+                hud,
+                "_controller!.PumpEmergencyCistern();");
+            Require(
+                hud,
+                "\"PUMP EMERGENCY CISTERN · 1 FUEL · +10.000 WATER · ONE FILL\"");
             Require(
                 fieldDeskPresenter,
                 "RUN HOT SHIFT\";");

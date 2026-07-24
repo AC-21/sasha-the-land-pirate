@@ -55,6 +55,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
             HotShiftCompletedCount = state.HotShiftCompletedCount;
             IsHotShiftRunAvailable =
                 ComputeHotShiftRunAvailable(state);
+            EmergencyCisternCharged =
+                state.EmergencyCisternCharged;
+            EmergencyCisternFuelCostUnits =
+                LastBearingBalanceV1.EmergencyCisternFuelCostUnits;
+            EmergencyCisternWaterMilli =
+                LastBearingBalanceV1.EmergencyCisternWaterMilli;
+            IsEmergencyCisternPumpAvailable =
+                ComputeEmergencyCisternPumpAvailable(state);
             IsHotShiftStalledByWorkshopPush =
                 state.HotShiftPhase == HotShiftPhase.InProgress
                 && state.WorkshopServiceSlotsReserved > 0;
@@ -242,6 +250,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public bool IsHotShiftStalledByWorkshopPush { get; private set; }
         public bool IsHotShiftStalledByDustFront { get; private set; }
         public bool IsHotShiftActivelyWorking { get; private set; }
+        public bool EmergencyCisternCharged { get; private set; }
+        public long EmergencyCisternFuelCostUnits { get; private set; }
+        public long EmergencyCisternWaterMilli { get; private set; }
+        public bool IsEmergencyCisternPumpAvailable { get; private set; }
         public long WaterMilli { get; private set; }
         public long WaterTrendMilliPerSettlementTick { get; private set; }
         public bool IsWaterRecovering { get; private set; }
@@ -401,6 +413,41 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         LastBearingBalanceV1.HotShiftFuelCostUnits
                         + LastBearingBalanceV1.RouteFuelCost(
                             state.PlannedModule));
+        }
+
+        private static bool ComputeEmergencyCisternPumpAvailable(
+            LastBearingState state)
+        {
+            if (state.EmergencyCisternCharged
+                || !state.SliceInfrastructureActive
+                || state.EmergencyStoragePadIndex
+                    == LastBearingState.UnplacedCityPadIndex
+                || !state.CityServiceLinkConnected
+                || state.CityServiceResidentId == null
+                || state.CityDeliveryStage
+                    != CityDeliveryStage.DeliveredToWorkshop
+                || state.PreparationChoice
+                    == PreparationChoice.Unselected
+                || state.PlannedModule == VehicleModule.None
+                || state.ModuleInstallationState
+                    == ModuleInstallationState.None
+                || state.ExpeditionPhase != ExpeditionPhase.AtHome
+                || state.DustFrontOutcome != DustFrontOutcome.Unresolved
+                || state.HotShiftPhase != HotShiftPhase.Idle
+                || state.WorkshopServiceSlotsReserved != 0
+                || state.WaterMilli
+                    > checked(
+                        LastBearingBalanceV1.WaterCapacityMilli
+                        - LastBearingBalanceV1.EmergencyCisternWaterMilli))
+            {
+                return false;
+            }
+
+            return state.FuelUnits
+                >= checked(
+                    LastBearingBalanceV1.EmergencyCisternFuelCostUnits
+                    + LastBearingBalanceV1.RouteFuelCost(
+                        state.PlannedModule));
         }
 
         private static bool IsHotShiftBlockedByDustFront(

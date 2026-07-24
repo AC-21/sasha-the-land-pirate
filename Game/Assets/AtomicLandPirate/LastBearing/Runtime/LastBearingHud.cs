@@ -305,6 +305,55 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
         }
 
+        private void DrawEmergencyCisternAction(
+            LastBearingReadModel model)
+        {
+            if (!model.SliceInfrastructureActive ||
+                model.EmergencyStoragePadIndex < 0 ||
+                model.PreparationChoice == PreparationChoice.Unselected ||
+                model.PlannedModule == VehicleModule.None ||
+                model.ExpeditionPhase != ExpeditionPhase.AtHome)
+            {
+                return;
+            }
+
+            GUILayout.Label("EMERGENCY CISTERN", _headingStyle);
+            if (model.EmergencyCisternCharged)
+            {
+                GUILayout.Label(
+                    "CHARGED · the one authorized 10.000-water fill is in storage.",
+                    _bodyStyle);
+                GUILayout.Space(10f);
+                return;
+            }
+
+            GUILayout.Label(
+                "One full fill only: spend 1 fuel, preserve Sasha's planned " +
+                "route reserve, and add +10.000 water before the Dust Front.",
+                _bodyStyle);
+            bool wasEnabled = GUI.enabled;
+            GUI.enabled = wasEnabled &&
+                          _controller!.CanPumpEmergencyCistern;
+            if (GUILayout.Button(
+                    "PUMP EMERGENCY CISTERN · 1 FUEL · +10.000 WATER · ONE FILL",
+                    _buttonStyle))
+            {
+                _controller!.PumpEmergencyCistern();
+            }
+
+            GUI.enabled = wasEnabled;
+            if (!model.IsEmergencyCisternPumpAvailable)
+            {
+                GUILayout.Label(
+                    "Requires the commissioned operator, an idle Hot Shift, " +
+                    "an unresolved Dust Front, room for the full fill, and " +
+                    "fuel beyond the planned route reserve.",
+                    _mutedStyle);
+            }
+
+            GUILayout.Space(10f);
+        }
+
         private void DrawContextActions(
             LastBearingReadModel model,
             LastBearingPermitJobPresentation permitJob)
@@ -338,6 +387,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
                 return;
             }
+
+            DrawEmergencyCisternAction(model);
 
             if (model.ExpeditionPhase == ExpeditionPhase.AtHome &&
                 model.PreparationChoice == PreparationChoice.Unselected &&
@@ -1800,6 +1851,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 .AppendLine();
             text.Append("Hot shift  ")
                 .Append(FormatHotShift(model))
+                .AppendLine();
+            text.Append("Emergency cistern  ")
+                .Append(model.EmergencyCisternCharged
+                    ? "charged · one full fill consumed"
+                    : model.IsEmergencyCisternPumpAvailable
+                        ? "ready · 1 fuel / +10.000 water"
+                        : "uncharged · prerequisites unmet")
                 .AppendLine();
             text.Append("Dust front  ")
                 .Append(model.DustFrontOutcome)

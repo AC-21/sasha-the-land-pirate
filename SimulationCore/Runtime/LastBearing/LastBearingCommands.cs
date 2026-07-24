@@ -159,6 +159,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long ExpectedCompletedCount { get; }
     }
 
+    public sealed class PumpEmergencyCisternCommand : LastBearingCommand
+    {
+        public PumpEmergencyCisternCommand(long sequence)
+            : base(sequence)
+        {
+        }
+    }
+
     public sealed class SelectPreparationCommand : LastBearingCommand
     {
         public SelectPreparationCommand(

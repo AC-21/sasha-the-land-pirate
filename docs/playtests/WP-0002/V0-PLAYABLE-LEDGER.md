@@ -47,7 +47,7 @@ The current experience is still a constitutional toy:
 
 | Area | Current state | V0 gap |
 |---|---|---|
-| City | Water need, camera, reversible D-0030 comparison, physical return check-in and pump-hall repair, and one fixed-socket auxiliary-pump improvement | Auxiliary-pump installation remains HUD-led; no authoritative placement or logistics path |
+| City | Water need, camera, working service cell, one-shot emergency-cistern reserve, physical return check-in and pump-hall repair, and one fixed-socket auxiliary-pump improvement | City production remains narrow; auxiliary-pump installation is still one fixed authored socket |
 | Driving | Real local physics shadowing deterministic progress/lateral commands, with explicit Wreck Line and depot-recovery verbs | Brake/reverse remain presentation-only; one corridor and two interactions are still thin |
 | Garage | Stable C0 scout sockets, fixed dollhouse bay, and garage-local module commitment | Module assembly remains one authored operation; no generalized rig-upgrade path |
 | Depot/scavenging | Recovery gate, faction choice, heavy/liquid cargo fields, exact custody, and one operated repair-cargo handoff | Range-tank liquid selection and return sealing remain HUD-led; one depot and its interactions are still thin |
@@ -645,6 +645,39 @@ new scenes/packages/dependencies, or a normal-PR 100-cycle soak.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-14-WORKING-SERVICE-CELL-CONTRACT.md`.
+
+## VGR-15 — Emergency Cistern
+
+Objective: turn the placed emergency-storage building into one clear survival
+decision before Sasha leaves.
+
+Status: implemented on the V0 feature branch; native visual verification remains
+an integration gate.
+
+Scope:
+
+- Add one Field Desk and legacy fallback action that spends exactly 1 fuel and
+  adds exactly 10,000 `WaterMilli` once.
+- Preserve the planned route fuel reserve and reject partial fill or spill.
+- Require the commissioned service cell, placed storage, available operator,
+  committed rig plan, Sasha home, unresolved Dust Front, and inactive Hot Shift.
+- Persist one explicit charged flag in schema 9 with deterministic schema-8
+  default `false`.
+- Autosave completion and derive a full marker on emergency storage.
+- Keep human, utility-robot, and mixed colonies mechanically identical.
+
+Acceptance:
+
+- invalid and repeated attempts conserve fuel and water exactly;
+- the base Dust Front brink changes from `Breached` without the fill to `Held`
+  with it;
+- current round trip, schema-8 migration, canonical mechanical hash, controller
+  delegation, and derived presentation are directly tested;
+- no new scene, package, dependency, asset, generalized storage system, or
+  everyday performance soak is introduced.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-15-EMERGENCY-CISTERN-CONTRACT.md`.
 
 ## Visual constitution
 
