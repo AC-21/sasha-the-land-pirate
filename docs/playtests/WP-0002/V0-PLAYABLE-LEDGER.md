@@ -928,6 +928,41 @@ generalized interaction framework, or normal-PR performance soak.
 Detailed contract:
 `docs/playtests/WP-0002/VGR-23-SERVICE-THE-SCOUT-CONTRACT.md`.
 
+## VGR-24 — Run the Wreck Line Again
+
+Status: core implementation target after VGR-23 Scout service; Unity
+presentation remains a separate integration step.
+
+Scope:
+
+- After exact urgent-work closure and a full 1.000-condition Scout service,
+  compare-and-swap the finalized predecessor into one fresh repeat transaction.
+- Reuse the existing road, Wreck Line operation, depot recovery, freeze,
+  homecoming, credit, and finalize path for both modules and all colony
+  compositions.
+- Recover and credit one bounded repeat frame-rail bundle worth the existing
+  four parts, while applying the selected module's normal route fuel, any
+  persistent authored future-route toll, and normal condition cost.
+- Preserve first-run faction, turbine repair, city improvement, emergency aid,
+  maintenance, route-permit, rotor, and liquid-return history; create no second
+  faction choice, repair cargo, rotor, or liquid return.
+- Reserve repeat transaction identities whose suffix is exactly the canonical
+  command sequence, preventing immediate and nonadjacent reuse, and bind every
+  invariant exception to exact repeat lineage. Repaired turbine state by itself
+  never relaxes custody or phase law.
+- Bound active repeat condition to the deterministic road-edge damage reachable
+  from the 1.000 service and route progress, then require the existing fixed
+  return charge; preserve installed auxiliary-pump history.
+- Preserve schema 9, deterministic save/load, stale/duplicate atomic rejection,
+  and require a fresh Scout service between consecutive circuits.
+
+Exclude: new save field, schema, migration, event kind, balance value,
+generalized expedition system, Unity presentation, scene, asset, package,
+dependency, or normal-PR performance soak.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-24-RUN-THE-WRECK-LINE-AGAIN-CONTRACT.md`.
+
 ## Visual constitution
 
 - **Texas iron is the scale of work:** cast housings, plate steel, oilfield,

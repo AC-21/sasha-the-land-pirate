@@ -49,6 +49,7 @@ namespace AtomicLandPirate.LastBearingTests
             DustFrontVerdictTests.Run(harness);
             EmergencyCisternTests.Run(harness);
             ServiceScoutTests.Run(harness);
+            RepeatWreckLineTests.Run(harness);
             SaveAtomicTests.Run(harness, repoRoot);
             HomecomingTests.RunSave(harness, repoRoot);
             SaveBoundaryTests.Run(harness, repoRoot);
@@ -146,6 +147,9 @@ namespace AtomicLandPirate.LastBearingTests
                     break;
                 case "vgr23-service-the-scout":
                     ServiceScoutTests.Run(harness);
+                    break;
+                case "vgr24-repeat-wreck-line":
+                    RepeatWreckLineTests.Run(harness);
                     break;
                 case "v0-hands-on-service-cell":
                     harness.Run(

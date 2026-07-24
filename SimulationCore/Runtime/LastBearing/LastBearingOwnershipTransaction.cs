@@ -75,7 +75,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         }
 
         internal static void RecoverFrameRailSalvageToVehicle(
-            LastBearingStateBuilder builder)
+            LastBearingStateBuilder builder,
+            bool repeatExpedition)
         {
             if (builder == null)
             {
@@ -84,7 +85,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             if (builder.FrameRailSalvageCustody
                     != FrameRailSalvageCustody.WreckLine
-                || builder.RigUpgrade != RigUpgrade.PatchworkSkidPlate
+                || (builder.RigUpgrade != RigUpgrade.PatchworkSkidPlate
+                    && !repeatExpedition)
                 || checked(
                     builder.OrdinaryCargoUsedUnits
                     + LastBearingBalanceV1

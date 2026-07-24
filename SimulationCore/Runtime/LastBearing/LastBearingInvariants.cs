@@ -532,7 +532,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 || state.ExpeditionPhase == ExpeditionPhase.AtDepot
                 || state.ExpeditionPhase == ExpeditionPhase.Returning
                 || state.ExpeditionPhase == ExpeditionPhase.Returned
-                || state.TransactionPhase >= TransactionPhase.CityCredited,
+                || state.TransactionPhase >= TransactionPhase.CityCredited
+                || LastBearingRepeatExpedition.IsLineage(state),
                 "LAST_BEARING_DEPOT_RESOLUTION_PHASE_INVALID");
 
             if (state.ExpeditionPhase == ExpeditionPhase.Outbound)
@@ -725,7 +726,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 Require(
                     state.OrdinaryCargoUsedUnits
-                        == checked(1 + FrameRailCargoUnits(state)),
+                            == checked(1 + FrameRailCargoUnits(state))
+                        || (LastBearingRepeatExpedition.IsLineage(state)
+                            && state.OrdinaryCargoUsedUnits
+                                == FrameRailCargoUnits(state)),
                     "LAST_BEARING_APPLIED_REPAIR_CARGO_OCCUPANCY_INVALID");
             }
 
@@ -751,7 +755,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 "LAST_BEARING_HEAVY_CUSTODY_INVALID");
             Require(
                 state.HeavyCargoCustody != HeavyCargoCustody.Settlement
-                || state.TransactionPhase >= TransactionPhase.CityCredited,
+                || state.TransactionPhase >= TransactionPhase.CityCredited
+                || LastBearingRepeatExpedition.IsLineage(state),
                 "LAST_BEARING_ROTOR_SETTLEMENT_PHASE_INVALID");
             if (state.VehicleModule == VehicleModule.WinchAssembly
                 && state.RouteActionUsed)
@@ -760,7 +765,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     state.InstalledCityImprovement
                         == CityImprovementKind.RefurbishedAuxiliaryPump
                         ? HeavyCargoCustody.InstalledAtAuxiliaryPump
-                        : state.TransactionPhase >= TransactionPhase.CityCredited
+                        : LastBearingRepeatExpedition.IsLineage(state)
+                            || state.TransactionPhase
+                                >= TransactionPhase.CityCredited
                             ? HeavyCargoCustody.Settlement
                             : HeavyCargoCustody.Vehicle;
                 Require(
@@ -779,15 +786,20 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 Require(
                     state.VehicleModule == VehicleModule.WinchAssembly
-                    && state.RouteActionUsed
-                    && state.TowSlotsUsed == 1,
+                    && (LastBearingRepeatExpedition.IsLineage(state)
+                        ? state.TowSlotsUsed == 0
+                            || (state.RouteActionUsed
+                                && state.TowSlotsUsed == 1)
+                        : state.RouteActionUsed
+                            && state.TowSlotsUsed == 1),
                     "LAST_BEARING_RECOVERED_ROTOR_STATE_INVALID");
             }
             else
             {
                 Require(
                     state.VehicleModule == VehicleModule.WinchAssembly
-                    && state.RouteActionUsed
+                    && (state.RouteActionUsed
+                        || LastBearingRepeatExpedition.IsLineage(state))
                     && state.TowSlotsUsed == 0,
                     "LAST_BEARING_INSTALLED_ROTOR_STATE_INVALID");
             }
@@ -839,7 +851,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             Require(
-                state.RigUpgrade == RigUpgrade.PatchworkSkidPlate,
+                state.RigUpgrade == RigUpgrade.PatchworkSkidPlate
+                || LastBearingRepeatExpedition.IsLineage(state),
                 "LAST_BEARING_FRAME_RAIL_SALVAGE_UPGRADE_REQUIRED");
 
             if (state.FrameRailSalvageCustody
@@ -962,14 +975,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             bool commonInstalledState =
-                state.ExpeditionPhase == ExpeditionPhase.AtHome
-                && state.TransactionPhase == TransactionPhase.Finalized
-                && state.TurbineCondition != TurbineCondition.Failing
+                state.TurbineCondition != TurbineCondition.Failing
                 && state.NextCityDecision == NextCityDecision.None
                 && state.PreparationChoice == PreparationChoice.WorkshopPush
-                && state.RouteActionUsed
                 && state.PartsUnits
-                    >= LastBearingBalanceV1.MinimumPostReturnPartsUnits;
+                    >= LastBearingBalanceV1.MinimumPostReturnPartsUnits
+                && ((state.ExpeditionPhase == ExpeditionPhase.AtHome
+                        && state.TransactionPhase
+                            == TransactionPhase.Finalized
+                        && state.RouteActionUsed)
+                    || LastBearingRepeatExpedition.IsLineage(state));
             if (state.InstalledCityImprovement
                 == CityImprovementKind.RefurbishedAuxiliaryPump)
             {
@@ -1034,8 +1049,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.DepotResolution == EncounterChoice.TakeBearing
                 && state.PreparationChoice == PreparationChoice.CivicBuffer
                 && state.VehicleModule == VehicleModule.WinchAssembly
-                && state.ExpeditionPhase == ExpeditionPhase.AtHome
-                && state.TransactionPhase == TransactionPhase.Finalized
+                && ((state.ExpeditionPhase == ExpeditionPhase.AtHome
+                        && state.TransactionPhase
+                            == TransactionPhase.Finalized)
+                    || (state.SpareBearingBatchPhase
+                            == SpareBearingBatchPhase.Settled
+                        && LastBearingRepeatExpedition.IsLineage(state)))
                 && state.TurbineCondition
                     == TurbineCondition.BearingRepaired
                 && state.DepotControl == DepotControl.Depleted

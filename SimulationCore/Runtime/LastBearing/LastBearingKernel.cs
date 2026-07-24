@@ -201,6 +201,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
             {
                 ApplyPrepareTransaction(builder, prepare, events);
             }
+            else if (command is PrepareRepeatExpeditionTransactionCommand repeat)
+            {
+                ApplyPrepareRepeatTransaction(builder, repeat, events);
+            }
             else if (command is DebitCityManifestCommand debit)
             {
                 ApplyDebitManifest(builder, debit, events);
@@ -1072,6 +1076,64 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 (long)TransactionPhase.Prepared);
         }
 
+        private static void ApplyPrepareRepeatTransaction(
+            LastBearingStateBuilder builder,
+            PrepareRepeatExpeditionTransactionCommand command,
+            LastBearingEventSink events)
+        {
+            EnsureTransactionIdentity(
+                builder,
+                command.CompletedTransactionId,
+                command.CompletedFingerprint);
+            if (builder.TransactionPhase != TransactionPhase.Finalized
+                || !LastBearingReadModel.CanPrepareRepeatExpedition(
+                    new LastBearingState(builder)))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_REPEAT_EXPEDITION_NOT_READY");
+            }
+
+            var previousSalvage = builder.FrameRailSalvageCustody;
+            builder.TransactionId = command.TransactionId;
+            builder.TransactionFingerprint = command.Fingerprint;
+            builder.TransactionPhase = TransactionPhase.Prepared;
+            builder.ExpeditionFuelManifestUnits = 0;
+            builder.RouteProgressTicks = 0;
+            builder.RouteMovementAccumulatorMilli = 0;
+            builder.VehicleLateralMilli = 0;
+            builder.RouteActionUsed = false;
+            builder.ReturnPayloadFrozen = false;
+            builder.HasArrivalClaimSnapshot = false;
+            builder.ArrivalFactionClaimProgressMilli = 0;
+            builder.ArrivalFactionClaimState =
+                FactionClaimState.Telegraphed;
+            builder.OrdinaryCargoUsedUnits = 0;
+            builder.TowSlotsUsed = 0;
+            builder.FrameRailSalvageCustody =
+                FrameRailSalvageCustody.WreckLine;
+
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.ExpeditionTransactionPrepared,
+                LastBearingEventCause.PlayerCommand,
+                builder.GlobalTick,
+                command.Sequence,
+                command.TransactionId,
+                (long)TransactionPhase.Finalized,
+                (long)TransactionPhase.Prepared);
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.FrameRailSalvageTransferred,
+                LastBearingEventCause.PlayerCommand,
+                builder.SettlementTick,
+                command.Sequence,
+                "cargo:wreck-line:repeat-frame-rails",
+                (long)previousSalvage,
+                (long)FrameRailSalvageCustody.WreckLine);
+        }
+
         private static void ApplyDebitManifest(
             LastBearingStateBuilder builder,
             DebitCityManifestCommand command,
@@ -1093,8 +1155,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     "LAST_BEARING_TRANSACTION_NOT_PREPARED");
             }
 
-            var routeFuel = LastBearingBalanceV1.RouteFuelCost(
-                builder.PlannedModule);
+            LastBearingState currentState = new LastBearingState(builder);
+            var routeFuel =
+                LastBearingRepeatExpedition.IsLineage(currentState)
+                    ? LastBearingRepeatExpedition.FuelCost(currentState)
+                    : LastBearingBalanceV1.RouteFuelCost(
+                        builder.PlannedModule);
             if (builder.FuelUnits < routeFuel)
             {
                 throw new InvalidOperationException(
@@ -1297,18 +1363,32 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             if (builder.VehicleModule == VehicleModule.WinchAssembly)
             {
-                LastBearingOwnershipTransaction.RecoverHeavyCargoToVehicle(
-                    builder);
-                Emit(
-                    builder,
-                    events,
-                    LastBearingEventKind.HeavyCargoTransferred,
-                    LastBearingEventCause.PlayerCommand,
-                    builder.RoadTick,
-                    command.Sequence,
-                    "cargo:last-bearing:pump-rotor",
-                    (long)HeavyCargoCustody.Depot,
-                    (long)HeavyCargoCustody.Vehicle);
+                if (builder.HeavyCargoCustody == HeavyCargoCustody.Depot)
+                {
+                    LastBearingOwnershipTransaction.RecoverHeavyCargoToVehicle(
+                        builder);
+                    Emit(
+                        builder,
+                        events,
+                        LastBearingEventKind.HeavyCargoTransferred,
+                        LastBearingEventCause.PlayerCommand,
+                        builder.RoadTick,
+                        command.Sequence,
+                        "cargo:last-bearing:pump-rotor",
+                        (long)HeavyCargoCustody.Depot,
+                        (long)HeavyCargoCustody.Vehicle);
+                }
+                else if (!LastBearingRepeatExpedition.IsLineage(
+                        new LastBearingState(builder))
+                    || (builder.HeavyCargoCustody
+                            != HeavyCargoCustody.Settlement
+                        && builder.HeavyCargoCustody
+                            != HeavyCargoCustody
+                                .InstalledAtAuxiliaryPump))
+                {
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_REPEAT_ROTOR_HISTORY_INVALID");
+                }
             }
             else if (builder.VehicleModule != VehicleModule.SealedRangeTank)
             {
@@ -1351,7 +1431,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             LastBearingOwnershipTransaction
-                .RecoverFrameRailSalvageToVehicle(builder);
+                .RecoverFrameRailSalvageToVehicle(
+                    builder,
+                    LastBearingRepeatExpedition.IsLineage(
+                        new LastBearingState(builder)));
             Emit(
                 builder,
                 events,
@@ -1381,7 +1464,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
         {
             return builder.ExpeditionPhase == ExpeditionPhase.Outbound
                 && builder.TransactionPhase == TransactionPhase.RoadOwned
-                && builder.RigUpgrade == RigUpgrade.PatchworkSkidPlate
+                && (builder.RigUpgrade == RigUpgrade.PatchworkSkidPlate
+                    || LastBearingRepeatExpedition.IsLineage(
+                        new LastBearingState(builder)))
                 && builder.RouteActionUsed
                 && builder.FrameRailSalvageCustody
                     == FrameRailSalvageCustody.WreckLine
@@ -1698,49 +1783,66 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     "LAST_BEARING_RETURN_FREEZE_PHASE_INVALID");
             }
 
-            RepairCargoKind expectedRepairCargo =
-                builder.DepotResolution == EncounterChoice.Cooperate
-                    ? RepairCargoKind.FieldSleeve
-                    : RepairCargoKind.CeramicBearing;
-            if (builder.RepairCargoKind != expectedRepairCargo
-                || builder.RepairCargoCustody != RepairCargoCustody.Vehicle)
+            bool repeatExpedition =
+                LastBearingRepeatExpedition.IsLineage(
+                    new LastBearingState(builder));
+            if (!repeatExpedition)
             {
-                throw new InvalidOperationException(
-                    "LAST_BEARING_REPAIR_CARGO_NOT_LOADED");
-            }
-
-            if (builder.VehicleModule == VehicleModule.WinchAssembly)
-            {
-                if (builder.HeavyCargoKind != HeavyCargoKind.PumpRotor
-                    || builder.HeavyCargoCustody
-                        != HeavyCargoCustody.Vehicle
-                    || builder.TowSlotsUsed != 1)
+                RepairCargoKind expectedRepairCargo =
+                    builder.DepotResolution == EncounterChoice.Cooperate
+                        ? RepairCargoKind.FieldSleeve
+                        : RepairCargoKind.CeramicBearing;
+                if (builder.RepairCargoKind != expectedRepairCargo
+                    || builder.RepairCargoCustody
+                        != RepairCargoCustody.Vehicle)
                 {
                     throw new InvalidOperationException(
-                        "LAST_BEARING_WINCH_ROTOR_NOT_RECOVERED");
+                        "LAST_BEARING_REPAIR_CARGO_NOT_LOADED");
+                }
+
+                if (builder.VehicleModule == VehicleModule.WinchAssembly)
+                {
+                    if (builder.HeavyCargoKind != HeavyCargoKind.PumpRotor
+                        || builder.HeavyCargoCustody
+                            != HeavyCargoCustody.Vehicle
+                        || builder.TowSlotsUsed != 1)
+                    {
+                        throw new InvalidOperationException(
+                            "LAST_BEARING_WINCH_ROTOR_NOT_RECOVERED");
+                    }
+                }
+                else if (builder.LiquidCargoKind == LiquidCargoKind.None)
+                {
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_TANK_RETURN_SELECTION_REQUIRED");
+                }
+
+                long expectedOrdinaryCargoUsed = checked(
+                    1 + FrameRailCargoUnits(builder));
+                if (builder.OrdinaryCargoUsedUnits == 0
+                    && builder.FrameRailSalvageCustody
+                        == FrameRailSalvageCustody.None)
+                {
+                    // Compatibility for valid development saves created before
+                    // the explicit depot load command existed.
+                    builder.OrdinaryCargoUsedUnits = 1;
+                }
+
+                if (builder.OrdinaryCargoUsedUnits
+                    != expectedOrdinaryCargoUsed)
+                {
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_REPAIR_CARGO_OCCUPANCY_INVALID");
                 }
             }
-            else if (builder.LiquidCargoKind == LiquidCargoKind.None)
+            else if (builder.FrameRailSalvageCustody
+                    != FrameRailSalvageCustody.Vehicle
+                || builder.OrdinaryCargoUsedUnits
+                    != LastBearingBalanceV1
+                        .WreckLineFrameRailSalvageCargoUnits)
             {
                 throw new InvalidOperationException(
-                    "LAST_BEARING_TANK_RETURN_SELECTION_REQUIRED");
-            }
-
-            long expectedOrdinaryCargoUsed = checked(
-                1 + FrameRailCargoUnits(builder));
-            if (builder.OrdinaryCargoUsedUnits == 0
-                && builder.FrameRailSalvageCustody
-                    == FrameRailSalvageCustody.None)
-            {
-                // Compatibility for valid development saves created before
-                // the explicit depot load command existed.
-                builder.OrdinaryCargoUsedUnits = 1;
-            }
-
-            if (builder.OrdinaryCargoUsedUnits != expectedOrdinaryCargoUsed)
-            {
-                throw new InvalidOperationException(
-                    "LAST_BEARING_REPAIR_CARGO_OCCUPANCY_INVALID");
+                    "LAST_BEARING_REPEAT_SALVAGE_NOT_RECOVERED");
             }
 
             builder.ReturnPayloadFrozen = true;
@@ -1798,6 +1900,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     "LAST_BEARING_CITY_RETURN_NOT_READY");
             }
 
+            bool repeatExpedition =
+                LastBearingRepeatExpedition.IsLineage(
+                    new LastBearingState(builder));
             var previousCondition = builder.VehicleConditionMilli;
             builder.VehicleConditionMilli = Math.Max(
                 0,
@@ -1817,9 +1922,12 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 previousCondition,
                 builder.VehicleConditionMilli);
 
-            LastBearingOwnershipTransaction.TransferHeavyCargoToSettlement(
-                builder);
-            CreditLiquidCargo(builder, command.Sequence, events);
+            if (!repeatExpedition)
+            {
+                LastBearingOwnershipTransaction.TransferHeavyCargoToSettlement(
+                    builder);
+                CreditLiquidCargo(builder, command.Sequence, events);
+            }
             if (builder.FrameRailSalvageCustody
                 == FrameRailSalvageCustody.Vehicle)
             {
@@ -1841,20 +1949,26 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     (long)FrameRailSalvageCustody.Credited);
             }
 
-            ApplyCooperativeReturnConsequences(builder, command.Sequence, events);
+            if (!repeatExpedition)
+            {
+                ApplyCooperativeReturnConsequences(
+                    builder,
+                    command.Sequence,
+                    events);
 
-            var previousDecision = builder.NextCityDecision;
-            builder.NextCityDecision = DetermineNextCityDecision(builder);
-            Emit(
-                builder,
-                events,
-                LastBearingEventKind.NextCityDecisionSet,
-                LastBearingEventCause.PlayerCommand,
-                builder.SettlementTick,
-                command.Sequence,
-                "settlement:last-bearing:next-decision",
-                (long)previousDecision,
-                (long)builder.NextCityDecision);
+                var previousDecision = builder.NextCityDecision;
+                builder.NextCityDecision = DetermineNextCityDecision(builder);
+                Emit(
+                    builder,
+                    events,
+                    LastBearingEventKind.NextCityDecisionSet,
+                    LastBearingEventCause.PlayerCommand,
+                    builder.SettlementTick,
+                    command.Sequence,
+                    "settlement:last-bearing:next-decision",
+                    (long)previousDecision,
+                    (long)builder.NextCityDecision);
+            }
             builder.TransactionPhase = TransactionPhase.CityCredited;
             Emit(
                 builder,
@@ -2890,7 +3004,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
             LastBearingEventSink events)
         {
             if (builder.TransactionPhase != TransactionPhase.CityDebited
-                || builder.PreparationPhase != PreparationPhase.Ready
+                || (builder.PreparationPhase != PreparationPhase.Ready
+                    && (builder.PreparationPhase
+                            != PreparationPhase.Committed
+                        || !LastBearingRepeatExpedition.IsLineage(
+                            new LastBearingState(builder))))
                 || builder.ModuleInstallationState
                     != ModuleInstallationState.Installed)
             {

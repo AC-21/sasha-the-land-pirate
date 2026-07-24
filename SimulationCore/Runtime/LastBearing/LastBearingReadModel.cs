@@ -130,6 +130,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     < LastBearingBalanceV1.StartingVehicleConditionMilli;
             IsVehicleServiceAvailable =
                 ComputeVehicleServiceAvailable(state);
+            IsRepeatExpeditionAvailable =
+                ComputeRepeatExpeditionAvailable(state);
             RepairCargoKind = state.RepairCargoKind;
             RepairCargoCustody = state.RepairCargoCustody;
             FrameRailSalvageCustody =
@@ -310,6 +312,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long VehicleServiceReservePartsUnits { get; private set; }
         public bool IsVehicleServiceNeeded { get; private set; }
         public bool IsVehicleServiceAvailable { get; private set; }
+        public bool IsRepeatExpeditionAvailable { get; private set; }
         public RepairCargoKind RepairCargoKind { get; private set; }
         public RepairCargoCustody RepairCargoCustody { get; private set; }
         public FrameRailSalvageCustody FrameRailSalvageCustody
@@ -675,6 +678,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return "service-scout-in-garage";
             }
 
+            if (ComputeRepeatExpeditionAvailable(state))
+            {
+                return "prepare-repeat-expedition";
+            }
+
             if (state.SpareBearingBatchPhase
                 == SpareBearingBatchPhase.Settled)
             {
@@ -720,6 +728,41 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.HotShiftPhase == HotShiftPhase.Idle
                 && state.NextCityDecision == NextCityDecision.None
                 && ComputeEmergencyAidWorkResolved(state)
+                && !state.MaintenanceDue
+                && state.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.InProgress
+                && state.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.Complete
+                && !state.IsDustFrontAcknowledgementRequired;
+        }
+
+        internal static bool CanPrepareRepeatExpedition(
+            LastBearingState state)
+        {
+            return ComputeRepeatExpeditionAvailable(state);
+        }
+
+        private static bool ComputeRepeatExpeditionAvailable(
+            LastBearingState state)
+        {
+            return state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.Finalized
+                && LastBearingRepeatExpedition
+                    .CanLaunchFromCompletedReturn(state)
+                && state.SliceInfrastructureActive
+                && state.AssignedResidentId != null
+                && state.CityDeliveryStage
+                    == CityDeliveryStage.DeliveredToWorkshop
+                && state.ModuleInstallationState
+                    == ModuleInstallationState.Installed
+                && state.PreparationPhase == PreparationPhase.Committed
+                && state.PartsUnits
+                    >= LastBearingBalanceV1.MinimumPostReturnPartsUnits
+                && state.FuelUnits
+                    >= LastBearingRepeatExpedition.FuelCost(state)
+                && state.HotShiftPhase == HotShiftPhase.Idle
+                && state.NextCityDecision == NextCityDecision.None
+                && IsEmergencyAidWorkResolved(state)
                 && !state.MaintenanceDue
                 && state.SpareBearingBatchPhase
                     != SpareBearingBatchPhase.InProgress
@@ -1077,7 +1120,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         {
             return state.ExpeditionPhase == ExpeditionPhase.Outbound
                 && state.TransactionPhase == TransactionPhase.RoadOwned
-                && state.RigUpgrade == RigUpgrade.PatchworkSkidPlate
+                && (state.RigUpgrade == RigUpgrade.PatchworkSkidPlate
+                    || LastBearingRepeatExpedition.IsLineage(state))
                 && state.RouteActionUsed
                 && state.FrameRailSalvageCustody
                     == FrameRailSalvageCustody.WreckLine
