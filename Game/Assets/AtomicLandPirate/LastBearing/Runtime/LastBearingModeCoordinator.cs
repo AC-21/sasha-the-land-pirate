@@ -63,6 +63,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
     {
         public const string ModeRootName = "Presentation Modes [Derived Only]";
 
+        // Authored road-feel tuning, not a real-world conversion from game units.
+        public const int PumpRotorPresentationMassKilograms = 1300;
+        public const int FrameRailPresentationMassKilograms = 400;
+        public const int CeramicBearingPresentationMassKilograms = 120;
+        public const int FieldSleevePresentationMassKilograms = 90;
+        public const int FullRangeTankPresentationMassKilograms = 600;
+        public const int MaximumPresentationCargoMassKilograms = 3000;
+
         private static readonly LastBearingPresentationMode[] OrderedModes =
         {
             LastBearingPresentationMode.CityOverview,
@@ -304,10 +312,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 (readModel.IsWreckLineModulePointAvailable ||
                  readModel.IsWreckLineFrameRailRecoveryAvailable);
             int presentationCargoMass =
-                readModel.HeavyCargoKind == HeavyCargoKind.PumpRotor &&
-                readModel.HeavyCargoCustody == HeavyCargoCustody.Vehicle
-                    ? 1300
-                    : 0;
+                DerivePresentationCargoMassKilograms(readModel);
             LastBearingRoadDamageBand presentationDamageBand =
                 DerivePresentationDamageBand(readModel.VehicleConditionMilli);
             TryInvokeRoadAdapter(
@@ -323,6 +328,61 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 !holdAtModulePoint,
                 holdAtRecovery,
                 holdAtModulePoint);
+        }
+
+        public static int DerivePresentationCargoMassKilograms(
+            LastBearingReadModel readModel)
+        {
+            if (readModel == null)
+            {
+                throw new ArgumentNullException(nameof(readModel));
+            }
+
+            var massKilograms = 0;
+            if (readModel.HeavyCargoKind == HeavyCargoKind.PumpRotor &&
+                readModel.HeavyCargoCustody == HeavyCargoCustody.Vehicle)
+            {
+                massKilograms += PumpRotorPresentationMassKilograms;
+            }
+
+            if (readModel.FrameRailSalvageCustody ==
+                FrameRailSalvageCustody.Vehicle)
+            {
+                massKilograms += FrameRailPresentationMassKilograms;
+            }
+
+            if (readModel.RepairCargoCustody == RepairCargoCustody.Vehicle)
+            {
+                massKilograms += readModel.RepairCargoKind switch
+                {
+                    RepairCargoKind.CeramicBearing =>
+                        CeramicBearingPresentationMassKilograms,
+                    RepairCargoKind.FieldSleeve =>
+                        FieldSleevePresentationMassKilograms,
+                    _ => 0,
+                };
+            }
+
+            if (readModel.LiquidCargoCustody == LiquidCargoCustody.Vehicle &&
+                readModel.LiquidCargoKind != LiquidCargoKind.None &&
+                readModel.LiquidCargoQuantityMilli > 0)
+            {
+                long liquidMassKilograms = checked(
+                    FullRangeTankPresentationMassKilograms *
+                    readModel.LiquidCargoQuantityMilli /
+                    LastBearingBalanceV1.TankLiquidCapacityMilli);
+                massKilograms = checked(
+                    massKilograms +
+                    Math.Max(1, checked((int)liquidMassKilograms)));
+            }
+
+            if (massKilograms > MaximumPresentationCargoMassKilograms)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_PRESENTATION_CARGO_MASS_EXCEEDED");
+            }
+
+            return massKilograms;
         }
 
         public static LastBearingRoadDamageBand DerivePresentationDamageBand(

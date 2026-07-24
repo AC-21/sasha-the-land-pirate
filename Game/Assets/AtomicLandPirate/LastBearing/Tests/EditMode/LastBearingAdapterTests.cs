@@ -1237,6 +1237,106 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             }
         }
 
+        [Test]
+        public void CanonicalVehicleCargoDerivesAdditivePresentationMass()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            PrepareControllerForGaragePlan(controller, ColonyComposition.Mixed);
+            LastBearingState state =
+                CreateFrameRailRecoveryState(controller.State!);
+            LastBearingReadModel rotorOnly =
+                LastBearingReadModel.FromState(state);
+
+            Assert.That(
+                LastBearingModeCoordinator
+                    .DerivePresentationCargoMassKilograms(rotorOnly),
+                Is.EqualTo(
+                    LastBearingModeCoordinator
+                        .PumpRotorPresentationMassKilograms));
+
+            var kernel = new LastBearingKernel();
+            state = kernel.Step(
+                state,
+                new LastBearingCommand[]
+                {
+                    new RecoverWreckLineFrameRailsCommand(
+                        state.NextCommandSequence),
+                }).State;
+            LastBearingReadModel rotorAndRails =
+                LastBearingReadModel.FromState(state);
+            int expected =
+                LastBearingModeCoordinator.PumpRotorPresentationMassKilograms +
+                LastBearingModeCoordinator.FrameRailPresentationMassKilograms;
+
+            Assert.That(
+                LastBearingModeCoordinator
+                    .DerivePresentationCargoMassKilograms(rotorAndRails),
+                Is.EqualTo(expected));
+            Assert.That(
+                expected,
+                Is.LessThanOrEqualTo(
+                    LastBearingModeCoordinator
+                        .MaximumPresentationCargoMassKilograms));
+
+            LastBearingDecodeResult decoded = LastBearingCanonicalCodec.TryDecode(
+                LastBearingCanonicalCodec.Encode(state));
+            Assert.That(decoded.Succeeded, Is.True);
+            Assert.That(decoded.State, Is.Not.Null);
+            Assert.That(
+                LastBearingModeCoordinator
+                    .DerivePresentationCargoMassKilograms(
+                        LastBearingReadModel.FromState(decoded.State!)),
+                Is.EqualTo(expected),
+                "presentation load must reconstruct from canonical custody");
+        }
+
+        [TestCase(LiquidCargoKind.Water, 690)]
+        [TestCase(LiquidCargoKind.Fuel, 190)]
+        public void RangeTankAndRepairCargoDeriveConservativePresentationMass(
+            LiquidCargoKind liquid,
+            int expectedMassKilograms)
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            PrepareControllerForGaragePlan(controller, ColonyComposition.Mixed);
+            LastBearingState state = CreateRangeTankCargoState(
+                controller.State!,
+                liquid);
+            LastBearingReadModel readModel =
+                LastBearingReadModel.FromState(state);
+
+            Assert.That(
+                readModel.RepairCargoKind,
+                Is.EqualTo(RepairCargoKind.FieldSleeve));
+            Assert.That(
+                readModel.RepairCargoCustody,
+                Is.EqualTo(RepairCargoCustody.Vehicle));
+            Assert.That(readModel.LiquidCargoKind, Is.EqualTo(liquid));
+            Assert.That(
+                readModel.LiquidCargoCustody,
+                Is.EqualTo(LiquidCargoCustody.Vehicle));
+            Assert.That(
+                LastBearingModeCoordinator
+                    .DerivePresentationCargoMassKilograms(readModel),
+                Is.EqualTo(expectedMassKilograms));
+            Assert.That(
+                expectedMassKilograms,
+                Is.LessThanOrEqualTo(
+                    LastBearingModeCoordinator
+                        .MaximumPresentationCargoMassKilograms));
+        }
+
+        [Test]
+        public void PresentationCargoMassRejectsMissingCanonicalReadModel()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+                LastBearingModeCoordinator
+                    .DerivePresentationCargoMassKilograms(null!));
+        }
+
         [TestCase(1000, LastBearingRoadDamageBand.Healthy)]
         [TestCase(999, LastBearingRoadDamageBand.Worn)]
         [TestCase(501, LastBearingRoadDamageBand.Worn)]
@@ -1762,6 +1862,119 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 LastBearingReadModel.FromState(state)
                     .IsWreckLineFrameRailRecoveryAvailable,
                 Is.True);
+            return state;
+        }
+
+        private static LastBearingState CreateRangeTankCargoState(
+            LastBearingState readyForPlan,
+            LiquidCargoKind liquid)
+        {
+            var kernel = new LastBearingKernel();
+            PreparationChoice preparation =
+                liquid == LiquidCargoKind.Fuel
+                    ? PreparationChoice.CivicBuffer
+                    : PreparationChoice.WorkshopPush;
+            LastBearingState state = ApplyPlanCommands(
+                readyForPlan,
+                preparation,
+                VehicleModule.SealedRangeTank);
+            var guard = 0;
+            while ((state.PreparationPhase != PreparationPhase.Ready ||
+                    state.ModuleInstallationState !=
+                        ModuleInstallationState.Installed) &&
+                   guard < 1000)
+            {
+                state = kernel.Step(
+                    state,
+                    Array.Empty<LastBearingCommand>()).State;
+                guard++;
+            }
+
+            Assert.That(state.PreparationPhase, Is.EqualTo(PreparationPhase.Ready));
+            Assert.That(
+                state.ModuleInstallationState,
+                Is.EqualTo(ModuleInstallationState.Installed));
+            long sequence = state.NextCommandSequence;
+            state = kernel.Step(
+                state,
+                new LastBearingCommand[]
+                {
+                    new PrepareExpeditionTransactionCommand(
+                        sequence,
+                        "tx:feel-the-load:tank",
+                        "fp:feel-the-load:tank"),
+                    new DebitCityManifestCommand(
+                        sequence + 1,
+                        "tx:feel-the-load:tank",
+                        "fp:feel-the-load:tank"),
+                    new DepartExpeditionCommand(sequence + 2),
+                }).State;
+
+            guard = 0;
+            while (!LastBearingReadModel.FromState(state)
+                       .IsDepotApproachRecoveryAvailable &&
+                   guard < 1000)
+            {
+                LastBearingReadModel readModel =
+                    LastBearingReadModel.FromState(state);
+                if (readModel.IsWreckLineModulePointAvailable)
+                {
+                    state = kernel.Step(
+                        state,
+                        new LastBearingCommand[]
+                        {
+                            new OperateWreckLineModuleCommand(
+                                state.NextCommandSequence,
+                                readModel.RouteActionKind),
+                        }).State;
+                }
+
+                state = kernel.Step(
+                    state,
+                    new LastBearingCommand[]
+                    {
+                        new DriveVehicleCommand(
+                            state.NextCommandSequence,
+                            1000,
+                            0),
+                    }).State;
+                guard++;
+            }
+
+            Assert.That(
+                LastBearingReadModel.FromState(state)
+                    .IsDepotApproachRecoveryAvailable,
+                Is.True);
+            state = kernel.Step(
+                state,
+                new LastBearingCommand[]
+                {
+                    new OperateDepotRecoveryPointCommand(
+                        state.NextCommandSequence),
+                }).State;
+            state = kernel.Step(
+                state,
+                new LastBearingCommand[]
+                {
+                    new ResolveDepotCommand(
+                        state.NextCommandSequence,
+                        EncounterChoice.Cooperate),
+                }).State;
+            state = kernel.Step(
+                state,
+                new LastBearingCommand[]
+                {
+                    new LoadDepotRepairCargoCommand(
+                        state.NextCommandSequence),
+                }).State;
+            state = kernel.Step(
+                state,
+                new LastBearingCommand[]
+                {
+                    new ChooseLiquidReturnCommand(
+                        state.NextCommandSequence,
+                        liquid),
+                }).State;
             return state;
         }
 
