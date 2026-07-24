@@ -135,6 +135,28 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "to continue the fixed profile.");
             }
 
+            if (model.IsVehicleServiceAvailable &&
+                model.NextObjective == "service-scout-in-garage")
+            {
+                return Create(
+                    LastBearingPermitJobChapter.Homecoming,
+                    JobStepCount,
+                    "FINAL SERVICE · SASHA'S SCOUT",
+                    "Put the road wear right",
+                    "The scout came home at " +
+                    model.VehicleConditionMilli +
+                    " / " +
+                    LastBearingBalanceV1.StartingVehicleConditionMilli +
+                    " condition. Service costs " +
+                    model.VehicleServicePartsCostUnits +
+                    " reclaimed parts while preserving " +
+                    model.VehicleServiceReservePartsUnits +
+                    " in civic reserve.",
+                    "Click OPEN GARAGE · SERVICE SASHA'S SCOUT, release the " +
+                    "route input, then use E, gamepad south, or the exact " +
+                    "service pendant.");
+            }
+
             if (IsFuelBondFinale(model))
             {
                 return Create(

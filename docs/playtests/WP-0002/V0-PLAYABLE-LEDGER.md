@@ -898,6 +898,34 @@ interaction framework, or normal-PR performance soak.
 Detailed contract:
 `docs/playtests/WP-0002/VGR-22-RECEIVE-THE-WATER-TENDER-CONTRACT.md`.
 
+## VGR-23 — Service the Scout
+
+Status: current implementation target on the V0 feature branch.
+
+Scope:
+
+- Make Sasha's actual return-road wear a final physical homecoming obligation
+  after repair, aid, improvement, fuel-bond, manufacturing/barter, maintenance,
+  Hot Shift, and Dust Front work has settled.
+- Make the Field Desk route-only into the existing garage mode; require fresh E,
+  gamepad South, or exact pendant-pointer input before delegating one bounded
+  service command.
+- Show actual worn condition, the exact two-part cost, and the separately
+  preserved two-part civic reserve; after acceptance reuse the existing service
+  hoist, module worklight, and scout condition telltale to show 1000 / 1000.
+- Preserve module, Patchwork Skid Plate, cargo, faction, city, improvement,
+  permit, future toll, all colony compositions, ready/accepted save-load, and
+  one shared camera/listener.
+- Autosave only on the exact paired parts-commit plus service-cell condition
+  events, so ordinary road-edge condition damage does not broaden the save seam.
+
+Exclude: new saved field, schema, migration, event kind, independent balance
+value, scene, mode, camera, package, dependency, production asset, audio,
+generalized interaction framework, or normal-PR performance soak.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-23-SERVICE-THE-SCOUT-CONTRACT.md`.
+
 ## Visual constitution
 
 - **Texas iron is the scale of work:** cast housings, plate steel, oilfield,

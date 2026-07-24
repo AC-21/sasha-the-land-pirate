@@ -922,6 +922,30 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            if (model.IsVehicleServiceAvailable)
+            {
+                if (_controller.IsScoutServiceQueued)
+                {
+                    GUILayout.Label(
+                        "SCOUT SERVICE QUEUED · two parts move only when the next city tick accepts the paired service events.",
+                        _mutedStyle);
+                }
+                else if (_controller.IsScoutServiceFocused)
+                {
+                    GUILayout.Label(
+                        "GARAGE PENDANT FOCUSED · release the route input, then use E, gamepad south, or the exact pendant.",
+                        _bodyStyle);
+                }
+                else if (GUILayout.Button(
+                             "OPEN GARAGE · SERVICE SASHA'S SCOUT",
+                             _buttonStyle))
+                {
+                    _controller.OpenScoutServiceBay();
+                }
+
+                return;
+            }
+
             GUILayout.Label(permitJob.ProgressLabel, _bodyStyle);
         }
 

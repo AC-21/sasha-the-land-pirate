@@ -356,6 +356,28 @@ namespace AtomicLandPirate.Presentation.LastBearing
             IsEmergencyAidReceptionFocused &&
             _world?.EmergencyAidInteractor?.IsInputArmed == true;
 
+        public bool IsScoutServiceQueued =>
+            _pendingCommands.Exists(command =>
+                command is ServiceScoutCommand);
+
+        public bool CanOpenScoutServiceBay =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsVehicleServiceAvailable == true &&
+            IsExactFieldDeskCityOverview &&
+            _world?.ScoutServiceInteractor != null;
+
+        public bool IsScoutServiceFocused =>
+            _world?.ScoutServiceInteractor?.IsControlFocused == true;
+
+        public bool CanServiceScout =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsVehicleServiceAvailable == true &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.GarageBay &&
+            _world?.ScoutServiceInteractor?.IsControlFocused == true &&
+            _world.ScoutServiceInteractor.IsInputArmed;
+
         public string Status => _status;
 
         public string SaveStatus => _saveStatus;
@@ -674,6 +696,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ConfigureDepotReturnInteraction(this);
             _world.ConfigureGarageModuleInteraction(this);
             _world.ConfigureGarageDepartureInteraction(this);
+            _world.ConfigureScoutServiceInteraction(this);
             _world.ConfigurePumpHallMaintenanceInteraction(this);
             _world.ConfigureFuelBondInteraction(this);
             _hud = gameObject.AddComponent<LastBearingHud>();
@@ -704,6 +727,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotReturnInteraction();
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
+            _world?.ResetScoutServiceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
             _world?.ResetFuelBondInteraction();
             _pendingCommands.Clear();
@@ -766,6 +790,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotReturnInteraction();
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
+            _world?.ResetScoutServiceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
             _world?.ResetFuelBondInteraction();
             _state = null;
@@ -830,6 +855,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 humanVisible: true,
                 robotVisible: true);
             _world?.ApplyFuelBondInteraction(null);
+            _world?.ApplyScoutServiceInteraction(null);
             _world?.HideCityServiceCell();
             _fieldDesk?.ResetForLifecycle();
         }
@@ -1528,7 +1554,38 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 _world?.ApplyGarageModuleInteraction(_readModel);
                 _world?.ApplyGarageDepartureInteraction(_readModel);
+                _world?.ApplyScoutServiceInteraction(_readModel);
             }
+        }
+
+        public void OpenScoutServiceBay()
+        {
+            if (!CanOpenScoutServiceBay ||
+                !TryRouteToScoutServiceBay(
+                    "Sasha's worn scout is framed under the service hoist. Release the route input, then pull the physical pendant; two parts move and two remain in reserve only on the city tick."))
+            {
+                _status =
+                    "Scout service opens only after the higher-priority return work is settled and the two-part reserve can be preserved.";
+            }
+        }
+
+        public void ServiceScout()
+        {
+            if (IsScoutServiceQueued)
+            {
+                return;
+            }
+
+            if (!CanServiceScout)
+            {
+                _status =
+                    "Service Sasha's scout only from the focused garage pendant after releasing the route input.";
+                return;
+            }
+
+            Queue(sequence => new ServiceScoutCommand(sequence));
+            _status =
+                "Scout service queued. Two parts remain in Last Bearing until the authoritative city tick accepts the work and preserves two in reserve.";
         }
 
         public void AttachRoadModeAdapter(ILastBearingRoadModeAdapter adapter)
@@ -2034,6 +2091,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetDepotReturnInteraction();
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
+            _world?.ResetScoutServiceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
             _world?.ResetFuelBondInteraction();
             ClearGaragePlanIntent();
@@ -2084,8 +2142,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                                 if (!TryRouteToFuelBondClaimsWicket(
                                         "Exact unposted fuel bond restored at the claims ledger. Release the load input before posting."))
                                 {
-                                    TryRouteToOneGoodBatchWorkshop(
-                                        "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                                    if (!TryRouteToScoutServiceBay(
+                                            "Exact worn scout restored under the garage hoist. Release the load input, then service it at the physical pendant."))
+                                    {
+                                        TryRouteToOneGoodBatchWorkshop(
+                                            "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                                    }
                                 }
                             }
                         }
@@ -2111,6 +2173,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.ApplyDepotReturnInteraction(_readModel);
                 _world?.ApplyGarageModuleInteraction(_readModel);
                 _world?.ApplyGarageDepartureInteraction(_readModel);
+                _world?.ApplyScoutServiceInteraction(_readModel);
                 _world?.ApplyPumpHallMaintenanceInteraction(_readModel);
                 _world?.ApplyFuelBondInteraction(_readModel);
                 _world?.EmergencyAidInteractor?.Apply(_readModel);
@@ -2193,6 +2256,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.FuelBondInteractor
                     ?.IsControlFocused == true ||
                 _world?.EmergencyAidInteractor
+                    ?.IsControlFocused == true ||
+                _world?.ScoutServiceInteractor
                     ?.IsControlFocused == true)
             {
                 return;
@@ -2350,6 +2415,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ContainsEvent(
                         result.DomainEvents,
                         LastBearingEventKind.EmergencyAidDelivered);
+                bool scoutServiced =
+                    _readModel.IsVehicleServiceAvailable &&
+                    ContainsScoutServiceEventPair(
+                        result.DomainEvents);
                 bool cityBuildingChanged = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.CityBuildingPlaced) ||
@@ -2449,6 +2518,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         _readModel.WaterMilli + " / " +
                         _readModel.WaterCapacityMilli +
                         " milli after the capacity clamp, and Shared Service plus its maintenance promise remain.";
+                }
+
+                if (scoutServiced)
+                {
+                    _status =
+                        "Sasha's scout is serviced to " +
+                        _readModel.VehicleConditionMilli +
+                        " / " +
+                        LastBearingBalanceV1.StartingVehicleConditionMilli +
+                        ". " +
+                        _readModel.VehicleServicePartsCostUnits +
+                        " parts were spent, the civic " +
+                        _readModel.VehicleServiceReservePartsUnits +
+                        "-part reserve remains, and every fitted module, " +
+                        "upgrade, cargo record, faction term, and city fact " +
+                        "is unchanged.";
                 }
 
                 if (rigUpgradeInstalled)
@@ -2818,6 +2903,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ApplyDepotReturnInteraction(_readModel);
             _world.ApplyGarageModuleInteraction(_readModel);
             _world.ApplyGarageDepartureInteraction(_readModel);
+            _world.ApplyScoutServiceInteraction(_readModel);
             _world.ApplyPumpHallMaintenanceInteraction(_readModel);
             _world.SetCityServiceCellFocus(
                 IsExactFieldDeskCityOverview &&
@@ -2834,6 +2920,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private void TryAutosave(
             IReadOnlyList<LastBearingDomainEvent> domainEvents)
         {
+            if (ContainsScoutServiceEventPair(domainEvents))
+            {
+                Save();
+                return;
+            }
+
             for (var index = 0; index < domainEvents.Count; index++)
             {
                 LastBearingEventKind kind = domainEvents[index].Kind;
@@ -3048,6 +3140,37 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return true;
         }
 
+        private bool TryRouteToScoutServiceBay(string successStatus)
+        {
+            if (_pendingCommands.Count != 0 ||
+                _readModel?.IsVehicleServiceAvailable != true ||
+                _world == null ||
+                _modeCoordinator == null)
+            {
+                return false;
+            }
+
+            _world.LeaveCityGrammarComparison();
+            if (!_modeCoordinator.TryShowCityMode(
+                    LastBearingPresentationMode.GarageBay,
+                    _readModel))
+            {
+                return false;
+            }
+
+            _world.ApplyGarageModuleInteraction(_readModel);
+            _world.ApplyGarageDepartureInteraction(_readModel);
+            _world.ApplyScoutServiceInteraction(_readModel);
+            if (_world.ScoutServiceInteractor?.FocusControl() != true)
+            {
+                return false;
+            }
+
+            _status = successStatus;
+            _fieldDesk?.Refresh(force: true);
+            return true;
+        }
+
         private bool IsOneGoodBatchWorkshopRelevant()
         {
             return _pendingCommands.Count == 0 &&
@@ -3068,6 +3191,46 @@ namespace AtomicLandPirate.Presentation.LastBearing
             for (var index = 0; index < domainEvents.Count; index++)
             {
                 if (domainEvents[index].Kind == eventKind)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool ContainsScoutServiceEventPair(
+            IReadOnlyList<LastBearingDomainEvent> domainEvents)
+        {
+            for (var index = 0;
+                 index + 1 < domainEvents.Count;
+                 index++)
+            {
+                LastBearingDomainEvent resources = domainEvents[index];
+                LastBearingDomainEvent condition =
+                    domainEvents[index + 1];
+                if (resources.Cause ==
+                        LastBearingEventCause.PlayerCommand &&
+                    resources.Kind ==
+                        LastBearingEventKind.CityResourcesCommitted &&
+                    string.Equals(
+                        resources.SubjectId,
+                        "settlement:last-bearing:parts",
+                        StringComparison.Ordinal) &&
+                    resources.BeforeValue - resources.AfterValue ==
+                        LastBearingBalanceV1.HotShiftOutputPartsUnits &&
+                    condition.Cause ==
+                        LastBearingEventCause.PlayerCommand &&
+                    condition.Kind ==
+                        LastBearingEventKind.VehicleConditionChanged &&
+                    string.Equals(
+                        condition.SubjectId,
+                        "vehicle:sasha:service-cell",
+                        StringComparison.Ordinal) &&
+                    condition.CommandSequence ==
+                        resources.CommandSequence &&
+                    condition.AfterValue ==
+                        LastBearingBalanceV1.StartingVehicleConditionMilli)
                 {
                     return true;
                 }

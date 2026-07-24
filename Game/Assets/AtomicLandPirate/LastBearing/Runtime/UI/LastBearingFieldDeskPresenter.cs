@@ -43,6 +43,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         OpenEmergencyCisternExpansion = 32,
         OpenFuelBondClaimsWicket = 33,
         OpenEmergencyAidWaterTender = 34,
+        OpenScoutServiceBay = 35,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -514,6 +515,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.TransactionPhase.GetHashCode());
             Mix(ref hash, model.RepairCargoKind.GetHashCode());
             Mix(ref hash, model.RepairCargoCustody.GetHashCode());
+            Mix(ref hash, model.VehicleConditionMilli);
+            Mix(ref hash, model.IsVehicleServiceNeeded);
+            Mix(ref hash, model.IsVehicleServiceAvailable);
+            Mix(ref hash, model.VehicleServicePartsCostUnits);
+            Mix(ref hash, model.VehicleServiceReservePartsUnits);
             Mix(ref hash, model.MaintenanceDue);
             Mix(ref hash, model.NextCityDecision.GetHashCode());
             Mix(ref hash, model.InstalledCityImprovement.GetHashCode());
@@ -807,6 +813,32 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     true,
                     canDispatch &&
                     controller.CanOpenFuelBondClaimsWicket,
+                    LastBearingFieldDeskActionTone.Signal);
+                return;
+            }
+
+            // Core exposes this only after every urgent return obligation has
+            // settled. Check it before the workshop's durable Settled receipt,
+            // which otherwise remains relevant after a completed barter.
+            if (model.IsVehicleServiceAvailable)
+            {
+                primary = Action(
+                    LastBearingFieldDeskIntent.OpenScoutServiceBay,
+                    "OPEN GARAGE · SERVICE SASHA'S SCOUT",
+                    "Scout condition " +
+                    model.VehicleConditionMilli +
+                    " / " +
+                    LastBearingBalanceV1.StartingVehicleConditionMilli +
+                    ". Spend " +
+                    model.VehicleServicePartsCostUnits +
+                    " parts and preserve " +
+                    model.VehicleServiceReservePartsUnits +
+                    " in civic reserve at the physical service pendant; " +
+                    "release the route input, then use E, gamepad south, " +
+                    "or the exact pendant.",
+                    true,
+                    canDispatch &&
+                    controller.CanOpenScoutServiceBay,
                     LastBearingFieldDeskActionTone.Signal);
                 return;
             }
@@ -1340,7 +1372,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return model.IsSpareBearingBatchStartAvailable ||
                    model.SpareBearingBatchPhase == SpareBearingBatchPhase.InProgress ||
                    model.IsSpareBearingBarterAvailable ||
-                   model.SpareBearingBatchPhase == SpareBearingBatchPhase.Settled;
+                   (model.SpareBearingBatchPhase ==
+                        SpareBearingBatchPhase.Settled &&
+                    !model.MaintenanceDue &&
+                    !model.IsVehicleServiceAvailable);
         }
 
         private static LastBearingFieldDeskActionProjection

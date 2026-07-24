@@ -619,6 +619,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         _controller.IsEmergencyAidReceptionFocused;
                     HideAndResetTransient();
                     break;
+                case LastBearingFieldDeskIntent.OpenScoutServiceBay:
+                    _controller.OpenScoutServiceBay();
+                    _physicalWorkRouted =
+                        _controller.IsScoutServiceFocused;
+                    HideAndResetTransient();
+                    break;
                 case LastBearingFieldDeskIntent.OpenPumpHallImprovement: _controller.OpenPumpHallImprovement(); break;
                 case LastBearingFieldDeskIntent.OpenEmergencyCisternExpansion:
                     _controller.OpenEmergencyCisternExpansion();

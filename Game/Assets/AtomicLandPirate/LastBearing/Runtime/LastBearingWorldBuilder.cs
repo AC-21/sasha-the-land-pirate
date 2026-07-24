@@ -87,6 +87,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public LastBearingGarageModuleInteractor? GarageModuleInteractor =>
             GarageBayView?.ModuleInteractor;
 
+        public LastBearingScoutServiceInteractor? ScoutServiceInteractor =>
+            GarageBayView?.ScoutServiceInteractor;
+
         public Transform? CityScaffoldRoot { get; private set; }
 
         public LastBearingReturnServiceView? ReturnServiceView { get; private set; }
@@ -641,6 +644,33 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingReadModel model)
         {
             GarageModuleInteractor?.Apply(model);
+        }
+
+        public void ConfigureScoutServiceInteraction(
+            LastBearingGameController controller)
+        {
+            if (MainCamera == null || ScoutServiceInteractor == null)
+            {
+                throw new InvalidOperationException(
+                    "Scout service interaction requires Sasha's shared garage camera.");
+            }
+
+            ScoutServiceInteractor.Configure(controller, MainCamera);
+        }
+
+        public void ResetScoutServiceInteraction()
+        {
+            ScoutServiceInteractor?.ResetLocalFocus();
+            GarageBayView?.ApplyScoutServicePresentation(
+                active: false,
+                accepted: false,
+                conditionHealthy: true);
+        }
+
+        public void ApplyScoutServiceInteraction(
+            LastBearingReadModel? model)
+        {
+            ScoutServiceInteractor?.Apply(model);
         }
 
         public void SelectCityGrammarHypothesis(
@@ -1433,11 +1463,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Material tungsten,
             Material signal)
         {
+            Transform? conditionTelltale =
+                VehicleView?.ScoutVisual?.Lod0Root?.Find(
+                    "SCOUT_CONDITION_TELL_TALE");
+            Renderer? conditionRenderer =
+                conditionTelltale?.GetComponent<Renderer>();
+            if (conditionRenderer == null)
+            {
+                throw new MissingReferenceException(
+                    "Sasha's scout condition telltale is required by the fixed garage service bay.");
+            }
+
             var garage = new GameObject(LastBearingGarageBayView.RootName);
             garage.transform.SetParent(garageModeRoot, false);
             GarageBayView = garage.AddComponent<LastBearingGarageBayView>();
             GarageBayView.Build(
                 VehicleView!.transform.position,
+                conditionRenderer,
                 concrete,
                 darkIron,
                 oxide,
