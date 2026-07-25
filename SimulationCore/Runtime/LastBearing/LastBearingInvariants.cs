@@ -200,6 +200,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static void ValidateHotShift(LastBearingState state)
         {
             RequireEnum(state.HotShiftPhase, "HOT_SHIFT_PHASE");
+            RequireEnum(
+                state.ActiveServiceWorkOrder,
+                "ACTIVE_SERVICE_WORK_ORDER");
             RequireNonnegative(
                 state.HotShiftElapsedTicks,
                 "HOT_SHIFT_ELAPSED_TICKS");
@@ -212,13 +215,18 @@ namespace AtomicLandPirate.Simulation.LastBearing
             RequireNonnegative(
                 state.HotShiftCompletedCount,
                 "HOT_SHIFT_COMPLETED_COUNT");
+            RequireNonnegative(
+                state.WaterShiftCompletedCount,
+                "WATER_SHIFT_COMPLETED_COUNT");
 
             if (state.HotShiftPhase == HotShiftPhase.Idle)
             {
                 Require(
                     state.HotShiftElapsedTicks == 0
                     && state.HotShiftRequiredTicks == 0
-                    && state.HotShiftFuelCommittedUnits == 0,
+                    && state.HotShiftFuelCommittedUnits == 0
+                    && state.ActiveServiceWorkOrder
+                        == ServiceWorkOrder.None,
                     "LAST_BEARING_HOT_SHIFT_IDLE_STATE_INVALID");
                 return;
             }
@@ -238,8 +246,25 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.HotShiftElapsedTicks
                     < state.HotShiftRequiredTicks
                 && state.HotShiftFuelCommittedUnits
-                    == LastBearingBalanceV1.HotShiftFuelCostUnits,
+                    == LastBearingBalanceV1.HotShiftFuelCostUnits
+                && (state.ActiveServiceWorkOrder
+                        == ServiceWorkOrder.PartsShift
+                    || state.ActiveServiceWorkOrder
+                        == ServiceWorkOrder.WaterShift),
                 "LAST_BEARING_HOT_SHIFT_PROGRESS_STATE_INVALID");
+            if (state.ActiveServiceWorkOrder
+                == ServiceWorkOrder.WaterShift)
+            {
+                Require(
+                    state.WaterMilli
+                        <= checked(
+                            LastBearingBalanceV1
+                                .EffectiveWaterCapacityMilli(
+                                    state.InstalledCityImprovement)
+                            - LastBearingBalanceV1
+                                .WaterShiftOutputWaterMilli),
+                    "LAST_BEARING_WATER_SHIFT_HEADROOM_INVALID");
+            }
         }
 
         private static void ValidateEmergencyCistern(

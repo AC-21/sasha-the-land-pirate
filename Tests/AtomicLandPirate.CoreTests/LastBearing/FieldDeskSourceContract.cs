@@ -429,7 +429,10 @@ namespace AtomicLandPirate.LastBearingTests
                 "Civic Buffer leaves the single machine-shop service slot available");
             Require(
                 fieldDeskPresenter,
-                "Settlement clocks are paused. Hot Shift still owns the single machine-shop service slot");
+                "FormatActiveServiceOrderName(model)");
+            Require(
+                fieldDeskPresenter,
+                " still owns the single machine-shop service slot");
             Require(
                 fieldDeskPresenter,
                 "Workshop Push still owns the single machine-shop service slot");
@@ -451,7 +454,16 @@ namespace AtomicLandPirate.LastBearingTests
                 "COMMISSIONING DELIVERY · ONCE");
             Require(
                 fieldDeskPresenter,
-                "HOT SHIFT · CITY WORK ORDER");
+                "SERVICE CELL · CITY WORK ORDERS");
+            Require(
+                fieldDeskPresenter,
+                "PARTS SHIFT: 1 FUEL · 120 TICKS · +2 PARTS");
+            Require(
+                fieldDeskPresenter,
+                "WATER SHIFT: 1 FUEL · 120 TICKS");
+            Require(
+                fieldDeskPresenter,
+                "GROSS +10.000 WATER · NO PARTS");
 
             foreach (string retiredDelegation in new[]
             {

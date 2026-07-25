@@ -201,11 +201,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            string activeServiceOrder =
+                model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.WaterShift
+                    ? "Water Shift"
+                    : "Hot Shift";
             GUILayout.Label("DUST FRONT · GLOBAL ALERT", _headingStyle);
             GUILayout.Label(
                 model.DustFrontOutcome == DustFrontOutcome.Held
                     ? "HELD · Last Bearing kept the reserve above the recoverable line."
-                    : "BREACHED · The failing turbine could not hold the dry line. Hot Shift stays stalled until turbine repair.",
+                    : "BREACHED · The failing turbine could not hold the dry line. " +
+                      activeServiceOrder +
+                      " stays stalled until turbine repair.",
                 _bodyStyle);
             bool usePhysicalRelay =
                 _controller!.CanOpenDustFrontRelay ||
@@ -406,7 +413,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (!model.IsEmergencyCisternPumpAvailable)
             {
                 GUILayout.Label(
-                    "Requires the commissioned operator, an idle Hot Shift, " +
+                    "Requires the commissioned operator, an idle service cell, " +
                     "an unresolved Dust Front, room for the full fill, and " +
                     "fuel beyond the planned route reserve.",
                     _mutedStyle);
@@ -2152,17 +2159,34 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             if (model.HotShiftPhase == HotShiftPhase.InProgress)
             {
-                return (model.IsHotShiftStalledByDustFront
-                        ? "front-stalled · turbine repair required · no added water draw"
-                        : model.IsPreparationStalledByHotShift
-                            ? "working · one service slot · Workshop Push held · garage gauge frozen · -0.010 water / settlement tick"
-                            : "working · -0.010 water / settlement tick") +
+                string order =
+                    model.ActiveServiceWorkOrder ==
+                        ServiceWorkOrder.WaterShift
+                        ? "water"
+                        : "parts";
+                string output =
+                    model.ActiveServiceWorkOrder ==
+                        ServiceWorkOrder.WaterShift
+                        ? "gross +10.000 on completion · ordinary water use continues"
+                        : "+2 parts · -0.010 water / settlement tick";
+                return order + " · " +
+                    (model.IsHotShiftStalledByDustFront
+                        ? "front-stalled · turbine repair required"
+                        : model.PauseCause != PauseCause.None
+                            ? "paused · city clock held"
+                            : model.IsPreparationStalledByHotShift
+                                ? "working · one service slot · Workshop Push held · garage gauge frozen"
+                                : "working") +
+                    " · " + output +
                     " · " + model.HotShiftElapsedTicks + '/' +
                     model.HotShiftRequiredTicks;
             }
 
-            return "idle · completed " + model.HotShiftCompletedCount +
-                   " · next run 1 fuel / 120 ticks / +2 parts";
+            return "idle · parts completed " +
+                   model.HotShiftCompletedCount +
+                   " · water completed " +
+                   model.WaterShiftCompletedCount +
+                   " · choose 1 fuel / 120 ticks / +2 parts or gross +10.000 water";
         }
 
         private static string FormatSigned(long value)

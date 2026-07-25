@@ -47,6 +47,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         AssignHumanRoadHand = 36,
         AssignRobotRoadHand = 37,
         OpenReturnedRailChassisBraceJig = 38,
+        RunWaterShift = 39,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -338,7 +339,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     permitJob,
                     unavailable,
                     unavailable,
-                    CreateSurvey(controller, null, false, false, false),
+                    CreateSurvey(
+                        controller,
+                        null,
+                        false,
+                        false,
+                        false,
+                        false),
                     unavailable,
                     unavailable,
                     unavailable,
@@ -378,6 +385,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     !model.IsDustFrontAcknowledgementRequired &&
                     primary.Intent != LastBearingFieldDeskIntent.RunHotShift &&
                     secondary.Intent != LastBearingFieldDeskIntent.RunHotShift,
+                    !model.IsDustFrontAcknowledgementRequired &&
+                    primary.Intent !=
+                        LastBearingFieldDeskIntent.RunWaterShift &&
+                    secondary.Intent !=
+                        LastBearingFieldDeskIntent.RunWaterShift,
                     !model.IsDustFrontAcknowledgementRequired &&
                     controller.CityNeedInspected),
                 Action(
@@ -500,6 +512,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.HotShiftRequiredTicks);
             Mix(ref hash, model.HotShiftCompletedCount);
             Mix(ref hash, model.IsHotShiftRunAvailable);
+            Mix(ref hash, model.ActiveServiceWorkOrder.GetHashCode());
+            Mix(ref hash, model.WaterShiftCompletedCount);
+            Mix(ref hash, model.IsWaterShiftRunAvailable);
+            Mix(ref hash, model.ServiceWorkOrderRouteFuelReserveUnits);
             Mix(ref hash, model.IsPreparationStalledByHotShift);
             Mix(ref hash, model.IsPreparationActivelyWorking);
             Mix(ref hash, model.IsHotShiftStalledByDustFront);
@@ -655,7 +671,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         : "OPEN EMERGENCY STORAGE · FACE DUST FRONT",
                     (model.DustFrontOutcome == DustFrontOutcome.Held
                         ? "HELD · Last Bearing kept the reserve above the recoverable line. Face the physical relay to resume settlement clocks."
-                        : "BREACHED · The failing turbine could not hold the dry line. Face the physical relay; Hot Shift stays stalled until turbine repair.") +
+                        : "BREACHED · The failing turbine could not hold the dry line. Face the physical relay; " +
+                          FormatActiveServiceOrderName(model) +
+                          " stays stalled until turbine repair.") +
                     (useFallback
                         ? " Physical relay unavailable; use the bounded fallback."
                         : string.Empty),
@@ -1101,6 +1119,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             LastBearingReadModel? model,
             bool serviceControlsVisible,
             bool allowSupplementalHotShift,
+            bool allowSupplementalWaterShift,
             bool allowEmergencyCistern)
         {
             if (model == null)
@@ -1134,22 +1153,35 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         model,
                         canDispatch)
                     : Hidden();
-            bool cisternOwnsSharedSlot =
+            bool cisternOwnsAdvanceSlot =
                 supplementalCistern.IsVisible &&
                 supplementalCistern.IsEnabled;
             LastBearingFieldDeskActionProjection supplementalHotShift =
                 allowSupplementalHotShift && !serviceControlsVisible
-                && !cisternOwnsSharedSlot
                     ? CreateHotShiftAction(controller, model, canDispatch)
                     : Hidden();
-            LastBearingFieldDeskActionProjection supplementalCityWork =
-                cisternOwnsSharedSlot
+            LastBearingFieldDeskActionProjection supplementalWaterShift =
+                allowSupplementalWaterShift && !serviceControlsVisible
+                    ? CreateWaterShiftAction(
+                        controller,
+                        model,
+                        canDispatch)
+                    : Hidden();
+            LastBearingFieldDeskActionProjection supplementalAdvance =
+                cisternOwnsAdvanceSlot
                     ? supplementalCistern
                     : supplementalHotShift.IsVisible
                         ? supplementalHotShift
                         : supplementalCistern;
+            LastBearingFieldDeskActionProjection overflowHotShift =
+                cisternOwnsAdvanceSlot &&
+                supplementalHotShift.IsVisible
+                    ? supplementalHotShift
+                    : Hidden();
             bool showSupplementalCityWork =
-                supplementalCityWork.IsVisible;
+                supplementalHotShift.IsVisible ||
+                supplementalWaterShift.IsVisible ||
+                supplementalCistern.IsVisible;
             bool surveyVisible =
                 serviceControlsVisible || showSupplementalCityWork;
             bool canUseService = serviceControlsVisible && canDispatch;
@@ -1157,13 +1189,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return new LastBearingFieldDeskSurveyProjection(
                 surveyVisible,
                 showSupplementalCityWork
-                    ? supplementalCityWork.Intent ==
-                        LastBearingFieldDeskIntent.OpenEmergencyCisternPump
-                        ? "EMERGENCY CISTERN · CITY WORK ORDER"
-                        : "HOT SHIFT · CITY WORK ORDER"
+                    ? "SERVICE CELL · CITY WORK ORDERS"
                     : FormatServiceCellState(model, controller),
                 showSupplementalCityWork
-                    ? supplementalCityWork.Detail
+                    ? "PARTS SHIFT: 1 FUEL · 120 TICKS · +2 PARTS · " +
+                      "ADDED WATER DRAW. WATER SHIFT: 1 FUEL · 120 TICKS · " +
+                      "GROSS +10.000 WATER · NO PARTS · ORDINARY CITY WATER " +
+                      "USE CONTINUES. ONE OPERATOR · ONE SERVICE SLOT."
                     : "COSTS: RECYCLER 2 · SHOP 3 · STORAGE 1 PART · " +
                       "MOVES FREE BEFORE LINK · " +
                       "LINK LOCKS PERMANENTLY FOR 1 PART · OPERATOR IS NEUTRAL · " +
@@ -1208,11 +1240,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     model,
                     canUseService,
                     serviceControlsVisible && hasPreview),
-                CreateConnectLinkAction(
-                    controller,
-                    model,
-                    canUseService,
-                    serviceControlsVisible),
+                serviceControlsVisible
+                    ? CreateConnectLinkAction(
+                        controller,
+                        model,
+                        canUseService,
+                        true)
+                    : supplementalWaterShift,
                 CreateStaffHumanAction(
                     controller,
                     model,
@@ -1225,17 +1259,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     canUseService,
                     serviceControlsVisible &&
                     model.Composition != ColonyComposition.HumanOnly),
-                showSupplementalCityWork
-                    ? supplementalCityWork
-                    : CreateAdvanceSledAction(
+                serviceControlsVisible
+                    ? CreateAdvanceSledAction(
                         controller,
                         model,
                         canUseService,
-                        serviceControlsVisible),
-                CreateCancelPreviewAction(
-                    controller,
-                    canUseService,
-                    serviceControlsVisible && hasPreview));
+                        true)
+                    : supplementalAdvance,
+                serviceControlsVisible
+                    ? CreateCancelPreviewAction(
+                        controller,
+                        canUseService,
+                        hasPreview)
+                    : overflowHotShift);
         }
 
         private static LastBearingFieldDeskActionProjection
@@ -1514,7 +1550,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 if (model.IsPreparationStalledByHotShift)
                 {
                     return
-                        "Settlement clocks are paused. Hot Shift still owns the single machine-shop service slot; Workshop Push preparation and the garage gauge remain frozen.";
+                        "Settlement clocks are paused. " +
+                        FormatActiveServiceOrderName(model) +
+                        " still owns the single machine-shop service slot; Workshop Push preparation and the garage gauge remain frozen.";
                 }
 
                 return model.PreparationChoice ==
@@ -1526,7 +1564,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (model.IsPreparationStalledByHotShift)
             {
                 return
-                    "Workshop Push is held. Hot Shift owns the single machine-shop service slot; preparation and the garage gauge are frozen.";
+                    "Workshop Push is held. " +
+                    FormatActiveServiceOrderName(model) +
+                    " owns the single machine-shop service slot; preparation and the garage gauge are frozen.";
             }
 
             if (model.IsPreparationActivelyWorking)
@@ -1609,12 +1649,20 @@ namespace AtomicLandPirate.Presentation.LastBearing
             string label;
             if (model.HotShiftPhase == HotShiftPhase.InProgress)
             {
-                label = model.IsHotShiftStalledByDustFront
+                label = model.ActiveServiceWorkOrder ==
+                        ServiceWorkOrder.WaterShift
+                    ? "PARTS SHIFT · WATER OWNS CELL"
+                    : model.IsHotShiftStalledByDustFront
                     ? "HOT SHIFT · FRONT-STALLED · " +
                       model.HotShiftElapsedTicks + " / " +
                       model.HotShiftRequiredTicks
-                    : "HOT SHIFT · " + model.HotShiftElapsedTicks + " / " +
-                      model.HotShiftRequiredTicks;
+                    : model.PauseCause != PauseCause.None
+                        ? "HOT SHIFT · PAUSED · " +
+                          model.HotShiftElapsedTicks + " / " +
+                          model.HotShiftRequiredTicks
+                        : "HOT SHIFT · " +
+                          model.HotShiftElapsedTicks + " / " +
+                          model.HotShiftRequiredTicks;
             }
             else
             {
@@ -1628,10 +1676,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             string detail;
-            if (model.IsHotShiftStalledByDustFront)
+            if (model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.WaterShift &&
+                model.HotShiftPhase == HotShiftPhase.InProgress)
+            {
+                detail =
+                    "Water Shift owns the operator, spindle, sled, and single machine-shop service slot. Parts Shift waits; the active order credits gross +10.000 water and no parts while ordinary city water use continues.";
+            }
+            else if (model.IsHotShiftStalledByDustFront)
             {
                 detail =
                     "The breached Dust Front stopped the 1-fuel, 120-tick, +2-part shift. Progress and its -0.010 water-per-tick draw stay held until turbine repair.";
+            }
+            else if (model.HotShiftPhase == HotShiftPhase.InProgress &&
+                     model.PauseCause != PauseCause.None)
+            {
+                detail =
+                    "Settlement clocks are paused. Parts Shift retains the operator and single machine-shop service slot; progress and its added water draw stay held until clocks resume.";
             }
             else if (model.IsPreparationStalledByHotShift)
             {
@@ -1641,17 +1702,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
             else if (model.HotShiftPhase == HotShiftPhase.InProgress)
             {
                 detail =
-                    "1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick. The operator, spindle, and sled are working.";
+                    "Parts Shift: 1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick. The operator, spindle, and sled are working.";
             }
             else if (model.PreparationChoice == PreparationChoice.CivicBuffer)
             {
                 detail =
-                    "1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick. Civic Buffer leaves the single machine-shop service slot available.";
+                    "Parts Shift: 1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick. Water Shift instead credits a gross +10.000 water and no parts for the same fuel and time; ordinary city water use continues. Civic Buffer leaves the single machine-shop service slot available.";
             }
             else
             {
                 detail =
-                    "1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick. Starting the shift takes the single machine-shop service slot and holds Workshop Push preparation until the shift releases it.";
+                    "Parts Shift: 1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick. Water Shift instead credits a gross +10.000 water and no parts for the same fuel and time; ordinary city water use continues. Starting either shift takes the single machine-shop service slot and holds Workshop Push preparation until it releases the slot.";
             }
 
             return Action(
@@ -1661,6 +1722,146 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 true,
                 canDispatch && controller.CanStartHotShift,
                 LastBearingFieldDeskActionTone.Signal);
+        }
+
+        private static LastBearingFieldDeskActionProjection
+            CreateWaterShiftAction(
+                LastBearingGameController controller,
+                LastBearingReadModel model,
+                bool canDispatch)
+        {
+            bool configuredAtHome =
+                model.ExpeditionPhase == ExpeditionPhase.AtHome &&
+                model.SliceInfrastructureActive &&
+                model.PreparationChoice != PreparationChoice.Unselected &&
+                model.PlannedModule != VehicleModule.None;
+            if (!configuredAtHome)
+            {
+                return Hidden();
+            }
+
+            bool isWaterShift =
+                model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.WaterShift;
+            long requiredFuel = checked(
+                model.WaterShiftFuelCostUnits
+                + model.ServiceWorkOrderRouteFuelReserveUnits);
+            string label;
+            if (!isWaterShift &&
+                model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.PartsShift &&
+                model.HotShiftPhase == HotShiftPhase.InProgress)
+            {
+                label = "WATER SHIFT · PARTS OWNS CELL";
+            }
+            else if (isWaterShift &&
+                model.HotShiftPhase == HotShiftPhase.InProgress)
+            {
+                label = model.IsHotShiftStalledByDustFront
+                    ? "WATER SHIFT · FRONT-STALLED · " +
+                      model.HotShiftElapsedTicks + " / " +
+                      model.HotShiftRequiredTicks
+                    : model.PauseCause != PauseCause.None
+                        ? "WATER SHIFT · PAUSED · " +
+                          model.HotShiftElapsedTicks + " / " +
+                          model.HotShiftRequiredTicks
+                        : "WATER SHIFT · " +
+                          model.HotShiftElapsedTicks +
+                          " / " + model.HotShiftRequiredTicks;
+            }
+            else
+            {
+                string verb = model.WaterShiftCompletedCount > 0
+                    ? "RUN ANOTHER WATER SHIFT"
+                    : "RUN WATER SHIFT";
+                label = verb + " · " +
+                    model.WaterShiftFuelCostUnits +
+                    " FUEL · " +
+                    LastBearingBalanceV1.HotShiftRequiredSettlementTicks +
+                    " TICKS · +" +
+                    FormatWaterOutput(model.WaterShiftOutputWaterMilli) +
+                    " WATER · NO PARTS";
+            }
+
+            string detail;
+            if (model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.PartsShift &&
+                model.HotShiftPhase == HotShiftPhase.InProgress)
+            {
+                detail =
+                    "Parts Shift owns the operator, spindle, sled, and single machine-shop service slot. Water Shift waits until that 1-fuel, 120-tick, +2-part order releases them.";
+            }
+            else if (model.IsHotShiftStalledByDustFront)
+            {
+                detail =
+                    "The breached Dust Front stopped the 1-fuel, 120-tick Water Shift and its gross +10.000-water output. Progress and reserved Emergency Storage headroom stay held until turbine repair.";
+            }
+            else if (isWaterShift &&
+                     model.PauseCause != PauseCause.None)
+            {
+                detail =
+                    "Settlement clocks are paused. Water Shift retains the operator, single service slot, and reserved Emergency Storage headroom; progress and ordinary settlement water use stay held until clocks resume.";
+            }
+            else if (isWaterShift &&
+                     model.IsPreparationStalledByHotShift)
+            {
+                detail =
+                    "Water Shift credits a gross +10.000 water and no parts after 120 settlement ticks; ordinary city water use continues while it runs. It owns the single machine-shop service slot, so Workshop Push and the garage gauge are held.";
+            }
+            else if (isWaterShift)
+            {
+                detail =
+                    "Water Shift credits a gross +10.000 water and no parts after 120 settlement ticks; ordinary city water use continues while it runs. The operator, spindle, sled, and reserved Emergency Storage headroom are working.";
+            }
+            else if (model.WaterMilli >
+                     model.WaterCapacityMilli -
+                     model.WaterShiftOutputWaterMilli)
+            {
+                detail =
+                    "The complete +10.000-water output will not fit. Water Shift never spills or accepts a partial order; use water or add capacity first.";
+            }
+            else if (model.FuelUnits < requiredFuel)
+            {
+                detail =
+                    "Water Shift needs " + requiredFuel +
+                    " fuel on hand: " +
+                    model.WaterShiftFuelCostUnits +
+                    " for the shift and " +
+                    model.ServiceWorkOrderRouteFuelReserveUnits +
+                    " reserved for Sasha's next route. Current fuel: " +
+                    model.FuelUnits + ".";
+            }
+            else if (model.ModuleInstallationState ==
+                     ModuleInstallationState.None)
+            {
+                detail =
+                    "Fit the planned rig module before committing the service cell. The shift will not spend Sasha's route reserve.";
+            }
+            else if (model.PreparationChoice ==
+                     PreparationChoice.CivicBuffer)
+            {
+                detail =
+                    "Water Shift spends 1 fuel and 120 settlement ticks for a gross +10.000 water and no parts; ordinary city water use continues. Parts Shift instead returns +2 parts while adding its water draw. Civic Buffer leaves the shared service slot available.";
+            }
+            else
+            {
+                detail =
+                    "Water Shift spends 1 fuel and 120 settlement ticks for a gross +10.000 water and no parts; ordinary city water use continues. Parts Shift instead returns +2 parts while adding its water draw. Starting either shift holds Workshop Push until the shared service slot is released.";
+            }
+
+            return Action(
+                LastBearingFieldDeskIntent.RunWaterShift,
+                label,
+                detail,
+                true,
+                canDispatch && controller.CanStartWaterShift,
+                LastBearingFieldDeskActionTone.Signal);
+        }
+
+        private static string FormatWaterOutput(long waterMilli)
+        {
+            return (waterMilli / 1000L) + "." +
+                (waterMilli % 1000L).ToString("000");
         }
 
         private static string FormatComposition(ColonyComposition composition)
@@ -1781,7 +1982,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (model.DustFrontOutcome == DustFrontOutcome.Breached)
             {
                 return model.IsHotShiftStalledByDustFront
-                    ? "DUST FRONT BREACHED · HOT SHIFT STALLED"
+                    ? "DUST FRONT BREACHED · " +
+                      FormatActiveServiceOrderName(model).ToUpperInvariant() +
+                      " STALLED"
                     : "DUST FRONT BREACHED · TURBINE RECOVERED";
             }
 
@@ -1796,6 +1999,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             return "PRESSURE · RESERVE FALLING";
+        }
+
+        private static string FormatActiveServiceOrderName(
+            LastBearingReadModel model)
+        {
+            return model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.WaterShift
+                ? "Water Shift"
+                : "Hot Shift";
         }
 
         private static bool IsServiceCellObjective(string objective)

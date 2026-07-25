@@ -980,6 +980,35 @@ dependency, or normal-PR performance soak.
 Detailed contract:
 `docs/playtests/WP-0002/VGR-24-RUN-THE-WRECK-LINE-AGAIN-CONTRACT.md`.
 
+## VGR-31 — Water Shift
+
+Status: implementation in progress on the post-VGR-30 V0 feature line.
+
+Scope:
+
+- Add one repeatable Water Shift beside the existing repeatable Parts Hot
+  Shift in the commissioned service cell.
+- Spend the same one fuel and 120 settlement ticks for exactly 10.000 water
+  instead of 2 reclaimed parts, while retaining the fitted route reserve and
+  any payable repeat-circuit toll.
+- Share the existing operator, service slot, clock, pause, Workshop Push
+  contention, and Dust Front safety-stop rules.
+- Reserve complete storage headroom at acceptance so Water Shift completes
+  exactly once without hidden clamping.
+- Keep one-shot water-tender aid and returned liquid cargo at their source when
+  the active reservation leaves no honest room for the transfer.
+- Persist only the active order and Water Shift completion count; migrate
+  schema 10 deterministically.
+- Expose the full parts-versus-water bargain at the Field Desk and physical
+  service cell for human-only, robot-only, and mixed colonies.
+
+Exclude: new buildings, resources, generalized jobs or recipes, population
+rules, market mechanics, faction/depot changes, scenes, packages, production
+assets, or normal-PR performance soak.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-31-WATER-SHIFT-CONTRACT.md`.
+
 ## Visual constitution
 
 - **Texas iron is the scale of work:** cast housings, plate steel, oilfield,

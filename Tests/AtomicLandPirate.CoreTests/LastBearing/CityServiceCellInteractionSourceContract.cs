@@ -64,7 +64,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(interactor, "keyboard?.rKey.wasPressedThisFrame");
             Require(interactor, "keyboard?.enterKey.wasPressedThisFrame");
             Require(interactor, "gamepad?.buttonSouth.wasPressedThisFrame");
-            Require(interactor, "FieldDesk?.OwnsKeyboardFocus != true");
+            Require(interactor, "bool fieldDeskOwnsKeyboard =");
+            Require(interactor, "FieldDesk?.OwnsKeyboardFocus == true;");
+            Require(interactor, "!fieldDeskOwnsKeyboard");
             Require(interactor, "BlocksWorldPointer(");
             Require(interactor, "ReferenceEquals(");
             Require(interactor, "private void OnDisable()");

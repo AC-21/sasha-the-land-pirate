@@ -39,6 +39,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             "SOCKET_CALIBRATION_SLED_DESTINATION";
         public const string HotShiftMachineControlName =
             "INTERACT_MACHINE_SHOP_HOT_SHIFT";
+        public const string WaterShiftMachineControlName =
+            "INTERACT_MACHINE_SHOP_WATER_SHIFT";
         public const string EmergencyCisternPumpControlName =
             "INTERACT_EMERGENCY_CISTERN_PUMP";
         public const string DustFrontRelayControlName =
@@ -95,6 +97,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private GameObject? _sledDestination;
         private GameObject? _hotShiftMachineControl;
         private TextMesh? _hotShiftMachineLabel;
+        private GameObject? _waterShiftMachineControl;
+        private TextMesh? _waterShiftMachineLabel;
         private GameObject? _emergencyCisternPumpControl;
         private GameObject? _emergencyCisternPumpLever;
         private GameObject? _emergencyCisternPumpFocusRail;
@@ -111,6 +115,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private bool _linkSourceSelected;
         private string? _selectedResidentId;
         private bool _hotShiftControlFocused;
+        private bool _waterShiftControlFocused;
         private bool _emergencyCisternPumpFocused;
         private bool _emergencyCisternPumpInputArmed;
         private bool _emergencyCisternPumpPresentationActive;
@@ -159,6 +164,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public string HotShiftMachineLabel =>
             _hotShiftMachineLabel?.text ?? string.Empty;
+
+        public bool IsWaterShiftControlFocused =>
+            _waterShiftControlFocused &&
+            _waterShiftMachineControl?.activeInHierarchy == true;
+
+        public bool IsWaterShiftControlVisible =>
+            _waterShiftMachineControl?.activeInHierarchy == true;
+
+        public string WaterShiftMachineLabel =>
+            _waterShiftMachineLabel?.text ?? string.Empty;
 
         public bool IsEmergencyCisternPumpControlVisible =>
             _emergencyCisternPumpControl?.activeInHierarchy == true &&
@@ -352,9 +367,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 InteractionKind.HotShiftMachineControl,
                 -1,
                 tungsten,
-                "CLOCK HOT SHIFT\nRETURN · GAMEPAD SOUTH");
+                "CLOCK HOT SHIFT\n1 · RETURN / D-PAD · SOUTH");
             _hotShiftMachineLabel =
                 _hotShiftMachineControl.GetComponentInChildren<TextMesh>();
+            _waterShiftMachineControl = CreateInteractionTarget(
+                WaterShiftMachineControlName,
+                Vector3.zero,
+                new Vector3(1.12f, 0.62f, 0.86f),
+                InteractionKind.WaterShiftMachineControl,
+                -1,
+                signal,
+                "CLOCK WATER SHIFT\n2 · RETURN / D-PAD · SOUTH");
+            _waterShiftMachineLabel =
+                _waterShiftMachineControl.GetComponentInChildren<TextMesh>();
             _emergencyCisternPumpControl = CreateInvisibleInteractionTarget(
                 EmergencyCisternPumpControlName,
                 Vector3.zero,
@@ -510,12 +535,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (!ShouldShowHotShiftControl(model))
             {
                 _hotShiftControlFocused = false;
+                _waterShiftControlFocused = false;
             }
             else if (!_hotShiftControlFocused &&
+                     !_waterShiftControlFocused &&
                      !_emergencyCisternPumpFocused &&
                      !_dustFrontRelayFocused)
             {
-                _hotShiftControlFocused = true;
+                _waterShiftControlFocused =
+                    model.ActiveServiceWorkOrder ==
+                        ServiceWorkOrder.WaterShift;
+                _hotShiftControlFocused =
+                    !_waterShiftControlFocused;
             }
 
             bool interactionTargetMoved = PositionServiceSockets(model);
@@ -546,6 +577,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _linkSourceSelected = false;
             _selectedResidentId = null;
             _hotShiftControlFocused = false;
+            _waterShiftControlFocused = false;
             ResetEmergencyCisternPumpFocus();
             ResetDustFrontRelayFocus();
             SetFeedback(
@@ -925,6 +957,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             _hotShiftControlFocused = true;
+            _waterShiftControlFocused = false;
             ResetEmergencyCisternPumpFocus();
             ResetDustFrontRelayFocus();
             SetFeedback(HotShiftFeedback(_model), rejected: false);
@@ -977,6 +1010,73 @@ namespace AtomicLandPirate.Presentation.LastBearing
             RefreshInteractionVisuals();
         }
 
+        public void FocusWaterShiftControl()
+        {
+            if (!IsInteractionActive() ||
+                _model == null ||
+                !ShouldShowHotShiftControl(_model))
+            {
+                _waterShiftControlFocused = false;
+                Reject("WATER SHIFT CONTROL UNAVAILABLE");
+                RefreshInteractionVisuals();
+                return;
+            }
+
+            _waterShiftControlFocused = true;
+            _hotShiftControlFocused = false;
+            ResetEmergencyCisternPumpFocus();
+            ResetDustFrontRelayFocus();
+            SetFeedback(WaterShiftFeedback(_model), rejected: false);
+            RefreshInteractionVisuals();
+        }
+
+        public void ClickWaterShiftControl()
+        {
+            if (!RequireCityOverview() ||
+                _model == null ||
+                !ShouldShowHotShiftControl(_model))
+            {
+                Reject("WATER SHIFT CONTROL UNAVAILABLE");
+                return;
+            }
+
+            _waterShiftControlFocused = true;
+            _hotShiftControlFocused = false;
+            ResetEmergencyCisternPumpFocus();
+            ResetDustFrontRelayFocus();
+            if (_controller!.HasPendingPlayerCommands)
+            {
+                SetFeedback(
+                    _controller.IsWaterShiftStartQueued
+                        ? "WATER SHIFT ALREADY QUEUED · storage unchanged until the city tick"
+                        : "ACTION QUEUED · let the city record it first",
+                    rejected: !_controller.IsWaterShiftStartQueued);
+                RefreshInteractionVisuals();
+                return;
+            }
+
+            if (!_controller.CanStartWaterShift)
+            {
+                _controller.StartWaterShift();
+                Reject(_controller.Status);
+                RefreshInteractionVisuals();
+                return;
+            }
+
+            _controller.StartWaterShift();
+            if (!_controller.IsWaterShiftStartQueued)
+            {
+                Reject(_controller.Status);
+                RefreshInteractionVisuals();
+                return;
+            }
+
+            SetFeedback(
+                "WATER SHIFT QUEUED · 1 fuel · 120 ticks · gross +10.000 water · no parts · ordinary water use continues",
+                rejected: false);
+            RefreshInteractionVisuals();
+        }
+
         public void FocusEmergencyCisternPump()
         {
             if (!IsInteractionActive() ||
@@ -991,6 +1091,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _emergencyCisternPumpFocused = true;
             _hotShiftControlFocused = false;
+            _waterShiftControlFocused = false;
             ResetDustFrontRelayFocus();
             _emergencyCisternPumpInputArmed = false;
             _emergencyCisternPumpPresentationActive = true;
@@ -1019,6 +1120,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _dustFrontRelayFocused = true;
             _hotShiftControlFocused = false;
+            _waterShiftControlFocused = false;
             ResetEmergencyCisternPumpFocus();
             _dustFrontRelayInputArmed = false;
             _dustFrontRelayPresentationActive = true;
@@ -1178,6 +1280,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _linkSourceSelected ||
                     _selectedResidentId != null ||
                     _hotShiftControlFocused ||
+                    _waterShiftControlFocused ||
                     _emergencyCisternPumpFocused ||
                     _emergencyCisternPumpPresentationActive ||
                     _dustFrontRelayFocused ||
@@ -1197,6 +1300,30 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             var gamepad = Gamepad.current;
             var mouse = Mouse.current;
+            bool fieldDeskOwnsKeyboard =
+                _controller?.FieldDesk?.OwnsKeyboardFocus == true;
+            bool selectPartsShift =
+                keyboard?.digit1Key.wasPressedThisFrame == true ||
+                gamepad?.dpad.left.wasPressedThisFrame == true;
+            bool selectWaterShift =
+                keyboard?.digit2Key.wasPressedThisFrame == true ||
+                gamepad?.dpad.right.wasPressedThisFrame == true;
+            if (!fieldDeskOwnsKeyboard &&
+                _model != null &&
+                ShouldShowHotShiftControl(_model) &&
+                !_emergencyCisternPumpFocused &&
+                !_dustFrontRelayFocused)
+            {
+                if (selectPartsShift)
+                {
+                    FocusHotShiftControl();
+                }
+                else if (selectWaterShift)
+                {
+                    FocusWaterShiftControl();
+                }
+            }
+
             UpdateEmergencyCisternPumpInputArming(
                 keyboard,
                 gamepad,
@@ -1214,23 +1341,30 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool operateHotShift =
                 keyboard?.enterKey.wasPressedThisFrame == true ||
                 gamepad?.buttonSouth.wasPressedThisFrame == true;
+            bool operateWaterShift = operateHotShift;
             if (operateDustFrontRelay &&
                 IsDustFrontRelayFocused &&
-                _controller?.FieldDesk?.OwnsKeyboardFocus != true)
+                !fieldDeskOwnsKeyboard)
             {
                 ClickDustFrontRelay();
             }
             else if (operateEmergencyCisternPump &&
                 IsEmergencyCisternPumpFocused &&
-                _controller?.FieldDesk?.OwnsKeyboardFocus != true)
+                !fieldDeskOwnsKeyboard)
             {
                 ClickEmergencyCisternPump();
             }
             else if (operateHotShift &&
                 IsHotShiftControlFocused &&
-                _controller?.FieldDesk?.OwnsKeyboardFocus != true)
+                !fieldDeskOwnsKeyboard)
             {
                 ClickHotShiftControl();
+            }
+            else if (operateWaterShift &&
+                IsWaterShiftControlFocused &&
+                !fieldDeskOwnsKeyboard)
+            {
+                ClickWaterShiftControl();
             }
 
             if (mouse != null &&
@@ -1344,6 +1478,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 case InteractionKind.HotShiftMachineControl:
                     FocusHotShiftControl();
                     ClickHotShiftControl();
+                    break;
+                case InteractionKind.WaterShiftMachineControl:
+                    FocusWaterShiftControl();
+                    ClickWaterShiftControl();
                     break;
                 case InteractionKind.EmergencyCisternPumpControl:
                     if (_model != null &&
@@ -1552,12 +1690,30 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 Vector3 position =
                     PadPositions[model.MachineShopPadIndex] +
                     RotateOffset(
-                        new Vector3(0f, 0f, -0.82f),
+                        new Vector3(-0.62f, 0f, -0.82f),
                         model.MachineShopQuarterTurns);
                 moved |= SetLocalPositionIfChanged(
                     _hotShiftMachineControl,
                     WithHeight(position, 0.58f));
                 _hotShiftMachineControl.transform.localRotation =
+                    Quaternion.Euler(
+                        0f,
+                        model.MachineShopQuarterTurns * 90f,
+                        0f);
+            }
+
+            if (_waterShiftMachineControl != null &&
+                IsValidPad(model.MachineShopPadIndex))
+            {
+                Vector3 position =
+                    PadPositions[model.MachineShopPadIndex] +
+                    RotateOffset(
+                        new Vector3(0.62f, 0f, -0.82f),
+                        model.MachineShopQuarterTurns);
+                moved |= SetLocalPositionIfChanged(
+                    _waterShiftMachineControl,
+                    WithHeight(position, 0.58f));
+                _waterShiftMachineControl.transform.localRotation =
                     Quaternion.Euler(
                         0f,
                         model.MachineShopQuarterTurns * 90f,
@@ -1680,6 +1836,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _hotShiftMachineControl,
                 showHotShiftControl);
             SetActive(
+                _waterShiftMachineControl,
+                showHotShiftControl);
+            SetActive(
                 _emergencyCisternPumpControl,
                 showSharedEmergencyControl);
             SetActive(_dryLineGauge, showDryLineGauge);
@@ -1717,6 +1876,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _hotShiftMachineControl,
                 showHotShiftControl && _hotShiftControlFocused);
             ScaleSelection(
+                _waterShiftMachineControl,
+                showHotShiftControl && _waterShiftControlFocused);
+            ScaleSelection(
                 _emergencyCisternPumpControl,
                 (showEmergencyCisternPumpControl &&
                  _emergencyCisternPumpFocused) ||
@@ -1747,6 +1909,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _hotShiftMachineLabel.color =
                     _model.IsHotShiftStalledByDustFront ||
                     _model.IsPreparationStalledByHotShift
+                        ? new Color32(255, 154, 102, 255)
+                        : new Color32(238, 221, 178, 255);
+            }
+
+            if (_waterShiftMachineLabel != null && _model != null)
+            {
+                string label = WaterShiftControlLabel(_model);
+                if (_waterShiftMachineLabel.text != label)
+                {
+                    _waterShiftMachineLabel.text = label;
+                }
+
+                _waterShiftMachineLabel.color =
+                    _model.IsHotShiftStalledByDustFront ||
+                    _model.IsPreparationStalledByHotShift ||
+                    !_model.IsWaterShiftRunAvailable &&
+                    _model.HotShiftPhase == HotShiftPhase.Idle
                         ? new Color32(255, 154, 102, 255)
                         : new Color32(238, 221, 178, 255);
             }
@@ -2168,6 +2347,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private static string HotShiftControlLabel(
             LastBearingReadModel model)
         {
+            if (model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.WaterShift &&
+                model.HotShiftPhase == HotShiftPhase.InProgress)
+            {
+                return "PARTS SHIFT WAITS\nWATER OWNS CELL";
+            }
+
             if (model.IsHotShiftStalledByDustFront)
             {
                 return "DUST FRONT STOP\nSHUTTER DOWN";
@@ -2189,13 +2375,74 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             return model.HotShiftCompletedCount > 0
-                ? "CLOCK ANOTHER HOT SHIFT\nRETURN · GAMEPAD SOUTH"
-                : "CLOCK HOT SHIFT\nRETURN · GAMEPAD SOUTH";
+                ? "CLOCK ANOTHER HOT SHIFT\n1 · RETURN / D-PAD · SOUTH"
+                : "CLOCK HOT SHIFT\n1 · RETURN / D-PAD · SOUTH";
+        }
+
+        private static string WaterShiftControlLabel(
+            LastBearingReadModel model)
+        {
+            if (model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.PartsShift &&
+                model.HotShiftPhase == HotShiftPhase.InProgress)
+            {
+                return "WATER SHIFT WAITS\nPARTS OWNS CELL";
+            }
+
+            if (model.IsHotShiftStalledByDustFront)
+            {
+                return "WATER SHIFT STOP\nSHUTTER DOWN";
+            }
+
+            if (model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.WaterShift &&
+                model.HotShiftPhase == HotShiftPhase.InProgress &&
+                model.PauseCause != PauseCause.None)
+            {
+                return model.IsPreparationStalledByHotShift
+                    ? "WATER SHIFT PAUSED\nGARAGE GAUGE HELD"
+                    : "WATER SHIFT PAUSED\nCITY CLOCK HELD";
+            }
+
+            if (model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.WaterShift &&
+                model.IsHotShiftActivelyWorking)
+            {
+                return model.IsPreparationStalledByHotShift
+                    ? "WATER SHIFT RUNNING\nGARAGE GAUGE HELD"
+                    : "WATER SHIFT RUNNING\nSPINDLE + SLED";
+            }
+
+            if (!model.IsWaterShiftRunAvailable)
+            {
+                if (!WaterShiftHasHeadroom(model))
+                {
+                    return "WATER SHIFT BLOCKED\nNEEDS 10.000 HEADROOM";
+                }
+
+                if (!WaterShiftHasFuelReserve(model))
+                {
+                    return "WATER SHIFT BLOCKED\nROUTE FUEL RESERVED";
+                }
+
+                return "WATER SHIFT BLOCKED\nFIT RIG PLAN";
+            }
+
+            return model.WaterShiftCompletedCount > 0
+                ? "CLOCK ANOTHER WATER SHIFT\n2 · RETURN / D-PAD · SOUTH"
+                : "CLOCK WATER SHIFT\n2 · RETURN / D-PAD · SOUTH";
         }
 
         private static string HotShiftFeedback(
             LastBearingReadModel model)
         {
+            if (model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.WaterShift &&
+                model.HotShiftPhase == HotShiftPhase.InProgress)
+            {
+                return "PARTS SHIFT WAITS · Water Shift owns the operator, spindle, sled, and service slot";
+            }
+
             if (model.IsHotShiftStalledByDustFront)
             {
                 return "DUST FRONT STOP · resident present · safety shutter down";
@@ -2219,6 +2466,87 @@ namespace AtomicLandPirate.Presentation.LastBearing
             return model.HotShiftCompletedCount > 0
                 ? "SHIFT COMPLETE · two-notch output witness · clock another?"
                 : "CLOCK HOT SHIFT · 1 fuel · 120 ticks · +2 parts";
+        }
+
+        private static string WaterShiftFeedback(
+            LastBearingReadModel model)
+        {
+            if (model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.PartsShift &&
+                model.HotShiftPhase == HotShiftPhase.InProgress)
+            {
+                return "WATER SHIFT WAITS · Parts Shift owns the operator, spindle, sled, and service slot";
+            }
+
+            if (model.IsHotShiftStalledByDustFront)
+            {
+                return "WATER SHIFT STOP · resident present · safety shutter down";
+            }
+
+            if (model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.WaterShift &&
+                model.HotShiftPhase == HotShiftPhase.InProgress &&
+                model.PauseCause != PauseCause.None)
+            {
+                return model.IsPreparationStalledByHotShift
+                    ? "WATER SHIFT PAUSED · single service slot held · garage gauge frozen"
+                    : "WATER SHIFT PAUSED · city clock held · machinery stopped";
+            }
+
+            if (model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.WaterShift &&
+                model.IsHotShiftActivelyWorking)
+            {
+                return model.IsPreparationStalledByHotShift
+                    ? "WATER SHIFT RUNNING · gross +10.000 output · Workshop Push held"
+                    : "WATER SHIFT RUNNING · gross +10.000 output · ordinary city water use continues";
+            }
+
+            if (!model.IsWaterShiftRunAvailable)
+            {
+                if (!WaterShiftHasHeadroom(model))
+                {
+                    return "WATER SHIFT BLOCKED · the full 10.000-water output will not fit · use water or add capacity";
+                }
+
+                if (!WaterShiftHasFuelReserve(model))
+                {
+                    long requiredFuel = checked(
+                        model.WaterShiftFuelCostUnits
+                        + model.ServiceWorkOrderRouteFuelReserveUnits);
+                    return "WATER SHIFT BLOCKED · needs " +
+                        requiredFuel + " fuel on hand: " +
+                        model.WaterShiftFuelCostUnits +
+                        " for the shift + " +
+                        model.ServiceWorkOrderRouteFuelReserveUnits +
+                        " reserved for Sasha's route · current " +
+                        model.FuelUnits;
+                }
+
+                return "WATER SHIFT BLOCKED · finish fitting Sasha's planned rig module";
+            }
+
+            return model.WaterShiftCompletedCount > 0
+                ? "WATER SHIFT COMPLETE · storage witness lit · clock another?"
+                : "CLOCK WATER SHIFT · 1 fuel · 120 ticks · gross +10.000 water · no parts";
+        }
+
+        private static bool WaterShiftHasHeadroom(
+            LastBearingReadModel model)
+        {
+            return model.WaterMilli
+                <= checked(
+                    model.WaterCapacityMilli
+                    - model.WaterShiftOutputWaterMilli);
+        }
+
+        private static bool WaterShiftHasFuelReserve(
+            LastBearingReadModel model)
+        {
+            return model.FuelUnits
+                >= checked(
+                    model.WaterShiftFuelCostUnits
+                    + model.ServiceWorkOrderRouteFuelReserveUnits);
         }
 
         private static Vector3 RotateOffset(
@@ -2306,6 +2634,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Sled,
             SledDestination,
             HotShiftMachineControl,
+            WaterShiftMachineControl,
             EmergencyCisternPumpControl,
         }
     }

@@ -44,6 +44,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 HotShiftRequiredTicks = 0,
                 HotShiftFuelCommittedUnits = 0,
                 HotShiftCompletedCount = 0,
+                ActiveServiceWorkOrder = ServiceWorkOrder.None,
+                WaterShiftCompletedCount = 0,
                 EmergencyCisternCharged = false,
 
                 WaterMilli = LastBearingBalanceV1.StartingWaterMilli,

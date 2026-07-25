@@ -46,6 +46,7 @@ namespace AtomicLandPirate.LastBearingTests
             RigUpgradeTests.Run(harness, repoRoot);
             FrameRailSalvageTests.RunSave(harness, repoRoot);
             HotShiftTests.RunSave(harness, repoRoot);
+            WaterShiftTests.Run(harness, repoRoot);
             DustFrontVerdictTests.Run(harness);
             EmergencyCisternTests.Run(harness);
             ServiceScoutTests.Run(harness);
@@ -128,6 +129,10 @@ namespace AtomicLandPirate.LastBearingTests
                 case "v0-hot-shift":
                     HotShiftTests.RunCore(harness);
                     HotShiftTests.RunSave(harness, repoRoot);
+                    break;
+                case "v0-water-shift":
+                case "vgr31-water-shift":
+                    WaterShiftTests.Run(harness, repoRoot);
                     break;
                 case "v0-dust-front-verdict":
                     DustFrontVerdictTests.Run(harness);

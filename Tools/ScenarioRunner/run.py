@@ -34,6 +34,7 @@ NAMED_TESTS = frozenset(
         "vgr25-returned-rail-chassis-brace",
         "vgr26-road-safe-line",
         "vgr27-one-pair-of-hands",
+        "vgr31-water-shift",
         "v0-hands-on-service-cell",
     }
 )

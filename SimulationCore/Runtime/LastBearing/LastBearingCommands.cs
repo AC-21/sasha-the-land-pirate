@@ -159,6 +159,25 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long ExpectedCompletedCount { get; }
     }
 
+    public sealed class RunWaterShiftCommand : LastBearingCommand
+    {
+        public RunWaterShiftCommand(
+            long sequence,
+            long expectedCompletedCount)
+            : base(sequence)
+        {
+            if (expectedCompletedCount < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(expectedCompletedCount));
+            }
+
+            ExpectedCompletedCount = expectedCompletedCount;
+        }
+
+        public long ExpectedCompletedCount { get; }
+    }
+
     public sealed class PumpEmergencyCisternCommand : LastBearingCommand
     {
         public PumpEmergencyCisternCommand(long sequence)

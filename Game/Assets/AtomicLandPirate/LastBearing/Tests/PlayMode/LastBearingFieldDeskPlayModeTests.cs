@@ -693,6 +693,55 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator WaterShiftDeskDispatchesExactlyOneNamedOrder()
+        {
+            LastBearingGameController controller = BuildController();
+            LastBearingFieldDesk desk = RequireDesk(controller);
+            CompleteWorkingServiceCell(controller);
+            controller.BeginGaragePlan(PreparationChoice.CivicBuffer);
+            controller.CommitGaragePlan(VehicleModule.SealedRangeTank);
+            InvokeSimulationTick(controller);
+            controller.ShowCityOverview();
+            yield return null;
+            desk.Refresh(force: true);
+
+            LastBearingFieldDeskProjection projection =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                projection.Survey.ConnectLink.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.RunWaterShift));
+            Button action = RequireDocument(controller)
+                .rootVisualElement.Q<Button>("record-clear-button");
+            Assert.That(
+                action.style.display.value,
+                Is.EqualTo(DisplayStyle.Flex));
+            Assert.That(
+                action.text,
+                Is.EqualTo(
+                    "RUN WATER SHIFT · 1 FUEL · 120 TICKS · +10.000 WATER · NO PARTS"));
+            Assert.That(action.enabledSelf, Is.True);
+
+            string hashBefore = controller.CanonicalHash;
+            long fuelBefore = controller.ReadModel!.FuelUnits;
+            long waterBefore = controller.ReadModel.WaterMilli;
+            Submit(action);
+            Submit(action);
+
+            List<LastBearingCommand> pending =
+                PendingCommands(controller);
+            Assert.That(pending, Has.Count.EqualTo(1));
+            Assert.That(pending[0], Is.TypeOf<RunWaterShiftCommand>());
+            Assert.That(
+                ((RunWaterShiftCommand)pending[0]).ExpectedCompletedCount,
+                Is.EqualTo(
+                    controller.ReadModel.WaterShiftCompletedCount));
+            Assert.That(controller.IsWaterShiftStartQueued, Is.True);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBefore));
+            Assert.That(controller.ReadModel.FuelUnits, Is.EqualTo(fuelBefore));
+            Assert.That(controller.ReadModel.WaterMilli, Is.EqualTo(waterBefore));
+        }
+
+        [UnityTest]
         public IEnumerator HotShiftHoldsWorkshopPushThenPreparationResumesAndAutosaves()
         {
             LastBearingGameController controller = BuildController();
@@ -1806,6 +1855,20 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(pending, Is.Not.Null);
             pending!.Clear();
             InvokeApplyPresentation(controller);
+        }
+
+        private static List<LastBearingCommand> PendingCommands(
+            LastBearingGameController controller)
+        {
+            FieldInfo? field =
+                typeof(LastBearingGameController).GetField(
+                    "_pendingCommands",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(field, Is.Not.Null);
+            var pending =
+                field!.GetValue(controller) as List<LastBearingCommand>;
+            Assert.That(pending, Is.Not.Null);
+            return pending!;
         }
 
         private static LastBearingFieldDesk RequireDesk(

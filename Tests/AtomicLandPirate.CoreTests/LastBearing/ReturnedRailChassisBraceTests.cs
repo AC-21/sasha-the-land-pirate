@@ -32,8 +32,8 @@ namespace AtomicLandPirate.LastBearingTests
                 "returned-rail brace protects both routes for every roster",
                 BothModulesAndAllRostersShareExactProtection);
             harness.Run(
-                "returned-rail brace migrates schema 9 and round trips schema 10",
-                SchemaNineMigrationAndSchemaTenRoundTrip);
+                "returned-rail brace migrates schema 9 and round trips schema 11",
+                SchemaNineMigrationAndSchemaElevenRoundTrip);
         }
 
         internal static CoreTestDriver CreateInstalledBraceRepeatReady(
@@ -430,7 +430,7 @@ namespace AtomicLandPirate.LastBearingTests
             }
         }
 
-        private static void SchemaNineMigrationAndSchemaTenRoundTrip()
+        private static void SchemaNineMigrationAndSchemaElevenRoundTrip()
         {
             CoreTestDriver current = ReachInstallReady(
                 ColonyComposition.Mixed,
@@ -439,31 +439,31 @@ namespace AtomicLandPirate.LastBearingTests
             current.Apply(sequence =>
                 new InstallReturnedRailChassisBraceCommand(sequence));
             TestHarness.Equal(
-                10,
+                11,
                 current.State.SchemaVersion,
-                "schema 10 installed state");
+                "schema 11 installed state");
             byte[] canonical = LastBearingCanonicalCodec.Encode(current.State);
             TestHarness.Equal(
-                "c7080397145292bce5bd4155ace03f98d3844ede4935bea993c8e76ce7fb25d8",
+                "420d3f3ab25dc138860398fba8f2770c28bef04e1420f5dd621210a6eedabc2b",
                 ComputeSha256(canonical),
-                "schema 10 installed golden digest");
+                "schema 11 installed golden digest");
             LastBearingDecodeResult restored =
                 LastBearingCanonicalCodec.TryDecode(canonical);
             TestHarness.True(
                 restored.Succeeded && restored.State != null,
-                "schema 10 brace decode");
+                "schema 11 brace decode");
             TestHarness.True(
                 restored.State!.ReturnedRailChassisBraceInstalled,
-                "schema 10 brace flag");
+                "schema 11 brace flag");
             TestHarness.True(
                 canonical.SequenceEqual(
                     LastBearingCanonicalCodec.Encode(restored.State)),
-                "schema 10 canonical golden round trip");
+                "schema 11 canonical golden round trip");
             TestHarness.Equal(
                 current.View.ProjectedRoundTripConditionLossMilli,
                 LastBearingReadModel.FromState(restored.State)
                     .ProjectedRoundTripConditionLossMilli,
-                "schema 10 restored route protection");
+                "schema 11 restored route protection");
 
             LastBearingState legacySource =
                 new LastBearingStateBuilder(
@@ -492,7 +492,7 @@ namespace AtomicLandPirate.LastBearingTests
                     && second.State != null,
                 "schema 9 brace migration decode");
             TestHarness.Equal(
-                10,
+                11,
                 first.State!.SchemaVersion,
                 "schema 9 migrated schema");
             TestHarness.True(

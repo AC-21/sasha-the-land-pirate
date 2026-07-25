@@ -849,7 +849,7 @@ namespace AtomicLandPirate.LastBearingTests
             return driver;
         }
 
-        private static CoreTestDriver ReachAdverseRepeatReady(
+        internal static CoreTestDriver ReachAdverseRepeatReady(
             int worldSeed)
         {
             CoreTestDriver driver = ReachRepairedReturn(
