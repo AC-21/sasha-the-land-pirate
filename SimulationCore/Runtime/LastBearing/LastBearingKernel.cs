@@ -3854,9 +3854,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
                         "LAST_BEARING_TURBINE_CONDITION_INVALID");
             }
 
+            long preparationWaterModifier =
+                hotShiftActivelyWorking
+                    && builder.PreparationPhase
+                        == PreparationPhase.Preparing
+                    && builder.PreparationChoice
+                        == PreparationChoice.WorkshopPush
+                ? 0
+                : builder.ActiveWaterModifierMilliPerSettlementTick;
             return checked(
                 baseRate
-                + builder.ActiveWaterModifierMilliPerSettlementTick
+                + preparationWaterModifier
                 + (hotShiftActivelyWorking
                     ? LastBearingBalanceV1
                         .HotShiftWaterModifierMilliPerSettlementTick

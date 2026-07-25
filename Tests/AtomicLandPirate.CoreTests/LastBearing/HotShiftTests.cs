@@ -217,6 +217,8 @@ namespace AtomicLandPirate.LastBearingTests
                 2602);
             long workshopPreparationBeforeStart =
                 workshop.State.PreparationElapsedTicks;
+            long workshopWaterBeforeStart =
+                workshop.State.WaterMilli;
             workshop.Apply(sequence =>
                 new RunHotShiftCommand(sequence, 0));
             TestHarness.True(
@@ -240,9 +242,15 @@ namespace AtomicLandPirate.LastBearingTests
                 workshop.State.PreparationElapsedTicks,
                 "Hot Shift start step stole preparation's owned tick");
             TestHarness.Equal(
-                LastBearingBalanceV1.FailingWaterRateMilliPerSettlementTick
+                workshopWaterBeforeStart
                     + LastBearingBalanceV1
-                        .WorkshopWaterModifierMilliPerSettlementTick
+                        .FailingWaterRateMilliPerSettlementTick
+                    + LastBearingBalanceV1
+                        .WorkshopWaterModifierMilliPerSettlementTick,
+                workshop.State.WaterMilli,
+                "Hot Shift start step water");
+            TestHarness.Equal(
+                LastBearingBalanceV1.FailingWaterRateMilliPerSettlementTick
                     + LastBearingBalanceV1
                         .HotShiftWaterModifierMilliPerSettlementTick,
                 workshop.View.WaterTrendMilliPerSettlementTick,
@@ -262,7 +270,10 @@ namespace AtomicLandPirate.LastBearingTests
                 "Hot Shift did not advance after start");
             TestHarness.Equal(
                 waterAtPreemption
-                    + workshop.View.WaterTrendMilliPerSettlementTick,
+                    + LastBearingBalanceV1
+                        .FailingWaterRateMilliPerSettlementTick
+                    + LastBearingBalanceV1
+                        .HotShiftWaterModifierMilliPerSettlementTick,
                 workshop.State.WaterMilli,
                 "preempting water draw");
 
@@ -517,7 +528,16 @@ namespace AtomicLandPirate.LastBearingTests
                 2615);
             paused.Apply(sequence =>
                 new RunHotShiftCommand(sequence, 0));
+            long waterBeforeHeldTick = paused.State.WaterMilli;
             paused.Advance(1);
+            TestHarness.Equal(
+                waterBeforeHeldTick
+                    + LastBearingBalanceV1
+                        .FailingWaterRateMilliPerSettlementTick
+                    + LastBearingBalanceV1
+                        .HotShiftWaterModifierMilliPerSettlementTick,
+                paused.State.WaterMilli,
+                "held Workshop Push water");
             long preparationBeforePause =
                 paused.State.PreparationElapsedTicks;
             long hotShiftBeforePause =
@@ -557,8 +577,6 @@ namespace AtomicLandPirate.LastBearingTests
                 waterBeforePause
                     + LastBearingBalanceV1
                         .FailingWaterRateMilliPerSettlementTick
-                    + LastBearingBalanceV1
-                        .WorkshopWaterModifierMilliPerSettlementTick
                     + LastBearingBalanceV1
                         .HotShiftWaterModifierMilliPerSettlementTick,
                 paused.State.WaterMilli,
