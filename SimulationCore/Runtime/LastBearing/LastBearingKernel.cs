@@ -3359,6 +3359,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 hotShiftWasInProgressAtTickStart
                 && builder.HotShiftPhase == HotShiftPhase.InProgress
                 && IsHotShiftActivelyWorking(builder);
+            bool preparationWorkingThisTick =
+                builder.PreparationPhase == PreparationPhase.Preparing
+                && !(builder.PreparationChoice
+                        == PreparationChoice.WorkshopPush
+                    && hotShiftWorkingThisTick);
             var previousWater = builder.WaterMilli;
             builder.WaterMilli = Math.Max(
                 0,
@@ -3384,7 +3389,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     builder.WaterMilli);
             }
 
-            if (builder.PreparationPhase == PreparationPhase.Preparing)
+            if (preparationWorkingThisTick)
             {
                 builder.PreparationElapsedTicks = checked(
                     builder.PreparationElapsedTicks + 1);
@@ -3864,7 +3869,6 @@ namespace AtomicLandPirate.Simulation.LastBearing
             LastBearingStateBuilder builder)
         {
             return builder.HotShiftPhase == HotShiftPhase.InProgress
-                && builder.WorkshopServiceSlotsReserved == 0
                 && !(builder.DustFrontOutcome == DustFrontOutcome.Breached
                     && builder.TurbineCondition
                         == TurbineCondition.Failing);

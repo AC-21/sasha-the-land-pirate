@@ -63,15 +63,21 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 LastBearingBalanceV1.EmergencyCisternWaterMilli;
             IsEmergencyCisternPumpAvailable =
                 ComputeEmergencyCisternPumpAvailable(state);
-            IsHotShiftStalledByWorkshopPush =
-                state.HotShiftPhase == HotShiftPhase.InProgress
-                && state.WorkshopServiceSlotsReserved > 0;
+            // Kept for source compatibility; Hot Shift now preempts Workshop Push.
+            IsHotShiftStalledByWorkshopPush = false;
             IsHotShiftStalledByDustFront =
                 IsHotShiftBlockedByDustFront(state);
             IsHotShiftActivelyWorking =
                 state.HotShiftPhase == HotShiftPhase.InProgress
-                && state.WorkshopServiceSlotsReserved == 0
                 && !IsHotShiftStalledByDustFront;
+            IsPreparationStalledByHotShift =
+                state.PreparationPhase == PreparationPhase.Preparing
+                && state.PreparationChoice == PreparationChoice.WorkshopPush
+                && IsHotShiftActivelyWorking;
+            IsPreparationActivelyWorking =
+                state.PauseCause == PauseCause.None
+                && state.PreparationPhase == PreparationPhase.Preparing
+                && !IsPreparationStalledByHotShift;
             WaterMilli = state.WaterMilli;
             WaterCapacityMilli =
                 LastBearingBalanceV1.EffectiveWaterCapacityMilli(
@@ -288,6 +294,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public bool IsHotShiftStalledByWorkshopPush { get; private set; }
         public bool IsHotShiftStalledByDustFront { get; private set; }
         public bool IsHotShiftActivelyWorking { get; private set; }
+        public bool IsPreparationStalledByHotShift { get; private set; }
+        public bool IsPreparationActivelyWorking { get; private set; }
         public bool EmergencyCisternCharged { get; private set; }
         public long EmergencyCisternFuelCostUnits { get; private set; }
         public long EmergencyCisternWaterMilli { get; private set; }
@@ -455,7 +463,6 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 baseRate
                 + state.ActiveWaterModifierMilliPerSettlementTick
                 + (state.HotShiftPhase == HotShiftPhase.InProgress
-                        && state.WorkshopServiceSlotsReserved == 0
                         && !IsHotShiftBlockedByDustFront(state)
                     ? LastBearingBalanceV1
                         .HotShiftWaterModifierMilliPerSettlementTick
