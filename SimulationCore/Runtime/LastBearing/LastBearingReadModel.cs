@@ -107,7 +107,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     ? 0
                     : LastBearingBalanceV1.RouteConditionLoss(
                         projectedModule,
-                        state.RigUpgrade);
+                        state.RigUpgrade,
+                        state.ReturnedRailChassisBraceInstalled);
             ExpeditionPhase = state.ExpeditionPhase;
             TransactionPhase = state.TransactionPhase;
             RouteKind = state.RouteKind;
@@ -138,6 +139,16 @@ namespace AtomicLandPirate.Simulation.LastBearing
             RepairCargoCustody = state.RepairCargoCustody;
             FrameRailSalvageCustody =
                 state.FrameRailSalvageCustody;
+            ReturnedRailChassisBraceInstalled =
+                state.ReturnedRailChassisBraceInstalled;
+            ReturnedRailChassisBracePartsCostUnits =
+                LastBearingBalanceV1
+                    .ReturnedRailChassisBracePartsCostUnits;
+            ReturnedRailChassisBraceProtectionMilli =
+                LastBearingBalanceV1
+                    .ReturnedRailChassisBraceProtectionMilli;
+            IsReturnedRailChassisBraceInstallAvailable =
+                ComputeReturnedRailChassisBraceInstallAvailable(state);
             FrameRailSalvagePartsUnits =
                 LastBearingBalanceV1
                     .WreckLineFrameRailSalvagePartsUnits;
@@ -319,6 +330,22 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public RepairCargoKind RepairCargoKind { get; private set; }
         public RepairCargoCustody RepairCargoCustody { get; private set; }
         public FrameRailSalvageCustody FrameRailSalvageCustody
+        {
+            get;
+            private set;
+        }
+        public bool ReturnedRailChassisBraceInstalled { get; private set; }
+        public long ReturnedRailChassisBracePartsCostUnits
+        {
+            get;
+            private set;
+        }
+        public long ReturnedRailChassisBraceProtectionMilli
+        {
+            get;
+            private set;
+        }
+        public bool IsReturnedRailChassisBraceInstallAvailable
         {
             get;
             private set;
@@ -681,6 +708,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return "service-scout-in-garage";
             }
 
+            if (ComputeReturnedRailChassisBraceInstallAvailable(state))
+            {
+                return "install-returned-rail-chassis-brace";
+            }
+
             if (ComputeRepeatExpeditionAvailable(state))
             {
                 return "prepare-repeat-expedition";
@@ -728,6 +760,43 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.VehicleConditionMilli
                     < LastBearingBalanceV1.StartingVehicleConditionMilli
                 && state.PartsUnits >= requiredParts
+                && state.HotShiftPhase == HotShiftPhase.Idle
+                && state.NextCityDecision == NextCityDecision.None
+                && ComputeEmergencyAidWorkResolved(state)
+                && !state.MaintenanceDue
+                && state.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.InProgress
+                && state.SpareBearingBatchPhase
+                    != SpareBearingBatchPhase.Complete
+                && !state.IsDustFrontAcknowledgementRequired;
+        }
+
+        private static bool
+            ComputeReturnedRailChassisBraceInstallAvailable(
+                LastBearingState state)
+        {
+            long requiredParts = checked(
+                LastBearingBalanceV1
+                    .ReturnedRailChassisBracePartsCostUnits
+                + LastBearingBalanceV1.MinimumPostReturnPartsUnits);
+            return !state.ReturnedRailChassisBraceInstalled
+                && IsReturnedRailChassisBraceInstallReady(state)
+                && state.PartsUnits >= requiredParts;
+        }
+
+        internal static bool IsReturnedRailChassisBraceInstallReady(
+            LastBearingState state)
+        {
+            return state.ExpeditionPhase == ExpeditionPhase.AtHome
+                && state.TransactionPhase == TransactionPhase.Finalized
+                && state.TurbineCondition != TurbineCondition.Failing
+                && state.SliceInfrastructureActive
+                && state.CityDeliveryStage
+                    == CityDeliveryStage.DeliveredToWorkshop
+                && state.VehicleConditionMilli
+                    == LastBearingBalanceV1.StartingVehicleConditionMilli
+                && state.FrameRailSalvageCustody
+                    == FrameRailSalvageCustody.Credited
                 && state.HotShiftPhase == HotShiftPhase.Idle
                 && state.NextCityDecision == NextCityDecision.None
                 && ComputeEmergencyAidWorkResolved(state)

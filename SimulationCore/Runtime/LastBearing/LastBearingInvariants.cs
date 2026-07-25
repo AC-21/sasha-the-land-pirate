@@ -84,6 +84,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
             ValidateDustFront(state);
             ValidateVehicleAndTransaction(state);
             ValidateCargo(state);
+            ValidateReturnedRailChassisBrace(state);
             ValidateFaction(state);
             ValidateCityImprovement(state);
             ValidateSpareBearingBatch(state);
@@ -899,6 +900,29 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && (state.ExpeditionPhase == ExpeditionPhase.Returned
                     || state.ExpeditionPhase == ExpeditionPhase.AtHome),
                 "LAST_BEARING_FRAME_RAIL_SALVAGE_CREDIT_INVALID");
+        }
+
+        private static void ValidateReturnedRailChassisBrace(
+            LastBearingState state)
+        {
+            if (!state.ReturnedRailChassisBraceInstalled)
+            {
+                return;
+            }
+
+            Require(
+                state.SliceInfrastructureActive
+                && state.CityDeliveryStage
+                    == CityDeliveryStage.DeliveredToWorkshop
+                && state.AssignedResidentId != null
+                && state.PreparationPhase == PreparationPhase.Committed
+                && state.ModuleInstallationState
+                    == ModuleInstallationState.Installed
+                && state.TurbineCondition != TurbineCondition.Failing
+                && state.TransactionId != null
+                && state.TransactionFingerprint != null
+                && state.DepotResolution != EncounterChoice.Unresolved,
+                "LAST_BEARING_RETURNED_RAIL_CHASSIS_BRACE_STATE_INVALID");
         }
 
         private static long FrameRailCargoUnits(LastBearingState state)

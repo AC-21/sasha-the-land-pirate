@@ -346,6 +346,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         DustFrontResolved = 57,
         DustFrontAcknowledged = 58,
         EmergencyCisternPumped = 59,
+        ReturnedRailChassisBraceInstalled = 60,
     }
 
     public enum LastBearingEventCause

@@ -31,6 +31,7 @@ NAMED_TESTS = frozenset(
         "vgr22-receive-water-tender",
         "vgr23-service-the-scout",
         "vgr24-repeat-wreck-line",
+        "vgr25-returned-rail-chassis-brace",
         "v0-hands-on-service-cell",
     }
 )

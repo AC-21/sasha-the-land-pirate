@@ -191,7 +191,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     + state.RouteProgressTicks),
                 LastBearingBalanceV1.RouteConditionLoss(
                     state.VehicleModule,
-                    state.RigUpgrade));
+                    state.RigUpgrade,
+                    state.ReturnedRailChassisBraceInstalled));
         }
 
         private static bool IsReachableCondition(

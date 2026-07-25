@@ -6,7 +6,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public sealed class LastBearingState
     {
-        public const int CurrentSchemaVersion = 9;
+        public const int CurrentSchemaVersion = 10;
         public const int CityConstructionPadCount = 5;
         public const int UnplacedCityPadIndex = -1;
         public const string SashaProtagonistId = "sasha";
@@ -156,6 +156,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             RepairCargoCustody = builder.RepairCargoCustody;
             FrameRailSalvageCustody =
                 builder.FrameRailSalvageCustody;
+            ReturnedRailChassisBraceInstalled =
+                builder.ReturnedRailChassisBraceInstalled;
             DepotBearingDisposition = builder.DepotBearingDisposition;
             ReturnPayloadFrozen = builder.ReturnPayloadFrozen;
             HasArrivalClaimSnapshot = builder.HasArrivalClaimSnapshot;
@@ -362,6 +364,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             private set;
         }
 
+        public bool ReturnedRailChassisBraceInstalled { get; private set; }
+
         public DepotBearingDisposition DepotBearingDisposition { get; private set; }
 
         public bool ReturnPayloadFrozen { get; private set; }
@@ -530,6 +534,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             RepairCargoKind = state.RepairCargoKind;
             RepairCargoCustody = state.RepairCargoCustody;
             FrameRailSalvageCustody = state.FrameRailSalvageCustody;
+            ReturnedRailChassisBraceInstalled =
+                state.ReturnedRailChassisBraceInstalled;
             DepotBearingDisposition = state.DepotBearingDisposition;
             ReturnPayloadFrozen = state.ReturnPayloadFrozen;
             HasArrivalClaimSnapshot = state.HasArrivalClaimSnapshot;
@@ -646,6 +652,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
         internal RepairCargoKind RepairCargoKind;
         internal RepairCargoCustody RepairCargoCustody;
         internal FrameRailSalvageCustody FrameRailSalvageCustody;
+        internal bool ReturnedRailChassisBraceInstalled;
         internal DepotBearingDisposition DepotBearingDisposition;
         internal bool ReturnPayloadFrozen;
         internal bool HasArrivalClaimSnapshot;

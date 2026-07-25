@@ -197,6 +197,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     installRigUpgrade,
                     events);
             }
+            else if (command is InstallReturnedRailChassisBraceCommand
+                installReturnedRailBrace)
+            {
+                ApplyInstallReturnedRailChassisBrace(
+                    builder,
+                    installReturnedRailBrace,
+                    events);
+            }
             else if (command is PrepareExpeditionTransactionCommand prepare)
             {
                 ApplyPrepareTransaction(builder, prepare, events);
@@ -1049,6 +1057,55 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 "vehicle:sasha:upgrade:patchwork-skid-plate",
                 (long)RigUpgrade.None,
                 (long)command.Upgrade);
+        }
+
+        private static void ApplyInstallReturnedRailChassisBrace(
+            LastBearingStateBuilder builder,
+            InstallReturnedRailChassisBraceCommand command,
+            LastBearingEventSink events)
+        {
+            if (builder.ReturnedRailChassisBraceInstalled)
+            {
+                EmitReplay(builder, command.Sequence, events);
+                return;
+            }
+
+            var currentState = new LastBearingState(builder);
+            if (!LastBearingReadModel
+                .IsReturnedRailChassisBraceInstallReady(currentState))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_RETURNED_RAIL_CHASSIS_BRACE_NOT_READY");
+            }
+
+            long requiredParts = checked(
+                LastBearingBalanceV1
+                    .ReturnedRailChassisBracePartsCostUnits
+                + LastBearingBalanceV1.MinimumPostReturnPartsUnits);
+            if (builder.PartsUnits < requiredParts)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_RETURNED_RAIL_CHASSIS_BRACE_PARTS_INSUFFICIENT");
+            }
+
+            builder.PartsUnits = checked(
+                builder.PartsUnits
+                - LastBearingBalanceV1
+                    .ReturnedRailChassisBracePartsCostUnits);
+            builder.FrameRailSalvageCustody =
+                FrameRailSalvageCustody.None;
+            builder.ReturnedRailChassisBraceInstalled = true;
+
+            Emit(
+                builder,
+                events,
+                LastBearingEventKind.ReturnedRailChassisBraceInstalled,
+                LastBearingEventCause.PlayerCommand,
+                builder.GlobalTick,
+                command.Sequence,
+                "vehicle:sasha:upgrade:returned-rail-chassis-brace",
+                0,
+                1);
         }
 
         private static void ApplyPrepareTransaction(
@@ -1924,7 +1981,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     builder.VehicleConditionMilli
                     - LastBearingBalanceV1.RouteConditionLoss(
                         builder.VehicleModule,
-                        builder.RigUpgrade)));
+                        builder.RigUpgrade,
+                        builder.ReturnedRailChassisBraceInstalled)));
             Emit(
                 builder,
                 events,

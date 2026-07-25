@@ -26,7 +26,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "water tender replay never duplicates delivered water",
                 DuplicateReceiptIsIdempotent);
             harness.Run(
-                "queued and delivered aid round trip in schema 9",
+                "queued and delivered aid round trip in the current schema",
                 QueuedAndDeliveredStatesRoundTrip);
             harness.Run(
                 "delivered tender witness requires exact cooperative lineage",
@@ -600,7 +600,7 @@ namespace AtomicLandPirate.LastBearingTests
             string label)
         {
             TestHarness.Equal(
-                9,
+                10,
                 LastBearingState.CurrentSchemaVersion,
                 label + " current schema constant");
             TestHarness.Equal(

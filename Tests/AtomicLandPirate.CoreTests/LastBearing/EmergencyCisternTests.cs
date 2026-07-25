@@ -313,14 +313,14 @@ namespace AtomicLandPirate.LastBearingTests
                 LastBearingCanonicalCodec.TryDecode(current);
             TestHarness.True(
                 restored.Succeeded && restored.State != null,
-                "schema 9 charged decode");
+                "current schema charged decode");
             TestHarness.True(
                 restored.State!.EmergencyCisternCharged,
-                "schema 9 charged flag");
+                "current schema charged flag");
             TestHarness.True(
                 current.SequenceEqual(
                     LastBearingCanonicalCodec.Encode(restored.State)),
-                "schema 9 canonical bytes");
+                    "current schema canonical bytes");
 
             byte[] schemaEight =
                 LastBearingCanonicalCodec

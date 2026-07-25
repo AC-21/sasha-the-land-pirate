@@ -20,8 +20,8 @@ namespace AtomicLandPirate.LastBearingTests
                 "expanded Emergency Cistern owns the authoritative water ceiling",
                 ExpandedCapacityIsAuthoritative);
             harness.Run(
-                "expanded Emergency Cistern survives schema 9 canonical round trip",
-                ExpansionRoundTripsInSchemaNine);
+                "expanded Emergency Cistern survives current-schema canonical round trip",
+                ExpansionRoundTripsInCurrentSchema);
             harness.Run(
                 "forged expanded Emergency Cistern states fail closed",
                 ForgedExpansionStatesFailClosed);
@@ -326,12 +326,12 @@ namespace AtomicLandPirate.LastBearingTests
                 "auxiliary pump capacity changed");
         }
 
-        private static void ExpansionRoundTripsInSchemaNine()
+        private static void ExpansionRoundTripsInCurrentSchema()
         {
             LastBearingState installed =
                 CreateExpandedStateForSaveTests();
             TestHarness.Equal(
-                9,
+                LastBearingState.CurrentSchemaVersion,
                 installed.SchemaVersion,
                 "installed schema version");
             byte[] canonical = LastBearingCanonicalCodec.Encode(installed);
@@ -357,25 +357,25 @@ namespace AtomicLandPirate.LastBearingTests
                     .WaterCapacityMilli,
                 "restored capacity");
 
-            LastBearingState oldSchemaNine =
+            LastBearingState unexpandedCurrent =
                 LastBearingScenarioFactory.CreateInitial(
                     ColonyComposition.HumanOnly,
                     3006);
             byte[] oldCanonical =
-                LastBearingCanonicalCodec.Encode(oldSchemaNine);
+                LastBearingCanonicalCodec.Encode(unexpandedCurrent);
             LastBearingDecodeResult oldDecoded =
                 LastBearingCanonicalCodec.TryDecode(oldCanonical);
             TestHarness.True(
                 oldDecoded.Succeeded && oldDecoded.State != null,
-                "old schema 9 decode");
+                "baseline current schema decode");
             TestHarness.Equal(
                 CityImprovementKind.None,
                 oldDecoded.State!.InstalledCityImprovement,
-                "old schema 9 improvement");
+                "baseline current schema improvement");
             TestHarness.True(
                 oldCanonical.SequenceEqual(
                     LastBearingCanonicalCodec.Encode(oldDecoded.State)),
-                "old schema 9 canonical bytes");
+                "baseline current schema canonical bytes");
         }
 
         private static void ForgedExpansionStatesFailClosed()

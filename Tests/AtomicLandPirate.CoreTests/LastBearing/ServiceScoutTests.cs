@@ -26,7 +26,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "scout service is preparation module outcome and composition neutral",
                 FullChoiceMatrixSharesMechanics);
             harness.Run(
-                "scout service ready and accepted states round trip in schema 9",
+                "scout service ready and accepted states round trip in the current schema",
                 ReadyAndAcceptedStatesRoundTrip);
             harness.Run(
                 "scout service rejects invalid and stale intents atomically",
@@ -552,7 +552,7 @@ namespace AtomicLandPirate.LastBearingTests
                 acceptedView.VehicleConditionMilli,
                 "restored accepted condition");
             TestHarness.Equal(
-                9,
+                LastBearingState.CurrentSchemaVersion,
                 restoredAccepted.SchemaVersion,
                 "service changed save schema");
         }
