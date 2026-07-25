@@ -104,11 +104,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             Renderer[] markers =
                 view.GetComponentsInChildren<Renderer>(true);
-            int[] markerIds = markers
-                .Select(item => item.GetInstanceID())
-                .OrderBy(item => item)
+            Renderer[] markerInstances = markers
+                .OrderBy(item => item.gameObject.name)
                 .ToArray();
-            int viewId = view.GetInstanceID();
             byte[] savedBytes =
                 LastBearingCanonicalCodec.Encode(controller.State!);
             string savedHash = controller.CanonicalHash;
@@ -138,13 +136,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     Is.EqualTo(LastBearingRoadSafeLineState.RightRisk));
                 Assert.That(view.IsRightWarningVisible, Is.True);
                 Assert.That(
-                    view.GetInstanceID(),
-                    Is.EqualTo(viewId));
+                    world.RoadSafeLineView,
+                    Is.SameAs(view));
                 CollectionAssert.AreEqual(
-                    markerIds,
+                    markerInstances,
                     view.GetComponentsInChildren<Renderer>(true)
-                        .Select(item => item.GetInstanceID())
-                        .OrderBy(item => item)
+                        .OrderBy(item => item.gameObject.name)
                         .ToArray());
                 Assert.That(
                     world.GetComponentsInChildren<
@@ -179,7 +176,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 savedBytes,
                 LastBearingCanonicalCodec.Encode(controller.State!));
             Assert.That(controller.CanonicalHash, Is.EqualTo(savedHash));
-            Assert.That(view.GetInstanceID(), Is.EqualTo(viewId));
+            Assert.That(world.RoadSafeLineView, Is.SameAs(view));
             AssertOneCameraAndListener();
         }
 
