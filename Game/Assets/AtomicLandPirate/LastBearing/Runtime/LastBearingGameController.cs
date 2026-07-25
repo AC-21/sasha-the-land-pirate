@@ -756,8 +756,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetRigUpgradePresentation();
             _modeCoordinator?.ClearSession();
 
-            AssignDefaultLeadResident();
-            _status = "Water is falling. Inspect the turbine, then wake the civic machinery.";
+            if (composition == ColonyComposition.Mixed)
+            {
+                _status =
+                    "Choose who rides with Sasha. Human and utility-robot road hands share the same duties and costs.";
+            }
+            else
+            {
+                AssignDefaultLeadResident();
+                _status =
+                    "Water is falling. Inspect the turbine, then wake the civic machinery.";
+            }
+
             ApplyPresentation();
         }
 
@@ -768,23 +778,56 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
-            if (_readModel.AssignedResidentId != null)
+            if (_readModel.Composition == ColonyComposition.Mixed)
             {
-                _status = "The expedition lead is already assigned.";
+                _status =
+                    "This colony has two valid road hands. Choose who supports Sasha.";
                 return;
             }
 
             string assignedResident = _readModel.Composition == ColonyComposition.RobotOnly
                 ? ResidentRoster.RobotResidentId
                 : ResidentRoster.HumanResidentId;
+            AssignRoadHand(assignedResident);
+        }
+
+        public void AssignRoadHand(string stableId)
+        {
+            if (_state == null || _readModel == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(stableId) ||
+                !_state.Roster.Contains(stableId))
+            {
+                _status =
+                    "Road-hand choice rejected safely; choose someone on this colony's roster.";
+                return;
+            }
+
+            if (_readModel.AssignedResidentId != null)
+            {
+                _status = string.Equals(
+                    _readModel.AssignedResidentId,
+                    stableId,
+                    StringComparison.Ordinal)
+                    ? "That road hand is already supporting Sasha."
+                    : "The road hand is already committed for this expedition.";
+                return;
+            }
+
+            string assignedResident = stableId;
             Queue(sequence => new AssignResidentCommand(sequence, assignedResident));
             SimulateOneTick();
             _status = string.Equals(
                 _readModel?.AssignedResidentId,
                 assignedResident,
                 StringComparison.Ordinal)
-                ? "Expedition lead assigned: " + assignedResident + "."
-                : "Lead assignment failed closed; choose the recovery action again.";
+                ? "Road hand assigned to support Sasha: " +
+                  RoadHandLabel(assignedResident) + "."
+                : "Road-hand assignment failed closed; choose again.";
+            _fieldDesk?.Refresh(force: true);
         }
 
         public void ReturnToTitle()
@@ -804,6 +847,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetScoutServiceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
             _world?.ResetFuelBondInteraction();
+            _world?.ApplyGarageRoadHand(null);
             _state = null;
             _readModel = null;
             ResetPublicSnapshotsToRuntime();
@@ -2120,7 +2164,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (_pendingCommands.Count != 0 || _state.AssignedResidentId == null)
             {
                 _saveStatus =
-                    "Save deferred until queued actions and lead assignment are authoritative.";
+                    "Save deferred until queued actions and the road-hand choice are authoritative.";
                 return;
             }
 
@@ -2959,6 +3003,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 IsGaragePlanIntentActive
                     ? _garagePreparationIntent
                     : _readModel.PreparationChoice);
+            _world.ApplyGarageRoadHand(_readModel.AssignedResidentId);
             _modeCoordinator?.ApplyCanonical(_readModel);
             _world.ApplyDepotApproachInteraction(_readModel);
             _world.ApplyDepotDecisionInteraction(_readModel);
@@ -3383,6 +3428,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 _world?.ApplyGarageModuleInteraction(_readModel);
             }
+        }
+
+        private static string RoadHandLabel(string stableId)
+        {
+            return string.Equals(
+                stableId,
+                ResidentRoster.RobotResidentId,
+                StringComparison.Ordinal)
+                ? "utility-robot road hand"
+                : "human road hand";
         }
 
         private string ExpeditionCommitUnavailableStatus()

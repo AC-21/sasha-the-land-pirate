@@ -403,6 +403,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Performance
             }
 
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
+            if (!string.Equals(
+                    controller.ReadModel?.AssignedResidentId,
+                    ResidentRoster.HumanResidentId,
+                    StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_NATIVE_REPRESENTATIVE_ROAD_HAND_MISSING");
+            }
+
             controller.InspectCityNeed();
             controller.SelectCityGrammarHypothesis(
                 LastBearingCityGrammarHypothesis.RestrainedSnapGrid);

@@ -572,6 +572,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             switch (source.Intent)
             {
                 case LastBearingFieldDeskIntent.AssignDefaultLead: _controller.AssignDefaultLeadResident(); break;
+                case LastBearingFieldDeskIntent.AssignHumanRoadHand:
+                    _controller.AssignRoadHand(ResidentRoster.HumanResidentId);
+                    break;
+                case LastBearingFieldDeskIntent.AssignRobotRoadHand:
+                    _controller.AssignRoadHand(ResidentRoster.RobotResidentId);
+                    break;
                 case LastBearingFieldDeskIntent.InspectCityNeed: _controller.InspectCityNeed(); break;
                 case LastBearingFieldDeskIntent.SelectRecycler: _controller.SelectCityBuildingPreview(CityBuildingKind.Recycler); break;
                 case LastBearingFieldDeskIntent.SelectMachineShop: _controller.SelectCityBuildingPreview(CityBuildingKind.MachineShop); break;

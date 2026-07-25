@@ -198,6 +198,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 {
                     "ReturnToTitle()",
                     "StartNewGame(Mixed)",
+                    "AssignRoadHand(Human)",
                     "InspectCityNeed()",
                     "SelectCityGrammarHypothesis(RestrainedSnapGrid)",
                     "ManipulateCityGrammarPrimary()",
@@ -759,6 +760,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         private static void StageTrialA(LastBearingGameController controller)
         {
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
             controller.InspectCityNeed();
             controller.SelectCityGrammarHypothesis(
                 LastBearingCityGrammarHypothesis.RestrainedSnapGrid);

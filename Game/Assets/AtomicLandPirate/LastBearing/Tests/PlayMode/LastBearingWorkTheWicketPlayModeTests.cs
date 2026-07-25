@@ -495,6 +495,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             ColonyComposition composition)
         {
             controller.StartNewGame(composition);
+            if (composition == ColonyComposition.Mixed)
+            {
+                controller.AssignRoadHand(
+                    ResidentRoster.HumanResidentId);
+            }
+
             Assert.That(controller.ReadModel!.GlobalTick, Is.EqualTo(1));
             Assert.That(PendingCommands(controller), Is.Empty);
             controller.InspectCityNeed();

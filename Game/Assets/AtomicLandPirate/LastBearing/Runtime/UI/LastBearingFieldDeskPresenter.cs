@@ -44,6 +44,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         OpenFuelBondClaimsWicket = 33,
         OpenEmergencyAidWaterTender = 34,
         OpenScoutServiceBay = 35,
+        AssignHumanRoadHand = 36,
+        AssignRobotRoadHand = 37,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -637,13 +639,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (model.AssignedResidentId == null)
             {
-                primary = Action(
-                    LastBearingFieldDeskIntent.AssignDefaultLead,
-                    "ASSIGN THE ROAD LEAD",
-                    "Seat the default resident in the expedition manifest.",
-                    true,
+                DeriveRoadHandOrder(
+                    model,
                     canDispatch,
-                    LastBearingFieldDeskActionTone.Primary);
+                    out primary,
+                    out secondary);
                 return;
             }
 
@@ -909,6 +909,46 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 controller,
                 model,
                 canDispatch);
+        }
+
+        private static void DeriveRoadHandOrder(
+            LastBearingReadModel model,
+            bool canDispatch,
+            out LastBearingFieldDeskActionProjection primary,
+            out LastBearingFieldDeskActionProjection secondary)
+        {
+            bool hasHuman =
+                model.Composition != ColonyComposition.RobotOnly;
+            bool hasRobot =
+                model.Composition != ColonyComposition.HumanOnly;
+            primary = hasHuman
+                ? Action(
+                    LastBearingFieldDeskIntent.AssignHumanRoadHand,
+                    "CHOOSE HUMAN ROAD HAND",
+                    hasRobot
+                        ? "A human road hand supports Sasha with the same " +
+                          "duties and costs as the utility robot."
+                        : "The colony's sole human road hand supports Sasha " +
+                          "on the road manifest.",
+                    true,
+                    canDispatch,
+                    LastBearingFieldDeskActionTone.Primary)
+                : Action(
+                    LastBearingFieldDeskIntent.AssignRobotRoadHand,
+                    "CHOOSE UTILITY-ROBOT ROAD HAND",
+                    "The colony's sole road hand supports Sasha on the same manifest.",
+                    true,
+                    canDispatch,
+                    LastBearingFieldDeskActionTone.Primary);
+            secondary = hasHuman && hasRobot
+                ? Action(
+                    LastBearingFieldDeskIntent.AssignRobotRoadHand,
+                    "CHOOSE UTILITY-ROBOT ROAD HAND",
+                    "A utility-robot road hand supports Sasha with the same duties and costs as the human.",
+                    true,
+                    canDispatch,
+                    LastBearingFieldDeskActionTone.Signal)
+                : Hidden();
         }
 
         private static void DeriveServiceCellOrder(

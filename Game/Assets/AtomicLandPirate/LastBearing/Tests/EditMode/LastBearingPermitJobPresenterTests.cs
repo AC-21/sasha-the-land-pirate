@@ -37,7 +37,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 lead.Chapter,
                 Is.EqualTo(LastBearingPermitJobChapter.CityCrisis));
-            Assert.That(lead.ProgressLabel, Does.Contain("Assign"));
+            Assert.That(lead.Headline, Does.Contain("supports Sasha"));
+            Assert.That(
+                lead.ProgressLabel,
+                Does.Contain("HUMAN ROAD HAND"));
+            Assert.That(
+                lead.ProgressLabel,
+                Does.Contain("UTILITY-ROBOT ROAD HAND"));
+            Assert.That(lead.Detail, Does.Contain("support hand"));
             Assert.That(
                 LastBearingCanonicalCodec.ComputeSha256(state),
                 Is.EqualTo(initialHash),

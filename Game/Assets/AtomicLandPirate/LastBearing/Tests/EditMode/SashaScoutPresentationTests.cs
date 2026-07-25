@@ -251,6 +251,56 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(garage.PreparationGaugeLitSegments, Is.Zero);
         }
 
+        [TestCase(
+            ResidentRoster.HumanResidentId,
+            GarageRoadHandManifestPresentation.Human)]
+        [TestCase(
+            ResidentRoster.RobotResidentId,
+            GarageRoadHandManifestPresentation.UtilityRobot)]
+        public void GarageManifestShowsTheRoadHandSupportingSasha(
+            string stableId,
+            GarageRoadHandManifestPresentation expected)
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.Mixed);
+            LastBearingGarageBayView garage =
+                controller.World!.GarageBayView!;
+
+            Assert.That(
+                garage.ActiveRoadHandManifest,
+                Is.EqualTo(GarageRoadHandManifestPresentation.None));
+            Assert.That(garage.IsHumanRoadHandManifestVisible, Is.False);
+            Assert.That(garage.IsRobotRoadHandManifestVisible, Is.False);
+
+            controller.AssignRoadHand(stableId);
+            string canonicalAfterChoice = controller.CanonicalHash;
+
+            Assert.That(
+                garage.ActiveRoadHandManifest,
+                Is.EqualTo(expected));
+            Assert.That(
+                garage.IsHumanRoadHandManifestVisible,
+                Is.EqualTo(
+                    expected ==
+                    GarageRoadHandManifestPresentation.Human));
+            Assert.That(
+                garage.IsRobotRoadHandManifestVisible,
+                Is.EqualTo(
+                    expected ==
+                    GarageRoadHandManifestPresentation.UtilityRobot));
+            controller.World.ApplyGarageRoadHand(stableId);
+            Assert.That(
+                controller.CanonicalHash,
+                Is.EqualTo(canonicalAfterChoice));
+
+            controller.ReturnToTitle();
+            Assert.That(
+                garage.ActiveRoadHandManifest,
+                Is.EqualTo(GarageRoadHandManifestPresentation.None));
+        }
+
         [Test]
         public void GaragePlanningMarkersKeepBothChoicesInTheSharedCameraFrame()
         {
@@ -424,6 +474,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingGameController controller)
         {
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
             controller.InspectCityNeed();
             controller.SelectCityGrammarHypothesis(
                 LastBearingCityGrammarHypothesis.DistrictStamp);

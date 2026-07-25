@@ -352,6 +352,20 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 return;
             }
 
+            if (builder.ExpeditionPhase != ExpeditionPhase.AtHome
+                || builder.TransactionPhase != TransactionPhase.None
+                || builder.PreparationPhase != PreparationPhase.Unselected)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_ROAD_HAND_ASSIGNMENT_PHASE_INVALID");
+            }
+
+            if (builder.AssignedResidentId != null)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_ROAD_HAND_ALREADY_ASSIGNED");
+            }
+
             builder.AssignedResidentId = command.StableId;
             Emit(
                 builder,
@@ -360,7 +374,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 LastBearingEventCause.PlayerCommand,
                 builder.GlobalTick,
                 command.Sequence,
-                "expedition-slot:lead",
+                "expedition-slot:road-hand",
                 0,
                 1);
         }

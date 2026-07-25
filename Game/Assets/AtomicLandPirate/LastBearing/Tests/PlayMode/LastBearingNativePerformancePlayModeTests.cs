@@ -134,6 +134,28 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator NativeHarnessStagesAnAssignedRepresentativeCity()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller =
+                _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            yield return null;
+
+            MethodInfo? prepare =
+                typeof(LastBearingNativePerformanceHarness).GetMethod(
+                    "PrepareRepresentativeCity",
+                    BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.That(prepare, Is.Not.Null);
+            prepare!.Invoke(null, new object[] { controller });
+
+            Assert.That(controller.HasActiveGame, Is.True);
+            Assert.That(
+                controller.ReadModel?.AssignedResidentId,
+                Is.EqualTo(ResidentRoster.HumanResidentId));
+        }
+
+        [UnityTest]
         public IEnumerator HarnessAcknowledgesDustFrontOnceBeforeExplicitPause()
         {
             LastBearingGameController controller = BuildController();
@@ -396,6 +418,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             var controller = _root.AddComponent<LastBearingGameController>();
             controller.Initialize();
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
             return controller;
         }
 

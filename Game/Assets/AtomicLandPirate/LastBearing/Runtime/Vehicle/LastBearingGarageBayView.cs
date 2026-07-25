@@ -11,6 +11,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         CivicBuffer = 2,
     }
 
+    public enum GarageRoadHandManifestPresentation
+    {
+        None = 0,
+        Human = 1,
+        UtilityRobot = 2,
+    }
+
     /// <summary>
     /// Derived-only dollhouse service bay. It stages vehicle inspection from
     /// one fixed camera pose and deliberately adds no on-foot mode.
@@ -34,6 +41,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         private GameObject? _tankPayload;
         private GameObject? _workshopPushPlanMarker;
         private GameObject? _civicBufferPlanMarker;
+        private GameObject? _humanRoadHandManifest;
+        private GameObject? _robotRoadHandManifest;
         private GameObject? _preparationGaugeRoot;
         private readonly GameObject?[] _preparationGaugeSegments =
             new GameObject?[PreparationGaugeSegmentCount];
@@ -101,6 +110,20 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             _civicBufferPlanMarker.activeSelf;
 
         public GaragePlanMarkerPresentation ActivePlanMarker { get; private set; }
+
+        public GarageRoadHandManifestPresentation ActiveRoadHandManifest
+        {
+            get;
+            private set;
+        }
+
+        public bool IsHumanRoadHandManifestVisible =>
+            _humanRoadHandManifest != null &&
+            _humanRoadHandManifest.activeSelf;
+
+        public bool IsRobotRoadHandManifestVisible =>
+            _robotRoadHandManifest != null &&
+            _robotRoadHandManifest.activeSelf;
 
         public int PreparationGaugeLitSegments { get; private set; }
 
@@ -243,6 +266,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 new Vector3(-2.2f, 3.25f, -4.16f),
                 new Vector3(2.8f, 0.48f, 0.06f),
                 tungsten);
+            BuildRoadHandManifest(darkIron, bone, tungsten, signal);
             BuildPreparationGauge(darkIron, signal);
             BuildPlanMarkers(darkIron, tungsten, signal);
             BuildDepartureControl(
@@ -302,6 +326,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             ApplyModule(SashaScoutModulePresentation.None);
             ApplyPreparationProgress(0, 0);
             ApplyPlanMarker(GaragePlanMarkerPresentation.None);
+            ApplyRoadHandManifest(
+                GarageRoadHandManifestPresentation.None);
             ApplyScoutServicePresentation(
                 active: false,
                 accepted: false,
@@ -534,6 +560,24 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 _civicBufferPlanMarker.SetActive(
                     marker == GaragePlanMarkerPresentation.CivicBuffer);
             }
+        }
+
+        public void ApplyRoadHandManifest(
+            GarageRoadHandManifestPresentation manifest)
+        {
+            if (manifest != GarageRoadHandManifestPresentation.Human &&
+                manifest !=
+                    GarageRoadHandManifestPresentation.UtilityRobot)
+            {
+                manifest = GarageRoadHandManifestPresentation.None;
+            }
+
+            ActiveRoadHandManifest = manifest;
+            _humanRoadHandManifest?.SetActive(
+                manifest == GarageRoadHandManifestPresentation.Human);
+            _robotRoadHandManifest?.SetActive(
+                manifest ==
+                    GarageRoadHandManifestPresentation.UtilityRobot);
         }
 
         internal void ApplyModule(LastBearingVisualModule module)
@@ -810,6 +854,83 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             }
 
             return marker;
+        }
+
+        private void BuildRoadHandManifest(
+            Material darkIron,
+            Material bone,
+            Material tungsten,
+            Material signal)
+        {
+            Vector3 cardPosition = new Vector3(-2.2f, 2.25f, -4.03f);
+            _humanRoadHandManifest = CreateRoadHandManifestCard(
+                "ROAD_HAND_MANIFEST_HUMAN",
+                cardPosition,
+                darkIron,
+                bone,
+                tungsten,
+                signal,
+                utilityRobot: false);
+            _robotRoadHandManifest = CreateRoadHandManifestCard(
+                "ROAD_HAND_MANIFEST_UTILITY_ROBOT",
+                cardPosition,
+                darkIron,
+                bone,
+                tungsten,
+                signal,
+                utilityRobot: true);
+        }
+
+        private GameObject CreateRoadHandManifestCard(
+            string name,
+            Vector3 position,
+            Material darkIron,
+            Material bone,
+            Material tungsten,
+            Material signal,
+            bool utilityRobot)
+        {
+            var card = new GameObject(name);
+            card.transform.SetParent(transform, false);
+            CreatePart(
+                name + "_TUNGSTEN_FRAME",
+                PrimitiveType.Cube,
+                position,
+                new Vector3(1.5f, 0.72f, 0.08f),
+                tungsten,
+                card.transform);
+            CreatePart(
+                name + "_IRON_FACE",
+                PrimitiveType.Cube,
+                position + new Vector3(0f, 0f, 0.06f),
+                new Vector3(1.28f, 0.52f, 0.05f),
+                darkIron,
+                card.transform);
+            CreatePart(
+                name + "_HEAD",
+                utilityRobot ? PrimitiveType.Cube : PrimitiveType.Sphere,
+                position + new Vector3(-0.36f, 0.1f, 0.12f),
+                utilityRobot
+                    ? new Vector3(0.24f, 0.2f, 0.04f)
+                    : new Vector3(0.2f, 0.2f, 0.04f),
+                utilityRobot ? bone : signal,
+                card.transform);
+            CreatePart(
+                name + "_BODY",
+                PrimitiveType.Cube,
+                position + new Vector3(-0.36f, -0.14f, 0.12f),
+                new Vector3(0.34f, 0.18f, 0.04f),
+                utilityRobot ? bone : signal,
+                card.transform);
+            CreatePart(
+                name + "_SASHA_SUPPORT_BAR",
+                PrimitiveType.Cube,
+                position + new Vector3(0.3f, 0f, 0.12f),
+                new Vector3(0.42f, 0.1f, 0.04f),
+                signal,
+                card.transform);
+            card.SetActive(false);
+            return card;
         }
 
         private Transform CreateAnchor(string name, Vector3 localPosition)

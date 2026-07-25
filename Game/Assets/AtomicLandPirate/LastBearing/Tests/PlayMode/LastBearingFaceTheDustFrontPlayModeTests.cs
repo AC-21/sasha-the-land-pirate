@@ -587,6 +587,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingGameController controller)
         {
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
             controller.InspectCityNeed();
             controller.SelectCityGrammarHypothesis(
                 LastBearingCityGrammarHypothesis.DistrictStamp);

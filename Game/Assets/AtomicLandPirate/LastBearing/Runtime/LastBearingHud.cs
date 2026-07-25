@@ -422,12 +422,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (model.AssignedResidentId == null)
             {
                 GUILayout.Label(
-                    "This valid profile has no expedition lead. Assign the " +
-                    "composition's default lead before continuing.",
+                    model.Composition == ColonyComposition.Mixed
+                        ? "Sasha's road manifest needs one support hand. Human " +
+                          "and utility-robot choices use the same duties and costs."
+                        : "Sasha's road manifest needs the colony's sole valid " +
+                          "road hand.",
                     _bodyStyle);
-                if (GUILayout.Button("ASSIGN DEFAULT EXPEDITION LEAD", _buttonStyle))
+                if (model.Composition != ColonyComposition.RobotOnly &&
+                    GUILayout.Button("CHOOSE HUMAN ROAD HAND", _buttonStyle))
                 {
-                    _controller!.AssignDefaultLeadResident();
+                    _controller!.AssignRoadHand(
+                        ResidentRoster.HumanResidentId);
+                }
+
+                if (model.Composition != ColonyComposition.HumanOnly &&
+                    GUILayout.Button(
+                        "CHOOSE UTILITY-ROBOT ROAD HAND",
+                        _buttonStyle))
+                {
+                    _controller!.AssignRoadHand(
+                        ResidentRoster.RobotResidentId);
                 }
 
                 return;
@@ -1515,9 +1529,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (model.AssignedResidentId == null)
             {
-                return "Click ASSIGN DEFAULT EXPEDITION LEAD above · the " +
-                       "resident enters the manifest without changing colony " +
-                       "mechanics." + serviceControls;
+                return "Choose a road hand above · the selected resident " +
+                       "supports Sasha without changing colony mechanics." +
+                       serviceControls;
             }
 
             if (!cityNeedInspected)
@@ -2109,7 +2123,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             text.Append("Access  ").Append(model.FactionAccessPolicy)
                 .Append("  ·  aid ").Append(model.FactionAidPolicy).AppendLine();
             text.Append("Roster  ").Append(model.Composition)
-                .Append("  ·  lead ").Append(model.AssignedResidentId ?? "unassigned")
+                .Append("  ·  road hand ").Append(
+                    model.AssignedResidentId ?? "unassigned")
                 .AppendLine();
             text.Append("Forecast  water ").Append(FormatTicks(model.WaterZeroSettlementTicks))
                 .Append("  ·  claim ").Append(FormatTicks(model.ClaimedFactionTicks))

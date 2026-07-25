@@ -112,6 +112,52 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 (int)LastBearingFieldDeskIntent.OpenFuelBondClaimsWicket,
                 Is.EqualTo(33));
+            Assert.That(
+                (int)LastBearingFieldDeskIntent.AssignHumanRoadHand,
+                Is.EqualTo(36));
+            Assert.That(
+                (int)LastBearingFieldDeskIntent.AssignRobotRoadHand,
+                Is.EqualTo(37));
+        }
+
+        [Test]
+        public void MixedColonyOffersBothRoadHandsWithoutChoosingForSasha()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.Mixed);
+            string canonicalBefore = controller.CanonicalHash;
+
+            LastBearingFieldDeskProjection projection =
+                LastBearingFieldDeskPresenter.Present(controller);
+
+            Assert.That(controller.ReadModel!.AssignedResidentId, Is.Null);
+            Assert.That(
+                projection.PrimaryAction.Intent,
+                Is.EqualTo(
+                    LastBearingFieldDeskIntent.AssignHumanRoadHand));
+            Assert.That(
+                projection.SecondaryAction.Intent,
+                Is.EqualTo(
+                    LastBearingFieldDeskIntent.AssignRobotRoadHand));
+            Assert.That(
+                projection.PrimaryAction.Detail,
+                Does.Contain("same duties and costs"));
+            Assert.That(
+                projection.SecondaryAction.Detail,
+                Does.Contain("same duties and costs"));
+            Assert.That(
+                LastBearingFieldDeskPresenter.IsIntentAvailable(
+                    controller,
+                    LastBearingFieldDeskIntent.AssignHumanRoadHand),
+                Is.True);
+            Assert.That(
+                LastBearingFieldDeskPresenter.IsIntentAvailable(
+                    controller,
+                    LastBearingFieldDeskIntent.AssignRobotRoadHand),
+                Is.True);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
         }
 
         [TestCase(
@@ -691,6 +737,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             var controller = _root.AddComponent<LastBearingGameController>();
             controller.Initialize();
             controller.StartNewGame(composition);
+            if (composition == ColonyComposition.Mixed)
+            {
+                controller.AssignRoadHand(
+                    ResidentRoster.HumanResidentId);
+            }
+
             Assert.That(controller.IsExactFieldDeskCityOverview, Is.True);
             return controller;
         }
