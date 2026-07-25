@@ -108,6 +108,45 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
+        public void FirstRunRailChoiceNamesTakeAndDeliberateLeave()
+        {
+            LastBearingState state = DriveUntil(
+                CreateDrivingState(
+                    VehicleModule.SealedRangeTank,
+                    installPatchworkSkidPlate: true),
+                model => model.IsWreckLineModulePointAvailable);
+            LastBearingReadModel gate =
+                LastBearingReadModel.FromState(state);
+            state = Apply(
+                state,
+                sequence => new OperateWreckLineModuleCommand(
+                    sequence,
+                    gate.RouteActionKind));
+
+            LastBearingReadModel choice =
+                LastBearingReadModel.FromState(state);
+            Assert.That(
+                choice.NextObjective,
+                Is.EqualTo("choose-wreck-line-frame-rails"));
+            Assert.That(
+                LastBearingRoadDeskPresenter.Present(choice).NextVerb,
+                Is.EqualTo(
+                    "E / A · TAKE +4 / BRACE / +400 KG  |  RELEASE, THEN W / RT · LEAVE SLOT OPEN / NO REWARD / NO RAIL MASS"));
+
+            state = Apply(
+                state,
+                sequence => new DriveVehicleCommand(sequence, 1000, 0));
+            LastBearingRoadDeskProjection left =
+                LastBearingRoadDeskPresenter.Present(
+                    LastBearingReadModel.FromState(state));
+            Assert.That(left.Cargo, Is.EqualTo("LOAD · EMPTY"));
+            Assert.That(left.CargoMassKilograms, Is.Zero);
+            Assert.That(
+                left.NextVerb,
+                Is.EqualTo("KEEP SCOUT ON THE BONE ROAD"));
+        }
+
+        [Test]
         public void HomeboundProjectionSummarizesTheLoadedScout()
         {
             LastBearingState state = DriveUntil(
@@ -189,7 +228,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         private static LastBearingState CreateDrivingState(
-            VehicleModule module)
+            VehicleModule module,
+            bool installPatchworkSkidPlate = false)
         {
             LastBearingState state =
                 LastBearingScenarioFactory.CreateInitial(
@@ -204,6 +244,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 state,
                 sequence =>
                     new ActivateSliceInfrastructureCommand(sequence));
+            if (installPatchworkSkidPlate)
+            {
+                state = Apply(
+                    state,
+                    sequence => new InstallRigUpgradeCommand(
+                        sequence,
+                        RigUpgrade.PatchworkSkidPlate));
+            }
+
             state = Apply(
                 state,
                 sequence => new SelectPreparationCommand(

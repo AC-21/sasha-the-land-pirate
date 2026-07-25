@@ -599,13 +599,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 if (model.IsWreckLineFrameRailRecoveryAvailable)
                 {
                     GUILayout.Label(
-                        "The fitted skid plate can belly under the wreck and free one fixed bundle of frame rails. It occupies one ordinary cargo unit until home check-in.",
+                        model.IsRepeatExpedition
+                            ? "The repeat circuit requires this fixed frame-rail bundle. It occupies one ordinary cargo unit until home check-in."
+                            : "The fitted skid plate can free one fixed frame-rail bundle. Taking it uses one ordinary cargo slot; leaving it means no +4 reclaimed parts and no returned-rail chassis brace.",
                         _bodyStyle);
                     if (GUILayout.Button(
-                            "E — Recover frame rails · +4 reclaimed parts at home",
+                            "E / A — Take frame rails · +4 reclaimed parts at home",
                             _buttonStyle))
                     {
                         _controller!.RecoverWreckLineFrameRails();
+                    }
+
+                    if (!model.IsRepeatExpedition)
+                    {
+                        GUILayout.Label(
+                            "LEAVE THEM · release the road controls, then hold W / right trigger to continue.",
+                            _mutedStyle);
                     }
 
                     return;
@@ -1568,8 +1577,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (model.IsWreckLineFrameRailRecoveryAvailable)
             {
-                return "Press E / gamepad south · recover the Wreck Line " +
-                       "frame rails for +4 reclaimed parts at home." +
+                return (model.IsRepeatExpedition
+                        ? "Press E / gamepad south · recover the required " +
+                          "Wreck Line frame rails for +4 reclaimed parts at home."
+                        : "Take the steel: E / gamepad south for +4 reclaimed " +
+                          "parts and the future chassis brace. Leave it: release " +
+                          "the road controls, then hold W / right trigger.") +
                        serviceControls;
             }
 

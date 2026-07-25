@@ -387,13 +387,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 LastBearingReadModel.FromState(state);
             Assert.That(
                 railsAvailable.NextObjective,
-                Is.EqualTo("recover-wreck-line-frame-rails"));
+                Is.EqualTo("choose-wreck-line-frame-rails"));
             LastBearingPermitJobPresentation railsCue = Present(state, true);
-            Assert.That(railsCue.Headline, Does.Contain("Strip the rails"));
+            Assert.That(
+                railsCue.Headline,
+                Is.EqualTo("Take the steel or leave it"));
             Assert.That(
                 railsCue.ProgressLabel,
                 Is.EqualTo(
-                    "E — Recover frame rails · +4 reclaimed parts at home"));
+                    "E / A — TAKE · release, then W / right trigger — LEAVE"));
             string railControls = InvokeHudString(
                 "BuildControlsText",
                 railsAvailable,

@@ -226,6 +226,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(view.IsRoadFrameRailCargoVisible, Is.False);
 
             view.ApplyFrameRailSalvage(
+                FrameRailSalvageCustody.None,
+                recoveryAvailable: false);
+            Assert.That(view.IsFrameRailSourceVisible, Is.False);
+            Assert.That(view.IsCanonicalFrameRailCargoVisible, Is.False);
+            Assert.That(view.IsRoadFrameRailCargoVisible, Is.False);
+
+            view.ApplyFrameRailSalvage(
+                FrameRailSalvageCustody.WreckLine,
+                recoveryAvailable: true);
+            view.ApplyFrameRailSalvage(
                 FrameRailSalvageCustody.Vehicle,
                 recoveryAvailable: false);
             Assert.That(view.IsFrameRailSourceVisible, Is.False);

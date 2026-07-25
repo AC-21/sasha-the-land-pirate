@@ -256,7 +256,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (model.IsWreckLineFrameRailRecoveryAvailable)
             {
-                return "E / A · LASH THE FRAME RAILS";
+                return model.IsRepeatExpedition
+                    ? "E / A · LASH THE REQUIRED FRAME RAILS"
+                    : "E / A · TAKE +4 / BRACE / +400 KG  |  RELEASE, THEN W / RT · LEAVE SLOT OPEN / NO REWARD / NO RAIL MASS";
             }
 
             if (model.IsDepotApproachRecoveryAvailable)

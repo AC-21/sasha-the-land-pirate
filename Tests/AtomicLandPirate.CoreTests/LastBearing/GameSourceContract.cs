@@ -683,6 +683,12 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 driveInput,
                 "_readModel.IsWreckLineFrameRailRecoveryAvailable");
+            Require(driveInput, "choosingFirstRunFrameRails");
+            Require(
+                driveInput,
+                "_world?.WreckLineInteractor?.IsInputArmed != true");
+            Require(driveInput, "_fieldDesk?.OwnsKeyboardFocus == true");
+            Require(driveInput, "input.ThrottleMilli <= 0");
             Require(
                 driveInput,
                 "_readModel.IsDepotApproachRecoveryAvailable");
@@ -1487,7 +1493,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(hud, "_controller!.RecoverWreckLineFrameRails();");
             Require(
                 hud,
-                "E — Recover frame rails · +4 reclaimed parts at home");
+                "E / A — Take frame rails · +4 reclaimed parts at home");
+            Require(
+                hud,
+                "LEAVE THEM · release the road controls, then hold W / right trigger");
             Require(hud, "model.FrameRailSalvageCustody");
             Require(hud, "model.IsRepairCargoLoadAvailable");
             Require(hud, "_controller.IsDepotRepairCargoLoadAvailable");
@@ -1728,6 +1737,18 @@ namespace AtomicLandPirate.LastBearingTests
             Require(wreckLineInteractor, "public bool IsInputArmed");
             Require(wreckLineInteractor, "OwnsKeyboardFocus");
             Require(wreckLineInteractor, "RELEASE CONTROLS");
+            Require(
+                wreckLineInteractor,
+                "RoadControlsReleased(keyboard, gamepad)");
+            Require(
+                wreckLineInteractor,
+                "QuantizedRoadAxisIsReleased(");
+            Require(
+                wreckLineInteractor,
+                "Mathf.Clamp01(Mathf.Abs(value)) * 1000f");
+            Require(
+                wreckLineInteractor,
+                "TAKE THE STEEL OR LEAVE IT");
             Require(
                 wreckLineInteractor,
                 "_controller?.Hud?.BlocksWorldPointer");
