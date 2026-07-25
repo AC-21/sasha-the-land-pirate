@@ -13,6 +13,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
     [DisallowMultipleComponent]
     public sealed class LastBearingCityServiceCellView : MonoBehaviour
     {
+        public const string ReturnedRailRackName =
+            "Canonical Returned Frame Rail Rack";
+        public const string ReturnedFrameRailNamePrefix =
+            "Returned Frame Rail ";
+
         private static readonly Vector3[] PadPositions =
         {
             new Vector3(-2.8f, 0.65f, -0.55f),
@@ -40,6 +45,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private GameObject? _dustFrontShutter;
         private GameObject? _completionWitnessA;
         private GameObject? _completionWitnessB;
+        private GameObject? _returnedRailRack;
         private float _hotShiftSledProgress = 1f;
         private bool _built;
 
@@ -104,6 +110,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool IsHotShiftCompletionWitnessVisible =>
             _completionWitnessA?.activeInHierarchy == true &&
             _completionWitnessB?.activeInHierarchy == true;
+
+        public bool IsReturnedRailRackVisible =>
+            _returnedRailRack?.activeInHierarchy == true;
 
         public float HotShiftSledProgress => _hotShiftSledProgress;
 
@@ -229,6 +238,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 new Vector3(0.18f, 0.72f, 0.4f),
                 new Vector3(0.12f, 0.18f, 0.12f),
                 bone);
+            _returnedRailRack = CreateReturnedRailRack(
+                _machineShop,
+                iron,
+                oxide);
             Interactor =
                 gameObject.AddComponent<LastBearingCityServiceCellInteractor>();
             Interactor.Build(
@@ -286,7 +299,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _workshopPushTransferArm == null ||
                 _dustFrontShutter == null ||
                 _completionWitnessA == null ||
-                _completionWitnessB == null)
+                _completionWitnessB == null ||
+                _returnedRailRack == null)
             {
                 return;
             }
@@ -418,6 +432,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool hasCompletedRun = model.HotShiftCompletedCount > 0;
             _completionWitnessA.SetActive(hasCompletedRun);
             _completionWitnessB.SetActive(hasCompletedRun);
+            _returnedRailRack.SetActive(
+                model.FrameRailSalvageCustody ==
+                    FrameRailSalvageCustody.Credited &&
+                _machineShop.gameObject.activeSelf);
             _hotShiftSpindle.localRotation = Quaternion.Euler(
                 model.HotShiftElapsedTicks * 31f,
                 0f,
@@ -506,6 +524,46 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             return block;
+        }
+
+        private static GameObject CreateReturnedRailRack(
+            Transform parent,
+            Material iron,
+            Material oxide)
+        {
+            var rack = new GameObject(ReturnedRailRackName);
+            rack.transform.SetParent(parent, false);
+            rack.transform.localPosition = new Vector3(1.05f, -0.34f, 0f);
+
+            CreateBlock(
+                "Returned Rail Rack Cradle A",
+                rack.transform,
+                new Vector3(-0.3f, 0f, 0f),
+                new Vector3(0.1f, 0.12f, 0.86f),
+                oxide);
+            CreateBlock(
+                "Returned Rail Rack Cradle B",
+                rack.transform,
+                new Vector3(0.3f, 0f, 0f),
+                new Vector3(0.1f, 0.12f, 0.86f),
+                oxide);
+
+            for (var index = 0; index < 4; index++)
+            {
+                CreateBlock(
+                    ReturnedFrameRailNamePrefix +
+                    (index + 1).ToString("00"),
+                    rack.transform,
+                    new Vector3(
+                        0f,
+                        0.12f,
+                        -0.3f + index * 0.2f),
+                    new Vector3(0.92f, 0.1f, 0.1f),
+                    iron);
+            }
+
+            rack.SetActive(false);
+            return rack;
         }
 
         private static GameObject CreateEmergencyCisternExpansionSaddle(

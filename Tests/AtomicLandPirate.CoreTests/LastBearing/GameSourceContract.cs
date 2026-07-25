@@ -995,6 +995,17 @@ namespace AtomicLandPirate.LastBearingTests
             Require(cityServiceCell, "Canonical Machine Shop");
             Require(cityServiceCell, "Canonical Emergency Storage");
             Require(cityServiceCell, "Canonical Parts Sled");
+            Require(
+                cityServiceCell,
+                "Canonical Returned Frame Rail Rack");
+            Require(cityServiceCell, "Returned Frame Rail ");
+            Require(
+                cityServiceCell,
+                "model.FrameRailSalvageCustody ==");
+            Require(
+                cityServiceCell,
+                "FrameRailSalvageCustody.Credited");
+            Require(cityServiceCell, "_returnedRailRack.SetActive(");
             Require(cityServiceCell, "model.HotShiftElapsedTicks");
             Require(cityServiceCell, "model.HotShiftRequiredTicks");
             Require(cityServiceCell, "collider.enabled = false");

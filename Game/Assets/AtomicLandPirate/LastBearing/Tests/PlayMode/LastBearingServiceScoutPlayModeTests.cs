@@ -18,7 +18,7 @@ using Object = UnityEngine.Object;
 
 namespace AtomicLandPirate.Presentation.LastBearing.Tests
 {
-    public sealed class LastBearingServiceScoutPlayModeTests :
+    public sealed partial class LastBearingServiceScoutPlayModeTests :
         InputTestFixture
     {
         private readonly List<GameObject> _roots = new List<GameObject>();

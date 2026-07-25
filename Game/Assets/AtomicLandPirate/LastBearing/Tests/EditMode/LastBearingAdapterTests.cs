@@ -14,7 +14,7 @@ using UnityEngine;
 
 namespace AtomicLandPirate.Presentation.LastBearing.Tests
 {
-    public sealed class LastBearingAdapterTests
+    public sealed partial class LastBearingAdapterTests
     {
         private GameObject? _root;
 
