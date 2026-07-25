@@ -67,10 +67,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
     {
         private const string Controls =
             "W / RT GO · S / LT BRAKE · A/D / LS STEER · " +
-            "SPACE / LB HANDBRAKE · E / A WORK · R / Y RECENTER";
+            "SPACE / LB HANDBRAKE · E / A WORK";
+        private const string RecoveryControls = " · R / Y RECENTER";
 
         public static LastBearingRoadDeskProjection Present(
-            LastBearingReadModel model)
+            LastBearingReadModel model,
+            bool canRecoverRoadPresentation = false)
         {
             if (model == null)
             {
@@ -122,7 +124,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 FormatEdge(edge),
                 edge,
                 FormatNextVerb(model),
-                Controls);
+                Controls +
+                (canRecoverRoadPresentation
+                    ? RecoveryControls
+                    : string.Empty));
         }
 
         private static string FormatRoute(
@@ -227,9 +232,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private static string FormatNextVerb(LastBearingReadModel model)
         {
-            if (model.PauseCause != PauseCause.None)
+            if (model.PauseCause == PauseCause.Explicit)
             {
                 return "ROAD CLOCK HELD · P TO RESUME";
+            }
+
+            if (model.PauseCause == PauseCause.DustFrontAlert)
+            {
+                return "DUST FRONT VERDICT · ACKNOWLEDGEMENT REQUIRED";
+            }
+
+            if (model.PauseCause == PauseCause.AutoAlert)
+            {
+                return "DEPOT ALERT · RESOLUTION REQUIRED";
             }
 
             if (model.IsWreckLineModulePointAvailable)

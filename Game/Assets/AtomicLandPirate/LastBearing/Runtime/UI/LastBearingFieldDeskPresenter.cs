@@ -456,6 +456,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ulong hash = OffsetBasis;
             Mix(ref hash, controller.IsExactFieldDeskCityOverview);
             Mix(ref hash, controller.IsExactFieldDeskDriving);
+            Mix(ref hash, controller.CanRecoverRoadPresentation);
             Mix(ref hash, controller.HasPendingPlayerCommands);
             Mix(ref hash, controller.CityNeedInspected);
             Mix(ref hash, controller.IsTurbineRepairReady);

@@ -125,7 +125,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             HasActiveGame &&
             _modeCoordinator?.HasActiveMode == true &&
             _modeCoordinator.CurrentMode ==
-                LastBearingPresentationMode.Driving;
+                LastBearingPresentationMode.Driving &&
+            (_readModel?.PauseCause == PauseCause.None ||
+             _readModel?.PauseCause == PauseCause.Explicit);
 
         public bool HasPendingPlayerCommands => _pendingCommands.Count != 0;
 

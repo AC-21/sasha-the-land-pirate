@@ -53,9 +53,32 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo("KEEP SCOUT ON THE BONE ROAD"));
             Assert.That(projection.Controls, Does.Contain("W / RT GO"));
             Assert.That(projection.Controls, Does.Contain("E / A WORK"));
+            Assert.That(projection.Controls, Does.Not.Contain("RECENTER"));
+            Assert.That(
+                LastBearingRoadDeskPresenter.Present(
+                    model,
+                    canRecoverRoadPresentation: true).Controls,
+                Does.Contain("R / Y RECENTER"));
             Assert.That(
                 LastBearingCanonicalCodec.Encode(state),
                 Is.EqualTo(before));
+        }
+
+        [Test]
+        public void ExplicitPauseOffersOnlyTheOperativeResumeKey()
+        {
+            LastBearingState state =
+                CreateDrivingState(VehicleModule.WinchAssembly);
+            state = Apply(
+                state,
+                sequence => new SetPauseCommand(
+                    sequence,
+                    isPaused: true));
+
+            Assert.That(
+                LastBearingRoadDeskPresenter.Present(
+                    LastBearingReadModel.FromState(state)).NextVerb,
+                Is.EqualTo("ROAD CLOCK HELD · P TO RESUME"));
         }
 
         [TestCase(

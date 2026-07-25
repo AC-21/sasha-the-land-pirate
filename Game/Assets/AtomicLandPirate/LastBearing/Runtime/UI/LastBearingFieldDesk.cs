@@ -631,7 +631,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             ApplyRoadProjection(
-                LastBearingRoadDeskPresenter.Present(model));
+                LastBearingRoadDeskPresenter.Present(
+                    model,
+                    _controller!.CanRecoverRoadPresentation));
             _lastStamp = stamp.Value;
             _hasStamp = true;
         }

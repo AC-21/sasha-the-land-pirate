@@ -237,6 +237,73 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator RoadStripFailsOpenForDustFrontAlertAcrossSaveLoad()
+        {
+            LastBearingGameController controller = BuildController();
+            LastBearingFieldDesk desk = RequireDesk(controller);
+            _ = InstallTemporarySaveAdapter(controller);
+            UIDocument document = RequireDocument(controller);
+            VisualElement overlay = document.rootVisualElement.Q<VisualElement>(
+                "field-desk-overlay");
+            LastBearingHud legacyHud =
+                controller.GetComponent<LastBearingHud>();
+            InstallControllerState(
+                controller,
+                PrimeDustFrontThreshold(
+                    CreateDrivingState(VehicleModule.WinchAssembly),
+                    holds: false));
+
+            InvokeSimulationTick(controller);
+            yield return null;
+            desk.Refresh(force: true);
+
+            AssertMode(controller, LastBearingPresentationMode.Driving);
+            Assert.That(
+                controller.ReadModel!.PauseCause,
+                Is.EqualTo(PauseCause.DustFrontAlert));
+            Assert.That(
+                controller.ReadModel.IsDustFrontAcknowledgementRequired,
+                Is.True);
+            Assert.That(desk.OwnsDriving, Is.False);
+            Assert.That(desk.OwnsRetainedHud, Is.False);
+            Assert.That(legacyHud.enabled, Is.True);
+            Assert.That(
+                overlay.style.display.value,
+                Is.EqualTo(DisplayStyle.None));
+            Assert.That(
+                controller.CanAcknowledgeDustFrontFallback,
+                Is.True);
+
+            string alertHash = controller.CanonicalHash;
+            controller.Save();
+            controller.ReturnToTitle();
+            controller.Load();
+            yield return null;
+            desk.Refresh(force: true);
+
+            AssertMode(controller, LastBearingPresentationMode.Driving);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(alertHash));
+            Assert.That(
+                controller.ReadModel!.PauseCause,
+                Is.EqualTo(PauseCause.DustFrontAlert));
+            Assert.That(desk.OwnsRetainedHud, Is.False);
+            Assert.That(legacyHud.enabled, Is.True);
+            Assert.That(
+                controller.CanAcknowledgeDustFrontFallback,
+                Is.True);
+
+            controller.AcknowledgeDustFrontFallback();
+            InvokeSimulationTick(controller);
+            desk.Refresh(force: true);
+
+            Assert.That(
+                controller.ReadModel.PauseCause,
+                Is.EqualTo(PauseCause.None));
+            Assert.That(desk.OwnsDriving, Is.True);
+            Assert.That(legacyHud.enabled, Is.False);
+        }
+
+        [UnityTest]
         public IEnumerator DryLineForecastTracksCisternHotShiftPauseLoadAndCycles()
         {
             LastBearingGameController controller = BuildController();
