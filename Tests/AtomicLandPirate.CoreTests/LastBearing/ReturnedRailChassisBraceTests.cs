@@ -26,6 +26,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "returned-rail brace replay cannot consume later rails",
                 DuplicateReplayPreservesLaterSalvage);
             harness.Run(
+                "delayed returned-rail brace preserves future repeat lineage",
+                DelayedInstallPreservesFutureRepeatLineage);
+            harness.Run(
                 "returned-rail brace protects both routes for every roster",
                 BothModulesAndAllRostersShareExactProtection);
             harness.Run(
@@ -269,6 +272,58 @@ namespace AtomicLandPirate.LastBearingTests
                 "brace replay event");
         }
 
+        private static void DelayedInstallPreservesFutureRepeatLineage()
+        {
+            CoreTestDriver driver = ReachInstallReady(
+                ColonyComposition.Mixed,
+                VehicleModule.WinchAssembly,
+                3631);
+            RunRepeatCircuit(driver);
+            driver.Apply(sequence => new ServiceScoutCommand(sequence));
+
+            TestHarness.True(
+                driver.View.IsReturnedRailChassisBraceInstallAvailable,
+                "repeat bundle did not expose delayed brace installation");
+            driver.Apply(sequence =>
+                new InstallReturnedRailChassisBraceCommand(sequence));
+            TestHarness.Equal(
+                FrameRailSalvageCustody.None,
+                driver.State.FrameRailSalvageCustody,
+                "delayed brace did not consume repeat bundle");
+
+            byte[] saved = LastBearingCanonicalCodec.Encode(driver.State);
+            LastBearingDecodeResult restored =
+                LastBearingCanonicalCodec.TryDecode(saved);
+            TestHarness.True(
+                restored.Succeeded && restored.State != null,
+                "delayed brace save did not restore");
+            var continued = new CoreTestDriver(restored.State!);
+            TestHarness.True(
+                continued.State.ReturnedRailChassisBraceInstalled,
+                "restored delayed brace flag");
+            TestHarness.Equal(
+                FrameRailSalvageCustody.None,
+                continued.State.FrameRailSalvageCustody,
+                "restored consumed repeat bundle");
+            TestHarness.True(
+                continued.View.IsRepeatExpeditionAvailable,
+                "delayed brace permanently blocked the next repeat");
+            TestHarness.Equal(
+                "prepare-repeat-expedition",
+                continued.View.NextObjective,
+                "delayed brace next objective");
+
+            PrepareRepeat(continued);
+            TestHarness.Equal(
+                TransactionPhase.Prepared,
+                continued.State.TransactionPhase,
+                "next repeat did not prepare after delayed brace");
+            TestHarness.Equal(
+                FrameRailSalvageCustody.WreckLine,
+                continued.State.FrameRailSalvageCustody,
+                "next repeat did not reset salvage source");
+        }
+
         private static void BothModulesAndAllRostersShareExactProtection()
         {
             foreach (VehicleModule module in new[]
@@ -380,15 +435,20 @@ namespace AtomicLandPirate.LastBearingTests
                     .ProjectedRoundTripConditionLossMilli,
                 "schema 10 restored route protection");
 
-            LastBearingState legacySource = ReachInstallReady(
-                ColonyComposition.HumanOnly,
-                VehicleModule.WinchAssembly,
-                3661).State;
+            LastBearingState legacySource =
+                new LastBearingStateBuilder(
+                    ReachInstallReady(
+                        ColonyComposition.HumanOnly,
+                        VehicleModule.WinchAssembly,
+                        3661).State)
+                {
+                    EmergencyCisternCharged = true,
+                }.Build();
             byte[] schemaNine =
                 LastBearingCanonicalCodec.EncodeLegacyV9ForMigrationTests(
                     legacySource);
             TestHarness.Equal(
-                "84f26665c1455aba184f66715f1f3cf202502d5e8e67ad047d599651bb10891a",
+                "ed574b750d7824e9241a6717cd17c283bd3a1958e275f1a25bd831931091b4bf",
                 ComputeSha256(schemaNine),
                 "schema 9 source golden digest");
             LastBearingDecodeResult first =
@@ -408,6 +468,9 @@ namespace AtomicLandPirate.LastBearingTests
             TestHarness.True(
                 !first.State.ReturnedRailChassisBraceInstalled,
                 "schema 9 brace default");
+            TestHarness.True(
+                first.State.EmergencyCisternCharged,
+                "schema 9 cistern flag was not preserved");
             TestHarness.True(
                 schemaNine.SequenceEqual(
                     LastBearingCanonicalCodec

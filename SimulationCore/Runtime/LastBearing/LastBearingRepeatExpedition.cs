@@ -236,12 +236,19 @@ namespace AtomicLandPirate.Simulation.LastBearing
         private static bool HasFinalizedSalvageShape(
             LastBearingState state)
         {
+            bool creditedBundlePresent =
+                state.FrameRailSalvageCustody
+                    == FrameRailSalvageCustody.Credited;
+            bool creditedBundleConsumedByBrace =
+                state.ReturnedRailChassisBraceInstalled
+                && state.FrameRailSalvageCustody
+                    == FrameRailSalvageCustody.None;
             return state.ExpeditionFuelManifestUnits == FuelCost(state)
                 && state.RouteActionUsed
                 && state.ReturnPayloadFrozen
                 && state.HasArrivalClaimSnapshot
-                && state.FrameRailSalvageCustody
-                    == FrameRailSalvageCustody.Credited
+                && (creditedBundlePresent
+                    || creditedBundleConsumedByBrace)
                 && state.OrdinaryCargoUsedUnits == 0
                 && state.TowSlotsUsed == 0;
         }
