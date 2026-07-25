@@ -994,7 +994,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             GarageBayView?.ApplyPlanMarker(marker);
         }
 
-        public void ApplyGarageRoadHand(string? assignedResidentId)
+        public void ApplyRoadHand(
+            string? assignedResidentId,
+            ExpeditionPhase expeditionPhase)
         {
             GarageRoadHandManifestPresentation manifest =
                 assignedResidentId == null
@@ -1012,6 +1014,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                             : throw new InvalidOperationException(
                                 "LAST_BEARING_ROAD_HAND_PRESENTATION_ID_INVALID");
             GarageBayView?.ApplyRoadHandManifest(manifest);
+            SashaScoutRoadHandPresentation occupant =
+                expeditionPhase == ExpeditionPhase.AtHome
+                    ? SashaScoutRoadHandPresentation.None
+                    : manifest switch
+                    {
+                        GarageRoadHandManifestPresentation.Human =>
+                            SashaScoutRoadHandPresentation.Human,
+                        GarageRoadHandManifestPresentation.UtilityRobot =>
+                            SashaScoutRoadHandPresentation.UtilityRobot,
+                        _ => SashaScoutRoadHandPresentation.None,
+                    };
+            VehicleView?.ScoutVisual?.ApplyRoadHand(occupant);
+            RoadFeelRig?.ScoutVisual.ApplyRoadHand(occupant);
         }
 
         public void ApplyRigUpgrade(RigUpgrade upgrade)

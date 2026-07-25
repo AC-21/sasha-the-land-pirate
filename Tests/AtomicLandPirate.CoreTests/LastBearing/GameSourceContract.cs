@@ -1200,10 +1200,13 @@ namespace AtomicLandPirate.LastBearingTests
                 "public void ApplyRoadHandManifest(");
             Require(
                 world,
-                "ApplyGarageRoadHand(string? assignedResidentId)");
+                "ApplyRoadHand(");
             Require(
                 controller,
-                "_world.ApplyGarageRoadHand(_readModel.AssignedResidentId)");
+                "_world.ApplyRoadHand(");
+            Require(
+                controller,
+                "_readModel.ExpeditionPhase);");
             foreach (string forbidden in new[]
             {
                 "AtomicLandPirate.Simulation",

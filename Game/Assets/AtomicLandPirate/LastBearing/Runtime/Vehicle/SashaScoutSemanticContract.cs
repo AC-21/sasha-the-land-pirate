@@ -59,9 +59,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         public const string CargoSocket02Name = "SOCKET_CARGO_02";
         public const string ToolDeploySocketName = "SOCKET_TOOL_DEPLOY";
         public const string DriverCameraSocketName = "SOCKET_DRIVER_CAMERA";
+        public const string RoadHandSocketName = "SOCKET_ROAD_HAND";
         public const string DriverDoorTransformName = "DOOR_DRIVER";
         public const string WinchModuleName = "MODULE_WINCH_ASSEMBLY";
         public const string RangeTankModuleName = "MODULE_SEALED_RANGE_TANK";
+        public const string HumanRoadHandName = "ROAD_HAND_HUMAN";
+        public const string UtilityRobotRoadHandName =
+            "ROAD_HAND_UTILITY_ROBOT";
         public const string PatchworkSkidPlateUpgradeName =
             "UPGRADE_PATCHWORK_SKID_PLATE";
         public const string ReturnedRailChassisBraceUpgradeName =
