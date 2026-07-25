@@ -498,7 +498,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.HotShiftRequiredTicks);
             Mix(ref hash, model.HotShiftCompletedCount);
             Mix(ref hash, model.IsHotShiftRunAvailable);
-            Mix(ref hash, model.IsHotShiftStalledByWorkshopPush);
+            Mix(ref hash, model.IsPreparationStalledByHotShift);
+            Mix(ref hash, model.IsPreparationActivelyWorking);
             Mix(ref hash, model.IsHotShiftStalledByDustFront);
             Mix(ref hash, model.IsHotShiftActivelyWorking);
             Mix(ref hash, model.EmergencyCisternCharged);
@@ -727,7 +728,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 primary = Action(
                     LastBearingFieldDeskIntent.OpenGarage,
                     "INSPECT SASHA'S RIG",
-                    "Preparation continues on the settlement clock.",
+                    CreatePreparationDetail(model),
                     true,
                     canDispatch,
                     LastBearingFieldDeskActionTone.Primary);
@@ -1488,6 +1489,40 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     !model.IsVehicleServiceAvailable);
         }
 
+        private static string CreatePreparationDetail(
+            LastBearingReadModel model)
+        {
+            if (model.PauseCause != PauseCause.None)
+            {
+                if (model.IsPreparationStalledByHotShift)
+                {
+                    return
+                        "Settlement clocks are paused. Hot Shift still owns the single machine-shop service slot; Workshop Push preparation and the garage gauge remain frozen.";
+                }
+
+                return model.PreparationChoice ==
+                       PreparationChoice.WorkshopPush
+                    ? "Settlement clocks are paused. Workshop Push still owns the single machine-shop service slot; preparation and the garage gauge are not advancing."
+                    : "Settlement clocks are paused. Preparation and the garage gauge are not advancing.";
+            }
+
+            if (model.IsPreparationStalledByHotShift)
+            {
+                return
+                    "Workshop Push is held. Hot Shift owns the single machine-shop service slot; preparation and the garage gauge are frozen.";
+            }
+
+            if (model.IsPreparationActivelyWorking)
+            {
+                return model.PreparationChoice ==
+                       PreparationChoice.WorkshopPush
+                    ? "Workshop Push owns the single machine-shop service slot and is actively advancing on the settlement clock."
+                    : "Preparation is actively advancing on the settlement clock.";
+            }
+
+            return "Preparation is waiting for the settlement clock.";
+        }
+
         private static LastBearingFieldDeskActionProjection
             CreateEmergencyCisternAction(
                 LastBearingGameController controller,
@@ -1561,12 +1596,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ? "HOT SHIFT · FRONT-STALLED · " +
                       model.HotShiftElapsedTicks + " / " +
                       model.HotShiftRequiredTicks
-                    : model.IsHotShiftStalledByWorkshopPush
-                        ? "HOT SHIFT · STALLED · " +
-                          model.HotShiftElapsedTicks + " / " +
-                          model.HotShiftRequiredTicks
-                        : "HOT SHIFT · " + model.HotShiftElapsedTicks + " / " +
-                          model.HotShiftRequiredTicks;
+                    : "HOT SHIFT · " + model.HotShiftElapsedTicks + " / " +
+                      model.HotShiftRequiredTicks;
             }
             else
             {
@@ -1583,27 +1614,27 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (model.IsHotShiftStalledByDustFront)
             {
                 detail =
-                    "The breached Dust Front stopped the failing waterworks. Progress and Hot Shift water draw stay held until turbine repair.";
+                    "The breached Dust Front stopped the 1-fuel, 120-tick, +2-part shift. Progress and its -0.010 water-per-tick draw stay held until turbine repair.";
             }
-            else if (model.IsHotShiftStalledByWorkshopPush)
+            else if (model.IsPreparationStalledByHotShift)
             {
                 detail =
-                    "Workshop Push borrowed the machine-shop operator. Progress is held and the stalled Hot Shift adds no water penalty.";
+                    "1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick. The active shift owns the single machine-shop service slot; Workshop Push preparation is held and the garage gauge is frozen.";
             }
             else if (model.HotShiftPhase == HotShiftPhase.InProgress)
             {
                 detail =
-                    "The operator is working. Hot Shift adds -0.010 water per settlement tick until completion.";
+                    "1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick. The operator, spindle, and sled are working.";
             }
             else if (model.PreparationChoice == PreparationChoice.CivicBuffer)
             {
                 detail =
-                    "Civic Buffer leaves the operator available. Working adds -0.010 water per settlement tick.";
+                    "1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick. Civic Buffer leaves the single machine-shop service slot available.";
             }
             else
             {
                 detail =
-                    "Workshop Push borrows the operator while preparation runs. The shift stalls with no water penalty until that operator returns.";
+                    "1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick. Starting the shift takes the single machine-shop service slot and holds Workshop Push preparation until the shift releases it.";
             }
 
             return Action(

@@ -159,6 +159,11 @@ namespace AtomicLandPirate.LastBearingTests
                 case "vgr26-road-safe-line":
                     RoadSafeLineTests.Run(harness);
                     break;
+                case "vgr27-one-pair-of-hands":
+                    HotShiftTests.RunOnePairOfHands(
+                        harness,
+                        repoRoot);
+                    break;
                 case "v0-hands-on-service-cell":
                     harness.Run(
                         "world service-cell source contract",

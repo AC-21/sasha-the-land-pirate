@@ -1746,7 +1746,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
                 _hotShiftMachineLabel.color =
                     _model.IsHotShiftStalledByDustFront ||
-                    _model.IsHotShiftStalledByWorkshopPush
+                    _model.IsPreparationStalledByHotShift
                         ? new Color32(255, 154, 102, 255)
                         : new Color32(238, 221, 178, 255);
             }
@@ -2173,20 +2173,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return "DUST FRONT STOP\nSHUTTER DOWN";
             }
 
-            if (model.IsHotShiftStalledByWorkshopPush)
-            {
-                return "WORKSHOP PUSH\nOPERATOR AT GARAGE";
-            }
-
             if (model.HotShiftPhase == HotShiftPhase.InProgress &&
                 model.PauseCause != PauseCause.None)
             {
-                return "HOT SHIFT PAUSED\nCITY CLOCK HELD";
+                return model.IsPreparationStalledByHotShift
+                    ? "HOT SHIFT PAUSED\nGARAGE GAUGE HELD"
+                    : "HOT SHIFT PAUSED\nCITY CLOCK HELD";
             }
 
             if (model.IsHotShiftActivelyWorking)
             {
-                return "HOT SHIFT RUNNING\nSPINDLE + SLED";
+                return model.IsPreparationStalledByHotShift
+                    ? "HOT SHIFT RUNNING\nGARAGE GAUGE HELD"
+                    : "HOT SHIFT RUNNING\nSPINDLE + SLED";
             }
 
             return model.HotShiftCompletedCount > 0
@@ -2202,20 +2201,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return "DUST FRONT STOP · resident present · safety shutter down";
             }
 
-            if (model.IsHotShiftStalledByWorkshopPush)
-            {
-                return "WORKSHOP PUSH STALL · operator borrowed by Sasha's rig";
-            }
-
             if (model.HotShiftPhase == HotShiftPhase.InProgress &&
                 model.PauseCause != PauseCause.None)
             {
-                return "HOT SHIFT PAUSED · city clock held · machinery stopped";
+                return model.IsPreparationStalledByHotShift
+                    ? "HOT SHIFT PAUSED · single service slot held · garage gauge frozen"
+                    : "HOT SHIFT PAUSED · city clock held · machinery stopped";
             }
 
             if (model.IsHotShiftActivelyWorking)
             {
-                return "HOT SHIFT RUNNING · spindle and sled follow the city clock";
+                return model.IsPreparationStalledByHotShift
+                    ? "HOT SHIFT RUNNING · one service slot · Workshop Push held · garage gauge frozen"
+                    : "HOT SHIFT RUNNING · spindle and sled follow the city clock";
             }
 
             return model.HotShiftCompletedCount > 0

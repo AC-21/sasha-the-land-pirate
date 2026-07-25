@@ -2141,8 +2141,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 return (model.IsHotShiftStalledByDustFront
                         ? "front-stalled · turbine repair required · no added water draw"
-                        : model.IsHotShiftStalledByWorkshopPush
-                            ? "stalled · operator borrowed · no added water draw"
+                        : model.IsPreparationStalledByHotShift
+                            ? "working · one service slot · Workshop Push held · garage gauge frozen · -0.010 water / settlement tick"
                             : "working · -0.010 water / settlement tick") +
                     " · " + model.HotShiftElapsedTicks + '/' +
                     model.HotShiftRequiredTicks;

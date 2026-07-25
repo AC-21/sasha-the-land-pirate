@@ -260,6 +260,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 available.PrimaryAction.Label,
                 Is.EqualTo("INSPECT SASHA'S RIG"));
             Assert.That(
+                available.PrimaryAction.Detail,
+                preparation == PreparationChoice.WorkshopPush
+                    ? Does.Contain(
+                        "Workshop Push owns the single machine-shop service slot and is actively advancing")
+                    : Does.Contain(
+                        "Preparation is actively advancing"));
+            Assert.That(
                 available.SecondaryAction.Intent,
                 Is.EqualTo(LastBearingFieldDeskIntent.RunHotShift));
             Assert.That(
@@ -270,8 +277,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 available.SecondaryAction.Detail,
                 preparation == PreparationChoice.CivicBuffer
-                    ? Does.Contain("leaves the operator available")
-                    : Does.Contain("borrows the operator"));
+                    ? Does.Contain(
+                        "single machine-shop service slot available")
+                    : Does.Contain(
+                        "holds Workshop Push preparation"));
+            Assert.That(
+                available.SecondaryAction.Detail,
+                Does.Contain(
+                    "1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick"));
 
             string canonicalBefore = controller.CanonicalHash;
             controller.StartHotShift();
@@ -290,54 +303,139 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingFieldDeskProjection active =
                 LastBearingFieldDeskPresenter.Present(controller);
             Assert.That(active.SecondaryAction.IsEnabled, Is.False);
+            Assert.That(
+                active.SecondaryAction.Label,
+                Does.StartWith("HOT SHIFT · "));
+            Assert.That(
+                active.SecondaryAction.Detail,
+                Does.Contain(
+                    "1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick"));
+            Assert.That(
+                controller.ReadModel!.IsPreparationStalledByHotShift,
+                Is.EqualTo(
+                    preparation == PreparationChoice.WorkshopPush));
+            Assert.That(
+                controller.ReadModel.IsPreparationActivelyWorking,
+                Is.EqualTo(
+                    preparation == PreparationChoice.CivicBuffer));
+            Assert.That(
+                active.DryLine.ProjectedWaterMilli,
+                Is.LessThan(60000));
+            Assert.That(
+                active.DryLine.Forecast,
+                Does.Contain(
+                    "PROJECTED BREACHED IF CURRENT DRAW CONTINUES"));
+
             if (preparation == PreparationChoice.WorkshopPush)
             {
                 Assert.That(
-                    active.SecondaryAction.Label,
-                    Is.EqualTo("HOT SHIFT · STALLED · 0 / 120"));
+                    active.PrimaryAction.Detail,
+                    Does.Contain("Workshop Push is held"));
+                Assert.That(
+                    active.PrimaryAction.Detail,
+                    Does.Contain(
+                        "Hot Shift owns the single machine-shop service slot"));
                 Assert.That(
                     active.SecondaryAction.Detail,
-                    Does.Contain("adds no water penalty"));
-                Assert.That(controller.Status, Does.Contain("borrowed the operator"));
+                    Does.Contain(
+                        "active shift owns the single machine-shop service slot"));
                 Assert.That(
-                    active.DryLine.ProjectedWaterMilli,
-                    Is.EqualTo(60000));
+                    active.SecondaryAction.Detail,
+                    Does.Contain("garage gauge is frozen"));
+                Assert.That(
+                    controller.Status,
+                    Does.Contain("single service slot"));
+
+                controller.TogglePause();
+                SimulateOneTick(controller);
+                LastBearingFieldDeskProjection pausedHeld =
+                    LastBearingFieldDeskPresenter.Present(controller);
+                Assert.That(
+                    pausedHeld.PrimaryAction.Detail,
+                    Does.Contain("Settlement clocks are paused"));
+                Assert.That(
+                    pausedHeld.PrimaryAction.Detail,
+                    Does.Contain(
+                        "Hot Shift still owns the single machine-shop service slot"));
             }
             else
             {
                 Assert.That(
-                    active.SecondaryAction.Label,
-                    Does.StartWith("HOT SHIFT · "));
+                    active.PrimaryAction.Detail,
+                    Does.Contain("Preparation is actively advancing"));
                 Assert.That(
                     active.SecondaryAction.Detail,
-                    Does.Contain("-0.010 water"));
-                Assert.That(controller.Status, Does.Contain("operator is working"));
+                    Does.Contain("operator, spindle, and sled are working"));
                 Assert.That(
-                    active.DryLine.ProjectedWaterMilli,
-                    Is.LessThan(60000));
-                Assert.That(
-                    active.DryLine.Forecast,
-                    Does.Contain(
-                        "PROJECTED BREACHED IF CURRENT DRAW CONTINUES"));
+                    controller.Status,
+                    Does.Contain("operator is working"));
             }
+        }
+
+        [TestCase(PreparationChoice.CivicBuffer)]
+        [TestCase(PreparationChoice.WorkshopPush)]
+        public void PausedPreparationCopyNamesClockAndSlotOwnership(
+            PreparationChoice preparation)
+        {
+            LastBearingGameController controller =
+                BuildController(ColonyComposition.Mixed);
+            PrepareForHotShift(controller, preparation);
+
+            controller.TogglePause();
+            SimulateOneTick(controller);
+
+            Assert.That(
+                controller.ReadModel!.PauseCause,
+                Is.EqualTo(PauseCause.Explicit));
+            Assert.That(
+                controller.ReadModel.IsPreparationActivelyWorking,
+                Is.False);
+            Assert.That(
+                controller.ReadModel.IsPreparationStalledByHotShift,
+                Is.False);
+            LastBearingFieldDeskProjection paused =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                paused.PrimaryAction.Detail,
+                Does.Contain("Settlement clocks are paused"));
+            Assert.That(
+                paused.PrimaryAction.Detail,
+                Does.Contain("not advancing"));
+            if (preparation == PreparationChoice.WorkshopPush)
+            {
+                Assert.That(
+                    paused.PrimaryAction.Detail,
+                    Does.Contain(
+                        "Workshop Push still owns the single machine-shop service slot"));
+            }
+            else
+            {
+                Assert.That(
+                    paused.PrimaryAction.Detail,
+                    Does.Not.Contain("still owns"));
+            }
+
+            controller.TogglePause();
+            SimulateOneTick(controller);
+            LastBearingFieldDeskProjection resumed =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                resumed.PrimaryAction.Detail,
+                Does.Contain("actively advancing"));
         }
 
         [TestCase(
             ColonyComposition.HumanOnly,
-            PreparationChoice.CivicBuffer,
-            true)]
+            PreparationChoice.CivicBuffer)]
         [TestCase(
             ColonyComposition.RobotOnly,
-            PreparationChoice.CivicBuffer,
-            true)]
+            PreparationChoice.CivicBuffer)]
         [TestCase(
             ColonyComposition.Mixed,
-            PreparationChoice.WorkshopPush,
-            false)]
-        public void PhysicalMachineShopProjectsTheExistingHotShiftTruth(
+            PreparationChoice.WorkshopPush)]
+        public void PhysicalMachineShopProjectsTheSingleServiceSlotTruth(
             ColonyComposition composition,
-            PreparationChoice preparation,
-            bool expectedWorking)
+            PreparationChoice preparation)
         {
             LastBearingGameController controller =
                 BuildController(composition);
@@ -352,7 +450,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(interactor.IsHotShiftControlFocused, Is.True);
             Assert.That(view.IsHotShiftSpindleMoving, Is.False);
             Assert.That(view.IsHotShiftWorkPoolVisible, Is.False);
-            Assert.That(view.IsWorkshopPushTransferArmVisible, Is.False);
+            Assert.That(
+                view.IsWorkshopPushTransferArmVisible,
+                Is.EqualTo(
+                    preparation == PreparationChoice.WorkshopPush));
+            Assert.That(
+                view.IsHumanOperatorVisible ||
+                view.IsRobotOperatorVisible,
+                Is.EqualTo(
+                    preparation == PreparationChoice.CivicBuffer));
             Assert.That(view.IsDustFrontShutterVisible, Is.False);
             Assert.That(
                 view.IsHotShiftCompletionWitnessVisible,
@@ -365,47 +471,84 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             Assert.That(
                 view.IsHotShiftSpindleMoving,
-                Is.EqualTo(expectedWorking));
+                Is.True);
             Assert.That(
                 view.IsHotShiftWorkPoolVisible,
-                Is.EqualTo(expectedWorking));
+                Is.True);
             Assert.That(
                 view.IsWorkshopPushTransferArmVisible,
-                Is.EqualTo(!expectedWorking));
+                Is.False);
             Assert.That(view.IsDustFrontShutterVisible, Is.False);
             Assert.That(
                 view.IsHumanOperatorVisible ||
                 view.IsRobotOperatorVisible,
-                Is.EqualTo(expectedWorking));
+                Is.True);
             Assert.That(view.HotShiftSledProgress, Is.EqualTo(0f));
+            Assert.That(
+                controller.ReadModel!.IsPreparationStalledByHotShift,
+                Is.EqualTo(
+                    preparation == PreparationChoice.WorkshopPush));
+            Assert.That(
+                controller.World.GarageBayView!
+                    .IsPreparationGaugeHeldByHotShift,
+                Is.EqualTo(
+                    preparation == PreparationChoice.WorkshopPush));
+            Assert.That(
+                controller.World.GarageBayView
+                    .IsPreparationGaugeActivelyWorking,
+                Is.EqualTo(
+                    preparation == PreparationChoice.CivicBuffer));
 
-            if (expectedWorking)
+            long partsBefore = controller.ReadModel.PartsUnits;
+            for (var tick = 0;
+                 tick <
+                 LastBearingBalanceV1
+                     .HotShiftRequiredSettlementTicks;
+                 tick++)
             {
-                long partsBefore = controller.ReadModel!.PartsUnits;
-                for (var tick = 0;
-                     tick <
-                     LastBearingBalanceV1
-                         .HotShiftRequiredSettlementTicks;
-                     tick++)
-                {
-                    SimulateOneTick(controller);
-                }
+                SimulateOneTick(controller);
+            }
 
+            Assert.That(
+                controller.ReadModel!.HotShiftCompletedCount,
+                Is.EqualTo(1));
+            Assert.That(
+                controller.ReadModel.PartsUnits,
+                Is.EqualTo(
+                    partsBefore +
+                    LastBearingBalanceV1
+                        .HotShiftOutputPartsUnits));
+            Assert.That(view.IsHotShiftSpindleMoving, Is.False);
+            Assert.That(view.IsHotShiftWorkPoolVisible, Is.False);
+            Assert.That(
+                view.IsHotShiftCompletionWitnessVisible,
+                Is.True);
+            Assert.That(view.HotShiftSledProgress, Is.EqualTo(1f));
+
+            if (preparation == PreparationChoice.WorkshopPush)
+            {
+                SimulateOneTick(controller);
                 Assert.That(
-                    controller.ReadModel!.HotShiftCompletedCount,
-                    Is.EqualTo(1));
-                Assert.That(
-                    controller.ReadModel.PartsUnits,
-                    Is.EqualTo(
-                        partsBefore +
-                        LastBearingBalanceV1
-                            .HotShiftOutputPartsUnits));
-                Assert.That(view.IsHotShiftSpindleMoving, Is.False);
-                Assert.That(view.IsHotShiftWorkPoolVisible, Is.False);
-                Assert.That(
-                    view.IsHotShiftCompletionWitnessVisible,
+                    controller.ReadModel.IsPreparationActivelyWorking,
                     Is.True);
-                Assert.That(view.HotShiftSledProgress, Is.EqualTo(1f));
+                Assert.That(
+                    controller.ReadModel.IsPreparationStalledByHotShift,
+                    Is.False);
+                Assert.That(
+                    view.IsWorkshopPushTransferArmVisible,
+                    Is.True);
+                Assert.That(
+                    view.IsHumanOperatorVisible ||
+                    view.IsRobotOperatorVisible,
+                    Is.False);
+                Assert.That(
+                    controller.World.GarageBayView!
+                        .IsPreparationGaugeActivelyWorking,
+                    Is.True);
+                Assert.That(
+                    controller.World.GarageBayView
+                        .IsPreparationGaugeHeldByHotShift,
+                    Is.False);
             }
         }
 

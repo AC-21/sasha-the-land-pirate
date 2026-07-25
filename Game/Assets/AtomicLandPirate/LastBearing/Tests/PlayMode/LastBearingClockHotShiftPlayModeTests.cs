@@ -228,7 +228,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
-        public IEnumerator GuardsAndStallsFailClosedAtThePhysicalMachine()
+        public IEnumerator GuardsAndSingleServiceSlotFailClosedAtThePhysicalMachine()
         {
             yield return BootController();
             LastBearingGameController controller = _controller!;
@@ -240,13 +240,20 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.World!.CityServiceCellView!;
             LastBearingCityServiceCellInteractor interactor =
                 view.Interactor!;
+            var garage = controller.World.GarageBayView!;
+            Renderer gaugeHousing = RequireNamed(
+                    garage.transform,
+                    "ASSEMBLY_PROGRESS_GAUGE_HOUSING")
+                .GetComponent<Renderer>();
+            Color workingGaugeColor =
+                gaugeHousing.sharedMaterial.color;
 
-            interactor.ClickHotShiftControl();
-            AssertSingleHotShiftCommand(controller);
-            InvokeSimulationTick(controller);
             Assert.That(
-                controller.ReadModel!.IsHotShiftStalledByWorkshopPush,
+                controller.ReadModel!.IsPreparationActivelyWorking,
                 Is.True);
+            Assert.That(
+                controller.ReadModel.IsPreparationStalledByHotShift,
+                Is.False);
             Assert.That(view.IsHumanOperatorVisible, Is.False);
             Assert.That(view.IsRobotOperatorVisible, Is.False);
             Assert.That(view.IsHotShiftSpindleMoving, Is.False);
@@ -254,8 +261,156 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 view.IsWorkshopPushTransferArmVisible,
                 Is.True);
+            Assert.That(
+                garage.IsPreparationGaugeActivelyWorking,
+                Is.True);
+            Assert.That(
+                garage.IsPreparationGaugeHeldByHotShift,
+                Is.False);
+
+            controller.TogglePause();
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.PauseCause,
+                Is.EqualTo(PauseCause.Explicit));
+            Assert.That(
+                controller.ReadModel.IsPreparationActivelyWorking,
+                Is.False);
+            Assert.That(
+                controller.ReadModel.IsPreparationStalledByHotShift,
+                Is.False);
+            Assert.That(view.IsHumanOperatorVisible, Is.False);
+            Assert.That(view.IsRobotOperatorVisible, Is.False);
+            Assert.That(
+                view.IsWorkshopPushTransferArmVisible,
+                Is.True);
+            Assert.That(
+                garage.IsPreparationGaugeActivelyWorking,
+                Is.False);
+            Assert.That(
+                garage.IsPreparationGaugeHeldByHotShift,
+                Is.False);
+            Color pausedGaugeColor =
+                gaugeHousing.sharedMaterial.color;
+            Assert.That(
+                pausedGaugeColor,
+                Is.Not.EqualTo(workingGaugeColor));
+            LastBearingFieldDeskProjection pausedPreparation =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                pausedPreparation.PrimaryAction.Detail,
+                Does.Contain("Settlement clocks are paused"));
+            Assert.That(
+                pausedPreparation.PrimaryAction.Detail,
+                Does.Contain(
+                    "Workshop Push still owns the single machine-shop service slot"));
+
+            controller.TogglePause();
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.PauseCause,
+                Is.EqualTo(PauseCause.None));
+            Assert.That(
+                controller.ReadModel.IsPreparationActivelyWorking,
+                Is.True);
+            Assert.That(
+                view.IsWorkshopPushTransferArmVisible,
+                Is.True);
+            Assert.That(
+                gaugeHousing.sharedMaterial.color,
+                Is.EqualTo(workingGaugeColor));
+            Assert.That(
+                LastBearingFieldDeskPresenter.Present(controller)
+                    .PrimaryAction.Detail,
+                Does.Contain("actively advancing"));
+            long preparationElapsedBeforeShift =
+                controller.ReadModel.PreparationElapsedTicks;
+
+            interactor.ClickHotShiftControl();
+            AssertSingleHotShiftCommand(controller);
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel!.IsPreparationStalledByHotShift,
+                Is.True);
+            Assert.That(
+                controller.ReadModel.IsPreparationActivelyWorking,
+                Is.False);
+            Assert.That(
+                controller.ReadModel.PreparationElapsedTicks,
+                Is.EqualTo(preparationElapsedBeforeShift + 1));
+            long preparationAtPreemption =
+                controller.ReadModel.PreparationElapsedTicks;
+            Assert.That(
+                view.IsHumanOperatorVisible ||
+                view.IsRobotOperatorVisible,
+                Is.True);
+            Assert.That(view.IsHotShiftSpindleMoving, Is.True);
+            Assert.That(view.IsHotShiftWorkPoolVisible, Is.True);
+            Assert.That(
+                view.IsWorkshopPushTransferArmVisible,
+                Is.False);
             Assert.That(view.IsDustFrontShutterVisible, Is.False);
             Assert.That(view.HotShiftSledProgress, Is.EqualTo(0f));
+            Assert.That(
+                garage.IsPreparationGaugeActivelyWorking,
+                Is.False);
+            Assert.That(
+                garage.IsPreparationGaugeHeldByHotShift,
+                Is.True);
+            Color heldGaugeColor =
+                gaugeHousing.sharedMaterial.color;
+            Assert.That(
+                heldGaugeColor,
+                Is.Not.EqualTo(pausedGaugeColor));
+
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.PreparationElapsedTicks,
+                Is.EqualTo(preparationAtPreemption));
+            Assert.That(
+                controller.ReadModel.HotShiftElapsedTicks,
+                Is.GreaterThan(0));
+            Assert.That(view.HotShiftSledProgress, Is.GreaterThan(0f));
+            controller.TogglePause();
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.PauseCause,
+                Is.EqualTo(PauseCause.Explicit));
+            Assert.That(
+                controller.ReadModel.IsPreparationStalledByHotShift,
+                Is.True);
+            Assert.That(
+                view.IsHumanOperatorVisible ||
+                view.IsRobotOperatorVisible,
+                Is.True);
+            Assert.That(
+                view.IsWorkshopPushTransferArmVisible,
+                Is.False);
+            Assert.That(view.IsHotShiftSpindleMoving, Is.False);
+            Assert.That(
+                garage.IsPreparationGaugeHeldByHotShift,
+                Is.True);
+            LastBearingFieldDeskProjection pausedHeld =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                pausedHeld.PrimaryAction.Detail,
+                Does.Contain("Settlement clocks are paused"));
+            Assert.That(
+                pausedHeld.PrimaryAction.Detail,
+                Does.Contain(
+                    "Hot Shift still owns the single machine-shop service slot"));
+            controller.TogglePause();
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.PauseCause,
+                Is.EqualTo(PauseCause.None));
+            Assert.That(
+                view.IsWorkshopPushTransferArmVisible,
+                Is.False);
+            Assert.That(
+                view.IsHumanOperatorVisible ||
+                view.IsRobotOperatorVisible,
+                Is.True);
             interactor.ClickHotShiftControl();
             Assert.That(PendingCommands(controller), Is.Empty);
             Assert.That(interactor.LastInteractionRejected, Is.True);

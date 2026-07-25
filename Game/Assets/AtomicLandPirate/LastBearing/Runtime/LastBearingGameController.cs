@@ -2751,9 +2751,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 {
                     _status = _readModel.IsHotShiftStalledByDustFront
                         ? "Hot Shift started, but the breached Dust Front has stopped the failing waterworks. Progress and water draw are stalled until turbine repair."
-                        : _readModel.IsHotShiftStalledByWorkshopPush
-                            ? "Hot Shift started, but Workshop Push borrowed the operator. Progress and the Hot Shift water draw are stalled."
-                            : "Hot Shift started. The operator is working; water draw adds -0.010 per settlement tick.";
+                        : _readModel.IsPreparationStalledByHotShift
+                            ? "Hot Shift started. One fuel drives 120 ticks for +2 parts at -0.010 water per tick. The active shift owns the single service slot; Workshop Push and its garage gauge are held."
+                            : "Hot Shift started. One fuel drives 120 ticks for +2 parts; the operator is working and water draw adds -0.010 per settlement tick.";
                 }
 
                 if (hotShiftCheckpointReached)
@@ -3090,7 +3090,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ApplyFuelBondInteraction(_readModel);
             _world.ApplyGaragePreparationProgress(
                 _readModel.PreparationElapsedTicks,
-                _readModel.PreparationRequiredTicks);
+                _readModel.PreparationRequiredTicks,
+                _readModel.IsPreparationStalledByHotShift,
+                _readModel.IsPreparationActivelyWorking);
             _world.ApplyGaragePlanIntent(
                 IsGaragePlanIntentActive
                     ? _garagePreparationIntent

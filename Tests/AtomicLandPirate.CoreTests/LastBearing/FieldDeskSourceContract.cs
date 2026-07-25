@@ -351,13 +351,38 @@ namespace AtomicLandPirate.LastBearingTests
                 "RUN ANOTHER HOT SHIFT");
             Require(
                 fieldDeskPresenter,
-                "HOT SHIFT · STALLED · ");
+                "IsPreparationStalledByHotShift");
             Require(
                 fieldDeskPresenter,
-                "Workshop Push borrowed the machine-shop operator");
+                "1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick.");
             Require(
                 fieldDeskPresenter,
-                "Civic Buffer leaves the operator available");
+                "The active shift owns the single machine-shop service slot");
+            Require(
+                fieldDeskPresenter,
+                "Workshop Push preparation is held and the garage gauge is frozen");
+            Require(
+                fieldDeskPresenter,
+                "Civic Buffer leaves the single machine-shop service slot available");
+            Require(
+                fieldDeskPresenter,
+                "Settlement clocks are paused. Hot Shift still owns the single machine-shop service slot");
+            Require(
+                fieldDeskPresenter,
+                "Workshop Push still owns the single machine-shop service slot");
+            Require(
+                fieldDeskPresenter,
+                "Workshop Push owns the single machine-shop service slot and is actively advancing");
+            TestHarness.True(
+                fieldDeskPresenter.IndexOf(
+                    "HOT SHIFT · STALLED",
+                    StringComparison.Ordinal) < 0,
+                "Field Desk must not claim Workshop Push stalls Hot Shift");
+            TestHarness.True(
+                fieldDeskPresenter.IndexOf(
+                    "Workshop Push borrowed the machine-shop operator",
+                    StringComparison.Ordinal) < 0,
+                "Field Desk must show Hot Shift owning the service slot");
             Require(
                 fieldDeskPresenter,
                 "COMMISSIONING DELIVERY · ONCE");

@@ -970,11 +970,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void ApplyGaragePreparationProgress(
             long elapsedTicks,
-            long requiredTicks)
+            long requiredTicks,
+            bool stalledByHotShift,
+            bool activelyWorking)
         {
             GarageBayView?.ApplyPreparationProgress(
                 elapsedTicks,
-                requiredTicks);
+                requiredTicks,
+                stalledByHotShift,
+                activelyWorking);
         }
 
         public void ApplyGaragePlanIntent(PreparationChoice preparation)
@@ -1073,7 +1077,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             if (snapshot.Phase == LastBearingVisualPhase.Title)
             {
-                GarageBayView?.ApplyPreparationProgress(0, 0);
+                GarageBayView?.ApplyPreparationProgress(
+                    0,
+                    0,
+                    stalledByHotShift: false,
+                    activelyWorking: false);
                 GarageBayView?.ApplyPlanMarker(
                     GaragePlanMarkerPresentation.None);
             }
