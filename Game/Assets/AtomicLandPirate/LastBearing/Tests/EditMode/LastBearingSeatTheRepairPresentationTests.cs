@@ -86,6 +86,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             foreach (ColonyComposition composition in compositions)
             {
                 controller.StartNewGame(composition);
+                if (composition == ColonyComposition.Mixed)
+                {
+                    controller.AssignRoadHand(
+                        ResidentRoster.HumanResidentId);
+                }
+
                 Assert.That(
                     view.IsHumanWorkerVisible,
                     Is.EqualTo(composition != ColonyComposition.RobotOnly),

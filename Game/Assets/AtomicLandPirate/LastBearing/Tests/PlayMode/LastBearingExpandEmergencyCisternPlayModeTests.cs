@@ -402,6 +402,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             var controller = root.AddComponent<LastBearingGameController>();
             controller.Initialize();
             controller.StartNewGame(composition);
+            if (composition == ColonyComposition.Mixed)
+            {
+                controller.AssignRoadHand(
+                    ResidentRoster.HumanResidentId);
+            }
+
             return controller;
         }
 

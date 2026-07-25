@@ -233,11 +233,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     LastBearingPermitJobChapter.CityCrisis,
                     1,
                     "CHAPTER I · THE FALLING RESERVE",
-                    "Name an expedition lead",
-                    "The roster is valid, but the road manifest needs one " +
-                    "resident in the lead slot.",
-                    "Click Assign Default Expedition Lead; the resident enters " +
-                    "the manifest without changing colony mechanics.");
+                    "Choose who supports Sasha on the road",
+                    "The roster is valid, but Sasha's road manifest still needs " +
+                    "one support hand.",
+                    model.Composition == ColonyComposition.Mixed
+                        ? "Choose HUMAN ROAD HAND or UTILITY-ROBOT ROAD HAND; identity changes, duties and costs do not."
+                        : "Choose the colony's sole road hand; Sasha remains the driver and expedition leader.");
             }
 
             if (!cityNeedInspected)

@@ -105,6 +105,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Object.FindAnyObjectByType<LastBearingGameController>();
             Assert.That(controller, Is.Not.Null);
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
             controller.enabled = false;
 
             LastBearingState canonicalState = controller.State!;

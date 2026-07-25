@@ -468,6 +468,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             bool pause)
         {
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
             controller.InspectCityNeed();
             controller.SelectCityGrammarHypothesis(
                 LastBearingCityGrammarHypothesis.DistrictStamp);
@@ -502,6 +503,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingGameController controller)
         {
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
             controller.InspectCityNeed();
 
             controller.SelectCityBuildingPreview(CityBuildingKind.Recycler);

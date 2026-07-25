@@ -209,7 +209,7 @@ namespace AtomicLandPirate.LastBearingTests
 
             foreach (string delegation in new[]
             {
-                ".AssignDefaultLeadResident(",
+                ".AssignRoadHand(",
                 ".InspectCityNeed(",
                 ".SelectCityBuildingPreview(",
                 ".MoveCityBuildingPreview(",
@@ -238,6 +238,35 @@ namespace AtomicLandPirate.LastBearingTests
             {
                 Require(fieldDesk, delegation);
             }
+
+            Require(
+                fieldDeskPresenter,
+                "AssignHumanRoadHand = 36");
+            Require(
+                fieldDeskPresenter,
+                "AssignRobotRoadHand = 37");
+            Require(
+                fieldDeskPresenter,
+                "CHOOSE HUMAN ROAD HAND");
+            Require(
+                fieldDeskPresenter,
+                "CHOOSE UTILITY-ROBOT ROAD HAND");
+            Require(
+                controller,
+                "public void AssignRoadHand(string stableId)");
+            Require(
+                controller,
+                "This colony has two valid road hands.");
+            TestHarness.Equal(
+                2,
+                CountOccurrences(fieldDesk, ".AssignRoadHand("),
+                "the Field Desk must dispatch both exact road-hand choices");
+            Require(
+                fieldDesk,
+                ".AssignRoadHand(ResidentRoster.HumanResidentId)");
+            Require(
+                fieldDesk,
+                ".AssignRoadHand(ResidentRoster.RobotResidentId)");
 
             TestHarness.True(
                 fieldDesk.IndexOf(

@@ -954,6 +954,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
             GarageBayView?.ApplyPlanMarker(marker);
         }
 
+        public void ApplyGarageRoadHand(string? assignedResidentId)
+        {
+            GarageRoadHandManifestPresentation manifest =
+                assignedResidentId == null
+                    ? GarageRoadHandManifestPresentation.None
+                    : string.Equals(
+                        assignedResidentId,
+                        ResidentRoster.HumanResidentId,
+                        StringComparison.Ordinal)
+                        ? GarageRoadHandManifestPresentation.Human
+                        : string.Equals(
+                            assignedResidentId,
+                            ResidentRoster.RobotResidentId,
+                            StringComparison.Ordinal)
+                            ? GarageRoadHandManifestPresentation.UtilityRobot
+                            : throw new InvalidOperationException(
+                                "LAST_BEARING_ROAD_HAND_PRESENTATION_ID_INVALID");
+            GarageBayView?.ApplyRoadHandManifest(manifest);
+        }
+
         public void ApplyRigUpgrade(RigUpgrade upgrade)
         {
             SashaScoutUpgradePresentation presentation =

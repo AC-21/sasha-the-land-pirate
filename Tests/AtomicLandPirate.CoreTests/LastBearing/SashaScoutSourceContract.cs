@@ -104,6 +104,19 @@ namespace AtomicLandPirate.LastBearingTests
             Require(garage, "ASSEMBLY_PROGRESS_GAUGE");
             Require(garage, "ApplyPreparationProgress");
             Require(garage, "PreparationGaugeLitSegments");
+            Require(
+                garage,
+                "GarageRoadHandManifestPresentation");
+            Require(garage, "ROAD_HAND_MANIFEST_HUMAN");
+            Require(
+                garage,
+                "ROAD_HAND_MANIFEST_UTILITY_ROBOT");
+            Require(
+                garage,
+                "public void ApplyRoadHandManifest(");
+            Require(
+                garage,
+                "public GarageRoadHandManifestPresentation ActiveRoadHandManifest");
             Require(garage, "RigUpgradeInstallPulseDurationSeconds");
             Require(garage, "public void PulseRigUpgradeInstall()");
             Require(garage, "public void ResetRigUpgradeInstallPulse()");
@@ -132,6 +145,15 @@ namespace AtomicLandPirate.LastBearingTests
             Require(world, "RoadFeelRig?.ScoutVisual.ApplyModule(snapshot.Module)");
             Require(world, "GarageBayView?.ApplyModule(snapshot.Module)");
             Require(world, "GarageBayView?.ApplyPreparationProgress(");
+            Require(
+                world,
+                "public void ApplyGarageRoadHand(string? assignedResidentId)");
+            Require(
+                world,
+                "GarageBayView?.ApplyRoadHandManifest(manifest)");
+            Require(
+                controller,
+                "_world.ApplyGarageRoadHand(_readModel.AssignedResidentId)");
             string upgradePresentation = Segment(
                 world,
                 "public void ApplyRigUpgrade(RigUpgrade upgrade)",

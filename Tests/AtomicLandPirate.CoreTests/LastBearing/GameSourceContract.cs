@@ -1177,6 +1177,22 @@ namespace AtomicLandPirate.LastBearingTests
             Require(garage, "public void ApplyPlanMarker(");
             Require(garage, "IsWorkshopPushPlanMarkerVisible");
             Require(garage, "IsCivicBufferPlanMarkerVisible");
+            Require(
+                garage,
+                "GarageRoadHandManifestPresentation");
+            Require(garage, "ROAD_HAND_MANIFEST_HUMAN");
+            Require(
+                garage,
+                "ROAD_HAND_MANIFEST_UTILITY_ROBOT");
+            Require(
+                garage,
+                "public void ApplyRoadHandManifest(");
+            Require(
+                world,
+                "ApplyGarageRoadHand(string? assignedResidentId)");
+            Require(
+                controller,
+                "_world.ApplyGarageRoadHand(_readModel.AssignedResidentId)");
             foreach (string forbidden in new[]
             {
                 "AtomicLandPirate.Simulation",

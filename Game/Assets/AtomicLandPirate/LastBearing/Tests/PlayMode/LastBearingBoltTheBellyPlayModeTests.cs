@@ -43,6 +43,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         {
             LastBearingGameController controller = BuildController();
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
             yield return null;
 
             LastBearingWorldBuilder world = controller.World!;

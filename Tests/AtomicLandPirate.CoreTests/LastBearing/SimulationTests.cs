@@ -45,6 +45,7 @@ namespace AtomicLandPirate.LastBearingTests
             DepotAccessRestorationTests.Run(harness);
             EmergencyAidReceptionTests.Run(harness);
             CompositionTests.Run(harness);
+            RoadHandTests.Run(harness);
             OwnershipTests.Run(harness);
         }
 

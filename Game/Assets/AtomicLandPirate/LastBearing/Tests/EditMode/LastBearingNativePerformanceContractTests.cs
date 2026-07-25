@@ -22,6 +22,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 var controller = root.AddComponent<LastBearingGameController>();
                 controller.Initialize();
                 controller.StartNewGame(ColonyComposition.Mixed);
+                controller.AssignRoadHand(
+                    ResidentRoster.HumanResidentId);
 
                 LastBearingState retainedState = controller.State!;
                 LastBearingReadModel retainedView = controller.ReadModel!;

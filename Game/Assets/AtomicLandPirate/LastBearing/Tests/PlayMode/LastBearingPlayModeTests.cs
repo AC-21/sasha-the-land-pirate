@@ -141,7 +141,21 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.ReadModel!.Composition, Is.EqualTo(ColonyComposition.Mixed));
             Assert.That(
                 controller.ReadModel.AssignedResidentId,
-                Is.EqualTo(ResidentRoster.HumanResidentId));
+                Is.Null);
+            Assert.That(
+                world.GarageBayView!.ActiveRoadHandManifest,
+                Is.EqualTo(GarageRoadHandManifestPresentation.None));
+
+            controller.AssignRoadHand(ResidentRoster.RobotResidentId);
+            yield return null;
+
+            Assert.That(
+                controller.ReadModel.AssignedResidentId,
+                Is.EqualTo(ResidentRoster.RobotResidentId));
+            Assert.That(
+                world.GarageBayView.ActiveRoadHandManifest,
+                Is.EqualTo(
+                    GarageRoadHandManifestPresentation.UtilityRobot));
             Assert.That(
                 GameObject.Find("Resident " + ResidentRoster.HumanResidentId),
                 Is.Not.Null);
@@ -168,6 +182,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.enabled = false;
             string profileDirectory = InstallTemporarySaveAdapter(controller);
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
             controller.InspectCityNeed();
 
             controller.SelectCityBuildingPreview(CityBuildingKind.Recycler);
@@ -2487,6 +2502,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingGameController controller =
                 UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
             yield return new WaitForSecondsRealtime(0.15f);
 
             SashaScoutVisual[] scouts =
@@ -2645,6 +2661,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.enabled = false;
             string profileDirectory = InstallTemporarySaveAdapter(controller);
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
             controller.InspectCityNeed();
             CompleteDistrictObservation(controller, clear: true);
             controller.ActivateInfrastructure();
@@ -2730,6 +2747,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.enabled = false;
             string profileDirectory = InstallTemporarySaveAdapter(controller);
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
             controller.InspectCityNeed();
             CompleteDistrictObservation(controller, clear: true);
             controller.ActivateInfrastructure();

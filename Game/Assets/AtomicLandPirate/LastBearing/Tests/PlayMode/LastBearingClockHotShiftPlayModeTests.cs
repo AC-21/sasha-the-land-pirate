@@ -494,6 +494,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             PreparationChoice preparation)
         {
             controller.StartNewGame(composition);
+            if (composition == ColonyComposition.Mixed)
+            {
+                controller.AssignRoadHand(
+                    ResidentRoster.HumanResidentId);
+            }
+
             controller.InspectCityNeed();
             controller.SelectCityGrammarHypothesis(
                 LastBearingCityGrammarHypothesis.DistrictStamp);

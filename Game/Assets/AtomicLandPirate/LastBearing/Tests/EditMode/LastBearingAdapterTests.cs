@@ -374,25 +374,42 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             Assert.That(controller.ReadModel, Is.Not.Null);
             Assert.That(controller.ReadModel!.Composition, Is.EqualTo(composition));
+            bool mixedChoicePending =
+                composition == ColonyComposition.Mixed;
             Assert.That(
                 controller.ReadModel.WaterMilli,
                 Is.EqualTo(
                     LastBearingBalanceV1.StartingWaterMilli +
-                    LastBearingBalanceV1.FailingWaterRateMilliPerSettlementTick));
+                    (mixedChoicePending
+                        ? 0
+                        : LastBearingBalanceV1
+                            .FailingWaterRateMilliPerSettlementTick)));
             Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(24));
             Assert.That(controller.ReadModel.FuelUnits, Is.EqualTo(18));
+            if (mixedChoicePending)
+            {
+                Assert.That(
+                    controller.ReadModel.AssignedResidentId,
+                    Is.Null);
+            }
+            else
+            {
+                Assert.That(
+                    controller.ReadModel.AssignedResidentId,
+                    Is.EqualTo(
+                        composition == ColonyComposition.RobotOnly
+                            ? ResidentRoster.RobotResidentId
+                            : ResidentRoster.HumanResidentId));
+            }
+
             Assert.That(
-                controller.ReadModel.AssignedResidentId,
-                Is.EqualTo(composition == ColonyComposition.RobotOnly
-                    ? ResidentRoster.RobotResidentId
-                    : ResidentRoster.HumanResidentId));
-            Assert.That(controller.State!.NextCommandSequence, Is.EqualTo(1));
+                controller.State!.NextCommandSequence,
+                Is.EqualTo(mixedChoicePending ? 0 : 1));
         }
 
         [TestCase(ColonyComposition.HumanOnly, ResidentRoster.HumanResidentId)]
         [TestCase(ColonyComposition.RobotOnly, ResidentRoster.RobotResidentId)]
-        [TestCase(ColonyComposition.Mixed, ResidentRoster.HumanResidentId)]
-        public void ValidUnassignedStateCanRecoverItsDefaultLeadImmediately(
+        public void ValidSingleKindStateRecoversItsSoleRoadHandImmediately(
             ColonyComposition composition,
             string expectedResidentId)
         {
@@ -411,6 +428,27 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(expectedResidentId));
             Assert.That(controller.State!.NextCommandSequence, Is.EqualTo(1));
             Assert.That(PendingCommandCount(controller), Is.EqualTo(0));
+        }
+
+        [TestCase(ResidentRoster.HumanResidentId)]
+        [TestCase(ResidentRoster.RobotResidentId)]
+        public void MixedColonyRequiresAnExplicitRoadHand(string stableId)
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            controller.StartNewGame(ColonyComposition.Mixed);
+
+            Assert.That(controller.ReadModel!.AssignedResidentId, Is.Null);
+            Assert.That(controller.State!.NextCommandSequence, Is.Zero);
+
+            controller.AssignRoadHand(stableId);
+
+            Assert.That(
+                controller.ReadModel.AssignedResidentId,
+                Is.EqualTo(stableId));
+            Assert.That(controller.State.NextCommandSequence, Is.EqualTo(1));
+            Assert.That(PendingCommandCount(controller), Is.Zero);
         }
 
         [Test]
@@ -471,6 +509,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             var controller = _root.AddComponent<LastBearingGameController>();
             controller.Initialize();
             controller.StartNewGame(ColonyComposition.Mixed);
+            controller.AssignRoadHand(ResidentRoster.HumanResidentId);
             controller.InspectCityNeed();
             LastBearingCityServiceCellView view =
                 controller.World!.CityServiceCellView!;
@@ -755,6 +794,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             var snapController = snapRoot.AddComponent<LastBearingGameController>();
             snapController.Initialize();
             snapController.StartNewGame(ColonyComposition.Mixed);
+            snapController.AssignRoadHand(
+                ResidentRoster.HumanResidentId);
             snapController.InspectCityNeed();
             CompleteSnapGridObservation(snapController, clear: true);
             snapController.ActivateInfrastructure();
@@ -765,6 +806,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             var stampController = stampRoot.AddComponent<LastBearingGameController>();
             stampController.Initialize();
             stampController.StartNewGame(ColonyComposition.Mixed);
+            stampController.AssignRoadHand(
+                ResidentRoster.HumanResidentId);
             stampController.InspectCityNeed();
             CompleteDistrictObservation(stampController, clear: false);
             stampController.ActivateInfrastructure();
@@ -1842,6 +1885,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             ColonyComposition composition = ColonyComposition.HumanOnly)
         {
             controller.StartNewGame(composition);
+            if (composition == ColonyComposition.Mixed)
+            {
+                controller.AssignRoadHand(
+                    ResidentRoster.HumanResidentId);
+            }
+
             controller.InspectCityNeed();
             CompleteDistrictObservation(controller, clear: true);
             controller.ActivateInfrastructure();
