@@ -946,6 +946,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ApplyFuelBondInteraction(null);
             _world?.ApplyScoutServiceInteraction(null);
             _world?.ApplyReturnedRailChassisBraceInteraction(null);
+            _world?.ApplyRoadSafeLine(null, isDrivingMode: false);
             _world?.HideCityServiceCell();
             _fieldDesk?.ResetForLifecycle();
         }
@@ -3096,6 +3097,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     : _readModel.PreparationChoice);
             _world.ApplyGarageRoadHand(_readModel.AssignedResidentId);
             _modeCoordinator?.ApplyCanonical(_readModel);
+            _world.ApplyRoadSafeLine(
+                _readModel,
+                _modeCoordinator?.HasActiveMode == true &&
+                _modeCoordinator.CurrentMode ==
+                    LastBearingPresentationMode.Driving);
             _world.ApplyDepotApproachInteraction(_readModel);
             _world.ApplyDepotDecisionInteraction(_readModel);
             _world.ApplyDepotCargoInteraction(_readModel);

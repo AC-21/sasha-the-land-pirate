@@ -79,6 +79,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public RoadFeelRigInstance? RoadFeelRig { get; private set; }
 
+        public LastBearingRoadSafeLineView? RoadSafeLineView
+        {
+            get;
+            private set;
+        }
+
         public LastBearingGarageBayView? GarageBayView { get; private set; }
 
         public LastBearingGarageDepartureInteractor? GarageDepartureInteractor =>
@@ -1022,6 +1028,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 .ApplyReturnedRailChassisBrace(installed);
         }
 
+        public void ApplyRoadSafeLine(
+            LastBearingReadModel? model,
+            bool isDrivingMode)
+        {
+            RoadSafeLineView?.Apply(model, isDrivingMode);
+        }
+
         public void PulseRigUpgradeInstall()
         {
             GarageBayView?.PulseRigUpgradeInstall();
@@ -1359,7 +1372,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             var root = new GameObject(RoadCorridorRootName).transform;
             root.SetParent(cityScaffoldRoot, false);
 
-            CreateRoadSurface(
+            GameObject routeApron = CreateRoadSurface(
                 RouteApronName,
                 root,
                 new Vector3(-6f, -0.01f, 3f),
@@ -1367,7 +1380,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 iron,
                 -24f,
                 RoadFeelSurfaceKind.Concrete);
-            CreateRoadSurface(
+            GameObject collapsedShortBranch = CreateRoadSurface(
                 CollapsedShortBranchName,
                 root,
                 new Vector3(1f, 0f, 17f),
@@ -1375,7 +1388,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 iron,
                 -18f,
                 RoadFeelSurfaceKind.Washboard);
-            CreateRoadSurface(
+            GameObject exposedLongRouteA = CreateRoadSurface(
                 ExposedLongRouteAName,
                 root,
                 new Vector3(10f, 0f, 11f),
@@ -1383,7 +1396,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 iron,
                 -52f,
                 RoadFeelSurfaceKind.Sand);
-            CreateRoadSurface(
+            GameObject exposedLongRouteB = CreateRoadSurface(
                 ExposedLongRouteBName,
                 root,
                 new Vector3(15f, 0f, 25f),
@@ -1391,6 +1404,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 iron,
                 25f,
                 RoadFeelSurfaceKind.Gravel);
+
+            var safeLine = new GameObject(
+                LastBearingRoadSafeLineView.RootName);
+            safeLine.transform.SetParent(root, false);
+            RoadSafeLineView =
+                safeLine.AddComponent<LastBearingRoadSafeLineView>();
+            RoadSafeLineView.Build(
+                routeApron.transform,
+                collapsedShortBranch.transform,
+                exposedLongRouteA.transform,
+                exposedLongRouteB.transform,
+                bone,
+                oxide);
 
             CreateBlock("Pipeline Ruin", root, new Vector3(-8f, 2.4f, 19f), new Vector3(18f, 0.55f, 0.55f), oxide);
 
