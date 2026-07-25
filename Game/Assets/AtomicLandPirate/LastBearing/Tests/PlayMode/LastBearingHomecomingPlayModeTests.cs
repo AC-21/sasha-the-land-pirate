@@ -70,6 +70,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 ColonyComposition.HumanOnly,
                 EncounterChoice.Cooperate);
             InstallControllerState(controller, beforeArrival);
+            controller.AttachRoadModeAdapter(
+                new LastBearingReadyTractionRoadAdapter());
 
             Assert.That(
                 controller.ReadModel!.ExpeditionPhase,

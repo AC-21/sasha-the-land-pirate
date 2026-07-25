@@ -47,6 +47,13 @@ namespace AtomicLandPirate.LastBearingTests
                 "Road Feel reset must not publish a stale dynamic physics pose");
             Require(vehicle, "RoadFeelTelemetry");
             Require(contracts, "ShouldApplyReverse");
+            Require(contracts, "RoadFeelRouteProfile");
+            Require(contracts, "RoadFeelTractionEvidence");
+            Require(contracts, "RoadFeelTractionQuantizer");
+            Require(contracts, "MinimumGroundedContacts = 2");
+            Require(
+                contracts,
+                "MinimumForwardSpeedMetresPerSecond = 0.75f");
 
             Require(surface, "RoadFeelSurfaceKind.Concrete");
             Require(surface, "RoadFeelSurfaceKind.Hardpack");
@@ -92,6 +99,14 @@ namespace AtomicLandPirate.LastBearingTests
             }
 
             Require(modeAdapter, "ILastBearingRoadModeAdapter");
+            Require(
+                modeAdapter,
+                "ILastBearingRoadTractionEvidenceSource");
+            Require(modeAdapter, "CaptureTractionEvidence");
+            Require(modeAdapter, "RoadFeelTractionQuantizer.Evaluate");
+            Require(modeAdapter, "vehicle.isActiveAndEnabled");
+            Require(modeAdapter, "!IsPhysicsSuspended");
+            Require(modeAdapter, "!vehicle.Body.isKinematic");
             Require(modeAdapter, "ApplyQuantizedCommandShadow");
             Require(modeAdapter, "ApplyPresentationOnlyControls");
             Require(modeAdapter, "ApplyDerivedPresentationLoad");

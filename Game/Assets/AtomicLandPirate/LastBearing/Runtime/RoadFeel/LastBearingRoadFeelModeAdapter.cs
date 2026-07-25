@@ -7,14 +7,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
 {
     /// <summary>
     /// Input-only adapter around the existing Road Feel rig. It accepts the
-    /// same bounded integers sent to DriveVehicleCommand and intentionally
-    /// exposes no Rigidbody or telemetry outcome to the canonical core. The
+    /// same bounded integers sent to DriveVehicleCommand. Raw Rigidbody and
+    /// telemetry state never leave this boundary; only a quantized traction
+    /// verdict can reach the canonical command gate. The
     /// Service brake, reverse arming, handbrake, and derived cargo/damage load
     /// remain presentation-only and cannot author canonical route progress.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class LastBearingRoadFeelModeAdapter : MonoBehaviour,
-        ILastBearingRoadModeAdapter
+        ILastBearingRoadModeAdapter,
+        ILastBearingRoadTractionEvidenceSource
     {
         private RoadFeelVehicleController? _vehicle;
 
@@ -152,6 +154,23 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
             _vehicle?.SetLoad(
                 cargoMassKilograms,
                 ToRoadFeelDamageBand(damageBand));
+        }
+
+        public RoadFeelTractionEvidence CaptureTractionEvidence(
+            RoadFeelRouteProfile routeProfile)
+        {
+            RoadFeelVehicleController? vehicle = _vehicle;
+            bool vehicleHealthy =
+                vehicle != null &&
+                vehicle.isActiveAndEnabled &&
+                vehicle.gameObject.activeInHierarchy &&
+                !IsPhysicsSuspended &&
+                !vehicle.Body.isKinematic;
+            return RoadFeelTractionQuantizer.Evaluate(
+                IsRoadModeActive,
+                vehicleHealthy,
+                routeProfile,
+                vehicleHealthy ? vehicle!.Telemetry : default);
         }
 
         public void SynchronizePresentationPose(

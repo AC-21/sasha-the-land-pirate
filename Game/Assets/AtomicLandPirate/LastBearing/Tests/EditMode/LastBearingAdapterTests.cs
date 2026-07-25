@@ -1294,7 +1294,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
-        public void RoadFeelAdapterAcceptsBoundedInputsAndReturnsNoOutcome()
+        public void RoadFeelAdapterExposesOnlyBoundedTractionEvidence()
         {
             _root = new GameObject("Road Feel Mode Adapter Test");
             var vehicleRoot = new GameObject("Road Feel Vehicle");
@@ -1349,6 +1349,19 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 adapter.Vehicle.Telemetry.DamageBand,
                 Is.EqualTo(RoadFeelDamageBand.Worn));
+            RoadFeelTractionEvidence evidence =
+                adapter.CaptureTractionEvidence(
+                    RoadFeelRouteProfile.WinchLine);
+            Assert.That(evidence.CanAdvance, Is.False);
+            vehicle.enabled = false;
+            RoadFeelTractionEvidence staleEvidence =
+                adapter.CaptureTractionEvidence(
+                    RoadFeelRouteProfile.WinchLine);
+            Assert.That(staleEvidence.CanAdvance, Is.False);
+            Assert.That(
+                staleEvidence.Reason,
+                Is.EqualTo(RoadFeelTractionEvidenceReason.AdapterFaulted));
+            vehicle.enabled = true;
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 adapter.ApplyQuantizedCommandShadow(1001, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() =>
@@ -1380,6 +1393,25 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Assert.That(method.ReturnType, Is.Not.EqualTo(typeof(RoadFeelTelemetry)));
                 Assert.That(method.ReturnType, Is.Not.EqualTo(typeof(Rigidbody)));
                 Assert.That(method.ReturnType, Is.Not.EqualTo(typeof(LastBearingState)));
+            }
+
+            Type evidenceInterface =
+                typeof(ILastBearingRoadTractionEvidenceSource);
+            Assert.That(
+                evidenceInterface.GetMethod(
+                    "CaptureTractionEvidence")!.ReturnType,
+                Is.EqualTo(typeof(RoadFeelTractionEvidence)));
+            foreach (MethodInfo method in evidenceInterface.GetMethods())
+            {
+                Assert.That(
+                    method.ReturnType,
+                    Is.Not.EqualTo(typeof(RoadFeelTelemetry)));
+                Assert.That(
+                    method.ReturnType,
+                    Is.Not.EqualTo(typeof(Rigidbody)));
+                Assert.That(
+                    method.ReturnType,
+                    Is.Not.EqualTo(typeof(LastBearingState)));
             }
         }
 

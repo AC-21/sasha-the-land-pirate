@@ -21,6 +21,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             string edge,
             LastBearingRoadSafeLineState edgeState,
             string nextVerb,
+            RoadFeelTractionEvidenceReason tractionReason,
+            string tractionStatus,
             string controls)
         {
             Leg = leg;
@@ -33,6 +35,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Edge = edge;
             EdgeState = edgeState;
             NextVerb = nextVerb;
+            TractionReason = tractionReason;
+            TractionStatus = tractionStatus;
             Controls = controls;
         }
 
@@ -56,6 +60,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public string NextVerb { get; }
 
+        public RoadFeelTractionEvidenceReason TractionReason { get; }
+
+        public string TractionStatus { get; }
+
         public string Controls { get; }
     }
 
@@ -72,7 +80,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public static LastBearingRoadDeskProjection Present(
             LastBearingReadModel model,
-            bool canRecoverRoadPresentation = false)
+            bool canRecoverRoadPresentation = false,
+            RoadFeelTractionEvidence tractionEvidence = default)
         {
             if (model == null)
             {
@@ -124,10 +133,38 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 FormatEdge(edge),
                 edge,
                 FormatNextVerb(model),
+                tractionEvidence.Reason,
+                FormatTractionStatus(model.RouteKind, tractionEvidence.Reason),
                 Controls +
                 (canRecoverRoadPresentation
                     ? RecoveryControls
                     : string.Empty));
+        }
+
+        private static string FormatTractionStatus(
+            RouteKind routeKind,
+            RoadFeelTractionEvidenceReason reason)
+        {
+            return reason switch
+            {
+                RoadFeelTractionEvidenceReason.Ready =>
+                    "TRACTION · EARNED",
+                RoadFeelTractionEvidenceReason.AdapterFaulted =>
+                    "TRACTION · SCOUT LINK FAULT",
+                RoadFeelTractionEvidenceReason.Recovering =>
+                    "TRACTION · RECENTERING",
+                RoadFeelTractionEvidenceReason.InsufficientGroundContacts =>
+                    "TRACTION · FIND TWO WHEELS OF GRIP",
+                RoadFeelTractionEvidenceReason.NotMovingForward =>
+                    "TRACTION · BUILD FORWARD SPEED",
+                RoadFeelTractionEvidenceReason.WrongSurface =>
+                    routeKind == RouteKind.CollapsedShortBranch
+                        ? "TRACTION · FIND WASHBOARD OR CONCRETE"
+                        : routeKind == RouteKind.ExposedLongRoute
+                            ? "TRACTION · FIND SAND, GRAVEL, OR CONCRETE"
+                            : "TRACTION · FIND THE MARKED ROAD",
+                _ => "TRACTION · PHYSICAL SCOUT OFFLINE",
+            };
         }
 
         private static string FormatRoute(

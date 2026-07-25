@@ -653,6 +653,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.ReadModel.ExpeditionPhase,
                 Is.EqualTo(ExpeditionPhase.Outbound));
+            controller.AttachRoadModeAdapter(
+                new LastBearingReadyTractionRoadAdapter());
 
             Press(keyboard.wKey);
             yield return null;

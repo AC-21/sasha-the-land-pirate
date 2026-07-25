@@ -113,6 +113,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private int _lastDispatchFrame = -1;
         private ulong _lastStamp;
         private bool _hasStamp;
+        private RoadFeelTractionEvidenceReason _lastRoadTractionReason;
+        private bool _hasRoadTractionReason;
         private bool _visible;
         private bool _cityVisible;
         private bool _roadVisible;
@@ -623,11 +625,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             LastBearingFieldDeskStamp stamp =
                 LastBearingFieldDeskPresenter.CaptureStamp(_controller!);
+            RoadFeelTractionEvidence tractionEvidence =
+                _controller!.RoadTractionEvidence;
             SetPresentationVisible(
                 cityVisible: false,
                 roadVisible: true);
             bool projectionChanged =
-                !_hasStamp || _lastStamp != stamp.Value;
+                !_hasStamp ||
+                _lastStamp != stamp.Value ||
+                !_hasRoadTractionReason ||
+                _lastRoadTractionReason != tractionEvidence.Reason;
             float now = Time.unscaledTime;
             if (!force && !projectionChanged && now < _nextRefreshTime)
             {
@@ -643,9 +650,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ApplyRoadProjection(
                 LastBearingRoadDeskPresenter.Present(
                     model,
-                    _controller!.CanRecoverRoadPresentation));
+                    _controller.CanRecoverRoadPresentation,
+                    tractionEvidence));
             _lastStamp = stamp.Value;
             _hasStamp = true;
+            _lastRoadTractionReason = tractionEvidence.Reason;
+            _hasRoadTractionReason = true;
         }
 
         private void ApplyRoadProjection(
@@ -667,7 +677,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 projection.EdgeState ==
                     LastBearingRoadSafeLineState.RightRisk);
             SetText(_roadNextVerb!, projection.NextVerb);
-            SetText(_roadControls!, projection.Controls);
+            SetText(
+                _roadControls!,
+                projection.TractionStatus + "\n" + projection.Controls);
         }
 
         private void Dispatch(ButtonBinding source)
@@ -808,7 +820,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void HideAndResetTransient()
         {
-            if (!_visible && !_hasStamp && _nextRefreshTime == 0f)
+            if (!_visible &&
+                !_hasStamp &&
+                !_hasRoadTractionReason &&
+                _nextRefreshTime == 0f)
             {
                 return;
             }
@@ -830,6 +845,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             _hasStamp = false;
+            _hasRoadTractionReason = false;
             _nextRefreshTime = 0f;
         }
 
