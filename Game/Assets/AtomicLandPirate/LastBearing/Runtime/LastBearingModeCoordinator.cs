@@ -265,6 +265,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             if (!IsCityMode(mode) ||
                 readModel == null ||
+                readModel.IsSettlementLost ||
                 readModel.ExpeditionPhase != ExpeditionPhase.AtHome)
             {
                 return false;

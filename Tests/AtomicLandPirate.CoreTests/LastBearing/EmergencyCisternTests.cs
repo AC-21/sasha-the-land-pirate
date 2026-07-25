@@ -355,7 +355,10 @@ namespace AtomicLandPirate.LastBearingTests
             LastBearingState brink =
                 new LastBearingStateBuilder(uncharged)
                 {
-                    WaterMilli = 0,
+                    WaterMilli =
+                        LastBearingBalanceV1
+                            .MinimumRecoverableWaterMilli
+                        - 1000,
                     DustFrontProgressTicks =
                         LastBearingBalanceV1
                             .DustFrontThresholdCrisisTicks - 1,
@@ -404,6 +407,30 @@ namespace AtomicLandPirate.LastBearingTests
                         .EncodeLegacyV8ForMigrationTests(
                             pausedMigration.State)),
                 "paused schema 8 source bytes");
+
+            LastBearingState dryLegacy =
+                new LastBearingStateBuilder(uncharged)
+                {
+                    WaterMilli = 0,
+                }.Build();
+            LastBearingDecodeResult dryMigration =
+                LastBearingCanonicalCodec.TryDecode(
+                    LastBearingCanonicalCodec
+                        .EncodeLegacyV8ForMigrationTests(dryLegacy));
+            TestHarness.True(
+                dryMigration.Succeeded
+                    && dryMigration.State != null,
+                "schema 8 dry migration decode");
+            LastBearingReadModel dryView =
+                LastBearingReadModel.FromState(
+                    dryMigration.State!);
+            TestHarness.True(
+                dryView.IsSettlementLost,
+                "schema 8 dry migration loss");
+            TestHarness.Equal(
+                LastBearingReadModel.DryBellSettlementLossReason,
+                dryView.SettlementLossReason,
+                "schema 8 dry migration reason");
 
             LastBearingState sameResourcesCharged =
                 new LastBearingStateBuilder(uncharged)

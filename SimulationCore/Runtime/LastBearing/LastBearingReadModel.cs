@@ -7,6 +7,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public sealed class LastBearingReadModel
     {
+        public const string DryBellSettlementLossReason =
+            "water-depleted-turbine-failing";
+
         private LastBearingReadModel(LastBearingState state)
         {
             CopyFrom(state);
@@ -97,6 +100,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
             PartsUnits = state.PartsUnits;
             FuelUnits = state.FuelUnits;
             TurbineCondition = state.TurbineCondition;
+            IsSettlementLost = IsSettlementLostState(state);
+            SettlementLossReason = IsSettlementLost
+                ? DryBellSettlementLossReason
+                : null;
             PreparationChoice = state.PreparationChoice;
             PreparationPhase = state.PreparationPhase;
             PreparationElapsedTicks = state.PreparationElapsedTicks;
@@ -328,6 +335,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long PartsUnits { get; private set; }
         public long FuelUnits { get; private set; }
         public TurbineCondition TurbineCondition { get; private set; }
+        public bool IsSettlementLost { get; private set; }
+        public string? SettlementLossReason { get; private set; }
         public PreparationChoice PreparationChoice { get; private set; }
         public PreparationPhase PreparationPhase { get; private set; }
         public long PreparationElapsedTicks { get; private set; }
@@ -628,6 +637,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             return checked(((numerator - 1) / denominator) + 1);
+        }
+
+        internal static bool IsSettlementLostState(LastBearingState state)
+        {
+            if (state == null)
+            {
+                throw new ArgumentNullException(nameof(state));
+            }
+
+            return state.WaterMilli == 0
+                && state.TurbineCondition == TurbineCondition.Failing;
         }
 
         private static string ComputeNextObjective(LastBearingState state)

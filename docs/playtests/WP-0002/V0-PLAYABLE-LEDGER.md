@@ -1011,7 +1011,7 @@ Detailed contract:
 
 ## VGR-32 — Pull the Lever, Pass the Lot
 
-Status: implementation in progress on the post-VGR-31 V0 feature line.
+Status: released on protected `main` in PR #135 at `32138b8`.
 
 Scope:
 
@@ -1036,6 +1036,56 @@ audio, or normal-PR performance soak.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-32-PULL-THE-LEVER-PASS-THE-LOT-CONTRACT.md`.
+
+## VGR-33 — The Dry Bell
+
+Status: integrated candidate awaiting canonical Unity validation.
+
+Objective: make the existing water economy capable of ending the run, with a
+clear causal explanation and a recoverable pre-failure checkpoint.
+
+Scope:
+
+- Derive settlement loss exactly when canonical water is zero while the
+  turbine remains failing; one milli-unit is still alive, and a repaired
+  turbine at zero is not a false loss.
+- Freeze authoritative clocks and reject all later gameplay commands without
+  changing sequence, resources, custody, or canonical bytes.
+- Evaluate the terminal projection only after a whole accepted tick, so a
+  Water Shift completing above zero on that tick averts the loss.
+- Replace ordinary Field Desk and legacy-HUD actions with a causal Dry Bell
+  recap and only the existing checkpoint-load, title, and new-colony recovery
+  paths.
+- Disable manual saving after loss and do not add a failure autosave, preserving
+  the latest recoverable pre-failure generation.
+- Re-derive failure after schema-11 load without a saved failure flag, new
+  command, event, balance value, resource, or composition rule.
+- Preserve the exact vehicle, cargo, faction, workshop, lot, permit, and city
+  state if the settlement runs dry while Sasha is away.
+
+Acceptance:
+
+- human-only, utility-robot-only, and mixed colonies obey the same exact
+  terminal rule;
+- same-tick water production, emergency water, returned water, or turbine
+  repair accepted before the dry tick averts failure through existing rules;
+- empty steps, input, stale presentation, and direct command attempts after
+  failure preserve byte-exact canonical state;
+- failure is legible from city, garage, road, depot, return, and cutaway modes;
+- manual save cannot overwrite the recovery point, while checkpoint load,
+  title, and new colony remain usable;
+- active and failed schema-11 states round-trip byte-exactly and rederive the
+  same terminal projection;
+- focused core, EditMode, and PlayMode tests, direct player-path verification,
+  and three to five city-to-garage transitions pass.
+
+Exclude: a saved failure field, schema, migration, new command or event, new
+resource, recipe, building, balance value, random death, population rule,
+composition differentiation, scene, package, dependency, production asset,
+audio, generalized game-over framework, or normal-PR performance soak.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-33-THE-DRY-BELL-CONTRACT.md`.
 
 ## Visual constitution
 

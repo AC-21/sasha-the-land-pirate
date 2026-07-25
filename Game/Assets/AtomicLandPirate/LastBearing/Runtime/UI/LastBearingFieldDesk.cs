@@ -318,6 +318,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             bool ownsCity = _controller.IsExactFieldDeskCityOverview;
             bool ownsRoad = _controller.IsExactFieldDeskDriving;
+            if (_controller.IsSettlementLost)
+            {
+                _physicalWorkRouted = false;
+                if (!ownsCity)
+                {
+                    HideAndResetTransient();
+                    return;
+                }
+            }
+
             if (!ownsCity && !ownsRoad)
             {
                 _physicalWorkRouted = false;
@@ -766,6 +776,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 case LastBearingFieldDeskIntent.Save: _controller.Save(); break;
                 case LastBearingFieldDeskIntent.Load: _controller.Load(); break;
                 case LastBearingFieldDeskIntent.ReturnToTitle: _controller.ReturnToTitle(); break;
+                case LastBearingFieldDeskIntent.StartNewColony:
+                    if (_controller.RuntimeReadModel != null)
+                    {
+                        _controller.StartNewGame(
+                            _controller.RuntimeReadModel.Composition);
+                    }
+                    break;
             }
 
             _hasStamp = false;

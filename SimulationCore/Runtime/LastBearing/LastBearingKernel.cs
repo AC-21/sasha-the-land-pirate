@@ -22,6 +22,14 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             LastBearingInvariants.Validate(state);
+            if (IsFrozenAfterSettlementLoss(state, commands))
+            {
+                return new LastBearingTickResult(
+                    state,
+                    Array.Empty<LastBearingDomainEvent>(),
+                    LastBearingReadModel.FromState(state));
+            }
+
             RejectMultipleDriveCommands(commands);
             var builder = new LastBearingStateBuilder(state);
             var events = new LastBearingAllocatingEventSink();
@@ -55,6 +63,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
             }
 
             LastBearingInvariants.Validate(state);
+            if (IsFrozenAfterSettlementLoss(state, commands))
+            {
+                destination.Begin(state);
+                destination.Commit();
+                return;
+            }
+
             RejectMultipleDriveCommands(commands);
             LastBearingStateBuilder builder = destination.Begin(state);
             ApplyStep(state, commands, builder, destination.WorkingEvents);
@@ -116,6 +131,24 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 AdvanceRoadClock(builder, roadScale);
             }
 
+        }
+
+        private static bool IsFrozenAfterSettlementLoss(
+            LastBearingState state,
+            IReadOnlyList<LastBearingCommand> commands)
+        {
+            if (!LastBearingReadModel.IsSettlementLostState(state))
+            {
+                return false;
+            }
+
+            if (commands.Count != 0)
+            {
+                throw new InvalidOperationException(
+                    "LAST_BEARING_SETTLEMENT_LOST");
+            }
+
+            return true;
         }
 
         private static void RejectMultipleDriveCommands(

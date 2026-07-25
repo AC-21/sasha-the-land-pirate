@@ -48,6 +48,7 @@ namespace AtomicLandPirate.LastBearingTests
             HotShiftTests.RunSave(harness, repoRoot);
             WaterShiftTests.Run(harness, repoRoot);
             DustFrontVerdictTests.Run(harness);
+            DryBellTests.Run(harness);
             EmergencyCisternTests.Run(harness);
             ServiceScoutTests.Run(harness);
             RepeatWreckLineTests.Run(harness);
@@ -136,6 +137,9 @@ namespace AtomicLandPirate.LastBearingTests
                     break;
                 case "v0-dust-front-verdict":
                     DustFrontVerdictTests.Run(harness);
+                    break;
+                case "vgr33-dry-bell":
+                    DryBellTests.Run(harness);
                     break;
                 case "v0-emergency-cistern":
                     EmergencyCisternTests.Run(harness);

@@ -48,6 +48,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         AssignRobotRoadHand = 37,
         OpenReturnedRailChassisBraceJig = 38,
         RunWaterShift = 39,
+        StartNewColony = 40,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -354,6 +355,84 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     controller.SaveStatus);
             }
 
+            if (model.IsSettlementLost)
+            {
+                LastBearingFieldDeskActionProjection hidden = Hidden();
+                bool canRecover = !controller.HasPendingPlayerCommands;
+                return new LastBearingFieldDeskProjection(
+                    FormatComposition(model.Composition),
+                    "LOSS · FROZEN",
+                    FormatWater(model.WaterMilli),
+                    "NO FURTHER SETTLEMENT TICKS",
+                    model.PartsUnits + " UNITS HELD",
+                    model.FuelUnits + " UNITS HELD",
+                    FormatTurbine(model.TurbineCondition),
+                    "SETTLEMENT LOST · CURRENT MODE HELD",
+                    new LastBearingDryLineProjection(
+                        0,
+                        LastBearingBalanceV1.MinimumRecoverableWaterMilli,
+                        0,
+                        model.DustFrontOutcome,
+                        false,
+                        "THE DRY BELL · WATER 0.000",
+                        "FAILING TURBINE · NO RECOVERY REMAINS"),
+                    new LastBearingPermitJobPresentation(
+                        LastBearingPermitJobChapter.CityCrisis,
+                        0,
+                        0,
+                        "THE DRY BELL · LAST BEARING",
+                        "The settlement went dry",
+                        "Water reached zero while the turbine was still failing. " +
+                        "The colony can no longer sustain its residents or civic machinery. " +
+                        "The exact world view is held so the cause remains visible.",
+                        "LOSS LOCKED · PROTECTED CHECKPOINT PRESERVED",
+                        0,
+                        0,
+                        false,
+                        false,
+                        false,
+                        string.Empty),
+                    Action(
+                        LastBearingFieldDeskIntent.Load,
+                        "LOAD PROTECTED CHECKPOINT",
+                        "Restore the last checkpoint written before the dry bell.",
+                        true,
+                        canRecover,
+                        LastBearingFieldDeskActionTone.Primary),
+                    Action(
+                        LastBearingFieldDeskIntent.StartNewColony,
+                        "NEW COLONY · SAME ROSTER",
+                        "Begin again with the current human, utility-robot, or mixed composition.",
+                        true,
+                        canRecover,
+                        LastBearingFieldDeskActionTone.Hazard),
+                    CreateSurvey(
+                        controller,
+                        model,
+                        false,
+                        false,
+                        false,
+                        false),
+                    hidden,
+                    Action(
+                        LastBearingFieldDeskIntent.Save,
+                        "SAVE DISABLED",
+                        LastBearingGameController.SettlementLossSaveStatus,
+                        true,
+                        false,
+                        LastBearingFieldDeskActionTone.Quiet),
+                    hidden,
+                    Action(
+                        LastBearingFieldDeskIntent.ReturnToTitle,
+                        "TITLE",
+                        "Leave the frozen loss and return to composition choice.",
+                        true,
+                        canRecover,
+                        LastBearingFieldDeskActionTone.Quiet),
+                    LastBearingGameController.SettlementLossStatus,
+                    LastBearingGameController.SettlementLossSaveStatus);
+            }
+
             bool canDispatch = controller.IsExactFieldDeskCityOverview &&
                                !controller.HasPendingPlayerCommands;
             DeriveCurrentOrder(
@@ -468,6 +547,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ulong hash = OffsetBasis;
             Mix(ref hash, controller.IsExactFieldDeskCityOverview);
             Mix(ref hash, controller.IsExactFieldDeskDriving);
+            Mix(ref hash, controller.IsSettlementLost);
             Mix(ref hash, controller.CanRecoverRoadPresentation);
             Mix(ref hash, controller.HasPendingPlayerCommands);
             Mix(ref hash, controller.CityNeedInspected);
@@ -495,6 +575,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             Mix(ref hash, model.Composition.GetHashCode());
+            Mix(ref hash, model.SettlementLossReason);
             Mix(ref hash, model.AssignedResidentId);
             Mix(ref hash, model.RecyclerPadIndex);
             Mix(ref hash, model.RecyclerQuarterTurns);
