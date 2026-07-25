@@ -52,7 +52,7 @@ The current experience is still a constitutional toy:
 | Garage | Stable C0 scout sockets, fixed dollhouse bay, and garage-local module commitment | Module assembly remains one authored operation; no generalized rig-upgrade path |
 | Depot/scavenging | Recovery gate, faction choice, heavy/liquid cargo fields, exact custody, and one operated repair-cargo handoff | Range-tank liquid selection and return sealing remain HUD-led; one depot and its interactions are still thin |
 | Colony | Exact typed rosters and visible human/robot primitives | No lived work feedback; mechanical differentiation remains forbidden while D-0039 is open |
-| Manufacturing/trade | One conserved spare-bearing batch, physical lot, workshop-local start, claims-wicket barter, and persistent corridor permit | The physical handoffs still use the temporary legacy HUD inside one fixed cutaway; no broader exchange by design while D-0044 remains open |
+| Manufacturing/trade | One conserved spare-bearing batch, physical lot, exact workshop-machine start, physical claims-wicket barter, and persistent corridor permit | One fixed recipe and bilateral bargain only; no broader exchange by design while D-0044 remains open |
 | Save | Exact disposable profile, fault-tested atomic store, and critical-transition autosaves | One dev slot; no production compatibility promise |
 | Presentation | Temporary IMGUI, procedural primitives, fixed cutaways, and a readable Permit Job rail | The released baseline still lacks retained UI, sound language, accepted meshes, textures, LODs, or audio |
 | Mac proof | Lightweight URP project on the selected Editor | No clean native build or target-Mac thermal/frame/memory soak evidence |
@@ -982,7 +982,7 @@ Detailed contract:
 
 ## VGR-31 — Water Shift
 
-Status: implementation in progress on the post-VGR-30 V0 feature line.
+Status: released on protected `main` at `7b346be`.
 
 Scope:
 
@@ -1008,6 +1008,34 @@ assets, or normal-PR performance soak.
 
 Detailed contract:
 `docs/playtests/WP-0002/VGR-31-WATER-SHIFT-CONTRACT.md`.
+
+## VGR-32 — Pull the Lever, Pass the Lot
+
+Status: implementation in progress on the post-VGR-31 V0 feature line.
+
+Scope:
+
+- Replace One Good Batch's cutaway-wide contextual action with two exact
+  physical targets: the workshop input-machine control and the finished-lot
+  claims-wicket handoff.
+- Reuse the existing batch-start and barter commands, eligibility, recipe,
+  duration, lot, custody, permit, grievance, toll, autosaves, and save schema.
+- Require a fresh input release after entering the cutaway, then queue exactly
+  one eligible command from keyboard, gamepad, or an exact unoccluded pointer.
+- Keep the temporary global shortcut and HUD actions only as a fail-closed
+  fallback when the dedicated physical control is genuinely unavailable.
+- Derive visibility, focus, labels, highlights, and rejection feedback from the
+  canonical read model and selected Building Cutaway; clear transient focus on
+  city, garage, title, new-game, and load transitions.
+- Preserve byte-exact ready, in-progress, completed, and settled save/load,
+  human/robot/mixed parity, and one shared camera/listener.
+
+Exclude: new commands, fields, schema, balance, recipes, lots, prices, buyers,
+market rules, generalized interactions, scenes, packages, production assets,
+audio, or normal-PR performance soak.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-32-PULL-THE-LEVER-PASS-THE-LOT-CONTRACT.md`.
 
 ## Visual constitution
 

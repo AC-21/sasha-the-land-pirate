@@ -56,7 +56,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
-        public IEnumerator GoldenPathWorksThePhysicalWicketAndReloadsEveryCheckpoint()
+        public IEnumerator GoldenPathPullsPhysicalLeverPassesLotAndReloadsEveryCheckpoint()
         {
             yield return LoadScene();
             LastBearingGameController controller = RequireController();
@@ -73,9 +73,21 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingWorldBuilder world = controller.World!;
             LastBearingOneGoodBatchCutawayView workshop =
                 world.OneGoodBatchCutawayView!;
+            LastBearingOneGoodBatchInteractor interactor =
+                workshop.Interactor!;
+            GameObject conservedLot = workshop.BearingLot!;
+            Camera sharedCamera = world.MainCamera!;
+            AudioListener sharedListener = controller
+                .GetComponentsInChildren<AudioListener>(true)
+                .Single();
             Assert.That(world.IsPumpHallCutawaySelected, Is.True);
             Assert.That(controller.IsWorkshopBatchStartAvailable, Is.False);
             Assert.That(controller.ReadModel!.IsSpareBearingBatchStartAvailable, Is.True);
+            Assert.That(interactor.HasDedicatedInteractionTargets, Is.True);
+            Assert.That(interactor.IsBatchStartControlVisible, Is.False);
+            Assert.That(interactor.IsBarterControlVisible, Is.False);
+            Assert.That(interactor.FocusBatchStartControl(), Is.False);
+            Assert.That(interactor.OperateFocused(), Is.False);
 
             byte[] readyBytes = CanonicalBytes(controller);
             IReadOnlyDictionary<string, string> readySave =
@@ -87,6 +99,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             controller.ShowCityOverview();
             controller.StartSpareBearingBatch();
+            Assert.That(interactor.FocusBatchStartControl(), Is.False);
+            Assert.That(interactor.OperateFocused(), Is.False);
             Assert.That(PendingCommands(controller), Is.Empty);
             CollectionAssert.AreEqual(readyBytes, CanonicalBytes(controller));
             AssertSaveSnapshot(readySave, SnapshotSaveFiles(profileDirectory));
@@ -99,6 +113,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.IsWorkshopBatchStartAvailable, Is.True);
             CollectionAssert.AreEqual(readyBytes, CanonicalBytes(controller));
             AssertSaveSnapshot(readySave, SnapshotSaveFiles(profileDirectory));
+            AssertWorkshopControlState(
+                interactor,
+                batchVisible: true,
+                barterVisible: false,
+                batchFocused: true,
+                barterFocused: false,
+                armed: false);
             AssertWorkshopStock(
                 workshop,
                 input: true,
@@ -108,10 +129,38 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 permit: false);
             Assert.That(workshop.IsHumanWorkerVisible, Is.True);
             Assert.That(workshop.IsRobotWorkerVisible, Is.True);
-            for (var repeat = 0; repeat < 2; repeat++)
+            for (var cycle = 0; cycle < 3; cycle++)
             {
                 controller.ShowCityOverview();
+                yield return null;
+                AssertWorkshopControlState(
+                    interactor,
+                    batchVisible: false,
+                    barterVisible: false,
+                    batchFocused: false,
+                    barterFocused: false,
+                    armed: false);
                 controller.OpenOneGoodBatchWorkshop();
+                yield return null;
+                AssertWorkshopControlState(
+                    interactor,
+                    batchVisible: true,
+                    barterVisible: false,
+                    batchFocused: true,
+                    barterFocused: false,
+                    armed: true);
+                AssertSingleWorkshopTopology(
+                    controller,
+                    interactor,
+                    conservedLot,
+                    sharedCamera,
+                    sharedListener);
+                CollectionAssert.AreEqual(
+                    readyBytes,
+                    CanonicalBytes(controller));
+                AssertSaveSnapshot(
+                    readySave,
+                    SnapshotSaveFiles(profileDirectory));
             }
 
             CollectionAssert.AreEqual(readyBytes, CanonicalBytes(controller));
@@ -125,20 +174,25 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 batchAvailable: true,
                 barterAvailable: false);
 
+            yield return null;
+            Assert.That(interactor.IsInputArmed, Is.True);
+
             long sequenceBeforeStart = controller.State!.NextCommandSequence;
             byte[] beforeStart = CanonicalBytes(controller);
             IReadOnlyDictionary<string, string> beforeStartSave =
                 SnapshotSaveFiles(profileDirectory);
             Press(keyboard.eKey);
+            InvokeGlobalShortcuts(controller);
+            Assert.That(PendingCommands(controller), Is.Empty);
             yield return null;
-            InvokeGlobalShortcuts(controller);
-            InvokeGlobalShortcuts(controller);
-            Assert.That(PendingCommands(controller), Has.Count.EqualTo(1));
-            Assert.That(
-                PendingCommands(controller)[0],
-                Is.TypeOf<StartSpareBearingBatchCommand>());
+            AssertExactWorkshopCommand<StartSpareBearingBatchCommand>(
+                controller,
+                sequenceBeforeStart);
+            Assert.That(interactor.OperateFocused(), Is.False);
             controller.StartSpareBearingBatch();
-            Assert.That(PendingCommands(controller), Has.Count.EqualTo(1));
+            AssertExactWorkshopCommand<StartSpareBearingBatchCommand>(
+                controller,
+                sequenceBeforeStart);
             CollectionAssert.AreEqual(beforeStart, CanonicalBytes(controller));
             AssertSaveSnapshot(beforeStartSave, SnapshotSaveFiles(profileDirectory));
             Release(keyboard.eKey);
@@ -161,19 +215,18 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 output: false,
                 claims: false,
                 permit: false);
+            AssertWorkshopControlState(
+                interactor,
+                batchVisible: false,
+                barterVisible: false,
+                batchFocused: false,
+                barterFocused: false,
+                armed: false);
             AssertRejectedWorkshopRequestsPreserve(
                 controller,
                 profileDirectory,
                 rejectStart: true,
                 rejectBarter: true);
-
-            AssertCheckpointRoundTrip(
-                controller,
-                profileDirectory,
-                SpareBearingBatchPhase.InProgress,
-                SpareBearingLotCustody.None,
-                batchAvailable: false,
-                barterAvailable: false);
 
             for (var tick = 1; tick <= 120; tick++)
             {
@@ -185,6 +238,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                         Is.EqualTo(60));
                     Assert.That(workshop.IsMachineRunning, Is.True);
                     Assert.That(workshop.IsWorkpieceVisible, Is.True);
+                    AssertCheckpointRoundTrip(
+                        controller,
+                        profileDirectory,
+                        SpareBearingBatchPhase.InProgress,
+                        SpareBearingLotCustody.None,
+                        batchAvailable: false,
+                        barterAvailable: false);
                 }
             }
 
@@ -204,6 +264,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 output: true,
                 claims: false,
                 permit: false);
+            AssertWorkshopControlState(
+                interactor,
+                batchVisible: false,
+                barterVisible: true,
+                batchFocused: false,
+                barterFocused: true,
+                armed: false);
             AssertRejectedWorkshopRequestsPreserve(
                 controller,
                 profileDirectory,
@@ -225,6 +292,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.OpenBuildingCutaway();
             Assert.That(world.IsOneGoodBatchCutawaySelected, Is.False);
             Assert.That(controller.IsWorkshopBarterAvailable, Is.False);
+            Assert.That(interactor.IsBarterControlVisible, Is.False);
+            Assert.That(interactor.FocusBarterControl(), Is.False);
+            Assert.That(interactor.OperateFocused(), Is.False);
             controller.BarterSpareBearingLot();
             Assert.That(PendingCommands(controller), Is.Empty);
 
@@ -234,6 +304,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.ModeCoordinator!.CurrentMode,
                 Is.EqualTo(LastBearingPresentationMode.CityOverview));
             Assert.That(controller.IsWorkshopBarterAvailable, Is.False);
+            Assert.That(interactor.IsBarterControlVisible, Is.False);
+            Assert.That(interactor.FocusBarterControl(), Is.False);
+            Assert.That(interactor.OperateFocused(), Is.False);
             controller.BarterSpareBearingLot();
             Assert.That(PendingCommands(controller), Is.Empty);
             CollectionAssert.AreEqual(completeBytes, CanonicalBytes(controller));
@@ -241,20 +314,37 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 completeSave,
                 SnapshotSaveFiles(profileDirectory));
 
+            Press(gamepad.buttonSouth);
             controller.OpenOneGoodBatchWorkshop();
             Assert.That(controller.IsWorkshopBarterAvailable, Is.True);
+            yield return null;
+            AssertWorkshopControlState(
+                interactor,
+                batchVisible: false,
+                barterVisible: true,
+                batchFocused: false,
+                barterFocused: true,
+                armed: false);
+            InvokeGlobalShortcuts(controller);
+            Assert.That(PendingCommands(controller), Is.Empty);
+            Assert.That(interactor.OperateFocused(), Is.False);
+            Release(gamepad.buttonSouth);
+            yield return null;
+            Assert.That(interactor.IsInputArmed, Is.True);
 
             long sequenceBeforeBarter = controller.State!.NextCommandSequence;
             Press(gamepad.buttonSouth);
+            InvokeGlobalShortcuts(controller);
+            Assert.That(PendingCommands(controller), Is.Empty);
             yield return null;
-            InvokeGlobalShortcuts(controller);
-            InvokeGlobalShortcuts(controller);
-            Assert.That(PendingCommands(controller), Has.Count.EqualTo(1));
-            Assert.That(
-                PendingCommands(controller)[0],
-                Is.TypeOf<BarterSpareBearingLotCommand>());
+            AssertExactWorkshopCommand<BarterSpareBearingLotCommand>(
+                controller,
+                sequenceBeforeBarter);
+            Assert.That(interactor.OperateFocused(), Is.False);
             controller.BarterSpareBearingLot();
-            Assert.That(PendingCommands(controller), Has.Count.EqualTo(1));
+            AssertExactWorkshopCommand<BarterSpareBearingLotCommand>(
+                controller,
+                sequenceBeforeBarter);
             Release(gamepad.buttonSouth);
             yield return null;
             InvokeSimulationTick(controller);
@@ -281,6 +371,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 output: false,
                 claims: true,
                 permit: true);
+            AssertWorkshopControlState(
+                interactor,
+                batchVisible: false,
+                barterVisible: false,
+                batchFocused: false,
+                barterFocused: false,
+                armed: false);
             AssertRejectedWorkshopRequestsPreserve(
                 controller,
                 profileDirectory,
@@ -310,25 +407,22 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 output: false,
                 claims: true,
                 permit: true);
-            Assert.That(
-                UnityEngine.Object.FindObjectsByType<Camera>(
-                    FindObjectsInactive.Include),
-                Has.Length.EqualTo(1));
-            Assert.That(
-                UnityEngine.Object.FindObjectsByType<AudioListener>(
-                    FindObjectsInactive.Include),
-                Has.Length.EqualTo(1));
+            AssertSingleWorkshopTopology(
+                controller,
+                interactor,
+                conservedLot,
+                sharedCamera,
+                sharedListener);
         }
 
         [UnityTest]
-        public IEnumerator EveryCompositionUsesTheSameWorkshopCommandsAndWorkers()
+        public IEnumerator EveryCompositionUsesTheSamePhysicalWorkshopControlsAndWorkers()
         {
             yield return LoadScene();
             LastBearingGameController controller = RequireController();
             controller.enabled = false;
             string profileDirectory = InstallTemporarySaveAdapter(controller);
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
-            Gamepad gamepad = InputSystem.AddDevice<Gamepad>();
             ColonyComposition[] compositions =
             {
                 ColonyComposition.HumanOnly,
@@ -343,6 +437,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     keyboard,
                     composition);
                 controller.OpenOneGoodBatchWorkshop();
+                LastBearingOneGoodBatchCutawayView workshop =
+                    controller.World!.OneGoodBatchCutawayView!;
+                LastBearingOneGoodBatchInteractor interactor =
+                    workshop.Interactor!;
                 Assert.That(controller.IsWorkshopBatchStartAvailable, Is.True);
                 AssertCheckpointRoundTrip(
                     controller,
@@ -351,23 +449,32 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     SpareBearingLotCustody.None,
                     batchAvailable: true,
                     barterAvailable: false);
-                if (composition == ColonyComposition.RobotOnly)
+                yield return null;
+                AssertWorkshopControlState(
+                    interactor,
+                    batchVisible: true,
+                    barterVisible: false,
+                    batchFocused: true,
+                    barterFocused: false,
+                    armed: true);
+                long startSequence = controller.State!.NextCommandSequence;
+                if (composition == ColonyComposition.Mixed)
                 {
-                    Press(gamepad.buttonSouth);
-                    yield return null;
-                    InvokeGlobalShortcuts(controller);
-                    Release(gamepad.buttonSouth);
-                    yield return null;
-                    Assert.That(PendingCommands(controller), Has.Count.EqualTo(1));
+                    Vector2 pointer = RequireWorkshopScreenPoint(
+                        controller,
+                        interactor.BatchStartControlWorldPosition);
                     Assert.That(
-                        PendingCommands(controller).Single(),
-                        Is.TypeOf<StartSpareBearingBatchCommand>());
+                        interactor.TryActivateAtScreenPosition(pointer),
+                        Is.True);
                 }
                 else
                 {
-                    controller.StartSpareBearingBatch();
+                    Assert.That(interactor.OperateFocused(), Is.True);
                 }
 
+                AssertExactWorkshopCommand<StartSpareBearingBatchCommand>(
+                    controller,
+                    startSequence);
                 InvokeSimulationTick(controller);
                 AssertCheckpointRoundTrip(
                     controller,
@@ -420,23 +527,21 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     SpareBearingLotCustody.WorkshopOutput,
                     batchAvailable: false,
                     barterAvailable: true);
-                if (composition == ColonyComposition.HumanOnly)
-                {
-                    Press(keyboard.eKey);
-                    yield return null;
-                    InvokeGlobalShortcuts(controller);
-                    Release(keyboard.eKey);
-                    yield return null;
-                }
-                else
-                {
-                    controller.BarterSpareBearingLot();
-                }
-
+                yield return null;
+                AssertWorkshopControlState(
+                    interactor,
+                    batchVisible: false,
+                    barterVisible: true,
+                    batchFocused: false,
+                    barterFocused: true,
+                    armed: true);
+                long barterSequence = controller.State!.NextCommandSequence;
+                Assert.That(interactor.OperateFocused(), Is.True);
+                AssertExactWorkshopCommand<BarterSpareBearingLotCommand>(
+                    controller,
+                    barterSequence);
                 InvokeSimulationTick(controller);
                 LastBearingReadModel model = controller.ReadModel!;
-                LastBearingOneGoodBatchCutawayView workshop =
-                    controller.World!.OneGoodBatchCutawayView!;
                 Assert.That(model.Composition, Is.EqualTo(composition));
                 Assert.That(
                     model.SpareBearingBatchPhase,
@@ -460,14 +565,21 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
-        public IEnumerator EarlyFailedLoadAndTitleRequestsNeverWrite()
+        public IEnumerator EarlyFailedLoadAndTitlePhysicalRequestsNeverWrite()
         {
             yield return LoadScene();
             LastBearingGameController controller = RequireController();
             controller.enabled = false;
             string profileDirectory = InstallTemporarySaveAdapter(controller);
             controller.StartNewGame(ColonyComposition.HumanOnly);
+            LastBearingOneGoodBatchInteractor interactor =
+                controller.World!.OneGoodBatchInteractor!;
             byte[] initial = CanonicalBytes(controller);
+            Assert.That(interactor.HasDedicatedInteractionTargets, Is.True);
+            Assert.That(interactor.OperateFocused(), Is.False);
+            Assert.That(
+                interactor.TryActivateAtScreenPosition(Vector2.zero),
+                Is.False);
             controller.StartSpareBearingBatch();
             controller.BarterSpareBearingLot();
             controller.OpenOneGoodBatchWorkshop();
@@ -480,6 +592,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo("Load refused: " + LastBearingSaveCodes.NoProfile));
 
             controller.ReturnToTitle();
+            Assert.That(interactor.OperateFocused(), Is.False);
+            Assert.That(
+                interactor.TryActivateAtScreenPosition(Vector2.zero),
+                Is.False);
             controller.StartSpareBearingBatch();
             controller.BarterSpareBearingLot();
             controller.OpenOneGoodBatchWorkshop();
@@ -631,6 +747,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.BarterSpareBearingLot();
             }
 
+            Assert.That(
+                controller.World!.OneGoodBatchInteractor!.OperateFocused(),
+                Is.False);
             Assert.That(PendingCommands(controller), Is.Empty);
             CollectionAssert.AreEqual(canonical, CanonicalBytes(controller));
             AssertSaveSnapshot(save, SnapshotSaveFiles(profileDirectory));
@@ -652,7 +771,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.SaveStatus);
             IReadOnlyDictionary<string, string> saved =
                 SnapshotSaveFiles(profileDirectory);
+            LastBearingOneGoodBatchInteractor interactor =
+                controller.World!.OneGoodBatchInteractor!;
             controller.ReturnToTitle();
+            Assert.That(interactor.OperateFocused(), Is.False);
             controller.StartSpareBearingBatch();
             controller.BarterSpareBearingLot();
             controller.OpenOneGoodBatchWorkshop();
@@ -673,6 +795,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.IsWorkshopBarterAvailable, Is.EqualTo(barterAvailable));
             LastBearingOneGoodBatchCutawayView workshop =
                 controller.World.OneGoodBatchCutawayView!;
+            AssertWorkshopControlState(
+                interactor,
+                batchVisible: batchAvailable,
+                barterVisible: barterAvailable,
+                batchFocused: batchAvailable,
+                barterFocused: barterAvailable,
+                armed: false);
             AssertWorkshopStock(
                 workshop,
                 input: phase == SpareBearingBatchPhase.None && batchAvailable,
@@ -683,6 +812,77 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 workshop.IsMachineRunning,
                 Is.EqualTo(phase == SpareBearingBatchPhase.InProgress));
+        }
+
+        private static void AssertWorkshopControlState(
+            LastBearingOneGoodBatchInteractor interactor,
+            bool batchVisible,
+            bool barterVisible,
+            bool batchFocused,
+            bool barterFocused,
+            bool armed)
+        {
+            Assert.That(
+                interactor.IsBatchStartControlVisible,
+                Is.EqualTo(batchVisible));
+            Assert.That(
+                interactor.IsBarterControlVisible,
+                Is.EqualTo(barterVisible));
+            Assert.That(
+                interactor.IsBatchStartControlFocused,
+                Is.EqualTo(batchFocused));
+            Assert.That(
+                interactor.IsBarterControlFocused,
+                Is.EqualTo(barterFocused));
+            Assert.That(interactor.IsInputArmed, Is.EqualTo(armed));
+        }
+
+        private static void AssertSingleWorkshopTopology(
+            LastBearingGameController controller,
+            LastBearingOneGoodBatchInteractor expectedInteractor,
+            GameObject expectedLot,
+            Camera expectedCamera,
+            AudioListener expectedListener)
+        {
+            Assert.That(
+                controller.GetComponentsInChildren<
+                    LastBearingOneGoodBatchInteractor>(true),
+                Has.Length.EqualTo(1));
+            Assert.That(
+                controller.World!.OneGoodBatchInteractor,
+                Is.SameAs(expectedInteractor));
+            Assert.That(
+                controller.World.OneGoodBatchCutawayView!.BearingLot,
+                Is.SameAs(expectedLot));
+            Assert.That(
+                controller.GetComponentsInChildren<Camera>(true),
+                Is.EqualTo(new[] { expectedCamera }));
+            Assert.That(
+                controller.GetComponentsInChildren<AudioListener>(true),
+                Is.EqualTo(new[] { expectedListener }));
+        }
+
+        private static Vector2 RequireWorkshopScreenPoint(
+            LastBearingGameController controller,
+            Vector3 worldPosition)
+        {
+            Physics.SyncTransforms();
+            Camera camera = controller.World!.MainCamera!;
+            Vector3 screen = camera.WorldToScreenPoint(worldPosition);
+            Assert.That(screen.z, Is.GreaterThan(0f));
+            return new Vector2(screen.x, screen.y);
+        }
+
+        private static T AssertExactWorkshopCommand<T>(
+            LastBearingGameController controller,
+            long expectedSequence)
+            where T : LastBearingCommand
+        {
+            Assert.That(PendingCommands(controller), Has.Count.EqualTo(1));
+            Assert.That(PendingCommands(controller).Single(), Is.TypeOf<T>());
+            var command = (T)PendingCommands(controller).Single();
+            Assert.That(command.Sequence, Is.EqualTo(expectedSequence));
+            return command;
         }
 
         private static void AssertWorkshopStock(

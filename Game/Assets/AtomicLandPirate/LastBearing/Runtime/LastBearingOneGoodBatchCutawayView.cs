@@ -8,7 +8,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
     /// <summary>
     /// One fixed, derived-only machine-shop and claims-wicket dollhouse.
     /// It visualizes the bounded VGR-05 batch and custody seam without owning
-    /// input, canonical state, physics, saving, or a general production UI.
+    /// canonical state, physics, saving, or a general production UI.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class LastBearingOneGoodBatchCutawayView : MonoBehaviour
@@ -80,6 +80,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public Transform? PermitAnchor { get; private set; }
 
         public LastBearingFuelBondInteractor? FuelBondInteractor
+        {
+            get;
+            private set;
+        }
+
+        public LastBearingOneGoodBatchInteractor? Interactor
         {
             get;
             private set;
@@ -181,6 +187,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
             BuildInputStillage(darkIron, oxide, bone);
             BuildOutputLot(darkIron, oxide, bone);
             BuildClaimsWicket(darkIron, oxide, bone, tungsten, signal);
+            Interactor =
+                gameObject.AddComponent<LastBearingOneGoodBatchInteractor>();
+            Interactor.Build(
+                InputAnchor ??
+                    throw new MissingReferenceException(
+                        "One Good Batch requires its input anchor."),
+                _bearingLot ??
+                    throw new MissingReferenceException(
+                        "One Good Batch requires its conserved lot."),
+                oxide,
+                bone,
+                tungsten,
+                signal);
             FuelBondInteractor =
                 gameObject.AddComponent<LastBearingFuelBondInteractor>();
             FuelBondInteractor.Build(

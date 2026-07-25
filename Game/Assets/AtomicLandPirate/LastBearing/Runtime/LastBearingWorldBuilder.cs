@@ -126,6 +126,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public LastBearingFuelBondInteractor? FuelBondInteractor =>
             OneGoodBatchCutawayView?.FuelBondInteractor;
 
+        public LastBearingOneGoodBatchInteractor? OneGoodBatchInteractor =>
+            OneGoodBatchCutawayView?.Interactor;
+
         public LastBearingEmergencyAidInteractor? EmergencyAidInteractor =>
             CityServiceCellView?.EmergencyAidInteractor;
 
@@ -530,6 +533,29 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             FuelBondInteractor.Configure(controller, MainCamera);
+        }
+
+        public void ConfigureOneGoodBatchInteraction(
+            LastBearingGameController controller)
+        {
+            if (MainCamera == null || OneGoodBatchInteractor == null)
+            {
+                throw new InvalidOperationException(
+                    "One Good Batch requires the shared workshop camera.");
+            }
+
+            OneGoodBatchInteractor.Configure(controller, MainCamera);
+        }
+
+        public void ResetOneGoodBatchInteraction()
+        {
+            OneGoodBatchInteractor?.ResetLocalFocus();
+        }
+
+        public void ApplyOneGoodBatchInteraction(
+            LastBearingReadModel? model)
+        {
+            OneGoodBatchInteractor?.Apply(model);
         }
 
         public void ResetFuelBondInteraction()

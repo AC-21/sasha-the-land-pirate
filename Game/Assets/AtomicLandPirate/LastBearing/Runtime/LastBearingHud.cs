@@ -884,14 +884,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 }
                 else
                 {
-                    GUILayout.Label(
-                        "Two approved input parts are staged at the selected machine. Press E or gamepad south to commit them to One Good Batch.",
-                        _bodyStyle);
-                    if (GUILayout.Button(
-                            "START ONE SPARE-BEARING LOT",
-                            _buttonStyle))
+                    bool hasPhysicalControl =
+                        _controller.World?.OneGoodBatchInteractor
+                            ?.HasDedicatedInteractionTargets == true;
+                    if (hasPhysicalControl)
                     {
-                        _controller.StartSpareBearingBatch();
+                        GUILayout.Label(
+                            "Two approved input parts are staged at the selected machine. Select the physical input stillage, release the route input, then use E or gamepad south.",
+                            _bodyStyle);
+                    }
+                    else
+                    {
+                        GUILayout.Label(
+                            "The physical input control is unavailable. Use the bounded fallback to commit the staged parts.",
+                            _bodyStyle);
+                        if (GUILayout.Button(
+                                "START ONE SPARE-BEARING LOT · FALLBACK",
+                                _buttonStyle))
+                        {
+                            _controller.StartSpareBearingBatch();
+                        }
                     }
                 }
 
@@ -914,14 +926,26 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 }
                 else
                 {
-                    GUILayout.Label(
-                        "The physical lot remains at workshop output. Press E or gamepad south to hand it across the selected claims wicket.",
-                        _bodyStyle);
-                    if (GUILayout.Button(
-                            "BARTER LOT FOR DEPOT ROUTE PERMIT",
-                            _buttonStyle))
+                    bool hasPhysicalControl =
+                        _controller.World?.OneGoodBatchInteractor
+                            ?.HasDedicatedInteractionTargets == true;
+                    if (hasPhysicalControl)
                     {
-                        _controller.BarterSpareBearingLot();
+                        GUILayout.Label(
+                            "The physical lot remains at workshop output. Select that conserved finished lot, release the route input, then use E or gamepad south to hand it across the claims wicket.",
+                            _bodyStyle);
+                    }
+                    else
+                    {
+                        GUILayout.Label(
+                            "The physical handoff control is unavailable. Use the bounded fallback to cross the claims wicket.",
+                            _bodyStyle);
+                        if (GUILayout.Button(
+                                "BARTER LOT FOR PERMIT · FALLBACK",
+                                _buttonStyle))
+                        {
+                            _controller.BarterSpareBearingLot();
+                        }
                     }
                 }
 

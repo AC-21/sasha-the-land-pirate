@@ -80,6 +80,14 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(
                     runtimeRoot,
                     "LastBearingOneGoodBatchCutawayView.cs"));
+            string oneGoodBatchInteractor = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "LastBearingOneGoodBatchInteractor.cs"));
+            string fieldDesk = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "UI/LastBearingFieldDesk.cs"));
             string garage = File.ReadAllText(
                 Path.Combine(
                     runtimeRoot,
@@ -1908,6 +1916,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(oneGoodBatch, "HasRoof => false");
             Require(oneGoodBatch, "HasNearWall => false");
             Require(oneGoodBatch, "collider.enabled = false");
+            Require(
+                oneGoodBatch,
+                "gameObject.AddComponent<LastBearingOneGoodBatchInteractor>()");
             foreach (string forbidden in new[]
             {
                 "Rigidbody",
@@ -1932,6 +1943,124 @@ namespace AtomicLandPirate.LastBearingTests
                     "One Good Batch cutaway contains forbidden authority or market grammar " +
                     forbidden);
             }
+
+            Require(
+                oneGoodBatchInteractor,
+                "public sealed class LastBearingOneGoodBatchInteractor");
+            Require(oneGoodBatchInteractor, "ReferenceEquals(");
+            Require(oneGoodBatchInteractor, "_controller.RuntimeReadModel");
+            Require(oneGoodBatchInteractor, "_controller?.HasActiveGame == true");
+            Require(
+                oneGoodBatchInteractor,
+                "Time.frameCount > _presentationEntryFrame");
+            Require(oneGoodBatchInteractor, "!inputHeld");
+            Require(oneGoodBatchInteractor, "Physics.RaycastNonAlloc(");
+            Require(
+                oneGoodBatchInteractor,
+                "FieldDesk?.BlocksWorldPointer(screenPosition)");
+            Require(
+                oneGoodBatchInteractor,
+                "Hud?.BlocksWorldPointer(screenPosition)");
+            string oneGoodBatchOperation = Segment(
+                oneGoodBatchInteractor,
+                "public bool OperateFocused()",
+                "public bool TryActivateAtScreenPosition(");
+            Require(
+                oneGoodBatchOperation,
+                "_controller.StartSpareBearingBatch();");
+            Require(
+                oneGoodBatchOperation,
+                "_controller.BarterSpareBearingLot();");
+            TestHarness.Equal(
+                1,
+                CountOccurrences(
+                    oneGoodBatchInteractor,
+                    "_controller.StartSpareBearingBatch();"),
+                "the physical batch input must delegate one existing start verb");
+            TestHarness.Equal(
+                1,
+                CountOccurrences(
+                    oneGoodBatchInteractor,
+                    "_controller.BarterSpareBearingLot();"),
+                "the physical lot must delegate one existing barter verb");
+            foreach (string forbidden in new[]
+            {
+                "new StartSpareBearingBatchCommand",
+                "new BarterSpareBearingLotCommand",
+                "LastBearingCommand",
+                "Queue(",
+                "LastBearingKernel",
+                "LastBearingState",
+                "_state =",
+                "_saveAdapter",
+                "SaveContracts",
+                "System.IO",
+                "Application.persistentDataPath",
+                "PlayerPrefs",
+                "File.",
+                "Rigidbody",
+                "RoadFeelTelemetry",
+            })
+            {
+                TestHarness.True(
+                    oneGoodBatchInteractor.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "One Good Batch interactor contains forbidden authority " +
+                    forbidden);
+            }
+
+            string batchGlobalFallback = Segment(
+                shortcuts,
+                "else if (IsWorkshopBatchStartAvailable",
+                "else if (IsWorkshopBarterAvailable");
+            Require(
+                batchGlobalFallback,
+                "?.HasDedicatedInteractionTargets != true");
+            Require(batchGlobalFallback, "StartSpareBearingBatch();");
+            string barterGlobalFallback = Segment(
+                controller,
+                "else if (IsWorkshopBarterAvailable",
+                "private void SimulateOneTick()");
+            Require(
+                barterGlobalFallback,
+                "?.HasDedicatedInteractionTargets != true");
+            Require(barterGlobalFallback, "BarterSpareBearingLot();");
+
+            string batchHudFallback = Segment(
+                hud,
+                "if (model.IsSpareBearingBatchStartAvailable)",
+                "if (model.IsSpareBearingBarterAvailable)");
+            Require(
+                batchHudFallback,
+                "?.HasDedicatedInteractionTargets == true");
+            Require(batchHudFallback, "if (hasPhysicalControl)");
+            Require(batchHudFallback, "StartSpareBearingBatch();");
+            string barterHudFallback = Segment(
+                hud,
+                "if (model.IsSpareBearingBarterAvailable)",
+                "if (model.MaintenanceDue)");
+            Require(
+                barterHudFallback,
+                "?.HasDedicatedInteractionTargets == true");
+            Require(barterHudFallback, "if (hasPhysicalControl)");
+            Require(barterHudFallback, "BarterSpareBearingLot();");
+
+            string fieldDeskWorkshopDispatch = Segment(
+                fieldDesk,
+                "case LastBearingFieldDeskIntent.OpenOneGoodBatchWorkshop:",
+                "case LastBearingFieldDeskIntent.OpenFuelBondClaimsWicket:");
+            Require(
+                fieldDeskWorkshopDispatch,
+                "_controller.OpenOneGoodBatchWorkshop();");
+            TestHarness.True(
+                fieldDesk.IndexOf(
+                    "_controller.StartSpareBearingBatch()",
+                    StringComparison.Ordinal) < 0 &&
+                fieldDesk.IndexOf(
+                    "_controller.BarterSpareBearingLot()",
+                    StringComparison.Ordinal) < 0,
+                "the Field Desk may open the workshop but must not run its work");
 
             Require(world, "SelectPumpHallCutaway");
             Require(world, "SelectOneGoodBatchCutaway");

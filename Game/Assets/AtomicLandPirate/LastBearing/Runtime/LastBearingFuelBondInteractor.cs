@@ -245,6 +245,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _inputArmed = false;
             _presentationActive = true;
             _presentationEntryFrame = Time.frameCount;
+            _controller?.World?.OneGoodBatchInteractor?.ResetLocalFocus();
             SetFeedback(
                 "FUEL BOND FOCUSED · RELEASE CONTROL · THEN POST",
                 rejected: false);

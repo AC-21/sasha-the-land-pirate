@@ -954,7 +954,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 primary = Action(
                     LastBearingFieldDeskIntent.OpenOneGoodBatchWorkshop,
                     "OPEN ONE GOOD BATCH",
-                    "Handle the active batch or physical lot at its workplace.",
+                    "Open the workplace, then pull its input lever or pass the tagged lot.",
                     true,
                     canDispatch,
                     LastBearingFieldDeskActionTone.Signal);
