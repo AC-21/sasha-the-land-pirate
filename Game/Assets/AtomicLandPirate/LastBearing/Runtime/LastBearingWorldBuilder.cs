@@ -90,6 +90,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public LastBearingScoutServiceInteractor? ScoutServiceInteractor =>
             GarageBayView?.ScoutServiceInteractor;
 
+        public LastBearingReturnedRailChassisBraceInteractor?
+            ReturnedRailChassisBraceInteractor =>
+                GarageBayView?.ReturnedRailChassisBraceInteractor;
+
         public Transform? CityScaffoldRoot { get; private set; }
 
         public LastBearingReturnServiceView? ReturnServiceView { get; private set; }
@@ -673,6 +677,32 @@ namespace AtomicLandPirate.Presentation.LastBearing
             ScoutServiceInteractor?.Apply(model);
         }
 
+        public void ConfigureReturnedRailChassisBraceInteraction(
+            LastBearingGameController controller)
+        {
+            if (MainCamera == null ||
+                ReturnedRailChassisBraceInteractor == null)
+            {
+                throw new InvalidOperationException(
+                    "Returned-rail chassis-brace interaction requires Sasha's shared garage camera.");
+            }
+
+            ReturnedRailChassisBraceInteractor.Configure(
+                controller,
+                MainCamera);
+        }
+
+        public void ResetReturnedRailChassisBraceInteraction()
+        {
+            ReturnedRailChassisBraceInteractor?.ResetLocalFocus();
+        }
+
+        public void ApplyReturnedRailChassisBraceInteraction(
+            LastBearingReadModel? model)
+        {
+            ReturnedRailChassisBraceInteractor?.Apply(model);
+        }
+
         public void SelectCityGrammarHypothesis(
             LastBearingCityGrammarHypothesis hypothesis)
         {
@@ -984,6 +1014,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
             RoadFeelRig?.ScoutVisual.ApplyUpgrade(presentation);
         }
 
+        public void ApplyReturnedRailChassisBrace(bool installed)
+        {
+            VehicleView?.ScoutVisual
+                ?.ApplyReturnedRailChassisBrace(installed);
+            RoadFeelRig?.ScoutVisual
+                .ApplyReturnedRailChassisBrace(installed);
+        }
+
         public void PulseRigUpgradeInstall()
         {
             GarageBayView?.PulseRigUpgradeInstall();
@@ -992,6 +1030,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public void ResetRigUpgradePresentation()
         {
             ApplyRigUpgrade(RigUpgrade.None);
+            ApplyReturnedRailChassisBrace(installed: false);
             GarageBayView?.ResetRigUpgradeInstallPulse();
         }
 

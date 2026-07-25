@@ -143,6 +143,87 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [Test]
+        public void ReturnedRailBraceIsIndependentColliderFreeAndSocketStable()
+        {
+            _root = new GameObject("Sasha Scout Returned Rail Brace Test");
+            SashaScoutBlockoutMaterials materials = CreateMaterials();
+            SashaScoutVisual staticVisual =
+                SashaScoutBlockoutFactory.Create(
+                    _root.transform,
+                    materials,
+                    includeRoadCollisionShell: false);
+            SashaScoutVisual roadVisual =
+                SashaScoutBlockoutFactory.Create(
+                    _root.transform,
+                    materials,
+                    includeRoadCollisionShell: true);
+
+            foreach (SashaScoutVisual visual in
+                     new[] { staticVisual, roadVisual })
+            {
+                Transform? socket = visual.FindSocket(
+                    SashaScoutSemanticContract
+                        .ReturnedRailChassisBraceSocketName);
+                Transform? brace =
+                    visual.ReturnedRailChassisBraceUpgradeRoot;
+                Assert.That(socket, Is.Not.Null);
+                Assert.That(brace, Is.Not.Null);
+                Assert.That(
+                    Vector3.Distance(
+                        socket!.position,
+                        brace!.position),
+                    Is.LessThan(0.00001f));
+                Assert.That(
+                    Quaternion.Angle(
+                        socket.rotation,
+                        brace.rotation),
+                    Is.LessThan(0.00001f));
+                Assert.That(
+                    brace.GetComponentsInChildren<Renderer>(true),
+                    Has.Length.EqualTo(10));
+                Assert.That(
+                    brace.GetComponentsInChildren<Rigidbody>(true),
+                    Is.Empty);
+                foreach (Collider collider in
+                         brace.GetComponentsInChildren<Collider>(true))
+                {
+                    Assert.That(
+                        collider.enabled,
+                        Is.False,
+                        collider.name);
+                }
+
+                visual.ApplyUpgrade(
+                    SashaScoutUpgradePresentation.PatchworkSkidPlate);
+                visual.ApplyReturnedRailChassisBrace(installed: true);
+                Assert.That(
+                    visual.IsPatchworkSkidPlateVisible,
+                    Is.True);
+                Assert.That(
+                    visual.IsReturnedRailChassisBraceVisible,
+                    Is.True);
+                visual.ApplyUpgrade(
+                    SashaScoutUpgradePresentation.None);
+                Assert.That(
+                    visual.IsPatchworkSkidPlateVisible,
+                    Is.False);
+                Assert.That(
+                    visual.IsReturnedRailChassisBraceVisible,
+                    Is.True);
+                visual.ApplyReturnedRailChassisBrace(installed: false);
+                Assert.That(
+                    visual.IsReturnedRailChassisBraceVisible,
+                    Is.False);
+            }
+
+            Assert.That(
+                roadVisual.CollisionRoot!
+                    .GetComponentsInChildren<BoxCollider>(true),
+                Has.Length.EqualTo(
+                    SashaScoutBlockoutFactory.RoadCollisionBoxCount));
+        }
+
+        [Test]
         public void GarageCutawayReusesOneCameraAndCannotChangeCanonicalState()
         {
             _root = new GameObject(LastBearingGameController.RuntimeRootName);

@@ -46,6 +46,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         OpenScoutServiceBay = 35,
         AssignHumanRoadHand = 36,
         AssignRobotRoadHand = 37,
+        OpenReturnedRailChassisBraceJig = 38,
     }
 
     public enum LastBearingFieldDeskActionTone
@@ -522,6 +523,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.IsVehicleServiceAvailable);
             Mix(ref hash, model.VehicleServicePartsCostUnits);
             Mix(ref hash, model.VehicleServiceReservePartsUnits);
+            Mix(ref hash, model.FrameRailSalvageCustody.GetHashCode());
+            Mix(ref hash, model.ReturnedRailChassisBraceInstalled);
+            Mix(
+                ref hash,
+                model.ReturnedRailChassisBracePartsCostUnits);
+            Mix(
+                ref hash,
+                model.ReturnedRailChassisBraceProtectionMilli);
+            Mix(
+                ref hash,
+                model.IsReturnedRailChassisBraceInstallAvailable);
+            Mix(ref hash, model.ProjectedRoundTripConditionLossMilli);
             Mix(ref hash, model.MaintenanceDue);
             Mix(ref hash, model.NextCityDecision.GetHashCode());
             Mix(ref hash, model.InstalledCityImprovement.GetHashCode());
@@ -840,6 +853,33 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     canDispatch &&
                     controller.CanOpenScoutServiceBay,
                     LastBearingFieldDeskActionTone.Signal);
+                return;
+            }
+
+            if (model.IsReturnedRailChassisBraceInstallAvailable)
+            {
+                long protectedLoss = Math.Max(
+                    0,
+                    model.ProjectedRoundTripConditionLossMilli -
+                    model.ReturnedRailChassisBraceProtectionMilli);
+                primary = Action(
+                    LastBearingFieldDeskIntent
+                        .OpenReturnedRailChassisBraceJig,
+                    "OPEN GARAGE · BRACE SASHA'S SCOUT",
+                    "The credited four-rail rack is ready at the dedicated " +
+                    "garage jig. Spend " +
+                    model.ReturnedRailChassisBracePartsCostUnits +
+                    " parts, preserve the civic reserve, and reduce projected " +
+                    "round-trip condition loss from " +
+                    model.ProjectedRoundTripConditionLossMilli +
+                    " to " +
+                    protectedLoss +
+                    ". Release the route input, then use E, gamepad south, " +
+                    "or the exact jig dog.",
+                    true,
+                    canDispatch &&
+                    controller.CanOpenReturnedRailChassisBraceJig,
+                    LastBearingFieldDeskActionTone.Primary);
                 return;
             }
 

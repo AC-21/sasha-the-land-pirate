@@ -391,7 +391,7 @@ namespace AtomicLandPirate.LastBearingTests
                 decoded.Succeeded && decoded.State != null,
                 "expanded Emergency Cistern canonical decode failed");
             TestHarness.Equal(
-                9,
+                LastBearingState.CurrentSchemaVersion,
                 decoded.State!.SchemaVersion,
                 "restored schema version");
             TestHarness.Equal(

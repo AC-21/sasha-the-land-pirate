@@ -29,7 +29,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "fuel bond retries do not duplicate value",
                 RetriesDoNotDuplicateValue);
             harness.Run(
-                "fuel bond preserves schema 9 save compatibility",
+                "fuel bond preserves current-schema save compatibility",
                 ExistingSchemaRoundTripsReadyAndSettledStates);
             harness.Run(
                 "fuel bond mechanics are composition invariant",
@@ -469,17 +469,20 @@ namespace AtomicLandPirate.LastBearingTests
 
             foreach (LastBearingState state in new[] { ready, settled })
             {
-                TestHarness.Equal(9, state.SchemaVersion, "schema version");
+                TestHarness.Equal(
+                    LastBearingState.CurrentSchemaVersion,
+                    state.SchemaVersion,
+                    "schema version");
                 byte[] encoded = LastBearingCanonicalCodec.Encode(state);
                 LastBearingDecodeResult decoded =
                     LastBearingCanonicalCodec.TryDecode(encoded);
                 TestHarness.True(
                     decoded.Succeeded && decoded.State != null,
-                    "schema 9 decode");
+                    "current schema decode");
                 TestHarness.True(
                     encoded.SequenceEqual(
                         LastBearingCanonicalCodec.Encode(decoded.State!)),
-                    "schema 9 canonical bytes");
+                    "current schema canonical bytes");
             }
 
             LastBearingState oldState =
@@ -491,11 +494,11 @@ namespace AtomicLandPirate.LastBearingTests
                 LastBearingCanonicalCodec.TryDecode(oldBytes);
             TestHarness.True(
                 oldDecoded.Succeeded && oldDecoded.State != null,
-                "old schema 9 decode");
+                "baseline current schema decode");
             TestHarness.True(
                 oldBytes.SequenceEqual(
                     LastBearingCanonicalCodec.Encode(oldDecoded.State!)),
-                "old schema 9 canonical bytes");
+                "baseline current schema canonical bytes");
         }
 
         private static void CompositionsShareExactMechanics()

@@ -95,6 +95,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 RepairCargoCustody = RepairCargoCustody.None,
                 FrameRailSalvageCustody =
                     FrameRailSalvageCustody.None,
+                ReturnedRailChassisBraceInstalled = false,
                 DepotBearingDisposition = DepotBearingDisposition.AtDepot,
                 ReturnPayloadFrozen = false,
                 HasArrivalClaimSnapshot = false,

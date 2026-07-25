@@ -85,17 +85,34 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 "title");
             controller.Load();
             controller.ShowCityOverview();
-            yield return null;
             CollectionAssert.AreEqual(
                 creditedBytes,
                 LastBearingCanonicalCodec.Encode(controller.State!));
             Assert.That(controller.CanonicalHash, Is.EqualTo(creditedHash));
+            yield return null;
             AssertReturnedRailRackInPlayMode(
                 view,
                 expectedVisible: true,
                 "loaded credited return");
 
-            LastBearingState outbound = LaunchRepeat(controller.State!);
+            LastBearingState braceInstalled = Apply(
+                controller.State!,
+                sequence =>
+                    new InstallReturnedRailChassisBraceCommand(
+                        sequence));
+            Assert.That(
+                braceInstalled.ReturnedRailChassisBraceInstalled,
+                Is.True);
+            Assert.That(
+                braceInstalled.FrameRailSalvageCustody,
+                Is.EqualTo(FrameRailSalvageCustody.None));
+            InstallControllerState(controller, braceInstalled);
+            AssertReturnedRailRackInPlayMode(
+                view,
+                expectedVisible: false,
+                "credited bundle fitted as brace");
+
+            LastBearingState outbound = LaunchRepeat(braceInstalled);
             Assert.That(
                 outbound.FrameRailSalvageCustody,
                 Is.EqualTo(FrameRailSalvageCustody.WreckLine));
@@ -168,11 +185,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 "repeat title");
             controller.Load();
             controller.ShowCityOverview();
-            yield return null;
             CollectionAssert.AreEqual(
                 recreditedBytes,
                 LastBearingCanonicalCodec.Encode(controller.State!));
             Assert.That(controller.CanonicalHash, Is.EqualTo(recreditedHash));
+            yield return null;
             AssertReturnedRailRackInPlayMode(
                 view,
                 expectedVisible: true,

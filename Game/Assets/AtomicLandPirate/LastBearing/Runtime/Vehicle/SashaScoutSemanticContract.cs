@@ -53,6 +53,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         public const string CargoUpgradeSocketName = "SOCKET_UPGRADE_CARGO_01";
         public const string UnderbodyUpgradeSocketName =
             "SOCKET_UPGRADE_UNDERBODY";
+        public const string ReturnedRailChassisBraceSocketName =
+            "SOCKET_UPGRADE_RETURNED_RAIL_CHASSIS_BRACE";
         public const string CargoSocket01Name = "SOCKET_CARGO_01";
         public const string CargoSocket02Name = "SOCKET_CARGO_02";
         public const string ToolDeploySocketName = "SOCKET_TOOL_DEPLOY";
@@ -62,6 +64,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         public const string RangeTankModuleName = "MODULE_SEALED_RANGE_TANK";
         public const string PatchworkSkidPlateUpgradeName =
             "UPGRADE_PATCHWORK_SKID_PLATE";
+        public const string ReturnedRailChassisBraceUpgradeName =
+            "UPGRADE_RETURNED_RAIL_CHASSIS_BRACE";
 
         public static Vector3 ForwardAxis => Vector3.forward;
 

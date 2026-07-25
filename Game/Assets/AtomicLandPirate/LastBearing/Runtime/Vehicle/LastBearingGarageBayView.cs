@@ -86,6 +86,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             private set;
         }
 
+        public LastBearingReturnedRailChassisBraceInteractor?
+            ReturnedRailChassisBraceInteractor
+        {
+            get;
+            private set;
+        }
+
         public bool IsDollhouseCutaway => true;
 
         public bool HasRoof => false;
@@ -322,6 +329,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 bone,
                 tungsten,
                 signal);
+            BuildReturnedRailChassisBraceControl(
+                darkIron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
 
             ApplyModule(SashaScoutModulePresentation.None);
             ApplyPreparationProgress(0, 0);
@@ -403,6 +416,31 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 service.AddComponent<LastBearingScoutServiceInteractor>();
             ScoutServiceInteractor.Build(
                 this,
+                darkIron,
+                oxide,
+                bone,
+                tungsten,
+                signal);
+        }
+
+        private void BuildReturnedRailChassisBraceControl(
+            Material darkIron,
+            Material oxide,
+            Material bone,
+            Material tungsten,
+            Material signal)
+        {
+            var jig = new GameObject(
+                LastBearingReturnedRailChassisBraceInteractor.RootName);
+            jig.transform.SetParent(transform, false);
+            jig.transform.localPosition =
+                new Vector3(2.55f, 0.08f, -2.55f);
+            jig.transform.localRotation =
+                Quaternion.Euler(0f, -8f, 0f);
+            ReturnedRailChassisBraceInteractor =
+                jig.AddComponent<
+                    LastBearingReturnedRailChassisBraceInteractor>();
+            ReturnedRailChassisBraceInteractor.Build(
                 darkIron,
                 oxide,
                 bone,

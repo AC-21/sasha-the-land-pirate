@@ -24,6 +24,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         private Transform? _winchModule;
         private Transform? _rangeTankModule;
         private Transform? _patchworkSkidPlateUpgrade;
+        private Transform? _returnedRailChassisBraceUpgrade;
 
         public string DirectionStage => SashaScoutSemanticContract.Stage;
 
@@ -72,6 +73,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 
         public SashaScoutUpgradePresentation Upgrade { get; private set; }
 
+        public bool IsReturnedRailChassisBraceVisible =>
+            _returnedRailChassisBraceUpgrade != null &&
+            _returnedRailChassisBraceUpgrade.gameObject.activeSelf;
+
+        public Transform? ReturnedRailChassisBraceUpgradeRoot =>
+            _returnedRailChassisBraceUpgrade;
+
         internal void Configure(
             SashaScoutBlockoutMaterials materials,
             Transform geometryRoot,
@@ -87,7 +95,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             Transform[] wheelPivots,
             Transform winchModule,
             Transform rangeTankModule,
-            Transform patchworkSkidPlateUpgrade)
+            Transform patchworkSkidPlateUpgrade,
+            Transform returnedRailChassisBraceUpgrade)
         {
             if (contactStations == null ||
                 wheelVisuals == null ||
@@ -123,8 +132,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             _patchworkSkidPlateUpgrade = patchworkSkidPlateUpgrade ??
                 throw new ArgumentNullException(
                     nameof(patchworkSkidPlateUpgrade));
+            _returnedRailChassisBraceUpgrade =
+                returnedRailChassisBraceUpgrade ??
+                throw new ArgumentNullException(
+                    nameof(returnedRailChassisBraceUpgrade));
             ApplyModule(SashaScoutModulePresentation.None);
             ApplyUpgrade(SashaScoutUpgradePresentation.None);
+            ApplyReturnedRailChassisBrace(installed: false);
         }
 
         public Transform[] CopyContactStations()
@@ -171,6 +185,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 _patchworkSkidPlateUpgrade.gameObject.SetActive(
                     upgrade ==
                     SashaScoutUpgradePresentation.PatchworkSkidPlate);
+            }
+        }
+
+        public void ApplyReturnedRailChassisBrace(bool installed)
+        {
+            if (_returnedRailChassisBraceUpgrade != null)
+            {
+                _returnedRailChassisBraceUpgrade.gameObject.SetActive(
+                    installed);
             }
         }
 

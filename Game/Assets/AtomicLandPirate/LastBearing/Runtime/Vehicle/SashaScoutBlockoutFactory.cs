@@ -145,6 +145,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 SashaScoutSemanticContract.CargoUpgradeSocketName)!;
             Transform underbodyUpgradeSocket = socketsRoot.Find(
                 SashaScoutSemanticContract.UnderbodyUpgradeSocketName)!;
+            Transform returnedRailChassisBraceSocket = socketsRoot.Find(
+                SashaScoutSemanticContract
+                    .ReturnedRailChassisBraceSocketName)!;
             Transform winch = BuildWinchModule(
                 modulesRoot,
                 winchSocket,
@@ -157,6 +160,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 modulesRoot,
                 underbodyUpgradeSocket,
                 materials);
+            Transform returnedRailChassisBrace =
+                BuildReturnedRailChassisBraceUpgrade(
+                    modulesRoot,
+                    returnedRailChassisBraceSocket,
+                    materials);
             if (includeRoadCollisionShell)
             {
                 BuildRoadCollisionShell(collisionRoot);
@@ -177,7 +185,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 wheelPivots,
                 winch,
                 tank,
-                patchworkSkidPlate);
+                patchworkSkidPlate,
+                returnedRailChassisBrace);
             return visual;
         }
 
@@ -280,6 +289,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 new Vector3(0f, 1.42f, -1.38f));
             CreateSocket(
                 SashaScoutSemanticContract.UnderbodyUpgradeSocketName,
+                root,
+                new Vector3(0f, 0.39f, 0.08f));
+            CreateSocket(
+                SashaScoutSemanticContract
+                    .ReturnedRailChassisBraceSocketName,
                 root,
                 new Vector3(0f, 0.39f, 0.08f));
             CreateSocket(
@@ -406,6 +420,105 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 Quaternion.identity,
                 materials.Oxide);
             return upgrade;
+        }
+
+        private static Transform BuildReturnedRailChassisBraceUpgrade(
+            Transform root,
+            Transform socket,
+            SashaScoutBlockoutMaterials materials)
+        {
+            Transform upgrade = CreateRoot(
+                SashaScoutSemanticContract
+                    .ReturnedRailChassisBraceUpgradeName,
+                root);
+            CopySocketPose(upgrade, socket);
+
+            CreateRenderPrimitive(
+                "RETURNED_RAIL_SISTER_LEFT",
+                PrimitiveType.Cube,
+                upgrade,
+                new Vector3(-1.57f, 0.81f, -1.18f),
+                new Vector3(0.18f, 0.18f, 2.20f),
+                Quaternion.identity,
+                materials.Iron);
+            CreateRenderPrimitive(
+                "RETURNED_RAIL_SISTER_RIGHT",
+                PrimitiveType.Cube,
+                upgrade,
+                new Vector3(1.57f, 0.81f, -1.18f),
+                new Vector3(0.18f, 0.18f, 2.20f),
+                Quaternion.identity,
+                materials.Iron);
+            CreateRenderPrimitive(
+                "RETURNED_RAIL_RISER_LEFT",
+                PrimitiveType.Cube,
+                upgrade,
+                new Vector3(-1.57f, 1.18f, -1.40f),
+                new Vector3(0.18f, 0.16f, 1.82f),
+                Quaternion.Euler(-28.5f, 0f, 0f),
+                materials.Iron);
+            CreateRenderPrimitive(
+                "RETURNED_RAIL_RISER_RIGHT",
+                PrimitiveType.Cube,
+                upgrade,
+                new Vector3(1.57f, 1.18f, -1.40f),
+                new Vector3(0.18f, 0.16f, 1.82f),
+                Quaternion.Euler(-28.5f, 0f, 0f),
+                materials.Iron);
+
+            CreateAttachmentShoe(
+                "RETURNED_RAIL_SHOE_LEFT_FORE",
+                upgrade,
+                new Vector3(-1.57f, 0.73f, -0.18f),
+                materials.Oxide);
+            CreateAttachmentShoe(
+                "RETURNED_RAIL_SHOE_LEFT_AFT",
+                upgrade,
+                new Vector3(-1.57f, 0.73f, -2.18f),
+                materials.Oxide);
+            CreateAttachmentShoe(
+                "RETURNED_RAIL_SHOE_RIGHT_FORE",
+                upgrade,
+                new Vector3(1.57f, 0.73f, -0.18f),
+                materials.Oxide);
+            CreateAttachmentShoe(
+                "RETURNED_RAIL_SHOE_RIGHT_AFT",
+                upgrade,
+                new Vector3(1.57f, 0.73f, -2.18f),
+                materials.Oxide);
+            CreateRenderPrimitive(
+                "RETURNED_RAIL_BONE_WITNESS_BAND_RIGHT",
+                PrimitiveType.Cube,
+                upgrade,
+                new Vector3(1.57f, 1.37f, -1.58f),
+                new Vector3(0.24f, 0.22f, 0.34f),
+                Quaternion.Euler(-28.5f, 0f, 0f),
+                materials.Bone);
+            CreateRenderPrimitive(
+                "RETURNED_RAIL_TUNGSTEN_SERVICE_MARKER_REAR",
+                PrimitiveType.Cube,
+                upgrade,
+                new Vector3(1.57f, 1.04f, -2.24f),
+                new Vector3(0.08f, 0.08f, 0.06f),
+                Quaternion.identity,
+                materials.Tungsten);
+            return upgrade;
+        }
+
+        private static void CreateAttachmentShoe(
+            string name,
+            Transform parent,
+            Vector3 localPosition,
+            Material material)
+        {
+            CreateRenderPrimitive(
+                name,
+                PrimitiveType.Cube,
+                parent,
+                localPosition,
+                new Vector3(0.34f, 0.12f, 0.32f),
+                Quaternion.identity,
+                material);
         }
 
         private static void CopySocketPose(

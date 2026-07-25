@@ -42,7 +42,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "repeat lineage permits bounded authored road-edge damage",
                 OffRoadRepeatConditionRemainsBounded);
             harness.Run(
-                "repeat states round trip throughout schema 9",
+                "repeat states round trip throughout the current schema",
                 RepeatStatesRoundTrip);
             harness.Run(
                 "two serviced repeat circuits cannot duplicate salvage",
@@ -663,7 +663,10 @@ namespace AtomicLandPirate.LastBearingTests
             LastBearingState finalized = RoundTrip(
                 driver.State,
                 "finalized");
-            TestHarness.Equal(9, finalized.SchemaVersion, "repeat schema");
+            TestHarness.Equal(
+                LastBearingState.CurrentSchemaVersion,
+                finalized.SchemaVersion,
+                "repeat schema");
             TestHarness.Equal(
                 FrameRailSalvageCustody.Credited,
                 finalized.FrameRailSalvageCustody,

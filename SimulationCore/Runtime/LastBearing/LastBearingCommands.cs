@@ -226,6 +226,15 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public RigUpgrade Upgrade { get; }
     }
 
+    public sealed class InstallReturnedRailChassisBraceCommand
+        : LastBearingCommand
+    {
+        public InstallReturnedRailChassisBraceCommand(long sequence)
+            : base(sequence)
+        {
+        }
+    }
+
     public sealed class PrepareExpeditionTransactionCommand : LastBearingCommand
     {
         public PrepareExpeditionTransactionCommand(

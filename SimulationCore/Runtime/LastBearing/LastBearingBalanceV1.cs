@@ -55,6 +55,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const long TankInstallFuelUnits = 6;
         public const long PatchworkSkidPlatePartsCostUnits = 3;
         public const long PatchworkSkidPlateProtectionMilli = 40;
+        public const long ReturnedRailChassisBracePartsCostUnits = 2;
+        public const long ReturnedRailChassisBraceProtectionMilli = 20;
         public const long WreckLineFrameRailSalvagePartsUnits = 4;
         public const long WreckLineFrameRailSalvageCargoUnits = 1;
 
@@ -275,6 +277,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
             VehicleModule module,
             RigUpgrade rigUpgrade)
         {
+            return RouteConditionLoss(
+                module,
+                rigUpgrade,
+                returnedRailChassisBraceInstalled: false);
+        }
+
+        internal static long RouteConditionLoss(
+            VehicleModule module,
+            RigUpgrade rigUpgrade,
+            bool returnedRailChassisBraceInstalled)
+        {
             long baseLoss;
             switch (module)
             {
@@ -291,16 +304,28 @@ namespace AtomicLandPirate.Simulation.LastBearing
             switch (rigUpgrade)
             {
                 case RigUpgrade.None:
-                    return baseLoss;
+                    break;
                 case RigUpgrade.PatchworkSkidPlate:
-                    return Math.Max(
+                    baseLoss = Math.Max(
                         0,
                         checked(
                             baseLoss
                             - PatchworkSkidPlateProtectionMilli));
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(rigUpgrade));
             }
+
+            if (returnedRailChassisBraceInstalled)
+            {
+                baseLoss = Math.Max(
+                    0,
+                    checked(
+                        baseLoss
+                        - ReturnedRailChassisBraceProtectionMilli));
+            }
+
+            return baseLoss;
         }
 
         internal static RouteKind RouteFor(VehicleModule module)
