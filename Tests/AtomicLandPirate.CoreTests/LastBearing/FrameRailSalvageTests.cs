@@ -16,6 +16,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "both modules hold for one explicit Wreck Line frame-rail recovery",
                 BothModulesHoldForExplicitRecovery);
             harness.Run(
+                "first run can leave the Wreck Line steel without credit or brace",
+                FirstRunCanLeaveSteelWithoutCreditOrBrace);
+            harness.Run(
                 "routes without the skid plate preserve the existing Wreck Line flow",
                 RouteWithoutUpgradeIsUnchanged);
             harness.Run(
@@ -65,17 +68,17 @@ namespace AtomicLandPirate.LastBearingTests
                     driver.View.IsWreckLineFrameRailRecoveryAvailable,
                     module + " salvage interaction unavailable");
                 TestHarness.Equal(
-                    "recover-wreck-line-frame-rails",
+                    "choose-wreck-line-frame-rails",
                     driver.View.NextObjective,
-                    module + " recovery objective");
+                    module + " choice objective");
                 AssertRejectedWithoutMutation(
                     driver.State,
                     new DriveVehicleCommand(
                         driver.State.NextCommandSequence,
-                        1000,
-                        0),
+                        0,
+                        1000),
                     "LAST_BEARING_WRECK_LINE_FRAME_RAIL_RECOVERY_REQUIRED",
-                    module + " drove past salvage");
+                    module + " steering abandoned salvage");
 
                 LastBearingTickResult recovered = driver.Apply(sequence =>
                     new RecoverWreckLineFrameRailsCommand(sequence));
@@ -124,6 +127,123 @@ namespace AtomicLandPirate.LastBearingTests
                 TestHarness.True(
                     driver.State.RouteProgressTicks > gate,
                     module + " route did not resume after recovery");
+            }
+        }
+
+        private static void FirstRunCanLeaveSteelWithoutCreditOrBrace()
+        {
+            foreach (VehicleModule module in new[]
+            {
+                VehicleModule.WinchAssembly,
+                VehicleModule.SealedRangeTank,
+            })
+            {
+                CoreTestDriver driver = ReachGate(
+                    module,
+                    checked(2520 + (int)module),
+                    installUpgrade: true);
+                driver.Apply(sequence =>
+                    new OperateWreckLineModuleCommand(
+                        sequence,
+                        driver.View.RouteActionKind));
+                long gate = driver.View.WreckLineGateTicks;
+                long partsBefore = driver.State.PartsUnits;
+
+                LastBearingTickResult left = driver.Apply(sequence =>
+                    new DriveVehicleCommand(sequence, 1000, 0));
+
+                TestHarness.Equal(
+                    FrameRailSalvageCustody.None,
+                    driver.State.FrameRailSalvageCustody,
+                    module + " left custody");
+                TestHarness.Equal(
+                    0L,
+                    driver.State.OrdinaryCargoUsedUnits,
+                    module + " left cargo occupancy");
+                TestHarness.True(
+                    driver.State.RouteProgressTicks > gate,
+                    module + " route did not resume");
+                TestHarness.True(
+                    !driver.View.IsWreckLineFrameRailRecoveryAvailable,
+                    module + " left rails remained recoverable");
+                TestHarness.True(
+                    left.DomainEvents.Any(item =>
+                        item.Kind ==
+                            LastBearingEventKind.FrameRailSalvageTransferred
+                        && item.BeforeValue ==
+                            (long)FrameRailSalvageCustody.WreckLine
+                        && item.AfterValue ==
+                            (long)FrameRailSalvageCustody.None),
+                    module + " leave event");
+
+                byte[] skipped = LastBearingCanonicalCodec.Encode(driver.State);
+                LastBearingDecodeResult decoded =
+                    LastBearingCanonicalCodec.TryDecode(skipped);
+                TestHarness.True(
+                    decoded.Succeeded && decoded.State != null,
+                    module + " skipped save decode");
+                TestHarness.True(
+                    skipped.SequenceEqual(
+                        LastBearingCanonicalCodec.Encode(decoded.State!)),
+                    module + " skipped save bytes");
+                driver = new CoreTestDriver(decoded.State!);
+                TestHarness.Equal(
+                    FrameRailSalvageCustody.None,
+                    driver.State.FrameRailSalvageCustody,
+                    module + " restored leave choice");
+
+                DriveToDepot(driver);
+                driver.Apply(sequence =>
+                    new OperateDepotRecoveryPointCommand(sequence));
+                driver.Apply(sequence =>
+                    new ResolveDepotCommand(
+                        sequence,
+                        EncounterChoice.Cooperate));
+                driver.Apply(sequence =>
+                    new LoadDepotRepairCargoCommand(sequence));
+                if (module == VehicleModule.SealedRangeTank)
+                {
+                    driver.Apply(sequence =>
+                        new ChooseLiquidReturnCommand(
+                            sequence,
+                            LiquidCargoKind.Water));
+                }
+
+                string transactionId = driver.State.TransactionId!;
+                string fingerprint = driver.State.TransactionFingerprint!;
+                driver.Apply(sequence =>
+                    new FreezeReturnPayloadCommand(
+                        sequence,
+                        transactionId,
+                        fingerprint));
+                while (driver.State.ExpeditionPhase != ExpeditionPhase.Returned)
+                {
+                    driver.Apply(sequence =>
+                        new DriveVehicleCommand(sequence, 1000, 0));
+                }
+
+                driver.Apply(sequence =>
+                    new CreditCityReturnCommand(
+                        sequence,
+                        transactionId,
+                        fingerprint));
+                driver.Apply(sequence =>
+                    new FinalizeExpeditionTransactionCommand(
+                        sequence,
+                        transactionId,
+                        fingerprint));
+
+                TestHarness.Equal(
+                    partsBefore,
+                    driver.State.PartsUnits,
+                    module + " left rails granted parts");
+                TestHarness.Equal(
+                    FrameRailSalvageCustody.None,
+                    driver.State.FrameRailSalvageCustody,
+                    module + " home custody");
+                TestHarness.True(
+                    !driver.View.IsReturnedRailChassisBraceInstallAvailable,
+                    module + " left rails exposed chassis brace");
             }
         }
 

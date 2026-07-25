@@ -1298,8 +1298,27 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
             if (IsWreckLineFrameRailRecoveryAvailable(builder))
             {
-                throw new InvalidOperationException(
-                    "LAST_BEARING_WRECK_LINE_FRAME_RAIL_RECOVERY_REQUIRED");
+                bool repeatExpedition =
+                    LastBearingRepeatExpedition.IsLineage(
+                        new LastBearingState(builder));
+                if (repeatExpedition || command.ThrottleMilli <= 0)
+                {
+                    throw new InvalidOperationException(
+                        "LAST_BEARING_WRECK_LINE_FRAME_RAIL_RECOVERY_REQUIRED");
+                }
+
+                builder.FrameRailSalvageCustody =
+                    FrameRailSalvageCustody.None;
+                Emit(
+                    builder,
+                    events,
+                    LastBearingEventKind.FrameRailSalvageTransferred,
+                    LastBearingEventCause.PlayerCommand,
+                    builder.RoadTick,
+                    command.Sequence,
+                    "cargo:wreck-line:frame-rails",
+                    (long)FrameRailSalvageCustody.WreckLine,
+                    (long)FrameRailSalvageCustody.None);
             }
 
             if (IsDepotApproachRecoveryAvailable(builder))

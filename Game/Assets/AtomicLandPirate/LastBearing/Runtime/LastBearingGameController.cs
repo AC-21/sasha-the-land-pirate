@@ -2612,6 +2612,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     result.DomainEvents,
                     LastBearingEventKind
                         .ReturnedRailChassisBraceInstalled);
+                bool frameRailsLeftBehind =
+                    _readModel.FrameRailSalvageCustody ==
+                        FrameRailSalvageCustody.WreckLine &&
+                    result.ReadModel.FrameRailSalvageCustody ==
+                        FrameRailSalvageCustody.None;
                 bool cityBuildingChanged = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.CityBuildingPlaced) ||
@@ -2681,6 +2686,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                                 ? "Return checked in. +4 reclaimed parts from the Wreck Line frame rails; seat the loaded repair at the pump hall."
                                 : "Return checked in. Seat the loaded repair at the pump hall.");
                     }
+                }
+
+                if (frameRailsLeftBehind)
+                {
+                    _status =
+                        "The Wreck Line steel stays in the dust. Sasha keeps the cargo slot open; no +4 reclaimed parts or returned-rail chassis brace will come home.";
                 }
 
                 if (turbineRepairAccepted &&
@@ -2817,12 +2828,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void QueueDriveInputIfApplicable()
         {
+            bool choosingFirstRunFrameRails =
+                _readModel?.IsWreckLineFrameRailRecoveryAvailable == true &&
+                !_readModel.IsRepeatExpedition;
             if (_pendingCommands.Count != 0 ||
                 _readModel == null ||
                 _readModel.PauseCause != PauseCause.None ||
                 _readModel.IsWreckLineModulePointAvailable ||
-                _readModel.IsWreckLineFrameRailRecoveryAvailable ||
                 _readModel.IsDepotApproachRecoveryAvailable ||
+                (_readModel.IsWreckLineFrameRailRecoveryAvailable &&
+                 (!choosingFirstRunFrameRails ||
+                  _world?.WreckLineInteractor?.IsInputArmed != true ||
+                  _fieldDesk?.OwnsKeyboardFocus == true)) ||
                 (_readModel.ExpeditionPhase != ExpeditionPhase.Outbound &&
                  _readModel.ExpeditionPhase != ExpeditionPhase.Returning))
             {
@@ -2830,6 +2847,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             RoadInputSample input = ReadRoadInputSample();
+            if (choosingFirstRunFrameRails &&
+                input.ThrottleMilli <= 0)
+            {
+                return;
+            }
+
             _modeCoordinator?.ApplyQuantizedRoadCommandShadow(
                 input.ThrottleMilli,
                 input.SteeringMilli);

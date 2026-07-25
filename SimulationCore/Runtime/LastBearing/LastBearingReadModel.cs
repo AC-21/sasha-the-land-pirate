@@ -640,7 +640,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
 
                 if (ComputeWreckLineFrameRailRecoveryAvailable(state))
                 {
-                    return "recover-wreck-line-frame-rails";
+                    return LastBearingRepeatExpedition.IsLineage(state)
+                        ? "recover-wreck-line-frame-rails"
+                        : "choose-wreck-line-frame-rails";
                 }
 
                 return ComputeDepotApproachRecoveryAvailable(state)

@@ -422,9 +422,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         LastBearingPermitJobChapter.Outbound,
                         3,
                         "CHAPTER III · THE WRECK LINE",
-                        "Strip the rails while the road is stopped",
-                        "The Patchwork Skid Plate lets Sasha belly under the wreck for one fixed frame-rail bundle. It uses one ordinary cargo slot and becomes four reclaimed parts only after home check-in.",
-                        "E — Recover frame rails · +4 reclaimed parts at home",
+                        "Take the steel or leave it",
+                        "The Patchwork Skid Plate can free one fixed frame-rail bundle. Take it for four reclaimed parts and a future chassis brace, or leave it to keep the cargo slot open.",
+                        "E / A — TAKE · release, then W / right trigger — LEAVE",
                         model.RouteProgressTicks,
                         model.RouteTargetTicks);
                 }

@@ -18,6 +18,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "repeat circuit returns four parts at normal road cost",
                 RepeatCircuitCostsAndSalvageAreExact);
             harness.Run(
+                "repeat Wreck Line steel remains mandatory and recoverable",
+                RepeatSteelCannotBeLeftBehind);
+            harness.Run(
                 "repeat circuit charges and preserves the authored route toll",
                 PersistentRouteTollIsApplied);
             harness.Run(
@@ -183,6 +186,70 @@ namespace AtomicLandPirate.LastBearingTests
                 rotorBefore,
                 driver.State.HeavyCargoCustody,
                 "repeat created a second rotor");
+        }
+
+        private static void RepeatSteelCannotBeLeftBehind()
+        {
+            CoreTestDriver driver = ReachRepeatReady(
+                ColonyComposition.Mixed,
+                VehicleModule.WinchAssembly,
+                3403);
+            PrepareRepeat(driver);
+            string transactionId = driver.State.TransactionId!;
+            string fingerprint = driver.State.TransactionFingerprint!;
+            driver.Apply(sequence =>
+                new DebitCityManifestCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            while (!driver.View.IsWreckLineModulePointAvailable)
+            {
+                driver.Apply(sequence =>
+                    new DriveVehicleCommand(sequence, 1000, 0));
+            }
+
+            driver.Apply(sequence =>
+                new OperateWreckLineModuleCommand(
+                    sequence,
+                    driver.View.RouteActionKind));
+            TestHarness.True(
+                driver.View.IsRepeatExpedition &&
+                driver.View.IsWreckLineFrameRailRecoveryAvailable,
+                "repeat rail choice fixture");
+            byte[] before = LastBearingCanonicalCodec.Encode(driver.State);
+            InvalidOperationException error =
+                TestHarness.Throws<InvalidOperationException>(
+                    () => new LastBearingKernel().Step(
+                        driver.State,
+                        new LastBearingCommand[]
+                        {
+                            new DriveVehicleCommand(
+                                driver.State.NextCommandSequence,
+                                1000,
+                                0),
+                        }),
+                    "repeat rails were left behind");
+            TestHarness.Equal(
+                "LAST_BEARING_WRECK_LINE_FRAME_RAIL_RECOVERY_REQUIRED",
+                error.Message,
+                "repeat leave rejection");
+            TestHarness.True(
+                before.SequenceEqual(
+                    LastBearingCanonicalCodec.Encode(driver.State)),
+                "repeat leave mutated state");
+
+            long gate = driver.State.RouteProgressTicks;
+            driver.Apply(sequence =>
+                new RecoverWreckLineFrameRailsCommand(sequence));
+            driver.Apply(sequence =>
+                new DriveVehicleCommand(sequence, 1000, 0));
+            TestHarness.Equal(
+                FrameRailSalvageCustody.Vehicle,
+                driver.State.FrameRailSalvageCustody,
+                "repeat recovery custody");
+            TestHarness.True(
+                driver.State.RouteProgressTicks > gate,
+                "repeat route did not resume after recovery");
         }
 
         private static void BothModulesAndAllCompositionsWork()

@@ -287,6 +287,187 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 "wrong mode");
         }
 
+        [UnityTest]
+        public IEnumerator FirstRunLeaveRequiresReleaseAndSurvivesThreeLoads()
+        {
+            AsyncOperation? load = SceneManager.LoadSceneAsync(
+                SceneName,
+                LoadSceneMode.Single);
+            Assert.That(load, Is.Not.Null);
+            yield return load;
+            yield return null;
+
+            LastBearingGameController controller =
+                UnityEngine.Object.FindAnyObjectByType<
+                    LastBearingGameController>();
+            controller.enabled = false;
+            string profileDirectory =
+                InstallTemporarySaveAdapter(controller);
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Gamepad gamepad = InputSystem.AddDevice<Gamepad>();
+            Press(keyboard.wKey);
+            Press(gamepad.rightTrigger);
+
+            LastBearingState recoveryReady =
+                CreateFrameRailRecoveryReadyState();
+            long gate = recoveryReady.RouteProgressTicks;
+            InstallControllerState(controller, recoveryReady);
+            LastBearingRouteModulePointView wreck =
+                controller.World!.RouteModulePointView!;
+            LastBearingWreckLineInteractor interactor =
+                wreck.Interactor!;
+            RoadFeelRigInstance roadRig = controller.World.RoadFeelRig!;
+            yield return null;
+            yield return null;
+
+            Assert.That(interactor.IsInputArmed, Is.False);
+            InvokeFrameRailDriveInputQueue(controller);
+            Assert.That(PendingCommands(controller), Is.Empty);
+
+            Release(keyboard.wKey);
+            yield return null;
+            Assert.That(
+                interactor.IsInputArmed,
+                Is.False,
+                "right trigger still held");
+            Set(gamepad.rightTrigger, 0.005f);
+            yield return null;
+            Assert.That(
+                interactor.IsInputArmed,
+                Is.False,
+                "nonzero quantized trigger armed leave");
+            Release(gamepad.rightTrigger);
+            yield return null;
+
+            Assert.That(interactor.IsInputArmed, Is.True);
+            Assert.That(
+                interactor.Feedback,
+                Does.Contain("TAKE THE STEEL OR LEAVE IT"));
+            Assert.That(
+                LastBearingRoadDeskPresenter.Present(
+                    controller.ReadModel!).NextVerb,
+                Does.Contain("RELEASE, THEN W / RT · LEAVE"));
+            Assert.That(
+                LastBearingRoadDeskPresenter.Present(
+                    controller.ReadModel!).NextVerb,
+                Does.Contain("+4 / BRACE / +400 KG"));
+            Assert.That(
+                LastBearingRoadDeskPresenter.Present(
+                    controller.ReadModel!).NextVerb,
+                Does.Contain("SLOT OPEN / NO REWARD / NO RAIL MASS"));
+
+            Press(keyboard.aKey);
+            InvokeFrameRailDriveInputQueue(controller);
+            Release(keyboard.aKey);
+            Assert.That(
+                PendingCommands(controller),
+                Is.Empty,
+                "steering selected leave");
+
+            Press(keyboard.sKey);
+            Press(gamepad.leftTrigger);
+            InvokeFrameRailDriveInputQueue(controller);
+            Release(keyboard.sKey);
+            Release(gamepad.leftTrigger);
+            Assert.That(
+                PendingCommands(controller),
+                Is.Empty,
+                "brake or reverse selected leave");
+
+            byte[] sourceCanonical =
+                LastBearingCanonicalCodec.Encode(controller.State!);
+            string sourceHash = controller.CanonicalHash;
+            Dictionary<string, string> sourceSave =
+                SnapshotSaveFiles(profileDirectory);
+            long leaveSequence = controller.State!.NextCommandSequence;
+            Press(keyboard.wKey);
+            InvokeFrameRailDriveInputQueue(controller);
+
+            LastBearingCommand[] queued = PendingCommands(controller);
+            Assert.That(queued, Has.Length.EqualTo(1));
+            Assert.That(queued[0], Is.TypeOf<DriveVehicleCommand>());
+            var leave = (DriveVehicleCommand)queued[0];
+            Assert.That(leave.Sequence, Is.EqualTo(leaveSequence));
+            Assert.That(leave.ThrottleMilli, Is.EqualTo(1000));
+            Assert.That(leave.SteeringMilli, Is.Zero);
+            CollectionAssert.AreEqual(
+                sourceCanonical,
+                LastBearingCanonicalCodec.Encode(controller.State!));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(sourceHash));
+            AssertSaveSnapshot(
+                sourceSave,
+                SnapshotSaveFiles(profileDirectory));
+
+            InvokeSimulationTick(controller);
+            Release(keyboard.wKey);
+            yield return null;
+
+            Assert.That(PendingCommands(controller), Is.Empty);
+            Assert.That(
+                controller.ReadModel!.FrameRailSalvageCustody,
+                Is.EqualTo(FrameRailSalvageCustody.None));
+            Assert.That(
+                controller.ReadModel.RouteProgressTicks,
+                Is.GreaterThan(gate));
+            Assert.That(
+                controller.Status,
+                Does.Contain("no +4 reclaimed parts"));
+            Assert.That(
+                controller.ReadModel.IsWreckLineFrameRailRecoveryAvailable,
+                Is.False);
+            Assert.That(wreck.IsFrameRailSourceVisible, Is.False);
+            Assert.That(wreck.IsCanonicalFrameRailCargoVisible, Is.False);
+            Assert.That(wreck.IsRoadFrameRailCargoVisible, Is.False);
+            Assert.That(interactor.IsTargetVisible, Is.False);
+            Assert.That(
+                roadRig.Adapter.LastCargoMassKilograms,
+                Is.Zero);
+            Assert.That(
+                roadRig.Vehicle.Telemetry.CargoMassKilograms,
+                Is.Zero);
+            AssertSaveSnapshotChanged(
+                sourceSave,
+                SnapshotSaveFiles(profileDirectory));
+
+            controller.Save();
+            byte[] skippedCanonical =
+                LastBearingCanonicalCodec.Encode(controller.State!);
+            string skippedHash = controller.CanonicalHash;
+            Dictionary<string, string> skippedSave =
+                SnapshotSaveFiles(profileDirectory);
+            for (var cycle = 0; cycle < 3; cycle++)
+            {
+                controller.ReturnToTitle();
+                yield return null;
+                controller.Load();
+                yield return null;
+
+                CollectionAssert.AreEqual(
+                    skippedCanonical,
+                    LastBearingCanonicalCodec.Encode(controller.State!),
+                    "cycle " + cycle);
+                Assert.That(
+                    controller.CanonicalHash,
+                    Is.EqualTo(skippedHash),
+                    "cycle " + cycle);
+                Assert.That(
+                    controller.ReadModel!.FrameRailSalvageCustody,
+                    Is.EqualTo(FrameRailSalvageCustody.None),
+                    "cycle " + cycle);
+                Assert.That(
+                    controller.ReadModel.RouteProgressTicks,
+                    Is.GreaterThan(gate),
+                    "cycle " + cycle);
+                Assert.That(interactor.IsTargetVisible, Is.False);
+                Assert.That(
+                    roadRig.Adapter.LastCargoMassKilograms,
+                    Is.Zero);
+                AssertSaveSnapshot(
+                    skippedSave,
+                    SnapshotSaveFiles(profileDirectory));
+            }
+        }
+
         private static LastBearingState
             CreateFrameRailRecoveryReadyState()
         {
@@ -336,6 +517,18 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     BindingFlags.NonPublic);
             Assert.That(readModel, Is.Not.Null);
             readModel!.SetValue(controller, model);
+        }
+
+        private static void InvokeFrameRailDriveInputQueue(
+            LastBearingGameController controller)
+        {
+            MethodInfo? queue =
+                typeof(LastBearingGameController).GetMethod(
+                    "QueueDriveInputIfApplicable",
+                    BindingFlags.Instance |
+                    BindingFlags.NonPublic);
+            Assert.That(queue, Is.Not.Null);
+            queue!.Invoke(controller, null);
         }
 
         private static void AssertRejectedWreckLineWithoutMutation(

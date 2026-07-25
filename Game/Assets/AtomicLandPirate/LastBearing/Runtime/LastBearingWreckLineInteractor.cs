@@ -402,7 +402,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 bool controlsReleased =
                     keyboard?.eKey.isPressed != true &&
                     gamepad?.buttonSouth.isPressed != true &&
-                    mouse?.leftButton.isPressed != true;
+                    mouse?.leftButton.isPressed != true &&
+                    RoadControlsReleased(keyboard, gamepad);
                 if (Time.frameCount > _presentationEntryFrame &&
                     controlsReleased)
                 {
@@ -587,9 +588,43 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 WreckLineInteractionStage.SealRangeTank =>
                     "LOCK TANK SEALS · CROSS THE DUST LINE\nE / A OR POINTER",
                 WreckLineInteractionStage.RecoverFrameRails =>
-                    "STRAP FRAME RAILS · TAKE THEM ABOARD\nE / A OR POINTER",
+                    _model?.IsRepeatExpedition == true
+                        ? "STRAP FRAME RAILS · TAKE THEM ABOARD\nE / A OR POINTER"
+                        : "TAKE THE STEEL OR LEAVE IT\nTAKE +4 / BRACE / +400 KG\nLEAVE SLOT OPEN / NO REWARD / NO RAIL MASS\nE / A TAKES · RELEASE, THEN W / RT LEAVES",
                 _ => string.Empty,
             };
+        }
+
+        private static bool RoadControlsReleased(
+            Keyboard? keyboard,
+            Gamepad? gamepad)
+        {
+            bool keyboardReleased =
+                keyboard?.wKey.isPressed != true &&
+                keyboard?.sKey.isPressed != true &&
+                keyboard?.aKey.isPressed != true &&
+                keyboard?.dKey.isPressed != true &&
+                keyboard?.upArrowKey.isPressed != true &&
+                keyboard?.downArrowKey.isPressed != true &&
+                keyboard?.leftArrowKey.isPressed != true &&
+                keyboard?.rightArrowKey.isPressed != true &&
+                keyboard?.spaceKey.isPressed != true;
+            bool gamepadReleased =
+                gamepad == null ||
+                (QuantizedRoadAxisIsReleased(
+                     gamepad.rightTrigger.ReadValue()) &&
+                 QuantizedRoadAxisIsReleased(
+                     gamepad.leftTrigger.ReadValue()) &&
+                 QuantizedRoadAxisIsReleased(
+                     gamepad.leftStick.x.ReadValue()) &&
+                 !gamepad.leftShoulder.isPressed);
+            return keyboardReleased && gamepadReleased;
+        }
+
+        private static bool QuantizedRoadAxisIsReleased(float value)
+        {
+            return Mathf.RoundToInt(
+                Mathf.Clamp01(Mathf.Abs(value)) * 1000f) == 0;
         }
 
         private static string QueuedFeedback(
