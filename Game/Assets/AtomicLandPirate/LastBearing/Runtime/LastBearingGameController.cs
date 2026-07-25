@@ -121,6 +121,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _modeCoordinator.CurrentMode ==
                 LastBearingPresentationMode.CityOverview;
 
+        public bool IsExactFieldDeskDriving =>
+            HasActiveGame &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.Driving;
+
         public bool HasPendingPlayerCommands => _pendingCommands.Count != 0;
 
         public bool IsDepotApproachRecoveryAvailable =>
@@ -744,7 +750,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _hud = gameObject.AddComponent<LastBearingHud>();
             _hud.Configure(this, _fieldDesk);
             SetLegacyHudSuppressedByFieldDesk(
-                _fieldDesk?.OwnsCityOverview == true);
+                _fieldDesk?.OwnsRetainedHud == true);
 
             try
             {

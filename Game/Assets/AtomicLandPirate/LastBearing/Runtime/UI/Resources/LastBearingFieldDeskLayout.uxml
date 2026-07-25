@@ -1,6 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:VisualElement name="field-desk-overlay" class="field-desk-overlay" picking-mode="Ignore">
+        <ui:VisualElement name="road-strip" class="road-strip" picking-mode="Ignore">
+            <ui:VisualElement class="road-nameplate" picking-mode="Ignore">
+                <ui:Label text="SASHA'S ROAD BOOK" class="road-kicker" picking-mode="Ignore" />
+                <ui:Label name="road-leg-label" class="road-leg" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="road-route-block" picking-mode="Ignore">
+                <ui:Label name="road-route-label" class="road-route" picking-mode="Ignore" />
+                <ui:ProgressBar name="road-progress-bar" class="road-progress" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="road-instrument-row" picking-mode="Ignore">
+                <ui:Label name="road-scout-label" class="road-instrument" picking-mode="Ignore" />
+                <ui:Label name="road-cargo-label" class="road-instrument road-cargo" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="road-order-row" picking-mode="Ignore">
+                <ui:Label name="road-edge-label" class="road-edge" picking-mode="Ignore" />
+                <ui:Label name="road-next-verb-label" class="road-next-verb" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:Label name="road-controls-label" class="road-controls" picking-mode="Ignore" />
+        </ui:VisualElement>
+
         <ui:VisualElement name="field-desk" class="field-desk" picking-mode="Position">
             <ui:ScrollView name="desk-scroll" class="desk-scroll">
                 <ui:VisualElement class="nameplate plate">

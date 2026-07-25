@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using AtomicLandPirate.Presentation.LastBearing.RoadFeel;
 using AtomicLandPirate.Simulation.LastBearing;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -70,6 +71,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private UIDocument? _document;
         private VisualElement? _overlay;
         private VisualElement? _desk;
+        private VisualElement? _roadStrip;
+        private Label? _roadLeg;
+        private Label? _roadRoute;
+        private ProgressBar? _roadProgress;
+        private Label? _roadScout;
+        private Label? _roadCargo;
+        private Label? _roadEdge;
+        private Label? _roadNextVerb;
+        private Label? _roadControls;
         private ScrollView? _scroll;
         private Foldout? _audit;
         private Label? _auditHash;
@@ -104,6 +114,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private ulong _lastStamp;
         private bool _hasStamp;
         private bool _visible;
+        private bool _cityVisible;
+        private bool _roadVisible;
         private bool _auditCallbackRegistered;
         private bool _physicalWorkRouted;
 
@@ -111,9 +123,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool OwnsCityOverview =>
             IsOperational &&
-            _visible &&
+            _cityVisible &&
             _overlay != null &&
             _controller?.IsExactFieldDeskCityOverview == true;
+
+        public bool OwnsDriving =>
+            IsOperational &&
+            _roadVisible &&
+            _overlay != null &&
+            _controller?.IsExactFieldDeskDriving == true;
+
+        public bool OwnsRetainedHud =>
+            OwnsCityOverview || OwnsDriving;
 
         public bool OwnsKeyboardFocus
         {
@@ -295,10 +316,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
-            if (!_controller.IsExactFieldDeskCityOverview)
+            bool ownsCity = _controller.IsExactFieldDeskCityOverview;
+            bool ownsRoad = _controller.IsExactFieldDeskDriving;
+            if (!ownsCity && !ownsRoad)
             {
                 _physicalWorkRouted = false;
                 HideAndResetTransient();
+                return;
+            }
+
+            if (ownsRoad)
+            {
+                _physicalWorkRouted = false;
+                RefreshRoad(force);
                 return;
             }
 
@@ -407,6 +437,22 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             VisualElement root = _document!.rootVisualElement;
             _desk = Require<VisualElement>(root, "field-desk");
+            _roadStrip = Require<VisualElement>(root, "road-strip");
+            _roadLeg = Require<Label>(root, "road-leg-label");
+            _roadRoute = Require<Label>(root, "road-route-label");
+            _roadProgress = Require<ProgressBar>(
+                root,
+                "road-progress-bar");
+            _roadScout = Require<Label>(root, "road-scout-label");
+            _roadCargo = Require<Label>(root, "road-cargo-label");
+            _roadEdge = Require<Label>(root, "road-edge-label");
+            _roadNextVerb = Require<Label>(
+                root,
+                "road-next-verb-label");
+            _roadControls = Require<Label>(
+                root,
+                "road-controls-label");
+            SetPickingModeRecursive(_roadStrip, PickingMode.Ignore);
             _scroll = Require<ScrollView>(root, "desk-scroll");
             _audit = Require<Foldout>(root, "audit-foldout");
             _auditHash = Require<Label>(root, "audit-hash-label");
@@ -461,6 +507,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 Bind(root, "load-button"),
                 Bind(root, "title-button"),
             };
+            SetPresentationVisible(
+                cityVisible: false,
+                roadVisible: false);
         }
 
         private void RegisterCallbacks()
@@ -551,6 +600,62 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 UpdateAudit();
             }
+        }
+
+        private void RefreshRoad(bool force)
+        {
+            LastBearingReadModel? model = _controller?.RuntimeReadModel;
+            if (model == null)
+            {
+                HideAndResetTransient();
+                return;
+            }
+
+            LastBearingFieldDeskStamp stamp =
+                LastBearingFieldDeskPresenter.CaptureStamp(_controller!);
+            SetPresentationVisible(
+                cityVisible: false,
+                roadVisible: true);
+            bool projectionChanged =
+                !_hasStamp || _lastStamp != stamp.Value;
+            float now = Time.unscaledTime;
+            if (!force && !projectionChanged && now < _nextRefreshTime)
+            {
+                return;
+            }
+
+            _nextRefreshTime = now + RefreshIntervalSeconds;
+            if (!force && !projectionChanged)
+            {
+                return;
+            }
+
+            ApplyRoadProjection(
+                LastBearingRoadDeskPresenter.Present(model));
+            _lastStamp = stamp.Value;
+            _hasStamp = true;
+        }
+
+        private void ApplyRoadProjection(
+            LastBearingRoadDeskProjection projection)
+        {
+            SetText(_roadLeg!, projection.Leg);
+            SetText(_roadRoute!, projection.Route);
+            _roadProgress!.lowValue = 0f;
+            _roadProgress.highValue = 100f;
+            _roadProgress.SetValueWithoutNotify(
+                projection.RouteProgressPercent);
+            SetText(_roadScout!, projection.Scout);
+            SetText(_roadCargo!, projection.Cargo);
+            SetText(_roadEdge!, projection.Edge);
+            _roadEdge!.EnableInClassList(
+                "road-edge-risk",
+                projection.EdgeState ==
+                    LastBearingRoadSafeLineState.LeftRisk ||
+                projection.EdgeState ==
+                    LastBearingRoadSafeLineState.RightRisk);
+            SetText(_roadNextVerb!, projection.NextVerb);
+            SetText(_roadControls!, projection.Controls);
         }
 
         private void Dispatch(ButtonBinding source)
@@ -688,7 +793,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             _document?.rootVisualElement.panel?.focusController
                 .focusedElement?.Blur();
-            SetDeskVisible(false);
+            SetPresentationVisible(
+                cityVisible: false,
+                roadVisible: false);
             if (_scroll != null)
             {
                 _scroll.scrollOffset = Vector2.zero;
@@ -706,19 +813,39 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void SetDeskVisible(bool visible)
         {
-            if (_overlay == null)
+            SetPresentationVisible(
+                cityVisible: visible,
+                roadVisible: false);
+        }
+
+        private void SetPresentationVisible(
+            bool cityVisible,
+            bool roadVisible)
+        {
+            if (_overlay == null || _desk == null || _roadStrip == null)
             {
                 return;
             }
 
+            bool visible = cityVisible || roadVisible;
             _controller?.SetLegacyHudSuppressedByFieldDesk(visible);
-            if (_visible == visible)
+            if (_visible == visible &&
+                _cityVisible == cityVisible &&
+                _roadVisible == roadVisible)
             {
                 return;
             }
 
             _visible = visible;
+            _cityVisible = cityVisible;
+            _roadVisible = roadVisible;
             _overlay.style.display = visible
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
+            _desk.style.display = cityVisible
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
+            _roadStrip.style.display = roadVisible
                 ? DisplayStyle.Flex
                 : DisplayStyle.None;
         }
@@ -741,6 +868,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (label.text != value)
             {
                 label.text = value;
+            }
+        }
+
+        private static void SetPickingModeRecursive(
+            VisualElement element,
+            PickingMode mode)
+        {
+            element.pickingMode = mode;
+            for (var index = 0; index < element.childCount; index++)
+            {
+                SetPickingModeRecursive(element[index], mode);
             }
         }
 
@@ -814,6 +952,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _document = null;
             _panelSettings = null;
             _overlay = null;
+            _desk = null;
+            _roadStrip = null;
         }
 
         private sealed class ButtonBinding

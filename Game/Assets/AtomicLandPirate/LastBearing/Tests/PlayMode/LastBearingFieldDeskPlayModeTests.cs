@@ -59,7 +59,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
-        public IEnumerator DeskOwnsOnlyCityAndReusesDocumentAcrossLifecycle()
+        public IEnumerator DeskOwnsCityAndReusesDocumentAcrossLifecycle()
         {
             LastBearingGameController controller = BuildController();
             yield return null;
@@ -113,6 +113,127 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.GetComponentsInChildren<UIDocument>(true),
                 Has.Length.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator RoadStripOwnsDirectDepartureSaveLoadAndFourCycles()
+        {
+            LastBearingGameController controller = BuildController();
+            LastBearingFieldDesk desk = RequireDesk(controller);
+            _ = InstallTemporarySaveAdapter(controller);
+            UIDocument document = RequireDocument(controller);
+            VisualElement overlay = document.rootVisualElement.Q<VisualElement>(
+                "field-desk-overlay");
+            VisualElement cityDesk =
+                document.rootVisualElement.Q<VisualElement>("field-desk");
+            VisualElement roadStrip =
+                document.rootVisualElement.Q<VisualElement>("road-strip");
+            Label route = document.rootVisualElement.Q<Label>(
+                "road-route-label");
+            LastBearingHud legacyHud =
+                controller.GetComponent<LastBearingHud>();
+
+            InstallControllerState(
+                controller,
+                CreateReadyDepartureState(
+                    VehicleModule.WinchAssembly));
+            controller.OpenGarageBay();
+            desk.Refresh(force: true);
+            AssertMode(controller, LastBearingPresentationMode.GarageBay);
+            Assert.That(desk.OwnsRetainedHud, Is.False);
+            Assert.That(legacyHud.enabled, Is.True);
+
+            controller.CommitExpedition();
+            InvokeSimulationTick(controller);
+            yield return null;
+            desk.Refresh(force: true);
+
+            AssertMode(controller, LastBearingPresentationMode.Driving);
+            Assert.That(desk.OwnsCityOverview, Is.False);
+            Assert.That(desk.OwnsDriving, Is.True);
+            Assert.That(desk.OwnsRetainedHud, Is.True);
+            Assert.That(desk.OwnsKeyboardFocus, Is.False);
+            Assert.That(
+                desk.BlocksWorldPointer(new Vector2(24f, 24f)),
+                Is.False);
+            Assert.That(
+                legacyHud.BlocksWorldPointer(new Vector2(24f, 24f)),
+                Is.False);
+            Assert.That(legacyHud.enabled, Is.False);
+            Assert.That(
+                overlay.style.display.value,
+                Is.EqualTo(DisplayStyle.Flex));
+            Assert.That(
+                cityDesk.style.display.value,
+                Is.EqualTo(DisplayStyle.None));
+            Assert.That(
+                roadStrip.style.display.value,
+                Is.EqualTo(DisplayStyle.Flex));
+            AssertPickingIgnored(roadStrip);
+            Assert.That(route.text, Does.StartWith("WRECK LINE · 0 / "));
+
+            string departureHash = controller.CanonicalHash;
+            string departureRoute = route.text;
+            LastBearingFieldDeskPerformanceTopology topology =
+                desk.CapturePerformanceTopology();
+            for (var index = 0; index < 4; index++)
+            {
+                desk.Refresh();
+                yield return null;
+            }
+
+            Assert.That(
+                desk.MatchesPerformanceTopology(topology),
+                Is.True);
+            Assert.That(route.text, Is.EqualTo(departureRoute));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(departureHash));
+
+            controller.Save();
+            controller.ReturnToTitle();
+            Assert.That(desk.OwnsRetainedHud, Is.False);
+            Assert.That(legacyHud.enabled, Is.True);
+            controller.Load();
+            yield return null;
+            desk.Refresh(force: true);
+            AssertMode(controller, LastBearingPresentationMode.Driving);
+            Assert.That(desk.OwnsDriving, Is.True);
+            Assert.That(legacyHud.enabled, Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(departureHash));
+            Assert.That(route.text, Is.EqualTo(departureRoute));
+
+            LastBearingState driving =
+                CreateDrivingState(VehicleModule.WinchAssembly);
+            LastBearingState depot =
+                CreateDepotState(VehicleModule.WinchAssembly);
+            for (var cycle = 0; cycle < 4; cycle++)
+            {
+                InstallControllerState(controller, depot);
+                desk.Refresh(force: true);
+                AssertMode(
+                    controller,
+                    LastBearingPresentationMode.DepotEncounter);
+                Assert.That(desk.OwnsRetainedHud, Is.False);
+                Assert.That(legacyHud.enabled, Is.True);
+                Assert.That(
+                    overlay.style.display.value,
+                    Is.EqualTo(DisplayStyle.None));
+
+                InstallControllerState(controller, driving);
+                desk.Refresh(force: true);
+                AssertMode(
+                    controller,
+                    LastBearingPresentationMode.Driving);
+                Assert.That(desk.OwnsDriving, Is.True);
+                Assert.That(desk.OwnsKeyboardFocus, Is.False);
+                Assert.That(
+                    desk.BlocksWorldPointer(
+                        new Vector2(24f, 24f)),
+                    Is.False);
+                Assert.That(legacyHud.enabled, Is.False);
+                Assert.That(
+                    roadStrip.style.display.value,
+                    Is.EqualTo(DisplayStyle.Flex));
+            }
         }
 
         [UnityTest]
@@ -1233,6 +1354,113 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             return Directory.GetFiles(profileDirectory, "gen-*.lbg").Length;
         }
 
+        private static LastBearingState CreateReadyDepartureState(
+            VehicleModule module)
+        {
+            LastBearingState state =
+                LastBearingScenarioFactory.CreateInitial(
+                    ColonyComposition.Mixed,
+                    4701);
+            state = Apply(
+                state,
+                sequence => new AssignResidentCommand(
+                    sequence,
+                    ResidentRoster.HumanResidentId));
+            state = Apply(
+                state,
+                sequence =>
+                    new ActivateSliceInfrastructureCommand(sequence));
+            state = Apply(
+                state,
+                sequence => new SelectPreparationCommand(
+                    sequence,
+                    PreparationChoice.CivicBuffer,
+                    module));
+            state = Apply(
+                state,
+                sequence =>
+                    new InstallVehicleModuleCommand(sequence, module));
+            for (var guard = 0;
+                 LastBearingReadModel.FromState(state).PreparationPhase !=
+                     PreparationPhase.Ready &&
+                 guard < 1000;
+                 guard++)
+            {
+                state = Advance(state, 1);
+            }
+
+            Assert.That(
+                LastBearingReadModel.FromState(state).PreparationPhase,
+                Is.EqualTo(PreparationPhase.Ready));
+            return state;
+        }
+
+        private static LastBearingState CreateDrivingState(
+            VehicleModule module)
+        {
+            LastBearingState state =
+                CreateReadyDepartureState(module);
+            const string transactionId =
+                "transaction:road-desk-cycle:4701";
+            const string fingerprint =
+                "fingerprint:road-desk-cycle:4701";
+            state = Apply(
+                state,
+                sequence => new PrepareExpeditionTransactionCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            state = Apply(
+                state,
+                sequence => new DebitCityManifestCommand(
+                    sequence,
+                    transactionId,
+                    fingerprint));
+            Assert.That(
+                LastBearingReadModel.FromState(state).ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.Outbound));
+            return state;
+        }
+
+        private static LastBearingState CreateDepotState(
+            VehicleModule module)
+        {
+            LastBearingState state = CreateDrivingState(module);
+            for (var guard = 0; guard < 1000; guard++)
+            {
+                LastBearingReadModel model =
+                    LastBearingReadModel.FromState(state);
+                if (model.IsWreckLineModulePointAvailable)
+                {
+                    state = Apply(
+                        state,
+                        sequence => new OperateWreckLineModuleCommand(
+                            sequence,
+                            model.RouteActionKind));
+                    model = LastBearingReadModel.FromState(state);
+                }
+
+                if (model.IsDepotApproachRecoveryAvailable)
+                {
+                    state = Apply(
+                        state,
+                        sequence =>
+                            new OperateDepotRecoveryPointCommand(sequence));
+                    break;
+                }
+
+                state = Apply(
+                    state,
+                    sequence =>
+                        new DriveVehicleCommand(sequence, 1000, 0));
+            }
+
+            Assert.That(
+                LastBearingReadModel.FromState(state).ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.AtDepot));
+            return state;
+        }
+
         private static LastBearingState CreatePostReturnState(
             bool repairTurbine,
             VehicleModule module = VehicleModule.SealedRangeTank)
@@ -1528,6 +1756,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.GetComponentsInChildren<UIDocument>(true);
             Assert.That(documents, Has.Length.EqualTo(1));
             return documents[0];
+        }
+
+        private static void AssertPickingIgnored(VisualElement element)
+        {
+            Assert.That(element.pickingMode, Is.EqualTo(PickingMode.Ignore));
+            Assert.That(element.focusable, Is.False);
+            for (var index = 0; index < element.childCount; index++)
+            {
+                AssertPickingIgnored(element[index]);
+            }
         }
 
         private static void Submit(Button button)

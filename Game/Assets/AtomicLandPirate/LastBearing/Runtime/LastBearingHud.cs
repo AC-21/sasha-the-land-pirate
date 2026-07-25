@@ -36,7 +36,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             if (!enabled ||
                 _controller == null ||
-                _fieldDesk?.OwnsCityOverview == true)
+                _fieldDesk?.OwnsRetainedHud == true)
             {
                 return false;
             }
@@ -59,7 +59,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
-            if (_fieldDesk?.OwnsCityOverview == true)
+            if (_fieldDesk?.OwnsRetainedHud == true)
             {
                 return;
             }
