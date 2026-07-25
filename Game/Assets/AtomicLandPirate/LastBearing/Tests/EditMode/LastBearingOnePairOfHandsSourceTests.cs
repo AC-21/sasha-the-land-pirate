@@ -62,17 +62,29 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 serviceCell,
                 Does.Contain(
+                    "bool workshopPushOwnsServiceSlot ="));
+            Assert.That(
+                serviceCell,
+                Does.Contain(
+                    "model.PreparationPhase == PreparationPhase.Preparing &&"));
+            Assert.That(
+                serviceCell,
+                Does.Contain(
+                    "!model.IsPreparationStalledByHotShift;"));
+            Assert.That(
+                serviceCell,
+                Does.Not.Contain(
                     "model.IsPreparationActivelyWorking;"));
             Assert.That(
                 serviceCell,
                 Does.Contain(
                     "bool operatorAtMachine =\n" +
-                    "                !workshopPushPreparationWorking;"));
+                    "                !workshopPushOwnsServiceSlot;"));
             Assert.That(
                 serviceCell,
                 Does.Contain(
                     "_workshopPushTransferArm.SetActive(\n" +
-                    "                workshopPushPreparationWorking);"));
+                    "                workshopPushOwnsServiceSlot);"));
         }
 
         [Test]
@@ -94,6 +106,23 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     "The active shift owns the single machine-shop " +
                     "service slot; Workshop Push preparation is held " +
                     "and the garage gauge is frozen."));
+            Assert.That(
+                presenter,
+                Does.Contain(
+                    "Settlement clocks are paused. Hot Shift still owns " +
+                    "the single machine-shop service slot; Workshop Push " +
+                    "preparation and the garage gauge remain frozen."));
+            Assert.That(
+                presenter,
+                Does.Contain(
+                    "Settlement clocks are paused. Workshop Push still " +
+                    "owns the single machine-shop service slot; preparation " +
+                    "and the garage gauge are not advancing."));
+            Assert.That(
+                presenter,
+                Does.Contain(
+                    "Workshop Push owns the single machine-shop service " +
+                    "slot and is actively advancing on the settlement clock."));
         }
 
         [Test]
@@ -145,6 +174,19 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Does.Contain(
                     "_preparationGaugeHousingRenderer.sharedMaterial =\n" +
                     "                    gaugeStateMaterial;"));
+            Assert.That(
+                apply,
+                Does.Contain(
+                    "IsPreparationGaugeActivelyWorking ||\n" +
+                    "                      preparationComplete"));
+            Assert.That(
+                apply,
+                Does.Contain(
+                    ": _preparationGaugeIdleMaterial;"));
+            Assert.That(
+                apply,
+                Does.Contain(
+                    "renderer.sharedMaterial = gaugeStateMaterial;"));
             Assert.That(
                 apply,
                 Does.Not.Contain(".material ="));

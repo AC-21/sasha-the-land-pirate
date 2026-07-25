@@ -728,7 +728,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 primary = Action(
                     LastBearingFieldDeskIntent.OpenGarage,
                     "INSPECT SASHA'S RIG",
-                    "Preparation continues on the settlement clock.",
+                    CreatePreparationDetail(model),
                     true,
                     canDispatch,
                     LastBearingFieldDeskActionTone.Primary);
@@ -1487,6 +1487,40 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         SpareBearingBatchPhase.Settled &&
                     !model.MaintenanceDue &&
                     !model.IsVehicleServiceAvailable);
+        }
+
+        private static string CreatePreparationDetail(
+            LastBearingReadModel model)
+        {
+            if (model.PauseCause != PauseCause.None)
+            {
+                if (model.IsPreparationStalledByHotShift)
+                {
+                    return
+                        "Settlement clocks are paused. Hot Shift still owns the single machine-shop service slot; Workshop Push preparation and the garage gauge remain frozen.";
+                }
+
+                return model.PreparationChoice ==
+                       PreparationChoice.WorkshopPush
+                    ? "Settlement clocks are paused. Workshop Push still owns the single machine-shop service slot; preparation and the garage gauge are not advancing."
+                    : "Settlement clocks are paused. Preparation and the garage gauge are not advancing.";
+            }
+
+            if (model.IsPreparationStalledByHotShift)
+            {
+                return
+                    "Workshop Push is held. Hot Shift owns the single machine-shop service slot; preparation and the garage gauge are frozen.";
+            }
+
+            if (model.IsPreparationActivelyWorking)
+            {
+                return model.PreparationChoice ==
+                       PreparationChoice.WorkshopPush
+                    ? "Workshop Push owns the single machine-shop service slot and is actively advancing on the settlement clock."
+                    : "Preparation is actively advancing on the settlement clock.";
+            }
+
+            return "Preparation is waiting for the settlement clock.";
         }
 
         private static LastBearingFieldDeskActionProjection

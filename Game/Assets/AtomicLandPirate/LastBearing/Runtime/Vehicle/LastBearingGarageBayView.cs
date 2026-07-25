@@ -477,6 +477,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 hasPreparation && stalledByHotShift;
             IsPreparationGaugeActivelyWorking =
                 hasPreparation && activelyWorking;
+            bool preparationComplete =
+                hasPreparation && elapsedTicks >= requiredTicks;
             PreparationProgressNormalized = hasPreparation
                 ? Mathf.Clamp01((float)elapsedTicks / requiredTicks)
                 : 0f;
@@ -500,7 +502,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 ? _preparationGaugeIdleMaterial
                 : IsPreparationGaugeHeldByHotShift
                     ? _preparationGaugeHeldMaterial
-                    : _preparationGaugeWorkingMaterial;
+                    : IsPreparationGaugeActivelyWorking ||
+                      preparationComplete
+                        ? _preparationGaugeWorkingMaterial
+                        : _preparationGaugeIdleMaterial;
             if (_preparationGaugeHousingRenderer != null &&
                 gaugeStateMaterial != null &&
                 !ReferenceEquals(
@@ -517,14 +522,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                     hasPreparation && index < PreparationGaugeLitSegments;
                 _preparationGaugeSegments[index]?.SetActive(lit);
                 Renderer? renderer = _preparationGaugeRenderers[index];
-                Material? material = IsPreparationGaugeHeldByHotShift
-                    ? _preparationGaugeHeldMaterial
-                    : _preparationGaugeWorkingMaterial;
                 if (renderer != null &&
-                    material != null &&
-                    !ReferenceEquals(renderer.sharedMaterial, material))
+                    gaugeStateMaterial != null &&
+                    !ReferenceEquals(
+                        renderer.sharedMaterial,
+                        gaugeStateMaterial))
                 {
-                    renderer.sharedMaterial = material;
+                    renderer.sharedMaterial = gaugeStateMaterial;
                 }
             }
         }

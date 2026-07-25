@@ -364,6 +364,15 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 fieldDeskPresenter,
                 "Civic Buffer leaves the single machine-shop service slot available");
+            Require(
+                fieldDeskPresenter,
+                "Settlement clocks are paused. Hot Shift still owns the single machine-shop service slot");
+            Require(
+                fieldDeskPresenter,
+                "Workshop Push still owns the single machine-shop service slot");
+            Require(
+                fieldDeskPresenter,
+                "Workshop Push owns the single machine-shop service slot and is actively advancing");
             TestHarness.True(
                 fieldDeskPresenter.IndexOf(
                     "HOT SHIFT · STALLED",

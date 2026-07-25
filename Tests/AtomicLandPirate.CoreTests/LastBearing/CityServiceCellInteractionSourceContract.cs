@@ -207,10 +207,13 @@ namespace AtomicLandPirate.LastBearingTests
             Require(view, "model.RecyclerQuarterTurns");
             Require(view, "model.MachineShopQuarterTurns");
             Require(view, "model.IsHotShiftActivelyWorking");
-            Require(view, "model.IsPreparationActivelyWorking");
+            Require(
+                view,
+                "model.PreparationPhase == PreparationPhase.Preparing");
+            Require(view, "!model.IsPreparationStalledByHotShift");
             Require(view, "model.IsHotShiftStalledByDustFront");
             Require(view, "model.HotShiftCompletedCount");
-            Require(view, "workshopPushPreparationWorking");
+            Require(view, "workshopPushOwnsServiceSlot");
             Require(view, "bool operatorAtMachine");
             Require(
                 interactor,

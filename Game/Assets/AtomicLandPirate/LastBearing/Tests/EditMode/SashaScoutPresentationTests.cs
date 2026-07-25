@@ -325,6 +325,26 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
 
             world.ApplyGaragePreparationProgress(
+                1,
+                120,
+                stalledByHotShift: false,
+                activelyWorking: false);
+            Color pausedColor =
+                housing.GetComponent<Renderer>().sharedMaterial.color;
+            Assert.That(garage.PreparationGaugeLitSegments, Is.Zero);
+            Assert.That(garage.IsPreparationGaugeActivelyWorking, Is.False);
+            Assert.That(garage.IsPreparationGaugeHeldByHotShift, Is.False);
+            Assert.That(
+                pausedColor,
+                Is.Not.EqualTo(workingColor),
+                "A paused incomplete gauge must not retain the active signal.");
+            Assert.That(
+                pausedColor,
+                Is.Not.EqualTo(heldColor),
+                "Pause and Hot Shift hold need distinct physical witnesses.");
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            world.ApplyGaragePreparationProgress(
                 60,
                 120,
                 stalledByHotShift: false,
@@ -374,6 +394,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(garage.PreparationProgressNormalized, Is.EqualTo(1f));
             Assert.That(garage.IsPreparationGaugeActivelyWorking, Is.False);
             Assert.That(garage.IsPreparationGaugeHeldByHotShift, Is.False);
+            Assert.That(
+                housing.GetComponent<Renderer>().sharedMaterial.color,
+                Is.EqualTo(workingColor),
+                "The completed gauge keeps its readable signal witness.");
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
 
             controller.ReturnToTitle();

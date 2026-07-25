@@ -260,6 +260,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 available.PrimaryAction.Label,
                 Is.EqualTo("INSPECT SASHA'S RIG"));
             Assert.That(
+                available.PrimaryAction.Detail,
+                preparation == PreparationChoice.WorkshopPush
+                    ? Does.Contain(
+                        "Workshop Push owns the single machine-shop service slot and is actively advancing")
+                    : Does.Contain(
+                        "Preparation is actively advancing"));
+            Assert.That(
                 available.SecondaryAction.Intent,
                 Is.EqualTo(LastBearingFieldDeskIntent.RunHotShift));
             Assert.That(
@@ -322,6 +329,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             if (preparation == PreparationChoice.WorkshopPush)
             {
                 Assert.That(
+                    active.PrimaryAction.Detail,
+                    Does.Contain("Workshop Push is held"));
+                Assert.That(
+                    active.PrimaryAction.Detail,
+                    Does.Contain(
+                        "Hot Shift owns the single machine-shop service slot"));
+                Assert.That(
                     active.SecondaryAction.Detail,
                     Does.Contain(
                         "active shift owns the single machine-shop service slot"));
@@ -331,9 +345,24 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Assert.That(
                     controller.Status,
                     Does.Contain("single service slot"));
+
+                controller.TogglePause();
+                SimulateOneTick(controller);
+                LastBearingFieldDeskProjection pausedHeld =
+                    LastBearingFieldDeskPresenter.Present(controller);
+                Assert.That(
+                    pausedHeld.PrimaryAction.Detail,
+                    Does.Contain("Settlement clocks are paused"));
+                Assert.That(
+                    pausedHeld.PrimaryAction.Detail,
+                    Does.Contain(
+                        "Hot Shift still owns the single machine-shop service slot"));
             }
             else
             {
+                Assert.That(
+                    active.PrimaryAction.Detail,
+                    Does.Contain("Preparation is actively advancing"));
                 Assert.That(
                     active.SecondaryAction.Detail,
                     Does.Contain("operator, spindle, and sled are working"));
@@ -341,6 +370,58 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     controller.Status,
                     Does.Contain("operator is working"));
             }
+        }
+
+        [TestCase(PreparationChoice.CivicBuffer)]
+        [TestCase(PreparationChoice.WorkshopPush)]
+        public void PausedPreparationCopyNamesClockAndSlotOwnership(
+            PreparationChoice preparation)
+        {
+            LastBearingGameController controller =
+                BuildController(ColonyComposition.Mixed);
+            PrepareForHotShift(controller, preparation);
+
+            controller.TogglePause();
+            SimulateOneTick(controller);
+
+            Assert.That(
+                controller.ReadModel!.PauseCause,
+                Is.EqualTo(PauseCause.Explicit));
+            Assert.That(
+                controller.ReadModel.IsPreparationActivelyWorking,
+                Is.False);
+            Assert.That(
+                controller.ReadModel.IsPreparationStalledByHotShift,
+                Is.False);
+            LastBearingFieldDeskProjection paused =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                paused.PrimaryAction.Detail,
+                Does.Contain("Settlement clocks are paused"));
+            Assert.That(
+                paused.PrimaryAction.Detail,
+                Does.Contain("not advancing"));
+            if (preparation == PreparationChoice.WorkshopPush)
+            {
+                Assert.That(
+                    paused.PrimaryAction.Detail,
+                    Does.Contain(
+                        "Workshop Push still owns the single machine-shop service slot"));
+            }
+            else
+            {
+                Assert.That(
+                    paused.PrimaryAction.Detail,
+                    Does.Not.Contain("still owns"));
+            }
+
+            controller.TogglePause();
+            SimulateOneTick(controller);
+            LastBearingFieldDeskProjection resumed =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                resumed.PrimaryAction.Detail,
+                Does.Contain("actively advancing"));
         }
 
         [TestCase(
