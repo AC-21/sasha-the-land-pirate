@@ -85,11 +85,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 "title");
             controller.Load();
             controller.ShowCityOverview();
-            yield return null;
             CollectionAssert.AreEqual(
                 creditedBytes,
                 LastBearingCanonicalCodec.Encode(controller.State!));
             Assert.That(controller.CanonicalHash, Is.EqualTo(creditedHash));
+            yield return null;
             AssertReturnedRailRackInPlayMode(
                 view,
                 expectedVisible: true,
@@ -168,11 +168,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 "repeat title");
             controller.Load();
             controller.ShowCityOverview();
-            yield return null;
             CollectionAssert.AreEqual(
                 recreditedBytes,
                 LastBearingCanonicalCodec.Encode(controller.State!));
             Assert.That(controller.CanonicalHash, Is.EqualTo(recreditedHash));
+            yield return null;
             AssertReturnedRailRackInPlayMode(
                 view,
                 expectedVisible: true,
