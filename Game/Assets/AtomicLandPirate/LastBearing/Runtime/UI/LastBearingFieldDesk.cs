@@ -631,6 +631,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         _controller.IsScoutServiceFocused;
                     HideAndResetTransient();
                     break;
+                case LastBearingFieldDeskIntent
+                    .OpenReturnedRailChassisBraceJig:
+                    _controller.OpenReturnedRailChassisBraceJig();
+                    _physicalWorkRouted =
+                        _controller
+                            .IsReturnedRailChassisBraceFocused;
+                    HideAndResetTransient();
+                    break;
                 case LastBearingFieldDeskIntent.OpenPumpHallImprovement: _controller.OpenPumpHallImprovement(); break;
                 case LastBearingFieldDeskIntent.OpenEmergencyCisternExpansion:
                     _controller.OpenEmergencyCisternExpansion();

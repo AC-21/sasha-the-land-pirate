@@ -157,6 +157,33 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "service pendant.");
             }
 
+            if (model.IsReturnedRailChassisBraceInstallAvailable &&
+                model.NextObjective ==
+                    "install-returned-rail-chassis-brace")
+            {
+                long protectedLoss = System.Math.Max(
+                    0,
+                    model.ProjectedRoundTripConditionLossMilli -
+                    model.ReturnedRailChassisBraceProtectionMilli);
+                return Create(
+                    LastBearingPermitJobChapter.Homecoming,
+                    JobStepCount,
+                    "FINAL FIT · RETURNED RAILS",
+                    "Brace the Scout before another Wreck Line run",
+                    "The credited four-rail rack can become a paired rear " +
+                    "chassis truss for " +
+                    model.ReturnedRailChassisBracePartsCostUnits +
+                    " reclaimed parts. It protects " +
+                    model.ReturnedRailChassisBraceProtectionMilli +
+                    " condition, moving projected round-trip loss from " +
+                    model.ProjectedRoundTripConditionLossMilli +
+                    " to " +
+                    protectedLoss +
+                    ".",
+                    "Click OPEN GARAGE · BRACE SASHA'S SCOUT, release the " +
+                    "route input, then use E, gamepad south, or the exact jig dog.");
+            }
+
             if (model.IsRepeatExpeditionAvailable)
             {
                 long baseFuel =

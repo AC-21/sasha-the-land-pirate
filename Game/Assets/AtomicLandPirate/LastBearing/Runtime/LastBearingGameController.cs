@@ -383,6 +383,36 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ScoutServiceInteractor?.IsControlFocused == true &&
             _world.ScoutServiceInteractor.IsInputArmed;
 
+        public bool IsReturnedRailChassisBraceInstallQueued =>
+            _pendingCommands.Exists(command =>
+                command is InstallReturnedRailChassisBraceCommand);
+
+        public bool CanOpenReturnedRailChassisBraceJig =>
+            _pendingCommands.Count == 0 &&
+            _readModel
+                ?.IsReturnedRailChassisBraceInstallAvailable == true &&
+            IsExactFieldDeskCityOverview &&
+            _world?.ReturnedRailChassisBraceInteractor != null;
+
+        public bool IsReturnedRailChassisBraceFocused =>
+            _world?.ReturnedRailChassisBraceInteractor
+                ?.IsControlFocused == true;
+
+        public bool IsReturnedRailChassisBraceInstallAvailable =>
+            _pendingCommands.Count == 0 &&
+            _readModel
+                ?.IsReturnedRailChassisBraceInstallAvailable == true &&
+            _modeCoordinator?.HasActiveMode == true &&
+            _modeCoordinator.CurrentMode ==
+                LastBearingPresentationMode.GarageBay;
+
+        public bool CanInstallReturnedRailChassisBrace =>
+            IsReturnedRailChassisBraceInstallAvailable &&
+            _world?.ReturnedRailChassisBraceInteractor
+                ?.IsControlFocused == true &&
+            _world.ReturnedRailChassisBraceInteractor
+                .IsInputArmed;
+
         public string Status => _status;
 
         public string SaveStatus => _saveStatus;
@@ -708,6 +738,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ConfigureGarageModuleInteraction(this);
             _world.ConfigureGarageDepartureInteraction(this);
             _world.ConfigureScoutServiceInteraction(this);
+            _world.ConfigureReturnedRailChassisBraceInteraction(this);
             _world.ConfigurePumpHallMaintenanceInteraction(this);
             _world.ConfigureFuelBondInteraction(this);
             _hud = gameObject.AddComponent<LastBearingHud>();
@@ -739,6 +770,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
             _world?.ResetScoutServiceInteraction();
+            _world?.ResetReturnedRailChassisBraceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
             _world?.ResetFuelBondInteraction();
             _pendingCommands.Clear();
@@ -845,6 +877,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
             _world?.ResetScoutServiceInteraction();
+            _world?.ResetReturnedRailChassisBraceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
             _world?.ResetFuelBondInteraction();
             _world?.ApplyGarageRoadHand(null);
@@ -912,6 +945,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 robotVisible: true);
             _world?.ApplyFuelBondInteraction(null);
             _world?.ApplyScoutServiceInteraction(null);
+            _world?.ApplyReturnedRailChassisBraceInteraction(null);
             _world?.HideCityServiceCell();
             _fieldDesk?.ResetForLifecycle();
         }
@@ -1614,6 +1648,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.ApplyGarageModuleInteraction(_readModel);
                 _world?.ApplyGarageDepartureInteraction(_readModel);
                 _world?.ApplyScoutServiceInteraction(_readModel);
+                _world?.ApplyReturnedRailChassisBraceInteraction(
+                    _readModel);
             }
 
             if (focusRepeatDeparture)
@@ -1650,6 +1686,40 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Queue(sequence => new ServiceScoutCommand(sequence));
             _status =
                 "Scout service queued. Two parts remain in Last Bearing until the authoritative city tick accepts the work and preserves two in reserve.";
+        }
+
+        public void OpenReturnedRailChassisBraceJig()
+        {
+            if (!CanOpenReturnedRailChassisBraceJig ||
+                !TryRouteToReturnedRailChassisBraceJig(
+                    "The credited Wreck Line rails are clamped in the garage jig. Release the route input, then throw the physical dog; the rack stays canonical until the city tick accepts the brace."))
+            {
+                _status =
+                    "The returned-rail brace jig opens only after scout service, while the credited rail rack and installation parts are available.";
+            }
+        }
+
+        public void InstallReturnedRailChassisBrace()
+        {
+            if (IsReturnedRailChassisBraceInstallQueued)
+            {
+                return;
+            }
+
+            if (!CanInstallReturnedRailChassisBrace ||
+                _readModel == null)
+            {
+                _status =
+                    "Install the returned-rail chassis brace only from the focused garage jig after releasing the route input.";
+                return;
+            }
+
+            Queue(sequence =>
+                new InstallReturnedRailChassisBraceCommand(sequence));
+            _status =
+                "Returned-rail chassis brace queued. " +
+                _readModel.ReturnedRailChassisBracePartsCostUnits +
+                " parts and the credited rack move only when the authoritative city tick accepts the work.";
         }
 
         public void AttachRoadModeAdapter(ILastBearingRoadModeAdapter adapter)
@@ -2195,6 +2265,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetGarageModuleInteraction();
             _world?.ResetGarageDepartureInteraction();
             _world?.ResetScoutServiceInteraction();
+            _world?.ResetReturnedRailChassisBraceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
             _world?.ResetFuelBondInteraction();
             ClearGaragePlanIntent();
@@ -2248,8 +2319,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                                     if (!TryRouteToScoutServiceBay(
                                             "Exact worn scout restored under the garage hoist. Release the load input, then service it at the physical pendant."))
                                     {
-                                        TryRouteToOneGoodBatchWorkshop(
-                                            "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                                        if (!TryRouteToReturnedRailChassisBraceJig(
+                                                "Exact credited rail rack restored at the garage brace jig. Release the load input, then throw the physical dog."))
+                                        {
+                                            TryRouteToOneGoodBatchWorkshop(
+                                                "Exact workshop batch and physical-lot state restored at One Good Batch.");
+                                        }
                                     }
                                 }
                             }
@@ -2277,6 +2352,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.ApplyGarageModuleInteraction(_readModel);
                 _world?.ApplyGarageDepartureInteraction(_readModel);
                 _world?.ApplyScoutServiceInteraction(_readModel);
+                _world?.ApplyReturnedRailChassisBraceInteraction(
+                    _readModel);
                 _world?.ApplyPumpHallMaintenanceInteraction(_readModel);
                 _world?.ApplyFuelBondInteraction(_readModel);
                 _world?.EmergencyAidInteractor?.Apply(_readModel);
@@ -2522,6 +2599,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _readModel.IsVehicleServiceAvailable &&
                     ContainsScoutServiceEventPair(
                         result.DomainEvents);
+                bool returnedRailChassisBraceInstalled = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind
+                        .ReturnedRailChassisBraceInstalled);
                 bool cityBuildingChanged = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.CityBuildingPlaced) ||
@@ -2647,6 +2728,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         "-part reserve remains, and every fitted module, " +
                         "upgrade, cargo record, faction term, and city fact " +
                         "is unchanged.";
+                }
+
+                if (returnedRailChassisBraceInstalled)
+                {
+                    _status =
+                        "Returned-rail chassis brace installed. The city rack is clear, the paired rear truss is on Sasha's Scout, and projected round-trip condition loss is now " +
+                        _readModel.ProjectedRoundTripConditionLossMilli +
+                        ".";
                 }
 
                 if (rigUpgradeInstalled)
@@ -2962,6 +3051,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 humanVisible,
                 robotVisible));
             _world.ApplyRigUpgrade(_readModel.RigUpgrade);
+            _world.ApplyReturnedRailChassisBrace(
+                _readModel.ReturnedRailChassisBraceInstalled);
             _world.ApplyDepotApproachRecovery(
                 _readModel.IsDepotApproachRecoveryAvailable,
                 _readModel.ExpeditionPhase == ExpeditionPhase.AtDepot);
@@ -3018,6 +3109,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ApplyGarageModuleInteraction(_readModel);
             _world.ApplyGarageDepartureInteraction(_readModel);
             _world.ApplyScoutServiceInteraction(_readModel);
+            _world.ApplyReturnedRailChassisBraceInteraction(_readModel);
             _world.ApplyPumpHallMaintenanceInteraction(_readModel);
             _world.SetCityServiceCellFocus(
                 IsExactFieldDeskCityOverview &&
@@ -3047,6 +3139,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 LastBearingEventKind kind = domainEvents[index].Kind;
                 if (kind == LastBearingEventKind.RigUpgradeInstalled
+                    || kind ==
+                        LastBearingEventKind
+                            .ReturnedRailChassisBraceInstalled
                     || kind == LastBearingEventKind.ExpeditionDeparted
                     || kind == LastBearingEventKind.RouteActionUsed
                     || kind == LastBearingEventKind.FrameRailSalvageTransferred
@@ -3279,6 +3374,41 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ApplyGarageDepartureInteraction(_readModel);
             _world.ApplyScoutServiceInteraction(_readModel);
             if (_world.ScoutServiceInteractor?.FocusControl() != true)
+            {
+                return false;
+            }
+
+            _status = successStatus;
+            _fieldDesk?.Refresh(force: true);
+            return true;
+        }
+
+        private bool TryRouteToReturnedRailChassisBraceJig(
+            string successStatus)
+        {
+            if (_pendingCommands.Count != 0 ||
+                _readModel
+                    ?.IsReturnedRailChassisBraceInstallAvailable != true ||
+                _world == null ||
+                _modeCoordinator == null)
+            {
+                return false;
+            }
+
+            _world.LeaveCityGrammarComparison();
+            if (!_modeCoordinator.TryShowCityMode(
+                    LastBearingPresentationMode.GarageBay,
+                    _readModel))
+            {
+                return false;
+            }
+
+            _world.ApplyGarageModuleInteraction(_readModel);
+            _world.ApplyGarageDepartureInteraction(_readModel);
+            _world.ApplyScoutServiceInteraction(_readModel);
+            _world.ApplyReturnedRailChassisBraceInteraction(_readModel);
+            if (_world.ReturnedRailChassisBraceInteractor
+                    ?.FocusControl() != true)
             {
                 return false;
             }
