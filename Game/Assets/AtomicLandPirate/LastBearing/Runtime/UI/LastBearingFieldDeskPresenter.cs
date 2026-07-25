@@ -455,6 +455,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             ulong hash = OffsetBasis;
             Mix(ref hash, controller.IsExactFieldDeskCityOverview);
+            Mix(ref hash, controller.IsExactFieldDeskDriving);
+            Mix(ref hash, controller.CanRecoverRoadPresentation);
             Mix(ref hash, controller.HasPendingPlayerCommands);
             Mix(ref hash, controller.CityNeedInspected);
             Mix(ref hash, controller.IsTurbineRepairReady);
@@ -517,8 +519,23 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Mix(ref hash, model.VehicleModule.GetHashCode());
             Mix(ref hash, model.ExpeditionPhase.GetHashCode());
             Mix(ref hash, model.TransactionPhase.GetHashCode());
+            Mix(ref hash, model.RouteKind.GetHashCode());
+            Mix(ref hash, model.RouteActionKind.GetHashCode());
+            Mix(ref hash, model.RouteActionUsed);
+            Mix(ref hash, model.RouteProgressTicks);
+            Mix(ref hash, model.RouteTargetTicks);
+            Mix(ref hash, model.VehicleLateralMilli);
+            Mix(ref hash, model.IsWreckLineModulePointAvailable);
+            Mix(ref hash, model.IsWreckLineFrameRailRecoveryAvailable);
+            Mix(ref hash, model.IsDepotApproachRecoveryAvailable);
             Mix(ref hash, model.RepairCargoKind.GetHashCode());
             Mix(ref hash, model.RepairCargoCustody.GetHashCode());
+            Mix(ref hash, model.FrameRailSalvageCargoUnits);
+            Mix(ref hash, model.HeavyCargoKind.GetHashCode());
+            Mix(ref hash, model.HeavyCargoCustody.GetHashCode());
+            Mix(ref hash, model.LiquidCargoKind.GetHashCode());
+            Mix(ref hash, model.LiquidCargoQuantityMilli);
+            Mix(ref hash, model.LiquidCargoCustody.GetHashCode());
             Mix(ref hash, model.VehicleConditionMilli);
             Mix(ref hash, model.IsVehicleServiceNeeded);
             Mix(ref hash, model.IsVehicleServiceAvailable);

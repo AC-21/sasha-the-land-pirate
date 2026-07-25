@@ -23,6 +23,10 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(
                     runtimeRoot,
                     "UI/LastBearingFieldDeskPresenter.cs"));
+            string roadDeskPresenter = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "UI/LastBearingRoadDeskPresenter.cs"));
             string serviceCellInteractor = File.ReadAllText(
                 Path.Combine(
                     runtimeRoot,
@@ -31,10 +35,15 @@ namespace AtomicLandPirate.LastBearingTests
                 Path.Combine(
                     runtimeRoot,
                     "UI/Resources/LastBearingFieldDeskLayout.uxml"));
+            string fieldDeskStyles = File.ReadAllText(
+                Path.Combine(
+                    runtimeRoot,
+                    "UI/Resources/LastBearingFieldDeskStyles.uss"));
 
             Require(controller, "private LastBearingFieldDesk? _fieldDesk;");
             Require(controller, "public LastBearingFieldDesk? FieldDesk => _fieldDesk;");
             Require(controller, "public bool IsExactFieldDeskCityOverview");
+            Require(controller, "public bool IsExactFieldDeskDriving");
             Require(controller, "public bool HasPendingPlayerCommands");
             Require(controller, "public bool CanAcknowledgeDustFront");
             Require(controller, "public bool CanOpenEmergencyCisternPump");
@@ -88,11 +97,11 @@ namespace AtomicLandPirate.LastBearingTests
                 "private void DrawHeader()");
             Require(
                 hudEntry,
-                "if (_fieldDesk?.OwnsCityOverview == true)");
+                "if (_fieldDesk?.OwnsRetainedHud == true)");
             TestHarness.Equal(
                 1,
-                CountOccurrences(hudEntry, "OwnsCityOverview"),
-                "the legacy HUD may suppress only for Field Desk city ownership");
+                CountOccurrences(hudEntry, "OwnsRetainedHud"),
+                "the legacy HUD must yield to the retained city or road surface");
             TestHarness.True(
                 hud.IndexOf(
                     "IsExactFieldDeskCityOverview",
@@ -105,12 +114,28 @@ namespace AtomicLandPirate.LastBearingTests
             Require(fieldDesk, "public sealed class LastBearingFieldDesk");
             Require(fieldDesk, "public bool IsOperational");
             Require(fieldDesk, "public bool OwnsCityOverview");
+            Require(fieldDesk, "public bool OwnsDriving");
+            Require(fieldDesk, "public bool OwnsRetainedHud");
             Require(fieldDesk, "IsExactFieldDeskCityOverview");
+            Require(fieldDesk, "IsExactFieldDeskDriving");
             Require(fieldDesk, "public void Configure(");
             Require(fieldDesk, "public void Refresh(");
             Require(fieldDesk, "public void ResetForLifecycle()");
             Require(fieldDesk, "LastBearingFieldDeskPresenter.Present(");
             Require(fieldDesk, "LastBearingFieldDeskPresenter.IsIntentAvailable(");
+            Require(fieldDesk, "LastBearingRoadDeskPresenter.Present(");
+            Require(fieldDesk, "SetPickingModeRecursive(");
+            Require(fieldDesk, "PickingMode.Ignore");
+            string keyboardOwnership = Segment(
+                fieldDesk,
+                "public bool OwnsKeyboardFocus",
+                "public bool BlocksWorldPointer");
+            Require(keyboardOwnership, "if (!OwnsCityOverview");
+            string pointerOwnership = Segment(
+                fieldDesk,
+                "public bool BlocksWorldPointer",
+                "internal void TrackPhysicalWorkRoute");
+            Require(pointerOwnership, "if (!OwnsCityOverview");
 
             Require(fieldDesk, "UIDocument");
             Require(fieldDesk, "PanelSettings");
@@ -188,6 +213,44 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 fieldDeskLayout,
                 "name=\"front-forecast-label\"");
+            string roadStrip = Segment(
+                fieldDeskLayout,
+                "name=\"road-strip\"",
+                "name=\"field-desk\"");
+            Require(roadStrip, "picking-mode=\"Ignore\"");
+            Require(roadStrip, "name=\"road-leg-label\"");
+            Require(roadStrip, "name=\"road-route-label\"");
+            Require(roadStrip, "name=\"road-progress-bar\"");
+            Require(roadStrip, "name=\"road-scout-label\"");
+            Require(roadStrip, "name=\"road-cargo-label\"");
+            Require(roadStrip, "name=\"road-edge-label\"");
+            Require(roadStrip, "name=\"road-next-verb-label\"");
+            Require(roadStrip, "name=\"road-controls-label\"");
+            TestHarness.True(
+                roadStrip.IndexOf("<ui:Button", StringComparison.Ordinal) < 0,
+                "the retained road strip must remain read-only");
+            Require(fieldDeskStyles, ".road-strip");
+            Require(fieldDeskStyles, ".road-edge-risk");
+
+            Require(
+                roadDeskPresenter,
+                "public static class LastBearingRoadDeskPresenter");
+            Require(
+                roadDeskPresenter,
+                "LastBearingRoadSafeLineView.DeriveState(");
+            Require(
+                roadDeskPresenter,
+                "DerivePresentationCargoMassKilograms(model)");
+            Require(
+                roadDeskPresenter,
+                "DerivePresentationDamageBand(");
+            Require(roadDeskPresenter, "IsWreckLineModulePointAvailable");
+            Require(
+                roadDeskPresenter,
+                "IsWreckLineFrameRailRecoveryAvailable");
+            Require(
+                roadDeskPresenter,
+                "IsDepotApproachRecoveryAvailable");
             Require(
                 serviceCellInteractor,
                 "EMERGENCY_STORAGE_DRY_LINE_GAUGE");
