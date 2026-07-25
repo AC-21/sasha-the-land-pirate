@@ -83,6 +83,55 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
         [TestCase(
             VehicleModule.WinchAssembly,
+            RoadFeelRouteProfile.WinchLine,
+            RoadFeelSurfaceKind.Sand,
+            "TRACTION · FIND WASHBOARD OR CONCRETE")]
+        [TestCase(
+            VehicleModule.SealedRangeTank,
+            RoadFeelRouteProfile.RangeLine,
+            RoadFeelSurfaceKind.Washboard,
+            "TRACTION · FIND SAND, GRAVEL, OR CONCRETE")]
+        public void TractionStatusExplainsTheRouteCorrectSurface(
+            VehicleModule module,
+            RoadFeelRouteProfile routeProfile,
+            RoadFeelSurfaceKind surface,
+            string expectedStatus)
+        {
+            LastBearingReadModel model = LastBearingReadModel.FromState(
+                CreateDrivingState(module));
+            RoadFeelTractionEvidence evidence =
+                RoadFeelTractionQuantizer.Evaluate(
+                    adapterActive: true,
+                    adapterHealthy: true,
+                    route: routeProfile,
+                    telemetry: new RoadFeelTelemetry(
+                        speedMetresPerSecond: 3f,
+                        forwardSpeedMetresPerSecond: 3f,
+                        yawRateDegreesPerSecond: 0f,
+                        bodySlipDegrees: 0f,
+                        steeringAngleDegrees: 0f,
+                        groundedContacts: 4,
+                        averageCompression: 0.5f,
+                        dominantSurface: surface,
+                        cargoMassKilograms: 0f,
+                        damageBand: RoadFeelDamageBand.Healthy,
+                        recovering: false));
+
+            LastBearingRoadDeskProjection projection =
+                LastBearingRoadDeskPresenter.Present(
+                    model,
+                    tractionEvidence: evidence);
+
+            Assert.That(
+                projection.TractionReason,
+                Is.EqualTo(RoadFeelTractionEvidenceReason.WrongSurface));
+            Assert.That(
+                projection.TractionStatus,
+                Is.EqualTo(expectedStatus));
+        }
+
+        [TestCase(
+            VehicleModule.WinchAssembly,
             "E / A · WORK THE WRECK-LINE WINCH")]
         [TestCase(
             VehicleModule.SealedRangeTank,

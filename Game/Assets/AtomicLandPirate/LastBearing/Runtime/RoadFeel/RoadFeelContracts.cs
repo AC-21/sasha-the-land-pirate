@@ -21,6 +21,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
         Critical
     }
 
+    public enum RoadFeelRouteProfile
+    {
+        None = 0,
+        WinchLine = 1,
+        RangeLine = 2,
+    }
+
     public readonly struct RoadFeelControlInput
     {
         public RoadFeelControlInput(
@@ -81,6 +88,115 @@ namespace AtomicLandPirate.Presentation.LastBearing.RoadFeel
         public float CargoMassKilograms { get; }
         public RoadFeelDamageBand DamageBand { get; }
         public bool Recovering { get; }
+    }
+
+    public enum RoadFeelTractionEvidenceReason
+    {
+        AdapterInactive = 0,
+        AdapterFaulted = 1,
+        Recovering = 2,
+        InsufficientGroundContacts = 3,
+        NotMovingForward = 4,
+        WrongSurface = 5,
+        Ready = 6,
+    }
+
+    public readonly struct RoadFeelTractionEvidence
+    {
+        internal RoadFeelTractionEvidence(
+            RoadFeelTractionEvidenceReason reason)
+        {
+            Reason = reason;
+        }
+
+        public RoadFeelTractionEvidenceReason Reason { get; }
+
+        public bool CanAdvance =>
+            Reason == RoadFeelTractionEvidenceReason.Ready;
+    }
+
+    public static class RoadFeelTractionQuantizer
+    {
+        public const int MinimumGroundedContacts = 2;
+        public const float MinimumForwardSpeedMetresPerSecond = 0.75f;
+
+        public static RoadFeelTractionEvidence Evaluate(
+            bool adapterActive,
+            bool adapterHealthy,
+            RoadFeelRouteProfile route,
+            RoadFeelTelemetry telemetry)
+        {
+            if (!adapterActive)
+            {
+                return Evidence(
+                    RoadFeelTractionEvidenceReason.AdapterInactive);
+            }
+
+            if (!adapterHealthy)
+            {
+                return Evidence(
+                    RoadFeelTractionEvidenceReason.AdapterFaulted);
+            }
+
+            if (telemetry.Recovering)
+            {
+                return Evidence(
+                    RoadFeelTractionEvidenceReason.Recovering);
+            }
+
+            if (telemetry.GroundedContacts < MinimumGroundedContacts)
+            {
+                return Evidence(
+                    RoadFeelTractionEvidenceReason.InsufficientGroundContacts);
+            }
+
+            if (float.IsNaN(telemetry.ForwardSpeedMetresPerSecond) ||
+                float.IsInfinity(telemetry.ForwardSpeedMetresPerSecond) ||
+                telemetry.ForwardSpeedMetresPerSecond <
+                    MinimumForwardSpeedMetresPerSecond)
+            {
+                return Evidence(
+                    RoadFeelTractionEvidenceReason.NotMovingForward);
+            }
+
+            if (!IsRouteSurface(route, telemetry.DominantSurface))
+            {
+                return Evidence(
+                    RoadFeelTractionEvidenceReason.WrongSurface);
+            }
+
+            return Evidence(RoadFeelTractionEvidenceReason.Ready);
+        }
+
+        private static RoadFeelTractionEvidence Evidence(
+            RoadFeelTractionEvidenceReason reason)
+        {
+            return new RoadFeelTractionEvidence(reason);
+        }
+
+        private static bool IsRouteSurface(
+            RoadFeelRouteProfile route,
+            RoadFeelSurfaceKind surface)
+        {
+            if (route != RoadFeelRouteProfile.WinchLine &&
+                route != RoadFeelRouteProfile.RangeLine)
+            {
+                return false;
+            }
+
+            if (surface == RoadFeelSurfaceKind.Concrete)
+            {
+                return true;
+            }
+
+            if (route == RoadFeelRouteProfile.WinchLine)
+            {
+                return surface == RoadFeelSurfaceKind.Washboard;
+            }
+
+            return surface == RoadFeelSurfaceKind.Sand ||
+                   surface == RoadFeelSurfaceKind.Gravel;
+        }
     }
 
     public static class RoadFeelMath

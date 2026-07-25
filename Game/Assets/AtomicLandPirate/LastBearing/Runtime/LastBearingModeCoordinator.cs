@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using AtomicLandPirate.Presentation.LastBearing.RoadFeel;
 using AtomicLandPirate.Simulation.LastBearing;
 using UnityEngine;
 
@@ -57,6 +58,17 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Quaternion rotation);
 
         void ResetPresentation();
+    }
+
+    /// <summary>
+    /// Optional, bounded outcome bridge for physical road presentations.
+    /// Existing adapters remain input-only unless they explicitly implement
+    /// this interface. Raw physics telemetry cannot cross this seam.
+    /// </summary>
+    public interface ILastBearingRoadTractionEvidenceSource
+    {
+        RoadFeelTractionEvidence CaptureTractionEvidence(
+            RoadFeelRouteProfile routeProfile);
     }
 
     /// <summary>
@@ -450,6 +462,54 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 adapter => adapter.ApplyPresentationOnlyControls(
                     brakeMilli,
                     handbrakeMilli));
+        }
+
+        public RoadFeelTractionEvidence CaptureRoadTractionEvidence(
+            RouteKind routeKind)
+        {
+            if (RoadAdapterFaulted)
+            {
+                return new RoadFeelTractionEvidence(
+                    RoadFeelTractionEvidenceReason.AdapterFaulted);
+            }
+
+            ILastBearingRoadModeAdapter? adapter = _roadAdapter;
+            if (!HasActiveMode ||
+                CurrentMode != LastBearingPresentationMode.Driving ||
+                !_roadPresentationActive ||
+                adapter is not
+                    ILastBearingRoadTractionEvidenceSource evidenceSource)
+            {
+                return default;
+            }
+
+            try
+            {
+                return evidenceSource.CaptureTractionEvidence(
+                    DeriveRoadFeelRouteProfile(routeKind));
+            }
+            catch (Exception exception)
+            {
+                DisableFaultedRoadAdapter(
+                    "capture-traction-evidence",
+                    adapter,
+                    exception);
+                return new RoadFeelTractionEvidence(
+                    RoadFeelTractionEvidenceReason.AdapterFaulted);
+            }
+        }
+
+        public static RoadFeelRouteProfile DeriveRoadFeelRouteProfile(
+            RouteKind routeKind)
+        {
+            return routeKind switch
+            {
+                RouteKind.CollapsedShortBranch =>
+                    RoadFeelRouteProfile.WinchLine,
+                RouteKind.ExposedLongRoute =>
+                    RoadFeelRouteProfile.RangeLine,
+                _ => RoadFeelRouteProfile.None,
+            };
         }
 
         public bool TryApplyRoadPresentationInput(

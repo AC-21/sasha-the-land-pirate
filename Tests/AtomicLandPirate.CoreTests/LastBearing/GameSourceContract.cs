@@ -114,6 +114,7 @@ namespace AtomicLandPirate.LastBearingTests
             Require(controller, "_readModel.VehicleLateralMilli");
             Require(controller, "LastBearingBalanceV1.RoadLateralLimitMilli");
             Require(controller, "ApplyQuantizedRoadCommandShadow");
+            Require(controller, "RoadFeelTractionEvidence");
             Require(controller, "GetModeRoot(");
             Require(controller, "LastBearingPresentationMode.Driving");
             Require(controller, "ConfigurePresentationOwners");
@@ -697,9 +698,20 @@ namespace AtomicLandPirate.LastBearingTests
                 "_world?.WreckLineInteractor?.IsInputArmed != true");
             Require(driveInput, "_fieldDesk?.OwnsKeyboardFocus == true");
             Require(driveInput, "input.ThrottleMilli <= 0");
+            Require(driveInput, "leavingFirstRunFrameRails");
+            Require(driveInput, "CaptureRoadTractionEvidence()");
+            Require(driveInput, "RoadTractionEvidence.CanAdvance");
             Require(
                 driveInput,
                 "_readModel.IsDepotApproachRecoveryAvailable");
+            TestHarness.True(
+                driveInput.IndexOf(
+                    "RoadTractionEvidence.CanAdvance",
+                    StringComparison.Ordinal) <
+                driveInput.IndexOf(
+                    "new DriveVehicleCommand",
+                    StringComparison.Ordinal),
+                "physical traction must gate drive-command admission");
             string load = Segment(
                 controller,
                 "public void Load()",
@@ -1259,6 +1271,21 @@ namespace AtomicLandPirate.LastBearingTests
             Require(modeCoordinator, "ExpeditionPhase.Returned");
             Require(modeCoordinator, "ActiveModeCount");
             Require(modeCoordinator, "ILastBearingRoadModeAdapter");
+            Require(
+                modeCoordinator,
+                "ILastBearingRoadTractionEvidenceSource");
+            Require(
+                modeCoordinator,
+                "CaptureRoadTractionEvidence");
+            Require(
+                modeCoordinator,
+                "DeriveRoadFeelRouteProfile");
+            Require(
+                modeCoordinator,
+                "RoadFeelRouteProfile.WinchLine");
+            Require(
+                modeCoordinator,
+                "RoadFeelRouteProfile.RangeLine");
             Require(modeCoordinator, "readModel.PauseCause == PauseCause.None");
             Require(modeCoordinator, "readModel.IsWreckLineModulePointAvailable");
             Require(

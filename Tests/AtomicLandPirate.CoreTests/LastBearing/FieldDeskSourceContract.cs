@@ -124,6 +124,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(fieldDesk, "LastBearingFieldDeskPresenter.Present(");
             Require(fieldDesk, "LastBearingFieldDeskPresenter.IsIntentAvailable(");
             Require(fieldDesk, "LastBearingRoadDeskPresenter.Present(");
+            Require(
+                fieldDesk,
+                "_controller!.RoadTractionEvidence");
+            Require(fieldDesk, "projection.TractionStatus");
             Require(fieldDesk, "SetPickingModeRecursive(");
             Require(fieldDesk, "PickingMode.Ignore");
             string keyboardOwnership = Segment(
@@ -244,6 +248,11 @@ namespace AtomicLandPirate.LastBearingTests
             Require(
                 roadDeskPresenter,
                 "DerivePresentationDamageBand(");
+            Require(
+                roadDeskPresenter,
+                "RoadFeelTractionEvidence tractionEvidence");
+            Require(roadDeskPresenter, "FormatTractionStatus(");
+            Require(roadDeskPresenter, "tractionEvidence.Reason");
             Require(roadDeskPresenter, "IsWreckLineModulePointAvailable");
             Require(
                 roadDeskPresenter,

@@ -1841,7 +1841,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
-        public IEnumerator RoadInputReachesPresentationBeforeCanonicalTick()
+        public IEnumerator RoadInputReachesPresentationWithoutGhostCanonicalTick()
         {
             AsyncOperation? load = SceneManager.LoadSceneAsync(
                 SceneName,
@@ -1891,14 +1891,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             Assert.That(
                 roadRig.Adapter.CommandReceiptCount,
-                Is.EqualTo(receiptCountBefore + 1));
+                Is.EqualTo(receiptCountBefore));
             Assert.That(
                 controller.ReadModel!.RouteProgressTicks,
-                Is.GreaterThan(progressBefore));
+                Is.EqualTo(progressBefore));
             Assert.That(
                 controller.ReadModel.VehicleLateralMilli,
-                Is.GreaterThan(0));
-            Assert.That(controller.CanonicalHash, Is.Not.EqualTo(hashBefore));
+                Is.Zero);
+            Assert.That(controller.RoadTractionEvidence.CanAdvance, Is.False);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBefore));
         }
 
         [UnityTest]
@@ -2359,7 +2360,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
-        public IEnumerator FaultingLiveRoadInputCannotBlockCanonicalTick()
+        public IEnumerator FaultingLiveRoadInputFailsClosedWithoutCanonicalTick()
         {
             AsyncOperation? load = SceneManager.LoadSceneAsync(
                 SceneName,
@@ -2402,14 +2403,17 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(throwingAdapter.ApplyAttemptCount, Is.EqualTo(1));
             Assert.That(
                 controller.ReadModel!.RouteProgressTicks,
-                Is.GreaterThan(progressBefore));
-            Assert.That(controller.CanonicalHash, Is.Not.EqualTo(hashBefore));
+                Is.EqualTo(progressBefore));
+            Assert.That(
+                controller.RoadTractionEvidence.Reason,
+                Is.EqualTo(RoadFeelTractionEvidenceReason.AdapterFaulted));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBefore));
             Assert.That(controller.World!.RoadFeelRig!.Root.activeInHierarchy, Is.False);
             Assert.That(controller.World.VehicleView!.gameObject.activeSelf, Is.True);
         }
 
         [UnityTest]
-        public IEnumerator ThrowingRoadAdapterCannotBlockCanonicalProgress()
+        public IEnumerator ThrowingRoadAdapterFailsClosedWithoutCanonicalProgress()
         {
             AsyncOperation? load = SceneManager.LoadSceneAsync(
                 SceneName,
@@ -2448,8 +2452,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             AssertCameraOwnership(controller, chaseActive: false);
             Assert.That(
                 controller.ReadModel!.RouteProgressTicks,
-                Is.GreaterThan(progressBefore));
-            Assert.That(controller.CanonicalHash, Is.Not.EqualTo(hashBefore));
+                Is.EqualTo(progressBefore));
+            Assert.That(
+                controller.RoadTractionEvidence.Reason,
+                Is.EqualTo(RoadFeelTractionEvidenceReason.AdapterFaulted));
+            Assert.That(controller.CanonicalHash, Is.EqualTo(hashBefore));
             Assert.That(
                 controller.World!.RoadFeelRig!.Root.activeInHierarchy,
                 Is.False);
@@ -2470,6 +2477,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 UnityEngine.Object.FindAnyObjectByType<LastBearingGameController>();
             LastBearingState outbound = CreateOutboundState();
             InstallControllerState(controller, outbound);
+            controller.AttachRoadModeAdapter(
+                new LastBearingReadyTractionRoadAdapter());
             LastBearingVehicleView vehicle = controller.World!.VehicleView!;
             Vector3 positionBefore = vehicle.transform.position;
             long routeProgressBefore = controller.ReadModel!.RouteProgressTicks;

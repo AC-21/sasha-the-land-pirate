@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using AtomicLandPirate.Presentation.LastBearing.RoadFeel;
 using AtomicLandPirate.Simulation.LastBearing;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -123,6 +124,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public LastBearingFieldDesk? FieldDesk => _fieldDesk;
 
         public LastBearingHud? Hud => _hud;
+
+        public RoadFeelTractionEvidence RoadTractionEvidence
+        {
+            get;
+            private set;
+        }
 
         public bool IsExactFieldDeskCityOverview =>
             HasActiveGame &&
@@ -2471,6 +2478,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (!HasActiveGame)
             {
                 _modeCoordinator?.ClearRoadPresentationInput();
+                RoadTractionEvidence = default;
                 _fieldDesk?.Refresh();
                 return;
             }
@@ -2479,6 +2487,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             {
                 HandleSettlementLossShortcuts();
                 HoldRoadPresentationAtSettlementLoss();
+                RoadTractionEvidence = default;
                 _fieldDesk?.Refresh();
                 return;
             }
@@ -3001,19 +3010,28 @@ namespace AtomicLandPirate.Presentation.LastBearing
             }
 
             RoadInputSample input = ReadRoadInputSample();
-            if (choosingFirstRunFrameRails &&
-                input.ThrottleMilli <= 0)
-            {
-                return;
-            }
-
             _modeCoordinator?.ApplyQuantizedRoadCommandShadow(
                 input.ThrottleMilli,
                 input.SteeringMilli);
             _modeCoordinator?.ApplyPresentationOnlyRoadControls(
                 input.BrakeMilli,
                 input.HandbrakeMilli);
+            RoadTractionEvidence = CaptureRoadTractionEvidence();
+            if (choosingFirstRunFrameRails &&
+                input.ThrottleMilli <= 0)
+            {
+                return;
+            }
+
+            bool leavingFirstRunFrameRails =
+                choosingFirstRunFrameRails;
             if (input.ThrottleMilli == 0 && input.SteeringMilli == 0)
+            {
+                return;
+            }
+
+            if (!leavingFirstRunFrameRails &&
+                !RoadTractionEvidence.CanAdvance)
             {
                 return;
             }
@@ -3029,6 +3047,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (!CanApplyRoadPresentationInput())
             {
                 _modeCoordinator?.ClearRoadPresentationInput();
+                RoadTractionEvidence = default;
                 return;
             }
 
@@ -3038,6 +3057,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 input.BrakeMilli,
                 input.SteeringMilli,
                 input.HandbrakeMilli);
+            RoadTractionEvidence = CaptureRoadTractionEvidence();
+        }
+
+        private RoadFeelTractionEvidence CaptureRoadTractionEvidence()
+        {
+            if (_readModel == null || _modeCoordinator == null)
+            {
+                return default;
+            }
+
+            return _modeCoordinator.CaptureRoadTractionEvidence(
+                _readModel.RouteKind);
         }
 
         private bool CanApplyRoadPresentationInput()

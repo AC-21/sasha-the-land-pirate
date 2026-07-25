@@ -1087,6 +1087,46 @@ audio, generalized game-over framework, or normal-PR performance soak.
 Detailed contract:
 `docs/playtests/WP-0002/VGR-33-THE-DRY-BELL-CONTRACT.md`.
 
+## VGR-34 — Earn the Miles
+
+Status: integrated candidate awaiting canonical Unity validation.
+
+Objective: make route progress follow credible physical traction, so holding
+the throttle without moving the Scout no longer earns expedition miles.
+
+Scope:
+
+- Quantize one bounded presentation verdict from adapter health, recovery,
+  grounded contacts, forward speed, dominant surface, and the canonical route's
+  presentation-only profile.
+- Require an active, healthy, non-recovering rig with at least two contacts and
+  finite forward speed of at least `0.75 m/s`.
+- Accept Concrete for either route, Washboard for the winch shortcut, and Sand
+  or Gravel for the range-tank route; fail closed on every other combination.
+- Use the verdict only to admit or reject the existing quantized
+  `DriveVehicleCommand`; retain deterministic-core ownership of progress,
+  steering, condition, events, sequence, time, cargo, and outcomes.
+- Apply the same gate outbound and returning while preserving pause, recovery,
+  module-point, depot, terminal, and existing command guards.
+- Preserve the armed first-run frame-rail `W / RT` leave interaction as the
+  one explicit legacy choice exception; it must not become a general traction
+  bypass.
+- Keep physical controls responsive before admission and expose one derived,
+  bounded Road Desk reason without persisting telemetry.
+- Prove that rejected input preserves canonical bytes, sequence, route
+  progress, pending commands, and protected save bytes, then accepts a later
+  valid reading without a hidden latch.
+- Cover Winch/Washboard and Range Tank/Sand-or-Gravel, the shared Concrete
+  apron, both directions, and four city-to-garage cycles.
+
+Exclude: a new canonical field, schema, migration, command, event, balance
+value, route, surface, physics tune, input map, scene, package, dependency,
+production asset, generalized telemetry or policy framework, or normal-PR
+performance soak.
+
+Detailed contract:
+`docs/playtests/WP-0002/VGR-34-EARN-THE-MILES-CONTRACT.md`.
+
 ## Visual constitution
 
 - **Texas iron is the scale of work:** cast housings, plate steel, oilfield,
