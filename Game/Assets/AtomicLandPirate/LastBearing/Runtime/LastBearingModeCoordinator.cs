@@ -330,6 +330,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Activate(
                 mode,
                 mode == LastBearingPresentationMode.Driving &&
+                !readModel.IsSettlementLost &&
                 readModel.PauseCause == PauseCause.None &&
                 !holdAtRecovery &&
                 !holdAtModulePoint,

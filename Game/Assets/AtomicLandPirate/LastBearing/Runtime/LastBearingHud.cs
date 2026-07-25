@@ -250,7 +250,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
             GUILayout.Space(8f);
             GUILayout.Label(
-                LastBearingGameController.SettlementLossSaveStatus,
+                _controller!.SaveStatus,
                 _mutedStyle);
         }
 

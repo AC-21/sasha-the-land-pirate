@@ -217,6 +217,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.ModeCoordinator.CurrentMode,
                 Is.EqualTo(LastBearingPresentationMode.Driving));
+            Assert.That(
+                controller.ModeCoordinator.IsRoadPresentationActive,
+                Is.False);
             Assert.That(controller.FieldDesk.OwnsRetainedHud, Is.False);
             Assert.That(controller.Hud, Is.Not.Null);
             Assert.That(controller.Hud!.enabled, Is.True);
@@ -280,6 +283,49 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                     LastBearingCanonicalCodec.Encode(controller.State!)));
         }
 
+        [UnityTest]
+        public IEnumerator FailedLoadIsVisibleAndDirectTitleClearsLossCopy()
+        {
+            yield return BootController();
+            LastBearingGameController controller = _controller!;
+            InstallTemporarySaveAdapter(controller);
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            LastBearingState edge = WithState(
+                controller.State!,
+                (
+                    "WaterMilli",
+                    -LastBearingBalanceV1
+                        .FailingWaterRateMilliPerSettlementTick));
+            InstallControllerState(controller, edge);
+            InvokeSimulationTick(controller);
+
+            Assert.That(controller.IsSettlementLost, Is.True);
+            controller.Load();
+            Assert.That(controller.IsSettlementLost, Is.True);
+            Assert.That(
+                controller.SaveStatus,
+                Does.StartWith("Load refused:"));
+            Assert.That(
+                LastBearingFieldDeskPresenter.Present(controller).SaveStatus,
+                Is.EqualTo(controller.SaveStatus));
+
+            controller.StartNewGame(ColonyComposition.HumanOnly);
+            InstallControllerState(controller, edge);
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.SaveStatus,
+                Is.EqualTo(
+                    LastBearingGameController.SettlementLossSaveStatus));
+            controller.ReturnToTitle();
+
+            Assert.That(controller.HasActiveGame, Is.False);
+            Assert.That(
+                controller.SaveStatus,
+                Is.EqualTo(
+                    LastBearingGameController
+                        .SettlementLossTitleSaveStatus));
+        }
+
         private IEnumerator BootController()
         {
             AsyncOperation? load = SceneManager.LoadSceneAsync(
@@ -290,7 +336,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             yield return null;
 
             LastBearingGameController controller =
-                UnityEngine.Object.FindFirstObjectByType<
+                UnityEngine.Object.FindAnyObjectByType<
                     LastBearingGameController>();
             Assert.That(controller, Is.Not.Null);
             _controller = controller;

@@ -430,7 +430,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         canRecover,
                         LastBearingFieldDeskActionTone.Quiet),
                     LastBearingGameController.SettlementLossStatus,
-                    LastBearingGameController.SettlementLossSaveStatus);
+                    controller.SaveStatus);
             }
 
             bool canDispatch = controller.IsExactFieldDeskCityOverview &&

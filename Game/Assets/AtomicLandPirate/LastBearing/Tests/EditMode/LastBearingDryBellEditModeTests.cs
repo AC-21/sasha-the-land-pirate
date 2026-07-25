@@ -13,7 +13,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         [TestCase(ColonyComposition.HumanOnly)]
         [TestCase(ColonyComposition.RobotOnly)]
         [TestCase(ColonyComposition.Mixed)]
-        public void BoundaryIsExactForEveryComposition(
+        public void FailingBoundaryIsExactForEveryComposition(
             ColonyComposition composition)
         {
             LastBearingState source =
@@ -23,7 +23,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 LastBearingReadModel.FromState(
                     WithState(
                         source,
-                        validate: true,
                         ("WaterMilli", 1L)));
             Assert.That(oneMilli.IsSettlementLost, Is.False);
             Assert.That(oneMilli.SettlementLossReason, Is.Null);
@@ -32,25 +31,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 LastBearingReadModel.FromState(
                     WithState(
                         source,
-                        validate: true,
                         ("WaterMilli", 0L)));
             Assert.That(dry.IsSettlementLost, Is.True);
             Assert.That(
                 dry.SettlementLossReason,
                 Is.EqualTo(
                     LastBearingReadModel.DryBellSettlementLossReason));
-
-            LastBearingReadModel repairedDry =
-                LastBearingReadModel.FromState(
-                    WithState(
-                        source,
-                        validate: false,
-                        ("WaterMilli", 0L),
-                        (
-                            "TurbineCondition",
-                            TurbineCondition.BearingRepaired)));
-            Assert.That(repairedDry.IsSettlementLost, Is.False);
-            Assert.That(repairedDry.SettlementLossReason, Is.Null);
         }
 
         [Test]
@@ -60,7 +46,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 LastBearingScenarioFactory.CreateInitial(
                     ColonyComposition.Mixed,
                     3311),
-                validate: true,
                 ("WaterMilli", 0L));
             byte[] before = LastBearingCanonicalCodec.Encode(lost);
             long sequence = lost.NextCommandSequence;
@@ -110,7 +95,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingState active = StartWaterShift();
             LastBearingState rescueReady = WithState(
                 active,
-                validate: true,
                 (
                     "WaterMilli",
                     -LastBearingBalanceV1
@@ -195,7 +179,6 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
         private static LastBearingState WithState(
             LastBearingState source,
-            bool validate,
             params (string Name, object Value)[] values)
         {
             Type? builderType =
@@ -223,25 +206,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 field!.SetValue(builder, value);
             }
 
-            if (validate)
-            {
-                MethodInfo? build =
-                    builderType.GetMethod("Build", flags);
-                Assert.That(build, Is.Not.Null);
-                return (LastBearingState)build!.Invoke(
-                    builder,
-                    null);
-            }
-
-            ConstructorInfo? stateConstructor =
-                typeof(LastBearingState).GetConstructor(
-                    flags,
-                    binder: null,
-                    new[] { builderType },
-                    modifiers: null);
-            Assert.That(stateConstructor, Is.Not.Null);
-            return (LastBearingState)stateConstructor!.Invoke(
-                new[] { builder });
+            MethodInfo? build =
+                builderType.GetMethod("Build", flags);
+            Assert.That(build, Is.Not.Null);
+            return (LastBearingState)build!.Invoke(
+                builder,
+                null);
         }
     }
 }

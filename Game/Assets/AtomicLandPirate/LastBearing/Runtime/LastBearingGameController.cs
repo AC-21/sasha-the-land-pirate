@@ -33,6 +33,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             "THE DRY BELL. Last Bearing ran out of water while the turbine was still failing. Gameplay is frozen; load the protected checkpoint, return to title, or begin a new colony.";
         public const string SettlementLossSaveStatus =
             "Manual save disabled: the zero-water loss cannot overwrite the protected checkpoint.";
+        public const string SettlementLossTitleSaveStatus =
+            "Loss state was not saved. Load a protected checkpoint if one exists.";
 
         private readonly struct RoadInputSample
         {
@@ -892,6 +894,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void ReturnToTitle()
         {
+            if (string.Equals(
+                    _saveStatus,
+                    SettlementLossSaveStatus,
+                    StringComparison.Ordinal))
+            {
+                _saveStatus = SettlementLossTitleSaveStatus;
+            }
+
             ResetCityImprovementInteraction();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
