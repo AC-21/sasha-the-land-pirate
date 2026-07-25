@@ -363,7 +363,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(settled.RoutePermitGranted, Is.True);
             Assert.That(settled.FutureRouteTollFuelUnits, Is.EqualTo(2));
             Assert.That(settled.FactionGrievance, Is.GreaterThan(0));
-            Assert.That(settled.NextObjective, Is.EqualTo("route-permit-recorded"));
+            Assert.That(
+                settled.NextObjective,
+                Is.EqualTo("service-scout-in-garage"));
             AssertWorkshopStock(
                 workshop,
                 input: false,
@@ -790,7 +792,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.ReadModel.SpareBearingLotCustody,
                 Is.EqualTo(custody));
-            Assert.That(controller.World!.IsOneGoodBatchCutawaySelected, Is.True);
+            bool shouldRouteToWorkshop =
+                phase == SpareBearingBatchPhase.InProgress ||
+                batchAvailable ||
+                barterAvailable;
+            Assert.That(
+                controller.World!.IsOneGoodBatchCutawaySelected,
+                Is.EqualTo(shouldRouteToWorkshop));
             Assert.That(controller.IsWorkshopBatchStartAvailable, Is.EqualTo(batchAvailable));
             Assert.That(controller.IsWorkshopBarterAvailable, Is.EqualTo(barterAvailable));
             LastBearingOneGoodBatchCutawayView workshop =
