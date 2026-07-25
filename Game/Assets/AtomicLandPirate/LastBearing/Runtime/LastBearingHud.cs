@@ -93,7 +93,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             GUILayout.Label("SASHA THE ATOMIC LAND PIRATE", _titleStyle);
             GUILayout.Label("THE LAST BEARING · DEV PROFILE", _mutedStyle);
             GUILayout.Space(8f);
-            GUILayout.Label(_controller!.Status, _bodyStyle);
+            GUILayout.Label(
+                _controller!.IsSettlementLost
+                    ? LastBearingGameController.SettlementLossStatus
+                    : _controller.Status,
+                _bodyStyle);
             GUILayout.Space(10f);
         }
 
@@ -132,6 +136,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void DrawActiveGame(LastBearingReadModel model)
         {
+            if (model.IsSettlementLost)
+            {
+                DrawSettlementLoss(model);
+                return;
+            }
+
             LastBearingPermitJobPresentation permitJob =
                 LastBearingPermitJobPresenter.Present(
                     model,
@@ -192,6 +202,56 @@ namespace AtomicLandPirate.Presentation.LastBearing
             GUILayout.Space(10f);
 
             DrawOneGoodBatch(model);
+        }
+
+        private void DrawSettlementLoss(LastBearingReadModel model)
+        {
+            GUILayout.Label("THE DRY BELL · SETTLEMENT LOST", _titleStyle);
+            GUILayout.Label(
+                "Water reached 0.000 while the turbine was still failing. " +
+                "Last Bearing can no longer sustain its residents or civic machinery.",
+                _bodyStyle);
+            GUILayout.Space(8f);
+            GUILayout.Label(
+                "The current world view is frozen at the moment of loss. " +
+                "No production, driving, construction, service, or barter " +
+                "command can advance this state.",
+                _bodyStyle);
+            GUILayout.Space(8f);
+            GUILayout.Label(
+                "PROTECTED CHECKPOINT · Manual save is disabled so this " +
+                "zero-water state cannot overwrite the last recoverable run.",
+                _mutedStyle);
+            GUILayout.Label(
+                "HELD STOCK · " + model.PartsUnits + " PARTS · " +
+                model.FuelUnits + " FUEL · TURBINE " +
+                model.TurbineCondition.ToString().ToUpperInvariant(),
+                _mutedStyle);
+            GUILayout.Space(12f);
+
+            if (GUILayout.Button(
+                    "LOAD PROTECTED CHECKPOINT",
+                    _buttonStyle))
+            {
+                _controller!.Load();
+            }
+
+            if (GUILayout.Button(
+                    "NEW COLONY · SAME ROSTER",
+                    _buttonStyle))
+            {
+                _controller!.StartNewGame(model.Composition);
+            }
+
+            if (GUILayout.Button("RETURN TO TITLE", _buttonStyle))
+            {
+                _controller!.ReturnToTitle();
+            }
+
+            GUILayout.Space(8f);
+            GUILayout.Label(
+                _controller!.SaveStatus,
+                _mutedStyle);
         }
 
         private void DrawDustFrontAlert(LastBearingReadModel model)

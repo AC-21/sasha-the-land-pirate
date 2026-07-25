@@ -29,6 +29,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private const int MaximumCatchUpTicks = 8;
         private const string TransactionId = "transaction:last-bearing:unity:0001";
         private const string TransactionFingerprint = "fingerprint:last-bearing:unity:0001";
+        public const string SettlementLossStatus =
+            "THE DRY BELL. Last Bearing ran out of water while the turbine was still failing. Gameplay is frozen; load the protected checkpoint, return to title, or begin a new colony.";
+        public const string SettlementLossSaveStatus =
+            "Manual save disabled: the zero-water loss cannot overwrite the protected checkpoint.";
+        public const string SettlementLossTitleSaveStatus =
+            "Loss state was not saved. Load a protected checkpoint if one exists.";
 
         private readonly struct RoadInputSample
         {
@@ -87,6 +93,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool HasActiveGame => _state != null && _readModel != null;
 
+        public bool IsSettlementLost =>
+            _readModel?.IsSettlementLost == true;
+
         public LastBearingState? State
         {
             get
@@ -123,6 +132,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool IsExactFieldDeskDriving =>
             HasActiveGame &&
+            !IsSettlementLost &&
             _modeCoordinator?.HasActiveMode == true &&
             _modeCoordinator.CurrentMode ==
                 LastBearingPresentationMode.Driving &&
@@ -174,7 +184,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _pendingCommands.Count;
 
         public bool CanRecoverRoadPresentation =>
-            _modeCoordinator?.CanRecoverRoadPresentation ?? false;
+            !IsSettlementLost &&
+            (_modeCoordinator?.CanRecoverRoadPresentation ?? false);
 
         public bool IsWreckLineModuleOperationAvailable =>
             _pendingCommands.Count == 0 &&
@@ -883,6 +894,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void ReturnToTitle()
         {
+            if (string.Equals(
+                    _saveStatus,
+                    SettlementLossSaveStatus,
+                    StringComparison.Ordinal))
+            {
+                _saveStatus = SettlementLossTitleSaveStatus;
+            }
+
             ResetCityImprovementInteraction();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
@@ -1796,6 +1815,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public bool RecoverRoadPresentation()
         {
+            if (IsSettlementLost)
+            {
+                return false;
+            }
+
             if (_modeCoordinator?.TryRecoverRoadPresentation() != true)
             {
                 return false;
@@ -2292,6 +2316,13 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         public void Save()
         {
+            if (IsSettlementLost)
+            {
+                _saveStatus = SettlementLossSaveStatus;
+                _fieldDesk?.Refresh(force: true);
+                return;
+            }
+
             if (_state == null || _saveAdapter == null)
             {
                 _saveStatus = "No active state or save boundary.";
@@ -2369,6 +2400,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _saveStatus = result.Code + " · " + CanonicalHash.Substring(0, 12);
                 _status = "Exact city, vehicle, custody, crisis, and faction state restored.";
                 ApplyPresentation();
+                if (IsSettlementLost)
+                {
+                    EnterSettlementLossPresentation();
+                    return;
+                }
+
                 if (!TryRouteToPumpHallRepair(
                         "Exact finalized return restored at the pump-hall service line."))
                 {
@@ -2438,6 +2475,14 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 return;
             }
 
+            if (IsSettlementLost)
+            {
+                HandleSettlementLossShortcuts();
+                HoldRoadPresentationAtSettlementLoss();
+                _fieldDesk?.Refresh();
+                return;
+            }
+
             HandleGlobalShortcuts();
             ApplyRoadPresentationInput();
             AdvanceSimulation(Time.unscaledDeltaTime);
@@ -2451,7 +2496,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 TickSeconds * MaximumCatchUpTicks);
             int ticks = 0;
             while (_accumulator >= TickSeconds &&
-                   ticks < MaximumCatchUpTicks)
+                   ticks < MaximumCatchUpTicks &&
+                   !IsSettlementLost)
             {
                 SimulateOneTick();
                 _accumulator -= TickSeconds;
@@ -2744,8 +2790,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _world?.BeginCityGrammarComparisonSession();
                 }
 
-                TryAutosave(result.DomainEvents);
+                if (!_readModel.IsSettlementLost)
+                {
+                    TryAutosave(result.DomainEvents);
+                }
+
                 ApplyPresentation();
+                if (_readModel.IsSettlementLost)
+                {
+                    EnterSettlementLossPresentation();
+                    return;
+                }
+
                 if (returnCheckInAccepted)
                 {
                     if (_readModel.IsRepeatExpedition)
@@ -3693,7 +3749,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
 
         private void Queue(params Func<long, LastBearingCommand>[] factories)
         {
-            if (_state == null)
+            if (_state == null || IsSettlementLost)
             {
                 return;
             }
@@ -3704,6 +3760,37 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _state.NextCommandSequence + _pendingCommands.Count);
                 _pendingCommands.Add(factory(sequence));
             }
+        }
+
+        private void HandleSettlementLossShortcuts()
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard?.f9Key.wasPressedThisFrame == true)
+            {
+                Load();
+            }
+            else if (keyboard?.f5Key.wasPressedThisFrame == true)
+            {
+                Save();
+            }
+        }
+
+        private void EnterSettlementLossPresentation()
+        {
+            _pendingCommands.Clear();
+            _accumulator = 0f;
+            HoldRoadPresentationAtSettlementLoss();
+            _status = SettlementLossStatus;
+            _saveStatus = SettlementLossSaveStatus;
+            _fieldDesk?.Refresh(force: true);
+        }
+
+        private void HoldRoadPresentationAtSettlementLoss()
+        {
+            _modeCoordinator?.ClearRoadPresentationInput();
+            _modeCoordinator?.ApplyPresentationOnlyRoadControls(
+                brakeMilli: 1000,
+                handbrakeMilli: 1000);
         }
 
         private void ClearGaragePlanIntent()

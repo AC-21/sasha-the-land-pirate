@@ -265,6 +265,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
         {
             if (!IsCityMode(mode) ||
                 readModel == null ||
+                readModel.IsSettlementLost ||
                 readModel.ExpeditionPhase != ExpeditionPhase.AtHome)
             {
                 return false;
@@ -329,6 +330,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             Activate(
                 mode,
                 mode == LastBearingPresentationMode.Driving &&
+                !readModel.IsSettlementLost &&
                 readModel.PauseCause == PauseCause.None &&
                 !holdAtRecovery &&
                 !holdAtModulePoint,
