@@ -228,7 +228,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
-        public IEnumerator GuardsAndStallsFailClosedAtThePhysicalMachine()
+        public IEnumerator GuardsAndSingleServiceSlotFailClosedAtThePhysicalMachine()
         {
             yield return BootController();
             LastBearingGameController controller = _controller!;
@@ -240,13 +240,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.World!.CityServiceCellView!;
             LastBearingCityServiceCellInteractor interactor =
                 view.Interactor!;
+            var garage = controller.World.GarageBayView!;
+            long preparationElapsedBeforeShift =
+                controller.ReadModel!.PreparationElapsedTicks;
 
-            interactor.ClickHotShiftControl();
-            AssertSingleHotShiftCommand(controller);
-            InvokeSimulationTick(controller);
             Assert.That(
-                controller.ReadModel!.IsHotShiftStalledByWorkshopPush,
+                controller.ReadModel.IsPreparationActivelyWorking,
                 Is.True);
+            Assert.That(
+                controller.ReadModel.IsPreparationStalledByHotShift,
+                Is.False);
             Assert.That(view.IsHumanOperatorVisible, Is.False);
             Assert.That(view.IsRobotOperatorVisible, Is.False);
             Assert.That(view.IsHotShiftSpindleMoving, Is.False);
@@ -254,8 +257,53 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 view.IsWorkshopPushTransferArmVisible,
                 Is.True);
+            Assert.That(
+                garage.IsPreparationGaugeActivelyWorking,
+                Is.True);
+            Assert.That(
+                garage.IsPreparationGaugeHeldByHotShift,
+                Is.False);
+
+            interactor.ClickHotShiftControl();
+            AssertSingleHotShiftCommand(controller);
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel!.IsPreparationStalledByHotShift,
+                Is.True);
+            Assert.That(
+                controller.ReadModel.IsPreparationActivelyWorking,
+                Is.False);
+            Assert.That(
+                controller.ReadModel.PreparationElapsedTicks,
+                Is.EqualTo(preparationElapsedBeforeShift + 1));
+            long preparationAtPreemption =
+                controller.ReadModel.PreparationElapsedTicks;
+            Assert.That(
+                view.IsHumanOperatorVisible ||
+                view.IsRobotOperatorVisible,
+                Is.True);
+            Assert.That(view.IsHotShiftSpindleMoving, Is.True);
+            Assert.That(view.IsHotShiftWorkPoolVisible, Is.True);
+            Assert.That(
+                view.IsWorkshopPushTransferArmVisible,
+                Is.False);
             Assert.That(view.IsDustFrontShutterVisible, Is.False);
             Assert.That(view.HotShiftSledProgress, Is.EqualTo(0f));
+            Assert.That(
+                garage.IsPreparationGaugeActivelyWorking,
+                Is.False);
+            Assert.That(
+                garage.IsPreparationGaugeHeldByHotShift,
+                Is.True);
+
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.PreparationElapsedTicks,
+                Is.EqualTo(preparationAtPreemption));
+            Assert.That(
+                controller.ReadModel.HotShiftElapsedTicks,
+                Is.GreaterThan(0));
+            Assert.That(view.HotShiftSledProgress, Is.GreaterThan(0f));
             interactor.ClickHotShiftControl();
             Assert.That(PendingCommands(controller), Is.Empty);
             Assert.That(interactor.LastInteractionRejected, Is.True);

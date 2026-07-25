@@ -505,15 +505,22 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
-        public IEnumerator HotShiftStallsThenMovesTheCommissioningSledAndAutosaves()
+        public IEnumerator HotShiftHoldsWorkshopPushThenPreparationResumesAndAutosaves()
         {
             LastBearingGameController controller = BuildController();
             LastBearingFieldDesk desk = RequireDesk(controller);
             string profileDirectory = InstallTemporarySaveAdapter(controller);
             CompleteWorkingServiceCell(controller);
-            Transform sled = controller.World!.CityServiceCellView!.transform.Find(
-                "Canonical Parts Sled");
+            LastBearingWorldBuilder world = controller.World!;
+            LastBearingCityServiceCellView serviceCell =
+                world.CityServiceCellView!;
+            var garage = world.GarageBayView!;
+            Camera sharedCamera = world.MainCamera!;
+            AudioListener sharedListener =
+                sharedCamera.GetComponent<AudioListener>();
+            Transform sled = serviceCell.transform.Find("Canonical Parts Sled");
             Assert.That(sled, Is.Not.Null);
+            Assert.That(sharedListener, Is.Not.Null);
             Vector3 commissionedAtShop = sled.localPosition;
 
             controller.BeginGaragePlan(PreparationChoice.WorkshopPush);
@@ -522,6 +529,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             controller.ShowCityOverview();
             yield return null;
             desk.Refresh(force: true);
+            long preparationElapsedBeforeShift =
+                controller.ReadModel!.PreparationElapsedTicks;
 
             LastBearingFieldDeskProjection available =
                 LastBearingFieldDeskPresenter.Present(controller);
@@ -532,12 +541,32 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 available.SecondaryAction.Label,
                 Is.EqualTo(
                     "RUN HOT SHIFT · 1 FUEL · 120 TICKS · +2 PARTS"));
+            Assert.That(
+                available.SecondaryAction.Detail,
+                Does.Contain(
+                    "1 fuel powers 120 settlement ticks for +2 parts at -0.010 water per tick"));
+            Assert.That(
+                controller.ReadModel.IsPreparationActivelyWorking,
+                Is.True);
+            Assert.That(
+                controller.ReadModel.IsPreparationStalledByHotShift,
+                Is.False);
+            Assert.That(
+                serviceCell.IsWorkshopPushTransferArmVisible,
+                Is.True);
+            Assert.That(serviceCell.IsHumanOperatorVisible, Is.False);
+            Assert.That(serviceCell.IsRobotOperatorVisible, Is.False);
+            Assert.That(
+                garage.IsPreparationGaugeActivelyWorking,
+                Is.True);
+            Assert.That(
+                garage.IsPreparationGaugeHeldByHotShift,
+                Is.False);
 
             VisualElement root =
                 RequireDocument(controller).rootVisualElement;
             Button secondaryAction =
                 root.Q<Button>("secondary-action-button");
-            Button advanceAction = root.Q<Button>("leave-trial-button");
             long partsBefore = controller.ReadModel!.PartsUnits;
             long fuelBefore = controller.ReadModel.FuelUnits;
             int generationsBeforeStart =
@@ -555,12 +584,47 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 controller.ReadModel.FuelUnits,
                 Is.EqualTo(fuelBefore - 1));
             Assert.That(
-                LastBearingFieldDeskPresenter.Present(controller)
-                    .SecondaryAction.Label,
-                Is.EqualTo("HOT SHIFT · STALLED · 0 / 120"));
+                controller.ReadModel.IsPreparationStalledByHotShift,
+                Is.True);
             Assert.That(
-                controller.Status,
-                Does.Contain("borrowed the operator"));
+                controller.ReadModel.IsPreparationActivelyWorking,
+                Is.False);
+            Assert.That(
+                controller.ReadModel.PreparationElapsedTicks,
+                Is.EqualTo(preparationElapsedBeforeShift + 1));
+            long preparationAtPreemption =
+                controller.ReadModel.PreparationElapsedTicks;
+            LastBearingFieldDeskProjection started =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                started.SecondaryAction.Label,
+                Is.EqualTo("HOT SHIFT · 0 / 120"));
+            Assert.That(
+                started.SecondaryAction.Detail,
+                Does.Contain(
+                    "active shift owns the single machine-shop service slot"));
+            Assert.That(
+                started.SecondaryAction.Detail,
+                Does.Contain("Workshop Push preparation is held"));
+            Assert.That(
+                started.SecondaryAction.Detail,
+                Does.Contain("garage gauge is frozen"));
+            Assert.That(controller.Status, Does.Contain("single service slot"));
+            Assert.That(
+                serviceCell.IsHumanOperatorVisible ||
+                serviceCell.IsRobotOperatorVisible,
+                Is.True);
+            Assert.That(serviceCell.IsHotShiftSpindleMoving, Is.True);
+            Assert.That(serviceCell.IsHotShiftWorkPoolVisible, Is.True);
+            Assert.That(
+                serviceCell.IsWorkshopPushTransferArmVisible,
+                Is.False);
+            Assert.That(
+                garage.IsPreparationGaugeActivelyWorking,
+                Is.False);
+            Assert.That(
+                garage.IsPreparationGaugeHeldByHotShift,
+                Is.True);
             string startHash = AssertAutosaveBoundary(
                 controller,
                 profileDirectory,
@@ -582,45 +646,72 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.ReadModel.FuelUnits,
                 Is.EqualTo(fuelBefore - 1));
+            Assert.That(
+                controller.ReadModel.PreparationElapsedTicks,
+                Is.EqualTo(preparationAtPreemption));
+            Assert.That(
+                controller.ReadModel.IsPreparationStalledByHotShift,
+                Is.True);
+            Assert.That(
+                controller.ReadModel.IsPreparationActivelyWorking,
+                Is.False);
             controller.ShowCityOverview();
+            yield return null;
             desk.Refresh(force: true);
+            Assert.That(controller.World, Is.SameAs(world));
+            Assert.That(controller.World!.GarageBayView, Is.SameAs(garage));
+            Assert.That(controller.World.MainCamera, Is.SameAs(sharedCamera));
+            Assert.That(
+                sharedCamera.GetComponent<AudioListener>(),
+                Is.SameAs(sharedListener));
 
-            InvokeSimulationTick(controller);
-            Assert.That(sled.localPosition, Is.EqualTo(stalledAtRecycler));
-
-            var preparationGuard = 0;
-            long preparationBound =
-                controller.ReadModel!.PreparationRemainingTicks + 2;
-            while (controller.ReadModel!.PreparationPhase ==
-                       PreparationPhase.Preparing &&
-                   preparationGuard < preparationBound)
+            for (var cycle = 0; cycle < 4; cycle++)
             {
-                InvokeSimulationTick(controller);
-                preparationGuard++;
+                controller.OpenGarageBay();
+                yield return null;
+                Assert.That(
+                    controller.ModeCoordinator!.CurrentMode,
+                    Is.EqualTo(LastBearingPresentationMode.GarageBay));
+                Assert.That(garage.gameObject.activeInHierarchy, Is.True);
+                Assert.That(
+                    garage.IsPreparationGaugeHeldByHotShift,
+                    Is.True);
+                Assert.That(
+                    controller.ReadModel!.PreparationElapsedTicks,
+                    Is.EqualTo(preparationAtPreemption));
+
+                controller.ShowCityOverview();
+                yield return null;
+                desk.Refresh(force: true);
+                Assert.That(
+                    controller.ModeCoordinator.CurrentMode,
+                    Is.EqualTo(LastBearingPresentationMode.CityOverview));
+                Assert.That(
+                    serviceCell.gameObject.activeInHierarchy,
+                    Is.True);
+                Assert.That(
+                    serviceCell.IsHotShiftSpindleMoving,
+                    Is.True);
+                Assert.That(
+                    Object.FindObjectsByType<Camera>(
+                        FindObjectsInactive.Include),
+                    Has.Length.EqualTo(1));
+                Assert.That(
+                    Object.FindObjectsByType<AudioListener>(
+                        FindObjectsInactive.Include),
+                    Has.Length.EqualTo(1));
+                Assert.That(
+                    world.MainCamera,
+                    Is.SameAs(sharedCamera));
             }
 
-            Assert.That(
-                controller.ReadModel!.PreparationPhase,
-                Is.EqualTo(PreparationPhase.Ready));
-            Assert.That(controller.ReadModel.HotShiftElapsedTicks, Is.Zero);
-            desk.Refresh(force: true);
-            Assert.That(
-                root.Q<Button>("primary-action-button").text,
-                Is.EqualTo("OPEN GARAGE · PULL LAUNCH DOG"));
-            Assert.That(
-                root.Q<Button>("secondary-action-button")
-                    .style.display.value,
-                Is.EqualTo(DisplayStyle.None));
-            Assert.That(
-                advanceAction.style.display.value,
-                Is.EqualTo(DisplayStyle.Flex));
-            Assert.That(
-                advanceAction.text,
-                Is.EqualTo("HOT SHIFT · 0 / 120"));
-            Assert.That(advanceAction.enabledSelf, Is.False);
-
             InvokeSimulationTick(controller);
-            Assert.That(controller.ReadModel.HotShiftElapsedTicks, Is.EqualTo(1));
+            Assert.That(
+                controller.ReadModel!.PreparationElapsedTicks,
+                Is.EqualTo(preparationAtPreemption));
+            Assert.That(
+                controller.ReadModel.HotShiftElapsedTicks,
+                Is.EqualTo(1));
             Assert.That(
                 Vector3.Distance(sled.localPosition, stalledAtRecycler),
                 Is.GreaterThan(0.001f));
@@ -647,8 +738,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 generationsBeforeCheckpoint,
                 hashBeforeCheckpoint);
             desk.Refresh(force: true);
-            Assert.That(advanceAction.text, Is.EqualTo("HOT SHIFT · 60 / 120"));
-            Assert.That(advanceAction.enabledSelf, Is.False);
+            Assert.That(
+                secondaryAction.text,
+                Is.EqualTo("HOT SHIFT · 60 / 120"));
+            Assert.That(secondaryAction.enabledSelf, Is.False);
 
             controller.ReturnToTitle();
             controller.Load();
@@ -658,6 +751,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(HotShiftPhase.InProgress));
             Assert.That(controller.ReadModel.HotShiftElapsedTicks, Is.EqualTo(60));
             Assert.That(controller.ReadModel.HotShiftCompletedCount, Is.Zero);
+            Assert.That(
+                controller.ReadModel.PreparationElapsedTicks,
+                Is.EqualTo(preparationAtPreemption));
+            Assert.That(
+                garage.IsPreparationGaugeHeldByHotShift,
+                Is.True);
             controller.ShowCityOverview();
             desk.Refresh(force: true);
 
@@ -687,6 +786,26 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 Vector3.Distance(sled.localPosition, commissionedAtShop),
                 Is.LessThan(0.001f));
+            Assert.That(
+                controller.ReadModel.IsPreparationStalledByHotShift,
+                Is.False);
+            Assert.That(
+                controller.ReadModel.IsPreparationActivelyWorking,
+                Is.True);
+            Assert.That(
+                serviceCell.IsWorkshopPushTransferArmVisible,
+                Is.True);
+            Assert.That(serviceCell.IsHotShiftSpindleMoving, Is.False);
+            Assert.That(
+                serviceCell.IsHumanOperatorVisible ||
+                serviceCell.IsRobotOperatorVisible,
+                Is.False);
+            Assert.That(
+                garage.IsPreparationGaugeActivelyWorking,
+                Is.True);
+            Assert.That(
+                garage.IsPreparationGaugeHeldByHotShift,
+                Is.False);
 
             controller.ReturnToTitle();
             controller.Load();
@@ -696,23 +815,29 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(HotShiftPhase.Idle));
             Assert.That(controller.ReadModel.HotShiftCompletedCount, Is.EqualTo(1));
             Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(partsBefore + 2));
+            Assert.That(
+                controller.ReadModel.IsPreparationActivelyWorking,
+                Is.True);
+            long preparationElapsedAfterRelease =
+                controller.ReadModel.PreparationElapsedTicks;
             controller.ShowCityOverview();
             yield return null;
             desk.Refresh(force: true);
             Assert.That(
-                advanceAction.text,
+                secondaryAction.text,
                 Is.EqualTo(
                     "RUN ANOTHER HOT SHIFT · 1 FUEL · 120 TICKS · +2 PARTS"));
-            Assert.That(advanceAction.enabledSelf, Is.True);
-
-            Submit(advanceAction);
-            Assert.That(controller.HasPendingPlayerCommands, Is.True);
+            Assert.That(secondaryAction.enabledSelf, Is.True);
             InvokeSimulationTick(controller);
-            Assert.That(controller.ReadModel.HotShiftCompletedCount, Is.EqualTo(1));
-            Assert.That(controller.ReadModel.HotShiftPhase, Is.EqualTo(HotShiftPhase.InProgress));
             Assert.That(
-                Vector3.Distance(sled.localPosition, stalledAtRecycler),
-                Is.LessThan(0.05f));
+                controller.ReadModel.PreparationElapsedTicks,
+                Is.GreaterThan(preparationElapsedAfterRelease));
+            Assert.That(
+                garage.IsPreparationGaugeActivelyWorking,
+                Is.True);
+            Assert.That(
+                serviceCell.IsWorkshopPushTransferArmVisible,
+                Is.True);
         }
 
         [UnityTest]

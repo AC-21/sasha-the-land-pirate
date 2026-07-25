@@ -292,9 +292,47 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(garage.PreparationGaugeLitSegments, Is.Zero);
             Assert.That(garage.PreparationProgressNormalized, Is.Zero);
 
-            world.ApplyGaragePreparationProgress(60, 120);
+            world.ApplyGaragePreparationProgress(
+                1,
+                120,
+                stalledByHotShift: false,
+                activelyWorking: true);
+            Transform housing = RequireGarageRoot(
+                garage,
+                "ASSEMBLY_PROGRESS_GAUGE")
+                .Find("ASSEMBLY_PROGRESS_GAUGE_HOUSING");
+            Assert.That(housing, Is.Not.Null);
+            Color workingColor =
+                housing!.GetComponent<Renderer>().sharedMaterial.color;
+            Assert.That(garage.PreparationGaugeLitSegments, Is.Zero);
+            Assert.That(garage.IsPreparationGaugeActivelyWorking, Is.True);
+            Assert.That(garage.IsPreparationGaugeHeldByHotShift, Is.False);
+
+            world.ApplyGaragePreparationProgress(
+                1,
+                120,
+                stalledByHotShift: true,
+                activelyWorking: false);
+            Color heldColor =
+                housing.GetComponent<Renderer>().sharedMaterial.color;
+            Assert.That(garage.PreparationGaugeLitSegments, Is.Zero);
+            Assert.That(garage.IsPreparationGaugeActivelyWorking, Is.False);
+            Assert.That(garage.IsPreparationGaugeHeldByHotShift, Is.True);
+            Assert.That(
+                heldColor,
+                Is.Not.EqualTo(workingColor),
+                "The persistent housing must expose a held gauge even before the first segment lights.");
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            world.ApplyGaragePreparationProgress(
+                60,
+                120,
+                stalledByHotShift: false,
+                activelyWorking: true);
 
             Assert.That(garage.IsPreparationGaugeVisible, Is.True);
+            Assert.That(garage.IsPreparationGaugeActivelyWorking, Is.True);
+            Assert.That(garage.IsPreparationGaugeHeldByHotShift, Is.False);
             Assert.That(
                 garage.PreparationGaugeLitSegments,
                 Is.EqualTo(LastBearingGarageBayView.PreparationGaugeSegmentCount / 2));
@@ -304,7 +342,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(garage.PreparationProgressNormalized, Is.EqualTo(0.5f));
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
 
-            world.ApplyGaragePreparationProgress(119, 120);
+            world.ApplyGaragePreparationProgress(
+                119,
+                120,
+                stalledByHotShift: true,
+                activelyWorking: false);
 
             Assert.That(
                 garage.PreparationGaugeLitSegments,
@@ -313,9 +355,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 CountActiveGaugeSegments(garage),
                 Is.EqualTo(LastBearingGarageBayView.PreparationGaugeSegmentCount - 1));
+            Assert.That(garage.IsPreparationGaugeActivelyWorking, Is.False);
+            Assert.That(garage.IsPreparationGaugeHeldByHotShift, Is.True);
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
 
-            world.ApplyGaragePreparationProgress(120, 120);
+            world.ApplyGaragePreparationProgress(
+                120,
+                120,
+                stalledByHotShift: false,
+                activelyWorking: false);
 
             Assert.That(
                 garage.PreparationGaugeLitSegments,
@@ -324,6 +372,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 CountActiveGaugeSegments(garage),
                 Is.EqualTo(LastBearingGarageBayView.PreparationGaugeSegmentCount));
             Assert.That(garage.PreparationProgressNormalized, Is.EqualTo(1f));
+            Assert.That(garage.IsPreparationGaugeActivelyWorking, Is.False);
+            Assert.That(garage.IsPreparationGaugeHeldByHotShift, Is.False);
             Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
 
             controller.ReturnToTitle();

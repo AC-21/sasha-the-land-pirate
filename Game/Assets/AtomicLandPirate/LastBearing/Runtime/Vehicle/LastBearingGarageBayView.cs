@@ -46,6 +46,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         private GameObject? _preparationGaugeRoot;
         private readonly GameObject?[] _preparationGaugeSegments =
             new GameObject?[PreparationGaugeSegmentCount];
+        private readonly Renderer?[] _preparationGaugeRenderers =
+            new Renderer?[PreparationGaugeSegmentCount];
+        private Renderer? _preparationGaugeHousingRenderer;
+        private Material? _preparationGaugeIdleMaterial;
+        private Material? _preparationGaugeWorkingMaterial;
+        private Material? _preparationGaugeHeldMaterial;
         private Transform? _serviceHoist;
         private Transform? _hoistCable;
         private Vector3 _serviceHoistRestPosition;
@@ -135,6 +141,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         public int PreparationGaugeLitSegments { get; private set; }
 
         public float PreparationProgressNormalized { get; private set; }
+
+        public bool IsPreparationGaugeHeldByHotShift { get; private set; }
+
+        public bool IsPreparationGaugeActivelyWorking { get; private set; }
 
         public bool IsRigUpgradeInstallPulseActive =>
             RigUpgradeInstallPulseRemainingSeconds > 0f;
@@ -274,7 +284,7 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 new Vector3(2.8f, 0.48f, 0.06f),
                 tungsten);
             BuildRoadHandManifest(darkIron, bone, tungsten, signal);
-            BuildPreparationGauge(darkIron, signal);
+            BuildPreparationGauge(darkIron, oxide, signal);
             BuildPlanMarkers(darkIron, tungsten, signal);
             BuildDepartureControl(
                 darkIron,
@@ -337,7 +347,11 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 signal);
 
             ApplyModule(SashaScoutModulePresentation.None);
-            ApplyPreparationProgress(0, 0);
+            ApplyPreparationProgress(
+                0,
+                0,
+                stalledByHotShift: false,
+                activelyWorking: false);
             ApplyPlanMarker(GaragePlanMarkerPresentation.None);
             ApplyRoadHandManifest(
                 GarageRoadHandManifestPresentation.None);
@@ -452,9 +466,17 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         /// Updates the physical assembly gauge from derived simulation progress.
         /// It never feeds values back into the canonical state.
         /// </summary>
-        public void ApplyPreparationProgress(long elapsedTicks, long requiredTicks)
+        public void ApplyPreparationProgress(
+            long elapsedTicks,
+            long requiredTicks,
+            bool stalledByHotShift,
+            bool activelyWorking)
         {
             bool hasPreparation = requiredTicks > 0;
+            IsPreparationGaugeHeldByHotShift =
+                hasPreparation && stalledByHotShift;
+            IsPreparationGaugeActivelyWorking =
+                hasPreparation && activelyWorking;
             PreparationProgressNormalized = hasPreparation
                 ? Mathf.Clamp01((float)elapsedTicks / requiredTicks)
                 : 0f;
@@ -474,10 +496,36 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 _preparationGaugeRoot.SetActive(hasPreparation);
             }
 
+            Material? gaugeStateMaterial = !hasPreparation
+                ? _preparationGaugeIdleMaterial
+                : IsPreparationGaugeHeldByHotShift
+                    ? _preparationGaugeHeldMaterial
+                    : _preparationGaugeWorkingMaterial;
+            if (_preparationGaugeHousingRenderer != null &&
+                gaugeStateMaterial != null &&
+                !ReferenceEquals(
+                    _preparationGaugeHousingRenderer.sharedMaterial,
+                    gaugeStateMaterial))
+            {
+                _preparationGaugeHousingRenderer.sharedMaterial =
+                    gaugeStateMaterial;
+            }
+
             for (var index = 0; index < _preparationGaugeSegments.Length; index++)
             {
-                _preparationGaugeSegments[index]?.SetActive(
-                    hasPreparation && index < PreparationGaugeLitSegments);
+                bool lit =
+                    hasPreparation && index < PreparationGaugeLitSegments;
+                _preparationGaugeSegments[index]?.SetActive(lit);
+                Renderer? renderer = _preparationGaugeRenderers[index];
+                Material? material = IsPreparationGaugeHeldByHotShift
+                    ? _preparationGaugeHeldMaterial
+                    : _preparationGaugeWorkingMaterial;
+                if (renderer != null &&
+                    material != null &&
+                    !ReferenceEquals(renderer.sharedMaterial, material))
+                {
+                    renderer.sharedMaterial = material;
+                }
             }
         }
 
@@ -776,19 +824,27 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             return stand;
         }
 
-        private void BuildPreparationGauge(Material darkIron, Material signal)
+        private void BuildPreparationGauge(
+            Material darkIron,
+            Material oxide,
+            Material signal)
         {
+            _preparationGaugeIdleMaterial = darkIron;
+            _preparationGaugeWorkingMaterial = signal;
+            _preparationGaugeHeldMaterial = oxide;
             _preparationGaugeRoot = new GameObject(
                 "ASSEMBLY_PROGRESS_GAUGE");
             _preparationGaugeRoot.transform.SetParent(transform, false);
 
-            CreatePart(
+            GameObject housing = CreatePart(
                 "ASSEMBLY_PROGRESS_GAUGE_HOUSING",
                 PrimitiveType.Cube,
                 new Vector3(1.15f, 3.42f, -4.13f),
                 new Vector3(2.7f, 0.62f, 0.08f),
                 darkIron,
                 _preparationGaugeRoot.transform);
+            _preparationGaugeHousingRenderer =
+                housing.GetComponent<Renderer>();
 
             const float startX = 0.12f;
             const float spacing = 0.3f;
@@ -808,6 +864,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                     new Vector3(0.16f, 0.25f, 0.03f),
                     signal,
                     _preparationGaugeRoot.transform);
+                _preparationGaugeRenderers[index] =
+                    _preparationGaugeSegments[index]!
+                        .GetComponent<Renderer>();
             }
         }
 

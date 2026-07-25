@@ -405,8 +405,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 model.CityServiceResidentId,
                 ResidentRoster.RobotResidentId,
                 StringComparison.Ordinal);
+            bool workshopPushPreparationWorking =
+                model.PreparationChoice == PreparationChoice.WorkshopPush &&
+                model.IsPreparationActivelyWorking;
             bool operatorAtMachine =
-                !model.IsHotShiftStalledByWorkshopPush;
+                !workshopPushPreparationWorking;
             _humanOperator.SetActive(humanAssigned && operatorAtMachine);
             _robotOperator.SetActive(robotAssigned && operatorAtMachine);
             if (IsValidPad(model.MachineShopPadIndex))
@@ -426,7 +429,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _hotShiftSpindle.gameObject.SetActive(activelyWorking);
             _hotShiftWorkPool.SetActive(activelyWorking);
             _workshopPushTransferArm.SetActive(
-                model.IsHotShiftStalledByWorkshopPush);
+                workshopPushPreparationWorking);
             _dustFrontShutter.SetActive(
                 model.IsHotShiftStalledByDustFront);
             bool hasCompletedRun = model.HotShiftCompletedCount > 0;
