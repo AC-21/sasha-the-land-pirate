@@ -539,6 +539,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _pendingCommands.Exists(command =>
                 command is RunHotShiftCommand);
 
+        public bool CanStartWaterShift =>
+            _pendingCommands.Count == 0 &&
+            _readModel?.IsWaterShiftRunAvailable == true &&
+            IsExactFieldDeskCityOverview;
+
+        public bool IsWaterShiftStartQueued =>
+            _pendingCommands.Exists(command =>
+                command is RunWaterShiftCommand);
+
         public bool IsEmergencyCisternPumpQueued =>
             _pendingCommands.Exists(command =>
                 command is PumpEmergencyCisternCommand);
@@ -1188,6 +1197,51 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 expectedCompletedCount));
             _status =
                 "Hot Shift queued: 1 fuel · 120 settlement ticks · +2 reclaimed parts.";
+        }
+
+        public void StartWaterShift()
+        {
+            if (IsWaterShiftStartQueued)
+            {
+                return;
+            }
+
+            if (_readModel == null)
+            {
+                _status =
+                    "Start or load Last Bearing before running the Water Shift.";
+                return;
+            }
+
+            if (_pendingCommands.Count != 0)
+            {
+                _status =
+                    "Finish the queued city action before starting the Water Shift.";
+                return;
+            }
+
+            if (!IsExactFieldDeskCityOverview)
+            {
+                _status =
+                    "Run the Water Shift from the physical Machine Shop or city Field Desk while Sasha is home.";
+                return;
+            }
+
+            if (!_readModel.IsWaterShiftRunAvailable)
+            {
+                _status = _readModel.HotShiftPhase == HotShiftPhase.InProgress
+                    ? "The service cell already has a shift in progress."
+                    : "The Water Shift needs the commissioned service cell, a fitted rig plan, Sasha home, route-reserve fuel, and room for the complete 10.000-water output.";
+                return;
+            }
+
+            long expectedCompletedCount =
+                _readModel.WaterShiftCompletedCount;
+            Queue(sequence => new RunWaterShiftCommand(
+                sequence,
+                expectedCompletedCount));
+            _status =
+                "Water Shift queued: 1 fuel · 120 settlement ticks · gross +10.000 water · no parts. Ordinary city water use continues while it runs.";
         }
 
         public void OpenEmergencyCisternPump()
@@ -2638,6 +2692,15 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 bool hotShiftCompleted = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.HotShiftCompleted);
+                bool waterShiftStarted = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.WaterShiftStarted);
+                bool waterShiftCheckpointReached = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.WaterShiftCheckpointReached);
+                bool waterShiftCompleted = ContainsEvent(
+                    result.DomainEvents,
+                    LastBearingEventKind.WaterShiftCompleted);
                 bool emergencyCisternPumped = ContainsEvent(
                     result.DomainEvents,
                     LastBearingEventKind.EmergencyCisternPumped);
@@ -2787,6 +2850,27 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         "Hot Shift complete. +2 reclaimed parts; the service sled is parked at the machine shop.";
                 }
 
+                if (waterShiftStarted)
+                {
+                    _status = _readModel.IsHotShiftStalledByDustFront
+                        ? "Water Shift started, but the breached Dust Front has stopped the service cell. Progress is held until turbine repair."
+                        : _readModel.IsPreparationStalledByHotShift
+                            ? "Water Shift started. One fuel drives 120 ticks for a gross +10.000-water output and no parts. Ordinary city water use continues; the active shift owns the single service slot, so Workshop Push and its garage gauge are held."
+                            : "Water Shift started. One fuel drives 120 ticks for a gross +10.000-water output and no parts; ordinary city water use continues while the operator works.";
+                }
+
+                if (waterShiftCheckpointReached)
+                {
+                    _status =
+                        "Water Shift checkpoint: 60 / 120 ticks. City state autosaved.";
+                }
+
+                if (waterShiftCompleted)
+                {
+                    _status =
+                        "Water Shift complete. Its gross +10.000-water output reached Emergency Storage; net storage also reflects ordinary water use during the 120 ticks. No reclaimed parts were produced.";
+                }
+
                 if (emergencyCisternPumped)
                 {
                     _status =
@@ -2801,7 +2885,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _status = _readModel.DustFrontOutcome ==
                               DustFrontOutcome.Held
                         ? "DUST FRONT HELD. Last Bearing kept the reserve above the recoverable line. Acknowledge the verdict to resume."
-                        : "DUST FRONT BREACHED. The failing turbine could not hold the dry line. Acknowledge the verdict; Hot Shift stays stalled until turbine repair.";
+                        : "DUST FRONT BREACHED. The failing turbine could not hold the dry line. Acknowledge the verdict; service shifts stay safety-stalled until turbine repair.";
                 }
 
                 if (dustFrontAcknowledged)
@@ -2809,7 +2893,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     _status = _readModel.DustFrontOutcome ==
                               DustFrontOutcome.Held
                         ? "Dust Front verdict acknowledged: HELD. Settlement clocks resumed."
-                        : "Dust Front verdict acknowledged: BREACHED. Settlement clocks resumed; Hot Shift remains stalled until turbine repair.";
+                        : "Dust Front verdict acknowledged: BREACHED. Settlement clocks resumed; service shifts remain safety-stalled until turbine repair.";
                 }
 
                 if (maintenanceServiced)
@@ -3210,6 +3294,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     || kind == LastBearingEventKind.HotShiftStarted
                     || kind == LastBearingEventKind.HotShiftCheckpointReached
                     || kind == LastBearingEventKind.HotShiftCompleted
+                    || kind == LastBearingEventKind.WaterShiftStarted
+                    || kind ==
+                        LastBearingEventKind.WaterShiftCheckpointReached
+                    || kind == LastBearingEventKind.WaterShiftCompleted
                     || kind == LastBearingEventKind.EmergencyCisternPumped
                     || kind == LastBearingEventKind.EmergencyAidDelivered
                     || kind == LastBearingEventKind.DustFrontResolved

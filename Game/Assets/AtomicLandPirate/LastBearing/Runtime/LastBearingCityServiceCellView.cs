@@ -45,6 +45,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
         private GameObject? _dustFrontShutter;
         private GameObject? _completionWitnessA;
         private GameObject? _completionWitnessB;
+        private GameObject? _waterShiftReserveWitness;
+        private GameObject? _waterShiftCompletionWitness;
         private GameObject? _returnedRailRack;
         private float _hotShiftSledProgress = 1f;
         private bool _built;
@@ -110,6 +112,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
         public bool IsHotShiftCompletionWitnessVisible =>
             _completionWitnessA?.activeInHierarchy == true &&
             _completionWitnessB?.activeInHierarchy == true;
+
+        public bool IsWaterShiftCompletionWitnessVisible =>
+            _waterShiftCompletionWitness?.activeInHierarchy == true;
+
+        public bool IsWaterShiftReserveWitnessVisible =>
+            _waterShiftReserveWitness?.activeInHierarchy == true;
 
         public bool IsReturnedRailRackVisible =>
             _returnedRailRack?.activeInHierarchy == true;
@@ -238,6 +246,18 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 new Vector3(0.18f, 0.72f, 0.4f),
                 new Vector3(0.12f, 0.18f, 0.12f),
                 bone);
+            _waterShiftReserveWitness = CreateBlock(
+                "Water Shift Reserved Headroom Witness",
+                _emergencyStorage,
+                new Vector3(0f, 0.42f, -0.48f),
+                new Vector3(0.72f, 0.06f, 0.12f),
+                tungsten);
+            _waterShiftCompletionWitness = CreateBlock(
+                "Water Shift Emergency Storage Witness",
+                _emergencyStorage,
+                new Vector3(0f, 0.54f, -0.48f),
+                new Vector3(0.72f, 0.12f, 0.12f),
+                water);
             _returnedRailRack = CreateReturnedRailRack(
                 _machineShop,
                 iron,
@@ -300,6 +320,8 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _dustFrontShutter == null ||
                 _completionWitnessA == null ||
                 _completionWitnessB == null ||
+                _waterShiftReserveWitness == null ||
+                _waterShiftCompletionWitness == null ||
                 _returnedRailRack == null)
             {
                 return;
@@ -444,6 +466,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
             bool hasCompletedRun = model.HotShiftCompletedCount > 0;
             _completionWitnessA.SetActive(hasCompletedRun);
             _completionWitnessB.SetActive(hasCompletedRun);
+            _waterShiftReserveWitness.SetActive(
+                model.ActiveServiceWorkOrder ==
+                    ServiceWorkOrder.WaterShift);
+            _waterShiftCompletionWitness.SetActive(
+                model.WaterShiftCompletedCount > 0);
             _returnedRailRack.SetActive(
                 model.FrameRailSalvageCustody ==
                     FrameRailSalvageCustody.Credited &&

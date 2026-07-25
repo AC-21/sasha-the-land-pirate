@@ -699,6 +699,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 case LastBearingFieldDeskIntent.AdvanceCityServiceSled: _controller.AdvanceCityServiceSled(); break;
                 case LastBearingFieldDeskIntent.CancelCityBuildingPreview: _controller.CancelCityBuildingPreview(); break;
                 case LastBearingFieldDeskIntent.RunHotShift: _controller.StartHotShift(); break;
+                case LastBearingFieldDeskIntent.RunWaterShift:
+                    _controller.StartWaterShift();
+                    break;
                 case LastBearingFieldDeskIntent.AcknowledgeDustFront:
                     _controller.AcknowledgeDustFrontFallback();
                     break;

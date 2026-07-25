@@ -53,8 +53,18 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 LastBearingBalanceV1
                     .HotShiftWaterModifierMilliPerSettlementTick;
             HotShiftCompletedCount = state.HotShiftCompletedCount;
+            ActiveServiceWorkOrder = state.ActiveServiceWorkOrder;
+            WaterShiftCompletedCount = state.WaterShiftCompletedCount;
+            WaterShiftFuelCostUnits =
+                LastBearingBalanceV1.WaterShiftFuelCostUnits;
+            WaterShiftOutputWaterMilli =
+                LastBearingBalanceV1.WaterShiftOutputWaterMilli;
+            ServiceWorkOrderRouteFuelReserveUnits =
+                ServiceWorkOrderRouteFuelReserve(state);
             IsHotShiftRunAvailable =
                 ComputeHotShiftRunAvailable(state);
+            IsWaterShiftRunAvailable =
+                ComputeWaterShiftRunAvailable(state);
             EmergencyCisternCharged =
                 state.EmergencyCisternCharged;
             EmergencyCisternFuelCostUnits =
@@ -96,6 +106,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 state.PreparationRequiredTicks
                     - state.PreparationElapsedTicks);
             PlannedModule = state.PlannedModule;
+            ModuleInstallationState = state.ModuleInstallationState;
             VehicleModule = state.VehicleModule;
             RigUpgrade = state.RigUpgrade;
             PatchworkSkidPlatePartsCostUnits =
@@ -290,7 +301,17 @@ namespace AtomicLandPirate.Simulation.LastBearing
             private set;
         }
         public long HotShiftCompletedCount { get; private set; }
+        public ServiceWorkOrder ActiveServiceWorkOrder { get; private set; }
+        public long WaterShiftCompletedCount { get; private set; }
+        public long WaterShiftFuelCostUnits { get; private set; }
+        public long WaterShiftOutputWaterMilli { get; private set; }
+        public long ServiceWorkOrderRouteFuelReserveUnits
+        {
+            get;
+            private set;
+        }
         public bool IsHotShiftRunAvailable { get; private set; }
+        public bool IsWaterShiftRunAvailable { get; private set; }
         public bool IsHotShiftStalledByWorkshopPush { get; private set; }
         public bool IsHotShiftStalledByDustFront { get; private set; }
         public bool IsHotShiftActivelyWorking { get; private set; }
@@ -313,6 +334,11 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long PreparationRequiredTicks { get; private set; }
         public long PreparationRemainingTicks { get; private set; }
         public VehicleModule PlannedModule { get; private set; }
+        public ModuleInstallationState ModuleInstallationState
+        {
+            get;
+            private set;
+        }
         public VehicleModule VehicleModule { get; private set; }
         public RigUpgrade RigUpgrade { get; private set; }
         public long PatchworkSkidPlatePartsCostUnits { get; private set; }
@@ -473,6 +499,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 baseRate
                 + preparationWaterModifier
                 + (hotShiftActivelyWorking
+                    && state.ActiveServiceWorkOrder
+                        == ServiceWorkOrder.PartsShift
                     ? LastBearingBalanceV1
                         .HotShiftWaterModifierMilliPerSettlementTick
                     : 0)
@@ -481,6 +509,24 @@ namespace AtomicLandPirate.Simulation.LastBearing
         }
 
         private static bool ComputeHotShiftRunAvailable(
+            LastBearingState state)
+        {
+            return ComputeServiceWorkOrderRunAvailable(state);
+        }
+
+        private static bool ComputeWaterShiftRunAvailable(
+            LastBearingState state)
+        {
+            return ComputeServiceWorkOrderRunAvailable(state)
+                && state.WaterMilli
+                    <= checked(
+                        LastBearingBalanceV1.EffectiveWaterCapacityMilli(
+                            state.InstalledCityImprovement)
+                        - LastBearingBalanceV1
+                            .WaterShiftOutputWaterMilli);
+        }
+
+        private static bool ComputeServiceWorkOrderRunAvailable(
             LastBearingState state)
         {
             return state.SliceInfrastructureActive
@@ -494,8 +540,23 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 && state.FuelUnits
                     >= checked(
                         LastBearingBalanceV1.HotShiftFuelCostUnits
-                        + LastBearingBalanceV1.RouteFuelCost(
-                            state.PlannedModule));
+                        + ServiceWorkOrderRouteFuelReserve(state));
+        }
+
+        private static long ServiceWorkOrderRouteFuelReserve(
+            LastBearingState state)
+        {
+            if (state.PlannedModule == VehicleModule.None)
+            {
+                return 0;
+            }
+
+            return LastBearingRepeatExpedition.IsLineage(state)
+                    || LastBearingRepeatExpedition
+                        .CanLaunchFromCompletedReturn(state)
+                ? LastBearingRepeatExpedition.FuelCost(state)
+                : LastBearingBalanceV1.RouteFuelCost(
+                    state.PlannedModule);
         }
 
         private static bool ComputeEmergencyCisternPumpAvailable(
@@ -1100,7 +1161,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
         {
             return state.FactionAidPolicy
                     == FactionAidPolicy.EmergencyWaterQueued
-                && HasExactEmergencyAidLineage(state);
+                && HasExactEmergencyAidLineage(state)
+                && WaterTransferPreservesReservedHeadroom(
+                    state,
+                    state.EmergencyAidWaterMilli);
         }
 
         private static bool ComputeEmergencyAidReceptionComplete(
@@ -1180,6 +1244,26 @@ namespace AtomicLandPirate.Simulation.LastBearing
                     state.FactionMemory.ConsequenceCode,
                     "FIELD_SLEEVE_SERVICE",
                     StringComparison.Ordinal);
+        }
+
+        private static bool WaterTransferPreservesReservedHeadroom(
+            LastBearingState state,
+            long transferWaterMilli)
+        {
+            if (transferWaterMilli <= 0
+                || state.HotShiftPhase != HotShiftPhase.InProgress
+                || state.ActiveServiceWorkOrder
+                    != ServiceWorkOrder.WaterShift)
+            {
+                return true;
+            }
+
+            long ceiling = checked(
+                LastBearingBalanceV1.EffectiveWaterCapacityMilli(
+                    state.InstalledCityImprovement)
+                - LastBearingBalanceV1.WaterShiftOutputWaterMilli);
+            return state.WaterMilli <= ceiling
+                && transferWaterMilli <= ceiling - state.WaterMilli;
         }
 
         private static bool ComputeDepotApproachRecoveryAvailable(

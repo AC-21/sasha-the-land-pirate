@@ -488,6 +488,210 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
         }
 
         [UnityTest]
+        public IEnumerator WaterShiftPhysicalControlSurvivesModeCyclesAndCompletes()
+        {
+            yield return BootController();
+            LastBearingGameController controller = _controller!;
+            LastBearingState source = PrepareControllerForHotShift(
+                controller,
+                ColonyComposition.Mixed,
+                PreparationChoice.CivicBuffer);
+            LastBearingCityServiceCellView view =
+                controller.World!.CityServiceCellView!;
+            LastBearingCityServiceCellInteractor interactor =
+                view.Interactor!;
+            string profileDirectory = Path.Combine(
+                _temporarySaveRoots.Single(),
+                LastBearingProfileContract.ProfileName);
+            long sourceParts = controller.ReadModel!.PartsUnits;
+            long sourceFuel = controller.ReadModel.FuelUnits;
+            string sourceHash = controller.CanonicalHash;
+
+            ActivateWorldTarget(
+                controller,
+                interactor,
+                LastBearingCityServiceCellInteractor
+                    .WaterShiftMachineControlName);
+            AssertSingleWaterShiftCommand(controller);
+            AssertPreTickUnchanged(
+                controller,
+                sourceHash,
+                sourceFuel);
+
+            interactor.ResetLocalSelection();
+            InstallControllerState(controller, source);
+            Assert.That(interactor.IsHotShiftControlFocused, Is.True);
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Press(keyboard.digit2Key);
+            InvokeInteractorUpdate(interactor);
+            Release(keyboard.digit2Key);
+            Assert.That(interactor.IsWaterShiftControlFocused, Is.True);
+            Assert.That(PendingCommands(controller), Is.Empty);
+            Press(keyboard.enterKey);
+            InvokeInteractorUpdate(interactor);
+            Release(keyboard.enterKey);
+            AssertSingleWaterShiftCommand(controller);
+            AssertPreTickUnchanged(
+                controller,
+                sourceHash,
+                sourceFuel);
+
+            interactor.ResetLocalSelection();
+            InstallControllerState(controller, source);
+            Assert.That(interactor.IsHotShiftControlFocused, Is.True);
+            Gamepad gamepad = InputSystem.AddDevice<Gamepad>();
+            Press(gamepad.dpad.right);
+            InvokeInteractorUpdate(interactor);
+            Release(gamepad.dpad.right);
+            Assert.That(interactor.IsWaterShiftControlFocused, Is.True);
+            Assert.That(PendingCommands(controller), Is.Empty);
+            Press(gamepad.buttonSouth);
+            InvokeInteractorUpdate(interactor);
+            Release(gamepad.buttonSouth);
+            AssertSingleWaterShiftCommand(controller);
+            AssertPreTickUnchanged(
+                controller,
+                sourceHash,
+                sourceFuel);
+
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.ActiveServiceWorkOrder,
+                Is.EqualTo(ServiceWorkOrder.WaterShift));
+            Assert.That(
+                controller.ReadModel.FuelUnits,
+                Is.EqualTo(
+                    sourceFuel -
+                    LastBearingBalanceV1.WaterShiftFuelCostUnits));
+            Assert.That(controller.ReadModel.HotShiftElapsedTicks, Is.Zero);
+            Assert.That(view.IsHotShiftSpindleMoving, Is.True);
+            Assert.That(view.IsHotShiftWorkPoolVisible, Is.True);
+            Assert.That(view.IsWaterShiftReserveWitnessVisible, Is.True);
+            Assert.That(view.IsWaterShiftCompletionWitnessVisible, Is.False);
+            Assert.That(view.IsHotShiftCompletionWitnessVisible, Is.False);
+            Assert.That(
+                view.IsHumanOperatorVisible ||
+                view.IsRobotOperatorVisible,
+                Is.True);
+
+            for (var cycle = 0; cycle < 3; cycle++)
+            {
+                string cycleHash = controller.CanonicalHash;
+                long cycleProgress =
+                    controller.ReadModel.HotShiftElapsedTicks;
+                long cycleFuel = controller.ReadModel.FuelUnits;
+                controller.OpenGarageBay();
+                Assert.That(
+                    interactor.IsWaterShiftControlVisible,
+                    Is.False);
+                controller.ShowCityOverview();
+                yield return null;
+                Assert.That(
+                    interactor.IsWaterShiftControlVisible,
+                    Is.True);
+                Assert.That(
+                    interactor.IsWaterShiftControlFocused,
+                    Is.True);
+                Assert.That(controller.CanonicalHash, Is.EqualTo(cycleHash));
+                Assert.That(
+                    controller.ReadModel.ActiveServiceWorkOrder,
+                    Is.EqualTo(ServiceWorkOrder.WaterShift));
+                Assert.That(
+                    controller.ReadModel.HotShiftElapsedTicks,
+                    Is.EqualTo(cycleProgress));
+                Assert.That(
+                    controller.ReadModel.FuelUnits,
+                    Is.EqualTo(cycleFuel));
+                Assert.That(
+                    UnityEngine.Object.FindObjectsByType<Camera>(
+                        FindObjectsInactive.Include),
+                    Has.Length.EqualTo(1));
+                Assert.That(
+                    UnityEngine.Object.FindObjectsByType<AudioListener>(
+                        FindObjectsInactive.Include),
+                    Has.Length.EqualTo(1));
+            }
+
+            while (controller.ReadModel.HotShiftElapsedTicks < 59)
+            {
+                InvokeSimulationTick(controller);
+            }
+
+            Assert.That(
+                controller.ReadModel.HotShiftElapsedTicks,
+                Is.EqualTo(59));
+            string hashBeforeCheckpoint = controller.CanonicalHash;
+            InvokeSimulationTick(controller);
+            Assert.That(
+                controller.ReadModel.HotShiftElapsedTicks,
+                Is.EqualTo(60));
+            Assert.That(
+                controller.CanonicalHash,
+                Is.Not.EqualTo(hashBeforeCheckpoint));
+            Assert.That(
+                controller.Status,
+                Does.Contain("Water Shift checkpoint: 60 / 120"));
+            string checkpointHash = controller.CanonicalHash;
+            Assert.That(
+                controller.SaveStatus,
+                Does.Contain(checkpointHash.Substring(0, 12)));
+            Assert.That(Directory.Exists(profileDirectory), Is.True);
+            Assert.That(
+                Directory.GetFiles(profileDirectory, "gen-*.lbg"),
+                Is.Not.Empty);
+
+            controller.ReturnToTitle();
+            controller.Load();
+            yield return null;
+            Assert.That(controller.CanonicalHash, Is.EqualTo(checkpointHash));
+            Assert.That(
+                controller.ReadModel!.ActiveServiceWorkOrder,
+                Is.EqualTo(ServiceWorkOrder.WaterShift));
+            Assert.That(
+                controller.ReadModel.HotShiftElapsedTicks,
+                Is.EqualTo(60));
+            Assert.That(
+                controller.ReadModel.WaterShiftCompletedCount,
+                Is.Zero);
+            Assert.That(
+                controller.ReadModel.FuelUnits,
+                Is.EqualTo(
+                    sourceFuel -
+                    LastBearingBalanceV1.WaterShiftFuelCostUnits));
+            Assert.That(view.IsWaterShiftReserveWitnessVisible, Is.True);
+            Assert.That(view.IsWaterShiftCompletionWitnessVisible, Is.False);
+            Assert.That(interactor.IsWaterShiftControlFocused, Is.True);
+
+            var guard = 0;
+            while (controller.ReadModel.HotShiftPhase ==
+                       HotShiftPhase.InProgress &&
+                   guard <
+                       LastBearingBalanceV1
+                           .HotShiftRequiredSettlementTicks + 2)
+            {
+                InvokeSimulationTick(controller);
+                guard++;
+            }
+
+            Assert.That(
+                controller.ReadModel.ActiveServiceWorkOrder,
+                Is.EqualTo(ServiceWorkOrder.None));
+            Assert.That(
+                controller.ReadModel.WaterShiftCompletedCount,
+                Is.EqualTo(1));
+            Assert.That(controller.ReadModel.PartsUnits, Is.EqualTo(sourceParts));
+            Assert.That(view.IsHotShiftSpindleMoving, Is.False);
+            Assert.That(view.IsHotShiftWorkPoolVisible, Is.False);
+            Assert.That(view.IsWaterShiftReserveWitnessVisible, Is.False);
+            Assert.That(view.IsWaterShiftCompletionWitnessVisible, Is.True);
+            Assert.That(view.IsHotShiftCompletionWitnessVisible, Is.False);
+            string completionHash = controller.CanonicalHash;
+            Assert.That(
+                controller.SaveStatus,
+                Does.Contain(completionHash.Substring(0, 12)));
+        }
+
+        [UnityTest]
         public IEnumerator ColonyOperatorsActiveSaveLoadAndCompletionReproject()
         {
             yield return BootController();
@@ -887,6 +1091,15 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(controller.IsHotShiftStartQueued, Is.True);
         }
 
+        private static void AssertSingleWaterShiftCommand(
+            LastBearingGameController controller)
+        {
+            LastBearingCommand[] commands = PendingCommands(controller);
+            Assert.That(commands, Has.Length.EqualTo(1));
+            Assert.That(commands[0], Is.TypeOf<RunWaterShiftCommand>());
+            Assert.That(controller.IsWaterShiftStartQueued, Is.True);
+        }
+
         private static void AssertPreTickUnchanged(
             LastBearingGameController controller,
             string expectedHash,
@@ -904,12 +1117,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
         private static void ActivateWorldTarget(
             LastBearingGameController controller,
-            LastBearingCityServiceCellInteractor interactor)
+            LastBearingCityServiceCellInteractor interactor,
+            string targetName =
+                LastBearingCityServiceCellInteractor
+                    .HotShiftMachineControlName)
         {
             Transform target = RequireNamed(
                 interactor.transform,
-                LastBearingCityServiceCellInteractor
-                    .HotShiftMachineControlName);
+                targetName);
             Vector3 screen =
                 controller.World!.MainCamera!.WorldToScreenPoint(
                     target.position);

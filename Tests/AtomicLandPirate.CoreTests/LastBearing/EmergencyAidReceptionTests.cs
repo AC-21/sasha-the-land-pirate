@@ -17,6 +17,9 @@ namespace AtomicLandPirate.LastBearingTests
                 "water tender receipt credits and clamps exact authored aid",
                 ReceiptCreditsAndClampsExactAid);
             harness.Run(
+                "active Water Shift preserves reserved tender headroom atomically",
+                ActiveWaterShiftRejectsTenderThatWouldConsumeReservedHeadroom);
+            harness.Run(
                 "water tender works before or after a city improvement",
                 ReceiptOrderIsIndependentOfCityImprovement);
             harness.Run(
@@ -159,6 +162,69 @@ namespace AtomicLandPirate.LastBearingTests
                 clampedResult.DomainEvents[0].AfterValue
                     - clampedResult.DomainEvents[0].BeforeValue,
                 "credited clamped quantity");
+        }
+
+        private static void
+            ActiveWaterShiftRejectsTenderThatWouldConsumeReservedHeadroom()
+        {
+            CoreTestDriver ready = ReachReceptionReady(
+                ColonyComposition.Mixed,
+                ResidentRoster.HumanResidentId,
+                PreparationChoice.CivicBuffer,
+                VehicleModule.WinchAssembly,
+                3230);
+            ready.Apply(sequence => new SetPauseCommand(sequence, true));
+            long reservedCeiling = checked(
+                ready.View.WaterCapacityMilli
+                - LastBearingBalanceV1.WaterShiftOutputWaterMilli);
+            var driver = new CoreTestDriver(
+                new LastBearingStateBuilder(ready.State)
+                {
+                    WaterMilli = checked(
+                        reservedCeiling
+                        - (LastBearingBalanceV1.CooperateAidWaterMilli / 2)),
+                }.Build());
+            driver.Apply(sequence =>
+                new RunWaterShiftCommand(
+                    sequence,
+                    driver.State.WaterShiftCompletedCount));
+
+            TestHarness.Equal(
+                ServiceWorkOrder.WaterShift,
+                driver.State.ActiveServiceWorkOrder,
+                "reserved tender active order");
+            TestHarness.Equal(
+                FactionAidPolicy.EmergencyWaterQueued,
+                driver.State.FactionAidPolicy,
+                "reserved tender queued policy");
+            TestHarness.True(
+                !driver.View.IsEmergencyAidReceptionAvailable,
+                "reserved tender remained available");
+
+            long waterBefore = driver.State.WaterMilli;
+            byte[] canonicalBefore =
+                LastBearingCanonicalCodec.Encode(driver.State);
+            InvalidOperationException error =
+                TestHarness.Throws<InvalidOperationException>(
+                    () => driver.Apply(sequence =>
+                        new ReceiveEmergencyAidCommand(sequence)),
+                    "reserved tender receipt was accepted");
+            TestHarness.Equal(
+                "LAST_BEARING_EMERGENCY_AID_WATER_SHIFT_HEADROOM_RESERVED",
+                error.Message,
+                "reserved tender rejection code");
+            TestHarness.Equal(
+                waterBefore,
+                driver.State.WaterMilli,
+                "reserved tender changed water");
+            TestHarness.Equal(
+                FactionAidPolicy.EmergencyWaterQueued,
+                driver.State.FactionAidPolicy,
+                "reserved tender consumed aid policy");
+            TestHarness.True(
+                canonicalBefore.SequenceEqual(
+                    LastBearingCanonicalCodec.Encode(driver.State)),
+                "reserved tender changed canonical state");
         }
 
         private static void ReceiptOrderIsIndependentOfCityImprovement()
@@ -600,7 +666,7 @@ namespace AtomicLandPirate.LastBearingTests
             string label)
         {
             TestHarness.Equal(
-                10,
+                11,
                 LastBearingState.CurrentSchemaVersion,
                 label + " current schema constant");
             TestHarness.Equal(

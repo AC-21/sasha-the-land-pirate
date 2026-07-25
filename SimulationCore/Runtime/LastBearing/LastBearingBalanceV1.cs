@@ -33,8 +33,15 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public const long HotShiftCheckpointSettlementTick = 60;
         public const long HotShiftOutputPartsUnits = 2;
         public const long HotShiftWaterModifierMilliPerSettlementTick = -10;
+        public const long WaterShiftFuelCostUnits = HotShiftFuelCostUnits;
+        public const long WaterShiftRequiredSettlementTicks =
+            HotShiftRequiredSettlementTicks;
+        public const long WaterShiftCheckpointSettlementTick =
+            HotShiftCheckpointSettlementTick;
         public const long EmergencyCisternFuelCostUnits = 1;
         public const long EmergencyCisternWaterMilli = 10000;
+        public const long WaterShiftOutputWaterMilli =
+            EmergencyCisternWaterMilli;
 
         public const long FailingWaterRateMilliPerSettlementTick = -10;
         public const long BearingRepairRateMilliPerSettlementTick = 30;

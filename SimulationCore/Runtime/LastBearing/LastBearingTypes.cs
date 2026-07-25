@@ -278,6 +278,13 @@ namespace AtomicLandPirate.Simulation.LastBearing
         InProgress = 1,
     }
 
+    public enum ServiceWorkOrder
+    {
+        None = 0,
+        PartsShift = 1,
+        WaterShift = 2,
+    }
+
     public enum DustFrontOutcome
     {
         Unresolved = 0,
@@ -347,6 +354,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
         DustFrontAcknowledged = 58,
         EmergencyCisternPumped = 59,
         ReturnedRailChassisBraceInstalled = 60,
+        WaterShiftStarted = 61,
+        WaterShiftCompleted = 62,
+        WaterShiftCheckpointReached = 63,
     }
 
     public enum LastBearingEventCause

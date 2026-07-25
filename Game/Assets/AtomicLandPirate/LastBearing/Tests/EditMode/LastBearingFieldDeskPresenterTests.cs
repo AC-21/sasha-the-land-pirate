@@ -374,6 +374,95 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
         [TestCase(PreparationChoice.CivicBuffer)]
         [TestCase(PreparationChoice.WorkshopPush)]
+        public void WaterShiftIsASeparateTruthfulDeskAndMachineOrder(
+            PreparationChoice preparation)
+        {
+            LastBearingGameController controller =
+                BuildController(ColonyComposition.Mixed);
+            PrepareForHotShift(controller, preparation);
+            LastBearingFieldDeskProjection available =
+                LastBearingFieldDeskPresenter.Present(controller);
+            LastBearingCityServiceCellView view =
+                controller.World!.CityServiceCellView!;
+            LastBearingCityServiceCellInteractor interactor =
+                view.Interactor!;
+
+            Assert.That(
+                available.SecondaryAction.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.RunHotShift));
+            Assert.That(
+                available.Survey.ConnectLink.Intent,
+                Is.EqualTo(LastBearingFieldDeskIntent.RunWaterShift));
+            Assert.That(
+                available.Survey.ConnectLink.Label,
+                Is.EqualTo(
+                    "RUN WATER SHIFT · 1 FUEL · 120 TICKS · +10.000 WATER · NO PARTS"));
+            Assert.That(
+                available.Survey.ConnectLink.Detail,
+                Does.Contain("gross +10.000 water"));
+            Assert.That(
+                available.Survey.ConnectLink.Detail,
+                Does.Contain("ordinary city water use continues"));
+            Assert.That(available.Survey.ConnectLink.IsEnabled, Is.True);
+            Assert.That(
+                LastBearingFieldDeskPresenter.IsIntentAvailable(
+                    controller,
+                    LastBearingFieldDeskIntent.RunWaterShift),
+                Is.True);
+            Assert.That(interactor.IsHotShiftControlVisible, Is.True);
+            Assert.That(interactor.IsWaterShiftControlVisible, Is.True);
+            Assert.That(view.IsWaterShiftReserveWitnessVisible, Is.False);
+            Assert.That(view.IsWaterShiftCompletionWitnessVisible, Is.False);
+
+            string canonicalBefore = controller.CanonicalHash;
+            controller.StartWaterShift();
+            LastBearingCommand[] pending = PendingCommands(controller);
+            Assert.That(pending, Has.Length.EqualTo(1));
+            Assert.That(pending[0], Is.TypeOf<RunWaterShiftCommand>());
+            Assert.That(
+                ((RunWaterShiftCommand)pending[0]).ExpectedCompletedCount,
+                Is.Zero);
+            Assert.That(controller.CanonicalHash, Is.EqualTo(canonicalBefore));
+
+            controller.StartWaterShift();
+            Assert.That(PendingCommands(controller), Has.Length.EqualTo(1));
+            SimulateOneTick(controller);
+
+            Assert.That(
+                controller.ReadModel!.ActiveServiceWorkOrder,
+                Is.EqualTo(ServiceWorkOrder.WaterShift));
+            Assert.That(view.IsHotShiftSpindleMoving, Is.True);
+            Assert.That(view.IsHotShiftWorkPoolVisible, Is.True);
+            Assert.That(view.IsHotShiftCompletionWitnessVisible, Is.False);
+            Assert.That(view.IsWaterShiftReserveWitnessVisible, Is.True);
+            Assert.That(view.IsWaterShiftCompletionWitnessVisible, Is.False);
+            LastBearingFieldDeskProjection active =
+                LastBearingFieldDeskPresenter.Present(controller);
+            Assert.That(
+                active.SecondaryAction.Label,
+                Is.EqualTo("PARTS SHIFT · WATER OWNS CELL"));
+            Assert.That(active.SecondaryAction.IsEnabled, Is.False);
+            Assert.That(
+                active.Survey.ConnectLink.Label,
+                Does.StartWith("WATER SHIFT · "));
+            Assert.That(active.Survey.ConnectLink.IsEnabled, Is.False);
+
+            controller.TogglePause();
+            SimulateOneTick(controller);
+            Assert.That(view.IsHotShiftSpindleMoving, Is.False);
+            Assert.That(
+                LastBearingFieldDeskPresenter.Present(controller)
+                    .Survey.ConnectLink.Label,
+                Does.StartWith("WATER SHIFT · PAUSED · "));
+            interactor.FocusWaterShiftControl();
+            Assert.That(interactor.IsWaterShiftControlFocused, Is.True);
+            Assert.That(
+                interactor.WaterShiftMachineLabel,
+                Does.StartWith("WATER SHIFT PAUSED"));
+        }
+
+        [TestCase(PreparationChoice.CivicBuffer)]
+        [TestCase(PreparationChoice.WorkshopPush)]
         public void PausedPreparationCopyNamesClockAndSlotOwnership(
             PreparationChoice preparation)
         {

@@ -6,7 +6,7 @@ namespace AtomicLandPirate.Simulation.LastBearing
 {
     public sealed class LastBearingState
     {
-        public const int CurrentSchemaVersion = 10;
+        public const int CurrentSchemaVersion = 11;
         public const int CityConstructionPadCount = 5;
         public const int UnplacedCityPadIndex = -1;
         public const string SashaProtagonistId = "sasha";
@@ -49,6 +49,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             "city:last-bearing:delivery:parts-batch:0001";
         public const string HotShiftId =
             "city:last-bearing:production:hot-shift";
+        public const string WaterShiftId =
+            "city:last-bearing:production:water-shift";
         public const string EmergencyCisternId =
             "city:last-bearing:storage:emergency-cistern";
         public const string DustFrontId =
@@ -105,6 +107,9 @@ namespace AtomicLandPirate.Simulation.LastBearing
             HotShiftFuelCommittedUnits =
                 builder.HotShiftFuelCommittedUnits;
             HotShiftCompletedCount = builder.HotShiftCompletedCount;
+            ActiveServiceWorkOrder = builder.ActiveServiceWorkOrder;
+            WaterShiftCompletedCount =
+                builder.WaterShiftCompletedCount;
             EmergencyCisternCharged = builder.EmergencyCisternCharged;
 
             WaterMilli = builder.WaterMilli;
@@ -265,6 +270,10 @@ namespace AtomicLandPirate.Simulation.LastBearing
         public long HotShiftFuelCommittedUnits { get; private set; }
 
         public long HotShiftCompletedCount { get; private set; }
+
+        public ServiceWorkOrder ActiveServiceWorkOrder { get; private set; }
+
+        public long WaterShiftCompletedCount { get; private set; }
 
         public bool EmergencyCisternCharged { get; private set; }
 
@@ -486,6 +495,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
             HotShiftFuelCommittedUnits =
                 state.HotShiftFuelCommittedUnits;
             HotShiftCompletedCount = state.HotShiftCompletedCount;
+            ActiveServiceWorkOrder = state.ActiveServiceWorkOrder;
+            WaterShiftCompletedCount = state.WaterShiftCompletedCount;
             EmergencyCisternCharged = state.EmergencyCisternCharged;
             WaterMilli = state.WaterMilli;
             PartsUnits = state.PartsUnits;
@@ -605,6 +616,8 @@ namespace AtomicLandPirate.Simulation.LastBearing
         internal long HotShiftRequiredTicks;
         internal long HotShiftFuelCommittedUnits;
         internal long HotShiftCompletedCount;
+        internal ServiceWorkOrder ActiveServiceWorkOrder;
+        internal long WaterShiftCompletedCount;
         internal bool EmergencyCisternCharged;
         internal long WaterMilli;
         internal long PartsUnits;
