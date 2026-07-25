@@ -409,8 +409,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 model.PreparationChoice == PreparationChoice.WorkshopPush &&
                 model.PreparationPhase == PreparationPhase.Preparing &&
                 !model.IsPreparationStalledByHotShift;
+            bool assignedResidentIsAway =
+                model.ExpeditionPhase != ExpeditionPhase.AtHome &&
+                model.AssignedResidentId != null &&
+                string.Equals(
+                    model.CityServiceResidentId,
+                    model.AssignedResidentId,
+                    StringComparison.Ordinal);
             bool operatorAtMachine =
-                !workshopPushOwnsServiceSlot;
+                !workshopPushOwnsServiceSlot &&
+                !assignedResidentIsAway;
             _humanOperator.SetActive(humanAssigned && operatorAtMachine);
             _robotOperator.SetActive(robotAssigned && operatorAtMachine);
             if (IsValidPad(model.MachineShopPadIndex))

@@ -888,7 +888,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetReturnedRailChassisBraceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
             _world?.ResetFuelBondInteraction();
-            _world?.ApplyGarageRoadHand(null);
+            _world?.ApplyRoadHand(null, ExpeditionPhase.AtHome);
             _state = null;
             _readModel = null;
             ResetPublicSnapshotsToRuntime();
@@ -3105,7 +3105,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 IsGaragePlanIntentActive
                     ? _garagePreparationIntent
                     : _readModel.PreparationChoice);
-            _world.ApplyGarageRoadHand(_readModel.AssignedResidentId);
+            _world.ApplyRoadHand(
+                _readModel.AssignedResidentId,
+                _readModel.ExpeditionPhase);
             _modeCoordinator?.ApplyCanonical(_readModel);
             _world.ApplyRoadSafeLine(
                 _readModel,

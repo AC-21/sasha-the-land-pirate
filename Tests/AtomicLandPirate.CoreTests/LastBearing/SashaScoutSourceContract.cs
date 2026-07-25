@@ -56,8 +56,11 @@ namespace AtomicLandPirate.LastBearingTests
                          "SOCKET_CARGO_02",
                          "SOCKET_TOOL_DEPLOY",
                          "SOCKET_DRIVER_CAMERA",
+                         "SOCKET_ROAD_HAND",
                          "MODULE_WINCH_ASSEMBLY",
                          "MODULE_SEALED_RANGE_TANK",
+                         "ROAD_HAND_HUMAN",
+                         "ROAD_HAND_UTILITY_ROBOT",
                          "UPGRADE_PATCHWORK_SKID_PLATE",
                          "new Vector3(-1.12f, 0.62f, 1.55f)",
                          "new Vector3(1.12f, 0.62f, 1.55f)",
@@ -74,6 +77,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(visual, "RangeTankModuleRoot");
             Require(visual, "PatchworkSkidPlateUpgradeRoot");
             Require(visual, "IsPatchworkSkidPlateVisible");
+            Require(visual, "SashaScoutRoadHandPresentation");
+            Require(visual, "HumanRoadHandRoot");
+            Require(visual, "UtilityRobotRoadHandRoot");
+            Require(visual, "ApplyRoadHand");
             Require(visual, "ApplyModule");
             Require(visual, "ApplyUpgrade");
             Require(visual, "SetFrontSteering");
@@ -87,6 +94,10 @@ namespace AtomicLandPirate.LastBearingTests
             Require(factory, "SKID_PLATE_AFT");
             Require(factory, "SKID_BRACE_LEFT");
             Require(factory, "SKID_BRACE_RIGHT");
+            Require(factory, "BuildRoadHandPresentations");
+            Require(factory, "CreateColliderFreeCube");
+            Require(factory, "HUMAN_TUNGSTEN_CAP");
+            Require(factory, "ROBOT_ROAD_SIGNAL_EYE");
             Require(factory, "collider.enabled = false");
             Require(factory, "collision.AddComponent<BoxCollider>()");
             TestHarness.True(
@@ -147,13 +158,44 @@ namespace AtomicLandPirate.LastBearingTests
             Require(world, "GarageBayView?.ApplyPreparationProgress(");
             Require(
                 world,
-                "public void ApplyGarageRoadHand(string? assignedResidentId)");
+                "public void ApplyRoadHand(");
             Require(
                 world,
                 "GarageBayView?.ApplyRoadHandManifest(manifest)");
             Require(
                 controller,
-                "_world.ApplyGarageRoadHand(_readModel.AssignedResidentId)");
+                "_world.ApplyRoadHand(");
+            Require(
+                controller,
+                "_readModel.ExpeditionPhase);");
+            Require(
+                world,
+                "VehicleView?.ScoutVisual?.ApplyRoadHand(occupant)");
+            Require(
+                world,
+                "RoadFeelRig?.ScoutVisual.ApplyRoadHand(occupant)");
+            string roadHandPresentation = Segment(
+                world,
+                "public void ApplyRoadHand(",
+                "public void ApplyRigUpgrade(RigUpgrade upgrade)");
+            foreach (string forbidden in new[]
+                     {
+                         "LastBearingState",
+                         "LastBearingKernel",
+                         "LastBearingCommand",
+                         "LastBearingCanonicalCodec",
+                         "Rigidbody",
+                         "Physics.",
+                         "Save(",
+                     })
+            {
+                TestHarness.True(
+                    roadHandPresentation.IndexOf(
+                        forbidden,
+                        StringComparison.Ordinal) < 0,
+                    "road-hand presentation contains forbidden authority " +
+                    forbidden);
+            }
             string upgradePresentation = Segment(
                 world,
                 "public void ApplyRigUpgrade(RigUpgrade upgrade)",

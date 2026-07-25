@@ -74,6 +74,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 staticVisual.FindSocket(
                     SashaScoutSemanticContract.DriverCameraSocketName),
                 Is.Not.Null);
+            Assert.That(
+                staticVisual.FindSocket(
+                    SashaScoutSemanticContract.RoadHandSocketName),
+                Is.Not.Null);
 
             Transform[] contacts = roadVisual.CopyContactStations();
             Assert.That(contacts, Has.Length.EqualTo(4));
@@ -107,8 +111,20 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                      roadVisual.GetComponentsInChildren<Renderer>(true))
             {
                 Collider? collider = renderer.GetComponent<Collider>();
-                Assert.That(collider, Is.Not.Null, renderer.name);
-                Assert.That(collider!.enabled, Is.False, renderer.name);
+                bool isRoadHand =
+                    renderer.transform.IsChildOf(
+                        roadVisual.HumanRoadHandRoot) ||
+                    renderer.transform.IsChildOf(
+                        roadVisual.UtilityRobotRoadHandRoot);
+                if (isRoadHand)
+                {
+                    Assert.That(collider, Is.Null, renderer.name);
+                }
+                else
+                {
+                    Assert.That(collider, Is.Not.Null, renderer.name);
+                    Assert.That(collider!.enabled, Is.False, renderer.name);
+                }
             }
         }
 
@@ -431,6 +447,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
 
             controller.AssignRoadHand(stableId);
             string canonicalAfterChoice = controller.CanonicalHash;
+            SashaScoutRoadHandPresentation expectedOccupant =
+                expected == GarageRoadHandManifestPresentation.Human
+                    ? SashaScoutRoadHandPresentation.Human
+                    : SashaScoutRoadHandPresentation.UtilityRobot;
+            SashaScoutVisual canonicalScout =
+                controller.World.VehicleView!.ScoutVisual!;
+            SashaScoutVisual roadScout =
+                controller.World.RoadFeelRig!.ScoutVisual;
 
             Assert.That(
                 garage.ActiveRoadHandManifest,
@@ -445,7 +469,47 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 Is.EqualTo(
                     expected ==
                     GarageRoadHandManifestPresentation.UtilityRobot));
-            controller.World.ApplyGarageRoadHand(stableId);
+            AssertRoadHandPresentation(
+                canonicalScout,
+                SashaScoutRoadHandPresentation.None);
+            AssertRoadHandPresentation(
+                roadScout,
+                SashaScoutRoadHandPresentation.None);
+
+            Transform canonicalHuman = canonicalScout.HumanRoadHandRoot!;
+            Transform canonicalRobot = canonicalScout.UtilityRobotRoadHandRoot!;
+            Transform roadHuman = roadScout.HumanRoadHandRoot!;
+            Transform roadRobot = roadScout.UtilityRobotRoadHandRoot!;
+            foreach (ExpeditionPhase awayPhase in new[]
+                     {
+                         ExpeditionPhase.Outbound,
+                         ExpeditionPhase.AtDepot,
+                         ExpeditionPhase.Returning,
+                         ExpeditionPhase.Returned,
+                     })
+            {
+                controller.World.ApplyRoadHand(stableId, awayPhase);
+                AssertRoadHandPresentation(canonicalScout, expectedOccupant);
+                AssertRoadHandPresentation(roadScout, expectedOccupant);
+                Assert.That(
+                    garage.ActiveRoadHandManifest,
+                    Is.EqualTo(expected));
+                Assert.That(
+                    controller.CanonicalHash,
+                    Is.EqualTo(canonicalAfterChoice));
+            }
+
+            Assert.That(canonicalScout.HumanRoadHandRoot, Is.SameAs(canonicalHuman));
+            Assert.That(canonicalScout.UtilityRobotRoadHandRoot, Is.SameAs(canonicalRobot));
+            Assert.That(roadScout.HumanRoadHandRoot, Is.SameAs(roadHuman));
+            Assert.That(roadScout.UtilityRobotRoadHandRoot, Is.SameAs(roadRobot));
+            controller.World.ApplyRoadHand(stableId, ExpeditionPhase.AtHome);
+            AssertRoadHandPresentation(
+                canonicalScout,
+                SashaScoutRoadHandPresentation.None);
+            AssertRoadHandPresentation(
+                roadScout,
+                SashaScoutRoadHandPresentation.None);
             Assert.That(
                 controller.CanonicalHash,
                 Is.EqualTo(canonicalAfterChoice));
@@ -454,6 +518,75 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 garage.ActiveRoadHandManifest,
                 Is.EqualTo(GarageRoadHandManifestPresentation.None));
+        }
+
+        [Test]
+        public void MatchingCityOperatorLeavesForRoadDutyAndReturnsHome()
+        {
+            _root = new GameObject(LastBearingGameController.RuntimeRootName);
+            var controller = _root.AddComponent<LastBearingGameController>();
+            controller.Initialize();
+            PrepareControllerForGaragePlan(controller);
+            LastBearingCityServiceCellView serviceCell =
+                controller.World!.CityServiceCellView!;
+            LastBearingState atHome = ReadyState(
+                controller.State!,
+                VehicleModule.WinchAssembly);
+            LastBearingReadModel homeModel =
+                LastBearingReadModel.FromState(atHome);
+
+            Assert.That(
+                homeModel.CityServiceResidentId,
+                Is.EqualTo(homeModel.AssignedResidentId));
+            serviceCell.Apply(
+                homeModel,
+                CityBuildingKind.None,
+                LastBearingState.UnplacedCityPadIndex,
+                0,
+                previewActive: false);
+            Assert.That(serviceCell.IsHumanOperatorVisible, Is.True);
+            Assert.That(serviceCell.IsRobotOperatorVisible, Is.False);
+
+            LastBearingState outbound = Depart(atHome);
+            serviceCell.Apply(
+                LastBearingReadModel.FromState(outbound),
+                CityBuildingKind.None,
+                LastBearingState.UnplacedCityPadIndex,
+                0,
+                previewActive: false);
+            Assert.That(serviceCell.IsHumanOperatorVisible, Is.False);
+            Assert.That(serviceCell.IsRobotOperatorVisible, Is.False);
+
+            serviceCell.Apply(
+                homeModel,
+                CityBuildingKind.None,
+                LastBearingState.UnplacedCityPadIndex,
+                0,
+                previewActive: false);
+            Assert.That(serviceCell.IsHumanOperatorVisible, Is.True);
+
+            var kernel = new LastBearingKernel();
+            LastBearingState robotAtMachine = Apply(
+                kernel,
+                controller.State!,
+                sequence => new AssignCityServiceResidentCommand(
+                    sequence,
+                    ResidentRoster.RobotResidentId));
+            robotAtMachine = ReadyState(
+                robotAtMachine,
+                VehicleModule.WinchAssembly);
+            LastBearingState humanAway = Depart(robotAtMachine);
+            serviceCell.Apply(
+                LastBearingReadModel.FromState(humanAway),
+                CityBuildingKind.None,
+                LastBearingState.UnplacedCityPadIndex,
+                0,
+                previewActive: false);
+            Assert.That(serviceCell.IsHumanOperatorVisible, Is.False);
+            Assert.That(
+                serviceCell.IsRobotOperatorVisible,
+                Is.True,
+                "a different resident assigned to the city machine must not disappear with Sasha's road hand");
         }
 
         [Test]
@@ -645,6 +778,120 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 controller.ReadModel.PreparationChoice,
                 Is.EqualTo(PreparationChoice.Unselected));
+        }
+
+        private static LastBearingState ReadyState(
+            LastBearingState source,
+            VehicleModule module)
+        {
+            var kernel = new LastBearingKernel();
+            LastBearingState state = Apply(
+                kernel,
+                source,
+                sequence => new SelectPreparationCommand(
+                    sequence,
+                    PreparationChoice.WorkshopPush,
+                    module));
+            state = Apply(
+                kernel,
+                state,
+                sequence => new InstallVehicleModuleCommand(
+                    sequence,
+                    module));
+            var guard = 0;
+            while ((state.PreparationPhase != PreparationPhase.Ready ||
+                    state.ModuleInstallationState !=
+                    ModuleInstallationState.Installed) &&
+                   guard < 1000)
+            {
+                state = kernel.Step(
+                    state,
+                    System.Array.Empty<LastBearingCommand>()).State;
+                guard++;
+            }
+
+            Assert.That(state.PreparationPhase, Is.EqualTo(PreparationPhase.Ready));
+            Assert.That(
+                state.ModuleInstallationState,
+                Is.EqualTo(ModuleInstallationState.Installed));
+            return state;
+        }
+
+        private static LastBearingState Depart(LastBearingState source)
+        {
+            var kernel = new LastBearingKernel();
+            LastBearingState state = Apply(
+                kernel,
+                source,
+                sequence => new PrepareExpeditionTransactionCommand(
+                    sequence,
+                    "tx:ride-beside-sasha",
+                    "fp:ride-beside-sasha"));
+            state = Apply(
+                kernel,
+                state,
+                sequence => new DebitCityManifestCommand(
+                    sequence,
+                    "tx:ride-beside-sasha",
+                    "fp:ride-beside-sasha"));
+            Assert.That(
+                state.ExpeditionPhase,
+                Is.EqualTo(ExpeditionPhase.Outbound));
+            return state;
+        }
+
+        private static LastBearingState Apply(
+            LastBearingKernel kernel,
+            LastBearingState state,
+            System.Func<long, LastBearingCommand> create)
+        {
+            return kernel.Step(
+                state,
+                new[] { create(state.NextCommandSequence) }).State;
+        }
+
+        private static void AssertRoadHandPresentation(
+            SashaScoutVisual scout,
+            SashaScoutRoadHandPresentation expected)
+        {
+            Assert.That(scout.RoadHand, Is.EqualTo(expected));
+            Assert.That(
+                scout.IsHumanRoadHandVisible,
+                Is.EqualTo(expected == SashaScoutRoadHandPresentation.Human));
+            Assert.That(
+                scout.IsUtilityRobotRoadHandVisible,
+                Is.EqualTo(
+                    expected ==
+                    SashaScoutRoadHandPresentation.UtilityRobot));
+
+            Transform? socket = scout.FindSocket(
+                SashaScoutSemanticContract.RoadHandSocketName);
+            Assert.That(socket, Is.Not.Null);
+            foreach (Transform root in new[]
+                     {
+                         scout.HumanRoadHandRoot!,
+                         scout.UtilityRobotRoadHandRoot!,
+                     })
+            {
+                Assert.That(
+                    Vector3.Distance(root.position, socket!.position),
+                    Is.LessThan(0.00001f));
+                Assert.That(
+                    Quaternion.Angle(root.rotation, socket.rotation),
+                    Is.LessThan(0.00001f));
+                Assert.That(
+                    root.GetComponentsInChildren<Collider>(true),
+                    Is.Empty);
+                Assert.That(
+                    root.GetComponentsInChildren<Rigidbody>(true),
+                    Is.Empty);
+                Assert.That(
+                    root.GetComponentsInChildren<Camera>(true),
+                    Is.Empty);
+                Assert.That(
+                    root.GetComponentsInChildren<AudioListener>(true),
+                    Is.Empty);
+            }
         }
 
         private static void InvokeSimulationTick(

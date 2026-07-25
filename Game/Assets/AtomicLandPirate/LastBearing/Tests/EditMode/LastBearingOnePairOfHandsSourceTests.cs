@@ -78,8 +78,22 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 serviceCell,
                 Does.Contain(
+                    "bool assignedResidentIsAway ="));
+            Assert.That(
+                serviceCell,
+                Does.Contain(
+                    "model.ExpeditionPhase != ExpeditionPhase.AtHome &&"));
+            Assert.That(
+                serviceCell,
+                Does.Contain(
+                    "model.CityServiceResidentId,\n" +
+                    "                    model.AssignedResidentId,"));
+            Assert.That(
+                serviceCell,
+                Does.Contain(
                     "bool operatorAtMachine =\n" +
-                    "                !workshopPushOwnsServiceSlot;"));
+                    "                !workshopPushOwnsServiceSlot &&\n" +
+                    "                !assignedResidentIsAway;"));
             Assert.That(
                 serviceCell,
                 Does.Contain(

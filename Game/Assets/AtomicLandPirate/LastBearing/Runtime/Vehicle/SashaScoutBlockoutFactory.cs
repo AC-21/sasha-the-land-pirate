@@ -90,6 +90,10 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
 
             BuildBody(lod0Root, materials);
             BuildSockets(socketsRoot);
+            Mesh roadHandCubeMesh = lod0Root
+                .Find("BOXED_IRON_CHASSIS")
+                .GetComponent<MeshFilter>()
+                .sharedMesh;
 
             var contactStations = new Transform[SashaScoutSemanticContract.WheelCount];
             var wheelVisuals = new Transform[SashaScoutSemanticContract.WheelCount];
@@ -148,6 +152,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             Transform returnedRailChassisBraceSocket = socketsRoot.Find(
                 SashaScoutSemanticContract
                     .ReturnedRailChassisBraceSocketName)!;
+            Transform roadHandSocket = socketsRoot.Find(
+                SashaScoutSemanticContract.RoadHandSocketName)!;
             Transform winch = BuildWinchModule(
                 modulesRoot,
                 winchSocket,
@@ -164,6 +170,12 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 BuildReturnedRailChassisBraceUpgrade(
                     modulesRoot,
                     returnedRailChassisBraceSocket,
+                    materials);
+            (Transform humanRoadHand, Transform utilityRobotRoadHand) =
+                BuildRoadHandPresentations(
+                    modulesRoot,
+                    roadHandSocket,
+                    roadHandCubeMesh,
                     materials);
             if (includeRoadCollisionShell)
             {
@@ -186,7 +198,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 winch,
                 tank,
                 patchworkSkidPlate,
-                returnedRailChassisBrace);
+                returnedRailChassisBrace,
+                humanRoadHand,
+                utilityRobotRoadHand);
             return visual;
         }
 
@@ -312,6 +326,96 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 SashaScoutSemanticContract.DriverCameraSocketName,
                 root,
                 new Vector3(0f, 2.08f, -0.25f));
+            CreateSocket(
+                SashaScoutSemanticContract.RoadHandSocketName,
+                root,
+                new Vector3(0.52f, 1.36f, 0.18f));
+        }
+
+        private static (Transform human, Transform utilityRobot)
+            BuildRoadHandPresentations(
+                Transform root,
+                Transform socket,
+                Mesh cubeMesh,
+                SashaScoutBlockoutMaterials materials)
+        {
+            Transform human = CreateRoot(
+                SashaScoutSemanticContract.HumanRoadHandName,
+                root);
+            CopySocketPose(human, socket);
+            CreateColliderFreeCube(
+                "HUMAN_ROAD_COAT",
+                human,
+                new Vector3(0f, 0.22f, 0f),
+                new Vector3(0.36f, 0.44f, 0.30f),
+                Quaternion.Euler(-5f, 0f, 0f),
+                cubeMesh,
+                materials.Oxide);
+            CreateColliderFreeCube(
+                "HUMAN_ROAD_HEAD",
+                human,
+                new Vector3(0f, 0.54f, 0.03f),
+                new Vector3(0.28f, 0.27f, 0.27f),
+                Quaternion.Euler(0f, -6f, 0f),
+                cubeMesh,
+                materials.Bone);
+            CreateColliderFreeCube(
+                "HUMAN_TUNGSTEN_CAP",
+                human,
+                new Vector3(0f, 0.69f, 0.04f),
+                new Vector3(0.34f, 0.08f, 0.33f),
+                Quaternion.Euler(0f, -6f, -3f),
+                cubeMesh,
+                materials.Tungsten);
+            CreateColliderFreeCube(
+                "HUMAN_STEADYING_ARM",
+                human,
+                new Vector3(-0.24f, 0.25f, 0.10f),
+                new Vector3(0.12f, 0.38f, 0.12f),
+                Quaternion.Euler(22f, 0f, -18f),
+                cubeMesh,
+                materials.Bone);
+
+            Transform utilityRobot = CreateRoot(
+                SashaScoutSemanticContract.UtilityRobotRoadHandName,
+                root);
+            CopySocketPose(utilityRobot, socket);
+            CreateColliderFreeCube(
+                "ROBOT_ROAD_IRON_TORSO",
+                utilityRobot,
+                new Vector3(0f, 0.22f, 0f),
+                new Vector3(0.38f, 0.40f, 0.30f),
+                Quaternion.identity,
+                cubeMesh,
+                materials.Iron);
+            CreateColliderFreeCube(
+                "ROBOT_ROAD_BONE_HEAD",
+                utilityRobot,
+                new Vector3(0f, 0.54f, 0.03f),
+                new Vector3(0.32f, 0.25f, 0.28f),
+                Quaternion.Euler(0f, 7f, 0f),
+                cubeMesh,
+                materials.Bone);
+            CreateColliderFreeCube(
+                "ROBOT_ROAD_SIGNAL_EYE",
+                utilityRobot,
+                new Vector3(0.07f, 0.56f, 0.18f),
+                new Vector3(0.08f, 0.07f, 0.05f),
+                Quaternion.Euler(0f, 7f, 0f),
+                cubeMesh,
+                materials.Signal);
+            CreateColliderFreeCube(
+                "ROBOT_ROAD_TOOL_ARM",
+                utilityRobot,
+                new Vector3(0.25f, 0.24f, 0.06f),
+                new Vector3(0.11f, 0.36f, 0.11f),
+                Quaternion.Euler(-18f, 0f, 16f),
+                cubeMesh,
+                materials.Tungsten);
+
+            human.gameObject.SetActive(false);
+            utilityRobot.gameObject.SetActive(false);
+            return (human, utilityRobot);
         }
 
         private static Transform BuildWinchModule(
@@ -628,6 +732,25 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 collider.enabled = false;
             }
 
+            return primitive;
+        }
+
+        private static GameObject CreateColliderFreeCube(
+            string name,
+            Transform parent,
+            Vector3 localPosition,
+            Vector3 localScale,
+            Quaternion localRotation,
+            Mesh cubeMesh,
+            Material material)
+        {
+            var primitive = new GameObject(name);
+            primitive.transform.SetParent(parent, false);
+            primitive.transform.localPosition = localPosition;
+            primitive.transform.localScale = localScale;
+            primitive.transform.localRotation = localRotation;
+            primitive.AddComponent<MeshFilter>().sharedMesh = cubeMesh;
+            primitive.AddComponent<MeshRenderer>().sharedMaterial = material;
             return primitive;
         }
 

@@ -11,6 +11,13 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         PatchworkSkidPlate = 1,
     }
 
+    public enum SashaScoutRoadHandPresentation
+    {
+        None = 0,
+        Human = 1,
+        UtilityRobot = 2,
+    }
+
     /// <summary>
     /// Stable presentation handles for the C0 scout. The component contains
     /// no input, Rigidbody, canonical state, save state, or asset loading.
@@ -25,6 +32,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         private Transform? _rangeTankModule;
         private Transform? _patchworkSkidPlateUpgrade;
         private Transform? _returnedRailChassisBraceUpgrade;
+        private Transform? _humanRoadHand;
+        private Transform? _utilityRobotRoadHand;
 
         public string DirectionStage => SashaScoutSemanticContract.Stage;
 
@@ -80,6 +89,19 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
         public Transform? ReturnedRailChassisBraceUpgradeRoot =>
             _returnedRailChassisBraceUpgrade;
 
+        public SashaScoutRoadHandPresentation RoadHand { get; private set; }
+
+        public Transform? HumanRoadHandRoot => _humanRoadHand;
+
+        public Transform? UtilityRobotRoadHandRoot => _utilityRobotRoadHand;
+
+        public bool IsHumanRoadHandVisible =>
+            _humanRoadHand != null && _humanRoadHand.gameObject.activeSelf;
+
+        public bool IsUtilityRobotRoadHandVisible =>
+            _utilityRobotRoadHand != null &&
+            _utilityRobotRoadHand.gameObject.activeSelf;
+
         internal void Configure(
             SashaScoutBlockoutMaterials materials,
             Transform geometryRoot,
@@ -96,7 +118,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
             Transform winchModule,
             Transform rangeTankModule,
             Transform patchworkSkidPlateUpgrade,
-            Transform returnedRailChassisBraceUpgrade)
+            Transform returnedRailChassisBraceUpgrade,
+            Transform humanRoadHand,
+            Transform utilityRobotRoadHand)
         {
             if (contactStations == null ||
                 wheelVisuals == null ||
@@ -136,9 +160,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 returnedRailChassisBraceUpgrade ??
                 throw new ArgumentNullException(
                     nameof(returnedRailChassisBraceUpgrade));
+            _humanRoadHand = humanRoadHand ??
+                throw new ArgumentNullException(nameof(humanRoadHand));
+            _utilityRobotRoadHand = utilityRobotRoadHand ??
+                throw new ArgumentNullException(nameof(utilityRobotRoadHand));
             ApplyModule(SashaScoutModulePresentation.None);
             ApplyUpgrade(SashaScoutUpgradePresentation.None);
             ApplyReturnedRailChassisBrace(installed: false);
+            ApplyRoadHand(SashaScoutRoadHandPresentation.None);
         }
 
         public Transform[] CopyContactStations()
@@ -195,6 +224,21 @@ namespace AtomicLandPirate.Presentation.LastBearing.Vehicle
                 _returnedRailChassisBraceUpgrade.gameObject.SetActive(
                     installed);
             }
+        }
+
+        public void ApplyRoadHand(SashaScoutRoadHandPresentation roadHand)
+        {
+            if (roadHand != SashaScoutRoadHandPresentation.Human &&
+                roadHand != SashaScoutRoadHandPresentation.UtilityRobot)
+            {
+                roadHand = SashaScoutRoadHandPresentation.None;
+            }
+
+            RoadHand = roadHand;
+            _humanRoadHand?.gameObject.SetActive(
+                roadHand == SashaScoutRoadHandPresentation.Human);
+            _utilityRobotRoadHand?.gameObject.SetActive(
+                roadHand == SashaScoutRoadHandPresentation.UtilityRobot);
         }
 
         internal void ApplyModule(LastBearingVisualModule module)
