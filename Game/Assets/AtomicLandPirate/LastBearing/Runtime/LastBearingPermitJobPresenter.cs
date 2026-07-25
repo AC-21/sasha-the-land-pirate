@@ -649,8 +649,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Commit exactly two parts",
                     "The machine shop can make one physical spare-bearing lot " +
                     "while retaining the two-part civic reserve.",
-                    "Click OPEN MACHINE SHOP, then press E / gamepad south; " +
-                    "commit two parts and start the batch clock.",
+                    "Click OPEN MACHINE SHOP, select the input lever, release " +
+                    "control, then press E / gamepad south to commit two " +
+                    "parts and start the batch clock.",
                     phaseProgressCurrent: 0,
                     phaseProgressTarget:
                         LastBearingBalanceV1.SpareBearingBatchRequiredSettlementTicks);
@@ -682,8 +683,9 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     "Trade the thing, not a number",
                     "One tagged spare-bearing lot sits in workshop output custody. " +
                     "Barter it once for the fixed depot-corridor permit.",
-                    "Click OPEN CLAIMS WICKET, then press E / gamepad south; " +
-                    "exchange the physical lot for the route permit.",
+                    "Click OPEN CLAIMS WICKET, select the tagged lot, release " +
+                    "control, then press E / gamepad south to pass the " +
+                    "physical lot for the route permit.",
                     phaseProgressCurrent: 0,
                     phaseProgressTarget: 1);
             }

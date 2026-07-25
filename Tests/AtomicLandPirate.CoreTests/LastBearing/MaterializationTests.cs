@@ -55,6 +55,8 @@ namespace AtomicLandPirate.LastBearingTests
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingPumpHallCutawayView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingPumpHallMaintenanceInteractor.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingPumpHallMaintenanceInteractor.cs.meta",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingOneGoodBatchInteractor.cs",
+            "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingOneGoodBatchInteractor.cs.meta",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingVehicleView.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/LastBearingSaveAdapter.cs",
             "Game/Assets/AtomicLandPirate/LastBearing/Runtime/UI.meta",

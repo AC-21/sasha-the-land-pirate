@@ -757,6 +757,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world.ConfigureScoutServiceInteraction(this);
             _world.ConfigureReturnedRailChassisBraceInteraction(this);
             _world.ConfigurePumpHallMaintenanceInteraction(this);
+            _world.ConfigureOneGoodBatchInteraction(this);
             _world.ConfigureFuelBondInteraction(this);
             _hud = gameObject.AddComponent<LastBearingHud>();
             _hud.Configure(this, _fieldDesk);
@@ -789,6 +790,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetScoutServiceInteraction();
             _world?.ResetReturnedRailChassisBraceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
+            _world?.ResetOneGoodBatchInteraction();
             _world?.ResetFuelBondInteraction();
             _pendingCommands.Clear();
             ClearGaragePlanIntent();
@@ -896,6 +898,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetScoutServiceInteraction();
             _world?.ResetReturnedRailChassisBraceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
+            _world?.ResetOneGoodBatchInteraction();
             _world?.ResetFuelBondInteraction();
             _world?.ApplyRoadHand(null, ExpeditionPhase.AtHome);
             _state = null;
@@ -960,6 +963,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 futureRouteTollFuelUnits: 0,
                 humanVisible: true,
                 robotVisible: true);
+            _world?.ApplyOneGoodBatchInteraction(null);
             _world?.ApplyFuelBondInteraction(null);
             _world?.ApplyScoutServiceInteraction(null);
             _world?.ApplyReturnedRailChassisBraceInteraction(null);
@@ -2330,6 +2334,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
             _world?.ResetScoutServiceInteraction();
             _world?.ResetReturnedRailChassisBraceInteraction();
             _world?.ResetPumpHallMaintenanceInteraction();
+            _world?.ResetOneGoodBatchInteraction();
             _world?.ResetFuelBondInteraction();
             ClearGaragePlanIntent();
             ClearCityBuildingPreview();
@@ -2418,6 +2423,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 _world?.ApplyReturnedRailChassisBraceInteraction(
                     _readModel);
                 _world?.ApplyPumpHallMaintenanceInteraction(_readModel);
+                _world?.ApplyOneGoodBatchInteraction(_readModel);
                 _world?.ApplyFuelBondInteraction(_readModel);
                 _world?.EmergencyAidInteractor?.Apply(_readModel);
             }
@@ -2496,6 +2502,10 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     ?.IsControlFocused == true ||
                 _world?.PumpHallMaintenanceInteractor
                     ?.IsControlFocused == true ||
+                _world?.OneGoodBatchInteractor
+                    ?.IsBatchStartControlFocused == true ||
+                _world?.OneGoodBatchInteractor
+                    ?.IsBarterControlFocused == true ||
                 _world?.FuelBondInteractor
                     ?.IsControlFocused == true ||
                 _world?.EmergencyAidInteractor
@@ -2560,12 +2570,16 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 InstallCityImprovement();
             }
             else if (IsWorkshopBatchStartAvailable &&
+                _world?.OneGoodBatchInteractor
+                    ?.HasDedicatedInteractionTargets != true &&
                 ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
                  (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
             {
                 StartSpareBearingBatch();
             }
             else if (IsWorkshopBarterAvailable &&
+                _world?.OneGoodBatchInteractor
+                    ?.HasDedicatedInteractionTargets != true &&
                 ((keyboard != null && keyboard.eKey.wasPressedThisFrame) ||
                  (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)))
             {
@@ -3202,6 +3216,7 @@ namespace AtomicLandPirate.Presentation.LastBearing
                 humanVisible,
                 robotVisible,
                 simulationPaused: _readModel.PauseCause != PauseCause.None);
+            _world.ApplyOneGoodBatchInteraction(_readModel);
             _world.ApplyFuelBondInteraction(_readModel);
             _world.ApplyGaragePreparationProgress(
                 _readModel.PreparationElapsedTicks,
@@ -3459,6 +3474,19 @@ namespace AtomicLandPirate.Presentation.LastBearing
             if (!_modeCoordinator.TryShowCityMode(
                     LastBearingPresentationMode.BuildingCutaway,
                     _readModel))
+            {
+                return false;
+            }
+
+            _world.ApplyOneGoodBatchInteraction(_readModel);
+            LastBearingOneGoodBatchInteractor? interactor =
+                _world.OneGoodBatchInteractor;
+            bool physicalActionAvailable =
+                IsWorkshopBatchStartAvailable ||
+                IsWorkshopBarterAvailable;
+            if (physicalActionAvailable &&
+                interactor?.HasDedicatedInteractionTargets == true &&
+                !interactor.FocusAvailableControl())
             {
                 return false;
             }

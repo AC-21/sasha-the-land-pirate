@@ -35,6 +35,8 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             LastBearingWorldBuilder world = controller.World!;
             LastBearingOneGoodBatchCutawayView view =
                 world.OneGoodBatchCutawayView!;
+            LastBearingOneGoodBatchInteractor interactor =
+                view.Interactor!;
             string canonicalBefore = controller.CanonicalHash;
 
             Assert.That(
@@ -80,8 +82,42 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(
                 view.GetComponentsInChildren<CharacterController>(true),
                 Is.Empty);
+            Assert.That(
+                view.GetComponentsInChildren<LastBearingOneGoodBatchInteractor>(
+                    true),
+                Has.Length.EqualTo(1));
+            Assert.That(
+                view.GetComponentsInChildren<LastBearingOneGoodBatchInteractor>(
+                    true)[0],
+                Is.SameAs(interactor));
+            Assert.That(interactor.HasDedicatedInteractionTargets, Is.True);
             Collider[] colliders =
                 view.GetComponentsInChildren<Collider>(true);
+            Transform batchStartTarget = view
+                .GetComponentsInChildren<Transform>(true)
+                .Single(item =>
+                    item.name ==
+                    LastBearingOneGoodBatchInteractor.BatchStartControlName);
+            Transform barterTarget = view
+                .GetComponentsInChildren<Transform>(true)
+                .Single(item =>
+                    item.name ==
+                    LastBearingOneGoodBatchInteractor.OutputLotControlName);
+            Assert.That(batchStartTarget.parent, Is.SameAs(view.InputAnchor));
+            Assert.That(
+                barterTarget.parent,
+                Is.SameAs(view.BearingLot!.transform));
+            BoxCollider? batchStartCollider =
+                batchStartTarget.GetComponent<BoxCollider>();
+            BoxCollider? barterCollider =
+                barterTarget.GetComponent<BoxCollider>();
+            AssertDedicatedTrigger(batchStartCollider);
+            AssertDedicatedTrigger(barterCollider);
+            Assert.That(batchStartCollider!.enabled, Is.False);
+            Assert.That(barterCollider!.enabled, Is.False);
+            Assert.That(interactor.IsBatchStartControlVisible, Is.False);
+            Assert.That(interactor.IsBarterControlVisible, Is.False);
+            Assert.That(interactor.IsInputArmed, Is.False);
             Transform fuelBondTargetTransform = view.transform.Find(
                 LastBearingFuelBondInteractor.RootName + "/" +
                 LastBearingFuelBondInteractor.ControlName);
@@ -93,7 +129,9 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(fuelBondTarget.enabled, Is.False);
             foreach (Collider collider in colliders)
             {
-                if (collider != fuelBondTarget)
+                if (collider != fuelBondTarget &&
+                    collider != batchStartCollider &&
+                    collider != barterCollider)
                 {
                     Assert.That(collider.enabled, Is.False, collider.name);
                 }
@@ -298,6 +336,16 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
             Assert.That(anchor!.name, Is.EqualTo(expectedName));
             Assert.That(anchor.localPosition, Is.EqualTo(expectedPosition));
             Assert.That(anchor.localRotation, Is.EqualTo(Quaternion.identity));
+        }
+
+        private static void AssertDedicatedTrigger(BoxCollider? collider)
+        {
+            Assert.That(collider, Is.Not.Null);
+            Assert.That(collider!.isTrigger, Is.True);
+            Assert.That(
+                collider!.gameObject.layer,
+                Is.EqualTo(
+                    LastBearingOneGoodBatchInteractor.InteractionLayer));
         }
 
         private static int CountNamedParts(
