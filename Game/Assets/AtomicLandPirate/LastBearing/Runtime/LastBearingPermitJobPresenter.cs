@@ -448,9 +448,12 @@ namespace AtomicLandPirate.Presentation.LastBearing
                     LastBearingPermitJobChapter.Outbound,
                     3,
                     "CHAPTER III · THE ROAD OUT",
-                    "Drive the corridor",
-                    "Throttle advances the canonical route. Steering outside " +
-                    "the safe road half-width costs vehicle condition.",
+                    "Hold the bone line",
+                    "Paired bone-enamel lines mark the safe half-width. The " +
+                    "oxide witness wakes on the side Sasha crosses; steering " +
+                    "alone warns, while route progress outside ±" +
+                    LastBearingBalanceV1.RoadSafeHalfWidthMilli +
+                    " can cost condition.",
                     "Hold W / right trigger to advance; steer with A/D / left " +
                     "stick · " + FormatRouteProgress(model),
                     model.RouteProgressTicks,
@@ -555,9 +558,11 @@ namespace AtomicLandPirate.Presentation.LastBearing
                         : "Bring the consequence back intact",
                     model.IsRepeatExpedition
                         ? "The frozen repeat salvage, vehicle condition, and " +
-                          "settled first-run history travel together."
+                          "settled first-run history travel together. Hold the " +
+                          "bone line; an oxide witness marks the unsafe side."
                         : "The frozen payload, vehicle condition, faction memory, " +
-                          "and recovered cargo all travel together.",
+                          "and recovered cargo all travel together. Hold the " +
+                          "bone line; an oxide witness marks the unsafe side.",
                     "Hold W / right trigger to drive home; steer with A/D / " +
                     "left stick · " + FormatRouteProgress(model),
                     model.RouteProgressTicks,

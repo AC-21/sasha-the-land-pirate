@@ -36,6 +36,20 @@ namespace AtomicLandPirate.LastBearingTests
                 SchemaNineMigrationAndSchemaTenRoundTrip);
         }
 
+        internal static CoreTestDriver CreateInstalledBraceRepeatReady(
+            ColonyComposition composition,
+            VehicleModule module,
+            int worldSeed)
+        {
+            CoreTestDriver driver = ReachInstallReady(
+                composition,
+                module,
+                worldSeed);
+            driver.Apply(sequence =>
+                new InstallReturnedRailChassisBraceCommand(sequence));
+            return driver;
+        }
+
         private static void InstallHasExactConservationAndEvent()
         {
             CoreTestDriver driver = ReachInstallReady(
@@ -290,6 +304,22 @@ namespace AtomicLandPirate.LastBearingTests
                 FrameRailSalvageCustody.None,
                 driver.State.FrameRailSalvageCustody,
                 "delayed brace did not consume repeat bundle");
+            LastBearingState forgedCityCredited =
+                new LastBearingStateBuilder(driver.State)
+                {
+                    ExpeditionPhase = ExpeditionPhase.Returned,
+                    TransactionPhase = TransactionPhase.CityCredited,
+                    VehicleConditionMilli = checked(
+                        LastBearingBalanceV1.StartingVehicleConditionMilli
+                        - LastBearingBalanceV1.RouteConditionLoss(
+                            driver.State.VehicleModule,
+                            driver.State.RigUpgrade,
+                            returnedRailChassisBraceInstalled: true)),
+                }.BuildUnchecked();
+            TestHarness.True(
+                !LastBearingRepeatExpedition.IsLineage(
+                    forgedCityCredited),
+                "CityCredited accepted a brace-consumed bundle");
 
             byte[] saved = LastBearingCanonicalCodec.Encode(driver.State);
             LastBearingDecodeResult restored =

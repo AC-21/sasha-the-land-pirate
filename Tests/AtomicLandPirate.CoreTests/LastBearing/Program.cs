@@ -51,6 +51,7 @@ namespace AtomicLandPirate.LastBearingTests
             ServiceScoutTests.Run(harness);
             RepeatWreckLineTests.Run(harness);
             ReturnedRailChassisBraceTests.Run(harness);
+            RoadSafeLineTests.Run(harness);
             SaveAtomicTests.Run(harness, repoRoot);
             HomecomingTests.RunSave(harness, repoRoot);
             SaveBoundaryTests.Run(harness, repoRoot);
@@ -154,6 +155,9 @@ namespace AtomicLandPirate.LastBearingTests
                     break;
                 case "vgr25-returned-rail-chassis-brace":
                     ReturnedRailChassisBraceTests.Run(harness);
+                    break;
+                case "vgr26-road-safe-line":
+                    RoadSafeLineTests.Run(harness);
                     break;
                 case "v0-hands-on-service-cell":
                     harness.Run(

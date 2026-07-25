@@ -110,14 +110,18 @@ namespace AtomicLandPirate.Simulation.LastBearing
                 case TransactionPhase.CityCredited:
                     return state.ExpeditionPhase == ExpeditionPhase.Returned
                         && HasReachableCreditedCondition(state)
-                        && HasFinalizedSalvageShape(state);
+                        && HasFinalizedSalvageShape(
+                            state,
+                            allowBraceConsumedBundle: false);
                 case TransactionPhase.Finalized:
                     return state.ExpeditionPhase == ExpeditionPhase.AtHome
                         && (HasReachableCreditedCondition(state)
                             || state.VehicleConditionMilli
                                 == LastBearingBalanceV1
                                     .StartingVehicleConditionMilli)
-                        && HasFinalizedSalvageShape(state);
+                        && HasFinalizedSalvageShape(
+                            state,
+                            allowBraceConsumedBundle: true);
                 default:
                     return false;
             }
@@ -234,13 +238,15 @@ namespace AtomicLandPirate.Simulation.LastBearing
         }
 
         private static bool HasFinalizedSalvageShape(
-            LastBearingState state)
+            LastBearingState state,
+            bool allowBraceConsumedBundle)
         {
             bool creditedBundlePresent =
                 state.FrameRailSalvageCustody
                     == FrameRailSalvageCustody.Credited;
             bool creditedBundleConsumedByBrace =
-                state.ReturnedRailChassisBraceInstalled
+                allowBraceConsumedBundle
+                && state.ReturnedRailChassisBraceInstalled
                 && state.FrameRailSalvageCustody
                     == FrameRailSalvageCustody.None;
             return state.ExpeditionFuelManifestUnits == FuelCost(state)
