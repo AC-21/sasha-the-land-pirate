@@ -251,9 +251,14 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 7321,
                 module: VehicleModule.SealedRangeTank,
                 installPatchworkSkidPlate: false);
-            LastBearingState repeatReady = Apply(
+            LastBearingState braceReady = Apply(
                 serviceReady,
                 sequence => new ServiceScoutCommand(sequence));
+            LastBearingState repeatReady = Apply(
+                braceReady,
+                sequence =>
+                    new InstallReturnedRailChassisBraceCommand(
+                        sequence));
             InstallControllerState(controller, repeatReady);
             controller.ShowCityOverview();
             yield return null;

@@ -95,7 +95,24 @@ namespace AtomicLandPirate.Presentation.LastBearing.Tests
                 expectedVisible: true,
                 "loaded credited return");
 
-            LastBearingState outbound = LaunchRepeat(controller.State!);
+            LastBearingState braceInstalled = Apply(
+                controller.State!,
+                sequence =>
+                    new InstallReturnedRailChassisBraceCommand(
+                        sequence));
+            Assert.That(
+                braceInstalled.ReturnedRailChassisBraceInstalled,
+                Is.True);
+            Assert.That(
+                braceInstalled.FrameRailSalvageCustody,
+                Is.EqualTo(FrameRailSalvageCustody.None));
+            InstallControllerState(controller, braceInstalled);
+            AssertReturnedRailRackInPlayMode(
+                view,
+                expectedVisible: false,
+                "credited bundle fitted as brace");
+
+            LastBearingState outbound = LaunchRepeat(braceInstalled);
             Assert.That(
                 outbound.FrameRailSalvageCustody,
                 Is.EqualTo(FrameRailSalvageCustody.WreckLine));
