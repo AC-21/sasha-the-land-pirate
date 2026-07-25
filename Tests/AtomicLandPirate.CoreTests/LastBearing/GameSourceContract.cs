@@ -1915,7 +1915,9 @@ namespace AtomicLandPirate.LastBearingTests
             Require(world, "ApplyGaragePreparationProgress(");
             Require(hud, "ONE GOOD BATCH");
             Require(hud, "Hot shift  ");
-            Require(hud, "operator borrowed · no added water draw");
+            Require(
+                hud,
+                "one service slot · Workshop Push held · garage gauge frozen");
             Require(hud, "-0.010 water / settlement tick");
             Require(hud, "COMMISSIONING DELIVERY · ONCE");
             Require(hud, "ONE-OFF BARTER · CARAVAN EXCHANGE CLOSED");

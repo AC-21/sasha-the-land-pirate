@@ -207,9 +207,24 @@ namespace AtomicLandPirate.LastBearingTests
             Require(view, "model.RecyclerQuarterTurns");
             Require(view, "model.MachineShopQuarterTurns");
             Require(view, "model.IsHotShiftActivelyWorking");
-            Require(view, "model.IsHotShiftStalledByWorkshopPush");
+            Require(view, "model.IsPreparationActivelyWorking");
             Require(view, "model.IsHotShiftStalledByDustFront");
             Require(view, "model.HotShiftCompletedCount");
+            Require(view, "workshopPushPreparationWorking");
+            Require(view, "bool operatorAtMachine");
+            Require(
+                interactor,
+                "model.IsPreparationStalledByHotShift");
+            TestHarness.True(
+                view.IndexOf(
+                    "model.IsHotShiftStalledByWorkshopPush",
+                    StringComparison.Ordinal) < 0,
+                "service-cell view must project Hot Shift as the priority owner");
+            TestHarness.True(
+                interactor.IndexOf(
+                    "model.IsHotShiftStalledByWorkshopPush",
+                    StringComparison.Ordinal) < 0,
+                "service-cell interactor must not describe the retired stall");
             Require(interactor, "HOT SHIFT PAUSED");
             Require(interactor, "model.PauseCause != PauseCause.None");
             Require(view, "Hot Shift Machine Spindle");
@@ -295,7 +310,7 @@ namespace AtomicLandPirate.LastBearingTests
                 "PointerDeskReturnAndGamepadQueueOneExactShift");
             Require(
                 hotShiftPlayMode,
-                "GuardsAndStallsFailClosedAtThePhysicalMachine");
+                "GuardsAndSingleServiceSlotFailClosedAtThePhysicalMachine");
             Require(
                 hotShiftPlayMode,
                 "ColonyOperatorsActiveSaveLoadAndCompletionReproject");
